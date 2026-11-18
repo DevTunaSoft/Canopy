@@ -2,13 +2,14 @@
 
 This is an ordinary user-owned app, NOT a complete desktop session or compositor.
 """
+import argparse
 import os
 from datetime import datetime
 from pathlib import Path
 
 from canopy.applications import matches_app, visible_apps
 from canopy.classic_model import DEFAULT_DOCK, clock_label, dock_position
-from canopy.preferences import load
+from canopy.preferences import Layout, Preferences, load, user_settings_path
 
 
 def show_app_launcher(Gtk, Gdk, parent, apps, launch):
@@ -72,9 +73,23 @@ def show_app_launcher(Gtk, Gdk, parent, apps, launch):
     search.grab_focus()
 
 
-def run():
+def run(*, safe_defaults=False):
     if os.geteuid() == 0:
         raise SystemExit('Run Canopy Classic from an ordinary user session')
+
+    if safe_defaults:
+        prefs = Preferences()
+    else:
+        path = user_settings_path()
+        try:
+            prefs = load(path)
+        except (OSError, ValueError) as error:
+            raise SystemExit(
+                f'Cannot read Canopy settings at {path}: {error}. '
+                'Run with --safe-defaults to open the preview without loading settings.'
+            ) from None
+    if prefs.layout is not Layout.CLASSIC:
+        raise SystemExit('Choose Classic in Canopy preferences to launch this preview')
 
     import gi
     gi.require_version('Gtk', '3.0')
@@ -83,11 +98,6 @@ def run():
 
     if not Gtk.init_check()[0]:
         raise RuntimeError('No graphical GTK display is available')
-
-    cfg = Path(os.environ.get('XDG_CONFIG_HOME', Path.home() / '.config')) / 'canopy' / 'settings.json'
-    prefs = load(cfg)
-    if prefs.layout.value != 'classic':
-        raise RuntimeError('Choose Classic in Canopy preferences to launch this preview')
 
     css = Gtk.CssProvider()
     css.load_from_data(b'''
@@ -101,6 +111,7 @@ def run():
 
     def create_window(css_class):
         window = Gtk.Window()
+        windows.append(window)
         window.set_title('Canopy Classic preview')
         window.set_decorated(False)
         window.set_resizable(False)
@@ -115,98 +126,107 @@ def run():
     display = Gdk.Display.get_default()
     monitor = display.get_primary_monitor() or display.get_monitor(0)
     workarea = monitor.get_workarea()
-    top, top_box = create_window('canopy-panel')
-    top.set_default_size(workarea.width, -1)
-    top.move(workarea.x, workarea.y)
+    windows = []
+    clock_source = None
+    handlers = []
+    try:
+        top, top_box = create_window('canopy-panel')
+        top.set_default_size(workarea.width, -1)
+        top.move(workarea.x, workarea.y)
 
-    def open_menu(button):
-        menu = Gtk.Menu()
-        for label, callback in (('About Canopy Classic', show_about), ('Quit preview', Gtk.main_quit)):
-            item = Gtk.MenuItem(label=label)
-            item.connect('activate', lambda _item, func=callback: func())
-            menu.append(item)
-        menu.show_all()
-        menu.popup_at_widget(button, Gdk.Gravity.SOUTH_WEST, Gdk.Gravity.NORTH_WEST, None)
+        def open_menu(button):
+            menu = Gtk.Menu()
+            for label, callback in (('About Canopy Classic', show_about), ('Quit preview', Gtk.main_quit)):
+                item = Gtk.MenuItem(label=label)
+                item.connect('activate', lambda _item, func=callback: func())
+                menu.append(item)
+            menu.show_all()
+            menu.popup_at_widget(button, Gdk.Gravity.SOUTH_WEST, Gdk.Gravity.NORTH_WEST, None)
 
-    def show_about():
-        dialog = Gtk.MessageDialog(transient_for=top, modal=True,
-                                   message_type=Gtk.MessageType.INFO,
-                                   buttons=Gtk.ButtonsType.CLOSE,
-                                   text='Canopy Classic — preview')
-        dialog.format_secondary_text('The Familiar Feel. The Freedom of Linux.\nCinnamon remains available.')
-        dialog.run()
-        dialog.destroy()
-
-    home_button = Gtk.Button()
-    emblem_path = Path(__file__).with_name('assets') / 'classic-penguin.svg'
-    emblem = Gtk.Image.new_from_file(str(emblem_path))
-    if emblem.get_storage_type() == Gtk.ImageType.PIXBUF:
-        home_button.set_image(emblem)
-    else:
-        home_button.set_label('Canopy ▾')
-    home_button.set_tooltip_text('Canopy menu')
-    home_button.get_accessible().set_name('Canopy menu')
-    home_button.connect('clicked', open_menu)
-    top_box.pack_start(home_button, False, False, 0)
-    top_box.pack_start(Gtk.Label(label='Classic'), False, False, 0)
-    top_box.pack_end(Gtk.Label(label='Preview'), False, False, 0)
-    clock = Gtk.Label()
-    top_box.pack_end(clock, False, False, 10)
-
-    def refresh_clock():
-        clock.set_text(clock_label(datetime.now()))
-        return True
-    refresh_clock()
-    clock_source = GLib.timeout_add_seconds(30, refresh_clock)
-
-    dock, dock_box = create_window('canopy-dock')
-    def launch(app):
-        try:
-            app.launch([], None)  # Gio uses the desktop file; never interpolate shell commands.
-        except GLib.Error as error:
-            dialog = Gtk.MessageDialog(transient_for=dock, modal=True,
-                                       message_type=Gtk.MessageType.ERROR,
+        def show_about():
+            dialog = Gtk.MessageDialog(transient_for=top, modal=True,
+                                       message_type=Gtk.MessageType.INFO,
                                        buttons=Gtk.ButtonsType.CLOSE,
-                                       text='Could not open application')
-            dialog.format_secondary_text(str(error))
+                                       text='Canopy Classic — preview')
+            dialog.format_secondary_text('The Familiar Feel. The Freedom of Linux.\nCinnamon remains available.')
             dialog.run()
             dialog.destroy()
 
-    def add_app_button(label, app):
-        button = Gtk.Button(label=label)
-        button.connect('clicked', lambda _button: launch(app))
-        dock_box.pack_start(button, False, False, 0)
+        home_button = Gtk.Button()
+        emblem_path = Path(__file__).with_name('assets') / 'classic-penguin.svg'
+        emblem = Gtk.Image.new_from_file(str(emblem_path))
+        if emblem.get_storage_type() == Gtk.ImageType.PIXBUF:
+            home_button.set_image(emblem)
+        else:
+            home_button.set_label('Canopy ▾')
+        home_button.set_tooltip_text('Canopy menu')
+        home_button.get_accessible().set_name('Canopy menu')
+        home_button.connect('clicked', open_menu)
+        top_box.pack_start(home_button, False, False, 0)
+        top_box.pack_start(Gtk.Label(label='Classic'), False, False, 0)
+        top_box.pack_end(Gtk.Label(label='Preview'), False, False, 0)
+        clock = Gtk.Label()
+        top_box.pack_end(clock, False, False, 10)
 
-    installed_apps = {app.get_id(): app for app in Gio.app_info_get_all()}
-    for item in DEFAULT_DOCK:
-        app = installed_apps.get(item.desktop_id)
-        if app is not None:
-            add_app_button(item.title, app)
+        def refresh_clock():
+            clock.set_text(clock_label(datetime.now()))
+            return True
+        refresh_clock()
 
-    apps_button = Gtk.Button(label='Apps ▾')
-    apps_button.connect(
-        'clicked', lambda _button: show_app_launcher(Gtk, Gdk, dock, Gio.app_info_get_all(), launch)
-    )
-    dock_box.pack_start(apps_button, False, False, 0)
+        dock, dock_box = create_window('canopy-dock')
+        def launch(app):
+            try:
+                app.launch([], None)  # Gio uses the desktop file; never interpolate shell commands.
+            except GLib.Error as error:
+                dialog = Gtk.MessageDialog(transient_for=dock, modal=True,
+                                           message_type=Gtk.MessageType.ERROR,
+                                           buttons=Gtk.ButtonsType.CLOSE,
+                                           text='Could not open application')
+                dialog.format_secondary_text(str(error))
+                dialog.run()
+                dialog.destroy()
 
-    dock_box.show_all()
-    _, natural_size = dock_box.get_preferred_size()
-    dock.move(*dock_position(
-        workarea.x, workarea.y, workarea.width, workarea.height,
-        natural_size.width, natural_size.height,
-    ))
-    top.show_all()
-    dock.show()
-    windows = [(window, window.connect('destroy', Gtk.main_quit)) for window in (top, dock)]
-    try:
+        def add_app_button(label, app):
+            button = Gtk.Button(label=label)
+            button.connect('clicked', lambda _button: launch(app))
+            dock_box.pack_start(button, False, False, 0)
+
+        installed_apps = {app.get_id(): app for app in Gio.app_info_get_all()}
+        for item in DEFAULT_DOCK:
+            app = installed_apps.get(item.desktop_id)
+            if app is not None:
+                add_app_button(item.title, app)
+
+        apps_button = Gtk.Button(label='Apps ▾')
+        apps_button.connect(
+            'clicked', lambda _button: show_app_launcher(Gtk, Gdk, dock, Gio.app_info_get_all(), launch)
+        )
+        dock_box.pack_start(apps_button, False, False, 0)
+
+        dock_box.show_all()
+        _, natural_size = dock_box.get_preferred_size()
+        dock.move(*dock_position(
+            workarea.x, workarea.y, workarea.width, workarea.height,
+            natural_size.width, natural_size.height,
+        ))
+        top.show_all()
+        dock.show()
+        for window in windows:
+            handlers.append((window, window.connect('destroy', Gtk.main_quit)))
+        clock_source = GLib.timeout_add_seconds(30, refresh_clock)
         Gtk.main()
     finally:
-        GLib.source_remove(clock_source)
-        for window, handler in windows:
+        if clock_source is not None:
+            GLib.source_remove(clock_source)
+        for window, handler in handlers:
             if window.handler_is_connected(handler):
                 window.disconnect(handler)
+        for window in windows:
             window.destroy()
 
 
 if __name__ == '__main__':
-    run()
+    parser = argparse.ArgumentParser(description='Run the Canopy Classic preview')
+    parser.add_argument('--safe-defaults', action='store_true',
+                        help='open with built-in settings without modifying the settings file')
+    run(safe_defaults=parser.parse_args().safe_defaults)

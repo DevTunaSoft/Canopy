@@ -33,3 +33,7 @@ R02/R07/R08: `test_preview_places_compact_dock_without_default_apps` launches th
 ## Classic menu emblem evidence (2026-11-18)
 
 R02/R09: The Classic menu displays `canopy/assets/classic-penguin.svg`, an original drawing. The GTK smoke test verifies the image and accessible name. Screen-reader and scaled-display checks on Mint remain open.
+
+## Preview recovery evidence (2026-11-18)
+
+R03/R07/R08: `canopy/preferences.py` resolves the XDG path and rejects invalid version types. `canopy/classic_gtk.py` exposes a temporary recovery launch and disposes windows after startup failures. `tests/test_preferences.py` and `tests/test_classic_gtk.py` cover the path, preserved corrupt bytes and a forced Gio failure. Settings migration, backup and Cinnamon recovery remain open.

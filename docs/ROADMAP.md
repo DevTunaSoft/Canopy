@@ -24,3 +24,5 @@ See `CODEX_START_HERE.md` for dependency-safe branch guidance. Do not repeat com
 The Classic preview now supports shared application search, keyboard selection and a headless GTK launcher smoke test. Next priorities are verified Cinnamon behavior, responsive dock placement, original menu artwork and the session architecture ADR.
 
 The Classic dock now sizes to its contents and uses the primary monitor's work area at startup. Verify the result with a Cinnamon panel in place and cover monitor changes before considering login-session integration.
+
+The Classic preview supports a temporary settings recovery launch. Follow with a versioned backup and migration design after target Mint testing establishes the settings location and session lifecycle.

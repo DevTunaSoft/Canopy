@@ -1,4 +1,5 @@
 """GTK launcher smoke test. Run with system Python on a graphical display."""
+from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -84,11 +85,17 @@ class ClassicGtkSmokeTests(unittest.TestCase):
             Gtk.main_quit()
             return GLib.SOURCE_REMOVE
 
-        GLib.idle_add(inspect_windows)
         with tempfile.TemporaryDirectory() as config:
+            settings = Path(config) / 'canopy/settings.json'
+            settings.parent.mkdir()
+            settings.write_bytes(b'{broken')
             with patch.dict('os.environ', {'XDG_CONFIG_HOME': config}), \
                     patch.object(Gio, 'app_info_get_all', return_value=[]):
-                run()
+                with self.assertRaisesRegex(SystemExit, '--safe-defaults'):
+                    run()
+                GLib.idle_add(inspect_windows)
+                run(safe_defaults=True)
+                self.assertEqual(settings.read_bytes(), b'{broken')
         display = Gdk.Display.get_default()
         monitor = display.get_primary_monitor() or display.get_monitor(0)
         area = monitor.get_workarea()
@@ -100,3 +107,12 @@ class ClassicGtkSmokeTests(unittest.TestCase):
         self.assertLess(dock_width, area.width)
         self.assertLess(abs(x + dock_width / 2 - (area.x + area.width / 2)), 2)
         self.assertEqual(y + dock_height, area.y + area.height - 12)
+
+    def test_startup_failure_disposes_windows(self):
+        from gi.repository import Gio
+
+        with patch.object(Gio, 'app_info_get_all', side_effect=RuntimeError('discovery failed')):
+            with self.assertRaisesRegex(RuntimeError, 'discovery failed'):
+                run(safe_defaults=True)
+        self.assertFalse(any(window.get_title() == 'Canopy Classic preview'
+                             for window in self.Gtk.Window.list_toplevels()))

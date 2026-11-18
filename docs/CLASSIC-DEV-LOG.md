@@ -41,3 +41,9 @@
 
 - Draft PR #6 passed [unit and GTK jobs](https://github.com/DevTunaSoft/Canopy/actions/runs/44245759206) and [docs](https://github.com/DevTunaSoft/Canopy/actions/runs/44245759288). Draft PR #7 passed [unit and GTK jobs](https://github.com/DevTunaSoft/Canopy/actions/runs/44245920262) and [docs](https://github.com/DevTunaSoft/Canopy/actions/runs/44245920232).
 - ADR-003 compares Cinnamon, independent compositor development and Labwc. Debian/Xvfb process measurements are recorded as preliminary evidence. Only a Mint trial can test the target login and recovery behavior.
+
+## 2026-11-18 — Preview settings recovery
+
+- Added a shared XDG settings path and strict version type validation. Classic startup reports invalid or unreadable settings and supports `--safe-defaults` for an in-memory recovery preview. The original settings file remains untouched.
+- Covered GTK window and timer cleanup across startup failures. A regression test forces Gio discovery to fail and verifies that the preview windows are disposed.
+- Local Debian 13 checks passed with 18 tests under GTK3/Xvfb, Python compilation and the documentation check. The regular Python environment passed 15 tests and skipped 3 graphical tests because PyGObject is unavailable there. Cinnamon and hardware tests remain open.

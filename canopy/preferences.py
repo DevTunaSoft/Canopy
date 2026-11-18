@@ -35,8 +35,11 @@ class Preferences:
     def from_dict(cls, data: dict) -> "Preferences":
         if not isinstance(data, dict) or set(data) - {"version", "layout", "profile", "auto_mode", "overrides"}:
             raise ValueError("Unknown preference fields")
-        if data.get("version", 1) != 1 or type(data.get("auto_mode", True)) is not bool:
-            raise ValueError("Unsupported version or invalid auto_mode")
+        version = data.get("version", 1)
+        if type(version) is not int or version != 1:
+            raise ValueError("Unsupported settings version")
+        if type(data.get("auto_mode", True)) is not bool:
+            raise ValueError("Invalid auto_mode")
         raw = data.get("overrides", {})
         if not isinstance(raw, dict) or set(raw) - FEATURES:
             raise ValueError("Invalid feature overrides")
@@ -49,6 +52,14 @@ class Preferences:
         return {"version": 1, "layout": self.layout.value, "profile": self.profile.value,
                 "auto_mode": self.auto_mode,
                 "overrides": {k: self.overrides[k].value for k in sorted(FEATURES)}}
+
+def user_settings_path() -> Path:
+    """Locate settings using the XDG config directory rules."""
+    config_home = Path(os.environ.get("XDG_CONFIG_HOME", ""))
+    if not config_home.is_absolute():
+        config_home = Path.home() / ".config"
+    return config_home / "canopy" / "settings.json"
+
 
 def load(path: Path) -> Preferences:
     try:

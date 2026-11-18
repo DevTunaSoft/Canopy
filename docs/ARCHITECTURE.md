@@ -9,3 +9,5 @@ Keep Cinnamon as a selectable fallback. Version settings and migrate transaction
 **ADRs required before implementation:** compositor and Wayland/X11 compatibility; UI toolkit/language; packaging; settings schema; performance thresholds; login/session recovery. Evaluate memory, CPU, hardware support, maintainability and security. Universal global menus are not assumed.
 
 The Classic preview uses `canopy/applications.py` for desktop-entry filtering, sorting and search. The module takes app descriptors supplied by the platform and has no GTK dependency. Classic owns its GTK controls and invokes the existing Gio activation path.
+
+The preview reads its path through shared `user_settings_path()` and supports an explicit temporary built-in defaults run. This recovery path never writes the stored file. Settings migration and backup stay in the shared core design.

@@ -21,7 +21,7 @@ The prototype displays a dark top bar with a Canopy menu and clock, plus a float
 
 ## Known limits
 
-- Menu uses text instead of final original white Tux art.
+- The menu button displays an original white penguin emblem. It shows the Canopy label if the SVG loader or artwork is unavailable.
 - Panel/dock do not reserve screen space or replace existing Cinnamon panels.
 - Not suitable for login-session use; no compositor or window management.
 - At startup the panel and dock use the primary monitor’s work area. The dock sizes to its buttons. Monitor changes after startup, scaling, Cinnamon panel interaction and Wayland placement remain unverified.

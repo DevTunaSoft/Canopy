@@ -30,3 +30,9 @@
 - A new full-preview smoke test exposed a startup failure when a default desktop ID was absent. PyGObject raises `TypeError` when `DesktopAppInfo.new()` returns NULL. The dock now matches its pinned IDs against installed Gio entries, omitting missing entries and retaining the Apps button.
 - GTK sizes the dock from its contents. Startup placement centers it above the bottom of the primary monitor's work area, including nonzero origins, and places the top bar at that work area's upper edge. Preview exit removes the clock timer and destroys both windows.
 - **PASS** Debian 13 GTK3/Xvfb, 16 tests, including startup with no pinned apps, measured geometry, and window cleanup. Cinnamon panel interaction, changes to monitor layout after startup, Wayland placement and resource measurements remain **NOT RUN**.
+
+## 2026-11-18 — Original Classic menu emblem
+
+- Drew `canopy/assets/classic-penguin.svg` from original paths for the white penguin menu mark. No external artwork imported. The GTK button has a stable accessible name and keeps its text fallback when the image cannot be loaded.
+- **PASS** Debian 13 GTK3/Xvfb, 16 tests. The preview smoke test confirms the named menu control loads a 20 px image. An initial smoke run caught a PyGObject error caused by clearing the button label with `None`. The button now starts empty and receives a label only for the fallback.
+- Live screen-reader and scaled-display visual acceptance remain **NOT RUN**. Product artwork licensing remains part of the release review.

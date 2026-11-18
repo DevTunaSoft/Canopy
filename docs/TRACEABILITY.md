@@ -29,3 +29,7 @@ R02/R09: `canopy/applications.py` and `canopy/classic_gtk.py` supply filterable 
 ## Dock startup evidence (2026-11-18)
 
 R02/R07/R08: `test_preview_places_compact_dock_without_default_apps` launches the actual preview using GTK3 and verifies geometry and cleanup with an empty app catalog. The model test checks offsets and undersized work areas. Cinnamon, dynamic monitor changes and Wayland placement still require verification.
+
+## Classic menu emblem evidence (2026-11-18)
+
+R02/R09: The Classic menu displays `canopy/assets/classic-penguin.svg`, an original drawing. The GTK smoke test verifies the image and accessible name. Screen-reader and scaled-display checks on Mint remain open.

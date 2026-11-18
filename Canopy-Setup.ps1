@@ -13,6 +13,7 @@ param(
     [switch]$CreateVM,
     [switch]$ConfigureUnattended,
     [switch]$StartVM,
+    [switch]$ResumeExistingVM,
     [switch]$SelfTest
 )
 Set-StrictMode -Version Latest
@@ -71,6 +72,15 @@ if ($SelfTest) {
     exit 0
 }
 
+if ($ResumeExistingVM) {
+    if ($CreateVM -or $ConfigureUnattended -or $StartVM -or $IsoUrl -or $PasswordFile) {
+        throw 'ResumeExistingVM cannot be combined with creation, URL, or password-file options'
+    }
+    $resume = Join-Path $PSScriptRoot 'scripts\Resume-CanopyMintInstall.ps1'
+    & $resume -IsoPath $IsoPath -IsoSha256 $IsoSha256
+    if ($LASTEXITCODE -ne 0) { throw 'Resume installer failed' }
+    exit 0
+}
 Assert-Options ([bool]$CreateVM) ([bool]$ConfigureUnattended) ([bool]$StartVM) $IsoPath $IsoSha256 $PasswordFile $IsoUrl
 $git = Get-Command 'git.exe' -ErrorAction SilentlyContinue
 if ($null -eq $git) { throw 'Git for Windows is required' }

@@ -10,7 +10,7 @@ Statuses: PLANNED = specified, no implementation; PROTOTYPE = code exists but ta
 | Auto Mode policy | VERIFIED-CI prototype | Caller-supplied flags only; no hardware monitoring |
 | Three cosmetic Auto/On/Off overrides | VERIFIED-CI prototype | Not yet connected to GTK visuals |
 | Reduced motion policy | VERIFIED-CI prototype | No system accessibility integration yet |
-| Settings JSON validation / atomic replacement | VERIFIED-CI prototype | No migration/backup or full corruption recovery |
+| Settings JSON validation / atomic replacement | PROTOTYPE | Preview can use built-in defaults after a corrupt or unreadable file while preserving its bytes. Migration, backup and durable directory synchronization remain open. |
 | GTK Classic top bar and local clock | PROTOTYPE | PR #3, GUI not tested on Mint |
 | GTK dock / Gio launch buttons | PROTOTYPE | Default desktop IDs if installed, content-sized dock at startup. GTK3/Xvfb startup and placement verified. Drag/reorder and Cinnamon behavior remain open. |
 | GTK application launcher | PROTOTYPE | Shared name and ID search, keyboard selection, and no fixed result cap. Launcher widget smoke passed on Debian 13 GTK3/Xvfb. Cinnamon and screen-reader checks remain open. |

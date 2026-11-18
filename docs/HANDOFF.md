@@ -41,3 +41,7 @@ Canonical full audit: `CODEX_START_HERE.md`. Master 16-rule mandate: `docs/MASTE
 ## 2026-11-18 — Session architecture evaluation
 
 ADR-003 records the Cinnamon-first evaluation path, a separate Labwc-backed candidate, and the cost of an independent compositor. It includes a Debian/Xvfb process sample and explicit decision gates. The next acceptance step requires a disposable Linux Mint Cinnamon target. No production session choice has been made.
+
+## 2026-11-18 — Preview settings recovery
+
+`feat/classic-safe-startup` follows the session evaluation branch. The preview now reports bad settings and can start with temporary built-in defaults through `--safe-defaults`. It leaves the stored file unchanged. GTK startup failures dispose created windows and the clock timer. Debian GTK3/Xvfb passed 18 tests. Mint session acceptance remains open.

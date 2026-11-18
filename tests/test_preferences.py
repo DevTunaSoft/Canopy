@@ -2,7 +2,8 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from canopy.preferences import Preferences, Profile, Layout, Override, load, save, effective_features
+from unittest.mock import patch
+from canopy.preferences import Preferences, Profile, Layout, Override, load, save, effective_features, user_settings_path
 
 class PreferencesTests(unittest.TestCase):
     def test_defaults(self):
@@ -47,12 +48,20 @@ class PreferencesTests(unittest.TestCase):
             self.assertEqual(path.stat().st_mode & 0o777, 0o600)
 
     def test_reject_unknown_or_invalid(self):
-        for data in ({"version": 2}, {"auto_mode": "false"},
+        for data in ({"version": 2}, {"version": True}, {"version": 1.0}, {"auto_mode": "false"},
                      {"overrides": {"networking": "off"}},
                      {"overrides": {"animations": "maybe"}},
                      {"layout": "unknown"}, {"unexpected": True}):
             with self.subTest(data=data), self.assertRaises(ValueError):
                 Preferences.from_dict(data)
+
+    def test_xdg_config_home_must_be_absolute(self):
+        fallback = Path.home() / ".config/canopy/settings.json"
+        for value in ("", "relative"):
+            with self.subTest(value=value), patch.dict("os.environ", {"XDG_CONFIG_HOME": value}):
+                self.assertEqual(user_settings_path(), fallback)
+        with patch.dict("os.environ", {"XDG_CONFIG_HOME": "/example/config"}):
+            self.assertEqual(user_settings_path(), Path("/example/config/canopy/settings.json"))
 
     def test_corrupt_file_is_not_silently_overwritten(self):
         with tempfile.TemporaryDirectory() as directory:

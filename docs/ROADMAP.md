@@ -26,3 +26,5 @@ The Classic preview now supports shared application search, keyboard selection a
 The Classic dock now sizes to its contents and uses the primary monitor's work area at startup. Verify the result with a Cinnamon panel in place and cover monitor changes before considering login-session integration.
 
 The Classic preview supports a temporary settings recovery launch. Follow with a versioned backup and migration design after target Mint testing establishes the settings location and session lifecycle.
+
+The Classic preview now stores user-selected dock pins in shared version 2 settings and bounds the dock on a narrow display. Next acceptance work includes Cinnamon behavior, explicit pin ordering, safe settings backup and a production session decision.

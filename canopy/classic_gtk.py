@@ -8,8 +8,8 @@ from datetime import datetime
 from pathlib import Path
 
 from canopy.applications import matches_app, visible_apps
-from canopy.classic_model import DEFAULT_DOCK, clock_label, dock_position
-from canopy.preferences import Layout, Preferences, load, user_settings_path
+from canopy.classic_model import clock_label, configured_dock_ids, dock_position
+from canopy.preferences import Layout, Preferences, load, update_classic_pins, user_settings_path
 
 
 def show_app_launcher(Gtk, Gdk, parent, apps, launch):
@@ -89,6 +89,48 @@ def show_app_launcher(Gtk, Gdk, parent, apps, launch):
     search.grab_focus()
 
 
+def select_dock_pins(Gtk, parent, apps, current_ids):
+    """Collect Classic dock pins without changing stored settings."""
+    dialog = Gtk.Dialog(title='Edit dock', transient_for=parent, modal=True)
+    dialog.set_default_size(420, 480)
+    dialog.add_button('Cancel', Gtk.ResponseType.CANCEL)
+    dialog.add_button('Save', Gtk.ResponseType.OK)
+    dialog.get_content_area().pack_start(
+        Gtk.Label(label='Choose up to 64 applications'), False, False, 0
+    )
+    scroller = Gtk.ScrolledWindow()
+    scroller.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+    dialog.get_content_area().pack_start(scroller, True, True, 0)
+    app_list = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+    app_list.set_border_width(12)
+    scroller.add(app_list)
+
+    available = visible_apps(apps)
+    visible_ids = {app.get_id() for app in available}
+    choices = [(desktop_id, f'{desktop_id} (unavailable)')
+               for desktop_id in current_ids if desktop_id not in visible_ids]
+    choices.extend((app.get_id(), app.get_name()) for app in available)
+    checks = {}
+    for desktop_id, title in choices:
+        checkbox = Gtk.CheckButton(label=title)
+        checkbox.set_tooltip_text(desktop_id)
+        checkbox.set_active(desktop_id in current_ids)
+        app_list.pack_start(checkbox, False, False, 0)
+        checks[desktop_id] = checkbox
+
+    dialog.show_all()
+    response = dialog.run()
+    selected = {desktop_id for desktop_id, checkbox in checks.items()
+                if checkbox.get_active()}
+    dialog.destroy()
+    if response != Gtk.ResponseType.OK:
+        return None
+    updated_ids = [desktop_id for desktop_id in current_ids if desktop_id in selected]
+    updated_ids.extend(desktop_id for desktop_id, _title in choices
+                       if desktop_id in selected and desktop_id not in current_ids)
+    return updated_ids
+
+
 def run(*, safe_defaults=False):
     if os.geteuid() == 0:
         raise SystemExit('Run Canopy Classic from an ordinary user session')
@@ -121,6 +163,7 @@ def run(*, safe_defaults=False):
       .canopy-dock { background: #263f38; border-radius: 16px; padding: 8px; }
       .canopy-dock-opaque { background: #263f38; }
       .canopy-dock-transparent { background: transparent; }
+      .canopy-dock scrolledwindow, .canopy-dock viewport { background: transparent; border: 0; }
       .canopy-panel button, .canopy-dock button { color: white; background: transparent; border: 0; }
       .canopy-panel button:hover, .canopy-dock button:hover { background: #476357; }
     ''')
@@ -162,7 +205,11 @@ def run(*, safe_defaults=False):
 
         def open_menu(button):
             menu = Gtk.Menu()
-            for label, callback in (('About Canopy Classic', show_about), ('Quit preview', Gtk.main_quit)):
+            items = [('About Canopy Classic', show_about)]
+            if not safe_defaults:
+                items.append(('Edit dock', show_dock_editor))
+            items.append(('Quit preview', Gtk.main_quit))
+            for label, callback in items:
                 item = Gtk.MenuItem(label=label)
                 item.connect('activate', lambda _item, func=callback: func())
                 menu.append(item)
@@ -212,29 +259,71 @@ def run(*, safe_defaults=False):
                 dialog.run()
                 dialog.destroy()
 
-        def add_app_button(label, app):
-            button = Gtk.Button(label=label)
-            button.connect('clicked', lambda _button: launch(app))
-            dock_box.pack_start(button, False, False, 0)
-
-        installed_apps = {app.get_id(): app for app in Gio.app_info_get_all()}
-        for item in DEFAULT_DOCK:
-            app = installed_apps.get(item.desktop_id)
-            if app is not None:
-                add_app_button(item.title, app)
-
+        pinned_box = Gtk.Box(spacing=8)
+        pinned_scroller = Gtk.ScrolledWindow()
+        pinned_scroller.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.NEVER)
+        pinned_scroller.set_shadow_type(Gtk.ShadowType.NONE)
+        pinned_scroller.add(pinned_box)
+        dock_box.pack_start(pinned_scroller, False, False, 0)
         apps_button = Gtk.Button(label='Apps ▾')
         apps_button.connect(
             'clicked', lambda _button: show_app_launcher(Gtk, Gdk, dock, Gio.app_info_get_all(), launch)
         )
         dock_box.pack_start(apps_button, False, False, 0)
 
-        dock_box.show_all()
-        _, natural_size = dock_box.get_preferred_size()
-        dock.move(*dock_position(
-            workarea.x, workarea.y, workarea.width, workarea.height,
-            natural_size.width, natural_size.height,
-        ))
+        def render_dock():
+            for child in pinned_box.get_children():
+                child.destroy()
+            installed_apps = {app.get_id(): app for app in visible_apps(Gio.app_info_get_all())}
+            for desktop_id in configured_dock_ids(prefs):
+                app = installed_apps.get(desktop_id)
+                if app is not None:
+                    button = Gtk.Button(label=app.get_name())
+                    button.connect('clicked', lambda _button, current=app: launch(current))
+                    pinned_box.pack_start(button, False, False, 0)
+
+            dock_box.show_all()
+            _, app_size = apps_button.get_preferred_size()
+            _, pinned_size = pinned_box.get_preferred_size()
+            available = max(0, workarea.width - app_size.width - 32)
+            if pinned_box.get_children() and available:
+                pinned_scroller.set_size_request(min(pinned_size.width, available), -1)
+            else:
+                pinned_scroller.hide()
+            _, dock_size = dock_box.get_preferred_size()
+            dock.resize(dock_size.width, dock_size.height)
+            dock.move(*dock_position(
+                workarea.x, workarea.y, workarea.width, workarea.height,
+                dock_size.width, dock_size.height,
+            ))
+
+        def show_dock_editor():
+            nonlocal prefs
+            updated_ids = select_dock_pins(
+                Gtk, top, Gio.app_info_get_all(), configured_dock_ids(prefs)
+            )
+            if updated_ids is None:
+                return
+            try:
+                updated = update_classic_pins(path, prefs.classic_pins, updated_ids)
+            except (OSError, ValueError) as error:
+                try:
+                    prefs = load(path)
+                    render_dock()
+                except (OSError, ValueError):
+                    pass
+                message = Gtk.MessageDialog(transient_for=top, modal=True,
+                                            message_type=Gtk.MessageType.ERROR,
+                                            buttons=Gtk.ButtonsType.CLOSE,
+                                            text='Could not save dock settings')
+                message.format_secondary_text(str(error))
+                message.run()
+                message.destroy()
+                return
+            prefs = updated
+            render_dock()
+
+        render_dock()
         top.show_all()
         dock.show()
         for window in windows:

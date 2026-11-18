@@ -18,6 +18,13 @@ DEFAULT_DOCK = (
 )
 
 
+def configured_dock_ids(preferences):
+    """Resolve untouched settings to the Classic defaults."""
+    if preferences.classic_pins is None:
+        return [item.desktop_id for item in DEFAULT_DOCK]
+    return preferences.classic_pins
+
+
 def clock_label(now: datetime) -> str:
     """Local, short clock suitable for a compact top bar."""
     return now.strftime('%a %H:%M')

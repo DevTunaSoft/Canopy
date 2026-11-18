@@ -10,12 +10,12 @@ Statuses: PLANNED = specified, no implementation; PROTOTYPE = code exists but ta
 | Auto Mode policy | VERIFIED-CI prototype | Caller-supplied flags only; no hardware monitoring |
 | Three cosmetic Auto/On/Off overrides | VERIFIED-CI prototype | Not yet connected to GTK visuals |
 | Reduced motion policy | VERIFIED-CI prototype | No system accessibility integration yet |
-| Settings JSON validation / atomic replacement | PROTOTYPE | Preview recovery preserves a corrupt file. Save syncs the replacement and containing directory. Migration, backup and simultaneous writer coordination remain open. |
+| Settings JSON validation / atomic replacement | PROTOTYPE | Preview recovery preserves a corrupt file. Schema v2 adds Classic pins and accepts v1. Save and pin updates use a per-file advisory lock. Backup and durable new parent directories remain open. |
 | GTK Classic top bar and local clock | PROTOTYPE | PR #3, GUI not tested on Mint |
-| GTK dock / Gio launch buttons | PROTOTYPE | Default desktop IDs if installed, content-sized dock at startup. GTK3/Xvfb startup and placement verified. Drag/reorder and Cinnamon behavior remain open. |
+| GTK dock / Gio launch buttons | PROTOTYPE | Versioned pins select installed apps, with a bounded horizontal scroller and an Apps entry. GTK3/Xvfb checks cover editor save and a 320px monitor. Reordering and Cinnamon behavior remain open. |
 | GTK application launcher | PROTOTYPE | Shared name and ID search, Enter to open the first match, Escape to close, and no fixed result cap. Launcher widget smoke passed on Debian 13 GTK3/Xvfb. Cinnamon and screen-reader checks remain open. |
 | Original white penguin menu emblem | PROTOTYPE | Original SVG with text fallback and accessible menu name. GTK3/Xvfb verified that the preview loads the image. |
-| Dock customization/animations | PLANNED | Nothing wired to profile policy |
+| Dock customization/animations | PROTOTYPE | Classic pin selection is stored in shared settings. Reordering and animation/profile binding remain planned. |
 | Windows-inspired Modern UI | PLANNED | Shared layout enum only |
 | Global menu / true window-management | PLANNED | Compositor/session architecture undecided |
 | Linux Mint selectable Canopy session | PLANNED | Preview is just a GTK process |

@@ -63,3 +63,10 @@
 - A Debian/Xvfb screenshot showed white square corners around the dock's rounded content. The GTK window retained its default background outside the styled box.
 - The dock now uses a matching opaque background without a compositor. When compositing and an RGBA visual are available, it requests a transparent window background. A second Debian/Xvfb screenshot confirmed that the white corners disappeared. GTK3/Xvfb passed 20 tests.
 - The composited appearance and Mint Cinnamon rendering remain unverified.
+
+## 2026-11-18 — Versioned Classic dock pins
+
+- Added a shared version 2 `classic_pins` setting with read compatibility for version 1. Null means built-in defaults and an explicit empty list means no pins. The Canopy menu opens an Edit dock dialog with keyboard-operable checkboxes for visible installed apps and unavailable saved pins. Save updates the dock and keeps Apps available.
+- The dock uses a horizontal scroller. A GTK smoke test selects 64 long-named pins and checks that the dock stays inside the monitor width. Tests ran on 1280 × 800 and 320 × 240 Debian/Xvfb displays. Pin order is retained for existing entries; new selections append in application-name order. Drag or explicit reorder remains open.
+- Review identified a lost-update risk when another process changed settings while the editor was open. The shared update now reloads under a file lock, preserves unrelated fields and rejects a stale pin list. Invalid saves validate before creating a settings directory. Tests cover version 1 migration, corrupt-file preservation, stale editor rejection, dialog selection and menu save/refresh.
+- An initial GTK test mocked the `Gtk.Menu` class and triggered a swallowed PyGObject exception despite a passing test. The test now captures only `popup_at_widget` and reports callback errors after the main loop. The corrected GTK test suite passed 29 tests on Debian/Xvfb. Linux Mint Cinnamon and real concurrent processes remain unverified.

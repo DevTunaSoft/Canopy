@@ -34,3 +34,7 @@ Date, context, alternatives, evidence/tests, choice, consequences, compatibility
 ### Session integration evaluation (proposed, 2026-11-18)
 
 [ADR-003](ADR-003-SESSION-CANDIDATES.md) compares Cinnamon extension integration, an independent compositor, and a Labwc-backed session. Trial Cinnamon first in a disposable target session. The shipping compositor and toolkit remain open pending accessibility, recovery, compatibility and performance evidence.
+
+### Classic dock pin persistence (provisional, 2026-11-18)
+
+Use versioned layout-specific pins within the shared preferences model, with the existing Gio desktop entry IDs and a bounded GTK dock view. Preserve version 1 settings on load, retain unavailable pins until explicitly removed, and serialize Canopy writers through an advisory lock. This supports a reversible user-level preview without committing to a production Cinnamon applet or compositor. See [ADR-001](ADR-001-SETTINGS.md). Mint integration and backup design remain open.

@@ -4,7 +4,8 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from canopy.classic_gtk import run, show_app_launcher
+from canopy.classic_gtk import run, select_dock_pins, show_app_launcher
+from canopy.preferences import Preferences, load, save
 
 from test_classic_model import FakeApp
 
@@ -88,6 +89,7 @@ class ClassicGtkSmokeTests(unittest.TestCase):
         search.set_text('writer')
         self.assertTrue(search.emit('key-press-event', enter))
         self.assertEqual(launched, [app])
+
         self.assertFalse(dialog.get_visible())
 
         show_app_launcher(Gtk, Gdk, parent, [app], launched.append)
@@ -101,6 +103,38 @@ class ClassicGtkSmokeTests(unittest.TestCase):
         self.assertFalse(dialog.get_visible())
         self.assertEqual(launched, [app])
 
+    def test_edit_dock_preserves_missing_pins_and_appends_selection(self):
+        Gtk, GLib = self.Gtk, self.GLib
+        parent = Gtk.Window()
+        self.addCleanup(parent.destroy)
+        parent.show()
+        observed = []
+        errors = []
+
+        def select_writer():
+            dialog = next(window for window in Gtk.Window.list_toplevels()
+                          if window.get_title() == 'Edit dock')
+            try:
+                scroller = next(child for child in dialog.get_content_area().get_children()
+                                if isinstance(child, Gtk.ScrolledWindow))
+                boxes = scroller.get_child().get_child().get_children()
+                checks = {box.get_tooltip_text(): box for box in boxes}
+                observed.append(checks['missing.desktop'].get_active())
+                checks['writer.desktop'].set_active(True)
+            except Exception as error:
+                errors.append(error)
+                dialog.response(Gtk.ResponseType.CANCEL)
+            else:
+                dialog.response(Gtk.ResponseType.OK)
+            return GLib.SOURCE_REMOVE
+
+        GLib.idle_add(select_writer)
+        selected = select_dock_pins(
+            Gtk, parent, [FakeApp('writer.desktop', 'Writer')], ['missing.desktop']
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(observed, [True])
+        self.assertEqual(selected, ['missing.desktop', 'writer.desktop'])
 
     def test_preview_places_compact_dock_without_default_apps(self):
         from gi.repository import Gio
@@ -152,3 +186,92 @@ class ClassicGtkSmokeTests(unittest.TestCase):
                 run(safe_defaults=True)
         self.assertFalse(any(window.get_title() == 'Canopy Classic preview'
                              for window in self.Gtk.Window.list_toplevels()))
+
+    def test_many_pins_stay_within_monitor_width(self):
+        from gi.repository import Gio
+
+        Gtk, Gdk, GLib = self.Gtk, self.Gdk, self.GLib
+        pins = [f'app{i}.desktop' for i in range(64)]
+        apps = [FakeApp(desktop_id, f'Long application name {index}')
+                for index, desktop_id in enumerate(pins)]
+        widths = []
+        apps_visible = []
+        scrolling = []
+
+        def inspect():
+            windows = [window for window in Gtk.Window.list_toplevels()
+                       if window.get_title() == 'Canopy Classic preview' and window.get_visible()]
+            for window in windows:
+                dock_box = window.get_child()
+                if not dock_box.get_style_context().has_class('canopy-dock'):
+                    continue
+                widths.append(window.get_size()[0])
+                for child in dock_box.get_children():
+                    if isinstance(child, Gtk.Button) and child.get_label() == 'Apps ▾':
+                        apps_visible.append(child.get_mapped() and child.get_allocation().width > 0)
+                    if isinstance(child, Gtk.ScrolledWindow):
+                        adjustment = child.get_hadjustment()
+                        scrolling.append(adjustment.get_upper() > adjustment.get_page_size())
+            Gtk.main_quit()
+            return GLib.SOURCE_REMOVE
+
+        with tempfile.TemporaryDirectory() as config:
+            path = Path(config) / 'canopy/settings.json'
+            save(path, Preferences(classic_pins=pins))
+            with patch.dict('os.environ', {'XDG_CONFIG_HOME': config}), \
+                    patch.object(Gio, 'app_info_get_all', return_value=apps):
+                GLib.idle_add(inspect)
+                run()
+
+        display = Gdk.Display.get_default()
+        monitor = display.get_primary_monitor() or display.get_monitor(0)
+        self.assertEqual(len(widths), 1)
+        self.assertLessEqual(widths[0], monitor.get_workarea().width)
+        self.assertEqual(apps_visible, [True])
+        self.assertEqual(scrolling, [True])
+
+    def test_edit_menu_persists_and_refreshes_dock(self):
+        from gi.repository import Gio
+
+        Gtk, GLib = self.Gtk, self.GLib
+        app = FakeApp('writer.desktop', 'Writer')
+        menus, labels, errors = [], [], []
+
+        def capture_popup(menu, *_args):
+            menus.append(menu)
+
+        def edit():
+            try:
+                windows = [window for window in Gtk.Window.list_toplevels()
+                           if window.get_title() == 'Canopy Classic preview']
+                top = next(window for window in windows
+                           if window.get_child().get_style_context().has_class('canopy-panel'))
+                home = next(button for button in top.get_child().get_children()
+                            if button.get_accessible().get_name() == 'Canopy menu')
+                home.clicked()
+                action = next(item for item in menus[-1].get_children()
+                              if item.get_label() == 'Edit dock')
+                action.activate()
+                dock = next(window for window in windows
+                            if window.get_child().get_style_context().has_class('canopy-dock'))
+                scroller = next(child for child in dock.get_child().get_children()
+                                if isinstance(child, Gtk.ScrolledWindow))
+                labels.extend(button.get_label() for button in
+                              scroller.get_child().get_child().get_children())
+            except Exception as error:
+                errors.append(error)
+            finally:
+                Gtk.main_quit()
+            return GLib.SOURCE_REMOVE
+
+        with tempfile.TemporaryDirectory() as config:
+            path = Path(config) / 'canopy/settings.json'
+            with patch.dict('os.environ', {'XDG_CONFIG_HOME': config}), \
+                    patch.object(Gio, 'app_info_get_all', return_value=[app]), \
+                    patch.object(Gtk.Menu, 'popup_at_widget', capture_popup), \
+                    patch('canopy.classic_gtk.select_dock_pins', return_value=['writer.desktop']):
+                GLib.idle_add(edit)
+                run()
+            self.assertEqual(load(path).classic_pins, ['writer.desktop'])
+        self.assertEqual(errors, [])
+        self.assertEqual(labels, ['Writer'])

@@ -41,8 +41,10 @@ def detect(*, os_release, environ, which, probe_gtk, geteuid):
         add(executable, which(executable) is not None, "Executable on PATH")
     add("gtk3-python", probe_gtk(), "System Python GTK3 introspection import")
     desktop = environ.get("XDG_CURRENT_DESKTOP", "")
-    add("cinnamon-session", "cinnamon" in desktop.lower().split(":"),
+    add("cinnamon-session", any(token in ("cinnamon", "x-cinnamon") for token in desktop.lower().split(":")),
         "Desktop=" + (desktop[:100] or "<unavailable>"))
+    session = environ.get("XDG_SESSION_TYPE", "").lower()
+    add("x11-session", session == "x11", "Session type=" + (session or "<missing>"))
     display = environ.get("DISPLAY", "")
     add("x11-display", display.startswith(":") and len(display) <= 80,
         "X11 DISPLAY configured (Wayland-only not sufficient)")

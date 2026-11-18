@@ -3,6 +3,8 @@ Last audited: 2026-11-17. Repository: https://github.com/DevTunaSoft/Canopy
 
 > **Mandatory first read.** This is a self-contained engineering handoff, not a claim that Canopy is a finished desktop. Preserve all existing README, AGENTS.md, specifications, roadmap, ADRs, logs, traceability, and prior decisions. Do not paraphrase them instead of reading them. This document adds detail; it does not supersede them.
 
+The 2026-11-17 audit below records the original takeover state. Read the 2026-11-18 checkpoint in section 10 before selecting a branch.
+
 ## 0. Exact Git state: READ BEFORE MODIFYING ANY FILE
 
 As audited on 2026-11-17:
@@ -29,7 +31,7 @@ python3 -m compileall -q canopy tests
 ```
 If local working state exists, do not overwrite or abandon it; inspect first. If the docs takeover branch is unavailable, use the latest verified descendant of `feat/classic-gtk-preview`, after inspecting PRs and commits. Replace the sample branch name with a unique descriptive feature branch if it already exists. No destructive Git commands. Work only on feature branches and draft PRs. Never force-push or merge main without authorization.
 
-**Stacked PR concern:** PR #2 currently targets `main` and includes PR #1's work; PR #3 correctly targets PR #2's branch. Plan and document safe sequential integration (#1 -> #2 -> #3) or re-target PR #2 against #1's branch to eliminate duplicated diffs, without merging until approved. The takeover branch is another descendant, not an independent implementation. Do not create duplicate PRs for the same changes. Coordinate with parallel agents.
+**Original stacked PR concern, resolved 2026-11-18:** PR #2 targeted `main` and included PR #1's work. PR #2 now targets the foundation branch, so the review diff contains only its preferences increment. PR #3 continues to target PR #2's branch. Continue to inspect live PR bases before integration. The takeover branch is another descendant, not an independent implementation. Do not create duplicate PRs for the same changes. Coordinate with parallel agents.
 
 ## 1. What Canopy actually is
 
@@ -161,3 +163,9 @@ Avoid repeat explanations or re-reading static documents every micro-step; first
 ## 9. Exact continuation instruction for Codex
 
 **Read every project document fully, beginning with AGENTS.md and CODEX_START_HERE.md. Inspect all current branches, PRs and CI before work. Continue from the latest safe descendant of the existing prototype; preserve and extend code rather than rebuilding it. Focus first on the macOS-inspired Canopy Classic preview while protecting one reusable core for future Canopy Modern. Implement focused code, run tests, fix root causes, record performance/security/accessibility impact, update all cumulative docs, commit/push verified changes to feature branches, and create draft PRs. Do not merge main or make irreversible, chargeable or privileged changes without authorization. Never claim a usable desktop shell until verified on Linux Mint. Continue autonomously until genuinely blocked or session ends.**
+
+## 10. Verified continuation checkpoint, 2026-11-18
+
+PR #2 was retargeted to `docs/initial-project-foundation` after confirming that branch is an ancestor of its head. Its diff now has nine files and 208 added lines. PR #1 through #8 remain open drafts. PR #9 adds a temporary settings recovery launch, PR #11 synchronizes the settings directory, PR #12 completes launcher keyboard actions, and PR #13 fixes an opaque dock background artifact. These PRs form a descendant chain ending at `fix/classic-dock-window-background` commit `e68ea5d`. All six checks on PR #13 passed when inspected. PR #10 is a separate draft based on PR #8 for the project-scoped Ponytail skill. Its checks passed, but fresh Codex skill discovery is unverified. Inspect current heads and checks before using either branch. [PR #2](https://github.com/DevTunaSoft/Canopy/pull/2) · [PR #9](https://github.com/DevTunaSoft/Canopy/pull/9) · [PR #10](https://github.com/DevTunaSoft/Canopy/pull/10) · [PR #11](https://github.com/DevTunaSoft/Canopy/pull/11) · [PR #12](https://github.com/DevTunaSoft/Canopy/pull/12) · [PR #13](https://github.com/DevTunaSoft/Canopy/pull/13)
+
+Debian 13 GTK3/Xvfb passed the 20-test Classic preview suite on PR #13's code. Screenshots exposed white corners on the dock window without a compositor, and a second capture confirmed they were removed. Neither screenshot tests Cinnamon or a composited display. An environment check found no Mint image, Cinnamon session, usable VM, or container service here. Target Mint, accessibility, graphics hardware, and a selectable login session remain unverified. See the chronological development log and ADR-003 for exact scope and preliminary resource measurements.

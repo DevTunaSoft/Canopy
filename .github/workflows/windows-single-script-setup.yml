@@ -12,7 +12,7 @@ jobs:
       - name: Parse every PowerShell setup entry point
         shell: pwsh
         run: |
-          $paths = @('Canopy-Setup.ps1', 'scripts/Start-CanopyTestLab.ps1')
+          $paths = @('Canopy-Setup.ps1', 'scripts/Start-CanopyTestLab.ps1', 'scripts/Resume-CanopyMintInstall.ps1')
           foreach ($path in $paths) {
             $tokens = $null
             $errors = $null
@@ -22,3 +22,6 @@ jobs:
       - name: Exercise standalone setup gates without host changes
         shell: pwsh
         run: ./Canopy-Setup.ps1 -SelfTest
+      - name: Exercise resume safety gate without host changes
+        shell: pwsh
+        run: ./scripts/Resume-CanopyMintInstall.ps1 -IsoPath 'C:\mint.iso' -IsoSha256 ('a' * 64) -SelfTest

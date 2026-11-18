@@ -53,3 +53,6 @@ R02/R03/R07/R08/R09: `canopy/preferences.py` accepts version 1 settings and stor
 ## Test-lab automation checkpoint (2026-11-18)
 
 R08 partial prototype: `scripts/mint_testlab.py` executes fixed commands and records PASS/FAIL/BLOCKED JSON; `tests/test_mint_testlab.py` provides unit regression tests. This is not a functioning remote Mint environment. Mint graphical acceptance, screenshot capture, VM provisioning and hardware benchmarks remain NOT RUN.
+
+## Visual regression evidence prototype
+R08 partial: `scripts/capture_classic.py` and `tests/test_capture_classic.py` capture only Canopy GTK test windows under isolated Xvfb. GitHub Actions uploads transient visual evidence. Mint GUI/session verification and screenshot baseline comparisons are still NOT RUN / NOT IMPLEMENTED.

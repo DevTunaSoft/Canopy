@@ -8,3 +8,11 @@
 - GitHub CI: NOT RUN at time of writing; real Linux Mint session: NOT RUN; resource benchmark: NOT RUN.
 - Limitations: No UI, dock, top bar, compositor, hardware metrics collection or working session yet. This is a shared core prototype, not a desktop.
 - Next: select compositor/toolkit through documented ADR; build a selectable session alongside Cinnamon, then Classic top bar and dock.
+
+## 2026-11-17 — Non-disruptive first UI preview
+- Implemented `canopy.classic_gtk`: GTK3 top bar, Canopy menu, time label, small dock, Gio AppInfo-backed launcher, no shell subprocesses.
+- Added `canopy.classic_model` and three unit tests for clock, visible app sorting/deduplication, dock IDs.
+- Local command `PYTHONPATH=. python -m unittest discover -s tests -v` on the **new module tests only**: PASS 3/3. `python -m compileall -q canopy tests`: PASS.
+- Local Python GI/GTK import: NOT AVAILABLE; live UI and Linux Mint compatibility NOT RUN. Parent preference tests not executed in the same local workspace; GitHub CI is required for combined coverage.
+- New docs: ADR-002 and CLASSIC-PREVIEW. No session, compositor, Tux vector art or packaged installer yet.
+- Next: verify combined remote CI; review Linux Mint visual behavior; decide session/compositor architecture via ADR; implement original assets and accessibility.

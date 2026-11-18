@@ -30,3 +30,7 @@ ADR-001 chooses Python standard library for configuration model, not final appli
 
 ## Decision record template
 Date, context, alternatives, evidence/tests, choice, consequences, compatibility/recovery implications, rollback, affected requirements and follow-up work. Never erase rejected alternatives or previous decision history; mark superseded.
+
+### Session integration evaluation (proposed, 2026-11-18)
+
+[ADR-003](ADR-003-SESSION-CANDIDATES.md) compares Cinnamon extension integration, an independent compositor, and a Labwc-backed session. Trial Cinnamon first in a disposable target session. The shipping compositor and toolkit remain open pending accessibility, recovery, compatibility and performance evidence.

@@ -37,3 +37,7 @@ Canonical full audit: `CODEX_START_HERE.md`. Master 16-rule mandate: `docs/MASTE
 ## 2026-11-18 — Classic menu emblem
 
 `feat/classic-menu-emblem` adds the original white penguin SVG, an accessible menu name and text fallback. GTK3/Xvfb verifies the asset loads in the preview. Screen-reader and target Mint appearance checks remain open alongside the session architecture evaluation.
+
+## 2026-11-18 — Session architecture evaluation
+
+ADR-003 records the Cinnamon-first evaluation path, a separate Labwc-backed candidate, and the cost of an independent compositor. It includes a Debian/Xvfb process sample and explicit decision gates. The next acceptance step requires a disposable Linux Mint Cinnamon target. No production session choice has been made.

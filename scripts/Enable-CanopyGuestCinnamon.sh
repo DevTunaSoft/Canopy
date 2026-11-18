@@ -27,6 +27,7 @@ if [[ -e /etc/lightdm/lightdm.conf.d/70-canopy-testlab.conf ]]; then
     exit 2
 fi
 sudo -v
+sudo install -d -m 755 /etc/lightdm/lightdm.conf.d
 printf '%s\n' \
     '[Seat:*]' \
     'autologin-user=canopy-test' \

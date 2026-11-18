@@ -1,0 +1,16 @@
+name: Documentation checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify baseline
+        run: |
+          set -euo pipefail
+          for f in README.md AGENTS.md docs/REQUIREMENTS.md docs/ARCHITECTURE.md docs/ROADMAP.md docs/TRACEABILITY.md docs/HANDOFF.md; do test -s "$f"; done
+          grep -Fq 'The Familiar Feel. The Freedom of Linux.' README.md

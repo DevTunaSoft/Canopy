@@ -27,5 +27,6 @@ If the settings file is corrupt or unreadable, the preview reports its path and 
 - Panel/dock do not reserve screen space or replace existing Cinnamon panels.
 - Not suitable for login-session use; no compositor or window management.
 - At startup the panel and dock use the primary monitor’s work area. The dock sizes to its buttons. Monitor changes after startup, scaling, Cinnamon panel interaction and Wayland placement remain unverified.
+- The dock's opaque fallback was inspected under Debian/Xvfb. Its composited transparency and rounded corners need target Mint visual review.
 - Preliminary Debian/Xvfb process measurements are recorded in ADR-003. Target Mint measurements remain open.
 - To exercise the launcher widgets with a virtual X11 display, run `xvfb-run -a /usr/bin/python3 -m unittest discover -s tests -v`. Linux Mint Cinnamon compatibility and screen-reader testing remain **NOT RUN**.

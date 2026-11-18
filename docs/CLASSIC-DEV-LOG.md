@@ -57,3 +57,9 @@
 
 - The search field now opens its first visible match with Enter and closes with Escape. Enter with no match keeps the launcher open. The existing Down key and row activation path remains available.
 - Debian 13 GTK3/Xvfb passed 20 tests, including the new keyboard regression. Regular Python passed 16 tests and skipped four graphical tests because PyGObject is unavailable in that interpreter. Target Cinnamon keyboard and screen-reader acceptance remain open.
+
+## 2026-11-18 — Dock window background
+
+- A Debian/Xvfb screenshot showed white square corners around the dock's rounded content. The GTK window retained its default background outside the styled box.
+- The dock now uses a matching opaque background without a compositor. When compositing and an RGBA visual are available, it requests a transparent window background. A second Debian/Xvfb screenshot confirmed that the white corners disappeared. GTK3/Xvfb passed 20 tests.
+- The composited appearance and Mint Cinnamon rendering remain unverified.

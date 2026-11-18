@@ -119,6 +119,8 @@ def run(*, safe_defaults=False):
     css.load_from_data(b'''
       .canopy-panel { background: #1f302b; color: #fff; padding: 5px 10px; }
       .canopy-dock { background: #263f38; border-radius: 16px; padding: 8px; }
+      .canopy-dock-opaque { background: #263f38; }
+      .canopy-dock-transparent { background: transparent; }
       .canopy-panel button, .canopy-dock button { color: white; background: transparent; border: 0; }
       .canopy-panel button:hover, .canopy-dock button:hover { background: #476357; }
     ''')
@@ -128,6 +130,14 @@ def run(*, safe_defaults=False):
     def create_window(css_class):
         window = Gtk.Window()
         windows.append(window)
+        if css_class == 'canopy-dock':
+            screen = window.get_screen()
+            visual = screen.get_rgba_visual() if screen.is_composited() else None
+            if visual is not None:
+                window.set_visual(visual)
+                window.get_style_context().add_class('canopy-dock-transparent')
+            else:
+                window.get_style_context().add_class('canopy-dock-opaque')
         window.set_title('Canopy Classic preview')
         window.set_decorated(False)
         window.set_resizable(False)

@@ -61,3 +61,7 @@ ADR-003 records the Cinnamon-first evaluation path, a separate Labwc-backed cand
 ## 2026-11-18 — Configurable Classic dock
 
 `feat/classic-pinned-dock` is based on draft PR #13. Schema version 2 accepts version 1 settings, and the preview's Edit dock dialog saves a validated pin list through a shared locked update. The dock scrolls horizontally within the work area and keeps Apps accessible. Debian GTK3/Xvfb tests cover the editor and 320px display. Cinnamon testing, backup and explicit pin reordering remain open. Draft PR #2 now targets the foundation branch, reducing its duplicated diff.
+
+## 2026-11-18 — Unattended test-lab runner checkpoint
+
+Branch `feat/mint-testlab-runner` based on `feat/classic-pinned-dock` (PR #15), preserving all preceding Classic prototype changes. Adds `scripts/mint_testlab.py`, `tests/test_mint_testlab.py`, `docs/MINT-TEST-LAB.md`, ignores generated test results. Fixed allowlisted subprocess arguments, 120-second default timeout per check (max 900), bounded logs, JSON results with PASS/FAIL/BLOCKED. No root, package install, host VM control, arbitrary command execution or self-hosted runner configuration. A Mint VM has NOT been connected, real Cinnamon tests remain NOT RUN. Review CI results for the new head SHA before asserting green. Next: safe standalone Mint VM with approved-commit private workflow and screenshot/GUI tests.

@@ -58,12 +58,10 @@ if (-not $Install) {
   Write-Output 'DRY RUN passed. Mint is NOT installed. Explicit -Install required.'
   exit 0
 }
-# Guard against rerunning unattended setup after the guest has already been installed.
-$attachments = & $VBoxManage showvminfo 'Canopy-Test-Mint' '--details'
-if ($LASTEXITCODE -ne 0) { throw 'Could not inspect dedicated VM media attachments' }
-if (($attachments | Out-String) -match '(?i)\.vdi\s*\(' -and
-    ($attachments | Out-String) -match '(?i)\.iso\s*\(') {
-  Write-Output 'WARNING: Existing VDI and ISO attachments present; only proceed on an uninstalled disposable VM.'
+# Reject a VM that already has snapshots: unattended setup must be first-time only.
+$snapshotInfo = & $VBoxManage snapshot 'Canopy-Test-Mint' list '--machinereadable' 2>&1
+if ($LASTEXITCODE -eq 0 -and (($snapshotInfo | Out-String) -match '(?m)^SnapshotName')) {
+  throw 'Existing VM snapshots detected; refusing to reconfigure an established test VM'
 }
 & $VBoxManage @argsToRun | Out-Null
 if ($LASTEXITCODE -ne 0) { throw 'Unattended configuration failed; inspect VM state' }

@@ -18,3 +18,6 @@ All items below are PLANNED, not verified. Add code locations, tests, CI links a
 
 ## Prototype evidence (2026-11-17)
 R03: Shared settings and layout selector IMPLEMENTED (prototype), local 8 unit tests PASS; Mint integration NOT RUN. R04/R05: five profile identifiers, Auto Mode cosmetic policy and overrides IMPLEMENTED (prototype); actual hardware monitoring and benchmarks NOT RUN. See `canopy/preferences.py`, `tests/test_preferences.py`, `docs/ADR-001-SETTINGS.md` and `docs/CLASSIC-DEV-LOG.md`.
+
+## Classic preview evidence
+R02: Partially IMPLEMENTED — experimental GTK3 top bar, menu, dock, app list in `canopy/classic_gtk.py`; original Tux icon, complete desktop session and real hardware testing remain PLANNED. Pure app model tests: 3 PASS locally; graphical GTK/CI: NOT RUN at commit time. R01: NOT IMPLEMENTED as a selectable login session (prototype runs inside Cinnamon). See ADR-002.

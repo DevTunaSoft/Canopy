@@ -43,6 +43,16 @@ def verify_checkout(plan, checkout, *, executor=subprocess.run):
     )
     if result.returncode != 0 or result.stdout.strip() != plan["commit"]:
         raise ValueError("Checkout HEAD does not match approved commit")
+    # A matching HEAD is insufficient if the worktree contains edited or
+    # additional files; include untracked files in the fail-closed check.
+    tree = executor(
+        ["git", "-C", str(checkout), "status", "--porcelain=v1", "--untracked-files=all"],
+        capture_output=True, text=True, timeout=10, check=False,
+    )
+    if tree.returncode != 0:
+        raise ValueError("Could not verify clean checkout")
+    if tree.stdout:
+        raise ValueError("Checkout contains uncommitted or untracked files")
     return {"status": "PASS", "repository": REPO, "commit": plan["commit"],
             "checks": list(plan["checks"]), "note": "Local commit equality only; not remote provenance"}
 

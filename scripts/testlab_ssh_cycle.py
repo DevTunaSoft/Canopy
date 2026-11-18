@@ -68,7 +68,7 @@ def run_cycle(plan, run_id, identity, known_hosts, output, *,
     if copied.returncode:
         raise RuntimeError("Approved plan upload failed")
     command = ("cd " + GUEST_REPO + " && PYTHONDONTWRITEBYTECODE=1 python3 -B -m scripts.run_approved_test_plan"
-               " --plan " + remote_plan + " --checkout " + GUEST_REPO
+               " --plan " + remote_plan + " --checkout " + GUEST_REPO +
                " --output " + remote_report)
     execution = invoke([*base, HOST, command], runner=runner, timeout=180)
     # Collect report regardless of guest exit; do not trust its status alone.

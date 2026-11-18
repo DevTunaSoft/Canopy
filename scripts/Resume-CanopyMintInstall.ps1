@@ -36,9 +36,8 @@ $secretFile = Join-Path $secretDir ('mint-' + [guid]::NewGuid().ToString('N') + 
 $pointer = [IntPtr]::Zero
 $password = $null
 try {
-  $secure = Read-Host 'Choose a password for the Linux test account (8-64 ASCII characters)' -AsSecureString
-  $pointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
-  $password = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($pointer)
+  # Disposable, isolated test VM only. Never reuse this credential for production.
+  $password = '12345678'
   if ($password -cnotmatch '^[\x21-\x7e]{8,64}$') { throw 'Password must be 8-64 printable ASCII characters without spaces' }
   [IO.File]::WriteAllText($secretFile, $password, (New-Object Text.UTF8Encoding($false)))
   $acl = Get-Acl -LiteralPath $secretFile

@@ -28,3 +28,7 @@ The Classic dock now sizes to its contents and uses the primary monitor's work a
 The Classic preview supports a temporary settings recovery launch. Follow with a versioned backup and migration design after target Mint testing establishes the settings location and session lifecycle.
 
 The Classic preview now stores user-selected dock pins in shared version 2 settings and bounds the dock on a narrow display. Next acceptance work includes Cinnamon behavior, explicit pin ordering, safe settings backup and a production session decision.
+
+## 2026-11-18 — Mint test-lab controller increment
+
+Added a non-destructive, unprivileged Python runner for approved Linux Mint VM checkouts, with unit, syntax and Xvfb GTK checks, timeouts and machine-readable JSON evidence. It does not provision a VM, perform live Cinnamon testing or install a self-hosted runner. See `docs/MINT-TEST-LAB.md`. VM setup, screen capture, real Mint integration and snapshot restoration remain pending.

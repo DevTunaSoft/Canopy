@@ -1,0 +1,14 @@
+name: Canopy single-file setup self-test
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  setup:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exercise standalone setup gates without host changes
+        shell: pwsh
+        run: ./Canopy-Setup.ps1 -SelfTest

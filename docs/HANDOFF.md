@@ -14,3 +14,10 @@
 
 ## 2026-11-17 checkpoint: Classic preferences prototype
 Branch: `feat/classic-preferences-on-foundation`. Shared `canopy/preferences.py` supports Classic/Modern layout identifier, five profile values, caller-supplied Auto Mode pressure signals, cosmetic Auto/On/Off overrides, reduced-motion safety, validated JSON and atomic user-level persistence. `tests/test_preferences.py` contains eight unit tests; local command `python -m unittest discover -s tests -v` passed. GitHub CI and real Mint tests NOT RUN as of checkpoint. No UI or working session. See `docs/ADR-001-SETTINGS.md` and `docs/CLASSIC-DEV-LOG.md`. Next: compositor/toolkit ADR, recoverable Cinnamon-alongside session, Classic UI.
+
+## 2026-11-17 — GTK Classic UI prototype checkpoint
+- Branch `feat/classic-gtk-preview`, based on `feat/classic-preferences-on-foundation`, itself based on `docs/initial-project-foundation` (stacked draft PR dependency; avoid duplicate merges).
+- `canopy/classic_gtk.py` adds optional GTK3 preview windows; `canopy/classic_model.py` isolates pure, tested display logic; `tests/test_classic_model.py` provides 3 unit tests.
+- Local model test results: 3 PASS; Python compileall PASS. GTK runtime unavailable in this execution environment, so GUI, Cinnamon and hardware tests NOT RUN. The parent preference tests were not rerun locally against the combined tree; use GitHub CI.
+- Limitations: no real desktop session; text placeholder instead of final white Tux; no actual reserved top-bar space; no global menu; no verified multi-monitor positioning; no compositor. See `docs/ADR-002-CLASSIC-PREVIEW.md` and `docs/CLASSIC-PREVIEW.md`.
+- Next priority: CI verification, real Mint prototype smoke test, compositor and packaging ADR, shared accessibility/visual assets; keep Cinnamon fallback. Never merge main without explicit approval.

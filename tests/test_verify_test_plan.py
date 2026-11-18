@@ -30,12 +30,32 @@ class ApprovedCommitTests(unittest.TestCase):
 
     def test_checkout_exact_match(self):
         with tempfile.TemporaryDirectory() as d:
-            result = verify_checkout(PLAN, d, executor=lambda *_a, **_kw:
-                subprocess.CompletedProcess([], 0, SHA + "\n", ""))
+            def clean_executor(argv, **_kw):
+                output = SHA + "\n" if "rev-parse" in argv else ""
+                return subprocess.CompletedProcess(argv, 0, output, "")
+            result = verify_checkout(PLAN, d, executor=clean_executor)
             self.assertEqual(result["status"], "PASS")
             with self.assertRaises(ValueError):
                 verify_checkout(PLAN, d, executor=lambda *_a, **_kw:
                     subprocess.CompletedProcess([], 0, "c" * 40 + "\n", ""))
+
+    def test_reject_dirty_and_untracked_checkout(self):
+        with tempfile.TemporaryDirectory() as d:
+            for modified in (" M scripts/code.py\n", "?? unexpected.py\n"):
+                def executor(argv, **_kw):
+                    output = SHA + "\n" if "rev-parse" in argv else modified
+                    return subprocess.CompletedProcess(argv, 0, output, "")
+                with self.subTest(modified=modified), self.assertRaisesRegex(ValueError, "uncommitted"):
+                    verify_checkout(PLAN, d, executor=executor)
+
+    def test_reject_failed_status_check(self):
+        with tempfile.TemporaryDirectory() as d:
+            def executor(argv, **_kw):
+                if "rev-parse" in argv:
+                    return subprocess.CompletedProcess(argv, 0, SHA + "\n", "")
+                return subprocess.CompletedProcess(argv, 1, "", "broken")
+            with self.assertRaisesRegex(ValueError, "clean checkout"):
+                verify_checkout(PLAN, d, executor=executor)
 
     def test_checkout_error(self):
         with tempfile.TemporaryDirectory() as d:

@@ -50,9 +50,12 @@ try {
   $acl.AddAccessRule($rule)
   Set-Acl -LiteralPath $secretFile -AclObject $acl
   $installer = Join-Path $PSScriptRoot 'Install-CanopyMintOS.ps1'
-  & $installer -IsoPath $iso -IsoSha256 $IsoSha256 -PasswordFile $secretFile
+  $auxDir = Join-Path $env:LOCALAPPDATA 'CanopyTestLab\unattended-media'
+  New-Item -ItemType Directory -Path $auxDir -Force | Out-Null
+  $auxPath = Join-Path $auxDir ('CanopyMint-' + [guid]::NewGuid().ToString('N'))
+  & $installer -IsoPath $iso -IsoSha256 $IsoSha256 -PasswordFile $secretFile -AuxiliaryBasePath $auxPath
   if ($LASTEXITCODE -ne 0) { throw 'VirtualBox unattended dry-run failed' }
-  & $installer -IsoPath $iso -IsoSha256 $IsoSha256 -PasswordFile $secretFile -Install
+  & $installer -IsoPath $iso -IsoSha256 $IsoSha256 -PasswordFile $secretFile -AuxiliaryBasePath $auxPath -Install
   if ($LASTEXITCODE -ne 0) { throw 'VirtualBox unattended configuration failed' }
 } finally {
   $password = $null

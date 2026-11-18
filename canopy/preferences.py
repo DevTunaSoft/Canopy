@@ -84,6 +84,11 @@ def save(path: Path, preferences: Preferences) -> None:
             stream.flush()
             os.fsync(stream.fileno())
         os.replace(temp_name, path)
+        directory_fd = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
     finally:
         if temp_name and os.path.exists(temp_name):
             os.unlink(temp_name)

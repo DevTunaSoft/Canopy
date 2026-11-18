@@ -7,6 +7,9 @@ source_iso=$(realpath "$1"); expected=$2; output=$(realpath -m "$3")
 [[ "$expected" =~ ^[[:xdigit:]]{64}$ ]] || { echo "Invalid SHA256" >&2; exit 2; }
 [[ "$source_iso" != "$output" ]] || { echo "Output must differ from source" >&2; exit 2; }
 [[ ! -e "$output" ]] || { echo "Refusing to overwrite existing output" >&2; exit 2; }
+# Never allow the output path to be a symlink or the input path to be missing.
+[[ -f "$source_iso" && ! -L "$output" ]] || { echo "Invalid source or output path" >&2; exit 2; }
+[[ "$(dirname "$output")" != "/" ]] || { echo "Refusing output in filesystem root" >&2; exit 2; }
 [[ $(sha256sum "$source_iso" | cut -d' ' -f1) == "${expected,,}" ]] || { echo "ISO hash mismatch" >&2; exit 1; }
 for cmd in xorriso python3 openssl; do command -v "$cmd" >/dev/null || { echo "Missing $cmd" >&2; exit 1; }; done
 here=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)

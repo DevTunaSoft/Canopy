@@ -11,7 +11,12 @@ source_iso=$(realpath "$1"); expected=$2; output=$(realpath -m "$3")
 for cmd in xorriso python3 openssl; do command -v "$cmd" >/dev/null || { echo "Missing $cmd" >&2; exit 1; }; done
 here=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 tmp=$(mktemp -d)
-trap 'rm -rf "$tmp"' EXIT
+completed=0
+cleanup() {
+  if [[ "$completed" -ne 1 ]]; then rm -f -- "$output"; fi
+  rm -rf -- "$tmp"
+}
+trap cleanup EXIT
 mkdir -p "$tmp/boot/grub" "$tmp/preseed"
 # Ensure the source ISO has replayable boot metadata before modifying anything.
 xorriso -indev "$source_iso" -report_el_torito as_mkisofs >"$tmp/boot-options.txt" 2>"$tmp/boot-options-errors.txt"
@@ -69,5 +74,6 @@ if ! grep -qi "El Torito" "$tmp/output-boot.txt"; then
   rm -f -- "$output"
   echo "Remastered image lacks verifiable El Torito metadata; deleted unsafe output" >&2; exit 1
 fi
+completed=1
 echo "Created test-only ISO: $output"
 echo "WARNING: NOT verified to install Mint. Never boot on a physical computer."

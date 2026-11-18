@@ -41,3 +41,7 @@ R03/R07/R08: `canopy/preferences.py` resolves the XDG path and rejects invalid v
 ## Settings save durability evidence (2026-11-18)
 
 R03/R07/R08: `save()` synchronizes the temporary file and its parent directory after replacement. `test_save_syncs_file_and_containing_directory` verifies both descriptor types. Parent directory creation durability and concurrency remain open.
+
+## Launcher keyboard evidence (2026-11-18)
+
+R02/R09: `test_search_enter_and_escape` checks Enter with and without a result and Escape from the search field under GTK3/Xvfb. Cinnamon keyboard and screen-reader checks remain open.

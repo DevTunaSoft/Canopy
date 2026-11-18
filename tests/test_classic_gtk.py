@@ -65,6 +65,42 @@ class ClassicGtkSmokeTests(unittest.TestCase):
         self.assertEqual(launched, [target])
         self.assertFalse(dialog.get_visible())
 
+    def test_search_enter_and_escape(self):
+        Gtk, Gdk = self.Gtk, self.Gdk
+        parent = Gtk.Window()
+        self.addCleanup(parent.destroy)
+        parent.show()
+        app = FakeApp('writer.desktop', 'Writer')
+        launched = []
+
+        show_app_launcher(Gtk, Gdk, parent, [app], launched.append)
+        dialog = next(window for window in Gtk.Window.list_toplevels()
+                      if window.get_transient_for() == parent)
+        search = next(child for child in dialog.get_content_area().get_children()
+                      if isinstance(child, Gtk.SearchEntry))
+        search.set_text('missing')
+        enter = Gdk.Event.new(Gdk.EventType.KEY_PRESS)
+        enter.keyval = Gdk.KEY_Return
+        self.assertTrue(search.emit('key-press-event', enter))
+        self.assertTrue(dialog.get_visible())
+        self.assertEqual(launched, [])
+
+        search.set_text('writer')
+        self.assertTrue(search.emit('key-press-event', enter))
+        self.assertEqual(launched, [app])
+        self.assertFalse(dialog.get_visible())
+
+        show_app_launcher(Gtk, Gdk, parent, [app], launched.append)
+        dialog = next(window for window in Gtk.Window.list_toplevels()
+                      if window.get_transient_for() == parent and window.get_visible())
+        search = next(child for child in dialog.get_content_area().get_children()
+                      if isinstance(child, Gtk.SearchEntry))
+        escape = Gdk.Event.new(Gdk.EventType.KEY_PRESS)
+        escape.keyval = Gdk.KEY_Escape
+        self.assertTrue(search.emit('key-press-event', escape))
+        self.assertFalse(dialog.get_visible())
+        self.assertEqual(launched, [app])
+
 
     def test_preview_places_compact_dock_without_default_apps(self):
         from gi.repository import Gio

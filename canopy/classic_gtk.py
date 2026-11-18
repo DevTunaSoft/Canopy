@@ -51,7 +51,16 @@ def show_app_launcher(Gtk, Gdk, parent, apps, launch):
         results.unselect_all()
         results.invalidate_filter()
 
-    def focus_results(_search, event):
+    def search_key_press(_search, event):
+        if event.keyval == Gdk.KEY_Escape:
+            dialog.destroy()
+            return True
+        if event.keyval in (Gdk.KEY_Return, Gdk.KEY_KP_Enter):
+            for row in results.get_children():
+                if row.get_child_visible():
+                    activate_app(results, row)
+                    break
+            return True
         if event.keyval != Gdk.KEY_Down:
             return False
         for row in results.get_children():
@@ -65,9 +74,16 @@ def show_app_launcher(Gtk, Gdk, parent, apps, launch):
         dialog.destroy()
         launch(applications[row])
 
+    def close_on_escape(_dialog, event):
+        if event.keyval == Gdk.KEY_Escape:
+            dialog.destroy()
+            return True
+        return False
+
     search.connect('changed', update_results)
-    search.connect('key-press-event', focus_results)
+    search.connect('key-press-event', search_key_press)
     results.connect('row-activated', activate_app)
+    dialog.connect('key-press-event', close_on_escape)
     dialog.connect('response', lambda window, _response: window.destroy())
     dialog.show_all()
     search.grab_focus()

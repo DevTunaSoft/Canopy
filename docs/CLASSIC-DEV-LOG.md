@@ -52,3 +52,8 @@
 
 - Review identified that `save()` synchronized the temporary file but omitted the containing directory after replacement. Added directory synchronization so an existing settings directory can persist the new name across supported filesystem power loss behavior.
 - The regression test records the types of file descriptors passed to `fsync` and confirms both file and directory synchronization. Local Python tests passed 16 of 19 methods, with three graphical tests skipped because this Python environment lacks PyGObject. The GTK workflow checks the full tree remotely.
+
+## 2026-11-18 — Launcher keyboard completion
+
+- The search field now opens its first visible match with Enter and closes with Escape. Enter with no match keeps the launcher open. The existing Down key and row activation path remains available.
+- Debian 13 GTK3/Xvfb passed 20 tests, including the new keyboard regression. Regular Python passed 16 tests and skipped four graphical tests because PyGObject is unavailable in that interpreter. Target Cinnamon keyboard and screen-reader acceptance remain open.

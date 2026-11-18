@@ -13,7 +13,7 @@ Statuses: PLANNED = specified, no implementation; PROTOTYPE = code exists but ta
 | Settings JSON validation / atomic replacement | PROTOTYPE | Preview recovery preserves a corrupt file. Save syncs the replacement and containing directory. Migration, backup and simultaneous writer coordination remain open. |
 | GTK Classic top bar and local clock | PROTOTYPE | PR #3, GUI not tested on Mint |
 | GTK dock / Gio launch buttons | PROTOTYPE | Default desktop IDs if installed, content-sized dock at startup. GTK3/Xvfb startup and placement verified. Drag/reorder and Cinnamon behavior remain open. |
-| GTK application launcher | PROTOTYPE | Shared name and ID search, keyboard selection, and no fixed result cap. Launcher widget smoke passed on Debian 13 GTK3/Xvfb. Cinnamon and screen-reader checks remain open. |
+| GTK application launcher | PROTOTYPE | Shared name and ID search, Enter to open the first match, Escape to close, and no fixed result cap. Launcher widget smoke passed on Debian 13 GTK3/Xvfb. Cinnamon and screen-reader checks remain open. |
 | Original white penguin menu emblem | PROTOTYPE | Original SVG with text fallback and accessible menu name. GTK3/Xvfb verified that the preview loads the image. |
 | Dock customization/animations | PLANNED | Nothing wired to profile policy |
 | Windows-inspired Modern UI | PLANNED | Shared layout enum only |

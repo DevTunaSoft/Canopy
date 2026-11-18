@@ -49,3 +49,7 @@ ADR-003 records the Cinnamon-first evaluation path, a separate Labwc-backed cand
 ## 2026-11-18 — Settings directory synchronization
 
 `fix/settings-directory-sync` follows draft PR #9. The shared settings writer synchronizes its containing directory after atomic replacement. A targeted test confirms file and directory `fsync` calls. New parent directory durability, backup, migration and simultaneous writer policy remain open.
+
+## 2026-11-18 — Launcher keyboard completion
+
+`feat/classic-launcher-keyboard` follows draft PR #11. Search supports Enter to launch the first match, Escape to close, and Down to move into results. Debian GTK3/Xvfb passed 20 tests. Cinnamon keyboard and screen-reader acceptance remains open.

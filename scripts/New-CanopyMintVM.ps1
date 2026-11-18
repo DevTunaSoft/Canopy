@@ -20,23 +20,19 @@ function Get-CanopyVBoxPlan {
     if ($VmName -ne 'Canopy-Test-Mint') { throw 'Only dedicated Canopy VM is permitted' }
     if (-not $IsoFile -or -not $DiskPath) { throw 'ISO and disk paths required' }
     return @(
-       @('createvm', '--name', $VmName, '--ostype', 'Ubuntu_64', '--register'),
-       @('modifyvm', $VmName, '--memory', '4096', '--cpus', '2', '--vram', '128',
-         '--graphicscontroller', 'vmsvga', '--nic1', 'nat', '--clipboard-mode', 'disabled',
-         '--draganddrop', 'disabled'),
-       @('modifyvm', $VmName, '--natpf1', 'canopy-ssh,tcp,127.0.0.1,2222,,22'),
-       @('createmedium', 'disk', '--filename', $DiskPath, '--size', '40960', '--format', 'VDI'),
-       @('storagectl', $VmName, '--name', 'SATA', '--add', 'sata', '--controller', 'IntelAhci'),
-       @('storageattach', $VmName, '--storagectl', 'SATA', '--port', '0', '--device', '0',
-          '--type', 'hdd', '--medium', $DiskPath),
-       @('storageattach', $VmName, '--storagectl', 'SATA', '--port', '1', '--device', '0',
-          '--type', 'dvddrive', '--medium', $IsoFile)
+       [pscustomobject]@{ Arguments=@('createvm', '--name', $VmName, '--ostype', 'Ubuntu_64', '--register') }
+       [pscustomobject]@{ Arguments=@('modifyvm', $VmName, '--memory', '4096', '--cpus', '2', '--vram', '128', '--graphicscontroller', 'vmsvga', '--nic1', 'nat', '--clipboard-mode', 'disabled', '--draganddrop', 'disabled') }
+       [pscustomobject]@{ Arguments=@('modifyvm', $VmName, '--natpf1', 'canopy-ssh,tcp,127.0.0.1,2222,,22') }
+       [pscustomobject]@{ Arguments=@('createmedium', 'disk', '--filename', $DiskPath, '--size', '40960', '--format', 'VDI') }
+       [pscustomobject]@{ Arguments=@('storagectl', $VmName, '--name', 'SATA', '--add', 'sata', '--controller', 'IntelAhci') }
+       [pscustomobject]@{ Arguments=@('storageattach', $VmName, '--storagectl', 'SATA', '--port', '0', '--device', '0', '--type', 'hdd', '--medium', $DiskPath) }
+       [pscustomobject]@{ Arguments=@('storageattach', $VmName, '--storagectl', 'SATA', '--port', '1', '--device', '0', '--type', 'dvddrive', '--medium', $IsoFile) }
     )
 }
 if ($SelfTest) {
     $commands = @(Get-CanopyVBoxPlan 'Canopy-Test-Mint' 'X:\isolated\test.vdi' 'X:\mint.iso')
-    if ($commands.Count -ne 7 -or $commands[1] -notcontains 'disabled' -or
-        $commands[2] -notcontains 'canopy-ssh,tcp,127.0.0.1,2222,,22') {
+    if ($commands.Count -ne 7 -or $commands[1].Arguments -notcontains 'disabled' -or
+        $commands[2].Arguments -notcontains 'canopy-ssh,tcp,127.0.0.1,2222,,22') {
         throw 'VirtualBox plan regression'
     }
     Write-Output 'PASS: verified only dedicated VM commands without executing VirtualBox'
@@ -78,9 +74,10 @@ if (-not $Create) {
 }
 New-Item -ItemType Directory -Path $dir -Force | Out-Null
 foreach ($command in $plan) {
-    & $VBoxManage @command | Out-Null
+    $arguments = $command.Arguments
+    & $VBoxManage @arguments | Out-Null
     if ($LASTEXITCODE -ne 0) {
-        throw ('VirtualBox command failed: ' + $command[0] +
+        throw ('VirtualBox command failed: ' + $arguments[0] +
                '. Inspect dedicated VM and disk before retry; no automatic destructive cleanup')
     }
 }

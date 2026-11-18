@@ -4,7 +4,7 @@
 
 Example, on an isolated, pre-authorized disposable VM:
 ```bash
-python3 scripts/run_approved_test_plan.py --plan /tmp/approved-canopy.json --checkout /home/tester/Canopy --output /tmp/canopy-result.json
+python3 -m scripts.run_approved_test_plan --plan /tmp/approved-canopy.json --checkout /home/tester/Canopy --output /tmp/canopy-result.json
 ```
 
 The approval file must contain the exact authorized `DevTunaSoft/Canopy` SHA and selected checks from `unit`, `syntax`, `gtk`. A clean local HEAD and permitted check names are required. **Do not equate this with real authorization**: the VM owner must provide a separate trusted source of approved plan data, verify Git origin/provenance, and isolate the execution environment. If the code itself is malicious, a Python verifier running inside that checkout is not a security boundary. GitHub public PRs must never execute automatically on a personal self-hosted runner.

@@ -1,0 +1,35 @@
+name: Canopy verification
+
+on:
+  push:
+    branches: [main, 'feat/**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stdlib-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python interpreter
+        run: python3 --version
+      - name: Compile Python files
+        run: python3 -m compileall -q tools tests
+      - name: Regression tests
+        run: python3 -m unittest discover -s tests -v
+      - name: Native layout CLI syntax
+        run: python3 tools/canopy_classic.py --help
+      - name: Self-contained prototype smoke check
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          text = Path('prototype/classic/index.html').read_text(encoding='utf-8')
+          assert '<!doctype html>' in text.lower()
+          assert '<script' in text.lower()
+          assert 'https://' not in text and 'http://' not in text
+          print('PASS: static asset check (NOT a browser/Linux runtime test)')
+          PY

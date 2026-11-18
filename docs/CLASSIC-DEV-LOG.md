@@ -47,3 +47,8 @@
 - Added a shared XDG settings path and strict version type validation. Classic startup reports invalid or unreadable settings and supports `--safe-defaults` for an in-memory recovery preview. The original settings file remains untouched.
 - Covered GTK window and timer cleanup across startup failures. A regression test forces Gio discovery to fail and verifies that the preview windows are disposed.
 - Local Debian 13 checks passed with 18 tests under GTK3/Xvfb, Python compilation and the documentation check. The regular Python environment passed 15 tests and skipped 3 graphical tests because PyGObject is unavailable there. Cinnamon and hardware tests remain open.
+
+## 2026-11-18 — Durable settings replacement
+
+- Review identified that `save()` synchronized the temporary file but omitted the containing directory after replacement. Added directory synchronization so an existing settings directory can persist the new name across supported filesystem power loss behavior.
+- The regression test records the types of file descriptors passed to `fsync` and confirms both file and directory synchronization. Local Python tests passed 16 of 19 methods, with three graphical tests skipped because this Python environment lacks PyGObject. The GTK workflow checks the full tree remotely.

@@ -37,3 +37,7 @@ R02/R09: The Classic menu displays `canopy/assets/classic-penguin.svg`, an origi
 ## Preview recovery evidence (2026-11-18)
 
 R03/R07/R08: `canopy/preferences.py` resolves the XDG path and rejects invalid version types. `canopy/classic_gtk.py` exposes a temporary recovery launch and disposes windows after startup failures. `tests/test_preferences.py` and `tests/test_classic_gtk.py` cover the path, preserved corrupt bytes and a forced Gio failure. Settings migration, backup and Cinnamon recovery remain open.
+
+## Settings save durability evidence (2026-11-18)
+
+R03/R07/R08: `save()` synchronizes the temporary file and its parent directory after replacement. `test_save_syncs_file_and_containing_directory` verifies both descriptor types. Parent directory creation durability and concurrency remain open.

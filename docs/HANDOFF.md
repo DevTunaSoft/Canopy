@@ -45,3 +45,7 @@ ADR-003 records the Cinnamon-first evaluation path, a separate Labwc-backed cand
 ## 2026-11-18 — Preview settings recovery
 
 `feat/classic-safe-startup` follows the session evaluation branch. The preview now reports bad settings and can start with temporary built-in defaults through `--safe-defaults`. It leaves the stored file unchanged. GTK startup failures dispose created windows and the clock timer. Debian GTK3/Xvfb passed 18 tests. Mint session acceptance remains open.
+
+## 2026-11-18 — Settings directory synchronization
+
+`fix/settings-directory-sync` follows draft PR #9. The shared settings writer synchronizes its containing directory after atomic replacement. A targeted test confirms file and directory `fsync` calls. New parent directory durability, backup, migration and simultaneous writer policy remain open.

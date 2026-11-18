@@ -1,5 +1,7 @@
 import json
+import os
 from pathlib import Path
+import stat
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -46,6 +48,23 @@ class PreferencesTests(unittest.TestCase):
             save(path, p)
             self.assertEqual(load(path).to_dict(), p.to_dict())
             self.assertEqual(path.stat().st_mode & 0o777, 0o600)
+
+    def test_save_syncs_file_and_containing_directory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'canopy/settings.json'
+            synced_modes = []
+            original_fsync = os.fsync
+
+            def record_fsync(descriptor):
+                synced_modes.append(os.fstat(descriptor).st_mode)
+                original_fsync(descriptor)
+
+            with patch('canopy.preferences.os.fsync', side_effect=record_fsync):
+                save(path, Preferences())
+
+            self.assertEqual(len(synced_modes), 2)
+            self.assertTrue(stat.S_ISREG(synced_modes[0]))
+            self.assertTrue(stat.S_ISDIR(synced_modes[1]))
 
     def test_reject_unknown_or_invalid(self):
         for data in ({"version": 2}, {"version": True}, {"version": 1.0}, {"auto_mode": "false"},

@@ -1,0 +1,14 @@
+name: Canopy VirtualBox VM plan self-test
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  vm-plan:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exercise safe hardware provisioning plan without VirtualBox
+        shell: pwsh
+        run: ./scripts/New-CanopyMintVM.ps1 -SelfTest

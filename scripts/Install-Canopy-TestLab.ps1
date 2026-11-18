@@ -7,6 +7,9 @@ Never silently downloads ISOs, installs software, starts VMs, or changes the hos
 [CmdletBinding()]
 param(
     [string]$Destination = '',
+    [string]$IsoPath = '',
+    [string]$IsoSha256 = '',
+    [switch]$CreateVM,
     [switch]$SelfTest
 )
 Set-StrictMode -Version Latest
@@ -24,6 +27,7 @@ function New-CanopyBootstrapPlan {
         actions = @(
             [ordered]@{ id='virtualbox'; state='NOT_RUN'; description='Install VirtualBox from official verified distribution after separate authorization' }
             [ordered]@{ id='mint-iso'; state='NOT_RUN'; description='Acquire and verify the chosen Linux Mint Cinnamon ISO and exact release checksum/signature' }
+            [ordered]@{ id='vm-hardware'; state='NOT_RUN'; description='Provision dedicated VirtualBox VM hardware from locally verified Mint ISO' }
             [ordered]@{ id='unattended-install'; state='NOT_RUN'; description='Create isolated VM and perform Mint unattended installation after installer support is verified' }
             [ordered]@{ id='snapshot'; state='NOT_RUN'; description='Create and inspect a clean named snapshot before testing' }
             [ordered]@{ id='trusted-worker'; state='NOT_RUN'; description='Install approved-job-only worker and independent host evidence collector' }
@@ -36,7 +40,7 @@ if ($SelfTest) {
     $good = New-CanopyBootstrapPlan ([pscustomobject]@{status='PASS'})
     $blocked = New-CanopyBootstrapPlan ([pscustomobject]@{status='BLOCKED'})
     if ($good.vm_name -ne 'Canopy-Test-Mint' -or $blocked.host_preflight -ne 'BLOCKED' -or
-        $good.actions.Count -ne 5 -or @($good.actions | Where-Object state -ne 'NOT_RUN').Count -ne 0) {
+        $good.actions.Count -ne 6 -or @($good.actions | Where-Object state -ne 'NOT_RUN').Count -ne 0) {
         throw 'Bootstrap plan self-test failed'
     }
     Write-Output 'PASS: bootstrap preparation self-test'
@@ -63,5 +67,29 @@ $planPath = Join-Path $target 'bootstrap-plan.json'
 Write-Output ('Canopy Test Lab preparation: ' + $plan.host_preflight)
 Write-Output ('Readiness details: ' + $hostPath)
 Write-Output ('Provisioning plan: ' + $planPath)
-Write-Output 'No software installed, VMs created or tests executed.'
-if ($plan.host_preflight -ne 'PASS') { exit 1 }
+if ($plan.host_preflight -ne 'PASS') {
+    Write-Output 'Host prerequisites BLOCKED; no VM created.'
+    exit 1
+}
+if (-not $CreateVM) {
+    Write-Output 'Preparation complete. No VM created and no tests executed.'
+    exit 0
+}
+if (-not $IsoPath -or -not $IsoSha256) {
+    throw 'VM creation requires -IsoPath and independently authenticated -IsoSha256'
+}
+$creator = Join-Path $PSScriptRoot 'New-CanopyMintVM.ps1'
+if (-not (Test-Path -LiteralPath $creator -PathType Leaf)) {
+    throw 'Missing safe VirtualBox VM creation module'
+}
+& $creator -IsoPath $IsoPath -IsoSha256 $IsoSha256 -Create
+if ($LASTEXITCODE -ne 0) {
+    throw 'VM hardware creation did not complete; review VirtualBox state before retry'
+}
+foreach ($action in $plan.actions) {
+    if ($action.id -eq 'vm-hardware') { $action.state = 'PASS' }
+}
+$plan.provisioning_status = 'PARTIAL'
+[IO.File]::WriteAllText($planPath, ($plan | ConvertTo-Json -Depth 10) + [Environment]::NewLine)
+Write-Output 'Dedicated VM hardware created. Linux Mint OS installation, guest SSH and full automation remain NOT RUN.'
+

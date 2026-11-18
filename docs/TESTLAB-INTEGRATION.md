@@ -49,3 +49,11 @@ A Windows GitHub Actions runner separately executes `Install-Canopy-TestLab.ps1 
 ## Pending decisions
 
 Separate Classic design reference PR #24 is intentionally **not** combined: it starts from main and needs a compatibility/design integration review. Original Classic code changes PR #1–#17 stay preserved as base ancestry; none have been merged into main.
+
+## 2026-11-18 — Host-to-VM provisioning preparation
+
+This second integration stage adds **three independently tested tracks**: PR #39 pinned-key host-initiated SSH command transport with host/guest result disagreement detection, PR #40 a guarded Windows `New-CanopyMintVM.ps1` VM hardware creator requiring a locally authenticated ISO checksum, and PR #41 one-time Mint guest dependencies and key-only SSH setup. The existing `Install-Canopy-TestLab.ps1` entrypoint now supports explicit `-CreateVM -IsoPath ... -IsoSha256 ...` after read-only host checks. It records a `PARTIAL` provisioning state rather than claiming that the Mint OS is installed.
+
+**Critical limitation:** These pieces prepare and create dedicated VM hardware but do **not** automatically install Linux Mint, configure authenticated SSH host-key trust, log into Cinnamon, or run unattended full acceptance. The Mint-specific unattended installer must be validated against a real official ISO; VirtualBox's default unattended installer should not be assumed to work on Mint. Real end-to-end VirtualBox/Mint: NOT RUN. The Windows host should remain isolated (localhost-only NAT port), with no shared folders or clipboard and no personal secrets in guest.
+
+Before final one-click release, validate official ISO signatures, create a noninteractive OS installer, provision the dedicated user and keys without leaking private material, set first-boot snapshot, schedule the authorized host controller, and prove complete guest reboot/recovery and independent screenshot test cycles. Do not treat passing GitHub CI as completed deployment.

@@ -14,3 +14,7 @@ Shared preferences and cosmetic policy prototype implemented on `feat/classic-pr
 
 ## Next UI checkpoint
 Experimental GTK3 Classic top-bar/dock preview exists, but not a full session and not visually validated on Mint. Follow with Linux Mint smoke testing, compositor/session ADR, accessibility and final original Tux icon. Keep Modern on the shared core, not a second desktop service stack.
+
+## 2026-11-17 Codex takeover checkpoint
+
+See `CODEX_START_HERE.md` for dependency-safe branch guidance. Do not repeat completed preferences/preview tasks. First verify GTK startup on real Mint, address any confirmed defects and add GUI smoke coverage; implement original Tux menu artwork, responsive launcher/search and polish; prepare compositor/session ADR with alternatives and measured evidence. Modern remains future presentation on shared core. Current CI success does not prove a working desktop session.

@@ -48,6 +48,8 @@ def run_cycle(plan, run_id, identity, known_hosts, output, *,
     output = Path(output).resolve()
     if plan == output or not ID.fullmatch(run_id):
         raise ValueError("Invalid run identity or output path")
+    if output.exists() or output.is_symlink():
+        raise ValueError("Host report already exists; refusing stale/overwritten evidence")
     if not plan.is_file() or plan.stat().st_size > 8192:
         raise ValueError("Missing or oversized approved plan")
     approved = validate_plan(json.loads(plan.read_text(encoding="utf-8")))
@@ -59,6 +61,12 @@ def run_cycle(plan, run_id, identity, known_hosts, output, *,
     mkdir = invoke([*base, HOST, "mkdir -p " + GUEST_WORK], runner=runner, timeout=20)
     if mkdir.returncode:
         raise RuntimeError("Guest run directory unavailable")
+    # A previous report with the same run ID is a replay risk, including FAIL reports.
+    # Refuse it before copying a new plan or starting any guest check.
+    freshness = invoke([*base, HOST, "test ! -e " + remote_report],
+                       runner=runner, timeout=20)
+    if freshness.returncode:
+        raise RuntimeError("Guest report already exists or freshness cannot be verified")
     # SCP uses the same pinned known_hosts and explicit identity as SSH.
     scp = ["scp", "-F", "none", "-P", str(port), "-i", str(Path(identity).resolve()),
            "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes",

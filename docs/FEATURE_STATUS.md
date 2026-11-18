@@ -32,3 +32,7 @@ Statuses: PLANNED = specified, no implementation; PROTOTYPE = code exists but ta
 PR #1, #2 and #3 open draft, **unmerged** when checked. Head workflow runs were successful: #1 docs 44241921860, #2 Python 44242300082/docs 44242300075, #3 Python 44242957886/docs 44242957966. Passing CI covers current Python tests and documentation-presence checks only. No Linux Mint UI or hardware verification.
 
 See `CODEX_START_HERE.md` for exact branch dependencies, inventory, risks, commands and takeover protocol.
+
+## Test-lab preparation (2026-11-18)
+
+An initial headless VM test controller exists in `scripts/mint_testlab.py`: allowlisted unit/syntax/GTK-Xvfb checks, bounded output, JSON results, timeout handling and explicit BLOCKED results. Runner unit tests: `tests/test_mint_testlab.py`. **Actual Mint VM, private runner connection, GUI automation within Cinnamon, screenshots and snapshot recovery are NOT IMPLEMENTED / NOT RUN.** See `docs/MINT-TEST-LAB.md` and the branch/PR status before claiming CI verification.

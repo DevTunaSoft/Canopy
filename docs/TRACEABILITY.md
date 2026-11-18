@@ -49,3 +49,7 @@ R02/R09: `test_search_enter_and_escape` checks Enter with and without a result a
 ## Classic dock configuration evidence (2026-11-18)
 
 R02/R03/R07/R08/R09: `canopy/preferences.py` accepts version 1 settings and stores validated version 2 Classic pins with locked updates that preserve concurrent non-pin edits. `canopy/classic_gtk.py` provides an Edit dock dialog and bounded pinned-app scroller with an Apps entry. Tests cover migration, conflict rejection, corrupt settings, menu persistence and a 320px Xvfb monitor. Linux Mint and real multi-process behavior remain open.
+
+## Test-lab automation checkpoint (2026-11-18)
+
+R08 partial prototype: `scripts/mint_testlab.py` executes fixed commands and records PASS/FAIL/BLOCKED JSON; `tests/test_mint_testlab.py` provides unit regression tests. This is not a functioning remote Mint environment. Mint graphical acceptance, screenshot capture, VM provisioning and hardware benchmarks remain NOT RUN.

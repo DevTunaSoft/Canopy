@@ -7,3 +7,6 @@ dist/
 __pycache__/
 .vscode/
 .idea/
+
+# Generated local/VM test output
+test-results/

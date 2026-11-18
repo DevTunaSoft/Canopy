@@ -16,7 +16,7 @@ import time
 
 COMMANDS = {
     "unit": ("python3", "-m", "unittest", "discover", "-s", "tests", "-v"),
-    "syntax": ("python3", "-m", "compileall", "-q", "canopy", "tests", "scripts"),
+    "syntax": ("python3", "-B", "-m", "scripts.readonly_syntax_check"),
     "gtk": ("xvfb-run", "-a", "/usr/bin/python3", "-m", "unittest", "discover", "-s", "tests", "-v"),
 }
 MAX_OUTPUT = 80_000

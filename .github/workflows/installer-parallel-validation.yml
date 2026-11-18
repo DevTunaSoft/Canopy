@@ -1,0 +1,62 @@
+name: Canopy installer parallel validation
+on:
+  push:
+    paths:
+      - 'scripts/Build-CanopyMintUnattendedISO.sh'
+      - 'scripts/Generate-CanopyMintPreseed.py'
+      - 'scripts/Resume-CanopyMintInstall.ps1'
+      - 'scripts/Install-CanopyMintOS.ps1'
+      - 'tests/test_mint_remaster.py'
+      - '.github/workflows/installer-parallel-validation.yml'
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  iso-builder:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate ISO builder shell
+        run: bash -n scripts/Build-CanopyMintUnattendedISO.sh
+      - name: Install image tools
+        run: sudo apt-get update && sudo apt-get install -y xorriso openssl
+      - name: Validate isolated preseed generator
+        run: |
+          python3 scripts/Generate-CanopyMintPreseed.py /tmp/canopy.seed --disposable-vm
+          grep -q 'passwd/username string canopy-test' /tmp/canopy.seed
+          if grep -q '12345678' /tmp/canopy.seed; then echo 'Plaintext password in seed'; exit 1; fi
+      - name: Run remaster safety regressions
+        run: python3 -m unittest discover -s tests -p 'test_mint_remaster.py' -v
+  windows-integration:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse all installer PowerShell scripts
+        shell: pwsh
+        run: |
+          $paths = @('Canopy-Setup.ps1','scripts/Resume-CanopyMintInstall.ps1','scripts/Install-CanopyMintOS.ps1')
+          foreach ($path in $paths) {
+            $tokens = $null; $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $path).Path,[ref]$tokens,[ref]$errors) | Out-Null
+            if ($errors.Count) { $errors | Format-List | Out-String | Write-Error; exit 1 }
+          }
+      - name: Check non-destructive setup contracts
+        shell: pwsh
+        run: |
+          ./Canopy-Setup.ps1 -SelfTest
+          ./scripts/Resume-CanopyMintInstall.ps1 -IsoPath 'C:\mint.iso' -IsoSha256 ('a' * 64) -SelfTest
+          ./scripts/Install-CanopyMintOS.ps1 -IsoPath 'C:\mint.iso' -IsoSha256 ('a' * 64) -PasswordFile 'C:\secret.txt' -SelfTest
+  security-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reject destructive installer invocation without VM acknowledgement
+        run: |
+          if python3 scripts/Generate-CanopyMintPreseed.py /tmp/must-not-exist.seed; then exit 1; fi
+          test ! -e /tmp/must-not-exist.seed
+      - name: Reject unverified image input without modifying it
+        run: |
+          printf 'invalid image' >/tmp/canopy-invalid.iso
+          if bash scripts/Build-CanopyMintUnattendedISO.sh /tmp/canopy-invalid.iso $(printf '0%.0s' {1..64}) /tmp/canopy-output.iso; then exit 1; fi
+          test ! -e /tmp/canopy-output.iso

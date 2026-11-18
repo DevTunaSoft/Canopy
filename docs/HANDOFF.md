@@ -21,3 +21,7 @@ Branch: `feat/classic-preferences-on-foundation`. Shared `canopy/preferences.py`
 - Local model test results: 3 PASS; Python compileall PASS. GTK runtime unavailable in this execution environment, so GUI, Cinnamon and hardware tests NOT RUN. The parent preference tests were not rerun locally against the combined tree; use GitHub CI.
 - Limitations: no real desktop session; text placeholder instead of final white Tux; no actual reserved top-bar space; no global menu; no verified multi-monitor positioning; no compositor. See `docs/ADR-002-CLASSIC-PREVIEW.md` and `docs/CLASSIC-PREVIEW.md`.
 - Next priority: CI verification, real Mint prototype smoke test, compositor and packaging ADR, shared accessibility/visual assets; keep Cinnamon fallback. Never merge main without explicit approval.
+
+## 2026-11-17 — Codex takeover audit
+
+Canonical full audit: `CODEX_START_HERE.md`. Master 16-rule mandate: `docs/MASTER_AUTONOMOUS_PROMPT.md`. Current feature status: `docs/FEATURE_STATUS.md`. Chronological product decisions: `docs/ENGINEERING_DECISIONS.md`. PRs #1/#2/#3 are open draft and unmerged, with stacked dependencies (PR #2 includes PR #1 against main; PR #3 targets PR #2). GitHub Actions for audited head SHAs: PR #1 docs SUCCESS, PR #2 unit/docs SUCCESS, PR #3 unit/docs SUCCESS. Linux Mint UI/hardware, accessibility and resource tests remain NOT RUN. Ponytail not installed/verified. Takeover docs isolated on branch `docs/codex-takeover-dossier`, derived from PR #3 branch. Begin Codex work only after fetching live Git and inspecting PR state.

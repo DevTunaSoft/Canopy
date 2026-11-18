@@ -68,3 +68,7 @@ Branch `feat/mint-testlab-runner` based on `feat/classic-pinned-dock` (PR #15), 
 
 ## 2026-11-18 — Isolated visual evidence automation
 Branch `feat/mint-testlab-visual-evidence` builds on PR #16 without duplicating Mint runner logic. New `scripts/capture_classic.py` captures precisely the two Canopy GTK preview windows under an isolated Xvfb display, with short-lived CI artifacts; `tests/test_capture_classic.py` verifies capture boundary, allowed test-display guard and invalid states. CI job includes an opt-in test-only screenshot capture, not a remote-control channel. Graphical Linux Mint Cinnamon, full session test, real VM provisioning, snapshot/reset and performance benchmarks remain NOT RUN. Consult `docs/MINT-TEST-LAB.md`, CI workflow and PR for actual evidence. Never merge main without authorization.
+
+## 2026-11-18 — Restricted VirtualBox host control
+
+Independent branch `feat/testlab-host-vm-controller` from PR #17 branch. Adds `scripts/vbox_lab_controller.py`, `tests/test_vbox_lab_controller.py`, and `docs/checkpoints/VIRTUALBOX-HOST-CONTROLLER.md`. Uses allowlisted VBoxManage argv, verifies VM name/UUID/state, and restricts snapshot reset to a powered-off dedicated Canopy VM with explicit local authorization and known snapshot. No VirtualBox host/VM run has occurred. Separate future work: host cycle scheduling, guest command transport, machine-independent result hashing/attestation and rollback validation.

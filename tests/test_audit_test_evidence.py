@@ -37,6 +37,7 @@ class EvidenceAuditTests(unittest.TestCase):
             lambda d: d["checks"][0].update(output="OK\n"),
             lambda d: d["checks"][0].update(output="Ran 10 tests in 0.1s\nFAILED (failures=2)"),
             lambda d: d["checks"][0].update(output_truncated=True),
+            lambda d: d["checks"][0].pop("output_truncated"),
             lambda d: d["checks"][0].update(duration_seconds=-1),
             lambda d: d["checks"][2].update(output="Ran 20 tests in 1s\nOK (skipped=1)\n"),
             lambda d: d["checks"][2].update(output="Ran 0 tests in 0s\nOK\n"),

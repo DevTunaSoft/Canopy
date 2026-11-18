@@ -18,3 +18,7 @@ Experimental GTK3 Classic top-bar/dock preview exists, but not a full session an
 ## 2026-11-17 Codex takeover checkpoint
 
 See `CODEX_START_HERE.md` for dependency-safe branch guidance. Do not repeat completed preferences/preview tasks. First verify GTK startup on real Mint, address any confirmed defects and add GUI smoke coverage; implement original Tux menu artwork, responsive launcher/search and polish; prepare compositor/session ADR with alternatives and measured evidence. Modern remains future presentation on shared core. Current CI success does not prove a working desktop session.
+
+## 2026-11-18 launcher checkpoint
+
+The Classic preview now supports shared application search, keyboard selection and a headless GTK launcher smoke test. Next priorities are verified Cinnamon behavior, responsive dock placement, original menu artwork and the session architecture ADR.

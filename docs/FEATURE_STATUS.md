@@ -13,7 +13,7 @@ Statuses: PLANNED = specified, no implementation; PROTOTYPE = code exists but ta
 | Settings JSON validation / atomic replacement | VERIFIED-CI prototype | No migration/backup or full corruption recovery |
 | GTK Classic top bar and local clock | PROTOTYPE | PR #3, GUI not tested on Mint |
 | GTK dock / Gio launch buttons | PROTOTYPE | Fixed desktop IDs, no drag/reorder or visual verification |
-| GTK applications menu | PROTOTYPE | First 40, no search or accessibility review |
+| GTK application launcher | PROTOTYPE | Shared name and ID search, keyboard selection, and no fixed result cap. Launcher widget smoke passed on Debian 13 GTK3/Xvfb. Cinnamon and screen-reader checks remain open. |
 | White original Tux menu icon | PLANNED | Text placeholder remains |
 | Dock customization/animations | PLANNED | Nothing wired to profile policy |
 | Windows-inspired Modern UI | PLANNED | Shared layout enum only |

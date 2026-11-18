@@ -6,13 +6,79 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-from canopy.classic_model import DEFAULT_DOCK, clock_label, visible_apps
+from canopy.applications import matches_app, visible_apps
+from canopy.classic_model import DEFAULT_DOCK, clock_label
 from canopy.preferences import load
 
 
+def show_app_launcher(Gtk, Gdk, parent, apps, launch):
+    dialog = Gtk.Dialog(title='Applications', transient_for=parent, modal=True)
+    dialog.set_default_size(420, 480)
+    dialog.add_button('Close', Gtk.ResponseType.CLOSE)
+
+    content = dialog.get_content_area()
+    content.set_border_width(12)
+    content.set_spacing(8)
+    search = Gtk.SearchEntry()
+    search.set_placeholder_text('Search applications')
+    search.get_accessible().set_name('Search applications')
+    content.pack_start(search, False, False, 0)
+
+    scroller = Gtk.ScrolledWindow()
+    scroller.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+    content.pack_start(scroller, True, True, 0)
+    results = Gtk.ListBox()
+    results.get_accessible().set_name('Applications')
+    results.set_placeholder(Gtk.Label(label='No applications found'))
+    scroller.add(results)
+    results.set_adjustment(scroller.get_vadjustment())
+
+    applications = {}
+    for app in visible_apps(apps):
+        row = Gtk.ListBoxRow()
+        label = Gtk.Label(label=app.get_name(), xalign=0)
+        label.set_margin_start(8)
+        label.set_margin_top(6)
+        label.set_margin_bottom(6)
+        row.add(label)
+        applications[row] = app
+        results.add(row)
+
+    results.set_filter_func(lambda row: matches_app(applications[row], search.get_text()))
+
+    def update_results(_search):
+        results.unselect_all()
+        results.invalidate_filter()
+
+    def focus_results(_search, event):
+        if event.keyval != Gdk.KEY_Down:
+            return False
+        for row in results.get_children():
+            if row.get_child_visible():
+                results.select_row(row)
+                row.grab_focus()
+                return True
+        return False
+
+    def activate_app(_results, row):
+        dialog.destroy()
+        launch(applications[row])
+
+    search.connect('changed', update_results)
+    search.connect('key-press-event', focus_results)
+    results.connect('row-activated', activate_app)
+    dialog.connect('response', lambda window, _response: window.destroy())
+    dialog.show_all()
+    search.grab_focus()
+
+
 def run():
+    if os.geteuid() == 0:
+        raise SystemExit('Run Canopy Classic from an ordinary user session')
+
     import gi
     gi.require_version('Gtk', '3.0')
+    gi.require_version('Gdk', '3.0')
     from gi.repository import Gdk, Gio, GLib, Gtk
 
     if not Gtk.init_check()[0]:
@@ -115,15 +181,9 @@ def run():
             add_app_button(item.title, app)
 
     apps_button = Gtk.Button(label='Apps ▾')
-    def open_apps(button):
-        menu = Gtk.Menu()
-        for app in visible_apps(Gio.app_info_get_all())[:40]:
-            item = Gtk.MenuItem(label=app.get_name())
-            item.connect('activate', lambda _item, current=app: launch(current))
-            menu.append(item)
-        menu.show_all()
-        menu.popup_at_widget(button, Gdk.Gravity.NORTH_WEST, Gdk.Gravity.SOUTH_WEST, None)
-    apps_button.connect('clicked', open_apps)
+    apps_button.connect(
+        'clicked', lambda _button: show_app_launcher(Gtk, Gdk, dock, Gio.app_info_get_all(), launch)
+    )
     dock_box.pack_start(apps_button, False, False, 0)
 
     top.connect('destroy', Gtk.main_quit)

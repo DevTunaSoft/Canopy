@@ -21,6 +21,31 @@ COMMANDS = {
 }
 MAX_OUTPUT = 80_000
 
+GTK_PROBE = (
+    "xvfb-run", "-a", "/usr/bin/python3", "-c",
+    "import gi; gi.require_version('Gtk', '3.0'); "
+    "from gi.repository import Gtk; "
+    "raise SystemExit(0 if Gtk.init_check()[0] else 3)",
+)
+
+
+def gtk_readiness(timeout, *, executor=subprocess.run, which=shutil.which):
+    """Require a working GTK3 graphical display; don't accept skipped GUI tests."""
+    missing = [program for program in ("xvfb-run", "xauth", "/usr/bin/python3")
+               if which(program) is None]
+    if missing:
+        return "Missing GTK test dependencies: " + ", ".join(missing)
+    try:
+        probe = executor(GTK_PROBE, capture_output=True, text=True,
+                         errors="replace", timeout=min(timeout, 15),
+                         check=False, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
+    except (OSError, subprocess.TimeoutExpired) as error:
+        return "GTK3 display probe unavailable: " + type(error).__name__
+    if probe.returncode != 0:
+        return "GTK3 display or Python GI introspection unavailable"
+    return None
+
+
 
 def run_check(name, command, root, timeout, *, executor=subprocess.run, which=shutil.which):
     """Run a predefined argv command; never invoke a shell."""
@@ -28,6 +53,11 @@ def run_check(name, command, root, timeout, *, executor=subprocess.run, which=sh
     if which(command[0]) is None:
         return {"name": name, "status": "BLOCKED",
                 "reason": f"Missing executable: {command[0]}", "duration_seconds": 0}
+    if name == "gtk":
+        blocker = gtk_readiness(timeout, executor=executor, which=which)
+        if blocker is not None:
+            return {"name": name, "status": "BLOCKED", "reason": blocker,
+                    "duration_seconds": round(time.monotonic() - start, 3)}
     try:
         result = executor(command, cwd=root, capture_output=True, text=True,
                           errors="replace", timeout=timeout, check=False,

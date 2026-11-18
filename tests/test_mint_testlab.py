@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 import unittest
 
-from scripts.mint_testlab import COMMANDS, execute, run_check
+from scripts.mint_testlab import COMMANDS, execute, gtk_readiness, run_check
 
 
 class TestLabTests(unittest.TestCase):
@@ -24,6 +24,39 @@ class TestLabTests(unittest.TestCase):
     def test_missing_executable(self):
         result = run_check('gtk', COMMANDS['gtk'], '.', 4, which=lambda _: None)
         self.assertEqual(result['status'], 'BLOCKED')
+
+    def test_gtk_requires_real_display_probe(self):
+        invocations = []
+        def executor(command, **_kwargs):
+            invocations.append(command)
+            if "-c" in command:
+                return subprocess.CompletedProcess(command, 3, "", "no display")
+            return subprocess.CompletedProcess(command, 0, "Ran 30 tests", "")
+        ready = run_check("gtk", COMMANDS["gtk"], ".", 30,
+                          executor=executor, which=lambda _: "/usr/bin/tool")
+        self.assertEqual(ready["status"], "BLOCKED")
+        self.assertIn("display", ready["reason"])
+        self.assertEqual(len(invocations), 1)
+
+    def test_gtk_success_requires_probe_and_test_execution(self):
+        calls = []
+        def executor(command, **_kwargs):
+            calls.append(command)
+            return subprocess.CompletedProcess(command, 0, "OK", "")
+        outcome = run_check("gtk", COMMANDS["gtk"], ".", 30,
+                            executor=executor, which=lambda _: "/usr/bin/tool")
+        self.assertEqual(outcome["status"], "PASS")
+        self.assertEqual(len(calls), 2)
+        self.assertIn("-c", calls[0])
+        self.assertIn("unittest", calls[1])
+
+    def test_gtk_missing_gi_dependency_is_blocked(self):
+        self.assertIn("xauth", gtk_readiness(
+            30, which=lambda program: None if program == "xauth" else "/bin/tool"))
+        self.assertIn("TimeoutExpired", gtk_readiness(
+            30, which=lambda _: "/bin/tool",
+            executor=lambda *_args, **_kwargs: (_ for _ in ()).throw(
+                subprocess.TimeoutExpired("gtk", 4))))
 
     def test_timeout_handles_bytes_and_text(self):
         def timeout(*_args, **_kwargs):

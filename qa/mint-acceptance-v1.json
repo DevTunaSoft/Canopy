@@ -1,0 +1,226 @@
+{
+  "schema_version": 1,
+  "target": "Linux Mint Cinnamon X11",
+  "release_gate": "ALL_MANDATORY_WITH_INDEPENDENT_EVIDENCE",
+  "mint_vm_status": "NOT_RUN",
+  "requirements": [
+    {
+      "id": "MINT-BOOT",
+      "category": "session",
+      "mandatory": true,
+      "methods": [
+        "guest-session-probe",
+        "host-vm-state"
+      ],
+      "negative_control": "session fails to start",
+      "evidence": [
+        "fresh-boot-id",
+        "guest-session-record",
+        "host-state"
+      ],
+      "hardware_required": false
+    },
+    {
+      "id": "MINT-CLASSIC-START",
+      "category": "gui",
+      "mandatory": true,
+      "methods": [
+        "gtk-process-observer",
+        "independent-window-inspector"
+      ],
+      "negative_control": "preview exits unexpectedly",
+      "evidence": [
+        "process-exit",
+        "window-enumeration",
+        "screen-record"
+      ],
+      "hardware_required": false
+    },
+    {
+      "id": "MINT-LAUNCHER",
+      "category": "gui",
+      "mandatory": true,
+      "methods": [
+        "keyboard-input-harness",
+        "independent-app-observer"
+      ],
+      "negative_control": "invalid launcher target",
+      "evidence": [
+        "input-replay",
+        "app-process-observation",
+        "screenshot"
+      ],
+      "hardware_required": false
+    },
+    {
+      "id": "MINT-DOCK-SIZE",
+      "category": "gui",
+      "mandatory": true,
+      "methods": [
+        "window-geometry-reader",
+        "independent-image-review"
+      ],
+      "negative_control": "dock clipped at 320 px",
+      "evidence": [
+        "geometry",
+        "png-with-hash"
+      ],
+      "hardware_required": false
+    },
+    {
+      "id": "MINT-SETTINGS",
+      "category": "recovery",
+      "mandatory": true,
+      "methods": [
+        "filesystem-hash-observer",
+        "independent-ui-observer"
+      ],
+      "negative_control": "corrupt preferences JSON",
+      "evidence": [
+        "before-after-hashes",
+        "recovery-launch-log"
+      ],
+      "hardware_required": false
+    },
+    {
+      "id": "MINT-INSTALL-ROLLBACK",
+      "category": "recovery",
+      "mandatory": true,
+      "methods": [
+        "package-state-probe",
+        "host-reboot-login-oracle"
+      ],
+      "negative_control": "interrupted install",
+      "evidence": [
+        "before-after-package-state",
+        "default-cinnamon-login"
+      ],
+      "hardware_required": false
+    },
+    {
+      "id": "MINT-VM-RESET",
+      "category": "recovery",
+      "mandatory": true,
+      "methods": [
+        "host-snapshot-check",
+        "fresh-guest-boot-id"
+      ],
+      "negative_control": "stale guest state",
+      "evidence": [
+        "snapshot-identity",
+        "boot-id"
+      ],
+      "hardware_required": false
+    },
+    {
+      "id": "MINT-PERF-IDLE",
+      "category": "performance",
+      "mandatory": true,
+      "methods": [
+        "proc-process-sampler",
+        "host-side-independent-observer"
+      ],
+      "negative_control": "induced CPU workload",
+      "evidence": [
+        "rss-timeline",
+        "cpu-timeline",
+        "baseline-and-hardware"
+      ],
+      "hardware_required": false
+    },
+    {
+      "id": "MINT-ACCESSIBILITY",
+      "category": "accessibility",
+      "mandatory": true,
+      "methods": [
+        "keyboard-focus-trace",
+        "accessibility-tree-inspector"
+      ],
+      "negative_control": "missing accessible control name",
+      "evidence": [
+        "tab-navigation",
+        "accessible-names",
+        "reduced-motion"
+      ],
+      "hardware_required": false
+    },
+    {
+      "id": "MINT-MULTIMONITOR",
+      "category": "compatibility",
+      "mandatory": true,
+      "methods": [
+        "virtual-display-geometry",
+        "independent-screen-capture"
+      ],
+      "negative_control": "changed monitor workarea",
+      "evidence": [
+        "geometry",
+        "scaling-captures"
+      ],
+      "hardware_required": false
+    },
+    {
+      "id": "MINT-SECURITY",
+      "category": "security",
+      "mandatory": true,
+      "methods": [
+        "uid-capability-check",
+        "filesystem-permission-audit"
+      ],
+      "negative_control": "root launch or unsafe settings mode",
+      "evidence": [
+        "uid",
+        "file-modes",
+        "negative-control"
+      ],
+      "hardware_required": false
+    },
+    {
+      "id": "MINT-STABILITY",
+      "category": "stability",
+      "mandatory": true,
+      "methods": [
+        "guest-memory-process-trace",
+        "host-runtime-heartbeat"
+      ],
+      "negative_control": "deliberate process crash",
+      "evidence": [
+        "duration",
+        "memory-growth",
+        "recovery-log"
+      ],
+      "hardware_required": false
+    },
+    {
+      "id": "MINT-SUSPEND-RESUME",
+      "category": "hardware",
+      "mandatory": false,
+      "methods": [
+        "host-power-state-monitor",
+        "guest-session-recheck"
+      ],
+      "negative_control": "unexpected session loss",
+      "evidence": [
+        "suspend-resume-events",
+        "session-recheck"
+      ],
+      "hardware_required": true
+    },
+    {
+      "id": "MINT-GPU-HARDWARE",
+      "category": "hardware",
+      "mandatory": false,
+      "methods": [
+        "native-compositor-observer",
+        "physical-device-acceptance"
+      ],
+      "negative_control": "GPU reset",
+      "evidence": [
+        "gpu-model",
+        "driver-version",
+        "render-artifact"
+      ],
+      "hardware_required": true
+    }
+  ]
+}

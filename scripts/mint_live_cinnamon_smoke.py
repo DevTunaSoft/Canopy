@@ -16,7 +16,7 @@ import time
 def session_ready(env, uid):
     desktop = env.get("XDG_CURRENT_DESKTOP", "").lower().split(":")
     session = env.get("XDG_SESSION_TYPE", "").lower()
-    return (uid != 0 and "cinnamon" in desktop and session == "x11"
+    return (uid != 0 and ("cinnamon" in desktop or "x-cinnamon" in desktop) and session == "x11"
             and bool(re.fullmatch(r":[0-9]+(?:\.[0-9]+)?", env.get("DISPLAY", "")))
             and env.get("CANOPY_ISOLATED_DISPLAY") != "1")
 

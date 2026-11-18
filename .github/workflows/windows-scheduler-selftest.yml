@@ -1,0 +1,14 @@
+name: Canopy Windows scheduler self-test
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  scheduler-plan:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify safe scheduled-task plan without registering tasks
+        shell: pwsh
+        run: ./scripts/Enable-CanopyTestLabSchedule.ps1 -SelfTest

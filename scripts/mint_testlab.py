@@ -18,6 +18,7 @@ COMMANDS = {
     "unit": ("python3", "-m", "unittest", "discover", "-s", "tests", "-v"),
     "syntax": ("python3", "-m", "compileall", "-q", "canopy", "tests", "scripts"),
     "gtk": ("xvfb-run", "-a", "/usr/bin/python3", "-m", "unittest", "discover", "-s", "tests", "-v"),
+    "cinnamon": ("python3", "-B", "-m", "scripts.cinnamon_guest_session"),
 }
 MAX_OUTPUT = 80_000
 

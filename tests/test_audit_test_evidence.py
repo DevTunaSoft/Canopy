@@ -58,6 +58,26 @@ class EvidenceAuditTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             audit(good(), ["unit", "unknown"])
 
+    def test_real_cinnamon_evidence_requires_two_observers(self):
+        sample = good()
+        sample["checks"].append({
+            "name": "cinnamon", "status": "PASS", "exit_code": 0,
+            "duration_seconds": 3.0, "output_truncated": False,
+            "output": json.dumps({
+                "status": "PASS", "desktop": "Cinnamon X11",
+                "window_count": 2, "wmctrl_windows": 2,
+                "xdotool_windows": 2, "pid": 425, "polls": 3,
+            })
+        })
+        self.assertEqual(audit(sample, ["unit", "syntax", "gtk", "cinnamon"])["status"], "PASS")
+        sample["checks"][-1]["output"] = json.dumps({
+            "status": "PASS", "desktop": "Cinnamon X11",
+            "window_count": 2, "wmctrl_windows": 1,
+            "xdotool_windows": 2, "pid": 425, "polls": 3,
+        })
+        with self.assertRaisesRegex(ValueError, "Cinnamon"):
+            audit(sample, ["unit", "syntax", "gtk", "cinnamon"])
+
     def test_reject_duplicate_json_keys(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "result.json"

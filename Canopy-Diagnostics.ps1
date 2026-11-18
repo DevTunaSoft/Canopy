@@ -53,6 +53,19 @@ try {
       'Bytes: ' + (Get-Item -LiteralPath $iso).Length
     } else { 'Expected ISO not found' }
   }
+  Save-Result 'vm-log-summary.txt' {
+    $vmDir = Join-Path $base 'VirtualMachines'
+    if (-not (Test-Path -LiteralPath $vmDir)) { 'VM directory not found' }
+    else {
+      $logs = @(Get-ChildItem -LiteralPath $vmDir -Filter 'VBox.log*' -File -Recurse -ErrorAction SilentlyContinue | Select-Object -First 4)
+      if ($logs.Count -eq 0) { 'No VirtualBox logs found' }
+      foreach ($log in $logs) {
+        'Log: ' + $log.Name
+        'Bytes: ' + $log.Length
+        'LastWriteUtc: ' + $log.LastWriteTimeUtc.ToString('o')
+      }
+    }
+  }
   [IO.File]::WriteAllText((Join-Path $tmp 'README.txt'), 'Read-only diagnostics. No passwords, environment dumps, guest logs, or VM disk contents collected. Review ZIP before sharing.')
   if (Test-Path -LiteralPath $out) { throw 'Diagnostic destination already exists' }
   Compress-Archive -Path (Join-Path $tmp '*') -DestinationPath $out -CompressionLevel Optimal

@@ -14,3 +14,11 @@ jobs:
           python-version: '3.12'
       - name: Run tests
         run: python -m unittest discover -s tests -v
+  gtk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install GTK smoke test dependencies
+        run: sudo apt-get update && sudo apt-get install -y python3-gi gir1.2-gtk-3.0 xvfb xauth
+      - name: Run with a virtual X11 display
+        run: xvfb-run -a /usr/bin/python3 -m unittest discover -s tests -v

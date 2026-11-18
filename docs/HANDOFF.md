@@ -25,3 +25,7 @@ Branch: `feat/classic-preferences-on-foundation`. Shared `canopy/preferences.py`
 ## 2026-11-17 — Codex takeover audit
 
 Canonical full audit: `CODEX_START_HERE.md`. Master 16-rule mandate: `docs/MASTER_AUTONOMOUS_PROMPT.md`. Current feature status: `docs/FEATURE_STATUS.md`. Chronological product decisions: `docs/ENGINEERING_DECISIONS.md`. PRs #1/#2/#3 are open draft and unmerged, with stacked dependencies (PR #2 includes PR #1 against main; PR #3 targets PR #2). GitHub Actions for audited head SHAs: PR #1 docs SUCCESS, PR #2 unit/docs SUCCESS, PR #3 unit/docs SUCCESS. Linux Mint UI/hardware, accessibility and resource tests remain NOT RUN. Ponytail not installed/verified. Takeover docs isolated on branch `docs/codex-takeover-dossier`, derived from PR #3 branch. Begin Codex work only after fetching live Git and inspecting PR state.
+
+## 2026-11-18 — Classic application search
+
+`feat/classic-app-search` is based on the dossier head `24b996f`. Classic now searches installed visible desktop entries by name and ID, including entries beyond the former 40-app cap. Discovery and search live in the shared application module. Debian 13 GTK3/Xvfb passed all 14 tests. See the development log and preview guide for scope and test evidence. Continue with Cinnamon smoke testing and responsive dock placement, followed by the session architecture ADR. Preserve the stacked PRs.

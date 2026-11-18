@@ -2,6 +2,8 @@
 from dataclasses import dataclass
 from datetime import datetime
 
+from canopy.applications import visible_apps as visible_apps
+
 
 @dataclass(frozen=True)
 class DockItem:
@@ -19,12 +21,3 @@ DEFAULT_DOCK = (
 def clock_label(now: datetime) -> str:
     """Local, short clock suitable for a compact top bar."""
     return now.strftime('%a %H:%M')
-
-
-def visible_apps(apps):
-    """Filter hidden or unnamed launchers and sort without duplicates."""
-    result = {}
-    for app in apps:
-        if app.should_show() and app.get_name() and app.get_id():
-            result.setdefault(app.get_id(), app)
-    return sorted(result.values(), key=lambda app: (app.get_name().casefold(), app.get_id()))

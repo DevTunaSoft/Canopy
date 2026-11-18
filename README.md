@@ -9,7 +9,7 @@ Canopy is a planned lightweight Linux desktop shell for Linux Mint, helping macO
 - **One core:** shared configuration, system integration, performance, accessibility and recovery.
 - **Safety:** install alongside Cinnamon, retain fallback, never run shell as root.
 
-**Status: planning only; no functional desktop shell or runtime validation yet.**
+**Status:** An experimental Classic GTK preview includes a top bar, dock and searchable application launcher. Linux Mint session and hardware acceptance are pending.
 
 Read [requirements](docs/REQUIREMENTS.md), [architecture](docs/ARCHITECTURE.md), [roadmap](docs/ROADMAP.md), [traceability](docs/TRACEABILITY.md), [handoff](docs/HANDOFF.md), and [engineering rules](AGENTS.md).
 

@@ -11,3 +11,7 @@
 **Risk & verification:** Local model unit tests pass, syntax compilation passes. GTK UI cannot be visually tested here because gi/GTK is unavailable. Test in Linux Mint under an ordinary user before considering packaging or autostart.
 
 **Future:** Evaluate native Cinnamon applet/extension vs own compositor/shell and choose through a separate ADR based on complete-session requirements and measured costs. Do not infer that GTK3 is automatically the final desktop toolkit.
+
+### 2026-11-18 launcher follow-up
+
+Keep Gio for discovery and activation, centralize discovery policy in `canopy/applications.py`, and use GTK's native search and list controls for Classic. A Debian 13/Xvfb smoke test now covers filtering and keyboard focus. Cinnamon remains the target for manual acceptance.

@@ -69,11 +69,18 @@ class ClassicGtkSmokeTests(unittest.TestCase):
         from gi.repository import Gio
         Gtk, Gdk, GLib = self.Gtk, self.Gdk, self.GLib
         snapshots = []
+        menu_images = []
 
         def inspect_windows():
             windows = [window for window in Gtk.Window.list_toplevels()
                        if window.get_title() == 'Canopy Classic preview' and window.get_visible()]
             snapshots.extend((window.get_size(), window.get_position()) for window in windows)
+            for window in windows:
+                for widget in window.get_child().get_children():
+                    if widget.get_accessible().get_name() == 'Canopy menu':
+                        image = widget.get_image()
+                        if image is not None and image.get_storage_type() == Gtk.ImageType.PIXBUF:
+                            menu_images.append(image.get_pixbuf().get_width())
             Gtk.main_quit()
             return GLib.SOURCE_REMOVE
 
@@ -87,6 +94,7 @@ class ClassicGtkSmokeTests(unittest.TestCase):
         area = monitor.get_workarea()
         self.assertFalse(any(window.get_title() == 'Canopy Classic preview'
                              for window in Gtk.Window.list_toplevels()))
+        self.assertEqual(menu_images, [20])
         self.assertEqual(len(snapshots), 2)
         (dock_width, dock_height), (x, y) = min(snapshots)
         self.assertLess(dock_width, area.width)

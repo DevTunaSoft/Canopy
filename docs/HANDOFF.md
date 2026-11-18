@@ -33,3 +33,7 @@ Canonical full audit: `CODEX_START_HERE.md`. Master 16-rule mandate: `docs/MASTE
 ## 2026-11-18 — Dock startup and placement
 
 `feat/classic-dock-placement` builds on draft PR #5. GTK/Xvfb tests now cover preview startup without any default apps and compact dock coordinates. The preview uses the primary work area at startup and cleans up both windows and the clock timer on exit. Next, verify work-area behavior on Cinnamon/X11 and examine Wayland placement before deciding on a longer-term integration strategy.
+
+## 2026-11-18 — Classic menu emblem
+
+`feat/classic-menu-emblem` adds the original white penguin SVG, an accessible menu name and text fallback. GTK3/Xvfb verifies the asset loads in the preview. Screen-reader and target Mint appearance checks remain open alongside the session architecture evaluation.

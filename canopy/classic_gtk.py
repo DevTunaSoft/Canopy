@@ -137,7 +137,15 @@ def run():
         dialog.run()
         dialog.destroy()
 
-    home_button = Gtk.Button(label='Canopy ▾')  # Original Tux art will replace this placeholder.
+    home_button = Gtk.Button()
+    emblem_path = Path(__file__).with_name('assets') / 'classic-penguin.svg'
+    emblem = Gtk.Image.new_from_file(str(emblem_path))
+    if emblem.get_storage_type() == Gtk.ImageType.PIXBUF:
+        home_button.set_image(emblem)
+    else:
+        home_button.set_label('Canopy ▾')
+    home_button.set_tooltip_text('Canopy menu')
+    home_button.get_accessible().set_name('Canopy menu')
     home_button.connect('clicked', open_menu)
     top_box.pack_start(home_button, False, False, 0)
     top_box.pack_start(Gtk.Label(label='Classic'), False, False, 0)

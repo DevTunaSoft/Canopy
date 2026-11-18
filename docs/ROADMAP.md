@@ -8,3 +8,6 @@
 - **Later:** dedicated installer image and additional layouts only after reliable daily-driver readiness.
 
 Every milestone needs acceptance tests, regression coverage, resource evidence, documentation and updated handoff. Status is planning, not implementation.
+
+## Current progress
+Shared preferences and cosmetic policy prototype implemented on `feat/classic-preferences-on-foundation`. Eight local unit tests passed. No desktop session or Linux Mint hardware verification yet. Next: compositor/toolkit ADR and Cinnamon-safe session prototype.

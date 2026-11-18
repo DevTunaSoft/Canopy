@@ -48,6 +48,7 @@ class SecureTransportTests(unittest.TestCase):
         self.assertEqual(result["status"],"PASS")
         self.assertEqual(len(calls),4)
         self.assertTrue(any("run_approved_test_plan" in str(c) for c in calls))
+        self.assertTrue(any("PYTHONDONTWRITEBYTECODE=1 python3 -B" in str(c) for c in calls))
 
     def test_false_success_disagreement_rejected(self):
         with self.assertRaisesRegex(RuntimeError,"contradicts"):

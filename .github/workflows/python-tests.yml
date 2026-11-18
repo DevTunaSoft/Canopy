@@ -24,3 +24,16 @@ jobs:
         run: xvfb-run -a /usr/bin/python3 -m unittest discover -s tests -v
       - name: Check dock on a narrow X11 display
         run: PYTHONPATH=.:tests xvfb-run -a -s '-screen 0 320x240x24' /usr/bin/python3 -m unittest test_classic_gtk.ClassicGtkSmokeTests.test_many_pins_stay_within_monitor_width -v
+      - name: Capture isolated Canopy Classic preview windows
+        env:
+          CANOPY_ISOLATED_DISPLAY: '1'
+          PYTHONPATH: .
+        run: xvfb-run -a /usr/bin/python3 scripts/capture_classic.py --output-dir test-results/visual
+      - name: Upload bounded Canopy-only visual artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: canopy-classic-isolated-screenshots
+          path: test-results/visual/
+          if-no-files-found: warn
+          retention-days: 3

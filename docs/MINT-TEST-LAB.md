@@ -33,3 +33,17 @@ New runner's pure Python tests pass in the development container. CI and Mint re
 3. Execute this runner as an ordinary Mint user, verify JSON report and artifact retention.
 4. Add Cinnamon-session GUI automation and screenshots using explicit display/session setup.
 5. Validate recovery of the VM from disposable snapshots; prohibit untrusted code from controlling the host or installing system services.
+
+## Automated visual-evidence capture (new prototype)
+
+`scripts/capture_classic.py` launches the existing Classic preview with in-memory defaults inside an **isolated Xvfb display** and saves **only the two Canopy preview windows** (`top-bar.png` and `dock.png`) plus `captures.json`. It does not capture a full personal desktop, inspect other windows or change persistent preferences. It refuses to start without `CANOPY_ISOLATED_DISPLAY=1` and an X11 `DISPLAY` argument; this is a guard against accidental use, **not** a security sandbox. Run this only in a dedicated disposable VM or GitHub-hosted test process.
+
+To capture after approved dependencies are installed:
+
+```bash
+CANOPY_ISOLATED_DISPLAY=1 PYTHONPATH=. xvfb-run -a /usr/bin/python3 scripts/capture_classic.py --output-dir test-results/visual
+```
+
+The existing GitHub-hosted GTK workflow now attempts this capture and uploads a short-lived three-day artifact, alongside running the existing smoke tests. The generated directory is gitignored. Before connecting to a future Mint VM, restrict the test worker to approved commits, provide an isolated display and verify captures contain no sensitive host content. GTK screenshots are **visual evidence**, not proof of correct interaction, accessibility, session recovery or responsiveness. Real Cinnamon desktop capture/interaction has **not** been implemented.
+
+GitHub workflow capture must pass before considering this increment verified. Check the job logs and verify the artifact actually contains two readable PNG images. Graphical acceptance on Mint remains NOT RUN.

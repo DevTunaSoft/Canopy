@@ -12,3 +12,11 @@ Canopy is a planned lightweight Linux desktop shell for Linux Mint, helping macO
 **Status: planning only; no functional desktop shell or runtime validation yet.**
 
 Read [requirements](docs/REQUIREMENTS.md), [architecture](docs/ARCHITECTURE.md), [roadmap](docs/ROADMAP.md), [traceability](docs/TRACEABILITY.md), [handoff](docs/HANDOFF.md), and [engineering rules](AGENTS.md).
+
+## Codex and engineering takeover
+
+**Start here: [CODEX_START_HERE.md](CODEX_START_HERE.md)** — verified GitHub state, stacked PR ordering, file inventory, precise implementation limits, local/CI tests, risk register and safe next steps.
+
+Additional authoritative files: [master autonomous mandate](docs/MASTER_AUTONOMOUS_PROMPT.md), [feature status](docs/FEATURE_STATUS.md), [engineering decisions](docs/ENGINEERING_DECISIONS.md), [Classic preview instructions](docs/CLASSIC-PREVIEW.md).
+
+**Development branch note:** The Classic GTK preview currently lives on `feat/classic-gtk-preview`, not on `main`. The takeover documentation lives on `docs/codex-takeover-dossier`. No login-capable Canopy session is built yet.

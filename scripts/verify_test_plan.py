@@ -10,7 +10,7 @@ import re
 import subprocess
 
 REPO = "DevTunaSoft/Canopy"
-CHECKS = frozenset({"unit", "syntax", "gtk"})
+CHECKS = frozenset({"unit", "syntax", "gtk", "cinnamon"})
 SHA = re.compile(r"[0-9a-f]{40}\Z")
 
 

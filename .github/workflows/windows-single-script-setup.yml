@@ -30,7 +30,7 @@ jobs:
         shell: pwsh
         run: |
           ./Canopy-Diagnostics.ps1
-          $files = @(Get-ChildItem (Join-Path $env:USERPROFILE 'Desktop') -Filter 'Canopy-Diagnostics-*.zip')
+          $files = @(Get-ChildItem (Join-Path $env:LOCALAPPDATA 'CanopyTestLab/diagnostics') -Filter 'Canopy-Diagnostics-*.zip')
           if ($files.Count -eq 0) { throw 'Diagnostic ZIP missing' }
           Add-Type -AssemblyName System.IO.Compression.FileSystem
           $zip = [IO.Compression.ZipFile]::OpenRead($files[-1].FullName)

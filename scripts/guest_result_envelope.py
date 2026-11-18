@@ -41,7 +41,7 @@ def wrap(*, commit, run_id, boot_id, report, status=None):
     if len(raw) > MAX_FILE:
         raise ValueError("Oversized report")
     parsed = json.loads(raw)
-    if not isinstance(parsed, dict) or parsed.get("schema_version") != 1:
+    if not isinstance(parsed, dict) or type(parsed.get("schema_version")) is not int or parsed.get("schema_version") != 1:
         raise ValueError("Invalid report schema")
     reported = parsed.get("status")
     if reported not in STATUS:

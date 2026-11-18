@@ -10,6 +10,7 @@ param(
   [Parameter(Mandatory=$true)][string]$IsoSha256,
   [Parameter(Mandatory=$true)][string]$PasswordFile,
   [string]$VBoxManage = '',
+  [string]$AuxiliaryBasePath = '',
   [switch]$Install,
   [switch]$SelfTest
 )
@@ -51,6 +52,11 @@ if (($info | Out-String) -notmatch '(?m)^VMState="poweroff"\s*$') {
   throw 'Dedicated VM must be powered off'
 }
 $argsToRun = @(Get-CanopyUnattendedArgs $iso $secret)
+if ($AuxiliaryBasePath) {
+  $parent = Split-Path -Parent $AuxiliaryBasePath
+  if (-not (Test-Path -LiteralPath $parent -PathType Container)) { throw 'Auxiliary media parent folder is missing' }
+  $argsToRun += ('--auxiliary-base-path=' + $AuxiliaryBasePath)
+}
 # Always probe without modifying guest first. This is NOT proof Mint can boot.
 & $VBoxManage @($argsToRun + @('--dry-run')) | Out-Null
 if ($LASTEXITCODE -ne 0) { throw 'VirtualBox rejected unattended dry-run for this ISO' }
@@ -63,6 +69,6 @@ $snapshotInfo = & $VBoxManage snapshot 'Canopy-Test-Mint' list '--machinereadabl
 if ($LASTEXITCODE -eq 0 -and (($snapshotInfo | Out-String) -match '(?m)^SnapshotName')) {
   throw 'Existing VM snapshots detected; refusing to reconfigure an established test VM'
 }
-& $VBoxManage @argsToRun | Out-Null
-if ($LASTEXITCODE -ne 0) { throw 'Unattended configuration failed; inspect VM state' }
+& $VBoxManage @argsToRun
+if ($LASTEXITCODE -ne 0) { throw 'Unattended configuration failed; inspect VirtualBox stderr and auxiliary media directory' }
 Write-Output 'Unattended configuration accepted. Start the dedicated VM and verify actual Mint installation and boot.'

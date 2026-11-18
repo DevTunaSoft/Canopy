@@ -41,3 +41,7 @@ Canonical full audit: `CODEX_START_HERE.md`. Master 16-rule mandate: `docs/MASTE
 ## 2026-11-18 — Session architecture evaluation
 
 ADR-003 records the Cinnamon-first evaluation path, a separate Labwc-backed candidate, and the cost of an independent compositor. It includes a Debian/Xvfb process sample and explicit decision gates. The next acceptance step requires a disposable Linux Mint Cinnamon target. No production session choice has been made.
+
+## 2026-11-18 — Ponytail project skill
+
+The project-scoped Ponytail skill is pinned to upstream commit `96608e0` in `.agents/skills/ponytail`, with a Claude Code symlink and license notice. See `docs/PONYTAIL-INTEGRATION.md` for validation and the pending fresh-session discovery check. Canopy engineering rules retain priority.

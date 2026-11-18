@@ -69,6 +69,14 @@ $snapshotInfo = & $VBoxManage snapshot 'Canopy-Test-Mint' list '--machinereadabl
 if ($LASTEXITCODE -eq 0 -and (($snapshotInfo | Out-String) -match '(?m)^SnapshotName')) {
   throw 'Existing VM snapshots detected; refusing to reconfigure an established test VM'
 }
-& $VBoxManage @argsToRun
-if ($LASTEXITCODE -ne 0) { throw 'Unattended configuration failed; inspect VirtualBox stderr and auxiliary media directory' }
+$output = & $VBoxManage @argsToRun 2>&1
+$code = $LASTEXITCODE
+$output | ForEach-Object { Write-Output $_ }
+if ($code -ne 0) {
+  $logDir = Join-Path $env:LOCALAPPDATA 'CanopyTestLab\diagnostics'
+  New-Item -ItemType Directory -Path $logDir -Force | Out-Null
+  $logFile = Join-Path $logDir ('unattended-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '.txt')
+  @('Canopy VirtualBox unattended configuration failure',('Exit code: ' + $code),('Auxiliary path: ' + $AuxiliaryBasePath),'VirtualBox output:',($output | Out-String)) | Set-Content -LiteralPath $logFile -Encoding UTF8
+  throw ('Unattended media construction failed; diagnostic log: ' + $logFile + '. Do not retry unchanged.')
+}
 Write-Output 'Unattended configuration accepted. Start the dedicated VM and verify actual Mint installation and boot.'

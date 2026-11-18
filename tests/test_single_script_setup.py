@@ -7,7 +7,7 @@ SOURCE = (Path(__file__).resolve().parents[1]/"Canopy-Setup.ps1").read_text(enco
 class SingleScriptSetupContract(unittest.TestCase):
     def test_orchestration(self):
         for token in ("Start-CanopyTestLab.ps1", "clone", "pull '--ff-only'",
-                      "Canopy-Test-Mint", "Get-Command git.exe",
+                      "Canopy-Test-Mint", "Get-Command 'git.exe'",
                       "IsoSha256", "[string]$IsoUrl", "Get-VerifiedMintIso", "Invoke-WebRequest", "Get-FileHash", "[switch]$StartVM", "[switch]$SelfTest"):
             self.assertIn(token, SOURCE)
 

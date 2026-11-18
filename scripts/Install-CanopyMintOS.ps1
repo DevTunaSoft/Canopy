@@ -24,7 +24,7 @@ function Get-CanopyUnattendedArgs {
 }
 if ($SelfTest) {
   $argsToCheck = @(Get-CanopyUnattendedArgs 'C:\mint.iso' 'C:\private-password.txt')
-  if ($argsToCheck.Count -ne 7 -or $argsToCheck[2] -ne 'Canopy-Test-Mint' -or
+  if ($argsToCheck.Count -ne 6 -or $argsToCheck[2] -ne 'Canopy-Test-Mint' -or
       $argsToCheck[4] -ne '--user=canopy-test' -or
       $argsToCheck[5] -ne '--user-password-file=C:\private-password.txt') {
     throw 'Unattended argument contract failed'

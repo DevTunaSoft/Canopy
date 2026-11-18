@@ -1,0 +1,75 @@
+#Requires -Version 5.1
+<#
+.SYNOPSIS
+Single-file Windows entry point for Canopy Mint test-lab setup.
+Run from any directory. Downloads a pinned GitHub branch using Git, then
+orchestrates the guarded host and VM scripts. Does not claim a completed OS install.
+#>
+[CmdletBinding()]
+param(
+ [string]$IsoPath = '',
+ [string]$IsoSha256 = '',
+ [string]$PasswordFile = '',
+ [switch]$CreateVM,
+ [switch]$ConfigureUnattended,
+ [switch]$StartVM,
+ [switch]$SelfTest
+)
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+$repository = 'https://github.com/DevTunaSoft/Canopy.git'
+$branch = 'fix/testlab-replay-proof-transport'
+$vm = 'Canopy-Test-Mint'
+function Assert-Options {
+ param([bool]$Create,[bool]$Unattended,[bool]$Start,[string]$Iso,[string]$Hash,[string]$Secret)
+ if ($Unattended -and -not $Create) { throw 'Unattended requires CreateVM' }
+ if ($Start -and -not $Unattended) { throw 'StartVM requires unattended configuration in this run' }
+ if ($Create -and (-not $Iso -or $Hash -notmatch '^[0-9a-fA-F]{64}$')) {
+   throw 'Creating a VM requires local ISO and independently authenticated SHA256'
+ }
+ if ($Unattended -and -not $Secret) { throw 'Protected password file required' }
+}
+if ($SelfTest) {
+ Assert-Options $false $false $false '' '' ''
+ $blocked = $false
+ try { Assert-Options $false $false $true '' '' '' } catch { $blocked = $true }
+ if (-not $blocked) { throw 'Start without installation was accepted' }
+ Write-Output 'PASS: standalone bootstrap safety gates'
+ exit 0
+}
+Assert-Options ([bool]$CreateVM) ([bool]$ConfigureUnattended) ([bool]$StartVM) $IsoPath $IsoSha256 $PasswordFile
+$git = Get-Command git.exe -ErrorAction SilentlyContinue
+if ($null -eq $git) { throw 'Git for Windows required: https://git-scm.com/downloads/win' }
+$base = Join-Path $env:LOCALAPPDATA 'CanopyTestLab'
+$checkout = Join-Path $base 'source'
+if (-not (Test-Path -LiteralPath $checkout)) {
+ New-Item -ItemType Directory -Path $base -Force | Out-Null
+ & $git.Source clone '--depth=1' '--single-branch' '--branch' $branch $repository $checkout
+ if ($LASTEXITCODE -ne 0) { throw 'Repository checkout failed' }
+} else {
+ if (-not (Test-Path -LiteralPath (Join-Path $checkout '.git'))) { throw 'Existing source path is not a Git checkout' }
+ $origin = (& $git.Source -C $checkout remote get-url origin | Out-String).Trim()
+ if ($LASTEXITCODE -ne 0 -or $origin -ne $repository) { throw 'Existing source checkout has unexpected origin; refusing to run' }
+ $currentBranch = (& $git.Source -C $checkout branch '--show-current' | Out-String).Trim()
+ if ($currentBranch -ne $branch) { throw 'Existing checkout is on unexpected branch' }
+ $dirty = (& $git.Source -C $checkout status '--porcelain=v1' '--untracked-files=all' | Out-String).Trim()
+ if ($LASTEXITCODE -ne 0 -or $dirty) { throw 'Existing source checkout is dirty; refusing to run' }
+ & $git.Source -C $checkout pull '--ff-only'
+ if ($LASTEXITCODE -ne 0) { throw 'Could not safely update checkout' }
+}
+$launcher = Join-Path $checkout 'scripts\Start-CanopyTestLab.ps1'
+if (-not (Test-Path -LiteralPath $launcher -PathType Leaf)) { throw 'Missing Canopy launcher' }
+if (-not $CreateVM) {
+ & $launcher
+ if ($LASTEXITCODE -ne 0) { throw 'Host preflight blocked' }
+ Write-Output 'Host ready. Mint ISO verification and VM creation not started.'
+ exit 0
+}
+& $launcher -Provision -IsoPath $IsoPath -IsoSha256 $IsoSha256 -ConfigureUnattended:$ConfigureUnattended -PasswordFile $PasswordFile
+if ($LASTEXITCODE -ne 0) { throw 'VM provisioning failed' }
+if (-not $StartVM) { exit 0 }
+$vbox = Join-Path $env:ProgramFiles 'Oracle\VirtualBox\VBoxManage.exe'
+if (-not (Test-Path -LiteralPath $vbox -PathType Leaf)) { throw 'VirtualBox CLI missing' }
+& $vbox startvm $vm '--type=headless'
+if ($LASTEXITCODE -ne 0) { throw 'VM start failed; inspect guest state' }
+Write-Output 'VM started. Mint installation and Cinnamon login remain UNVERIFIED.'

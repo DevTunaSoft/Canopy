@@ -28,6 +28,10 @@ match = re.search(r"(?m)^\s*linux(?:efi)?\s+(/casper/vmlinuz\S*)\s+([^\n]*)$", o
 if not match:
     raise SystemExit("Unsupported GRUB menu: no /casper/vmlinuz entry")
 kernel, args = match.groups()
+initrd_match = re.search(r"(?m)^\s*initrd(?:efi)?\s+(/casper/initrd\S*)\s*$", original)
+if not initrd_match:
+    raise SystemExit("Unsupported GRUB menu: no /casper/initrd entry")
+initrd = initrd_match.group(1)
 args = re.sub(r"\s+quiet\b|\s+splash\b", "", args)
 args = args.replace("---", " ")
 args = args.strip()
@@ -37,7 +41,7 @@ menu = (
     "menuentry 'Canopy disposable VM automatic installation' {\n"
     f"    linux {kernel} {args} automatic-ubiquity only-ubiquity "
     "file=/cdrom/preseed/canopy.seed noprompt ---\n"
-    "    initrd /casper/initrd\n"
+    f"    initrd {initrd}\n"
     "}\n"
 )
 # Original boot menu remains available for inspection/recovery.

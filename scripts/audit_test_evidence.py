@@ -56,7 +56,7 @@ def audit(report, required=("unit", "syntax", "gtk")):
         found.add(name)
         if item.get("status") != "PASS" or type(item.get("exit_code")) is not int or item["exit_code"] != 0:
             raise ValueError(f"{name}: result conflicts with successful process exit")
-        if item.get("output_truncated") is True:
+        if item.get("output_truncated") is not False:
             raise ValueError(f"{name}: truncated logs cannot establish complete evidence")
         duration = item.get("duration_seconds")
         if type(duration) not in (int, float) or not 0 <= duration <= 900:

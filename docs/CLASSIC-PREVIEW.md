@@ -24,6 +24,6 @@ The prototype displays a dark top bar with a Canopy menu and clock, plus a float
 - Menu uses text instead of final original white Tux art.
 - Panel/dock do not reserve screen space or replace existing Cinnamon panels.
 - Not suitable for login-session use; no compositor or window management.
-- Layout and height are preliminary; multi-monitor, scaling and behavior under Wayland are **NOT RUN**.
+- At startup the panel and dock use the primary monitor’s work area. The dock sizes to its buttons. Monitor changes after startup, scaling, Cinnamon panel interaction and Wayland placement remain unverified.
 - No measurements of startup/RAM/CPU have been recorded yet.
 - To exercise the launcher widgets with a virtual X11 display, run `xvfb-run -a /usr/bin/python3 -m unittest discover -s tests -v`. Linux Mint Cinnamon compatibility and screen-reader testing remain **NOT RUN**.

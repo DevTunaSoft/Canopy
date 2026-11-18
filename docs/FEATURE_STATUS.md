@@ -36,3 +36,6 @@ See `CODEX_START_HERE.md` for exact branch dependencies, inventory, risks, comma
 ## Test-lab preparation (2026-11-18)
 
 An initial headless VM test controller exists in `scripts/mint_testlab.py`: allowlisted unit/syntax/GTK-Xvfb checks, bounded output, JSON results, timeout handling and explicit BLOCKED results. Runner unit tests: `tests/test_mint_testlab.py`. **Actual Mint VM, private runner connection, GUI automation within Cinnamon, screenshots and snapshot recovery are NOT IMPLEMENTED / NOT RUN.** See `docs/MINT-TEST-LAB.md` and the branch/PR status before claiming CI verification.
+
+## Isolated screenshot evidence (2026-11-18)
+`scripts/capture_classic.py` with `tests/test_capture_classic.py` and GitHub-hosted Xvfb CI can record top-bar and dock images; this is prototype support for manual review, not live Mint testing or full automated visual diffing. Confirm current run results and artifact availability before marking it VERIFIED. No shared host screen capture or remote desktop control is enabled.

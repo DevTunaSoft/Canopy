@@ -49,3 +49,7 @@ If VirtualBox rejects the dry-run, stop. **Do not use `-Install`**. If it passes
 - Collect independent host screenshot/window evidence and compare guest test reports.
 
 Do not report an unattended Mint VM as PASS until these have been exercised on real hardware and retained in a run ledger.
+
+## Read-only inspection after VM creation
+
+Run `./scripts/Get-CanopyVMStatus.ps1` from PowerShell to capture a JSON report of the dedicated VM UUID and current VirtualBox state without modifying the VM. The report explicitly marks Mint installation, boot verification, SSH and Cinnamon testing as unverified; a VirtualBox `running` state is **not** proof of a working Mint desktop. The Windows GitHub CI self-test checks the parser with synthetic VM data only.

@@ -2,7 +2,9 @@
 # Double-clickable, read-only diagnostic collector for the dedicated Canopy test VM.
 $ErrorActionPreference = 'Stop'
 $base = Join-Path $env:LOCALAPPDATA 'CanopyTestLab'
-$out = Join-Path $env:USERPROFILE ('Desktop\Canopy-Diagnostics-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '.zip')
+$destination = Join-Path $base 'diagnostics'
+New-Item -ItemType Directory -Path $destination -Force | Out-Null
+$out = Join-Path $destination ('Canopy-Diagnostics-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '-' + [guid]::NewGuid().ToString('N').Substring(0,8) + '.zip')
 $tmp = Join-Path ([IO.Path]::GetTempPath()) ('CanopyDiag-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $tmp -Force | Out-Null
 function Save-Result([string]$Name, [scriptblock]$Action) {

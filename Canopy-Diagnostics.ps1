@@ -53,7 +53,7 @@ try {
   }
   [IO.File]::WriteAllText((Join-Path $tmp 'README.txt'), 'Read-only diagnostics. No passwords, environment dumps, guest logs, or VM disk contents collected. Review ZIP before sharing.')
   if (Test-Path -LiteralPath $out) { throw 'Diagnostic destination already exists' }
-  Compress-Archive -LiteralPath (Join-Path $tmp '*') -DestinationPath $out -CompressionLevel Optimal
+  Compress-Archive -Path (Join-Path $tmp '*') -DestinationPath $out -CompressionLevel Optimal
   Write-Host ('Diagnostic ZIP created: ' + $out)
 } finally {
   Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue

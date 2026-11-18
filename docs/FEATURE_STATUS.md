@@ -25,7 +25,7 @@ Statuses: PLANNED = specified, no implementation; PROTOTYPE = code exists but ta
 | Resource benchmarks | NOT RUN | Set budgets from actual measurements |
 | First-run migration wizard | PLANNED | macOS/Windows guidance deferred |
 | Secure updates/packages/release image | PLANNED | No installer package |
-| Ponytail project installation | NOT RUN | No repo-local skill installed or discovery verified |
+| Ponytail project skill | PROTOTYPE | Pinned upstream skill and MIT notice in repo, with Claude project path. Fresh-session discovery remains unverified. |
 
 ## Audit status
 

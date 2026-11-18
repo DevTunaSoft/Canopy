@@ -29,6 +29,8 @@ jobs:
           CANOPY_ISOLATED_DISPLAY: '1'
           PYTHONPATH: .
         run: xvfb-run -a /usr/bin/python3 scripts/capture_classic.py --output-dir test-results/visual
+      - name: Verify isolated PNG integrity and metadata
+        run: /usr/bin/python3 scripts/validate_visual.py --directory test-results/visual
       - name: Upload bounded Canopy-only visual artifacts
         if: always()
         uses: actions/upload-artifact@v4

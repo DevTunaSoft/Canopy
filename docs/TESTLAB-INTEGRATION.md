@@ -65,3 +65,21 @@ Sibling branches #43 and #44 are consolidated here: the newly connected worker c
 **Do not claim an unattended Mint installer exists yet.** The VirtualBox probe uses `--dry-run` only and provides no proof of a successful Linux Mint Ubiquity installation. GTK/Xvfb CI is not a full Cinnamon session. A real Mint desktop login, verified image, trust bootstrap, and host-controlled snapshot still must be commissioned on the user's VM. If VirtualBox rejects this Mint ISO, pursue a signed-source, reviewed preseed image builder and first-boot verified setup; never silently fall back to an insecure image or an untrusted installation command. Actual guest/Windows hardware evidence: NOT RUN.
 
 Useful human-readable checkpoints are in `docs/checkpoints/MINT-VM-CREATION.md`, `docs/checkpoints/MINT-GUEST-SETUP.md`, `docs/checkpoints/HOST-SSH-CYCLE.md`, `docs/checkpoints/MINT-UNATTENDED-PROBE.md`, `docs/checkpoints/MINT-LIVE-CINNAMON.md`.
+
+## 2026-11-18 — Opt-in unattended installer and host supervision
+
+This integration stage combines:
+- PR #46 `scripts/start_mint_unattended.py`: explicitly authorized attempt to start VirtualBox's unattended Linux Mint installation only after matching ISO SHA-256, dedicated VM UUID and successful `--dry-run`; outputs **INSTALL_STARTED_NOT_VERIFIED** rather than a false installed/PASS verdict.
+- PR #47 `scripts/testlab_host_supervisor.py`: one-shot host-owned execution coordinator with nonblocking OS lock, exact dedicated VM identity, headless VM start, pinned-SSH plan execution, independent saved-report consistency audit, host-side SHA-256 evidence, atomic progress checkpoint, prevention of duplicate green runs, and three-attempt limit.
+- PR #47 `scripts/Enable-CanopyTestLabSchedule.ps1`: explicit current-user Windows Task Scheduler registration, every 30 minutes, no SYSTEM account/password or new public listener, uninstall path. Requires logged-in Windows account.
+
+**No VM has been created or tested on user's PC.** VirtualBox Ubiquity installer may not support the Mint ISO even if a dry-run succeeds. One-click guest bootstrap/host-key pinning and Cinnamon session permissions remain incomplete. Scheduled host execution cannot work until the dedicated VM is installed and configured. No new feature may be marked Mint-VERIFIED until the release acceptance contract's independent gates pass.
+
+## Commissioning sequence (target, not yet executed)
+
+1. Verify official Mint ISO signature and hash; install VirtualBox with explicit host authorization.
+2. Provision dedicated VM hardware with the Windows script; test unattended-install capability.
+3. Attempt Mint unattended install only if preflight permits; verify boot/Cinnamon/SSH. If unsupported, implement a reviewed Mint-specific ISO preseed path rather than requesting repeated user interaction.
+4. Configure dedicated guest account, SSH keys and trusted host fingerprint; snapshot clean VM.
+5. Set protected host plan/config and schedule the one-shot host supervisor; verify two independent observer paths for each acceptance scenario.
+6. Run automated real Cinnamon smoke, install/uninstall rollback, performance, graphics/keyboard and fault-injection tests. Export logs/screenshots and recover from failures.

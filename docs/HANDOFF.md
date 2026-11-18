@@ -57,3 +57,7 @@ ADR-003 records the Cinnamon-first evaluation path, a separate Labwc-backed cand
 ## 2026-11-18 — Dock window background
 
 `fix/classic-dock-window-background` follows draft PR #12. The dock window uses an opaque matching background without a compositor and an RGBA visual when compositing is available. Debian/Xvfb screenshots confirmed removal of the white corners. Cinnamon and composited appearance remain open.
+
+## 2026-11-18 — Configurable Classic dock
+
+`feat/classic-pinned-dock` is based on draft PR #13. Schema version 2 accepts version 1 settings, and the preview's Edit dock dialog saves a validated pin list through a shared locked update. The dock scrolls horizontally within the work area and keeps Apps accessible. Debian GTK3/Xvfb tests cover the editor and 320px display. Cinnamon testing, backup and explicit pin reordering remain open. Draft PR #2 now targets the foundation branch, reducing its duplicated diff.

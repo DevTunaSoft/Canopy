@@ -11,3 +11,5 @@ Keep Cinnamon as a selectable fallback. Version settings and migrate transaction
 The Classic preview uses `canopy/applications.py` for desktop-entry filtering, sorting and search. The module takes app descriptors supplied by the platform and has no GTK dependency. Classic owns its GTK controls and invokes the existing Gio activation path.
 
 The preview reads its path through shared `user_settings_path()` and supports an explicit temporary built-in defaults run. This recovery path never writes the stored file. Settings migration and backup stay in the shared core design.
+
+Classic dock selection is a layout-specific field in the shared versioned preferences model. The presentation resolves null pins to Classic defaults and renders installed desktop entries through Gio. A horizontal scroller bounds the dock to the primary work area while the Apps entry stays available. The GTK editor asks the shared settings API to update only the pins under a file lock.

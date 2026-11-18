@@ -22,3 +22,5 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y python3-gi gir1.2-gtk-3.0 xvfb xauth
       - name: Run with a virtual X11 display
         run: xvfb-run -a /usr/bin/python3 -m unittest discover -s tests -v
+      - name: Check dock on a narrow X11 display
+        run: PYTHONPATH=.:tests xvfb-run -a -s '-screen 0 320x240x24' /usr/bin/python3 -m unittest test_classic_gtk.ClassicGtkSmokeTests.test_many_pins_stay_within_monitor_width -v

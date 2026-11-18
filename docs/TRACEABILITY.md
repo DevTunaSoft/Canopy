@@ -45,3 +45,7 @@ R03/R07/R08: `save()` synchronizes the temporary file and its parent directory a
 ## Launcher keyboard evidence (2026-11-18)
 
 R02/R09: `test_search_enter_and_escape` checks Enter with and without a result and Escape from the search field under GTK3/Xvfb. Cinnamon keyboard and screen-reader checks remain open.
+
+## Classic dock configuration evidence (2026-11-18)
+
+R02/R03/R07/R08/R09: `canopy/preferences.py` accepts version 1 settings and stores validated version 2 Classic pins with locked updates that preserve concurrent non-pin edits. `canopy/classic_gtk.py` provides an Edit dock dialog and bounded pinned-app scroller with an Apps entry. Tests cover migration, conflict rejection, corrupt settings, menu persistence and a 320px Xvfb monitor. Linux Mint and real multi-process behavior remain open.

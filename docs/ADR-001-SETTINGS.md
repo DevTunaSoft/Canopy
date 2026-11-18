@@ -17,3 +17,9 @@ The shared `user_settings_path()` uses an absolute `XDG_CONFIG_HOME` or the user
 ## 2026-11-18 directory synchronization follow-up
 
 The settings writer now synchronizes the containing directory after replacing the file. This makes the replacement durable on filesystems that support directory synchronization. A failure at that step is reported to the caller because durability is uncertain, although the new file may already be visible. Newly created parent directory entries, backup, migration and simultaneous writer coordination still need separate design and verification.
+
+## 2026-11-18 Classic dock settings follow-up
+
+Schema version 2 adds `classic_pins`. Version 1 files load with default Classic pins and are written as version 2 on the next explicit save. A null pin list retains the built-in Classic defaults, while an empty list intentionally leaves only the Apps entry. Pin IDs must be distinct desktop entry IDs, with a 64-entry limit. Future Modern presentation can use the same settings service with its own presentation fields.
+
+`save()` and `update_classic_pins()` use a user-level advisory lock on a sibling `.lock` file. The editor updates pins under that lock after reloading the current file, preserving changes to layout, profile and overrides made by another Canopy process. It rejects a stale pin selection instead of silently replacing another editor's work. Invalid whole-object saves validate before creating the settings directory. A save failure may occur after atomic replacement, so the preview reloads the visible file before reporting the error. Backup and full migration beyond version 2 remain open.

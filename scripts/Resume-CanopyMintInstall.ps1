@@ -43,7 +43,7 @@ try {
   [IO.File]::WriteAllText($secretFile, $password, (New-Object Text.UTF8Encoding($false)))
   $acl = Get-Acl -LiteralPath $secretFile
   $acl.SetAccessRuleProtection($true, $false)
-  $rule = New-Object Security.AccessControl.FileSystemAccessRule(
+  $rule = [Security.AccessControl.FileSystemAccessRule]::new(
     [Security.Principal.WindowsIdentity]::GetCurrent().User,
     [Security.AccessControl.FileSystemRights]::FullControl,
     [Security.AccessControl.AccessControlType]::Allow)

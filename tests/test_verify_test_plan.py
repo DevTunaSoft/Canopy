@@ -41,9 +41,9 @@ class ApprovedCommitTests(unittest.TestCase):
 
     def test_reject_dirty_and_untracked_checkout(self):
         with tempfile.TemporaryDirectory() as d:
-            for modified in (" M scripts/code.py\\n", "?? unexpected.py\\n"):
+            for modified in (" M scripts/code.py\n", "?? unexpected.py\n"):
                 def executor(argv, **_kw):
-                    output = SHA + "\\n" if "rev-parse" in argv else modified
+                    output = SHA + "\n" if "rev-parse" in argv else modified
                     return subprocess.CompletedProcess(argv, 0, output, "")
                 with self.subTest(modified=modified), self.assertRaisesRegex(ValueError, "uncommitted"):
                     verify_checkout(PLAN, d, executor=executor)
@@ -52,7 +52,7 @@ class ApprovedCommitTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             def executor(argv, **_kw):
                 if "rev-parse" in argv:
-                    return subprocess.CompletedProcess(argv, 0, SHA + "\\n", "")
+                    return subprocess.CompletedProcess(argv, 0, SHA + "\n", "")
                 return subprocess.CompletedProcess(argv, 1, "", "broken")
             with self.assertRaisesRegex(ValueError, "clean checkout"):
                 verify_checkout(PLAN, d, executor=executor)

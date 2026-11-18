@@ -32,3 +32,6 @@ The Classic preview now stores user-selected dock pins in shared version 2 setti
 ## 2026-11-18 — Mint test-lab controller increment
 
 Added a non-destructive, unprivileged Python runner for approved Linux Mint VM checkouts, with unit, syntax and Xvfb GTK checks, timeouts and machine-readable JSON evidence. It does not provision a VM, perform live Cinnamon testing or install a self-hosted runner. See `docs/MINT-TEST-LAB.md`. VM setup, screen capture, real Mint integration and snapshot restoration remain pending.
+
+## 2026-11-18 — Visual automation preparation
+Add isolated GTK preview window screenshots and machine-readable visual metadata in GitHub-hosted Xvfb, without accessing a personal desktop. Verify artifacts and CI. Next: real Mint VM provisioning (separate authorization), live Cinnamon automated interactions, screenshot comparison with validated baselines, crash recovery, resource metrics and safe VM reset.

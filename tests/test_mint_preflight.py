@@ -4,7 +4,7 @@ from scripts.mint_preflight import detect, parse_os_release
 
 
 MINT = 'NAME="Linux Mint"\nID=linuxmint\nVERSION_ID="22.2"\n'
-ENV = {"XDG_CURRENT_DESKTOP": "X-Cinnamon:Cinnamon", "DISPLAY": ":0"}
+ENV = {"XDG_CURRENT_DESKTOP": "X-Cinnamon:Cinnamon", "DISPLAY": ":0", "XDG_SESSION_TYPE": "x11"}
 
 
 class MintPreflightTests(unittest.TestCase):
@@ -17,7 +17,7 @@ class MintPreflightTests(unittest.TestCase):
     def test_mint_session_ready(self):
         result = self.probe()
         self.assertEqual(result["status"], "PASS")
-        self.assertEqual(len(result["checks"]), 8)
+        self.assertEqual(len(result["checks"]), 9)
         self.assertEqual(result["distro"]["version"], "22.2")
 
     def test_unsupported_distro_is_blocked(self):
@@ -36,6 +36,12 @@ class MintPreflightTests(unittest.TestCase):
         failures = [x["name"] for x in result["checks"] if x["status"] != "PASS"]
         self.assertIn("gtk3-python", failures)
         self.assertIn("xvfb-run", failures)
+
+    def test_wayland_with_xwayland_display_is_blocked(self):
+        result = self.probe(env={**ENV, "XDG_SESSION_TYPE": "wayland"})
+        failures = [x["name"] for x in result["checks"] if x["status"] != "PASS"]
+        self.assertIn("x11-session", failures)
+        self.assertNotIn("x11-display", failures)
 
     def test_refuse_root(self):
         self.assertEqual(self.probe(root=True)["status"], "BLOCKED")

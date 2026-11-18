@@ -9,7 +9,7 @@ from pathlib import Path
 import re
 import sys
 
-KNOWN = frozenset({"unit", "syntax", "gtk"})
+KNOWN = frozenset({"unit", "syntax", "gtk", "cinnamon"})
 TEST_COUNT = re.compile(r"\bRan (\d+) tests? in\b")
 SKIPS = re.compile(r"\bskipped\s*=\s*(\d+)\b")
 UNSAFE = re.compile(r"\bFAILED\s*\(|\bERROR\s*:")
@@ -67,6 +67,22 @@ def audit(report, required=("unit", "syntax", "gtk")):
         output = item.get("output")
         if not isinstance(output, str) or len(output) > 80_000:
             raise ValueError(f"{name}: absent or oversized unittest output")
+        if name == "cinnamon":
+            try:
+                evidence = json.loads(output)
+            except (ValueError, TypeError) as error:
+                raise ValueError("Cinnamon: missing machine-readable GUI evidence") from error
+            if (not isinstance(evidence, dict) or evidence.get("status") != "PASS"
+                    or evidence.get("desktop") != "Cinnamon X11"
+                    or evidence.get("window_count") != 2
+                    or evidence.get("wmctrl_windows") != 2
+                    or type(evidence.get("xdotool_windows")) is not int
+                    or evidence["xdotool_windows"] < 2
+                    or type(evidence.get("pid")) is not int or evidence["pid"] <= 0
+                    or type(evidence.get("polls")) is not int or evidence["polls"] < 1):
+                raise ValueError("Cinnamon: inconsistent independent guest window evidence")
+            counts[name] = None
+            continue
         match = TEST_COUNT.search(output)
         if not match or int(match.group(1)) < 1:
             raise ValueError(f"{name}: missing nonzero unittest count")

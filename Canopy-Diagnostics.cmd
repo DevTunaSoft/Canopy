@@ -6,5 +6,5 @@ if errorlevel 1 (
   pause
   exit /b 1
 )
-echo Upload the Canopy-Diagnostics ZIP from your Desktop.
+echo Upload the Canopy-Diagnostics ZIP from %LOCALAPPDATA%\CanopyTestLab\diagnostics.
 pause

@@ -35,3 +35,7 @@ Added a non-destructive, unprivileged Python runner for approved Linux Mint VM c
 
 ## 2026-11-18 — Visual automation preparation
 Add isolated GTK preview window screenshots and machine-readable visual metadata in GitHub-hosted Xvfb, without accessing a personal desktop. Verify artifacts and CI. Next: real Mint VM provisioning (separate authorization), live Cinnamon automated interactions, screenshot comparison with validated baselines, crash recovery, resource metrics and safe VM reset.
+
+## Dedicated Windows-host VM supervision prototype — 2026-11-18
+
+A host-side restricted controller is now available in `scripts/vbox_lab_controller.py`. It checks the exact `Canopy-Test-Mint` VM identity and state, supports headless start, and requires local explicit reset authorization while powered off for the exact `Canopy-Clean` snapshot. This is NOT a scheduler, unattended test transport, VM provisioning, direct desktop access, or independently validated boot-health observer. The VM and snapshot are NOT CREATED. See `docs/checkpoints/VIRTUALBOX-HOST-CONTROLLER.md`.

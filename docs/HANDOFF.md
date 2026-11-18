@@ -53,3 +53,7 @@ ADR-003 records the Cinnamon-first evaluation path, a separate Labwc-backed cand
 ## 2026-11-18 — Launcher keyboard completion
 
 `feat/classic-launcher-keyboard` follows draft PR #11. Search supports Enter to launch the first match, Escape to close, and Down to move into results. Debian GTK3/Xvfb passed 20 tests. Cinnamon keyboard and screen-reader acceptance remains open.
+
+## 2026-11-18 — Dock window background
+
+`fix/classic-dock-window-background` follows draft PR #12. The dock window uses an opaque matching background without a compositor and an RGBA visual when compositing is available. Debian/Xvfb screenshots confirmed removal of the white corners. Cinnamon and composited appearance remain open.

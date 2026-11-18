@@ -1,0 +1,14 @@
+name: Canopy Windows test-lab launcher self-test
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  launcher:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify launcher consent gates without VM changes
+        shell: pwsh
+        run: ./scripts/Start-CanopyTestLab.ps1 -SelfTest

@@ -11,3 +11,6 @@ Every milestone needs acceptance tests, regression coverage, resource evidence, 
 
 ## Current progress
 Shared preferences and cosmetic policy prototype implemented on `feat/classic-preferences-on-foundation`. Eight local unit tests passed. No desktop session or Linux Mint hardware verification yet. Next: compositor/toolkit ADR and Cinnamon-safe session prototype.
+
+## Next UI checkpoint
+Experimental GTK3 Classic top-bar/dock preview exists, but not a full session and not visually validated on Mint. Follow with Linux Mint smoke testing, compositor/session ADR, accessibility and final original Tux icon. Keep Modern on the shared core, not a second desktop service stack.

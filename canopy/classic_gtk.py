@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 
 from canopy.applications import matches_app, visible_apps
-from canopy.classic_model import DEFAULT_DOCK, clock_label
+from canopy.classic_model import DEFAULT_DOCK, clock_label, dock_position
 from canopy.preferences import load
 
 
@@ -99,7 +99,7 @@ def run():
     Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), css,
                                                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
-    def window_at(y, width, css_class):
+    def create_window(css_class):
         window = Gtk.Window()
         window.set_title('Canopy Classic preview')
         window.set_decorated(False)
@@ -107,24 +107,18 @@ def run():
         window.set_keep_above(True)
         window.set_type_hint(Gdk.WindowTypeHint.DOCK)
         window.set_skip_taskbar_hint(True)
-        window.set_default_size(width, -1)
-        window.move(max(0, (screen_width - width) // 2), y)
         container = Gtk.Box(spacing=8)
         container.get_style_context().add_class(css_class)
         window.add(container)
         return window, container
 
-    screen = Gdk.Screen.get_default()
-    monitor = screen.get_primary_monitor()
-    if monitor < 0:
-        monitor = 0
-    rect = screen.get_monitor_geometry(monitor)
-    screen_width = rect.width
-    # Position relative to the primary monitor; avoid hardcoded monitor origin.
-    def set_position(window, x, y):
-        window.move(rect.x + x, rect.y + y)
+    display = Gdk.Display.get_default()
+    monitor = display.get_primary_monitor() or display.get_monitor(0)
+    workarea = monitor.get_workarea()
+    top, top_box = create_window('canopy-panel')
+    top.set_default_size(workarea.width, -1)
+    top.move(workarea.x, workarea.y)
 
-    top, top_box = window_at(0, rect.width, 'canopy-panel')
     def open_menu(button):
         menu = Gtk.Menu()
         for label, callback in (('About Canopy Classic', show_about), ('Quit preview', Gtk.main_quit)):
@@ -155,9 +149,9 @@ def run():
         clock.set_text(clock_label(datetime.now()))
         return True
     refresh_clock()
-    GLib.timeout_add_seconds(30, refresh_clock)
+    clock_source = GLib.timeout_add_seconds(30, refresh_clock)
 
-    dock, dock_box = window_at(rect.height - 88, 400, 'canopy-dock')
+    dock, dock_box = create_window('canopy-dock')
     def launch(app):
         try:
             app.launch([], None)  # Gio uses the desktop file; never interpolate shell commands.
@@ -175,8 +169,9 @@ def run():
         button.connect('clicked', lambda _button: launch(app))
         dock_box.pack_start(button, False, False, 0)
 
+    installed_apps = {app.get_id(): app for app in Gio.app_info_get_all()}
     for item in DEFAULT_DOCK:
-        app = Gio.DesktopAppInfo.new(item.desktop_id)
+        app = installed_apps.get(item.desktop_id)
         if app is not None:
             add_app_button(item.title, app)
 
@@ -186,13 +181,23 @@ def run():
     )
     dock_box.pack_start(apps_button, False, False, 0)
 
-    top.connect('destroy', Gtk.main_quit)
-    dock.connect('destroy', Gtk.main_quit)
+    dock_box.show_all()
+    _, natural_size = dock_box.get_preferred_size()
+    dock.move(*dock_position(
+        workarea.x, workarea.y, workarea.width, workarea.height,
+        natural_size.width, natural_size.height,
+    ))
     top.show_all()
-    dock.show_all()
-    set_position(top, 0, 0)
-    set_position(dock, max(0, (rect.width - 400) // 2), max(0, rect.height - 88))
-    Gtk.main()
+    dock.show()
+    windows = [(window, window.connect('destroy', Gtk.main_quit)) for window in (top, dock)]
+    try:
+        Gtk.main()
+    finally:
+        GLib.source_remove(clock_source)
+        for window, handler in windows:
+            if window.handler_is_connected(handler):
+                window.disconnect(handler)
+            window.destroy()
 
 
 if __name__ == '__main__':

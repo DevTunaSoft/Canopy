@@ -1,4 +1,5 @@
 """GTK launcher smoke test. Run with system Python on a graphical display."""
+import tempfile
 import unittest
 from unittest.mock import patch
 
@@ -14,19 +15,22 @@ class PrivilegeTests(unittest.TestCase):
                 run()
 
 
-class LauncherSmokeTests(unittest.TestCase):
-    def test_search_beyond_old_limit_and_activate_with_keyboard(self):
+class ClassicGtkSmokeTests(unittest.TestCase):
+    def setUp(self):
         try:
             import gi
 
             gi.require_version('Gtk', '3.0')
             gi.require_version('Gdk', '3.0')
-            from gi.repository import Gdk, Gtk
+            from gi.repository import Gdk, GLib, Gtk
         except (ImportError, ValueError) as error:
             self.skipTest(str(error))
         if not Gtk.init_check()[0]:
             self.skipTest('No graphical GTK display is available')
+        self.Gdk, self.GLib, self.Gtk = Gdk, GLib, Gtk
 
+    def test_search_beyond_old_limit_and_activate_with_keyboard(self):
+        Gtk, Gdk = self.Gtk, self.Gdk
         parent = Gtk.Window()
         self.addCleanup(parent.destroy)
         parent.show()
@@ -59,3 +63,32 @@ class LauncherSmokeTests(unittest.TestCase):
         visible[0].activate()
         self.assertEqual(launched, [target])
         self.assertFalse(dialog.get_visible())
+
+
+    def test_preview_places_compact_dock_without_default_apps(self):
+        from gi.repository import Gio
+        Gtk, Gdk, GLib = self.Gtk, self.Gdk, self.GLib
+        snapshots = []
+
+        def inspect_windows():
+            windows = [window for window in Gtk.Window.list_toplevels()
+                       if window.get_title() == 'Canopy Classic preview' and window.get_visible()]
+            snapshots.extend((window.get_size(), window.get_position()) for window in windows)
+            Gtk.main_quit()
+            return GLib.SOURCE_REMOVE
+
+        GLib.idle_add(inspect_windows)
+        with tempfile.TemporaryDirectory() as config:
+            with patch.dict('os.environ', {'XDG_CONFIG_HOME': config}), \
+                    patch.object(Gio, 'app_info_get_all', return_value=[]):
+                run()
+        display = Gdk.Display.get_default()
+        monitor = display.get_primary_monitor() or display.get_monitor(0)
+        area = monitor.get_workarea()
+        self.assertFalse(any(window.get_title() == 'Canopy Classic preview'
+                             for window in Gtk.Window.list_toplevels()))
+        self.assertEqual(len(snapshots), 2)
+        (dock_width, dock_height), (x, y) = min(snapshots)
+        self.assertLess(dock_width, area.width)
+        self.assertLess(abs(x + dock_width / 2 - (area.x + area.width / 2)), 2)
+        self.assertEqual(y + dock_height, area.y + area.height - 12)

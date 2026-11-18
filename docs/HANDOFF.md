@@ -29,3 +29,7 @@ Canonical full audit: `CODEX_START_HERE.md`. Master 16-rule mandate: `docs/MASTE
 ## 2026-11-18 — Classic application search
 
 `feat/classic-app-search` is based on the dossier head `24b996f`. Classic now searches installed visible desktop entries by name and ID, including entries beyond the former 40-app cap. Discovery and search live in the shared application module. Debian 13 GTK3/Xvfb passed all 14 tests. See the development log and preview guide for scope and test evidence. Continue with Cinnamon smoke testing and responsive dock placement, followed by the session architecture ADR. Preserve the stacked PRs.
+
+## 2026-11-18 — Dock startup and placement
+
+`feat/classic-dock-placement` builds on draft PR #5. GTK/Xvfb tests now cover preview startup without any default apps and compact dock coordinates. The preview uses the primary work area at startup and cleans up both windows and the clock timer on exit. Next, verify work-area behavior on Cinnamon/X11 and examine Wayland placement before deciding on a longer-term integration strategy.

@@ -21,3 +21,14 @@ DEFAULT_DOCK = (
 def clock_label(now: datetime) -> str:
     """Local, short clock suitable for a compact top bar."""
     return now.strftime('%a %H:%M')
+
+
+def dock_position(
+    area_x: int, area_y: int, area_width: int, area_height: int,
+    dock_width: int, dock_height: int, gap: int = 12,
+) -> tuple[int, int]:
+    """Center the dock at the bottom of the monitor's usable work area."""
+    return (
+        area_x + max(0, (area_width - dock_width) // 2),
+        area_y + max(0, area_height - dock_height - gap),
+    )

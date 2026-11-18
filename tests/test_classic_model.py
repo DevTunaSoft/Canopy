@@ -1,7 +1,7 @@
 import unittest
 from datetime import datetime
 from canopy.applications import matches_app, visible_apps
-from canopy.classic_model import DEFAULT_DOCK, clock_label
+from canopy.classic_model import DEFAULT_DOCK, clock_label, dock_position
 
 class FakeApp:
     def __init__(self, id_, name, show=True):
@@ -21,6 +21,10 @@ class ClassicTests(unittest.TestCase):
 
     def test_dock_ids_are_unique(self):
         self.assertEqual(len(DEFAULT_DOCK), len(set(item.desktop_id for item in DEFAULT_DOCK)))
+
+    def test_dock_uses_workarea_origin_and_actual_size(self):
+        self.assertEqual(dock_position(-1280, 40, 1280, 740, 240, 52), (-760, 716))
+        self.assertEqual(dock_position(50, 30, 100, 40, 120, 60), (50, 30))
 
     def test_search_matches_casefolded_terms_across_name_and_id(self):
         app = FakeApp('org.example.Reader.desktop', 'Straße Reader')

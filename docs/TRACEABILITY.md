@@ -25,3 +25,7 @@ R02: Partially IMPLEMENTED — experimental GTK3 top bar, menu, dock, app list i
 ## Searchable launcher evidence (2026-11-18)
 
 R02/R09: `canopy/applications.py` and `canopy/classic_gtk.py` supply filterable app discovery, named controls and keyboard selection. `tests/test_classic_gtk.py` verifies focus and activation with GTK3 under Xvfb. R06: preview startup rejects effective UID 0. R08: the Python workflow now includes a GTK/Xvfb job. Screen-reader, Cinnamon and hardware acceptance remain open.
+
+## Dock startup evidence (2026-11-18)
+
+R02/R07/R08: `test_preview_places_compact_dock_without_default_apps` launches the actual preview using GTK3 and verifies geometry and cleanup with an empty app catalog. The model test checks offsets and undersized work areas. Cinnamon, dynamic monitor changes and Wayland placement still require verification.

@@ -69,8 +69,28 @@ $snapshotInfo = & $VBoxManage snapshot 'Canopy-Test-Mint' list '--machinereadabl
 if ($LASTEXITCODE -eq 0 -and (($snapshotInfo | Out-String) -match '(?m)^SnapshotName')) {
   throw 'Existing VM snapshots detected; refusing to reconfigure an established test VM'
 }
-$output = & $VBoxManage @argsToRun 2>&1
-$code = $LASTEXITCODE
+# VirtualBox needs the DVD slot to prepare its own unattended media.
+# The VM creator attaches the source ISO at SATA port 1; detach only that
+# exact verified ISO, and restore it if unattended setup fails.
+$dvdEntry = @($info | Where-Object { $_ -match '^"SATA-1-0"=' })
+if ($dvdEntry.Count -ne 1) { throw 'Expected exactly one SATA port 1 DVD attachment; refusing unsafe storage change' }
+$dvdValue = ($dvdEntry[0] -split '=',2)[1].Trim('"')
+if ([IO.Path]::GetFullPath($dvdValue) -ne [IO.Path]::GetFullPath($iso)) {
+  throw 'SATA port 1 does not contain the verified Mint ISO; refusing to detach'
+}
+& $VBoxManage storageattach 'Canopy-Test-Mint' '--storagectl=SATA' '--port=1' '--device=0' '--type=dvddrive' '--medium=none'
+if ($LASTEXITCODE -ne 0) { throw 'Could not release Mint DVD for unattended configuration' }
+try {
+  $output = & $VBoxManage @argsToRun 2>&1
+  $code = $LASTEXITCODE
+  if ($code -ne 0) {
+    & $VBoxManage storageattach 'Canopy-Test-Mint' '--storagectl=SATA' '--port=1' '--device=0' '--type=dvddrive' ('--medium=' + $iso)
+    if ($LASTEXITCODE -ne 0) { throw 'Unattended setup failed and original ISO restoration failed; inspect VM storage' }
+  }
+} catch {
+  & $VBoxManage storageattach 'Canopy-Test-Mint' '--storagectl=SATA' '--port=1' '--device=0' '--type=dvddrive' ('--medium=' + $iso)
+  throw
+}
 $output | ForEach-Object { Write-Output $_ }
 if ($code -ne 0) {
   $logDir = Join-Path $env:LOCALAPPDATA 'CanopyTestLab\diagnostics'

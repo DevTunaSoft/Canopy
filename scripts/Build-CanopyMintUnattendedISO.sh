@@ -13,6 +13,11 @@ here=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 mkdir -p "$tmp/boot/grub" "$tmp/preseed"
+# Ensure the source ISO has replayable boot metadata before modifying anything.
+xorriso -indev "$source_iso" -report_el_torito as_mkisofs >"$tmp/boot-options.txt" 2>"$tmp/boot-options-errors.txt"
+if ! grep -Eq -- "(^-b | -eltorito-boot | -e )" "$tmp/boot-options.txt"; then
+  echo "Cannot verify source El Torito boot metadata" >&2; exit 1
+fi
 # Read the source boot menu, preserving the ISO's native hybrid boot records.
 xorriso -osirrox on -indev "$source_iso" -extract /boot/grub/grub.cfg "$tmp/boot/grub/grub.cfg" >/dev/null
 python3 "$here/Generate-CanopyMintPreseed.py" "$tmp/preseed/canopy.seed" --disposable-vm
@@ -58,5 +63,11 @@ xorriso -osirrox on -indev "$output" -extract /boot/grub/grub.cfg "$tmp/check-gr
   -extract /preseed/canopy.seed "$tmp/check-seed" >/dev/null
 grep -q 'automatic-ubiquity' "$tmp/check-grub.cfg"
 grep -q 'partman/confirm' "$tmp/check-seed"
+# Verify the output still advertises boot images after remastering.
+xorriso -indev "$output" -report_el_torito plain >"$tmp/output-boot.txt" 2>&1
+if ! grep -qi "El Torito" "$tmp/output-boot.txt"; then
+  rm -f -- "$output"
+  echo "Remastered image lacks verifiable El Torito metadata; deleted unsafe output" >&2; exit 1
+fi
 echo "Created test-only ISO: $output"
 echo "WARNING: NOT verified to install Mint. Never boot on a physical computer."

@@ -35,3 +35,7 @@ Added a non-destructive, unprivileged Python runner for approved Linux Mint VM c
 
 ## 2026-11-18 — Visual automation preparation
 Add isolated GTK preview window screenshots and machine-readable visual metadata in GitHub-hosted Xvfb, without accessing a personal desktop. Verify artifacts and CI. Next: real Mint VM provisioning (separate authorization), live Cinnamon automated interactions, screenshot comparison with validated baselines, crash recovery, resource metrics and safe VM reset.
+
+## Priority acceptance gate: no false-green GTK tests (2026-11-18)
+
+The unattended Mint test runner requires a working GTK3/Xvfb display probe before reporting a graphical test PASS. This closes the skipped-tests false-positive risk. The priority remains a genuine Mint Cinnamon smoke run with controlled graphical interaction, not just more Ubuntu/Xvfb tests.

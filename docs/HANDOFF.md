@@ -68,3 +68,7 @@ Branch `feat/mint-testlab-runner` based on `feat/classic-pinned-dock` (PR #15), 
 
 ## 2026-11-18 — Isolated visual evidence automation
 Branch `feat/mint-testlab-visual-evidence` builds on PR #16 without duplicating Mint runner logic. New `scripts/capture_classic.py` captures precisely the two Canopy GTK preview windows under an isolated Xvfb display, with short-lived CI artifacts; `tests/test_capture_classic.py` verifies capture boundary, allowed test-display guard and invalid states. CI job includes an opt-in test-only screenshot capture, not a remote-control channel. Graphical Linux Mint Cinnamon, full session test, real VM provisioning, snapshot/reset and performance benchmarks remain NOT RUN. Consult `docs/MINT-TEST-LAB.md`, CI workflow and PR for actual evidence. Never merge main without authorization.
+
+## 2026-11-18 — GTK false-green regression checkpoint
+
+A test-lab audit found that the GTK smoke suite could pass with GUI tests skipped when GTK introspection or a display was unavailable. Branch `fix/testlab-gtk-false-green` adds an actual GTK3/Xvfb initialization probe before the runner marks GTK tests PASS, with regression tests and explicit BLOCKED on missing dependencies. Files: `scripts/mint_testlab.py`, `tests/test_mint_testlab.py`, `docs/MINT-TEST-LAB.md`. No GTK application functionality changed, Mint Cinnamon session still NOT RUN, and this branch must be integrated through its draft PR after CI. No unauthorized main merge.

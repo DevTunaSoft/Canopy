@@ -47,3 +47,7 @@ CANOPY_ISOLATED_DISPLAY=1 PYTHONPATH=. xvfb-run -a /usr/bin/python3 scripts/capt
 The existing GitHub-hosted GTK workflow now attempts this capture and uploads a short-lived three-day artifact, alongside running the existing smoke tests. The generated directory is gitignored. Before connecting to a future Mint VM, restrict the test worker to approved commits, provide an isolated display and verify captures contain no sensitive host content. GTK screenshots are **visual evidence**, not proof of correct interaction, accessibility, session recovery or responsiveness. Real Cinnamon desktop capture/interaction has **not** been implemented.
 
 GitHub workflow capture must pass before considering this increment verified. Check the job logs and verify the artifact actually contains two readable PNG images. Graphical acceptance on Mint remains NOT RUN.
+
+## 2026-11-18 — Fail-closed graphical readiness
+
+The GTK check now launches an explicit `xvfb-run` graphical initialization probe with `/usr/bin/python3` and GTK3 introspection **before** running the test suite. Previously, a unittest suite with skipped graphical tests could still exit zero and be marked PASS. Missing `xauth`, system Python/GTK, Xvfb, or a nonfunctional GTK virtual display now returns **BLOCKED** instead. The readiness probe runs with a separate 15-second maximum timeout, and tests cover both blocked and successful paths. This doesn't establish that tests perform real Cinnamon integration: they still use an isolated Xvfb display. Do not treat a PASS as Mint visual acceptance.

@@ -68,3 +68,7 @@ Branch `feat/mint-testlab-runner` based on `feat/classic-pinned-dock` (PR #15), 
 
 ## 2026-11-18 — Isolated visual evidence automation
 Branch `feat/mint-testlab-visual-evidence` builds on PR #16 without duplicating Mint runner logic. New `scripts/capture_classic.py` captures precisely the two Canopy GTK preview windows under an isolated Xvfb display, with short-lived CI artifacts; `tests/test_capture_classic.py` verifies capture boundary, allowed test-display guard and invalid states. CI job includes an opt-in test-only screenshot capture, not a remote-control channel. Graphical Linux Mint Cinnamon, full session test, real VM provisioning, snapshot/reset and performance benchmarks remain NOT RUN. Consult `docs/MINT-TEST-LAB.md`, CI workflow and PR for actual evidence. Never merge main without authorization.
+
+## 2026-11-18 — Rigorous multi-path Mint acceptance policy
+
+Independent branch `feat/mint-acceptance-policy` from `feat/mint-testlab-visual-evidence`. Adds machine-readable `qa/mint-acceptance-v1.json`, human-readable `docs/ACCEPTANCE-STANDARD.md`, and contract regression `tests/test_mint_acceptance_policy.py`. Twelve mandatory Mint desktop test areas plus two physical-hardware follow-ups; each requires two independent observation paths and negative-control evidence. No VM has run this matrix and no final acceptance PASS is asserted. Do not merge into main without explicit approval.

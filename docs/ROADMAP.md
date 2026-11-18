@@ -35,3 +35,7 @@ Added a non-destructive, unprivileged Python runner for approved Linux Mint VM c
 
 ## 2026-11-18 — Visual automation preparation
 Add isolated GTK preview window screenshots and machine-readable visual metadata in GitHub-hosted Xvfb, without accessing a personal desktop. Verify artifacts and CI. Next: real Mint VM provisioning (separate authorization), live Cinnamon automated interactions, screenshot comparison with validated baselines, crash recovery, resource metrics and safe VM reset.
+
+## Mandatory Mint acceptance contract — 2026-11-18
+
+The release gate is now explicitly defined in `qa/mint-acceptance-v1.json` and `docs/ACCEPTANCE-STANDARD.md`: 12 mandatory categories and two physical-hardware follow-up categories. All mandatory categories require genuinely independent same-run observations, expected failure detection, fresh hashes, exact approved commit, host-side VM evidence, snapshot recovery, and fail-closed reporting. A GitHub/Ubuntu/Xvfb green check **cannot certify a Mint desktop**. The contract is an engineering requirement with synthetic regression tests; target Mint execution and independent trusted collectors remain NOT RUN. Future autonomous agent must not weaken acceptance gates to make checks pass.

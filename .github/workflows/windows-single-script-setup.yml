@@ -12,7 +12,7 @@ jobs:
       - name: Parse every PowerShell setup entry point
         shell: pwsh
         run: |
-          $paths = @('Canopy-Setup.ps1', 'scripts/Start-CanopyTestLab.ps1', 'scripts/Resume-CanopyMintInstall.ps1')
+          $paths = @('Canopy-Setup.ps1', 'scripts/Start-CanopyTestLab.ps1', 'scripts/Resume-CanopyMintInstall.ps1', 'Canopy-Diagnostics.ps1')
           foreach ($path in $paths) {
             $tokens = $null
             $errors = $null
@@ -25,3 +25,18 @@ jobs:
       - name: Exercise resume safety gate without host changes
         shell: pwsh
         run: ./scripts/Resume-CanopyMintInstall.ps1 -IsoPath 'C:\mint.iso' -IsoSha256 ('a' * 64) -SelfTest
+
+      - name: Exercise one-click diagnostic collector without VM mutation
+        shell: pwsh
+        run: |
+          ./Canopy-Diagnostics.ps1
+          $files = @(Get-ChildItem (Join-Path $env:USERPROFILE 'Desktop') -Filter 'Canopy-Diagnostics-*.zip')
+          if ($files.Count -eq 0) { throw 'Diagnostic ZIP missing' }
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zip = [IO.Compression.ZipFile]::OpenRead($files[-1].FullName)
+          try {
+            $names = @($zip.Entries | ForEach-Object FullName)
+            foreach ($name in @('host.txt','virtualbox.txt','repository.txt','iso.txt','README.txt')) {
+              if ($names -notcontains $name) { throw "Missing diagnostic entry: $name" }
+            }
+          } finally { $zip.Dispose() }

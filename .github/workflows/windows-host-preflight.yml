@@ -1,0 +1,14 @@
+name: Windows test-lab preflight self-test
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  windows-host-check:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate PowerShell preflight logic without host modification
+        shell: pwsh
+        run: ./scripts/Test-CanopyHost.ps1 -SelfTest

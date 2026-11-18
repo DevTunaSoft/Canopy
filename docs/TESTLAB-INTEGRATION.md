@@ -57,3 +57,11 @@ This second integration stage adds **three independently tested tracks**: PR #39
 **Critical limitation:** These pieces prepare and create dedicated VM hardware but do **not** automatically install Linux Mint, configure authenticated SSH host-key trust, log into Cinnamon, or run unattended full acceptance. The Mint-specific unattended installer must be validated against a real official ISO; VirtualBox's default unattended installer should not be assumed to work on Mint. Real end-to-end VirtualBox/Mint: NOT RUN. The Windows host should remain isolated (localhost-only NAT port), with no shared folders or clipboard and no personal secrets in guest.
 
 Before final one-click release, validate official ISO signatures, create a noninteractive OS installer, provision the dedicated user and keys without leaking private material, set first-boot snapshot, schedule the authorized host controller, and prove complete guest reboot/recovery and independent screenshot test cycles. Do not treat passing GitHub CI as completed deployment.
+
+## VM commissioning preflight (2026-11-18)
+
+Sibling branches #43 and #44 are consolidated here: the newly connected worker can be tested against **actual** Cinnamon X11 with independently enumerated window visibility (`scripts/mint_live_cinnamon_smoke.py`), while the Windows host can non-destructively probe whether its VirtualBox version supports unattended installation of a selected ISO (`scripts/probe_vbox_unattended.py`).
+
+**Do not claim an unattended Mint installer exists yet.** The VirtualBox probe uses `--dry-run` only and provides no proof of a successful Linux Mint Ubiquity installation. GTK/Xvfb CI is not a full Cinnamon session. A real Mint desktop login, verified image, trust bootstrap, and host-controlled snapshot still must be commissioned on the user's VM. If VirtualBox rejects this Mint ISO, pursue a signed-source, reviewed preseed image builder and first-boot verified setup; never silently fall back to an insecure image or an untrusted installation command. Actual guest/Windows hardware evidence: NOT RUN.
+
+Useful human-readable checkpoints are in `docs/checkpoints/MINT-VM-CREATION.md`, `docs/checkpoints/MINT-GUEST-SETUP.md`, `docs/checkpoints/HOST-SSH-CYCLE.md`, `docs/checkpoints/MINT-UNATTENDED-PROBE.md`, `docs/checkpoints/MINT-LIVE-CINNAMON.md`.

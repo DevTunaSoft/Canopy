@@ -35,3 +35,7 @@ Added a non-destructive, unprivileged Python runner for approved Linux Mint VM c
 
 ## 2026-11-18 — Visual automation preparation
 Add isolated GTK preview window screenshots and machine-readable visual metadata in GitHub-hosted Xvfb, without accessing a personal desktop. Verify artifacts and CI. Next: real Mint VM provisioning (separate authorization), live Cinnamon automated interactions, screenshot comparison with validated baselines, crash recovery, resource metrics and safe VM reset.
+
+## 2026-11-18 — PR integration is a prerequisite to release
+
+Audit the growing stacked draft PR graph before bringing any experimental features into a release branch. `scripts/pr_stack_audit.py` now inventories ancestor chains, multiple independent roots, unknown bases and cycles **without merging**. Actual integration requires reviewing code ancestry, overlapping diffs, license compatibility and green CI per SHA; no merges into `main` without authorization. Do not let parallel prototype branches substitute for an installable, Mint-verified Canopy Classic desktop.

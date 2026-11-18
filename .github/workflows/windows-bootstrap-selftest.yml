@@ -1,0 +1,14 @@
+name: Canopy Windows bootstrap self-test
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  windows-bootstrap:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify non-mutating bootstrap plan
+        shell: pwsh
+        run: ./scripts/Install-Canopy-TestLab.ps1 -SelfTest

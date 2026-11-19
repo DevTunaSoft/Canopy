@@ -26,6 +26,22 @@ jobs:
         run: cmake -S prototype/classic -B build/classic -G Ninja -DCMAKE_BUILD_TYPE=Release
       - name: Compile
         run: cmake --build build/classic --parallel 2
+      - name: Autonomous UI screenshot test
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          mkdir -p test-artifacts
+          timeout 30s xvfb-run -a ./build/classic/canopy-classic-spike --self-test-screenshot test-artifacts/classic.png
+          python3 -c "from pathlib import Path; p=Path('test-artifacts/classic.png'); assert p.is_file() and p.stat().st_size > 1000, 'Missing or empty UI screenshot'"
+      - name: Upload UI test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: canopy-classic-ui-evidence
+          path: test-artifacts/
+          if-no-files-found: warn
+          retention-days: 7
       - name: Headless QML smoke test
         env:
           QT_QUICK_BACKEND: software

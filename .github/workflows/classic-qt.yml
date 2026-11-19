@@ -39,6 +39,12 @@ jobs:
           python3 tools/check_screenshot.py test-artifacts/classic-standard.png 1200 750
           timeout 30s xvfb-run -a ./build/classic/canopy-classic-spike --self-test-size 760x500 --self-test-screenshot test-artifacts/classic-compact.png
           python3 tools/check_screenshot.py test-artifacts/classic-compact.png 760 500
+      - name: Capture informational CPU and PSS baseline
+        timeout-minutes: 2
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: xvfb-run -a python3 tools/measure_qt.py build/classic/canopy-classic-spike test-artifacts/qt-resource-baseline.json --seconds 5
       - name: Upload UI test evidence
         if: always()
         uses: actions/upload-artifact@v4

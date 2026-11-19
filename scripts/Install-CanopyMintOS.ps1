@@ -1,0 +1,102 @@
+#Requires -Version 5.1
+<#
+.SYNOPSIS
+Opt-in VirtualBox unattended Mint installation attempt on dedicated VM only.
+Dry-run by default. VirtualBox/Mint compatibility must be verified on hardware.
+#>
+[CmdletBinding()]
+param(
+  [Parameter(Mandatory=$true)][string]$IsoPath,
+  [Parameter(Mandatory=$true)][string]$IsoSha256,
+  [Parameter(Mandatory=$true)][string]$PasswordFile,
+  [string]$VBoxManage = '',
+  [string]$AuxiliaryBasePath = '',
+  [switch]$Install,
+  [switch]$SelfTest
+)
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+function Get-CanopyUnattendedArgs {
+  param([string]$Iso, [string]$Secret)
+  return @('unattended','install','Canopy-Test-Mint',
+           ('--iso=' + $Iso),'--user=canopy-test',
+           ('--user-password-file=' + $Secret),
+           '--no-install-additions')
+}
+if ($SelfTest) {
+  $argsToCheck = @(Get-CanopyUnattendedArgs 'C:\mint.iso' 'C:\private-password.txt')
+  if ($argsToCheck.Count -ne 7 -or $argsToCheck[2] -ne 'Canopy-Test-Mint' -or
+      $argsToCheck[4] -ne '--user=canopy-test' -or
+      $argsToCheck[5] -ne '--user-password-file=C:\private-password.txt') {
+    throw 'Unattended argument contract failed'
+  }
+  Write-Output 'PASS: dedicated unattended install argument contract'
+  exit 0
+}
+if ($IsoSha256 -notmatch '^[0-9a-fA-F]{64}$') { throw 'Expected independently authenticated SHA256' }
+$iso = (Resolve-Path -LiteralPath $IsoPath -ErrorAction Stop).ProviderPath
+if (-not $iso.EndsWith('.iso',[StringComparison]::OrdinalIgnoreCase)) { throw 'Expected ISO file' }
+if ((Get-FileHash -LiteralPath $iso -Algorithm SHA256).Hash -ne $IsoSha256.ToUpperInvariant()) {
+  throw 'ISO checksum mismatch'
+}
+$secret = (Resolve-Path -LiteralPath $PasswordFile -ErrorAction Stop).ProviderPath
+if ((Get-Item -LiteralPath $secret).Length -lt 1 -or
+    (Get-Item -LiteralPath $secret).Length -gt 128) {
+  throw 'Password file must contain 1–128 bytes'
+}
+if (-not $VBoxManage) { $VBoxManage = Join-Path $env:ProgramFiles 'Oracle\VirtualBox\VBoxManage.exe' }
+if (-not (Test-Path -LiteralPath $VBoxManage -PathType Leaf)) { throw 'VirtualBox is not installed' }
+$info = & $VBoxManage showvminfo 'Canopy-Test-Mint' '--machinereadable'
+if ($LASTEXITCODE -ne 0) { throw 'Dedicated VM not found' }
+if (($info | Out-String) -notmatch '(?m)^VMState="poweroff"\s*$') {
+  throw 'Dedicated VM must be powered off'
+}
+$argsToRun = @(Get-CanopyUnattendedArgs $iso $secret)
+if ($AuxiliaryBasePath) {
+  $parent = Split-Path -Parent $AuxiliaryBasePath
+  if (-not (Test-Path -LiteralPath $parent -PathType Container)) { throw 'Auxiliary media parent folder is missing' }
+  $argsToRun += ('--auxiliary-base-path=' + $AuxiliaryBasePath)
+}
+# Always probe without modifying guest first. This is NOT proof Mint can boot.
+& $VBoxManage @($argsToRun + @('--dry-run')) | Out-Null
+if ($LASTEXITCODE -ne 0) { throw 'VirtualBox rejected unattended dry-run for this ISO' }
+if (-not $Install) {
+  Write-Output 'DRY RUN passed. Mint is NOT installed. Explicit -Install required.'
+  exit 0
+}
+# Reject a VM that already has snapshots: unattended setup must be first-time only.
+$snapshotInfo = & $VBoxManage snapshot 'Canopy-Test-Mint' list '--machinereadable' 2>&1
+if ($LASTEXITCODE -eq 0 -and (($snapshotInfo | Out-String) -match '(?m)^SnapshotName')) {
+  throw 'Existing VM snapshots detected; refusing to reconfigure an established test VM'
+}
+# VirtualBox needs the DVD slot to prepare its own unattended media.
+# The VM creator attaches the source ISO at SATA port 1; detach only that
+# exact verified ISO, and restore it if unattended setup fails.
+$dvdEntry = @($info | Where-Object { $_ -match '^"SATA-1-0"=' })
+if ($dvdEntry.Count -ne 1) { throw 'Expected exactly one SATA port 1 DVD attachment; refusing unsafe storage change' }
+$dvdValue = ($dvdEntry[0] -split '=',2)[1].Trim('"')
+if ([IO.Path]::GetFullPath($dvdValue) -ne [IO.Path]::GetFullPath($iso)) {
+  throw 'SATA port 1 does not contain the verified Mint ISO; refusing to detach'
+}
+& $VBoxManage storageattach 'Canopy-Test-Mint' '--storagectl=SATA' '--port=1' '--device=0' '--type=dvddrive' '--medium=none'
+if ($LASTEXITCODE -ne 0) { throw 'Could not release Mint DVD for unattended configuration' }
+try {
+  $output = & $VBoxManage @argsToRun 2>&1
+  $code = $LASTEXITCODE
+  if ($code -ne 0) {
+    & $VBoxManage storageattach 'Canopy-Test-Mint' '--storagectl=SATA' '--port=1' '--device=0' '--type=dvddrive' ('--medium=' + $iso)
+    if ($LASTEXITCODE -ne 0) { throw 'Unattended setup failed and original ISO restoration failed; inspect VM storage' }
+  }
+} catch {
+  & $VBoxManage storageattach 'Canopy-Test-Mint' '--storagectl=SATA' '--port=1' '--device=0' '--type=dvddrive' ('--medium=' + $iso)
+  throw
+}
+$output | ForEach-Object { Write-Output $_ }
+if ($code -ne 0) {
+  $logDir = Join-Path $env:LOCALAPPDATA 'CanopyTestLab\diagnostics'
+  New-Item -ItemType Directory -Path $logDir -Force | Out-Null
+  $logFile = Join-Path $logDir ('unattended-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '.txt')
+  @('Canopy VirtualBox unattended configuration failure',('Exit code: ' + $code),('Auxiliary path: ' + $AuxiliaryBasePath),'VirtualBox output:',($output | Out-String)) | Set-Content -LiteralPath $logFile -Encoding UTF8
+  throw ('Unattended media construction failed; diagnostic log: ' + $logFile + '. Do not retry unchanged.')
+}
+Write-Output 'Unattended configuration accepted. Start the dedicated VM and verify actual Mint installation and boot.'

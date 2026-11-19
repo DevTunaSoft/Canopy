@@ -1,0 +1,14 @@
+name: Canopy Mint unattended installer argument self-test
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  mint-install-plan:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate dedicated VM installer arguments without creating a VM
+        shell: pwsh
+        run: ./scripts/Install-CanopyMintOS.ps1 -IsoPath ignored -IsoSha256 ignored -PasswordFile ignored -SelfTest

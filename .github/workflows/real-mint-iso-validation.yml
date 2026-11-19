@@ -1,0 +1,66 @@
+name: Canopy real Mint ISO remaster validation
+on:
+  workflow_dispatch:
+    inputs:
+      iso_url:
+        description: Direct HTTPS Linux Mint ISO URL
+        required: true
+        type: string
+      iso_sha256:
+        description: Independently verified official SHA256
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  validate-remaster:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate URL and checksum before download
+        env:
+          ISO_URL: ${{ inputs.iso_url }}
+          ISO_SHA256: ${{ inputs.iso_sha256 }}
+        run: |
+          python3 - <<'PY'
+          import os,re,urllib.parse
+          u=urllib.parse.urlsplit(os.environ["ISO_URL"])
+          if u.scheme!="https" or not u.hostname or u.username or u.password or u.fragment or not u.path.lower().endswith(".iso"):
+              raise SystemExit("BLOCKED: direct HTTPS .iso URL required")
+          if not re.fullmatch(r"[a-fA-F0-9]{64}",os.environ["ISO_SHA256"]):
+              raise SystemExit("BLOCKED: official SHA256 required")
+          PY
+      - name: Install ISO tooling
+        run: sudo apt-get update && sudo apt-get install -y xorriso openssl
+      - name: Download verified ISO
+        env:
+          ISO_URL: ${{ inputs.iso_url }}
+          ISO_SHA256: ${{ inputs.iso_sha256 }}
+        run: |
+          curl --fail --location --retry 2 --max-time 1500 --output /tmp/mint-source.iso "$ISO_URL"
+          echo "$ISO_SHA256  /tmp/mint-source.iso" | sha256sum --check --status
+      - name: Build test-only ISO
+        env:
+          ISO_SHA256: ${{ inputs.iso_sha256 }}
+        run: |
+          bash scripts/Build-CanopyMintUnattendedISO.sh /tmp/mint-source.iso "$ISO_SHA256" /tmp/canopy-prepared.iso
+      - name: Verify boot metadata and remastered content
+        run: |
+          test -s /tmp/canopy-prepared.iso
+          xorriso -indev /tmp/canopy-prepared.iso -report_el_torito plain > /tmp/boot-metadata.txt 2>&1
+          grep -qi 'El Torito' /tmp/boot-metadata.txt
+          xorriso -osirrox on -indev /tmp/canopy-prepared.iso -extract /preseed/canopy.seed /tmp/verify-seed
+          grep -q 'partman/confirm' /tmp/verify-seed
+          sha256sum /tmp/canopy-prepared.iso | tee /tmp/prepared-sha256.txt
+          echo 'Remaster validation PASS. Actual Mint installation/boot NOT tested.'
+      - name: Upload verification report only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: canopy-remaster-verification
+          path: |
+            /tmp/boot-metadata.txt
+            /tmp/prepared-sha256.txt
+          if-no-files-found: ignore
+          retention-days: 7

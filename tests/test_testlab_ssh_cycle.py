@@ -46,7 +46,7 @@ class SecureTransportTests(unittest.TestCase):
         calls=[]
         result=run_cycle(self.plan,RUN,self.key,self.hosts,self.out,runner=self.fake(checked=calls))
         self.assertEqual(result["status"],"PASS")
-        self.assertEqual(len(calls),4)
+        self.assertEqual(len(calls),5)
         self.assertTrue(any("run_approved_test_plan" in str(c) for c in calls))
         self.assertTrue(any("PYTHONDONTWRITEBYTECODE=1 python3 -B" in str(c) for c in calls))
 
@@ -70,6 +70,23 @@ class SecureTransportTests(unittest.TestCase):
             run_cycle(self.plan,RUN,self.key,self.hosts,self.out,runner=fake_wrong)
         with self.assertRaises(ValueError):
             run_cycle(self.plan,"old",self.key,self.hosts,self.out,runner=self.fake())
+
+    def test_refuse_existing_host_report(self):
+        self.out.write_text('old report')
+        with self.assertRaisesRegex(ValueError, "already exists"):
+            run_cycle(self.plan, RUN, self.key, self.hosts, self.out,
+                      runner=self.fake())
+
+    def test_refuse_existing_guest_report(self):
+        calls = []
+        def stale(argv, **kwargs):
+            calls.append(argv)
+            if argv[0] == "ssh" and "test ! -e" in argv[-1]:
+                return subprocess.CompletedProcess(argv, 1, "", "")
+            return subprocess.CompletedProcess(argv, 0, "", "")
+        with self.assertRaisesRegex(RuntimeError, "already exists"):
+            run_cycle(self.plan, RUN, self.key, self.hosts, self.out, runner=stale)
+        self.assertFalse(any(command[0] == "scp" for command in calls))
 
     def test_missing_report_is_not_success(self):
         with self.assertRaises(RuntimeError):

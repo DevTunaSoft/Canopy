@@ -72,20 +72,40 @@ $iso = if ($IsoPath) { $IsoPath } else { Join-Path $env:USERPROFILE 'Downloads\l
 $hashFile = Join-Path $PSScriptRoot 'mint-source.sha256'
 $expected = Resolve-ApprovedHash $IsoSha256 $hashFile
 Assert-Source $iso $expected
-if (-not (Get-Command wsl.exe -ErrorAction SilentlyContinue)) { throw 'BLOCKED: WSL missing; install an Ubuntu WSL distribution before retrying' }
-$distributions = @(& wsl.exe --list --quiet 2>$null)
-if ($LASTEXITCODE -ne 0 -or -not ($distributions | Where-Object { $_ -match '[a-zA-Z]' })) {
- throw 'BLOCKED: No configured WSL distribution. Run wsl --install -d Ubuntu and complete initial setup.'
+# Bootstrap WSL automatically when possible. A required Windows reboot is reported,
+# never forced, and no VM is modified before the Linux builder is ready.
+function Test-WslReady {
+ $wslCommand = Get-Command wsl.exe -ErrorAction SilentlyContinue
+ if (-not $wslCommand) { return $false }
+ & wsl.exe --exec bash -c 'exit 0' 2>$null | Out-Null
+ return ($LASTEXITCODE -eq 0)
 }
-& wsl.exe --exec bash -c 'command -v xorriso >/dev/null && command -v python3 >/dev/null && command -v openssl >/dev/null && command -v sha256sum >/dev/null'
+if (-not (Test-WslReady)) {
+ $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+ $principal = New-Object Security.Principal.WindowsPrincipal($identity)
+ if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+  $arguments = '-NoProfile -ExecutionPolicy Bypass -File "' + $PSCommandPath + '"'
+  if ($IsoPath) { $arguments += ' -IsoPath "' + $IsoPath.Replace('"','') + '"' }
+  if ($IsoSha256) { $arguments += ' -IsoSha256 ' + $IsoSha256 }
+  $arguments += ' -InstallWslTools'
+  Start-Process -FilePath 'powershell.exe' -ArgumentList $arguments -Verb RunAs -Wait
+  exit 0
+ }
+ Write-Host 'Installing WSL Ubuntu prerequisite (Windows may require a restart)...'
+ & wsl.exe --install -d Ubuntu --no-launch
+ if (-not (Test-WslReady)) {
+  throw 'BLOCKED: WSL setup requires Windows restart or Ubuntu first-run initialization. The VM was not modified.'
+ }
+}
+& wsl.exe --exec bash -c 'command -v xorriso >/dev/null && command -v python3 >/dev/null && command -v openssl >/dev/null && command -v sha256sum >/dev/null' | Out-Null
 if ($LASTEXITCODE -ne 0) {
- if (-not $InstallWslTools) { throw 'BLOCKED: WSL dependencies missing. Re-run with -InstallWslTools to install packages in the default WSL distribution.' }
+ Write-Host 'Installing missing ISO-building tools in WSL...'
  & wsl.exe --exec sudo -n apt-get update
- if ($LASTEXITCODE -ne 0) { throw 'BLOCKED: unattended sudo or apt update unavailable; no VM changes made' }
+ if ($LASTEXITCODE -ne 0) { throw 'BLOCKED: WSL package installation requires sudo initialization. VM unchanged.' }
  & wsl.exe --exec sudo -n apt-get install -y --no-install-recommends xorriso python3 openssl coreutils
- if ($LASTEXITCODE -ne 0) { throw 'BLOCKED: WSL dependency installation failed; no VM changes made' }
- & wsl.exe --exec bash -c 'command -v xorriso >/dev/null && command -v python3 >/dev/null && command -v openssl >/dev/null && command -v sha256sum >/dev/null'
- if ($LASTEXITCODE -ne 0) { throw 'BLOCKED: WSL dependencies still missing after installation' }
+ if ($LASTEXITCODE -ne 0) { throw 'BLOCKED: WSL package installation failed. VM unchanged.' }
+ & wsl.exe --exec bash -c 'command -v xorriso >/dev/null && command -v python3 >/dev/null && command -v openssl >/dev/null && command -v sha256sum >/dev/null' | Out-Null
+ if ($LASTEXITCODE -ne 0) { throw 'BLOCKED: ISO-building tools remain unavailable.' }
 }
 $directory = Join-Path $base 'prepared'
 New-Item -ItemType Directory -Force -Path $directory | Out-Null

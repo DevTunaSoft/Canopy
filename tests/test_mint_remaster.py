@@ -62,8 +62,7 @@ class MintRemasterTests(unittest.TestCase):
         script = BUILDER.read_text(encoding="utf-8")
         self.assertIn("Patch-CanopyBiosMenu.py", script)
         self.assertIn('grep -Eq --', script)
-        self.assertLess(script.index("Patch-CanopyBiosMenu.py"),
-                        script.index("xorriso -osirrox on -indev"))
+        self.assertIn("map_bios=(-map", script)
 
     def test_builder_requires_matching_source_hash(self):
         with tempfile.TemporaryDirectory() as d:

@@ -28,6 +28,13 @@ class OneClickStructureTests(unittest.TestCase):
             with self.subTest(marker=marker):
                 self.assertEqual(self.source.count(marker), 1)
 
+    def test_elevation_does_not_report_completed_installation(self):
+        marker = "if ($elevated.ExitCode -ne 0)"
+        self.assertEqual(self.source.count(marker), 1)
+        tail = self.source.split(marker, 1)[1].split("Clear-CanopyResume", 1)[0]
+        self.assertIn("throw 'BLOCKED: elevated prerequisite setup returned;", tail)
+        self.assertNotIn("exit 0", tail)
+
     def test_no_code_after_final_launch_status(self):
         marker = "'VM launched; actual Mint installation and desktop boot remain unverified.'"
         self.assertEqual(self.source.count(marker), 1)

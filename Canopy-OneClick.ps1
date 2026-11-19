@@ -72,6 +72,22 @@ $iso = if ($IsoPath) { $IsoPath } else { Join-Path $env:USERPROFILE 'Downloads\l
 $hashFile = Join-Path $PSScriptRoot 'mint-source.sha256'
 $expected = Resolve-ApprovedHash $IsoSha256 $hashFile
 Assert-Source $iso $expected
+function Get-ResumeCommand([string]$Launcher) {
+ if (-not [IO.Path]::IsPathRooted($Launcher) -or -not (Test-Path -LiteralPath $Launcher -PathType Leaf)) { throw 'Unsafe resume launcher path' }
+ if ($Launcher -match '"') { throw 'Unsafe quote in resume launcher path' }
+ return ('"' + $Launcher + '"')
+}
+function Register-CanopyResume {
+ $launcher = Join-Path $PSScriptRoot 'Canopy-OneClick.cmd'
+ $command = Get-ResumeCommand $launcher
+ $key = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce'
+ if (-not (Test-Path -LiteralPath $key)) { New-Item -Path $key -Force | Out-Null }
+ New-ItemProperty -Path $key -Name 'CanopyResumeSetup' -Value $command -PropertyType String -Force | Out-Null
+ Write-Host 'Canopy will resume at your next Windows sign-in. No automatic restart was requested.'
+}
+function Clear-CanopyResume {
+ Remove-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce' -Name 'CanopyResumeSetup' -ErrorAction SilentlyContinue
+}
 # Bootstrap WSL automatically when possible. A required Windows reboot is reported,
 # never forced, and no VM is modified before the Linux builder is ready.
 function Test-WslReady {
@@ -96,9 +112,11 @@ if (-not (Test-WslReady)) {
  Write-Host 'Installing WSL Ubuntu prerequisite (Windows may require a restart)...'
  & wsl.exe --install -d Ubuntu --no-launch
  if (-not (Test-WslReady)) {
-  throw 'BLOCKED: WSL setup requires Windows restart or Ubuntu first-run initialization. The VM was not modified.'
+  Register-CanopyResume
+  throw 'BLOCKED: WSL requires a restart or first-run initialization; setup will retry at next sign-in. VM unchanged.'
  }
 }
+Clear-CanopyResume
 & wsl.exe --exec bash -c 'command -v xorriso >/dev/null && command -v python3 >/dev/null && command -v openssl >/dev/null && command -v sha256sum >/dev/null' | Out-Null
 if ($LASTEXITCODE -ne 0) {
  Write-Host 'Installing missing ISO-building tools in WSL...'

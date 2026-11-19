@@ -44,7 +44,10 @@ Subtle depth must degrade gracefully without becoming visually cheap.
 ## Automated gate versus human acceptance
 
 GitHub Actions currently checks foundation tests, builds Qt, launches the
-window under Xvfb, and validates screenshot integrity and dimensions.
+window under Xvfb, validates screenshot integrity and dimensions, and records
+an informational five-second CPU/PSS sample in the UI evidence artifact.
+That short software-rendered measurement is not a production performance
+budget or a substitute for five-minute idle tests on Linux Mint.
 It does not verify rendering aesthetics, real session behavior, or Mint
 performance. CI failures block promotion; screenshots must be reviewed
 before any visual-completion claim. Never silently replace failed

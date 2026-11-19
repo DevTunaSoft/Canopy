@@ -40,4 +40,4 @@ $answer = [System.Windows.Forms.MessageBox]::Show($question,'Canopy disposable V
 if ($answer -ne [System.Windows.Forms.DialogResult]::Yes) { 'Canceled; no changes made.'; exit 0 }
 $attach = Join-Path $PSScriptRoot 'scripts\Attach-CanopyPreparedISO.ps1'
 & $attach -IsoPath $iso -IsoSha256 $hash -Start
-if ($LASTEXITCODE -ne 0) { throw 'Prepared ISO VM launch failed' }
+if (-not $?) { throw 'Prepared ISO VM launch failed' }

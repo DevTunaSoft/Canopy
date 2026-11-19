@@ -26,10 +26,16 @@ xorriso -indev "$source_iso" -report_el_torito as_mkisofs >"$tmp/boot-options.tx
 if ! grep -Eq -- "(^-b | -eltorito-boot | -e )" "$tmp/boot-options.txt"; then
   echo "Cannot verify source El Torito boot metadata" >&2; exit 1
 fi
-# Fail closed for BIOS ISOLINUX images: changing GRUB alone is insufficient.
+# Detect BIOS ISOLINUX/SYSLINUX boot media and patch its actual menu as well.
+bios_isolinux=0
 if grep -Eq -- '(^|[[:space:]])-b[[:space:]]+[^[:space:]]*(isolinux|syslinux)' "$tmp/boot-options.txt"; then
-  echo "BLOCKED: BIOS ISOLINUX/SYSLINUX unattended boot is not implemented" >&2
-  exit 1
+  bios_isolinux=1
+  mkdir -p "$tmp/isolinux"
+  if ! xorriso -osirrox on -indev "$source_iso" -extract /isolinux/isolinux.cfg "$tmp/isolinux/isolinux.cfg" >/dev/null 2>&1; then
+    echo "BLOCKED: BIOS ISOLINUX boot image lacks /isolinux/isolinux.cfg" >&2
+    exit 1
+  fi
+  python3 "$here/Patch-CanopyBiosMenu.py" "$tmp/isolinux/isolinux.cfg"
 fi
 # Read the source boot menu, preserving the ISO's native hybrid boot records.
 xorriso -osirrox on -indev "$source_iso" -extract /boot/grub/grub.cfg "$tmp/boot/grub/grub.cfg" >/dev/null
@@ -67,7 +73,12 @@ path.write_text(menu + "\n" + original, encoding="utf-8")
 PY
 # Replay original El Torito and system-area boot equipment instead of guessing
 # boot image offsets. Replay must succeed or output is rejected.
-xorriso -indev "$source_iso" -outdev "$output" \
+map_bios=()
+if [[ "$bios_isolinux" -eq 1 ]]; then
+  map_bios=(-map "$tmp/isolinux/isolinux.cfg" /isolinux/isolinux.cfg)
+fi
+xorriso -indev "$source_iso" -outdev "$output" \\
+  "${map_bios[@]}" \\
   -map "$tmp/boot/grub/grub.cfg" /boot/grub/grub.cfg \
   -map "$tmp/preseed/canopy.seed" /preseed/canopy.seed \
   -boot_image any replay -commit -end
@@ -76,6 +87,10 @@ xorriso -osirrox on -indev "$output" -extract /boot/grub/grub.cfg "$tmp/check-gr
   -extract /preseed/canopy.seed "$tmp/check-seed" >/dev/null
 grep -q 'automatic-ubiquity' "$tmp/check-grub.cfg"
 grep -q 'partman/confirm' "$tmp/check-seed"
+if [[ "$bios_isolinux" -eq 1 ]]; then
+  xorriso -osirrox on -indev "$output" -extract /isolinux/isolinux.cfg "$tmp/check-bios.cfg" >/dev/null
+  grep -q 'canopy-auto' "$tmp/check-bios.cfg"
+fi
 # Verify the output still advertises boot images after remastering.
 xorriso -indev "$output" -report_el_torito plain >"$tmp/output-boot.txt" 2>&1
 if ! grep -qi "El Torito" "$tmp/output-boot.txt"; then

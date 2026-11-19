@@ -80,6 +80,7 @@ function Get-ResumeCommand([string]$Launcher) {
 function Register-CanopyResume {
  $launcher = Join-Path $PSScriptRoot 'Canopy-OneClick.cmd'
  $command = Get-ResumeCommand $launcher
+ if ($IsoPath -or $IsoSha256) { throw 'BLOCKED: custom ISO arguments cannot yet be preserved across restart; no automatic resume registered' }
  $key = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce'
  if (-not (Test-Path -LiteralPath $key)) { New-Item -Path $key -Force | Out-Null }
  New-ItemProperty -Path $key -Name 'CanopyResumeSetup' -Value $command -PropertyType String -Force | Out-Null

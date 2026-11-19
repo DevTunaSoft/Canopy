@@ -18,6 +18,53 @@ function Assert-Input([string]$Path,[string]$Hash) {
    throw 'Prepared ISO and independently verified SHA256 required'
  }
 }
+function Assert-DedicatedDisk([string]$VmInfo,[string]$ExpectedDisk) {
+ $matchesFound = [regex]::Matches($VmInfo, '(?m)^"SATA-0-0"="([^"]+)"\\s*
+ $blocked = $false
+ try { Assert-Input '' 'invalid' } catch { $blocked = $true }
+ if (-not $blocked) { throw 'Missing hash was accepted' }
+ Assert-Input 'C:\\prepared.iso' ('a' * 64)
+ 'PASS: prepared ISO attachment input gates'
+ exit 0
+}
+Assert-Input $IsoPath $IsoSha256
+$iso = (Resolve-Path -LiteralPath $IsoPath -ErrorAction Stop).ProviderPath
+if (-not $iso.EndsWith('.iso',[StringComparison]::OrdinalIgnoreCase)) { throw 'Expected ISO extension' }
+if ((Get-FileHash -LiteralPath $iso -Algorithm SHA256).Hash -ne $IsoSha256.ToUpperInvariant()) { throw 'ISO checksum mismatch' }
+$vbox = Join-Path $env:ProgramFiles 'Oracle\VirtualBox\VBoxManage.exe'
+if (-not (Test-Path -LiteralPath $vbox -PathType Leaf)) { throw 'VirtualBox missing' }
+$info = @(& $vbox showvminfo 'Canopy-Test-Mint' '--machinereadable')
+if ($LASTEXITCODE -ne 0) { throw 'Dedicated VM not found' }
+$raw = $info | Out-String
+if ($raw -notmatch '(?m)^VMState="poweroff"\s*$') { throw 'Dedicated VM must be powered off' }
+if ($raw -notmatch '(?m)^firmware="BIOS"\s*$') { throw 'Only the verified BIOS test-VM configuration is supported' }
+if ($raw -notmatch '(?m)^"SATA-0-0"=.+\.vdi"\s*$') { throw 'Expected existing SATA virtual disk; refusing unexpected storage layout' }
+$dvd = @($info | Where-Object { $_ -match '^"SATA-1-0"=' })
+if ($dvd.Count -ne 1) { throw 'Expected one SATA port 1 DVD attachment' }
+$previous = ($dvd[0] -split '=',2)[1].Trim('"')
+if ($previous -and $previous -ne 'none' -and $previous -ne 'emptydrive' -and -not (Test-Path -LiteralPath $previous -PathType Leaf)) {
+ throw 'Existing DVD path cannot be verified; refusing to change it'
+}
+if ($previous -eq $iso) { 'Prepared ISO already attached' }
+else {
+ & $vbox storageattach 'Canopy-Test-Mint' '--storagectl=SATA' '--port=1' '--device=0' '--type=dvddrive' ('--medium=' + $iso)
+ if ($LASTEXITCODE -ne 0) { throw 'Failed to attach prepared ISO' }
+}
+if ($Start) {
+ & $vbox modifyvm 'Canopy-Test-Mint' '--boot1=dvd' '--boot2=disk'
+ if ($LASTEXITCODE -ne 0) { throw 'Unable to set DVD boot priority' }
+ & $vbox startvm 'Canopy-Test-Mint' '--type=gui'
+ if ($LASTEXITCODE -ne 0) { throw 'VM start failed' }
+ 'VM started. Actual guest installation and boot still require verification.'
+} else { 'Prepared ISO attached; VM not started.' }
+)
+ if ($matchesFound.Count -ne 1) { throw 'Missing or ambiguous SATA-0-0 virtual disk' }
+ $actual = [IO.Path]::GetFullPath($matchesFound[0].Groups[1].Value)
+ $expected = [IO.Path]::GetFullPath($ExpectedDisk)
+ if (-not [string]::Equals($actual,$expected,[StringComparison]::OrdinalIgnoreCase)) {
+  throw 'Virtual disk is not the dedicated Canopy test disk; refusing to boot installer'
+ }
+}
 if ($SelfTest) {
  $blocked = $false
  try { Assert-Input '' 'invalid' } catch { $blocked = $true }

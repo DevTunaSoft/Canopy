@@ -124,7 +124,7 @@ if (-not (Test-WslReady)) {
   $arguments += ' -InstallWslTools'
   $elevated = Start-Process -FilePath 'powershell.exe' -ArgumentList $arguments -Verb RunAs -Wait -PassThru
   if ($elevated.ExitCode -ne 0) { throw ('BLOCKED: elevated setup exited with code ' + $elevated.ExitCode) }
-  exit 0
+  throw 'BLOCKED: elevated prerequisite setup returned; installation and VM boot are not verified. Recheck setup status before reporting success.'
  }
  if (-not (Get-Command wsl.exe -ErrorAction SilentlyContinue)) { throw 'BLOCKED: wsl.exe unavailable; Windows servicing is required before bootstrap' }
  Write-Host 'Installing WSL Ubuntu prerequisite (Windows may require a restart)...'

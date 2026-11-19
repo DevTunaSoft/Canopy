@@ -1,0 +1,32 @@
+name: Classic Qt build and smoke test
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qt-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Qt build and headless runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake ninja-build xvfb \
+            qt6-base-dev qt6-declarative-dev qt6-declarative-dev-tools \
+            qml6-module-qtquick qml6-module-qtquick-controls \
+            qml6-module-qtquick-layouts qml6-module-qtquick-window \
+            qml6-module-qtqml-workerscript
+      - name: Configure
+        run: cmake -S prototype/classic -B build/classic -G Ninja -DCMAKE_BUILD_TYPE=Release
+      - name: Compile
+        run: cmake --build build/classic --parallel 2
+      - name: Headless QML smoke test
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: xvfb-run -a python3 tools/qt_smoke.py build/classic/canopy-classic-spike

@@ -17,7 +17,7 @@ def chunk(kind: bytes, payload: bytes) -> bytes:
 
 def image(width=760, height=500):
     ihdr = struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0)
-    raw = b"\\x00" + b"\\x20\\x40\\x60" * width
+    raw = b"\x00" + b"\x20\x40\x60" * width
     return (
         PNG_SIGNATURE + chunk(b"IHDR", ihdr)
         + chunk(b"IDAT", zlib.compress(raw * height))

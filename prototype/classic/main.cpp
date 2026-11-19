@@ -7,6 +7,7 @@
 #include <QImage>
 #include <QStringList>
 #include <QRegularExpression>
+#include <QSet>
 
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
@@ -50,12 +51,29 @@ int main(int argc, char *argv[]) {
         const QString screenshotPath = args.at(screenshotIndex + 1);
         QTimer::singleShot(1000, window, [window, screenshotPath]() {
             const QImage frame = window->grabWindow();
-            if (frame.isNull() || !frame.save(screenshotPath, "PNG")) {
+            if (frame.isNull() || frame.width() < 720 || frame.height() < 480) {
+                qCritical() << "SELF_TEST_FAIL: invalid screenshot dimensions";
+                QCoreApplication::exit(1);
+                return;
+            }
+            QSet<QRgb> sampledColors;
+            for (int y = 0; y < frame.height(); y += qMax(1, frame.height() / 12)) {
+                for (int x = 0; x < frame.width(); x += qMax(1, frame.width() / 12)) {
+                    sampledColors.insert(frame.pixel(x, y));
+                }
+            }
+            if (sampledColors.size() < 8) {
+                qCritical() << "SELF_TEST_FAIL: screenshot appears blank or uniform";
+                QCoreApplication::exit(1);
+                return;
+            }
+            if (!frame.save(screenshotPath, "PNG")) {
                 qCritical() << "SELF_TEST_FAIL: could not capture window" << screenshotPath;
                 QCoreApplication::exit(1);
                 return;
             }
-            qInfo() << "SELF_TEST_PASS: window screenshot captured" << frame.size();
+            qInfo() << "SELF_TEST_PASS: nonuniform window screenshot captured" << frame.size()
+                    << "sampled colors" << sampledColors.size();
             QCoreApplication::quit();
         });
     }

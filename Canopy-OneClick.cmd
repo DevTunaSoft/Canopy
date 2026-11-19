@@ -10,6 +10,7 @@ if not "%CANOPY_EXIT%"=="0" (
   echo Canopy installation was BLOCKED or failed. Collecting diagnostics...
   powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0Canopy-Diagnostics.ps1"
   echo Diagnostic files are under %CANOPY_LOG_DIR%
+  if /I "%CANOPY_GITHUB_REPORT%"=="1" powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\Publish-CanopyStatus.ps1" -Status BLOCKED -Stage launcher
 )
 pause
 exit /b %CANOPY_EXIT%

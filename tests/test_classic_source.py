@@ -6,9 +6,19 @@ ROOT = Path(__file__).resolve().parents[1] / "prototype" / "classic"
 
 class ClassicSourceTests(unittest.TestCase):
     def test_required_files(self):
-        for name in ("CMakeLists.txt", "main.cpp", "Main.qml", "README.md"):
+        for name in ("CMakeLists.txt", "main.cpp", "Main.qml", "Theme.qml", "README.md"):
             with self.subTest(name=name):
                 self.assertTrue((ROOT / name).is_file())
+
+    def test_theme_is_embedded_without_background_services(self):
+        cmake = (ROOT / "CMakeLists.txt").read_text()
+        qml = (ROOT / "Main.qml").read_text()
+        theme = (ROOT / "Theme.qml").read_text()
+        self.assertIn("Main.qml Theme.qml", cmake)
+        self.assertIn("Theme { id: palette }", qml)
+        self.assertNotIn("Timer {", qml)
+        self.assertNotIn("NumberAnimation", qml)
+        self.assertIn("dockSurface", theme)
 
     def test_explicit_nonproduction_scope(self):
         self.assertIn("not a Linux desktop session", (ROOT / "README.md").read_text())

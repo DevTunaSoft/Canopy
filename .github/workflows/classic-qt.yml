@@ -21,7 +21,6 @@ jobs:
             qml6-module-qtquick qml6-module-qtquick-controls \
             qml6-module-qtquick-layouts qml6-module-qtquick-window \
             qml6-module-qtquick-templates qml6-module-qtqml \
-
             qml6-module-qtqml-workerscript
       - name: Configure
         run: cmake -S prototype/classic -B build/classic -G Ninja -DCMAKE_BUILD_TYPE=Release

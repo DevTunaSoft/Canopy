@@ -15,6 +15,7 @@ ApplicationWindow {
     readonly property color foreground: "#f3f5f9"
     readonly property color surface: "#243449"
     readonly property color accent: "#91c5ff"
+    readonly property bool compactLayout: width < 900
 
     Rectangle {
         anchors.fill: parent
@@ -28,13 +29,13 @@ ApplicationWindow {
         id: topBar
         anchors.top: parent.top
         width: parent.width
-        height: 40
+        height: 44
         color: "#e6192535"
         RowLayout {
             anchors.fill: parent
             anchors.leftMargin: 18
             anchors.rightMargin: 18
-            spacing: 18
+            spacing: root.compactLayout ? 12 : 18
             Label {
                 text: "◈"
                 color: root.accent
@@ -42,8 +43,8 @@ ApplicationWindow {
                 Accessible.name: "Canopy menu placeholder"
             }
             Label { text: "Canopy"; color: root.foreground; font.bold: true }
-            Label { text: "File"; color: root.foreground }
-            Label { text: "View"; color: root.foreground }
+            Label { text: "File"; color: root.foreground; visible: !root.compactLayout }
+            Label { text: "View"; color: root.foreground; visible: !root.compactLayout }
             Item { Layout.fillWidth: true }
             Label { text: Qt.formatDateTime(new Date(), "ddd d MMM"); color: root.foreground }
         }
@@ -62,6 +63,9 @@ ApplicationWindow {
         Label {
             anchors.horizontalCenter: parent.horizontalCenter
             text: "The Familiar Feel. The Freedom of Linux."
+            wrapMode: Text.WordWrap
+            horizontalAlignment: Text.AlignHCenter
+            width: Math.min(implicitWidth, root.width - 48)
             font.pixelSize: 15
             color: "#c2d1e4"
         }
@@ -75,7 +79,7 @@ ApplicationWindow {
 
     Rectangle {
         id: dock
-        width: dockRow.implicitWidth + 28
+        width: Math.min(root.width - 32, dockRow.implicitWidth + 28)
         height: 76
         radius: 22
         color: root.surface
@@ -84,6 +88,7 @@ ApplicationWindow {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 24
+        clip: true
 
         Row {
             id: dockRow

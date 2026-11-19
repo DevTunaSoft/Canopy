@@ -40,6 +40,13 @@ class MintRemasterTests(unittest.TestCase):
             self.assertNotEqual(existing.returncode, 0)
             self.assertEqual(output.read_bytes(), b"keep")
 
+    def test_bios_isolinux_requires_explicit_support(self):
+        script = BUILDER.read_text(encoding="utf-8")
+        self.assertIn("BIOS ISOLINUX/SYSLINUX unattended boot is not implemented", script)
+        self.assertIn('grep -Eq --', script)
+        self.assertLess(script.index("BIOS ISOLINUX/SYSLINUX unattended boot is not implemented"),
+                        script.index("xorriso -osirrox on -indev"))
+
     def test_builder_requires_matching_source_hash(self):
         with tempfile.TemporaryDirectory() as d:
             source = Path(d) / "mint.iso"

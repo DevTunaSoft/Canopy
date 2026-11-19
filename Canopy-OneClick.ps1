@@ -88,9 +88,10 @@ if (-not (Test-WslReady)) {
   if ($IsoPath) { $arguments += ' -IsoPath "' + $IsoPath.Replace('"','') + '"' }
   if ($IsoSha256) { $arguments += ' -IsoSha256 ' + $IsoSha256 }
   $arguments += ' -InstallWslTools'
-  Start-Process -FilePath 'powershell.exe' -ArgumentList $arguments -Verb RunAs -Wait
-  exit 0
+  $elevated = Start-Process -FilePath 'powershell.exe' -ArgumentList $arguments -Verb RunAs -Wait -PassThru
+  exit $elevated.ExitCode
  }
+ if (-not (Get-Command wsl.exe -ErrorAction SilentlyContinue)) { throw 'BLOCKED: wsl.exe unavailable; Windows servicing is required before bootstrap' }
  Write-Host 'Installing WSL Ubuntu prerequisite (Windows may require a restart)...'
  & wsl.exe --install -d Ubuntu --no-launch
  if (-not (Test-WslReady)) {

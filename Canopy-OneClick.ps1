@@ -37,6 +37,10 @@ function Assert-Cache([string]$Image,[string]$Receipt,[string]$SourceHash) {
  if ((Get-FileHash -LiteralPath $Image -Algorithm SHA256).Hash -ne $record.prepared_sha256.ToUpperInvariant()) { throw 'Prepared ISO checksum mismatch' }
  return $true
 }
+function Get-ResumeAttemptAction([int]$Attempts) {
+ if ($Attempts -ge 2) { return 'block' }
+ return 'register'
+}
 if ($SelfTest) {
  $test = Join-Path $env:TEMP ('canopy-' + [guid]::NewGuid().ToString('N') + '.iso')
  $receipt = $test + '.json'
@@ -77,10 +81,6 @@ function Get-ResumeCommand([string]$Launcher) {
  if (-not [IO.Path]::IsPathRooted($Launcher) -or -not (Test-Path -LiteralPath $Launcher -PathType Leaf)) { throw 'Unsafe resume launcher path' }
  if ($Launcher -match '"') { throw 'Unsafe quote in resume launcher path' }
  return ('"' + $Launcher + '"')
-}
-function Get-ResumeAttemptAction([int]$Attempts) {
- if ($Attempts -ge 2) { return 'block' }
- return 'register'
 }
 function Register-CanopyResume {
  $launcher = Join-Path $PSScriptRoot 'Canopy-OneClick.cmd'

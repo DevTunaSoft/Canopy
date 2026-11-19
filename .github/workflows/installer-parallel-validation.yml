@@ -12,6 +12,7 @@ on:
       - 'Canopy-OneClick.ps1'
       - 'Canopy-OneClick.cmd'
       - 'scripts/Publish-CanopyStatus.ps1'
+      - 'scripts/Save-CanopyCheckpoint.ps1'
       - 'tests/test_mint_remaster.py'
       - '.github/workflows/installer-parallel-validation.yml'
   pull_request:
@@ -41,7 +42,7 @@ jobs:
       - name: Parse all installer PowerShell scripts
         shell: pwsh
         run: |
-          $paths = @('Canopy-Setup.ps1','scripts/Resume-CanopyMintInstall.ps1','scripts/Install-CanopyMintOS.ps1','scripts/Attach-CanopyPreparedISO.ps1','Canopy-Launch-Prepared.ps1','Canopy-OneClick.ps1','scripts/Publish-CanopyStatus.ps1')
+          $paths = @('Canopy-Setup.ps1','scripts/Resume-CanopyMintInstall.ps1','scripts/Install-CanopyMintOS.ps1','scripts/Attach-CanopyPreparedISO.ps1','Canopy-Launch-Prepared.ps1','Canopy-OneClick.ps1','scripts/Publish-CanopyStatus.ps1','scripts/Save-CanopyCheckpoint.ps1')
           foreach ($path in $paths) {
             $tokens = $null; $errors = $null
             [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $path).Path,[ref]$tokens,[ref]$errors) | Out-Null
@@ -64,6 +65,7 @@ jobs:
           ./Canopy-Launch-Prepared.ps1 -SelfTest
           ./Canopy-OneClick.ps1 -SelfTest
           ./scripts/Publish-CanopyStatus.ps1 -SelfTest
+          ./scripts/Save-CanopyCheckpoint.ps1 -Status BLOCKED -SelfTest
   security-review:
     runs-on: ubuntu-latest
     steps:

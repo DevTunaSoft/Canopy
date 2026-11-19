@@ -2,6 +2,10 @@
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
 #include <QDebug>
+#include <QTimer>
+#include <QCoreApplication>
+#include <QImage>
+#include <QStringList>
 
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
@@ -16,5 +20,24 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     qInfo() << "CANOPY_CLASSIC_WINDOW_READY";
+    const QStringList args = QCoreApplication::arguments();
+    const int screenshotIndex = args.indexOf(QStringLiteral("--self-test-screenshot"));
+    if (screenshotIndex >= 0) {
+        if (screenshotIndex + 1 >= args.size()) {
+            qCritical() << "Missing screenshot output path";
+            return 2;
+        }
+        const QString screenshotPath = args.at(screenshotIndex + 1);
+        QTimer::singleShot(1000, window, [window, screenshotPath]() {
+            const QImage frame = window->grabWindow();
+            if (frame.isNull() || !frame.save(screenshotPath, "PNG")) {
+                qCritical() << "SELF_TEST_FAIL: could not capture window" << screenshotPath;
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SELF_TEST_PASS: window screenshot captured" << frame.size();
+            QCoreApplication::quit();
+        });
+    }
     return app.exec();
 }

@@ -36,7 +36,7 @@ jobs:
           $zip = [IO.Compression.ZipFile]::OpenRead($files[-1].FullName)
           try {
             $names = @($zip.Entries | ForEach-Object FullName)
-            foreach ($name in @('host.txt','virtualbox.txt','repository.txt','iso.txt','README.txt')) {
+            foreach ($name in @('host.txt','virtualbox.txt','repository.txt','iso.txt','README.txt','setup-preflight-summary.txt','vm-log-summary.txt')) {
               if ($names -notcontains $name) { throw "Missing diagnostic entry: $name" }
             }
           } finally { $zip.Dispose() }

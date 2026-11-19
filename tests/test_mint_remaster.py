@@ -40,9 +40,27 @@ class MintRemasterTests(unittest.TestCase):
             self.assertNotEqual(existing.returncode, 0)
             self.assertEqual(output.read_bytes(), b"keep")
 
+    def test_bios_menu_patcher(self):
+        spec = importlib.util.spec_from_file_location(
+            "canopy_bios", ROOT / "scripts" / "Patch-CanopyBiosMenu.py")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        original = "DEFAULT live\\nTIMEOUT 50\\nLABEL live\\n KERNEL /casper/vmlinuz\\n APPEND initrd=/casper/initrd boot=casper\\n"
+        updated = module.patch(original)
+        self.assertIn("DEFAULT canopy-auto", updated)
+        self.assertIn("automatic-ubiquity only-ubiquity", updated)
+        self.assertIn("LABEL live", updated)
+        self.assertEqual(updated.count("DEFAULT "), 1)
+        with self.assertRaises(ValueError):
+            module.patch("UI menu.c32\\n" + original)
+        with self.assertRaises(ValueError):
+            module.patch("DEFAULT live\\nLABEL live\\n KERNEL /other/vmlinuz\\n")
+        with self.assertRaises(ValueError):
+            module.patch(updated)
+
     def test_bios_isolinux_requires_explicit_support(self):
         script = BUILDER.read_text(encoding="utf-8")
-        self.assertIn("BIOS ISOLINUX/SYSLINUX unattended boot is not implemented", script)
+        self.assertIn("Patch-CanopyBiosMenu.py", script)
         self.assertIn('grep -Eq --', script)
         self.assertLess(script.index("BIOS ISOLINUX/SYSLINUX unattended boot is not implemented"),
                         script.index("xorriso -osirrox on -indev"))

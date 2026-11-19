@@ -40,6 +40,14 @@ class MintRemasterTests(unittest.TestCase):
             self.assertNotEqual(existing.returncode, 0)
             self.assertEqual(output.read_bytes(), b"keep")
 
+    def test_iso_builder_shell_syntax_and_continuations(self):
+        result = subprocess.run(["bash", "-n", str(BUILDER)], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        script = BUILDER.read_text(encoding="utf-8")
+        self.assertIn('"${map_bios[@]}"', script)
+        self.assertNotIn(chr(92) * 2 + chr(10), script,
+                         "Double backslash before newline breaks the xorriso command")
+
     def test_bios_menu_patcher(self):
         spec = importlib.util.spec_from_file_location(
             "canopy_bios", ROOT / "scripts" / "Patch-CanopyBiosMenu.py")

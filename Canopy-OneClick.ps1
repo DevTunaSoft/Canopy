@@ -1,6 +1,6 @@
 #Requires -Version 5.1
 [CmdletBinding()]
-param([switch]$SelfTest)
+param([switch]$SelfTest,[switch]$InstallWslTools)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 function Assert-Hash([string]$Expected) {
@@ -55,9 +55,21 @@ $hashFile = Join-Path $PSScriptRoot 'mint-source.sha256'
 if (-not (Test-Path -LiteralPath $hashFile -PathType Leaf)) { throw 'BLOCKED: authenticated Mint checksum file missing' }
 $expected = (Get-Content -LiteralPath $hashFile -Raw).Trim()
 Assert-Source $iso $expected
-if (-not (Get-Command wsl.exe -ErrorAction SilentlyContinue)) { throw 'BLOCKED: WSL missing' }
-& wsl.exe --exec bash -c 'command -v xorriso && command -v python3 && command -v openssl && command -v sha256sum' | Out-Null
-if ($LASTEXITCODE -ne 0) { throw 'BLOCKED: WSL image-building dependencies missing' }
+if (-not (Get-Command wsl.exe -ErrorAction SilentlyContinue)) { throw 'BLOCKED: WSL missing; install an Ubuntu WSL distribution before retrying' }
+$distributions = @(& wsl.exe --list --quiet 2>$null)
+if ($LASTEXITCODE -ne 0 -or -not ($distributions | Where-Object { $_ -match '[a-zA-Z]' })) {
+ throw 'BLOCKED: No configured WSL distribution. Run wsl --install -d Ubuntu and complete initial setup.'
+}
+& wsl.exe --exec bash -c 'command -v xorriso >/dev/null && command -v python3 >/dev/null && command -v openssl >/dev/null && command -v sha256sum >/dev/null'
+if ($LASTEXITCODE -ne 0) {
+ if (-not $InstallWslTools) { throw 'BLOCKED: WSL dependencies missing. Re-run with -InstallWslTools to install packages in the default WSL distribution.' }
+ & wsl.exe --exec sudo -n apt-get update
+ if ($LASTEXITCODE -ne 0) { throw 'BLOCKED: unattended sudo or apt update unavailable; no VM changes made' }
+ & wsl.exe --exec sudo -n apt-get install -y --no-install-recommends xorriso python3 openssl coreutils
+ if ($LASTEXITCODE -ne 0) { throw 'BLOCKED: WSL dependency installation failed; no VM changes made' }
+ & wsl.exe --exec bash -c 'command -v xorriso >/dev/null && command -v python3 >/dev/null && command -v openssl >/dev/null && command -v sha256sum >/dev/null'
+ if ($LASTEXITCODE -ne 0) { throw 'BLOCKED: WSL dependencies still missing after installation' }
+}
 $directory = Join-Path $base 'prepared'
 New-Item -ItemType Directory -Force -Path $directory | Out-Null
 $prepared = Join-Path $directory 'canopy-mint-test.iso'

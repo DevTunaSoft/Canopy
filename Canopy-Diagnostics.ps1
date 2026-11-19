@@ -53,6 +53,16 @@ try {
       'Bytes: ' + (Get-Item -LiteralPath $iso).Length
     } else { 'Expected ISO not found' }
   }
+  Save-Result 'setup-preflight-summary.txt' {
+    $log = Join-Path $destination 'last-setup-preflight.log'
+    if (-not (Test-Path -LiteralPath $log -PathType Leaf)) { 'No setup preflight log available' }
+    else {
+      'Preflight log available'
+      'LastWriteUtc: ' + (Get-Item -LiteralPath $log).LastWriteTimeUtc.ToString('o')
+      'Bytes: ' + (Get-Item -LiteralPath $log).Length
+      'Full log stays on the local computer to avoid exporting sensitive paths or command output.'
+    }
+  }
   Save-Result 'vm-log-summary.txt' {
     $vmDir = Join-Path $base 'VirtualMachines'
     if (-not (Test-Path -LiteralPath $vmDir)) { 'VM directory not found' }

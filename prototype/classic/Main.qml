@@ -10,18 +10,45 @@ ApplicationWindow {
     minimumHeight: 480
     visible: true
     title: "Canopy Classic — Technology Spike"
-    color: "#101b29"
+    color: "#09111d"
 
-    readonly property color foreground: "#f3f5f9"
-    readonly property color surface: "#243449"
-    readonly property color accent: "#91c5ff"
+    Theme { id: palette }
     readonly property bool compactLayout: width < 900
 
+    // Lightweight wallpaper composition: gradients and rectangles only.
+    // No shader effects, animation loops, timers or additional processes.
     Rectangle {
         anchors.fill: parent
         gradient: Gradient {
-            GradientStop { position: 0; color: "#263d56" }
-            GradientStop { position: 1; color: "#0c1420" }
+            GradientStop { position: 0; color: palette.backgroundTop }
+            GradientStop { position: 1; color: palette.backgroundBottom }
+        }
+    }
+    Rectangle {
+        width: root.width * 1.04
+        height: root.height * 0.78
+        x: root.width * 0.22
+        y: root.height * 0.25
+        rotation: -27
+        radius: height * 0.45
+        opacity: 0.50
+        gradient: Gradient {
+            GradientStop { position: 0; color: "#365a7a" }
+            GradientStop { position: 0.45; color: "#253c59" }
+            GradientStop { position: 1; color: "#0c1727" }
+        }
+    }
+    Rectangle {
+        width: root.width * 0.83
+        height: root.height * 0.44
+        x: root.width * 0.40
+        y: root.height * 0.65
+        rotation: -16
+        radius: height * 0.45
+        opacity: 0.46
+        gradient: Gradient {
+            GradientStop { position: 0; color: "#537898" }
+            GradientStop { position: 1; color: "#17283c" }
         }
     }
 
@@ -29,71 +56,101 @@ ApplicationWindow {
         id: topBar
         anchors.top: parent.top
         width: parent.width
-        height: 44
-        color: "#e6192535"
+        height: palette.barHeight
+        color: palette.chrome
+
+        Rectangle {
+            anchors.bottom: parent.bottom
+            width: parent.width
+            height: 1
+            color: "#3a5168"
+            opacity: 0.65
+        }
+
         RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: 18
-            anchors.rightMargin: 18
-            spacing: root.compactLayout ? 12 : 18
-            Label {
-                text: "◈"
-                color: root.accent
-                font.pixelSize: 22
-                Accessible.name: "Canopy menu placeholder"
+            anchors.leftMargin: root.compactLayout ? 14 : 22
+            anchors.rightMargin: root.compactLayout ? 14 : 22
+            spacing: root.compactLayout ? 12 : 20
+
+            // Original, stylized white penguin silhouette, not Apple artwork.
+            Canvas {
+                id: tuxMark
+                Layout.preferredWidth: 23
+                Layout.preferredHeight: 28
+                Accessible.name: "Canopy launcher placeholder"
+                onPaint: {
+                    const ctx = getContext("2d")
+                    ctx.clearRect(0, 0, width, height)
+                    ctx.fillStyle = "#f7f9fd"
+                    ctx.beginPath()
+                    ctx.ellipse(11.5, 15.5, 7.5, 11.8, 0, 0, 2 * Math.PI)
+                    ctx.fill()
+                    ctx.fillStyle = "#25354a"
+                    ctx.beginPath()
+                    ctx.ellipse(11.5, 18.5, 4.8, 7.5, 0, 0, 2 * Math.PI)
+                    ctx.fill()
+                    ctx.fillStyle = "#f7f9fd"
+                    ctx.beginPath()
+                    ctx.arc(9, 10, 1.3, 0, 2 * Math.PI)
+                    ctx.arc(14, 10, 1.3, 0, 2 * Math.PI)
+                    ctx.fill()
+                    ctx.fillStyle = "#e7bd82"
+                    ctx.beginPath()
+                    ctx.moveTo(10, 12.5)
+                    ctx.lineTo(13, 12.5)
+                    ctx.lineTo(11.5, 15)
+                    ctx.closePath()
+                    ctx.fill()
+                }
             }
-            Label { text: "Canopy"; color: root.foreground; font.bold: true }
-            Label { text: "File"; color: root.foreground; visible: !root.compactLayout }
-            Label { text: "View"; color: root.foreground; visible: !root.compactLayout }
+            Label {
+                text: "Canopy"
+                color: palette.foreground
+                font.pixelSize: 14
+                font.bold: true
+                font.family: "Sans Serif"
+            }
+            Label {
+                text: "File"
+                visible: !root.compactLayout
+                color: palette.foreground
+                font.pixelSize: 13
+            }
+            Label {
+                text: "View"
+                visible: !root.compactLayout
+                color: palette.foreground
+                font.pixelSize: 13
+            }
             Item { Layout.fillWidth: true }
-            Label { text: Qt.formatDateTime(new Date(), "ddd d MMM"); color: root.foreground }
+            Label {
+                text: Qt.formatDateTime(new Date(), "ddd d MMM")
+                color: palette.foreground
+                font.pixelSize: 12
+                font.weight: Font.Medium
+            }
         }
     }
 
-    Column {
-        anchors.centerIn: parent
-        spacing: 12
-        Label {
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: "Canopy"
-            font.pixelSize: 54
-            font.weight: Font.Light
-            color: root.foreground
-        }
-        Label {
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: "The Familiar Feel. The Freedom of Linux."
-            wrapMode: Text.WordWrap
-            horizontalAlignment: Text.AlignHCenter
-            width: Math.min(implicitWidth, root.width - 48)
-            font.pixelSize: 15
-            color: "#c2d1e4"
-        }
-        Label {
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: "Technology spike · not a desktop session"
-            font.pixelSize: 12
-            color: "#9fb2c8"
-        }
-    }
-
+    // Dock controls are explicitly nonfunctional until session services exist.
     Rectangle {
         id: dock
-        width: Math.min(root.width - 32, dockRow.implicitWidth + 28)
-        height: 76
-        radius: 22
-        color: root.surface
-        border.color: "#617c98"
+        width: Math.min(root.width - 32, dockRow.implicitWidth + 2 * palette.dockPadding)
+        height: palette.dockSize
+        radius: palette.cornerRadius
+        color: palette.dockSurface
+        border.color: palette.dockBorder
         border.width: 1
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: 24
+        anchors.bottomMargin: 22
         clip: true
 
         Row {
             id: dockRow
             anchors.centerIn: parent
-            spacing: 12
+            spacing: palette.dockSpacing
             Repeater {
                 model: [
                     { title: "Home", glyph: "⌂" },
@@ -103,25 +160,40 @@ ApplicationWindow {
                 ]
                 delegate: Button {
                     required property var modelData
-                    width: 56
-                    height: 56
+                    width: palette.tileSize
+                    height: palette.tileSize
                     hoverEnabled: true
                     Accessible.name: modelData.title + " (demonstration)"
                     ToolTip.visible: hovered
                     ToolTip.text: modelData.title + " — demonstration only"
                     background: Rectangle {
-                        radius: 14
-                        color: parent.hovered ? "#46617e" : "#334b65"
+                        radius: 13
+                        color: parent.hovered ? palette.tileHover : palette.tile
+                        border.color: parent.hovered ? "#7797b4" : "#49617a"
+                        border.width: 1
                     }
                     contentItem: Label {
                         text: modelData.glyph
-                        font.pixelSize: 28
+                        font.pixelSize: 26
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
-                        color: root.foreground
+                        color: palette.foreground
                     }
                 }
             }
         }
+    }
+
+    Label {
+        anchors.right: parent.right
+        anchors.rightMargin: 21
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 9
+        text: "CLASSIC PREVIEW"
+        color: palette.muted
+        opacity: 0.64
+        font.pixelSize: 9
+        font.letterSpacing: 2
+        visible: root.width > 900
     }
 }

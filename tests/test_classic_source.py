@@ -20,6 +20,12 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertNotIn("NumberAnimation", qml)
         self.assertIn("dockSurface", theme)
 
+    def test_screenshot_rejects_uniform_frames(self):
+        source = (ROOT / "main.cpp").read_text()
+        self.assertIn("sampledColors.size() < 8", source)
+        self.assertIn("SELF_TEST_FAIL: screenshot appears blank or uniform", source)
+        self.assertIn("SELF_TEST_PASS: nonuniform window screenshot captured", source)
+
     def test_explicit_nonproduction_scope(self):
         self.assertIn("not a Linux desktop session", (ROOT / "README.md").read_text())
         self.assertIn("Qt6::Quick", (ROOT / "CMakeLists.txt").read_text())

@@ -32,8 +32,10 @@ jobs:
           LIBGL_ALWAYS_SOFTWARE: "1"
         run: |
           mkdir -p test-artifacts
-          timeout 30s xvfb-run -a ./build/classic/canopy-classic-spike --self-test-screenshot test-artifacts/classic.png
-          python3 -c "from pathlib import Path; p=Path('test-artifacts/classic.png'); assert p.is_file() and p.stat().st_size > 1000, 'Missing or empty UI screenshot'"
+          timeout 30s xvfb-run -a ./build/classic/canopy-classic-spike --self-test-size 1200x750 --self-test-screenshot test-artifacts/classic-standard.png
+          python3 tools/check_screenshot.py test-artifacts/classic-standard.png 1200 750
+          timeout 30s xvfb-run -a ./build/classic/canopy-classic-spike --self-test-size 760x500 --self-test-screenshot test-artifacts/classic-compact.png
+          python3 tools/check_screenshot.py test-artifacts/classic-compact.png 760 500
       - name: Upload UI test evidence
         if: always()
         uses: actions/upload-artifact@v4

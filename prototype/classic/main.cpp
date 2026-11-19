@@ -6,6 +6,7 @@
 #include <QCoreApplication>
 #include <QImage>
 #include <QStringList>
+#include <QRegularExpression>
 
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
@@ -21,6 +22,25 @@ int main(int argc, char *argv[]) {
     }
     qInfo() << "CANOPY_CLASSIC_WINDOW_READY";
     const QStringList args = QCoreApplication::arguments();
+    const int sizeIndex = args.indexOf(QStringLiteral("--self-test-size"));
+    if (sizeIndex >= 0) {
+        if (sizeIndex + 1 >= args.size()) {
+            qCritical() << "Missing --self-test-size WIDTHxHEIGHT";
+            return 2;
+        }
+        const auto match = QRegularExpression(QStringLiteral("^(\\d+)x(\\d+)$")).match(args.at(sizeIndex + 1));
+        if (!match.hasMatch()) {
+            qCritical() << "Invalid --self-test-size value";
+            return 2;
+        }
+        const int width = match.captured(1).toInt();
+        const int height = match.captured(2).toInt();
+        if (width < 720 || height < 480 || width > 3840 || height > 2160) {
+            qCritical() << "Self-test size outside supported test range";
+            return 2;
+        }
+        window->resize(width, height);
+    }
     const int screenshotIndex = args.indexOf(QStringLiteral("--self-test-screenshot"));
     if (screenshotIndex >= 0) {
         if (screenshotIndex + 1 >= args.size()) {

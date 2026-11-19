@@ -46,7 +46,12 @@ jobs:
           foreach ($path in $paths) {
             $tokens = $null; $errors = $null
             [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $path).Path,[ref]$tokens,[ref]$errors) | Out-Null
-            if ($errors.Count) { $errors | Format-List | Out-String | Write-Error; exit 1 }
+            if ($errors.Count) {
+            foreach ($parseError in $errors) {
+              Write-Host ('INVALID PowerShell: ' + $path + ':' + $parseError.Extent.StartLineNumber + ':' + $parseError.Extent.StartColumnNumber + ' ' + $parseError.Message)
+            }
+            exit 1
+          }
           }
       - name: Verify one-click launcher forwards options
         shell: pwsh

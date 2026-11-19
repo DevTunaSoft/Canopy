@@ -77,8 +77,8 @@ map_bios=()
 if [[ "$bios_isolinux" -eq 1 ]]; then
   map_bios=(-map "$tmp/isolinux/isolinux.cfg" /isolinux/isolinux.cfg)
 fi
-xorriso -indev "$source_iso" -outdev "$output" \\
-  "${map_bios[@]}" \\
+xorriso -indev "$source_iso" -outdev "$output" \
+  "${map_bios[@]}" \
   -map "$tmp/boot/grub/grub.cfg" /boot/grub/grub.cfg \
   -map "$tmp/preseed/canopy.seed" /preseed/canopy.seed \
   -boot_image any replay -commit -end

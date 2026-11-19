@@ -26,6 +26,11 @@ xorriso -indev "$source_iso" -report_el_torito as_mkisofs >"$tmp/boot-options.tx
 if ! grep -Eq -- "(^-b | -eltorito-boot | -e )" "$tmp/boot-options.txt"; then
   echo "Cannot verify source El Torito boot metadata" >&2; exit 1
 fi
+# Fail closed for BIOS ISOLINUX images: changing GRUB alone is insufficient.
+if grep -Eq -- '(^|[[:space:]])-b[[:space:]]+[^[:space:]]*(isolinux|syslinux)' "$tmp/boot-options.txt"; then
+  echo "BLOCKED: BIOS ISOLINUX/SYSLINUX unattended boot is not implemented" >&2
+  exit 1
+fi
 # Read the source boot menu, preserving the ISO's native hybrid boot records.
 xorriso -osirrox on -indev "$source_iso" -extract /boot/grub/grub.cfg "$tmp/boot/grub/grub.cfg" >/dev/null
 python3 "$here/Generate-CanopyMintPreseed.py" "$tmp/preseed/canopy.seed" --disposable-vm

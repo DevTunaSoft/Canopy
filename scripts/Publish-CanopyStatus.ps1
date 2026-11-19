@@ -8,6 +8,9 @@ function Get-CheckpointTitle([string]$Step) {
  Assert-SafeField $Step
  return ('Canopy checkpoint: ' + $Step)
 }
+function Assert-CompleteIssueListing([object[]]$Issues) {
+ if ($Issues.Count -ge 100) { throw 'Checkpoint issue listing may be truncated; refusing duplicate creation' }
+}
 function Select-CheckpointIssue([object[]]$Issues,[string]$Step) {
  $title=Get-CheckpointTitle $Step
  $matches=@($Issues | Where-Object { $_.title -ceq $title })
@@ -32,6 +35,10 @@ if ($SelfTest) {
  $ambiguous=$false
  try { Select-CheckpointIssue @([pscustomobject]@{title='Canopy checkpoint: wsl';number=42},[pscustomobject]@{title='Canopy checkpoint: wsl';number=43}) 'wsl' | Out-Null } catch { $ambiguous=$true }
  if (-not $ambiguous) { throw 'Duplicate issue ambiguity accepted' }
+ $truncated=$false
+ try { Assert-CompleteIssueListing @(1..100) } catch { $truncated=$true }
+ if (-not $truncated) { throw 'Truncated issue listing accepted' }
+ Assert-CompleteIssueListing @(1..99)
  'PASS: sanitized GitHub status and checkpoint issue reuse self-test'; exit 0
 }
 Assert-SafeField $Stage
@@ -43,6 +50,7 @@ $repo='DevTunaSoft/Canopy'
 $raw=@(& gh.exe issue list --repo $repo --state open --limit 100 --json number,title)
 if ($LASTEXITCODE -ne 0) { throw 'Could not inspect existing checkpoint issues; refusing duplicate creation' }
 $issues=@($raw | Out-String | ConvertFrom-Json)
+Assert-CompleteIssueListing $issues
 $number=Select-CheckpointIssue $issues $Stage
 if ($number -gt 0) {
  & gh.exe issue edit $number --repo $repo --body $body

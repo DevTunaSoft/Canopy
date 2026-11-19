@@ -46,6 +46,13 @@ jobs:
             [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $path).Path,[ref]$tokens,[ref]$errors) | Out-Null
             if ($errors.Count) { $errors | Format-List | Out-String | Write-Error; exit 1 }
           }
+      - name: Verify one-click launcher forwards options
+        shell: pwsh
+        run: |
+          $launcher = Get-Content -LiteralPath 'Canopy-OneClick.cmd' -Raw
+          if ($launcher -notmatch [regex]::Escape('Canopy-OneClick.ps1" %*')) {
+            throw 'Windows launcher silently discards ISO and WSL options'
+          }
       - name: Check non-destructive setup contracts
         shell: pwsh
         run: |

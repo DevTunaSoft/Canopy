@@ -1,10 +1,19 @@
 #Requires -Version 5.1
 [CmdletBinding()]
-param([switch]$SelfTest,[switch]$InstallWslTools)
+param([switch]$SelfTest,[switch]$InstallWslTools,[string]$IsoPath = '',[string]$IsoSha256 = '')
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 function Assert-Hash([string]$Expected) {
  if ($Expected.Length -ne 64 -or $Expected -match '[^a-fA-F0-9]') { throw 'Expected a verified SHA256 checksum' }
+}
+function Resolve-ApprovedHash([string]$Provided,[string]$ChecksumFile) {
+ if ($Provided) { Assert-Hash $Provided; return $Provided.ToUpperInvariant() }
+ if (-not (Test-Path -LiteralPath $ChecksumFile -PathType Leaf)) {
+  throw 'BLOCKED: supply independently authenticated -IsoSha256 or mint-source.sha256'
+ }
+ $value = (Get-Content -LiteralPath $ChecksumFile -Raw).Trim()
+ Assert-Hash $value
+ return $value.ToUpperInvariant()
 }
 function Assert-Source([string]$Path,[string]$Hash) {
  Assert-Hash $Hash
@@ -41,6 +50,10 @@ if ($SelfTest) {
   try { Assert-Cache $test $receipt ('a' * 64) | Out-Null } catch { $blocked = $true }
   if (-not $blocked) { throw 'Tampered image accepted' }
  } finally { Remove-Item -LiteralPath $test,$receipt -Force -ErrorAction SilentlyContinue }
+ if ((Resolve-ApprovedHash ('b' * 64) 'C:\missing-checksum-file') -ne ('B' * 64)) { throw 'Explicit verified hash rejected' }
+ $blocked = $false
+ try { Resolve-ApprovedHash '' 'C:\missing-checksum-file' | Out-Null } catch { $blocked = $true }
+ if (-not $blocked) { throw 'Missing authenticated checksum accepted' }
  if ((Get-VMAction $false $false) -ne 'create') { throw 'VM creation decision regression' }
  if ((Get-VMAction $true $true) -ne 'reuse') { throw 'Existing VM decision regression' }
  $blocked = $false
@@ -50,10 +63,9 @@ if ($SelfTest) {
  exit 0
 }
 $base = Join-Path $env:LOCALAPPDATA 'CanopyTestLab'
-$iso = Join-Path $env:USERPROFILE 'Downloads\linuxmint-22.3-cinnamon-64bit (1).iso'
+$iso = if ($IsoPath) { $IsoPath } else { Join-Path $env:USERPROFILE 'Downloads\linuxmint-22.3-cinnamon-64bit (1).iso' }
 $hashFile = Join-Path $PSScriptRoot 'mint-source.sha256'
-if (-not (Test-Path -LiteralPath $hashFile -PathType Leaf)) { throw 'BLOCKED: authenticated Mint checksum file missing' }
-$expected = (Get-Content -LiteralPath $hashFile -Raw).Trim()
+$expected = Resolve-ApprovedHash $IsoSha256 $hashFile
 Assert-Source $iso $expected
 if (-not (Get-Command wsl.exe -ErrorAction SilentlyContinue)) { throw 'BLOCKED: WSL missing; install an Ubuntu WSL distribution before retrying' }
 $distributions = @(& wsl.exe --list --quiet 2>$null)

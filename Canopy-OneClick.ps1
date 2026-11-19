@@ -89,7 +89,8 @@ if (-not (Test-WslReady)) {
   if ($IsoSha256) { $arguments += ' -IsoSha256 ' + $IsoSha256 }
   $arguments += ' -InstallWslTools'
   $elevated = Start-Process -FilePath 'powershell.exe' -ArgumentList $arguments -Verb RunAs -Wait -PassThru
-  exit $elevated.ExitCode
+  if ($elevated.ExitCode -ne 0) { throw ('BLOCKED: elevated setup exited with code ' + $elevated.ExitCode) }
+  exit 0
  }
  if (-not (Get-Command wsl.exe -ErrorAction SilentlyContinue)) { throw 'BLOCKED: wsl.exe unavailable; Windows servicing is required before bootstrap' }
  Write-Host 'Installing WSL Ubuntu prerequisite (Windows may require a restart)...'
@@ -101,9 +102,9 @@ if (-not (Test-WslReady)) {
 & wsl.exe --exec bash -c 'command -v xorriso >/dev/null && command -v python3 >/dev/null && command -v openssl >/dev/null && command -v sha256sum >/dev/null' | Out-Null
 if ($LASTEXITCODE -ne 0) {
  Write-Host 'Installing missing ISO-building tools in WSL...'
- & wsl.exe --exec sudo -n apt-get update
- if ($LASTEXITCODE -ne 0) { throw 'BLOCKED: WSL package installation requires sudo initialization. VM unchanged.' }
- & wsl.exe --exec sudo -n apt-get install -y --no-install-recommends xorriso python3 openssl coreutils
+ & wsl.exe --user root --exec apt-get update
+ if ($LASTEXITCODE -ne 0) { throw 'BLOCKED: WSL package installation failed or root account unavailable. VM unchanged.' }
+ & wsl.exe --user root --exec apt-get install -y --no-install-recommends xorriso python3 openssl coreutils
  if ($LASTEXITCODE -ne 0) { throw 'BLOCKED: WSL package installation failed. VM unchanged.' }
  & wsl.exe --exec bash -c 'command -v xorriso >/dev/null && command -v python3 >/dev/null && command -v openssl >/dev/null && command -v sha256sum >/dev/null' | Out-Null
  if ($LASTEXITCODE -ne 0) { throw 'BLOCKED: ISO-building tools remain unavailable.' }

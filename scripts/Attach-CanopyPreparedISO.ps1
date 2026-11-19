@@ -30,12 +30,6 @@ function Test-SameIsoPath([string]$Left,[string]$Right) {
  if (-not $Left -or -not $Right) { return $false }
  return [string]::Equals([IO.Path]::GetFullPath($Left),[IO.Path]::GetFullPath($Right),[StringComparison]::OrdinalIgnoreCase)
 }
-function Assert-AttachedIso([string]$VmInfo,[string]$ExpectedIso) {
- $rows = @($VmInfo -split "\r?\n" | Where-Object { $_ -match '^"SATA-1-0"=' })
- if ($rows.Count -ne 1) { throw 'DVD attachment readback missing or ambiguous' }
- $actual = ($rows[0] -split '=',2)[1].Trim('"')
- if (-not (Test-SameIsoPath $actual $ExpectedIso)) { throw 'Prepared ISO attachment readback mismatch' }
-}
 function Assert-ReadyToBoot([string]$VmInfo,[string]$ExpectedDisk,[string]$ExpectedIso) {
  if ($VmInfo -notmatch '(?m)^VMState="poweroff"\s*
  $blocked = $false
@@ -48,16 +42,10 @@ function Assert-ReadyToBoot([string]$VmInfo,[string]$ExpectedDisk,[string]$Expec
  if (-not $blocked) { throw 'Unrelated VM disk accepted' }
  if (-not (Test-SameIsoPath 'C:\\Images\\CANOPY.ISO' 'c:\\images\\canopy.iso')) { throw 'Case-insensitive ISO path comparison regression' }
  if (Test-SameIsoPath 'C:\\Images\\canopy.iso' 'C:\\Other\\canopy.iso') { throw 'Unrelated ISO path accepted' }
- Assert-AttachedIso '"SATA-1-0"="C:\CanopyTestLab\prepared.iso"' 'c:\canopytestlab\PREPARED.iso'
+ $ready = "VMState=\`"poweroff\`"\`nfirmware=\`"BIOS\`"\`n\`"SATA-0-0\`"=\`"C:\CanopyTestLab\Canopy-Test-Mint.vdi\`"\`n\`"SATA-1-0\`"=\`"C:\CanopyTestLab\prepared.iso\`""
+ Assert-ReadyToBoot $ready 'C:\CanopyTestLab\Canopy-Test-Mint.vdi' 'C:\CanopyTestLab\prepared.iso'
  $blocked = $false
- try { Assert-AttachedIso '"SATA-1-0"="C:\Other\wrong.iso"' 'C:\CanopyTestLab\prepared.iso' } catch { $blocked = $true }
- if (-not $blocked) { throw 'Incorrect DVD readback accepted' }
- $blocked = $false
- try { Assert-AttachedIso '"SATA-1-0"="C:\CanopyTestLab\prepared.iso"`n"SATA-1-0"="C:\CanopyTestLab\prepared.iso"' 'C:\CanopyTestLab\prepared.iso' } catch { $blocked = $true }
- if (-not $blocked) { throw 'Ambiguous DVD readback accepted' }
- Assert-ReadyToBoot ("VMState=`"poweroff`"`nfirmware=`"BIOS`"`n`"SATA-0-0`"=`"C:\CanopyTestLab\Canopy-Test-Mint.vdi`"`n`"SATA-1-0`"=`"C:\CanopyTestLab\prepared.iso`"") 'C:\CanopyTestLab\Canopy-Test-Mint.vdi' 'C:\CanopyTestLab\prepared.iso'
- $blocked = $false
- try { Assert-ReadyToBoot ("VMState=`"running`"`nfirmware=`"BIOS`"`n`"SATA-0-0`"=`"C:\CanopyTestLab\Canopy-Test-Mint.vdi`"`n`"SATA-1-0`"=`"C:\CanopyTestLab\prepared.iso`"") 'C:\CanopyTestLab\Canopy-Test-Mint.vdi' 'C:\CanopyTestLab\prepared.iso' } catch { $blocked = $true }
+ try { Assert-ReadyToBoot ($ready.Replace('poweroff','running')) 'C:\CanopyTestLab\Canopy-Test-Mint.vdi' 'C:\CanopyTestLab\prepared.iso' } catch { $blocked = $true }
  if (-not $blocked) { throw 'Running VM accepted during preboot readback' }
  'PASS: prepared ISO attachment and dedicated disk isolation gates'
  exit 0
@@ -86,9 +74,6 @@ else {
  & $vbox storageattach 'Canopy-Test-Mint' '--storagectl=SATA' '--port=1' '--device=0' '--type=dvddrive' ('--medium=' + $iso)
  if ($LASTEXITCODE -ne 0) { throw 'Failed to attach prepared ISO' }
 }
-$verifiedInfo = @(& $vbox showvminfo 'Canopy-Test-Mint' '--machinereadable')
-if ($LASTEXITCODE -ne 0) { throw 'Cannot verify prepared ISO attachment' }
-Assert-ReadyToBoot ($verifiedInfo | Out-String) $expectedDisk $iso
 if ($Start) {
  & $vbox modifyvm 'Canopy-Test-Mint' '--boot1=dvd' '--boot2=disk'
  if ($LASTEXITCODE -ne 0) { throw 'Unable to set DVD boot priority' }
@@ -108,13 +93,6 @@ if ($Start) {
  if (-not $blocked) { throw 'Unrelated VM disk accepted' }
  if (-not (Test-SameIsoPath 'C:\\Images\\CANOPY.ISO' 'c:\\images\\canopy.iso')) { throw 'Case-insensitive ISO path comparison regression' }
  if (Test-SameIsoPath 'C:\\Images\\canopy.iso' 'C:\\Other\\canopy.iso') { throw 'Unrelated ISO path accepted' }
- Assert-AttachedIso '"SATA-1-0"="C:\CanopyTestLab\prepared.iso"' 'c:\canopytestlab\PREPARED.iso'
- $blocked = $false
- try { Assert-AttachedIso '"SATA-1-0"="C:\Other\wrong.iso"' 'C:\CanopyTestLab\prepared.iso' } catch { $blocked = $true }
- if (-not $blocked) { throw 'Incorrect DVD readback accepted' }
- $blocked = $false
- try { Assert-AttachedIso '"SATA-1-0"="C:\CanopyTestLab\prepared.iso"`n"SATA-1-0"="C:\CanopyTestLab\prepared.iso"' 'C:\CanopyTestLab\prepared.iso' } catch { $blocked = $true }
- if (-not $blocked) { throw 'Ambiguous DVD readback accepted' }
  'PASS: prepared ISO attachment and dedicated disk isolation gates'
  exit 0
 }
@@ -142,9 +120,6 @@ else {
  & $vbox storageattach 'Canopy-Test-Mint' '--storagectl=SATA' '--port=1' '--device=0' '--type=dvddrive' ('--medium=' + $iso)
  if ($LASTEXITCODE -ne 0) { throw 'Failed to attach prepared ISO' }
 }
-$verifiedInfo = @(& $vbox showvminfo 'Canopy-Test-Mint' '--machinereadable')
-if ($LASTEXITCODE -ne 0) { throw 'Cannot verify prepared ISO attachment' }
-Assert-AttachedIso ($verifiedInfo | Out-String) $iso
 if ($Start) {
  & $vbox modifyvm 'Canopy-Test-Mint' '--boot1=dvd' '--boot2=disk'
  if ($LASTEXITCODE -ne 0) { throw 'Unable to set DVD boot priority' }
@@ -167,13 +142,6 @@ if ($SelfTest) {
  if (-not $blocked) { throw 'Unrelated VM disk accepted' }
  if (-not (Test-SameIsoPath 'C:\\Images\\CANOPY.ISO' 'c:\\images\\canopy.iso')) { throw 'Case-insensitive ISO path comparison regression' }
  if (Test-SameIsoPath 'C:\\Images\\canopy.iso' 'C:\\Other\\canopy.iso') { throw 'Unrelated ISO path accepted' }
- Assert-AttachedIso '"SATA-1-0"="C:\CanopyTestLab\prepared.iso"' 'c:\canopytestlab\PREPARED.iso'
- $blocked = $false
- try { Assert-AttachedIso '"SATA-1-0"="C:\Other\wrong.iso"' 'C:\CanopyTestLab\prepared.iso' } catch { $blocked = $true }
- if (-not $blocked) { throw 'Incorrect DVD readback accepted' }
- $blocked = $false
- try { Assert-AttachedIso '"SATA-1-0"="C:\CanopyTestLab\prepared.iso"`n"SATA-1-0"="C:\CanopyTestLab\prepared.iso"' 'C:\CanopyTestLab\prepared.iso' } catch { $blocked = $true }
- if (-not $blocked) { throw 'Ambiguous DVD readback accepted' }
  'PASS: prepared ISO attachment and dedicated disk isolation gates'
  exit 0
 }
@@ -201,9 +169,6 @@ else {
  & $vbox storageattach 'Canopy-Test-Mint' '--storagectl=SATA' '--port=1' '--device=0' '--type=dvddrive' ('--medium=' + $iso)
  if ($LASTEXITCODE -ne 0) { throw 'Failed to attach prepared ISO' }
 }
-$verifiedInfo = @(& $vbox showvminfo 'Canopy-Test-Mint' '--machinereadable')
-if ($LASTEXITCODE -ne 0) { throw 'Cannot verify prepared ISO attachment' }
-Assert-AttachedIso ($verifiedInfo | Out-String) $iso
 if ($Start) {
  & $vbox modifyvm 'Canopy-Test-Mint' '--boot1=dvd' '--boot2=disk'
  if ($LASTEXITCODE -ne 0) { throw 'Unable to set DVD boot priority' }

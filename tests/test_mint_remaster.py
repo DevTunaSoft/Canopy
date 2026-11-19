@@ -45,16 +45,16 @@ class MintRemasterTests(unittest.TestCase):
             "canopy_bios", ROOT / "scripts" / "Patch-CanopyBiosMenu.py")
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
-        original = "DEFAULT live\\nTIMEOUT 50\\nLABEL live\\n KERNEL /casper/vmlinuz\\n APPEND initrd=/casper/initrd boot=casper\\n"
+        original = "DEFAULT live\nTIMEOUT 50\nLABEL live\n KERNEL /casper/vmlinuz\n APPEND initrd=/casper/initrd boot=casper\n"
         updated = module.patch(original)
         self.assertIn("DEFAULT canopy-auto", updated)
         self.assertIn("automatic-ubiquity only-ubiquity", updated)
         self.assertIn("LABEL live", updated)
         self.assertEqual(updated.count("DEFAULT "), 1)
         with self.assertRaises(ValueError):
-            module.patch("UI menu.c32\\n" + original)
+            module.patch("UI menu.c32\n" + original)
         with self.assertRaises(ValueError):
-            module.patch("DEFAULT live\\nLABEL live\\n KERNEL /other/vmlinuz\\n")
+            module.patch("DEFAULT live\nLABEL live\n KERNEL /other/vmlinuz\n")
         with self.assertRaises(ValueError):
             module.patch(updated)
 

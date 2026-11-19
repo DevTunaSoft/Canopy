@@ -44,7 +44,23 @@ if ($SelfTest) {
  $blocked = $false
  try { Assert-Source 'C:\missing.iso' ('a' * 64) } catch { $blocked = $true }
  if (-not $blocked) { throw 'Missing source accepted' }
- 'PASS: one-click source checksum and existence gates'
+ $tempImage = Join-Path $env:TEMP ('canopy-cache-test-' + [guid]::NewGuid().ToString('N') + '.iso')
+ try {
+  [IO.File]::WriteAllText($tempImage, 'test')
+  $blocked = $false
+  try { Assert-PreparedCache $tempImage ($tempImage + '.json') ('a' * 64) | Out-Null } catch { $blocked = $true }
+  if (-not $blocked) { throw 'Prepared ISO without receipt was accepted' }
+  $actual = (Get-FileHash -LiteralPath $tempImage -Algorithm SHA256).Hash
+  @{source_sha256=('a' * 64);prepared_sha256=$actual} | ConvertTo-Json | Set-Content -LiteralPath ($tempImage + '.json')
+  if (-not (Assert-PreparedCache $tempImage ($tempImage + '.json') ('a' * 64))) { throw 'Valid cache rejected' }
+  [IO.File]::WriteAllText($tempImage, 'tampered')
+  $blocked = $false
+  try { Assert-PreparedCache $tempImage ($tempImage + '.json') ('a' * 64) | Out-Null } catch { $blocked = $true }
+  if (-not $blocked) { throw 'Tampered ISO was accepted' }
+ } finally {
+  Remove-Item -LiteralPath $tempImage,($tempImage + '.json') -Force -ErrorAction SilentlyContinue
+ }
+ 'PASS: source and prepared ISO provenance regression gates'
  exit 0
 }
 $repo = $PSScriptRoot
@@ -64,13 +80,17 @@ New-Item -ItemType Directory -Path $preparedDir -Force | Out-Null
 $prepared = Join-Path $preparedDir 'canopy-mint-test.iso'
 $builder = Join-Path $repo 'scripts\Build-CanopyMintUnattendedISO.sh'
 if (-not (Test-Path -LiteralPath $builder -PathType Leaf)) { throw 'ISO builder missing' }
-if (-not (Test-Path -LiteralPath $prepared -PathType Leaf)) {
+$receipt = $prepared + '.json'
+if (-not (Assert-PreparedCache $prepared $receipt $expected)) {
  $linuxBuilder = Get-WslPath $builder
  $linuxIso = Get-WslPath $iso
  $linuxPrepared = Get-WslPath $prepared
  & wsl.exe --exec bash $linuxBuilder $linuxIso $expected $linuxPrepared
  if ($LASTEXITCODE -ne 0) { throw 'Mint ISO remaster failed. VM was not modified.' }
+ $builtHash = (Get-FileHash -LiteralPath $prepared -Algorithm SHA256).Hash
+ @{source_sha256=$expected.ToUpperInvariant();prepared_sha256=$builtHash} | ConvertTo-Json | Set-Content -LiteralPath $receipt -Encoding UTF8
 }
+if (-not (Assert-PreparedCache $prepared $receipt $expected)) { throw 'Prepared ISO validation failed' }
 $preparedHash = (Get-FileHash -LiteralPath $prepared -Algorithm SHA256).Hash
 $vbox = Join-Path $env:ProgramFiles 'Oracle\VirtualBox\VBoxManage.exe'
 if (-not (Test-Path -LiteralPath $vbox -PathType Leaf)) { throw 'VirtualBox missing' }

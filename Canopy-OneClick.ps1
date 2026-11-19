@@ -20,6 +20,9 @@ function Assert-Source([string]$Path,[string]$Hash) {
  if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { throw 'Mint ISO not found' }
  if ((Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash -ne $Hash.ToUpperInvariant()) { throw 'Mint ISO checksum mismatch' }
 }
+function Test-DedicatedVmListed([string]$Listing) {
+ return [bool]($Listing -match '(?m)^"Canopy-Test-Mint"\s+\{[0-9a-fA-F-]{36}\}\s*$')
+}
 function Get-VMAction([bool]$Exists,[bool]$DedicatedDiskExists) {
  if ($Exists) { return 'reuse' }
  if ($DedicatedDiskExists) { throw 'Orphaned dedicated virtual disk exists; refusing to overwrite it' }
@@ -54,6 +57,8 @@ if ($SelfTest) {
  $blocked = $false
  try { Resolve-ApprovedHash '' 'C:\missing-checksum-file' | Out-Null } catch { $blocked = $true }
  if (-not $blocked) { throw 'Missing authenticated checksum accepted' }
+ if (-not (Test-DedicatedVmListed '"Canopy-Test-Mint" {12345678-1234-1234-1234-123456789abc}')) { throw 'Existing VM not detected' }
+ if (Test-DedicatedVmListed '"Other-VM" {12345678-1234-1234-1234-123456789abc}') { throw 'Unrelated VM detected as Canopy' }
  if ((Get-VMAction $false $false) -ne 'create') { throw 'VM creation decision regression' }
  if ((Get-VMAction $true $true) -ne 'reuse') { throw 'Existing VM decision regression' }
  $blocked = $false
@@ -101,7 +106,7 @@ $vbox = Join-Path $env:ProgramFiles 'Oracle\VirtualBox\VBoxManage.exe'
 if (-not (Test-Path -LiteralPath $vbox -PathType Leaf)) { throw 'VirtualBox missing' }
 $vmList = @(& $vbox list vms)
 if ($LASTEXITCODE -ne 0) { throw 'Unable to enumerate VirtualBox VMs' }
-$exists = [bool](($vmList | Out-String) -match '(?m)^"Canopy-Test-Mint"\\s')
+$exists = Test-DedicatedVmListed ($vmList | Out-String)
 $disk = Join-Path $base 'VirtualMachines\\Canopy-Test-Mint.vdi'
 $action = Get-VMAction $exists (Test-Path -LiteralPath $disk)
 if ($action -eq 'create') {

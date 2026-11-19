@@ -92,7 +92,20 @@ function Register-CanopyResume {
  $attempts = 0
  if (Test-Path -LiteralPath $stateFile -PathType Leaf) {
   $raw = (Get-Content -LiteralPath $stateFile -Raw).Trim()
-  if ($raw -notmatch '^[0-9]{1,2}
+  if ($raw -notmatch '^[0-9]{1,2}$') { throw 'BLOCKED: invalid restart recovery state' }
+  $attempts = [int]$raw
+ }
+ if ((Get-ResumeAttemptAction $attempts) -eq 'block') { throw 'BLOCKED: restart recovery retry limit reached; manual investigation required' }
+ $key = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce'
+ if (-not (Test-Path -LiteralPath $key)) { New-Item -Path $key -Force | Out-Null }
+ Set-Content -LiteralPath $stateFile -Value ($attempts + 1) -Encoding Ascii
+ New-ItemProperty -Path $key -Name 'CanopyResumeSetup' -Value $command -PropertyType String -Force | Out-Null
+ Write-Host 'Canopy will retry at your next Windows sign-in (maximum two attempts). No automatic reboot.'
+}
+function Clear-CanopyResume {
+ Remove-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce' -Name 'CanopyResumeSetup' -ErrorAction SilentlyContinue
+ Remove-Item -LiteralPath (Join-Path $env:LOCALAPPDATA 'CanopyTestLab\resume-attempts.txt') -Force -ErrorAction SilentlyContinue
+}
 # Bootstrap WSL automatically when possible. A required Windows reboot is reported,
 # never forced, and no VM is modified before the Linux builder is ready.
 function Test-WslReady {

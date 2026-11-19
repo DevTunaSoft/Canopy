@@ -25,7 +25,13 @@ def main():
             print(stderr.decode(errors="replace"), file=sys.stderr)
             print(f"FAIL: app exited early ({process.returncode})", file=sys.stderr)
             return 1
-        print("PASS: Qt process remained alive for 5 seconds under Xvfb")
+        process.terminate()
+        stdout, stderr = process.communicate(timeout=5)
+        if b"CANOPY_CLASSIC_WINDOW_READY" not in stderr:
+            print(stderr.decode(errors="replace"), file=sys.stderr)
+            print("FAIL: Qt process did not confirm a visible QML window", file=sys.stderr)
+            return 1
+        print("PASS: visible Qt Quick window initialized and remained alive for 5 seconds")
         return 0
     finally:
         if process.poll() is None:

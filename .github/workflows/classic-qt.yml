@@ -13,6 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Qt build and headless runtime dependencies
+        timeout-minutes: 8
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
@@ -25,8 +26,10 @@ jobs:
       - name: Configure
         run: cmake -S prototype/classic -B build/classic -G Ninja -DCMAKE_BUILD_TYPE=Release
       - name: Compile
+        timeout-minutes: 5
         run: cmake --build build/classic --parallel 2
       - name: Autonomous UI screenshot test
+        timeout-minutes: 2
         env:
           QT_QUICK_BACKEND: software
           LIBGL_ALWAYS_SOFTWARE: "1"

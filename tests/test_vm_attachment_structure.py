@@ -33,6 +33,23 @@ class AttachmentStructureTests(unittest.TestCase):
         self.assertEqual(self.source.count(marker), 1)
         self.assertFalse(self.source.split(marker, 1)[1].strip())
 
+    def test_vm_rechecked_after_boot_priority_change(self):
+        source = self.source
+        priority = source.index("& $vbox modifyvm 'Canopy-Test-Mint'")
+        readback = source.index("$preStartInfo = @(& $vbox showvminfo")
+        start = source.index("& $vbox startvm 'Canopy-Test-Mint'")
+        self.assertLess(priority, readback)
+        self.assertLess(readback, start)
+        between = source[readback:start]
+        for check in (
+            "VM state changed before boot",
+            "VM firmware changed before boot",
+            "Assert-DedicatedDisk $preStart $expectedDisk",
+            "Assert-AttachedIso $preStart $iso",
+        ):
+            with self.subTest(check=check):
+                self.assertIn(check, between)
+
     def test_iso_readback_precedes_vm_start(self):
         source = self.source
         self.assertLess(source.index("Assert-AttachedIso ($verifiedInfo | Out-String) $iso"),

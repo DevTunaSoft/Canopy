@@ -26,6 +26,10 @@ function Assert-DedicatedDisk([string]$VmInfo,[string]$ExpectedDisk) {
   throw 'Unexpected virtual disk path; refusing installer boot'
  }
 }
+function Test-SameIsoPath([string]$Left,[string]$Right) {
+ if (-not $Left -or -not $Right) { return $false }
+ return [string]::Equals([IO.Path]::GetFullPath($Left),[IO.Path]::GetFullPath($Right),[StringComparison]::OrdinalIgnoreCase)
+}
 if ($SelfTest) {
  $blocked = $false
  try { Assert-Input '' 'invalid' } catch { $blocked = $true }
@@ -35,6 +39,8 @@ if ($SelfTest) {
  $blocked = $false
  try { Assert-DedicatedDisk '"SATA-0-0"="C:\OtherVM\private.vdi"' 'C:\CanopyTestLab\Canopy-Test-Mint.vdi' } catch { $blocked = $true }
  if (-not $blocked) { throw 'Unrelated VM disk accepted' }
+ if (-not (Test-SameIsoPath 'C:\\Images\\CANOPY.ISO' 'c:\\images\\canopy.iso')) { throw 'Case-insensitive ISO path comparison regression' }
+ if (Test-SameIsoPath 'C:\\Images\\canopy.iso' 'C:\\Other\\canopy.iso') { throw 'Unrelated ISO path accepted' }
  'PASS: prepared ISO attachment and dedicated disk isolation gates'
  exit 0
 }
@@ -57,7 +63,7 @@ $previous = ($dvd[0] -split '=',2)[1].Trim('"')
 if ($previous -and $previous -ne 'none' -and $previous -ne 'emptydrive' -and -not (Test-Path -LiteralPath $previous -PathType Leaf)) {
  throw 'Existing DVD path cannot be verified; refusing to change it'
 }
-if ($previous -eq $iso) { 'Prepared ISO already attached' }
+if (Test-SameIsoPath $previous $iso) { 'Prepared ISO already attached' }
 else {
  & $vbox storageattach 'Canopy-Test-Mint' '--storagectl=SATA' '--port=1' '--device=0' '--type=dvddrive' ('--medium=' + $iso)
  if ($LASTEXITCODE -ne 0) { throw 'Failed to attach prepared ISO' }

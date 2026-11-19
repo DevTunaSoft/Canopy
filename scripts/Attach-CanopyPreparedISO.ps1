@@ -87,6 +87,13 @@ Assert-AttachedIso ($verifiedInfo | Out-String) $iso
 if ($Start) {
  & $vbox modifyvm 'Canopy-Test-Mint' '--boot1=dvd' '--boot2=disk'
  if ($LASTEXITCODE -ne 0) { throw 'Unable to set DVD boot priority' }
+ $preStartInfo = @(& $vbox showvminfo 'Canopy-Test-Mint' '--machinereadable')
+ if ($LASTEXITCODE -ne 0) { throw 'Cannot verify VM state immediately before boot' }
+ $preStart = $preStartInfo | Out-String
+ if ($preStart -notmatch '(?m)^VMState="poweroff"\s*$') { throw 'VM state changed before boot; refusing to start' }
+ if ($preStart -notmatch '(?m)^firmware="BIOS"\s*$') { throw 'VM firmware changed before boot' }
+ Assert-DedicatedDisk $preStart $expectedDisk
+ Assert-AttachedIso $preStart $iso
  & $vbox startvm 'Canopy-Test-Mint' '--type=gui'
  if ($LASTEXITCODE -ne 0) { throw 'VM start failed' }
  'VM started. Actual guest installation and boot still require verification.'

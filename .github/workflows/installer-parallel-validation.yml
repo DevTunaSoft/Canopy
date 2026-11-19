@@ -7,6 +7,8 @@ on:
       - 'scripts/Resume-CanopyMintInstall.ps1'
       - 'scripts/Install-CanopyMintOS.ps1'
       - 'scripts/Attach-CanopyPreparedISO.ps1'
+      - 'Canopy-Launch-Prepared.ps1'
+      - 'Canopy-Launch-Prepared.cmd'
       - 'tests/test_mint_remaster.py'
       - '.github/workflows/installer-parallel-validation.yml'
   pull_request:
@@ -36,7 +38,7 @@ jobs:
       - name: Parse all installer PowerShell scripts
         shell: pwsh
         run: |
-          $paths = @('Canopy-Setup.ps1','scripts/Resume-CanopyMintInstall.ps1','scripts/Install-CanopyMintOS.ps1','scripts/Attach-CanopyPreparedISO.ps1')
+          $paths = @('Canopy-Setup.ps1','scripts/Resume-CanopyMintInstall.ps1','scripts/Install-CanopyMintOS.ps1','scripts/Attach-CanopyPreparedISO.ps1','Canopy-Launch-Prepared.ps1')
           foreach ($path in $paths) {
             $tokens = $null; $errors = $null
             [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $path).Path,[ref]$tokens,[ref]$errors) | Out-Null
@@ -49,6 +51,7 @@ jobs:
           ./scripts/Resume-CanopyMintInstall.ps1 -IsoPath 'C:\mint.iso' -IsoSha256 ('a' * 64) -SelfTest
           ./scripts/Install-CanopyMintOS.ps1 -IsoPath 'C:\mint.iso' -IsoSha256 ('a' * 64) -PasswordFile 'C:\secret.txt' -SelfTest
           ./scripts/Attach-CanopyPreparedISO.ps1 -IsoPath 'C:\prepared.iso' -IsoSha256 ('a' * 64) -SelfTest
+          ./Canopy-Launch-Prepared.ps1 -SelfTest
   security-review:
     runs-on: ubuntu-latest
     steps:

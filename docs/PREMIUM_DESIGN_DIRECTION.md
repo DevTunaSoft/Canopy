@@ -78,6 +78,14 @@ placeholder visuals. Plan the redesign in a focused design-review branch, then
 implement it in bounded, testable commits. Keep #69 draft/rejected while
 design work proceeds. No main-branch merge without the visual gate.
 
+## Current rebuilding branch
+
+The first isolated corrective candidate is documented in
+[CLASSIC_VISUAL_REBUILD.md](CLASSIC_VISUAL_REBUILD.md), including
+source attribution, Apple reference-pattern boundaries, and Qt image-decode
+test gates. The new artwork is **unapproved**. No further design may be
+promoted merely by compiling or passing an SVG safety check.
+
 ## Product identity
 
 Canopy Classic is a genuinely refined, macOS-inspired desktop shell for Linux Mint.

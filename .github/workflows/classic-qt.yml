@@ -42,6 +42,8 @@ jobs:
           python3 tools/check_screenshot.py test-artifacts/classic-standard.png 1200 750
           timeout 30s xvfb-run -a ./build/classic/canopy-classic-spike --self-test-size 760x500 --self-test-screenshot test-artifacts/classic-compact.png
           python3 tools/check_screenshot.py test-artifacts/classic-compact.png 760 500
+          timeout 30s xvfb-run -a ./build/classic/canopy-classic-spike --self-test-size 1920x1080 --self-test-screenshot test-artifacts/classic-fullhd.png
+          python3 tools/check_screenshot.py test-artifacts/classic-fullhd.png 1920 1080
       - name: Capture informational CPU and PSS baseline
         timeout-minutes: 2
         env:

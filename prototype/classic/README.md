@@ -1,4 +1,10 @@
-# Classic Qt Quick technology spike
+> **Reference-correction notice (November 20, 2026).** The user rejected
+> PR #72's claim that its combined tree+penguin emblem and colored penguin
+> matched supplied icons. The current prototype instead uses a traced
+> white-on-dark penguin launcher from a recovered reference image and
+> six moodboard application *categories* (not verified master artwork).
+> See [VISUAL_REFERENCE_PROVENANCE.md](../../docs/VISUAL_REFERENCE_PROVENANCE.md).
+> Visual sign-off remains pending.\n\n# Classic Qt Quick technology spike
 
 This is a **standalone demonstration window**, not a Linux desktop session, window manager, dock replacement, installer, or completed product. Dock buttons are deliberately inert; no app-launch capability is claimed. The Files window is an interactive visual-only composition: sidebar navigation, sample-folder selection and name filtering work on local demonstration data, but no live directory browsing or disk access is implemented. The screenshot self-test rejects a missing, clipped or overlapping preview, verifies the original wallpaper fills the window and that all seven dock icons exist, but is not a human aesthetic review. The original Canopy launcher and the seven dock concepts are visual-only; no app launch or desktop services are implied.
 
@@ -34,7 +40,7 @@ one consistent authored blue folder SVG rather than the rejected pastel tiles.
 There is no real file browser, launcher or system menu integration.
 
 The older Canvas dock artwork was rejected and replaced on the separate icon
-candidate branch with seven original source-controlled SVG files. The new
+candidate branch with six original source-controlled SVG candidates. The new
 family's readiness is checked at runtime and its source safety is checked with
 `tools/check_icon_set.py`, but it still requires human aesthetic review. The
 previous generic Home/Mail/Calendar lineup is no longer used. The brandboard-aligned concepts now include Canopy, Files, Browser, Photos, Settings, Terminal and Trash, plus a separate penguin launcher. These icons are still *visual candidates*, not approved production masters. This is not

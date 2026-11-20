@@ -250,6 +250,18 @@ int main(int argc, char *argv[]) {
         qCritical() << "Canopy Classic: QML root did not create a visible window";
         return 1;
     }
+    // Open the real Qt launcher scene during CI screenshot runs. This exercises
+    // the same QML path as a click on the Canopy penguin, without mouse synthesis.
+    const bool launcherScreenshot = args.contains(QStringLiteral("--self-test-launcher"));
+    if (launcherScreenshot) {
+        auto *launcherOverlay = window->findChild<QQuickItem *>(
+            QStringLiteral("canopyAppLauncher"));
+        if (!launcherOverlay) {
+            qCritical() << "SELF_TEST_FAIL: application launcher was not created";
+            return 1;
+        }
+        launcherOverlay->setVisible(true);
+    }
     qInfo() << "CANOPY_CLASSIC_WINDOW_READY";
     const int sizeIndex = args.indexOf(QStringLiteral("--self-test-size"));
     if (sizeIndex >= 0) {
@@ -277,7 +289,7 @@ int main(int argc, char *argv[]) {
             return 2;
         }
         const QString screenshotPath = args.at(screenshotIndex + 1);
-        QTimer::singleShot(1000, window, [window, screenshotPath, approvedMode, landscapeMode]() {
+        QTimer::singleShot(1000, window, [window, screenshotPath, approvedMode, landscapeMode, launcherScreenshot]() {
             auto *bar = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBar"));
             auto *dock = window->findChild<QQuickItem *>(QStringLiteral("canopyDock"));
             auto *launcher = window->findChild<QQuickItem *>(QStringLiteral("canopyLauncher"));
@@ -327,6 +339,26 @@ int main(int argc, char *argv[]) {
                             << preview->size() << "dock" << dockOrigin << dock->size();
                 QCoreApplication::exit(1);
                 return;
+            }
+            if (launcherScreenshot) {
+                auto *launcherOverlay = window->findChild<QQuickItem *>(
+                    QStringLiteral("canopyAppLauncher"));
+                const int expected = approvedMode ? 8 : 6;
+                if (!launcherOverlay || !launcherOverlay->isVisible() ||
+                    launcherOverlay->property("visibleIconCount").toInt() != expected ||
+                    countVisualItems(launcherOverlay, QStringLiteral("canopyDockTile")) != expected ||
+                    countReadyDockTiles(launcherOverlay) != expected) {
+                    qCritical() << "SELF_TEST_FAIL: app launcher grid incomplete"
+                                << "expected" << expected
+                                << "visible"
+                                << (launcherOverlay ? launcherOverlay->isVisible() : false)
+                                << "ready icons"
+                                << (launcherOverlay ? countReadyDockTiles(launcherOverlay) : 0);
+                    QCoreApplication::exit(1);
+                    return;
+                }
+                qInfo() << "SELF_TEST_PASS: searchable application launcher rendered with"
+                        << expected << "original icons";
             }
             const int dockTileCount = countVisualItems(dock, QStringLiteral("canopyDockTile"));
             if (!wallpaper->property("imageReady").toBool()) {

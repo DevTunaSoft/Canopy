@@ -47,10 +47,10 @@ Canvas {
             c.fillStyle = gradient
             c.beginPath()
             c.moveTo(points[0][0], points[0][1])
-            c.bezierCurveTo(...points[2])
-            c.bezierCurveTo(...points[3])
-            c.bezierCurveTo(...points[4])
-            c.bezierCurveTo(...points[5])
+            c.bezierCurveTo(points[2][0], points[2][1], points[2][2], points[2][3], points[2][4], points[2][5])
+            c.bezierCurveTo(points[3][0], points[3][1], points[3][2], points[3][3], points[3][4], points[3][5])
+            c.bezierCurveTo(points[4][0], points[4][1], points[4][2], points[4][3], points[4][4], points[4][5])
+            c.bezierCurveTo(points[5][0], points[5][1], points[5][2], points[5][3], points[5][4], points[5][5])
             c.closePath()
             c.fill()
         }

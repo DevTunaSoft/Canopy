@@ -156,8 +156,12 @@ ApplicationWindow {
             Repeater {
                 model: [
                     { title: "Home" },
-                    { title: "Search" },
+                    { title: "Web" },
                     { title: "Files" },
+                    { title: "Photos" },
+                    { title: "Notes" },
+                    { title: "Search" },
+                    { title: "Terminal" },
                     { title: "Settings" }
                 ]
                 delegate: DockTile {

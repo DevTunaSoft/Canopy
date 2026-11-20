@@ -259,14 +259,18 @@ Rectangle {
                 visible: preview.currentSection === "Home"
                 clip: true
                 contentWidth: width
-                contentHeight: folders.childrenRect.height + 10
+                contentHeight: Math.max(height, folders.height + 10)
                 boundsBehavior: Flickable.StopAtBounds
                 flickableDirection: Flickable.VerticalFlick
-                ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+                ScrollBar.vertical: ScrollBar {
+                    policy: preview.condensed ? ScrollBar.AlwaysOn : ScrollBar.AsNeeded
+                    active: preview.condensed
+                }
                 Flow {
                     id: folders
-                    width: folderScroller.width - 8
+                    width: folderScroller.width - 13
                     spacing: preview.condensed ? 6 : 10
+                    height: childrenRect.height
                     Repeater {
                         model: preview.sampleFolders
                         delegate: FolderTile {

@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-<title>Canopy Post — original icon artwork</title>
-<desc>Original static 128-pixel Canopy Classic vector artwork, independent of commercial app icons.</desc>
-<defs><linearGradient id="b" x1="0" y1="0" x2=".9" y2="1"><stop offset="0" stop-color="#a2e8ff"/><stop offset=".45" stop-color="#55bce7"/><stop offset="1" stop-color="#1262ab"/></linearGradient><linearGradient id="p" x1="0" y1="0" x2=".95" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#f6fcff"/><stop offset="1" stop-color="#c9dce9"/></linearGradient></defs><path d="M12 43 Q12 31 24 31 H104 Q116 31 116 43 V91 Q116 102 104 102 H24 Q12 102 12 91Z" fill="url(#b)" stroke="#2d72ad" stroke-width="3"/>
-<path d="M22 39 H106 V88 H22Z" fill="url(#p)"/>
-<path d="M22 40 L64 75 L106 40" fill="none" stroke="#6d9dbe" stroke-width="4" stroke-linejoin="round"/>
-<path d="M22 90 L53 66 M106 90 L75 66" stroke="#b0cfdf" stroke-width="3"/>
-<path d="M16 45 L23 42 V96 H105 L112 88" fill="none" stroke="#e3f8ff" stroke-opacity=".72" stroke-width="3"/></svg>

@@ -14,9 +14,10 @@ qt_add_qml_module(canopy-classic-spike
 qt_add_resources(canopy-classic-spike "canopy-original-art"
     PREFIX "/Canopy/Classic"
     FILES assets/wallpapers/blue-current.svg
-          assets/icons/home.svg assets/icons/files.svg assets/icons/browser.svg
-          assets/icons/photos.svg assets/icons/mail.svg assets/icons/calendar.svg
-          assets/icons/settings.svg
+          assets/brand/penguin-launcher.svg
+          assets/icons/canopy.svg assets/icons/files.svg assets/icons/browser.svg
+          assets/icons/photos.svg assets/icons/settings.svg
+          assets/icons/terminal.svg assets/icons/trash.svg
 )
 target_link_libraries(canopy-classic-spike PRIVATE Qt6::Quick Qt6::QuickControls2)
 install(TARGETS canopy-classic-spike RUNTIME DESTINATION bin)

@@ -73,6 +73,24 @@ wallpaper, icon or typeface. No Apple-owned visual assets may be imported.
    advancing another design to production status. A source-quality check or
    GitHub green run is only engineering acceptance.
 
+## Approved brandboard lineup correction (Nov 20, 2026)
+
+The owner flagged missing **their actual Canopy icons** after viewing the
+seven-generic-icon Qt preview. The chosen Canopy brand moodboard—not the newer
+generic UI concept—sets the direction: forest green `#1B5E3B`, charcoal
+`#1F2326`, ivory `#F7F5EB`, and soft gold `#D8B87A`; its central identity
+is a tree canopy protecting a Linux penguin, with a smaller standalone penguin
+launcher. The dock shows file manager, navigator, settings, photos, terminal
+and trash concepts. The prior Home/Mail/Calendar generic line-up must not
+be described as *the user's icon set*.
+
+A new standalone SVG launcher and tree/penguin app icon were authored, with
+Terminal and Trash replacing the displaced generic apps in the seven-slot Qt
+preview. The remaining icons are candidate illustrations and need to be
+reviewed against the original brandboard, not just a generic macOS reference.
+They are **not a pixel-perfect export of the approved branding master**.
+No third-party protected application icons may be copied.
+
 ## Next isolated increments
 
 - Replace generic Dock glyph tiles with an independently designed source SVG

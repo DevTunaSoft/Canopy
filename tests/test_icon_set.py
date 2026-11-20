@@ -7,6 +7,7 @@ from tools.check_icon_set import ICON_NAMES, verify_icon, verify_icon_set
 
 ICONS = (Path(__file__).resolve().parents[1] /
          "prototype/classic/assets/icons")
+BRAND = ICONS.parent / "brand" / "penguin-launcher.svg"
 
 
 class IconSourceTests(unittest.TestCase):
@@ -21,6 +22,18 @@ class IconSourceTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, message):
                 verify_icon(path)
 
+    def test_original_launcher_is_verified(self):
+        verify_icon(BRAND)
+        text = BRAND.read_text(encoding="utf-8")
+        self.assertIn("Canopy penguin launcher symbol", text)
+        self.assertNotIn("<image", text)
+        self.assertNotIn("<script", text)
+
+    def test_corrupt_launcher_is_rejected(self):
+        source = BRAND.read_text(encoding="utf-8")
+        self.check_reject(source.replace("</svg>", "<script>bad()</script></svg>"),
+                          "Unsupported or unsafe")
+
     def test_no_svg_script_allowed(self):
         source = (ICONS / "files.svg").read_text(encoding="utf-8")
         self.check_reject(source.replace("</svg>", "<script>bad()</script></svg>"),
@@ -32,8 +45,8 @@ class IconSourceTests(unittest.TestCase):
                           "Unsupported icon attribute")
 
     def test_broken_gradient_not_allowed(self):
-        source = (ICONS / "home.svg").read_text(encoding="utf-8")
-        self.check_reject(source.replace("url(#b)", "url(#notthere)", 1),
+        source = (ICONS / "canopy.svg").read_text(encoding="utf-8")
+        self.check_reject(source.replace("url(#bg)", "url(#notthere)", 1),
                           "undefined gradient")
 
     def test_missing_asset_fails_set(self):

@@ -1,6 +1,6 @@
 # Classic Qt Quick technology spike
 
-This is a **standalone demonstration window**, not a Linux desktop session, window manager, dock replacement, installer, or completed product. Dock buttons are deliberately inert; no app-launch capability is claimed. The Files window is an interactive visual-only composition: sidebar navigation, sample-folder selection and name filtering work on local demonstration data, but no live directory browsing or disk access is implemented. The screenshot self-test rejects a missing, clipped or overlapping preview, verifies the original wallpaper fills the window and that all seven dock icons exist, but is not a human aesthetic review. The calendar numeral and all other icons are visual-only examples, not live system integration.
+This is a **standalone demonstration window**, not a Linux desktop session, window manager, dock replacement, installer, or completed product. Dock buttons are deliberately inert; no app-launch capability is claimed. The Files window is an interactive visual-only composition: sidebar navigation, sample-folder selection and name filtering work on local demonstration data, but no live directory browsing or disk access is implemented. The screenshot self-test rejects a missing, clipped or overlapping preview, verifies the original wallpaper fills the window and that all seven dock icons exist, but is not a human aesthetic review. The original Canopy launcher and the seven dock concepts are visual-only; no app launch or desktop services are implied.
 
 ## Prerequisites
 CMake 3.21+, C++17 compiler, Qt 6.4+ with Qt Quick and Qt Quick Controls, a working graphical Linux session.
@@ -12,7 +12,7 @@ cmake --build build/classic --parallel 2
 ./build/classic/canopy-classic-spike
 ```
 
-Use a throwaway build directory; do not replace your normal desktop session. The wallpaper is a single statically painted QML Canvas with an image backing store: verify its proportional memory cost on high-DPI displays before selecting this technique for production.
+Use a throwaway build directory; do not replace your normal desktop session. The Blue Current wallpaper is a static cached SVG image loaded by Qt. Measure rasterization memory at high DPI; avoid expensive refresh effects.
 
 ## Acceptance and measurement
 Record distro, Qt version, CPU, GPU, session type, and driver. Run cold and warm starts; sample process proportional set size (PSS) via /proc/PID/smaps_rollup, CPU utilization over five minutes idle, and interaction responsiveness. Capture screenshots for 1080p, HiDPI, keyboard focus, and dark mode. Compare to a minimal GTK alternative before selecting a production toolkit.
@@ -37,7 +37,7 @@ The older Canvas dock artwork was rejected and replaced on the separate icon
 candidate branch with seven original source-controlled SVG files. The new
 family's readiness is checked at runtime and its source safety is checked with
 `tools/check_icon_set.py`, but it still requires human aesthetic review. The
-folder demo art remains **explicitly rejected**. This is not
+previous generic Home/Mail/Calendar lineup is no longer used. The brandboard-aligned concepts now include Canopy, Files, Browser, Photos, Settings, Terminal and Trash, plus a separate penguin launcher. These icons are still *visual candidates*, not approved production masters. This is not
 an accepted redesign. See
 [`docs/CLASSIC_VISUAL_REBUILD.md`](../../docs/CLASSIC_VISUAL_REBUILD.md)
 for references, provenance, rollout criteria, and remaining work.

@@ -27,6 +27,12 @@ The draft Blue Current static SVG source is packaged in the Qt binary using
 the fallback solid background when SVG decoding fails. A plain Qt build does
 not establish that the wallpaper is visually acceptable or memory-efficient.
 
+The main preview now has lightweight *working demo menus* for showing/hiding
+the sample Files window, resetting sample selection and opening an About
+dialog. These actions do not control the Linux desktop. Sample folders reuse
+one consistent authored blue folder SVG rather than the rejected pastel tiles.
+There is no real file browser, launcher or system menu integration.
+
 The older Canvas dock artwork was rejected and replaced on the separate icon
 candidate branch with seven original source-controlled SVG files. The new
 family's readiness is checked at runtime and its source safety is checked with

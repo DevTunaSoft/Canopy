@@ -54,6 +54,7 @@ ApplicationWindow {
 
     Rectangle {
         id: topBar
+        objectName: "canopyTopBar"
         anchors.top: parent.top
         width: parent.width
         height: canopyTheme.barHeight
@@ -136,6 +137,7 @@ ApplicationWindow {
     // Dock controls are explicitly nonfunctional until session services exist.
     Rectangle {
         id: dock
+        objectName: "canopyDock"
         width: Math.min(root.width - 32, dockRow.implicitWidth + 2 * canopyTheme.dockPadding)
         height: canopyTheme.dockSize
         radius: canopyTheme.cornerRadius

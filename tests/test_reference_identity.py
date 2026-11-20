@@ -51,7 +51,7 @@ class ReferenceIdentityTests(unittest.TestCase):
 
     def test_provenance_is_explicit_about_uncertainty(self):
         manifest = (ROOT / "docs/VISUAL_REFERENCE_PROVENANCE.md").read_text()
-        self.assertIn("6bc6fbf22a8da5f20af4b6f35ec6647db80923d96480d831190d6159282724f", manifest)
+        self.assertIn("6bc6fbf22a8da5f20af4b6f35ec6647dbb80923d96480d831190d6159282724f", manifest)
         self.assertIn("not proof these are individually approved master assets", manifest)
         self.assertIn("not a byte-identical image", manifest)
 

@@ -37,6 +37,8 @@ class AppLauncherTests(unittest.TestCase):
         self.assertIn("countReadyDockTiles(launcherOverlay) != expected", main)
         self.assertIn("SELF_TEST_PASS: searchable application launcher", main)
         self.assertIn("--self-test-launcher", workflow)
+        self.assertIn("--self-test-launcher-filter-files", workflow)
+        self.assertIn('searchControl->setProperty("text", "Files")', main)
 
 
 if __name__ == "__main__":

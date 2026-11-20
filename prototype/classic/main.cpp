@@ -55,7 +55,8 @@ int main(int argc, char *argv[]) {
             auto *bar = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBar"));
             auto *dock = window->findChild<QQuickItem *>(QStringLiteral("canopyDock"));
             auto *launcher = window->findChild<QQuickItem *>(QStringLiteral("canopyLauncher"));
-            if (!bar || !dock || !launcher) {
+            auto *preview = window->findChild<QQuickItem *>(QStringLiteral("canopyPreviewWindow"));
+            if (!bar || !dock || !launcher || !preview) {
                 qCritical() << "SELF_TEST_FAIL: missing required desktop chrome";
                 QCoreApplication::exit(1);
                 return;
@@ -81,6 +82,21 @@ int main(int argc, char *argv[]) {
                 QCoreApplication::exit(1);
                 return;
             }
+            const QPointF previewOrigin = preview->mapToItem(window->contentItem(), QPointF(0, 0));
+            const bool previewFits = previewOrigin.x() >= 0
+                && previewOrigin.y() >= bar->height() - 1
+                && previewOrigin.x() + preview->width() <= window->width() + 1
+                && previewOrigin.y() + preview->height() <= dockOrigin.y() - 2
+                && preview->width() >= 480 && preview->height() >= 250;
+            if (!previewFits) {
+                qCritical() << "SELF_TEST_FAIL: preview overlaps desktop chrome or is too small"
+                            << "window" << window->size() << "preview" << previewOrigin
+                            << preview->size() << "dock" << dockOrigin << dock->size();
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SELF_TEST_PASS: preview window fits above dock" << previewOrigin
+                    << preview->size();
             qInfo() << "SELF_TEST_PASS: desktop chrome geometry" << window->size();
             const QImage frame = window->grabWindow();
             if (frame.isNull() || frame.width() < 720 || frame.height() < 480) {

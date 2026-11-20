@@ -73,6 +73,8 @@ def verify_icon_set(root: Path) -> None:
         raise ValueError(f"Expected exactly seven original icons; missing {sorted(expected - actual)}; unexpected {sorted(actual - expected)}")
     for name in ICON_NAMES:
         verify_icon(root / (name + ".svg"))
+    # The launcher is a distinct brand asset, not an eighth dock icon.
+    verify_icon(root.parent / "brand" / "penguin-launcher.svg")
 
 
 def main() -> int:
@@ -83,7 +85,7 @@ def main() -> int:
         verify_icon_set(args.directory)
     except (OSError, ValueError) as exc:
         parser.exit(1, f"FAIL: {exc}\n")
-    print("PASS: seven self-contained Canopy dock SVG assets")
+    print("PASS: seven Canopy dock SVG assets plus original penguin launcher")
     return 0
 
 

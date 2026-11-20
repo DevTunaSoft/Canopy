@@ -5,6 +5,8 @@ import QtQuick.Controls
 Button {
     id: tile
     required property string iconName
+    // C++ enables reviewed resources only for explicit opt-in builds.
+    readonly property bool reviewedIconReady: canopyReviewedIconsAvailable
     width: 48
     height: 48
     readonly property color topTone: iconName === "Browser" ? "#2385ef" :
@@ -29,6 +31,7 @@ Button {
     ToolTip.text: iconName + " — demonstration only"
 
     background: Rectangle {
+        visible: !tile.reviewedIconReady
         radius: 12
         border.color: tile.hovered ? "#e5f3ff" : "#7297b7"
         border.width: 1
@@ -47,8 +50,22 @@ Button {
         }
     }
 
-    contentItem: Canvas {
+    contentItem: Item {
+        Image {
+            id: approvedArtwork
+            objectName: "canopyReviewedIconImage"
+            anchors.fill: parent
+            visible: tile.reviewedIconReady
+            source: tile.reviewedIconReady
+                ? "qrc:/canopy/classic/icons/" + tile.iconName.toLowerCase() + ".png" : ""
+            fillMode: Image.PreserveAspectFit
+            cache: true
+            asynchronous: false
+        }
+        Canvas {
         id: artwork
+        anchors.fill: parent
+        visible: !tile.reviewedIconReady
         width: 30
         height: 30
         onPaint: {
@@ -160,5 +177,6 @@ Button {
             }
             ctx.restore()
         }
+    }
     }
 }

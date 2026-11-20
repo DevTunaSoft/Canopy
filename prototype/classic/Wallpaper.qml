@@ -24,7 +24,7 @@ Item {
         asynchronous: false
         cache: true
         smooth: true
-        sourceSize: Qt.size(1920, 1080)
+        sourceSize: canopyApprovedMode ? Qt.size(1280, 720) : Qt.size(1920, 1080)
         Accessible.name: "Static Blue Current wallpaper artwork"
     }
     readonly property bool imageReady: blueCurrent.status === Image.Ready

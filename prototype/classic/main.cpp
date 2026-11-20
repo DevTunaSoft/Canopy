@@ -11,6 +11,17 @@
 #include <QRegularExpression>
 #include <QSet>
 
+// A Repeater can give its delegates QObject owners different from their
+// visual parents. Traverse the actual QQuickItem scene tree for UI assertions.
+static int countVisualItems(QQuickItem *parent, const QString &objectName) {
+    if (!parent)
+        return 0;
+    int count = parent->objectName() == objectName ? 1 : 0;
+    for (QQuickItem *child : parent->childItems())
+        count += countVisualItems(child, objectName);
+    return count;
+}
+
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
     QGuiApplication::setApplicationDisplayName(QStringLiteral("Canopy Classic Spike"));
@@ -96,17 +107,16 @@ int main(int argc, char *argv[]) {
                 QCoreApplication::exit(1);
                 return;
             }
-            const QList<QQuickItem *> dockTiles = dock->findChildren<QQuickItem *>(
-                QStringLiteral("canopyDockTile"));
+            const int dockTileCount = countVisualItems(dock, QStringLiteral("canopyDockTile"));
             const QPointF wallpaperOrigin = wallpaper->mapToItem(window->contentItem(), QPointF(0, 0));
             const bool wallpaperFits = qAbs(wallpaperOrigin.x()) <= 1
                 && qAbs(wallpaperOrigin.y()) <= 1
                 && qAbs(wallpaper->width() - window->width()) <= 1
                 && qAbs(wallpaper->height() - window->height()) <= 1;
-            if (!wallpaperFits || dockTiles.size() != 7) {
+            if (!wallpaperFits || dockTileCount != 7) {
                 qCritical() << "SELF_TEST_FAIL: wallpaper bounds or dock icon count invalid"
                             << "wallpaper" << wallpaperOrigin << wallpaper->size()
-                            << "icon count" << dockTiles.size();
+                            << "icon count" << dockTileCount;
                 QCoreApplication::exit(1);
                 return;
             }

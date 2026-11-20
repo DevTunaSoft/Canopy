@@ -15,7 +15,7 @@ ApplicationWindow {
     Theme { id: canopyTheme }
     readonly property bool compactLayout: width < 900
 
-    // Original static landscape, never a live effect or background service.
+    // Original abstract wallpaper: cached image, never a live effect or service.
     Landscape {
         anchors.fill: parent
     }
@@ -132,7 +132,7 @@ ApplicationWindow {
             }
             Label {
                 text: "Canopy"
-                color: canopyTheme.foreground
+                color: canopyTheme.menuForeground
                 font.pixelSize: 14
                 font.bold: true
                 font.family: "Sans Serif"
@@ -140,7 +140,13 @@ ApplicationWindow {
             Label {
                 text: "File"
                 visible: !root.compactLayout
-                color: canopyTheme.foreground
+                color: canopyTheme.menuForeground
+                font.pixelSize: 13
+            }
+            Label {
+                text: "Edit"
+                visible: !root.compactLayout
+                color: canopyTheme.menuForeground
                 font.pixelSize: 13
             }
             Label {
@@ -149,10 +155,28 @@ ApplicationWindow {
                 color: canopyTheme.foreground
                 font.pixelSize: 13
             }
+            Label {
+                text: "Go"
+                visible: !root.compactLayout
+                color: canopyTheme.menuForeground
+                font.pixelSize: 13
+            }
+            Label {
+                text: "Window"
+                visible: !root.compactLayout
+                color: canopyTheme.menuForeground
+                font.pixelSize: 13
+            }
+            Label {
+                text: "Help"
+                visible: !root.compactLayout
+                color: canopyTheme.menuForeground
+                font.pixelSize: 13
+            }
             Item { Layout.fillWidth: true }
             Label {
                 text: Qt.formatDateTime(new Date(), "ddd d MMM")
-                color: canopyTheme.foreground
+                color: canopyTheme.menuForeground
                 font.pixelSize: 12
                 font.weight: Font.Medium
             }

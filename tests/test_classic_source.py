@@ -39,6 +39,13 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertNotIn("NumberAnimation", dock)
         self.assertNotIn("Timer {", dock)
         self.assertIn('tile.iconName === "Settings"', dock)
+        for icon in ("Web", "Photos", "Notes", "Terminal"):
+            with self.subTest(icon=icon):
+                self.assertIn('tile.iconName === "' + icon + '"', dock)
+        for icon in ("Web", "Photos", "Notes", "Terminal"):
+            self.assertIn('{ title: "' + icon + '" }', qml)
+        self.assertNotIn("roundedRect(", dock)
+
 
     def test_original_wallpaper_is_static(self):
         cmake = (ROOT / "CMakeLists.txt").read_text()

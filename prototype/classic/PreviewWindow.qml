@@ -13,15 +13,17 @@ Rectangle {
     property string selectedFolder: ""
     property string searchQuery: ""
     readonly property var sampleFolders: [
-        { name: "Documents", tone: "#6b9ec9" },
-        { name: "Pictures", tone: "#9b93d0" },
-        { name: "Music", tone: "#d4a078" },
-        { name: "Projects", tone: "#7cad9f" },
-        { name: "Downloads", tone: "#819fd0" },
-        { name: "Shared", tone: "#ba93ad" }
+        { name: "Desktop", tone: "#58b6e8" },
+        { name: "Documents", tone: "#58b6e8" },
+        { name: "Downloads", tone: "#58b6e8" },
+        { name: "Music", tone: "#58b6e8" },
+        { name: "Pictures", tone: "#58b6e8" },
+        { name: "Public", tone: "#58b6e8" },
+        { name: "Templates", tone: "#58b6e8" },
+        { name: "Videos", tone: "#58b6e8" }
     ]
     radius: 12
-    color: "#fcfdff"
+    color: "#f9fbff"
     border.width: 1
     border.color: "#b7c6d2"
     clip: true
@@ -33,7 +35,7 @@ Rectangle {
         width: parent.width
         height: 52
         radius: 12
-        color: "#eff3f7"
+        color: "#e5f1fb"
         Rectangle {
             anchors.bottom: parent.bottom
             width: parent.width
@@ -78,9 +80,9 @@ Rectangle {
         anchors.top: titlebar.bottom
         anchors.left: parent.left
         anchors.bottom: parent.bottom
-        width: preview.condensed ? 135 : 170
+        width: preview.condensed ? 135 : 176
         radius: 12
-        color: "#edf2f7"
+        color: "#e8f0f8"
         Rectangle {
             anchors.top: parent.top
             width: parent.width
@@ -91,58 +93,73 @@ Rectangle {
             anchors.right: parent.right
             width: 1
             height: parent.height
-            color: "#d9e1e9"
+            color: "#d2e0ec"
         }
-        Column {
+        Flickable {
+            id: sidebarScroll
+            objectName: "canopySidebarScroller"
             anchors.fill: parent
-            anchors.margins: preview.condensed ? 10 : 15
-            spacing: 5
-            Label {
-                text: "FAVORITES"
-                font.pixelSize: 10
-                font.weight: Font.DemiBold
-                font.letterSpacing: 1.1
-                color: "#788ba0"
-                bottomPadding: 9
-                leftPadding: 6
-            }
-            Repeater {
-                model: ["Home", "Documents", "Pictures", "Downloads"]
-                delegate: Button {
-                    id: nav
-                    required property string modelData
-                    width: parent.width
-                    height: 33
-                    implicitHeight: 33
-                    hoverEnabled: true
-                    padding: 0
-                    leftPadding: 9
-                    Accessible.name: "Preview " + modelData
-                    onClicked: {
-                        preview.currentSection = modelData
-                        preview.selectedFolder = ""
-                        preview.searchQuery = ""
-                        searchField.text = ""
-                    }
-                    background: Rectangle {
-                        radius: 7
-                        color: preview.currentSection === nav.modelData
-                            ? "#d8e7f6" : nav.hovered ? "#e3ebf4" : "transparent"
-                    }
-                    contentItem: Row {
-                        spacing: 10
-                        Rectangle {
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: 12
-                            height: 12
-                            radius: 3
-                            color: preview.currentSection === nav.modelData ? "#5b8bbd" : "#91a5b9"
+            anchors.margins: preview.condensed ? 9 : 13
+            clip: true
+            contentWidth: width
+            contentHeight: sidebarList.implicitHeight + 9
+            flickableDirection: Flickable.VerticalFlick
+            boundsBehavior: Flickable.StopAtBounds
+            ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+            Column {
+                id: sidebarList
+                width: sidebarScroll.width - 5
+                spacing: 3
+                Label {
+                    text: "FAVORITES"
+                    font.pixelSize: 10
+                    font.weight: Font.DemiBold
+                    font.letterSpacing: 1.1
+                    color: "#6a87a2"
+                    bottomPadding: 9
+                    leftPadding: 8
+                }
+                Repeater {
+                    model: ["Recent", "Starred", "Home", "Desktop", "Documents",
+                            "Downloads", "Music", "Pictures", "Videos", "Trash"]
+                    delegate: Button {
+                        id: nav
+                        required property string modelData
+                        width: sidebarList.width
+                        height: 32
+                        implicitHeight: 32
+                        hoverEnabled: true
+                        padding: 0
+                        leftPadding: 11
+                        Accessible.name: "Preview " + modelData
+                        onClicked: {
+                            preview.currentSection = modelData
+                            preview.selectedFolder = ""
+                            preview.searchQuery = ""
+                            searchField.text = ""
                         }
-                        Label {
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: nav.modelData
-                            color: "#36495e"
-                            font.pixelSize: 12
+                        background: Rectangle {
+                            radius: 8
+                            color: preview.currentSection === nav.modelData
+                                ? "#4ca2ee" : nav.hovered ? "#dceaf7" : "transparent"
+                        }
+                        contentItem: Row {
+                            spacing: 10
+                            Rectangle {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 12
+                                height: 12
+                                radius: 3
+                                color: preview.currentSection === nav.modelData
+                                    ? "#f8fdff" : "#76a2ca"
+                            }
+                            Label {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: nav.modelData
+                                color: preview.currentSection === nav.modelData
+                                    ? "#ffffff" : "#344b62"
+                                font.pixelSize: 12
+                            }
                         }
                     }
                 }
@@ -319,7 +336,7 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 text: preview.selectedFolder !== ""
                     ? preview.selectedFolder + " selected · demo only"
-                    : preview.currentSection === "Home" ? "6 sample folders · no disk access"
+                    : preview.currentSection === "Home" ? "8 sample folders · no disk access"
                     : "Preview only · no disk access"
                 font.pixelSize: 10
                 color: "#79899b"

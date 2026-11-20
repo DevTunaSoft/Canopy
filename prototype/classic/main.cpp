@@ -293,7 +293,7 @@ int main(int argc, char *argv[]) {
             }
             const int folderCount = countVisualItems(preview, QStringLiteral("canopyFolderTile"));
             const int searchCount = countVisualItems(preview, QStringLiteral("canopyPreviewSearch"));
-            if (folderCount != 6 || searchCount != 1) {
+            if (folderCount != 8 || searchCount != 1) {
                 qCritical() << "SELF_TEST_FAIL: sample Files preview content incomplete"
                             << "sample folders" << folderCount << "search inputs" << searchCount;
                 QCoreApplication::exit(1);
@@ -316,14 +316,14 @@ int main(int argc, char *argv[]) {
             }
             qInfo() << "SELF_TEST_PASS: compact folder scrolling viewport validated";
             const int folderArtworkReady = countReadyFolderTiles(preview);
-            if (folderArtworkReady != 6) {
+            if (folderArtworkReady != 8) {
                 qCritical() << "SELF_TEST_FAIL: folder artwork did not load"
                             << "ready sample folders" << folderArtworkReady;
                 QCoreApplication::exit(1);
                 return;
             }
-            qInfo() << "SELF_TEST_PASS: all six original sample folder images loaded";
-            qInfo() << "SELF_TEST_PASS: six demo folders and one search control present";
+            qInfo() << "SELF_TEST_PASS: all eight original sample folder images loaded";
+            qInfo() << "SELF_TEST_PASS: eight demo folders and one search control present";
             if (approvedMode)
                 qInfo() << "SELF_TEST_PASS: verified user-supplied blue wave and eight selected PNG icons present";
             else

@@ -6,6 +6,18 @@
 > See [VISUAL_REFERENCE_PROVENANCE.md](../../docs/VISUAL_REFERENCE_PROVENANCE.md).
 > Visual sign-off remains pending.\n\n# Classic Qt Quick technology spike
 
+## Files window content alignment
+
+The screenshot-driven Qt preview now models the same eight **sample** folder
+categories as the newly accepted desktop concept (Desktop, Documents,
+Downloads, Music, Pictures, Public, Templates, Videos), rather than the
+previous six unrelated names. This remains local demo content: no filesystem
+contents or privacy-sensitive directory information is read. The sidebar uses
+a clipped, vertically scrolling navigation area so compact preview resolutions
+cannot silently lose entries. The internal folder pictogram is original
+`assets/ui/folder-blue.svg`; it is a generic file-content symbol,
+**not a substitute for the exact user-approved Files dock PNG**.
+
 ## Exact approved artwork integration (new)
 
 The old six-icon SVG Dock remains an **unapproved legacy test scene** when

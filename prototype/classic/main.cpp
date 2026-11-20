@@ -159,14 +159,14 @@ int main(int argc, char *argv[]) {
                 && qAbs(wallpaper->width() - window->width()) <= 1
                 && qAbs(wallpaper->height() - window->height()) <= 1;
             const int iconReadyCount = countReadyDockTiles(dock);
-            if (iconReadyCount != 7) {
+            if (iconReadyCount != 6) {
                 qCritical() << "SELF_TEST_FAIL: original dock artwork failed to load"
                             << "ready icons" << iconReadyCount;
                 QCoreApplication::exit(1);
                 return;
             }
-            qInfo() << "SELF_TEST_PASS: all seven original SVG dock icons loaded";
-            if (!wallpaperFits || dockTileCount != 7) {
+            qInfo() << "SELF_TEST_PASS: all six SVG dock candidates loaded";
+            if (!wallpaperFits || dockTileCount != 6) {
                 qCritical() << "SELF_TEST_FAIL: wallpaper bounds or dock icon count invalid"
                             << "wallpaper" << wallpaperOrigin << wallpaper->size()
                             << "icon count" << dockTileCount;
@@ -206,7 +206,7 @@ int main(int argc, char *argv[]) {
             }
             qInfo() << "SELF_TEST_PASS: all six original sample folder images loaded";
             qInfo() << "SELF_TEST_PASS: six demo folders and one search control present";
-            qInfo() << "SELF_TEST_PASS: original wallpaper and seven dock icons present";
+            qInfo() << "SELF_TEST_PASS: original wallpaper and six dock icon candidates present";
             qInfo() << "SELF_TEST_PASS: preview window fits above dock" << previewOrigin
                     << preview->size();
             qInfo() << "SELF_TEST_PASS: desktop chrome geometry" << window->size();

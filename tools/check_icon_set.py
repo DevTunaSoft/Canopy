@@ -9,14 +9,14 @@ import re
 import xml.etree.ElementTree as ET
 
 NS = "{http://www.w3.org/2000/svg}"
-ICON_NAMES = ("canopy", "files", "browser", "photos", "settings", "terminal", "trash")
+ICON_NAMES = ("files", "browser", "settings", "photos", "terminal", "trash")
 TAGS = {"svg", "title", "desc", "defs", "linearGradient", "stop", "rect",
         "path", "circle", "text"}
 ATTRS = {"width", "height", "viewBox", "id", "x1", "y1", "x2", "y2", "offset",
          "stop-color", "stop-opacity", "fill", "stroke", "stroke-width",
          "stroke-opacity", "fill-opacity", "opacity", "stroke-linecap",
          "stroke-linejoin", "cx", "cy", "r", "rx", "ry", "x", "y", "d",
-         "font-family", "font-weight", "font-size", "text-anchor"}
+         "font-family", "font-weight", "font-size", "text-anchor", "fill-rule"}
 LOCAL_REF = re.compile(r"^url\(#([A-Za-z][A-Za-z0-9_-]*)\)$")
 
 
@@ -60,7 +60,14 @@ def verify_icon(path: Path) -> None:
             defs.add(identifier)
         if tag in {"rect", "path", "circle"}:
             shapes += 1
-    if shapes < 3:
+    if path.name == "penguin-launcher.svg":
+        if shapes != 1 or not any(
+                element.tag == NS + "path"
+                and element.get("fill") == "#fff"
+                and element.get("fill-rule") == "evenodd"
+                for element in root.iter()):
+            raise ValueError("Launcher must preserve the single white reference silhouette")
+    elif shapes < 3:
         raise ValueError("Icon does not have sufficient authored geometry")
     if not set(refs).issubset(defs):
         raise ValueError("Icon uses an undefined gradient")
@@ -70,7 +77,7 @@ def verify_icon_set(root: Path) -> None:
     actual = {path.name for path in root.glob("*.svg")}
     expected = {name + ".svg" for name in ICON_NAMES}
     if actual != expected:
-        raise ValueError(f"Expected exactly seven original icons; missing {sorted(expected - actual)}; unexpected {sorted(actual - expected)}")
+        raise ValueError(f"Expected exactly six original icons; missing {sorted(expected - actual)}; unexpected {sorted(actual - expected)}")
     for name in ICON_NAMES:
         verify_icon(root / (name + ".svg"))
     # The launcher is a distinct brand asset, not an eighth dock icon.
@@ -85,7 +92,7 @@ def main() -> int:
         verify_icon_set(args.directory)
     except (OSError, ValueError) as exc:
         parser.exit(1, f"FAIL: {exc}\n")
-    print("PASS: seven Canopy dock SVG assets plus original penguin launcher")
+    print("PASS: six Canopy dock SVG candidates plus reference-traced white penguin launcher")
     return 0
 
 

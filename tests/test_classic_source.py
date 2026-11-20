@@ -27,7 +27,8 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn('backgroundBottom: "#eef2f8"', theme)
         self.assertIn('foreground: "#273345"', theme)
         self.assertIn('chrome: "#dd090f2d"', theme)
-        self.assertIn('tile.iconName === "Home" ? "#d7e7fb"', dock)
+        self.assertIn('iconName === "Home" ? "#6fc3fb"', dock)
+        self.assertIn('gradient: Gradient', dock)
 
     def test_dock_has_original_vector_artwork(self):
         cmake = (ROOT / "CMakeLists.txt").read_text()

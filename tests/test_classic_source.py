@@ -27,7 +27,7 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn('backgroundBottom: "#eef2f8"', theme)
         self.assertIn('foreground: "#273345"', theme)
         self.assertIn('chrome: "#edf6f9fc"', theme)
-        self.assertIn('iconName === "Home" ? "#72b5e8"', dock)
+        self.assertIn('source: tile.iconUrl', dock)
 
     def test_dock_has_original_vector_artwork(self):
         cmake = (ROOT / "CMakeLists.txt").read_text()
@@ -36,12 +36,16 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn("DockTile.qml", cmake)
         self.assertIn("delegate: DockTile", qml)
         self.assertIn("contentItem: Item", dock)
-        self.assertIn("Canvas {", dock)
-        self.assertIn('iconName === "Photos"', dock)
-        self.assertIn('iconName === "Calendar"', dock)
+        self.assertIn("Image {", dock)
+        self.assertIn("readonly property bool iconReady", dock)
+        self.assertIn('objectName: "canopyDockIcon"', dock)
+        self.assertIn("source: tile.iconUrl", dock)
+        self.assertNotIn("Canvas {", dock)
+        self.assertIn('iconName.toLowerCase()', dock)
+        self.assertIn('assets/icons/', dock)
         self.assertNotIn("NumberAnimation", dock)
         self.assertNotIn("Timer {", dock)
-        self.assertIn('tile.iconName === "Settings"', dock)
+        self.assertIn('ToolTip.text: iconName + " — preview only"', dock)
 
     def test_representative_preview_is_included(self):
         cmake = (ROOT / "CMakeLists.txt").read_text()

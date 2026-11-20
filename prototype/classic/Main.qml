@@ -13,6 +13,16 @@ ApplicationWindow {
     color: "#eef2f8"
 
     Theme { id: canopyTheme }
+    readonly property var classicApps: [
+        { name: "Browser", icon: "Browser" },
+        { name: "Mail", icon: "Mail" },
+        { name: "Files", icon: "Files" },
+        { name: "Calendar", icon: "Calendar" },
+        { name: "Photos", icon: "Photos" },
+        { name: "Music", icon: "Music" },
+        { name: "Terminal", icon: "Terminal" },
+        { name: "Settings", icon: "Settings" }
+    ]
     readonly property bool compactLayout: width < 900
     property bool launcherOpen: false
     function toggleLauncher() { launcherOpen = !launcherOpen; if (launcherOpen) appLauncher.clearAndFocus() }
@@ -195,6 +205,7 @@ ApplicationWindow {
         id: appLauncher
         z: 0.9
         anchors.fill: parent
+        applications: root.classicApps
         opened: root.launcherOpen
         onCloseRequested: root.launcherOpen = false
     }
@@ -220,22 +231,12 @@ ApplicationWindow {
             anchors.centerIn: parent
             spacing: canopyTheme.dockSpacing
             Repeater {
-                model: [
-                    { title: "Home" },
-                    { title: "Web" },
-                    { title: "Files" },
-                    { title: "Photos" },
-                    { title: "Notes" },
-                    { title: "Search" },
-                    { title: "Terminal" },
-                    { title: "Settings" }
-                ]
+                model: root.classicApps
                 delegate: DockTile {
                     required property var modelData
-                    iconName: modelData.title
-                    onClicked: {
-                        if (modelData.title === "Search") root.toggleLauncher()
-                    }
+                    iconName: modelData.icon
+                    // App execution is deliberately unavailable in the visual prototype.
+                    onClicked: {}
                 }
             }
         }

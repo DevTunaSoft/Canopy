@@ -2,6 +2,82 @@
 
 **Status: mandatory design brief.** This is the intended quality bar, NOT a claim about the current technology spike.
 
+## Visual rejection and course correction — November 20, 2026
+
+**Decision: the screenshots from PR #69 are rejected as a design direction.**
+The source may remain useful as a Qt test fixture, but its visual choices are not
+acceptable for Canopy Classic. Do not merge it as the user-facing desktop design
+or call it "premium" because it compiles or takes screenshots.
+
+The current evidence at 1200x750 and 760x500 exposes the specific failure:
+- The hand-painted angular mountain/lake image reads as low-detail clip art.
+  Replace it with a professionally composed **original** full-resolution
+  wallpaper asset. Prefer a static prepared image over per-frame effects.
+- The seven dock tiles are near-identical rounded squares containing crude
+  white glyphs. Commission/design coherent **original** multicolor application
+  icon artwork with appropriate geometry, depth, silhouette and optical size.
+  Icons must remain legible across 32/48/64/128 px and high DPI. No Apple icons.
+- The dock is an opaque rounded white rectangle without believable material
+  hierarchy. Redesign its proportions, icon placement, separators, indicator
+  geometry, subtle elevation, light/dark materials and the scaling behavior.
+  Static fallback materials must still look deliberate when blur is disabled.
+- The top bar is visually underpopulated and lacks contextual menu behavior and
+  real state-based status affordances. An actual working implementation should
+  drive menus and status; do not paint fake controls.
+- The fake Files window is a sparse card with simplified colored folders, not
+  an authentic polished file experience. Build a realistic representative
+  window (toolbar/actions, sidebar hierarchy, content density, selection,
+  scroll, resize, keyboard navigation, consistent chrome) and a viable path
+  to a **real** Linux file manager. Demo data must remain clearly nonfunctional.
+- Current visuals read as a small demo running inside a single application
+  window rather than a cohesive **desktop shell**. The end-state design must
+  own the real top-bar/dock/window theme integration in a Linux Mint session.
+
+**Design target:** On first glance, a person familiar with macOS should
+immediately recognize the desktop's layout, polish and interaction language,
+while every brand mark, glyph, wallpaper, icon, font choice and packaged asset
+is either original or explicitly licensed for Canopy redistribution. Do not
+substitute cartoon artwork, flat pastel tiles or a simplified design just
+because they are easier to implement. Do not copy Apple's proprietary assets.
+
+### Visual proof gate — required BEFORE additional polish claims
+
+1. Produce a clearly labeled design reference board comparing representative
+   macOS desktop patterns with Canopy's proposed **original** equivalents:
+   menu bar, launcher, dock, application iconography, window, wallpaper,
+   popovers, typography, spacing, light/dark modes. Record chosen references
+   and any rights/license review.
+2. Approve one cohesive light-theme desktop composition **before** broad
+   component implementation. Then author an equally complete dark appearance.
+   The existing unapproved mockups and Qt screenshots are NOT the target.
+3. Use authored artwork from a documented asset pipeline (e.g. source SVG
+   icons exported to necessary pixel sizes, color-managed wallpaper with
+   multiple resolution variants), not low-effort primitive emoji/glyph icons.
+   Preserve original source and license manifest, never bundle copied Apple art.
+4. Implement a representative *real render-path* scene with an authentic
+   desktop-like menu bar, dock, at least one credible interactive window,
+   realistic content density and tested keyboard/focus behavior.
+5. Capture 760x500, 1200x750, 1920x1080 and a high-DPI Mint VM screenshot;
+   review at 100% scale against the approved reference board. Flag plastic
+   textures, toy-like icons, blank window regions, misaligned chrome, harsh
+   borders, simplistic wallpaper and inconsistent spacing as **visual failures**
+   even if functional CI is green.
+6. Measure startup, five-minute idle CPU, PSS, frame responsiveness and
+   software-rendering fallback. Performance profiles may turn off optional
+   visual effects, but **must not** substitute an inferior icon set or layout.
+7. Visual acceptance needs a specific recorded human approval on actual
+   application screenshots. A green Qt build is an engineering gate, never
+   aesthetic approval. Never silently promote this rejected branch's imagery
+   as a release design.
+
+### Engineering handoff
+
+Do not throw away Qt build/runtime tests, screenshot infrastructure, regression
+logic or VM tools. Separate that infrastructure from the rejected wallpaper and
+placeholder visuals. Plan the redesign in a focused design-review branch, then
+implement it in bounded, testable commits. Keep #69 draft/rejected while
+design work proceeds. No main-branch merge without the visual gate.
+
 ## Product identity
 
 Canopy Classic is a genuinely refined, macOS-inspired desktop shell for Linux Mint.

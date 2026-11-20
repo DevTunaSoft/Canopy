@@ -6,6 +6,31 @@
 > See [VISUAL_REFERENCE_PROVENANCE.md](../../docs/VISUAL_REFERENCE_PROVENANCE.md).
 > Visual sign-off remains pending.\n\n# Classic Qt Quick technology spike
 
+## Exact approved artwork integration (new)
+
+The old six-icon SVG Dock remains an **unapproved legacy test scene** when
+this demo runs without art arguments. To launch the true eight-icon visual
+candidate, download `Canopy_Classic_Exact_Artwork_Runtime.zip` from
+ChatGPT Library → Canopy, extract to an `approved-art` directory, then run:
+
+```sh
+./build/classic/canopy-classic-spike \
+  --approved-art-dir /absolute/path/to/approved-art \
+  --self-test-approved --self-test-size 1200x750 \
+  --self-test-screenshot approved-classic.png
+```
+
+The program rejects the entire set before rendering if any of the eight
+PNG images or blue-wave background differs from the canonical SHA-256.
+The new approved mode does **not** switch to the hand-painted SVG demo
+icons on missing files. The PNGs are *not yet present in this GitHub branch*
+because the connector's text-file operations cannot transfer binary art;
+they are preserved in the user's Canopy Library ZIP. Full exact-image Qt
+screenshot acceptance is blocked until the package is supplied to the
+runner. See [canonical artwork](../../docs/CLASSIC_CANONICAL_ARTWORK.md).
+
+
+
 This is a **standalone demonstration window**, not a Linux desktop session, window manager, dock replacement, installer, or completed product. Dock buttons are deliberately inert; no app-launch capability is claimed. The Files window is an interactive visual-only composition: sidebar navigation, sample-folder selection and name filtering work on local demonstration data, but no live directory browsing or disk access is implemented. The screenshot self-test rejects a missing, clipped or overlapping preview, verifies the original wallpaper fills the window and that all seven dock icons exist, but is not a human aesthetic review. The original Canopy launcher and the seven dock concepts are visual-only; no app launch or desktop services are implied.
 
 ## Prerequisites

@@ -46,7 +46,8 @@ int main(int argc, char *argv[]) {
         }
         window->resize(width, height);
     }
-    if (args.contains(QStringLiteral("--self-test-launcher"))) {
+    if (args.contains(QStringLiteral("--self-test-launcher"))
+        || args.contains(QStringLiteral("--self-test-search"))) {
         if (!window->setProperty("launcherOpen", true)) {
             qCritical() << "SELF_TEST_FAIL: launcher property unavailable";
             return 2;
@@ -99,6 +100,33 @@ int main(int argc, char *argv[]) {
                 return;
             }
             qInfo() << "SELF_TEST_PASS: Classic eight-app dock and launcher catalog";
+            if (QCoreApplication::arguments().contains(QStringLiteral("--self-test-search"))) {
+                auto *searchField = window->findChild<QObject *>(
+                    QStringLiteral("canopyLauncherSearch"));
+                if (!searchField || !appOverlay->isVisible()) {
+                    qCritical() << "SELF_TEST_FAIL: search control unavailable";
+                    QCoreApplication::exit(1);
+                    return;
+                }
+                // Exercise the live QML binding, including case-folding,
+                // no-match and restoration; no external programs are run.
+                searchField->setProperty("text", QStringLiteral("mUsIc"));
+                QCoreApplication::processEvents();
+                const bool matchOne = appOverlay->property("resultCount").toInt() == 1;
+                searchField->setProperty("text", QStringLiteral("zz-canopy-no-match"));
+                QCoreApplication::processEvents();
+                const bool matchNone = appOverlay->property("resultCount").toInt() == 0;
+                searchField->setProperty("text", QString());
+                QCoreApplication::processEvents();
+                const bool restored = appOverlay->property("resultCount").toInt() == 8;
+                if (!matchOne || !matchNone || !restored) {
+                    qCritical() << "SELF_TEST_FAIL: Classic live application search"
+                                << matchOne << matchNone << restored;
+                    QCoreApplication::exit(1);
+                    return;
+                }
+                qInfo() << "SELF_TEST_PASS: Classic live application search";
+            }
             const QPointF barOrigin = bar->mapToItem(window->contentItem(), QPointF(0, 0));
             const QPointF dockOrigin = dock->mapToItem(window->contentItem(), QPointF(0, 0));
             const bool barFits = qAbs(barOrigin.x()) <= 2 && qAbs(barOrigin.y()) <= 2

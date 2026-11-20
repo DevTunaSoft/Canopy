@@ -16,6 +16,16 @@ class IconSourceTests(unittest.TestCase):
                 self.assertEqual(root.attrib.get("viewBox"), "0 0 128 128")
                 self.assertIn(icon.lower(), root.attrib.get("aria-label", "").lower())
 
+    def test_distinctive_motifs_not_earlier_apple_adjacent_drafts(self):
+        browser = (ICONS / "browser.svg").read_text()
+        mail = (ICONS / "mail.svg").read_text()
+        files = (ICONS / "files.svg").read_text()
+        self.assertNotIn("<circle cx=\"64\" cy=\"64\" r=\"39\"", browser)
+        self.assertNotIn('rect x="24" y="36" width="80" height="58"', mail)
+        self.assertNotIn('stop-color="#5fd8ff"', files)
+        self.assertIn('Q57 51 78 72', files)
+        self.assertIn('Q61 23 108 38', mail)
+
     def test_icons_are_self_contained_and_size_bounded(self):
         for icon in SAMPLES:
             with self.subTest(icon=icon):

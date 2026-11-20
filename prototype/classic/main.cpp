@@ -13,6 +13,18 @@
 
 // A Repeater can give its delegates QObject owners different from their
 // visual parents. Traverse the actual QQuickItem scene tree for UI assertions.
+static QQuickItem *findVisualItem(QQuickItem *parent, const QString &name) {
+    if (!parent)
+        return nullptr;
+    if (parent->objectName() == name)
+        return parent;
+    for (QQuickItem *child : parent->childItems()) {
+        if (auto *match = findVisualItem(child, name))
+            return match;
+    }
+    return nullptr;
+}
+
 static int countReadyFolderTiles(QQuickItem *parent) {
     if (!parent)
         return 0;
@@ -163,6 +175,22 @@ int main(int argc, char *argv[]) {
                 QCoreApplication::exit(1);
                 return;
             }
+            auto *folderScroller = findVisualItem(
+                preview, QStringLiteral("canopyFolderScroller"));
+            const bool compactMustScroll = window->width() <= 800;
+            if (!folderScroller || !folderScroller->clip()
+                || (compactMustScroll &&
+                    folderScroller->property("contentHeight").toDouble()
+                    <= folderScroller->height() + 5)) {
+                qCritical() << "SELF_TEST_FAIL: sample folder scrolling unavailable"
+                            << "compact" << compactMustScroll
+                            << "viewport" << (folderScroller ? folderScroller->height() : 0)
+                            << "content" << (folderScroller ?
+                                folderScroller->property("contentHeight").toDouble() : 0);
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SELF_TEST_PASS: compact folder scrolling viewport validated";
             const int folderArtworkReady = countReadyFolderTiles(preview);
             if (folderArtworkReady != 6) {
                 qCritical() << "SELF_TEST_FAIL: folder artwork did not load"

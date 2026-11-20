@@ -7,10 +7,10 @@ Rectangle {
     id: preview
     objectName: "canopyPreviewWindow"
     property bool compact: width < 620
-    radius: 13
-    color: "#fbfcfe"
+    radius: 20
+    color: "#eeeafa"
     border.width: 1
-    border.color: "#b9c5d2"
+    border.color: "#a8a5c8"
     clip: true
     Accessible.name: "Files window visual preview, not a functional file manager"
 
@@ -20,7 +20,15 @@ Rectangle {
         anchors.right: parent.right
         anchors.top: parent.top
         height: 53
-        color: "#eef2f6"
+        radius: 20
+        color: "#e1dff3"
+        // Fill the lower radius to keep a flat join with the content area.
+        Rectangle {
+            anchors.bottom: parent.bottom
+            width: parent.width
+            height: 24
+            color: "#e1dff3"
+        }
         Row {
             anchors.left: parent.left
             anchors.leftMargin: 18
@@ -60,7 +68,7 @@ Rectangle {
         anchors.top: titlebar.bottom
         anchors.bottom: parent.bottom
         width: preview.compact ? 126 : 180
-        color: "#eaf0f6"
+        color: "#dbd8ee"
         Rectangle {
             anchors.right: parent.right
             width: 1
@@ -86,7 +94,7 @@ Rectangle {
                     width: parent.width
                     height: 32
                     radius: 7
-                    color: modelData === "Home" ? "#d7e5f5" : "transparent"
+                    color: modelData === "Home" ? "#bbb9e0" : "transparent"
                     Row {
                         anchors.fill: parent
                         anchors.leftMargin: 9
@@ -125,7 +133,7 @@ Rectangle {
             anchors.right: parent.right
             anchors.top: parent.top
             height: 48
-            color: "#f9fbfd"
+            color: "#eeecfa"
             Rectangle {
                 anchors.bottom: parent.bottom
                 width: parent.width
@@ -210,8 +218,8 @@ Rectangle {
             anchors.rightMargin: 18
             anchors.top: subtitle.bottom
             anchors.topMargin: 20
-            columns: preview.compact ? 2 : 3
-            columnSpacing: preview.compact ? 10 : 22
+            columns: preview.compact ? 2 : 4
+            columnSpacing: preview.compact ? 10 : 20
             rowSpacing: 17
             Repeater {
                 model: [
@@ -224,31 +232,41 @@ Rectangle {
                 ]
                 delegate: Column {
                     required property var modelData
-                    width: preview.compact ? 78 : 94
+                    width: preview.compact ? 78 : 102
                     spacing: 7
-                    Rectangle {
-                        width: 64
-                        height: 48
-                        radius: 7
-                        color: modelData.tone
-                        border.color: "#a7b5c6"
-                        border.width: 1
+                    Item {
+                        width: 68
+                        height: 51
                         anchors.horizontalCenter: parent.horizontalCenter
                         Rectangle {
-                            width: 24
-                            height: 7
-                            radius: 3
-                            color: modelData.tone
-                            anchors.top: parent.top
-                            anchors.topMargin: -4
-                            anchors.left: parent.left
-                            anchors.leftMargin: 4
+                            x: 4
+                            y: 1
+                            width: 29
+                            height: 14
+                            radius: 4
+                            color: "#82c8ff"
                         }
                         Rectangle {
-                            anchors.fill: parent
-                            anchors.margins: 5
+                            x: 1
+                            y: 9
+                            width: 66
+                            height: 40
+                            radius: 7
+                            gradient: Gradient {
+                                GradientStop { position: 0; color: "#71c5fa" }
+                                GradientStop { position: 0.53; color: "#2fa5f0" }
+                                GradientStop { position: 1; color: "#167bce" }
+                            }
+                            border.color: "#478fca"
+                            border.width: 1
+                        }
+                        Rectangle {
+                            x: 5
+                            y: 14
+                            width: 58
+                            height: 9
                             radius: 4
-                            color: "#55ffffff"
+                            color: "#60ffffff"
                         }
                     }
                     Label {

@@ -7,6 +7,20 @@ Button {
     required property string iconName
     width: 48
     height: 48
+    readonly property color topTone: iconName === "Home" ? "#6fc3fb" :
+        iconName === "Web" ? "#2385ef" :
+        iconName === "Files" ? "#60c9fc" :
+        iconName === "Photos" ? "#f48aaa" :
+        iconName === "Notes" ? "#ffd976" :
+        iconName === "Search" ? "#bf95f5" :
+        iconName === "Terminal" ? "#55647e" : "#a4afc6"
+    readonly property color bottomTone: iconName === "Home" ? "#156bc7" :
+        iconName === "Web" ? "#13429e" :
+        iconName === "Files" ? "#057ac9" :
+        iconName === "Photos" ? "#bb377b" :
+        iconName === "Notes" ? "#df8b24" :
+        iconName === "Search" ? "#6639ba" :
+        iconName === "Terminal" ? "#1d2744" : "#56647b"
     hoverEnabled: true
     Accessible.name: iconName + " (demonstration)"
     ToolTip.visible: hovered
@@ -15,15 +29,21 @@ Button {
 
     background: Rectangle {
         radius: 12
-        color: tile.hovered ? "#ffffff" : (tile.iconName === "Home" ? "#d7e7fb" :
-            tile.iconName === "Search" ? "#e7dff8" :
-            tile.iconName === "Files" ? "#d5edee" :
-            tile.iconName === "Settings" ? "#e3e6ee" :
-            tile.iconName === "Web" ? "#c9e6f4" :
-            tile.iconName === "Photos" ? "#f4d9e5" :
-            tile.iconName === "Notes" ? "#f7e5b9" : "#d9e4df")
-        border.color: tile.hovered ? "#95a9c2" : "#d0d7e1"
+        border.color: tile.hovered ? "#e5f3ff" : "#7297b7"
         border.width: 1
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: tile.topTone }
+            GradientStop { position: 1.0; color: tile.bottomTone }
+        }
+        Rectangle {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.margins: 4
+            height: 12
+            radius: 8
+            color: "#30ffffff"
+        }
     }
 
     contentItem: Canvas {
@@ -36,8 +56,8 @@ Button {
             ctx.save()
             ctx.translate(width / 2, height / 2)
             ctx.scale(Math.min(width, height) / 32, Math.min(width, height) / 32)
-            ctx.strokeStyle = "#34445d"
-            ctx.fillStyle = "#34445d"
+            ctx.strokeStyle = "#ffffff"
+            ctx.fillStyle = "#ffffff"
             ctx.lineWidth = 2.2
             ctx.lineCap = "round"
             ctx.lineJoin = "round"

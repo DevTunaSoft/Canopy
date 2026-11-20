@@ -10,6 +10,8 @@
 #include <QStringList>
 #include <QRegularExpression>
 #include <QSet>
+#include <QVariantMap>
+#include <QVariantList>
 
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
@@ -68,6 +70,35 @@ int main(int argc, char *argv[]) {
                 QCoreApplication::exit(1);
                 return;
             }
+            // Runtime contract: both presentations must show exactly the
+            // eight user-approved application names, in one shared order.
+            // This deliberately checks instantiated Qt objects, not source text.
+            const QStringList expectedApps = {
+                QStringLiteral("Browser"), QStringLiteral("Mail"),
+                QStringLiteral("Files"), QStringLiteral("Calendar"),
+                QStringLiteral("Photos"), QStringLiteral("Music"),
+                QStringLiteral("Terminal"), QStringLiteral("Settings")
+            };
+            const QVariantList catalog = window->property("classicApps").toList();
+            auto *dockRepeater = window->findChild<QObject *>(
+                QStringLiteral("canopyDockRepeater"));
+            bool catalogMatches = catalog.size() == expectedApps.size()
+                && dockRepeater && dockRepeater->property("count").toInt() == expectedApps.size();
+            for (int i = 0; catalogMatches && i < expectedApps.size(); ++i) {
+                const QVariantMap appEntry = catalog.at(i).toMap();
+                catalogMatches = appEntry.value(QStringLiteral("name")).toString() == expectedApps.at(i)
+                    && appEntry.value(QStringLiteral("icon")).toString() == expectedApps.at(i);
+            }
+            const bool launcherMatches = appOverlay->property("resultCount").toInt() == expectedApps.size();
+            if (!catalogMatches || !launcherMatches) {
+                qCritical() << "SELF_TEST_FAIL: Classic approved application catalog mismatch"
+                            << "catalog" << catalog.size()
+                            << "dock" << (dockRepeater ? dockRepeater->property("count") : QVariant())
+                            << "launcher" << appOverlay->property("resultCount");
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SELF_TEST_PASS: Classic eight-app dock and launcher catalog";
             const QPointF barOrigin = bar->mapToItem(window->contentItem(), QPointF(0, 0));
             const QPointF dockOrigin = dock->mapToItem(window->contentItem(), QPointF(0, 0));
             const bool barFits = qAbs(barOrigin.x()) <= 2 && qAbs(barOrigin.y()) <= 2

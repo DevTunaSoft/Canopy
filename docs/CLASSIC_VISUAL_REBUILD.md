@@ -47,7 +47,8 @@ product marks, proprietary fonts, or application code.
 | Asset | Source | License/ownership | Runtime | State |
 | --- | --- | --- | --- | --- |
 | Blue Current wallpaper | `prototype/classic/assets/wallpapers/blue-current.svg` | Original Canopy-authored curves, gradients, no third-party media | Embedded Qt resource, static SVG image decode via QtSvg image plugin | Candidate, **not yet approved** |
-| Existing seven dock demo symbols | `prototype/classic/DockTile.qml` | Original test-fixture Canvas glyphs | QML Canvas | **Rejected as visual design** |
+| Original dock icon family (7) | `prototype/classic/assets/icons/*.svg` | Seven independently authored Canopy vectors; no copied Apple artwork | Embedded QtSvg images with per-tile readiness checks | **Candidate, unapproved** |
+| Previous dock glyphs | Replaced from `prototype/classic/DockTile.qml` | Old Canvas squares retired | No longer used on the icon candidate branch | **Rejected** |
 | Existing folder demo tiles | `prototype/classic/FolderTile.qml` | Original test-fixture primitives | QML | **Rejected as visual design** |
 
 The reference sources above are **not** asset licenses. The new SVG is original

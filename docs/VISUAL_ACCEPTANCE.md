@@ -7,6 +7,20 @@ The current standalone preview is **not** an approved high-quality skin. The new
 original lakeside wallpaper, seven-icon dock, and sample Files window are a first
 visual refinement, not proof that the result is premium or that demo controls work.
 
+## Evidence-led review, November 20, 2026
+
+The first landscape-and-seven-icon screenshot build at commit `5102356`
+passed automated Qt tests (GitHub Actions run 44769825430), producing actual
+1200×750 and 760×500 PNGs. Inspection identified **visual shortcomings**:
+the Files window had excessive blank space, flat sample folders, and insufficient
+navigation/toolbar detail. The initial image must not be treated as approved.
+
+Subsequent draft changes introduce a compact-aware toolbar, reusable folder
+artwork, keyboard-accessible sample navigation, search filtering, and sample
+selection. These actions only change local demo data; they are **not** operating
+system or filesystem features. All later screenshots require a fresh visual
+review on the exact post-change commit. Source-level tests cannot certify this.
+
 ## Design intent
 
 Canopy Classic must look deliberately composed and premium at both compact and standard

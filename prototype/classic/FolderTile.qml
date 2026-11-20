@@ -4,6 +4,7 @@ import QtQuick.Controls
 // Original lightweight folder artwork used by the visual-only Files preview.
 Button {
     id: folder
+    objectName: "canopyFolderTile"
     required property string folderName
     required property color folderTone
     property bool selected: false

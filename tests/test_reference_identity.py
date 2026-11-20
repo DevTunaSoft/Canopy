@@ -33,8 +33,8 @@ class ReferenceIdentityTests(unittest.TestCase):
         dock = desktop.split('id: dockRow', 1)[1]
         self.assertIn("model: canopyApprovedMode", dock)
         approved, legacy = dock.split('                    : [', 1)
-        approved_names = re.findall(r'\\{ title: "([^"]+)" \\}', approved)
-        legacy_names = re.findall(r'\\{ title: "([^"]+)" \\}', legacy)
+        approved_names = re.findall(r'\{ title: "([^"]+)" \}', approved)
+        legacy_names = re.findall(r'\{ title: "([^"]+)" \}', legacy)
         self.assertEqual(
             approved_names,
             ["Browser", "Mail", "Files", "Calendar", "Photos",

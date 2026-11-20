@@ -2,6 +2,10 @@
 
 Status: engineering specification; **not verified on Linux Mint**.
 
+**Mandatory visual brief:** [PREMIUM_DESIGN_DIRECTION.md](PREMIUM_DESIGN_DIRECTION.md).
+The current standalone preview is **not** an approved high-quality skin; its
+placeholder artwork and empty desktop must not be described as premium.
+
 ## Design intent
 
 Canopy Classic must look deliberately composed and premium at both compact and standard
@@ -26,7 +30,9 @@ For each image, a reviewer must confirm:
 - Keyboard focus and hover cues are visible; usability is not hover-dependent.
 - Dark theme remains readable; no visible color banding or broken scaling.
 
-Fail the visual gate for meaningful defects and attach annotated screenshots.
+Fail the visual gate for meaningful defects, placeholder-grade artwork, toy-like
+four-button dock layouts, or the absence of a representative interactive
+application window. Attach annotated screenshots.
 Do not label automatic screenshot verification a visual review.
 
 ## Performance and resource budget

@@ -92,7 +92,10 @@ jobs:
           timeout 30s xvfb-run -a ./build/classic/canopy-classic-spike --landscape-wallpaper test-artifacts/landscape-test-fixture.png --self-test-launcher --self-test-size 760x500 --self-test-screenshot test-artifacts/classic-launcher-compact.png >test-launcher-compact.log 2>&1 || { cat test-launcher-compact.log; exit 1; }
           grep -q 'SELF_TEST_PASS: searchable application launcher rendered with 6 original icons' test-launcher-compact.log
           python3 tools/check_screenshot.py test-artifacts/classic-launcher-compact.png 760 500
-          echo "PASS: real Qt launcher screenshot captured at 1200x750 and 760x500; icon decode confirmed"
+          timeout 30s xvfb-run -a ./build/classic/canopy-classic-spike --landscape-wallpaper test-artifacts/landscape-test-fixture.png --self-test-launcher --self-test-launcher-filter-files --self-test-size 1200x750 --self-test-screenshot test-artifacts/classic-launcher-filtered.png >test-launcher-filtered.log 2>&1 || { cat test-launcher-filtered.log; exit 1; }
+          grep -q 'SELF_TEST_PASS: searchable application launcher rendered with 1 original icons' test-launcher-filtered.log
+          python3 tools/check_screenshot.py test-artifacts/classic-launcher-filtered.png 1200 750
+          echo "PASS: Qt launcher grid, compact layout and live Files search filter"
       - name: Autonomous UI screenshot test
         timeout-minutes: 2
         env:

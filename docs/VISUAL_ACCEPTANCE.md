@@ -21,6 +21,39 @@ selection. These actions only change local demo data; they are **not** operating
 system or filesystem features. All later screenshots require a fresh visual
 review on the exact post-change commit. Source-level tests cannot certify this.
 
+## Active visual decision — REJECTED
+
+**Current design verdict: VISUAL_REJECTED.** On November 20, 2026 the user
+reviewed the actual screenshots from PR #69 and confirmed they look cheap
+and unlike the approved macOS-inspired goal. This supersedes any earlier
+internal progress note that suggested the updated wallpaper or dock were
+visually acceptable. Both 760x500 and 1200x750 images are diagnostic test
+artifacts, not release screenshots or an approved design.
+
+The issue is systemic, not a compact-layout spacing defect:
+- cartoon-like gradient dock tiles rather than crafted application art;
+- flat vector mountains instead of a compelling, original wallpaper;
+- a generic, visually empty Files window with toy-like sample folders;
+- plain bar/dock surfaces with insufficient compositional fidelity;
+- a standalone demonstration, not a credible themed desktop environment.
+
+Preserve the Qt test infrastructure, but restart the visual direction from
+docs/PREMIUM_DESIGN_DIRECTION.md. Require a coherent reference-driven design,
+original high-DPI assets and explicit review before promoting any replacement.
+
+### Public visual language references (patterns only; no asset copying)
+
+- Apple macOS desktop/menu bar/Dock guide:
+  https://support.apple.com/guide/mac-help/desktop-menu-bar-and-dock-mchlws12345m2/mac
+- Apple's macOS Tahoe design overview (window/dock/sidebar material hierarchy):
+  https://www.apple.com/newsroom/2025/06/macos-tahoe-26-makes-the-mac-more-capable-productive-and-intelligent-than-ever/
+- Apple macOS Tahoe employee starter guide (annotated Finder/window composition):
+  https://www.apple.com/business/enterprise/docs/resources/Mac_Employee_Starter_Guide.pdf
+
+Use these to understand spatial and interaction conventions, not as sources
+of Apple imagery, logos, icon files, code or proprietary fonts. The final
+reference choice, assets and screenshots still require a user-approved review.
+
 ## Design intent
 
 Canopy Classic must look deliberately composed and premium at both compact and standard

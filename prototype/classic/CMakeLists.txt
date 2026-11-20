@@ -13,7 +13,8 @@ qt_add_qml_module(canopy-classic-spike
 )
 qt_add_resources(canopy-classic-spike "canopy-original-art"
     PREFIX "/Canopy/Classic"
-    FILES assets/wallpapers/blue-current.svg
+    FILES assets/approved/manifest.json
+          assets/wallpapers/blue-current.svg
           assets/brand/penguin-launcher.svg
           assets/icons/files.svg assets/icons/browser.svg
           assets/icons/photos.svg assets/icons/settings.svg

@@ -27,7 +27,7 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn('backgroundBottom: "#eef2f8"', theme)
         self.assertIn('foreground: "#273345"', theme)
         self.assertIn('chrome: "#dd090f2d"', theme)
-        self.assertIn('iconName === "Home" ? "#6fc3fb"', dock)
+        self.assertIn('iconName === "Browser" ? "#2385ef"', dock)
         self.assertIn('gradient: Gradient', dock)
 
     def test_dock_has_original_vector_artwork(self):
@@ -37,15 +37,21 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn("DockTile.qml", cmake)
         self.assertIn("delegate: DockTile", qml)
         self.assertIn("contentItem: Canvas", dock)
+        self.assertIn("NOT the user-approved high-detail icon artwork", dock)
         self.assertNotIn("NumberAnimation", dock)
         self.assertNotIn("Timer {", dock)
         self.assertIn('tile.iconName === "Settings"', dock)
-        for icon in ("Web", "Photos", "Notes", "Terminal"):
+        for icon in ("Browser", "Mail", "Files", "Calendar", "Photos", "Music", "Terminal", "Settings"):
             with self.subTest(icon=icon):
                 self.assertIn('tile.iconName === "' + icon + '"', dock)
-        for icon in ("Web", "Photos", "Notes", "Terminal"):
-            self.assertIn('{ title: "' + icon + '" }', qml)
+        for icon in ("Browser", "Mail", "Files", "Calendar", "Photos", "Music", "Terminal", "Settings"):
+            self.assertIn('{ name: "' + icon + '", icon: "' + icon + '" }', qml)
         self.assertNotIn("roundedRect(", dock)
+        self.assertIn("model: root.classicApps", qml)
+        self.assertIn("applications: root.classicApps", qml)
+        self.assertIn("property var applications: []", (ROOT / "LauncherOverlay.qml").read_text())
+        self.assertNotIn('{ title: "Notes" }', qml)
+        self.assertNotIn('{ title: "Search" }', qml)
 
 
     def test_original_wallpaper_is_static(self):

@@ -7,23 +7,24 @@ Button {
     required property string iconName
     width: 48
     height: 48
-    readonly property color topTone: iconName === "Home" ? "#6fc3fb" :
-        iconName === "Web" ? "#2385ef" :
+    readonly property color topTone: iconName === "Browser" ? "#2385ef" :
+        iconName === "Mail" ? "#567de8" :
         iconName === "Files" ? "#60c9fc" :
         iconName === "Photos" ? "#f48aaa" :
-        iconName === "Notes" ? "#ffd976" :
-        iconName === "Search" ? "#bf95f5" :
+        iconName === "Calendar" ? "#9e86f5" :
+        iconName === "Music" ? "#bd55df" :
         iconName === "Terminal" ? "#55647e" : "#a4afc6"
-    readonly property color bottomTone: iconName === "Home" ? "#156bc7" :
-        iconName === "Web" ? "#13429e" :
+    readonly property color bottomTone: iconName === "Browser" ? "#13429e" :
+        iconName === "Mail" ? "#5424a1" :
         iconName === "Files" ? "#057ac9" :
         iconName === "Photos" ? "#bb377b" :
-        iconName === "Notes" ? "#df8b24" :
-        iconName === "Search" ? "#6639ba" :
+        iconName === "Calendar" ? "#493196" :
+        iconName === "Music" ? "#532b8f" :
         iconName === "Terminal" ? "#1d2744" : "#56647b"
     hoverEnabled: true
     Accessible.name: iconName + " (demonstration)"
     ToolTip.visible: hovered
+    // Fallback glyphs only. NOT the user-approved high-detail icon artwork.
     // Preview-only: icons are decorative until actual app launch services exist.
     ToolTip.text: iconName + " — demonstration only"
 
@@ -62,24 +63,23 @@ Button {
             ctx.lineCap = "round"
             ctx.lineJoin = "round"
             ctx.beginPath()
-            if (tile.iconName === "Home") {
-                ctx.moveTo(-11, -1)
-                ctx.lineTo(0, -11)
-                ctx.lineTo(11, -1)
-                ctx.moveTo(-8, -3)
-                ctx.lineTo(-8, 10)
-                ctx.lineTo(8, 10)
-                ctx.lineTo(8, -3)
-                ctx.moveTo(-3, 10)
-                ctx.lineTo(-3, 2)
-                ctx.lineTo(3, 2)
-                ctx.lineTo(3, 10)
+            if (tile.iconName === "Mail") {
+                ctx.rect(-12, -8, 24, 16)
+                ctx.moveTo(-12, -8)
+                ctx.lineTo(0, 2)
+                ctx.lineTo(12, -8)
                 ctx.stroke()
-            } else if (tile.iconName === "Search") {
-                ctx.arc(-3, -3, 8, 0, 2 * Math.PI)
-                ctx.moveTo(3, 3)
-                ctx.lineTo(12, 12)
+            } else if (tile.iconName === "Music") {
+                ctx.moveTo(2, -11)
+                ctx.lineTo(11, -13)
+                ctx.lineTo(11, 5)
+                ctx.moveTo(2, -11)
+                ctx.lineTo(2, 8)
                 ctx.stroke()
+                ctx.beginPath()
+                ctx.arc(-4, 8, 4, 0, 2 * Math.PI)
+                ctx.arc(5, 5, 4, 0, 2 * Math.PI)
+                ctx.fill()
             } else if (tile.iconName === "Files") {
                 ctx.moveTo(-12, -7)
                 ctx.lineTo(-3, -7)
@@ -95,7 +95,7 @@ Button {
                 ctx.lineTo(-4, -10)
                 ctx.lineTo(-1, -7)
                 ctx.stroke()
-            } else if (tile.iconName === "Web") {
+            } else if (tile.iconName === "Browser") {
                 ctx.arc(0, 0, 12, 0, 2 * Math.PI)
                 ctx.stroke()
                 ctx.beginPath()
@@ -123,7 +123,7 @@ Button {
                 ctx.lineTo(6, 0)
                 ctx.lineTo(11, 7)
                 ctx.stroke()
-            } else if (tile.iconName === "Notes") {
+            } else if (tile.iconName === "Calendar") {
                 ctx.rect(-10, -12, 20, 24)
                 ctx.stroke()
                 ctx.beginPath()

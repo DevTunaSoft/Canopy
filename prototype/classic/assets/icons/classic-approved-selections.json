@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "style": "classic",
+  "selection_state": "user_approved_visual_reference",
+  "reference_origin": "Canopy original eight-option comparison sheets selected 2026-11-20",
+  "notes": "Selections identify original concept artwork, not existing SVG drafts. No raster source files, license clearance or Qt integration are implied.",
+  "icons": [
+    {
+      "app": "browser",
+      "option": 3,
+      "description": "Tux with orbiting blue globe",
+      "production_asset": null
+    },
+    {
+      "app": "mail",
+      "option": 5,
+      "description": "Blue envelope, @ emblem, gold orbital sweep",
+      "production_asset": null
+    },
+    {
+      "app": "files",
+      "option": 2,
+      "description": "Gold folder with documents and Tux",
+      "production_asset": null
+    },
+    {
+      "app": "calendar",
+      "option": 3,
+      "description": "Stacked calendars, checkmark, Tux",
+      "production_asset": null
+    },
+    {
+      "app": "photos",
+      "option": 2,
+      "description": "Overlapping mountain landscape photographs",
+      "production_asset": null
+    },
+    {
+      "app": "music",
+      "option": 3,
+      "description": "Tux headphones with colorful equalizer",
+      "production_asset": null
+    },
+    {
+      "app": "terminal",
+      "option": 4,
+      "description": "Blue terminal prompt with Tux",
+      "production_asset": null
+    },
+    {
+      "app": "settings",
+      "option": 8,
+      "description": "Blue gear with Tux",
+      "production_asset": null
+    }
+  ]
+}

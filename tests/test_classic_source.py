@@ -6,7 +6,7 @@ ROOT = Path(__file__).resolve().parents[1] / "prototype" / "classic"
 
 class ClassicSourceTests(unittest.TestCase):
     def test_required_files(self):
-        for name in ("CMakeLists.txt", "main.cpp", "Main.qml", "Theme.qml", "DockTile.qml", "PreviewWindow.qml", "Wallpaper.qml", "README.md"):
+        for name in ("CMakeLists.txt", "main.cpp", "Main.qml", "Theme.qml", "DockTile.qml", "PreviewWindow.qml", "Wallpaper.qml", "FolderTile.qml", "README.md"):
             with self.subTest(name=name):
                 self.assertTrue((ROOT / name).is_file())
 
@@ -53,7 +53,14 @@ class ClassicSourceTests(unittest.TestCase):
         cpp = (ROOT / "main.cpp").read_text()
         self.assertIn("SELF_TEST_PASS: preview window fits above dock", cpp)
         self.assertIn("SELF_TEST_FAIL: preview overlaps desktop chrome or is too small", cpp)
-        self.assertIn('not a functional file manager', window)
+        self.assertIn('not a filesystem browser', window)
+        self.assertIn('FolderTile {', window)
+        self.assertIn('objectName: "canopyPreviewSearch"', window)
+        self.assertIn('onClicked: preview.selectedFolder = folderName', window)
+        self.assertIn('No local files are loaded in this preview.', window)
+        tiles = (ROOT / "FolderTile.qml").read_text()
+        self.assertIn("Accessible.description:", tiles)
+        self.assertNotIn("Timer {", tiles)
         self.assertNotIn("Timer {", window)
         self.assertNotIn("NumberAnimation", window)
 

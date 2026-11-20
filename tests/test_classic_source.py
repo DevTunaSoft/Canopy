@@ -27,6 +27,14 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn("SELF_TEST_FAIL: screenshot appears blank or uniform", source)
         self.assertIn("SELF_TEST_PASS: nonuniform window screenshot captured", source)
 
+    def test_chrome_geometry_is_runtime_verified(self):
+        source = (ROOT / "main.cpp").read_text()
+        qml = (ROOT / "Main.qml").read_text()
+        self.assertIn('objectName: "canopyTopBar"', qml)
+        self.assertIn('objectName: "canopyDock"', qml)
+        self.assertIn("SELF_TEST_FAIL: desktop chrome geometry invalid", source)
+        self.assertIn("SELF_TEST_PASS: desktop chrome geometry", source)
+
     def test_explicit_nonproduction_scope(self):
         self.assertIn("not a Linux desktop session", (ROOT / "README.md").read_text())
         self.assertIn("Qt6::Quick", (ROOT / "CMakeLists.txt").read_text())

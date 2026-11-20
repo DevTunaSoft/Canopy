@@ -49,7 +49,8 @@ product marks, proprietary fonts, or application code.
 | Blue Current wallpaper | `prototype/classic/assets/wallpapers/blue-current.svg` | Original Canopy-authored curves, gradients, no third-party media | Embedded Qt resource, static SVG image decode via QtSvg image plugin | Candidate, **not yet approved** |
 | Original dock icon family (7) | `prototype/classic/assets/icons/*.svg` | Seven independently authored Canopy vectors; no copied Apple artwork | Embedded QtSvg images with per-tile readiness checks | **Candidate, unapproved** |
 | Previous dock glyphs | Replaced from `prototype/classic/DockTile.qml` | Old Canvas squares retired | No longer used on the icon candidate branch | **Rejected** |
-| Existing folder demo tiles | `prototype/classic/FolderTile.qml` | Original test-fixture primitives | QML | **Rejected as visual design** |
+| Consistent sample folder artwork | `prototype/classic/FolderTile.qml` + `assets/icons/files.svg` | Reuses original blue Files SVG rather than random pastel blocks | Static embedded SVG image | **Candidate, unapproved** |
+| Previous pastel folder blocks | Retired from `FolderTile.qml` | Old rejected primitive shapes | Not active | **Rejected** |
 
 The reference sources above are **not** asset licenses. The new SVG is original
 and self-contained; source safety is checked by `tools/check_art_asset.py`.

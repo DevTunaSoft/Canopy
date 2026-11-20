@@ -21,6 +21,14 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertNotIn("NumberAnimation", qml)
         self.assertIn("dockSurface", theme)
 
+    def test_classic_defaults_to_light_appearance(self):
+        theme = (ROOT / "Theme.qml").read_text()
+        dock = (ROOT / "DockTile.qml").read_text()
+        self.assertIn('backgroundBottom: "#eef2f8"', theme)
+        self.assertIn('foreground: "#273345"', theme)
+        self.assertIn('chrome: "#edf6f9fc"', theme)
+        self.assertIn('tile.iconName === "Home" ? "#d7e7fb"', dock)
+
     def test_dock_has_original_vector_artwork(self):
         cmake = (ROOT / "CMakeLists.txt").read_text()
         qml = (ROOT / "Main.qml").read_text()

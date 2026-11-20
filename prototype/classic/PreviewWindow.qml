@@ -116,6 +116,74 @@ Rectangle {
         anchors.top: titlebar.bottom
         anchors.bottom: parent.bottom
 
+        // Static toolbar composition. Navigation and search are deliberately
+        // noninteractive until an actual file-management backend is connected.
+        Rectangle {
+            id: contentToolbar
+            objectName: "canopyFilesToolbar"
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            height: 48
+            color: "#f9fbfd"
+            Rectangle {
+                anchors.bottom: parent.bottom
+                width: parent.width
+                height: 1
+                color: "#e1e7ee"
+            }
+            Row {
+                anchors.left: parent.left
+                anchors.leftMargin: preview.compact ? 14 : 22
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 12
+                Label {
+                    text: "‹"
+                    color: "#53677d"
+                    font.pixelSize: 25
+                    Accessible.name: "Back navigation preview, not interactive"
+                }
+                Label {
+                    text: "›"
+                    color: "#a5b1bf"
+                    font.pixelSize: 25
+                    Accessible.name: "Forward navigation preview, not interactive"
+                }
+                Rectangle {
+                    width: 1
+                    height: 18
+                    color: "#d7e0e9"
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+                Label {
+                    text: "Home"
+                    color: "#54677d"
+                    font.pixelSize: 12
+                    font.weight: Font.Medium
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+            }
+            Rectangle {
+                visible: !preview.compact
+                width: 154
+                height: 28
+                radius: 8
+                color: "#f0f4f8"
+                border.color: "#dde5ed"
+                anchors.right: parent.right
+                anchors.rightMargin: 16
+                anchors.verticalCenter: parent.verticalCenter
+                Label {
+                    anchors.left: parent.left
+                    anchors.leftMargin: 12
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "⌕  Search"
+                    color: "#8897a8"
+                    font.pixelSize: 12
+                }
+            }
+        }
+
         Label {
             id: heading
             text: "Home"
@@ -124,8 +192,8 @@ Rectangle {
             color: "#27374b"
             anchors.left: parent.left
             anchors.leftMargin: 22
-            anchors.top: parent.top
-            anchors.topMargin: 20
+            anchors.top: contentToolbar.bottom
+            anchors.topMargin: 16
         }
         Label {
             id: subtitle

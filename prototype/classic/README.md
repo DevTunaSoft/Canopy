@@ -27,7 +27,11 @@ The draft Blue Current static SVG source is packaged in the Qt binary using
 the fallback solid background when SVG decoding fails. A plain Qt build does
 not establish that the wallpaper is visually acceptable or memory-efficient.
 
-The old Dock and folder demo art remains **explicitly rejected**. This is not
+The older Canvas dock artwork was rejected and replaced on the separate icon
+candidate branch with seven original source-controlled SVG files. The new
+family's readiness is checked at runtime and its source safety is checked with
+`tools/check_icon_set.py`, but it still requires human aesthetic review. The
+folder demo art remains **explicitly rejected**. This is not
 an accepted redesign. See
 [`docs/CLASSIC_VISUAL_REBUILD.md`](../../docs/CLASSIC_VISUAL_REBUILD.md)
 for references, provenance, rollout criteria, and remaining work.

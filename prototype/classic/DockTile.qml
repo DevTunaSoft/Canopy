@@ -9,8 +9,19 @@ Button {
     objectName: "canopyDockTile"
     required property string iconName
     property bool previewActive: false
-    readonly property string iconUrl: "qrc:/Canopy/Classic/assets/icons/"
-                                      + iconName.toLowerCase() + ".svg"
+    readonly property string approvedFileName:
+        iconName === "Browser" ? "Browser_Option_3.png" :
+        iconName === "Mail" ? "Mail_Option_5.png" :
+        iconName === "Files" ? "Files_Option_2.png" :
+        iconName === "Calendar" ? "Calendar_Option_3.png" :
+        iconName === "Photos" ? "Photos_Option_2.png" :
+        iconName === "Music" ? "Music_Option_3.png" :
+        iconName === "Terminal" ? "Terminal_Option_4.png" :
+        iconName === "Settings" ? "Settings_Option_8.png" : ""
+    readonly property string iconUrl: canopyApprovedMode
+        ? canopyApprovedIconBase + approvedFileName
+        : "qrc:/Canopy/Classic/assets/icons/"
+          + iconName.toLowerCase() + ".svg"
     readonly property bool iconReady: iconArt.status === Image.Ready
     width: 58
     height: 70

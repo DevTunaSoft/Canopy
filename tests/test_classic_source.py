@@ -87,6 +87,10 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn("SELF_TEST_FAIL: wallpaper bounds or dock icon count invalid", runtime)
         self.assertIn("countVisualItems", runtime)
         self.assertIn("parent->childItems()", runtime)
+        self.assertIn("SELF_TEST_PASS: six demo folders and one search control present", runtime)
+        self.assertIn("SELF_TEST_FAIL: sample Files preview content incomplete", runtime)
+        self.assertIn("SELF_TEST_PASS: wallpaper sky and foreground visually distinct", runtime)
+        self.assertIn('objectName: "canopyFolderTile"', tiles)
         self.assertNotIn("dock->findChildren<QQuickItem *>", runtime)
 
     def test_screenshot_rejects_uniform_frames(self):

@@ -6,7 +6,7 @@ ROOT = Path(__file__).resolve().parents[1] / "prototype" / "classic"
 
 class ClassicSourceTests(unittest.TestCase):
     def test_required_files(self):
-        for name in ("CMakeLists.txt", "main.cpp", "Main.qml", "Theme.qml", "README.md"):
+        for name in ("CMakeLists.txt", "main.cpp", "Main.qml", "Theme.qml", "DockTile.qml", "README.md"):
             with self.subTest(name=name):
                 self.assertTrue((ROOT / name).is_file())
 
@@ -20,6 +20,17 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertNotIn("Timer {", qml)
         self.assertNotIn("NumberAnimation", qml)
         self.assertIn("dockSurface", theme)
+
+    def test_dock_has_original_vector_artwork(self):
+        cmake = (ROOT / "CMakeLists.txt").read_text()
+        qml = (ROOT / "Main.qml").read_text()
+        dock = (ROOT / "DockTile.qml").read_text()
+        self.assertIn("DockTile.qml", cmake)
+        self.assertIn("delegate: DockTile", qml)
+        self.assertIn("contentItem: Canvas", dock)
+        self.assertNotIn("NumberAnimation", dock)
+        self.assertNotIn("Timer {", dock)
+        self.assertIn('tile.iconName === "Settings"', dock)
 
     def test_screenshot_rejects_uniform_frames(self):
         source = (ROOT / "main.cpp").read_text()

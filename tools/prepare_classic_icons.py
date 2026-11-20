@@ -15,7 +15,7 @@ from xml.etree import ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "prototype/classic/assets/icons/classic-approved-selections.json"
-PNG_SIGNATURE = b"\\x89PNG\\r\\n\\x1a\\n"
+PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 MAX_PNG_SIZE = 4 * 1024 * 1024
 MIN_DIMENSION = 256
 MAX_DIMENSION = 2048
@@ -101,7 +101,7 @@ def stage_assets(source, output):
         records.append({"app": app, "option": option, "file": destination, "dimensions": list(dimensions)})
     ET.ElementTree(resources).write(output / "classic-icons.qrc", encoding="unicode", xml_declaration=True)
     (output / "staged-icons.json").write_text(
-        json.dumps({"scope": "review_only_not_release_approved", "icons": records}, indent=2) + "\\n",
+        json.dumps({"scope": "review_only_not_release_approved", "icons": records}, indent=2) + "\n",
         encoding="utf-8",
     )
     return records

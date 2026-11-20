@@ -231,6 +231,7 @@ ApplicationWindow {
             anchors.centerIn: parent
             spacing: canopyTheme.dockSpacing
             Repeater {
+                objectName: "canopyDockRepeater"
                 model: root.classicApps
                 delegate: DockTile {
                     required property var modelData

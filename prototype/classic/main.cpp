@@ -1,6 +1,8 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
+#include <QQuickItem>
+#include <QtMath>
 #include <QDebug>
 #include <QTimer>
 #include <QCoreApplication>
@@ -50,6 +52,29 @@ int main(int argc, char *argv[]) {
         }
         const QString screenshotPath = args.at(screenshotIndex + 1);
         QTimer::singleShot(1000, window, [window, screenshotPath]() {
+            auto *bar = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBar"));
+            auto *dock = window->findChild<QQuickItem *>(QStringLiteral("canopyDock"));
+            if (!bar || !dock) {
+                qCritical() << "SELF_TEST_FAIL: missing required desktop chrome";
+                QCoreApplication::exit(1);
+                return;
+            }
+            const QPointF barOrigin = bar->mapToItem(window->contentItem(), QPointF(0, 0));
+            const QPointF dockOrigin = dock->mapToItem(window->contentItem(), QPointF(0, 0));
+            const bool barFits = qAbs(barOrigin.x()) <= 2 && qAbs(barOrigin.y()) <= 2
+                && qAbs(bar->width() - window->width()) <= 2 && bar->height() >= 40;
+            const bool dockFits = dockOrigin.x() >= 0 && dockOrigin.y() >= bar->height()
+                && dockOrigin.x() + dock->width() <= window->width() + 1
+                && dockOrigin.y() + dock->height() <= window->height() + 1
+                && qAbs(dockOrigin.x() + dock->width() / 2 - window->width() / 2) <= 2;
+            if (!barFits || !dockFits) {
+                qCritical() << "SELF_TEST_FAIL: desktop chrome geometry invalid"
+                            << "window" << window->size() << "bar" << barOrigin << bar->size()
+                            << "dock" << dockOrigin << dock->size();
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SELF_TEST_PASS: desktop chrome geometry" << window->size();
             const QImage frame = window->grabWindow();
             if (frame.isNull() || frame.width() < 720 || frame.height() < 480) {
                 qCritical() << "SELF_TEST_FAIL: invalid screenshot dimensions";

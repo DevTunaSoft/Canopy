@@ -40,3 +40,5 @@ cmake --build build/classic-with-icons --parallel 2
 ```
 
 The dock **and launcher** reuse `DockTile.qml`, so the same compiled icon resources appear in both. A build without the complete set automatically stays on Canvas fallback; no external file fetches or runtime background services. This opt-in visual inspection path is not a legal/visual quality clearance or production asset integration, and source art is not supplied with this PR. Do not ship review-only imagery without IP/provenance, Tux attribution, high-resolution and Mint VM acceptance.
+
+For the optional icon-enabled build, `--self-test-icons --self-test-screenshot PATH` now verifies that all eight compiled PNG resources **decode successfully** and that all eight named QML Image nodes reach Ready status, before saving the screenshot. CI exercises this with synthetic PNG fixtures. This is technical image-load evidence only, not visual review of the user's selected artwork.

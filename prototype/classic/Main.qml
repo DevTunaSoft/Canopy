@@ -12,7 +12,7 @@ ApplicationWindow {
     title: "Canopy Classic — Technology Spike"
     color: "#09111d"
 
-    Theme { id: palette }
+    Theme { id: canopyTheme }
     readonly property bool compactLayout: width < 900
 
     // Lightweight wallpaper composition: gradients and rectangles only.
@@ -20,8 +20,8 @@ ApplicationWindow {
     Rectangle {
         anchors.fill: parent
         gradient: Gradient {
-            GradientStop { position: 0; color: palette.backgroundTop }
-            GradientStop { position: 1; color: palette.backgroundBottom }
+            GradientStop { position: 0; color: canopyTheme.backgroundTop }
+            GradientStop { position: 1; color: canopyTheme.backgroundBottom }
         }
     }
     Rectangle {
@@ -56,8 +56,8 @@ ApplicationWindow {
         id: topBar
         anchors.top: parent.top
         width: parent.width
-        height: palette.barHeight
-        color: palette.chrome
+        height: canopyTheme.barHeight
+        color: canopyTheme.chrome
 
         Rectangle {
             anchors.bottom: parent.bottom
@@ -106,7 +106,7 @@ ApplicationWindow {
             }
             Label {
                 text: "Canopy"
-                color: palette.foreground
+                color: canopyTheme.foreground
                 font.pixelSize: 14
                 font.bold: true
                 font.family: "Sans Serif"
@@ -114,19 +114,19 @@ ApplicationWindow {
             Label {
                 text: "File"
                 visible: !root.compactLayout
-                color: palette.foreground
+                color: canopyTheme.foreground
                 font.pixelSize: 13
             }
             Label {
                 text: "View"
                 visible: !root.compactLayout
-                color: palette.foreground
+                color: canopyTheme.foreground
                 font.pixelSize: 13
             }
             Item { Layout.fillWidth: true }
             Label {
                 text: Qt.formatDateTime(new Date(), "ddd d MMM")
-                color: palette.foreground
+                color: canopyTheme.foreground
                 font.pixelSize: 12
                 font.weight: Font.Medium
             }
@@ -136,11 +136,11 @@ ApplicationWindow {
     // Dock controls are explicitly nonfunctional until session services exist.
     Rectangle {
         id: dock
-        width: Math.min(root.width - 32, dockRow.implicitWidth + 2 * palette.dockPadding)
-        height: palette.dockSize
-        radius: palette.cornerRadius
-        color: palette.dockSurface
-        border.color: palette.dockBorder
+        width: Math.min(root.width - 32, dockRow.implicitWidth + 2 * canopyTheme.dockPadding)
+        height: canopyTheme.dockSize
+        radius: canopyTheme.cornerRadius
+        color: canopyTheme.dockSurface
+        border.color: canopyTheme.dockBorder
         border.width: 1
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
@@ -150,7 +150,7 @@ ApplicationWindow {
         Row {
             id: dockRow
             anchors.centerIn: parent
-            spacing: palette.dockSpacing
+            spacing: canopyTheme.dockSpacing
             Repeater {
                 model: [
                     { title: "Home", glyph: "⌂" },
@@ -160,15 +160,15 @@ ApplicationWindow {
                 ]
                 delegate: Button {
                     required property var modelData
-                    width: palette.tileSize
-                    height: palette.tileSize
+                    width: canopyTheme.tileSize
+                    height: canopyTheme.tileSize
                     hoverEnabled: true
                     Accessible.name: modelData.title + " (demonstration)"
                     ToolTip.visible: hovered
                     ToolTip.text: modelData.title + " — demonstration only"
                     background: Rectangle {
                         radius: 13
-                        color: parent.hovered ? palette.tileHover : palette.tile
+                        color: parent.hovered ? canopyTheme.tileHover : canopyTheme.tile
                         border.color: parent.hovered ? "#7797b4" : "#49617a"
                         border.width: 1
                     }
@@ -177,7 +177,7 @@ ApplicationWindow {
                         font.pixelSize: 26
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
-                        color: palette.foreground
+                        color: canopyTheme.foreground
                     }
                 }
             }
@@ -190,7 +190,7 @@ ApplicationWindow {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 9
         text: "CLASSIC PREVIEW"
-        color: palette.muted
+        color: canopyTheme.muted
         opacity: 0.64
         font.pixelSize: 9
         font.letterSpacing: 2

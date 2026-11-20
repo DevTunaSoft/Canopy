@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+<title>Canopy Settings — original icon artwork</title>
+<desc>Original static 128-pixel Canopy Classic vector artwork, independent of commercial app icons.</desc>
+<defs><linearGradient id="m" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e5f0f8"/><stop offset=".45" stop-color="#899cae"/><stop offset="1" stop-color="#4e647a"/></linearGradient><linearGradient id="n" x1=".1" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5fb4db"/><stop offset=".5" stop-color="#185d9f"/><stop offset="1" stop-color="#122f66"/></linearGradient></defs><path d="M52 9 H76 L80 23 L92 28 L105 22 L119 38 L110 51 L114 64 L123 73 L114 96 L99 96 L91 106 L88 120 H40 L36 106 L25 99 L10 96 L5 73 L17 63 L17 52 L7 39 L22 22 L36 28 L48 23Z" fill="url(#m)" stroke="#607e95" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="64" cy="65" r="35" fill="#b8cedd" stroke="#fafcff" stroke-width="3"/>
+<circle cx="64" cy="65" r="26" fill="url(#n)" stroke="#6889a2" stroke-width="2"/>
+<circle cx="64" cy="65" r="13" fill="#d6e9f3" stroke="#fff" stroke-width="2"/>
+<circle cx="64" cy="65" r="5" fill="#668ca5"/></svg>

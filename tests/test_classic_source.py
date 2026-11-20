@@ -158,6 +158,8 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn('readonly property bool imageReady: penguinArt.status === Image.Ready', qml)
         self.assertIn("launcherFits", source)
         self.assertIn("SELF_TEST_FAIL: desktop chrome geometry invalid", source)
+        self.assertIn("SELF_TEST_FAIL: original Canopy launcher icon did not load", source)
+        self.assertIn("SELF_TEST_PASS: original Canopy penguin launcher loaded", source)
         self.assertIn("SELF_TEST_PASS: desktop chrome geometry", source)
 
     def test_explicit_nonproduction_scope(self):

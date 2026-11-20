@@ -102,6 +102,7 @@ Rectangle {
                     implicitHeight: 33
                     hoverEnabled: true
                     padding: 0
+                    leftPadding: 9
                     Accessible.name: "Preview " + modelData
                     onClicked: {
                         preview.currentSection = modelData
@@ -115,7 +116,6 @@ Rectangle {
                             ? "#d8e7f6" : nav.hovered ? "#e3ebf4" : "transparent"
                     }
                     contentItem: Row {
-                        leftPadding: 9
                         spacing: 10
                         Rectangle {
                             anchors.verticalCenter: parent.verticalCenter

@@ -32,7 +32,7 @@ class IconSourceTests(unittest.TestCase):
                           "Unsupported icon attribute")
 
     def test_broken_gradient_not_allowed(self):
-        source = (ICONS / "home.svg").read_text(encoding="utf-8")
+        source = (ICONS / "canopy.svg").read_text(encoding="utf-8")
         self.check_reject(source.replace("url(#b)", "url(#notthere)", 1),
                           "undefined gradient")
 

@@ -113,6 +113,12 @@ int main(int argc, char *argv[]) {
                 && dockOrigin.x() + dock->width() <= window->width() + 1
                 && dockOrigin.y() + dock->height() <= window->height() + 1
                 && qAbs(dockOrigin.x() + dock->width() / 2 - window->width() / 2) <= 2;
+            if (!launcher->property("imageReady").toBool()) {
+                qCritical() << "SELF_TEST_FAIL: original Canopy launcher icon did not load";
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SELF_TEST_PASS: original Canopy penguin launcher loaded";
             const QPointF launcherOrigin = launcher->mapToItem(window->contentItem(), QPointF(0, 0));
             const bool launcherFits = launcher->width() >= 24 && launcher->height() >= 28
                 && launcherOrigin.x() >= 0 && launcherOrigin.y() >= 0

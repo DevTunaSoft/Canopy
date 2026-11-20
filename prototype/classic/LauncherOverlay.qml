@@ -46,10 +46,10 @@ FocusScope {
         id: panel
         objectName: "canopyLauncherPanel"
         width: Math.min(parent.width - 48, 824)
-        height: Math.min(parent.height - 110, 530)
+        height: Math.min(parent.height - 170, 405)
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
-        anchors.verticalCenterOffset: -12
+        anchors.verticalCenterOffset: -18
         radius: 28
         color: "#e42d2947"
         border.width: 1
@@ -111,7 +111,7 @@ FocusScope {
             model: launcher.filteredApps
             readonly property int columnCount: width < 535 ? 3 : width < 700 ? 4 : 6
             cellWidth: width / columnCount
-            cellHeight: panel.height < 450 ? 83 : 110
+            cellHeight: panel.height < 360 ? 64 : 110
             keyNavigationWraps: true
             activeFocusOnTab: true
             highlightFollowsCurrentItem: true
@@ -129,14 +129,14 @@ FocusScope {
                 DockTile {
                     iconName: modelData.icon
                     anchors.top: parent.top
-                    anchors.topMargin: 9
+                    anchors.topMargin: panel.height < 360 ? 1 : 9
                     anchors.horizontalCenter: parent.horizontalCenter
                     onClicked: launcher.selectionMessage = modelData.name + " — preview only"
                 }
                 Label {
                     text: modelData.name
                     anchors.top: parent.top
-                    anchors.topMargin: panel.height < 450 ? 62 : 66
+                    anchors.topMargin: panel.height < 360 ? 50 : 66
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width - 10
                     horizontalAlignment: Text.AlignHCenter

@@ -9,7 +9,7 @@ import re
 import xml.etree.ElementTree as ET
 
 NS = "{http://www.w3.org/2000/svg}"
-ICON_NAMES = ("home", "files", "browser", "photos", "mail", "calendar", "settings")
+ICON_NAMES = ("canopy", "files", "browser", "photos", "settings", "terminal", "trash")
 TAGS = {"svg", "title", "desc", "defs", "linearGradient", "stop", "rect",
         "path", "circle", "text"}
 ATTRS = {"width", "height", "viewBox", "id", "x1", "y1", "x2", "y2", "offset",

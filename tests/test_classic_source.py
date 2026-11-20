@@ -73,6 +73,15 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertNotIn("Timer {", window)
         self.assertNotIn("NumberAnimation", window)
 
+    def test_files_toolbar_is_preview_only_and_responsive(self):
+        window = (ROOT / "PreviewWindow.qml").read_text()
+        self.assertIn('objectName: "canopyFilesToolbar"', window)
+        self.assertIn('anchors.top: contentToolbar.bottom', window)
+        self.assertIn('visible: !preview.compact', window)
+        self.assertIn('not interactive', window)
+        self.assertNotIn("Timer {", window)
+        self.assertNotIn("NumberAnimation", window)
+
     def test_screenshot_rejects_uniform_frames(self):
         source = (ROOT / "main.cpp").read_text()
         self.assertIn("sampledColors.size() < 8", source)

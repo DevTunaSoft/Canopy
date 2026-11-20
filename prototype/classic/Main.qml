@@ -15,43 +15,8 @@ ApplicationWindow {
     Theme { id: canopyTheme }
     readonly property bool compactLayout: width < 900
 
-    // Lightweight wallpaper composition: gradients and rectangles only.
-    // No shader effects, animation loops, timers or additional processes.
-    Rectangle {
-        anchors.fill: parent
-        gradient: Gradient {
-            GradientStop { position: 0; color: canopyTheme.backgroundTop }
-            GradientStop { position: 1; color: canopyTheme.backgroundBottom }
-        }
-    }
-    Rectangle {
-        width: root.width * 1.04
-        height: root.height * 0.78
-        x: root.width * 0.22
-        y: root.height * 0.25
-        rotation: -27
-        radius: height * 0.45
-        opacity: 0.73
-        gradient: Gradient {
-            GradientStop { position: 0; color: "#b2cdf0" }
-            GradientStop { position: 0.45; color: "#d1c5ef" }
-            GradientStop { position: 1; color: "#f8d4dd" }
-        }
-    }
-    Rectangle {
-        width: root.width * 0.83
-        height: root.height * 0.44
-        x: root.width * 0.40
-        y: root.height * 0.65
-        rotation: -16
-        radius: height * 0.45
-        opacity: 0.65
-        gradient: Gradient {
-            GradientStop { position: 0; color: "#99c6db" }
-            GradientStop { position: 1; color: "#e8e0f4" }
-        }
-    }
-
+    // Original static artwork; no rotating placeholder rectangles.
+    Wallpaper { anchors.fill: parent }
 
     // Visual-only composition: file management and window controls are not wired.
     // It scales down for screenshot checks; the floating dock remains unobscured.
@@ -189,28 +154,20 @@ ApplicationWindow {
             Repeater {
                 model: [
                     { title: "Home" },
-                    { title: "Search" },
                     { title: "Files" },
+                    { title: "Browser" },
+                    { title: "Photos" },
+                    { title: "Mail" },
+                    { title: "Calendar" },
                     { title: "Settings" }
                 ]
                 delegate: DockTile {
                     required property var modelData
                     iconName: modelData.title
+                    previewActive: modelData.title === "Files"
                 }
             }
         }
     }
 
-    Label {
-        anchors.right: parent.right
-        anchors.rightMargin: 21
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 9
-        text: "CANOPY CLASSIC · PREVIEW"
-        color: canopyTheme.muted
-        opacity: 0.64
-        font.pixelSize: 9
-        font.letterSpacing: 2
-        visible: root.width > 900
-    }
 }

@@ -64,6 +64,38 @@ jobs:
           path: test-artifacts/
           if-no-files-found: warn
           retention-days: 7
+      - name: Compile and test opt-in synthetic icon resources
+        timeout-minutes: 5
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          # Synthetic RGBA fixtures only. No approved/user icon artwork is copied.
+          python3 - <<'PY'
+          import json, struct, zlib
+          from pathlib import Path
+          from tools.prepare_classic_icons import stage_assets, MANIFEST
+
+          src = Path("build/synthetic-reviewed-icon-sources")
+          src.mkdir(parents=True, exist_ok=True)
+          def chunk(kind, content):
+              return struct.pack(">I", len(content)) + kind + content + struct.pack(">I", zlib.crc32(kind + content) & 0xffffffff)
+          def fixture(index):
+              ihdr = struct.pack(">IIBBBBB", 256, 256, 8, 6, 0, 0, 0)
+              row = b"\\x00" + bytes((index * 23, 71, 201, 255)) * 256
+              payload = zlib.compress(row * 256)
+              return (b"\\x89PNG\\r\\n\\x1a\\n" + chunk(b"IHDR", ihdr)
+                      + chunk(b"IDAT", payload) + chunk(b"IEND", b""))
+          for number, item in enumerate(json.loads(MANIFEST.read_text())["icons"], 1):
+              (src / f'{item["app"]}-option-{item["option"]}.png').write_bytes(fixture(number))
+          stage_assets(src, Path("build/synthetic-reviewed-icon-stage"))
+          PY
+          cmake -S prototype/classic -B build/classic-synthetic-icons -G Ninja -DCMAKE_BUILD_TYPE=Release -DCANOPY_REVIEWED_ICONS_DIR="$PWD/build/synthetic-reviewed-icon-stage"
+          cmake --build build/classic-synthetic-icons --parallel 2
+          set -o pipefail
+          timeout 30s xvfb-run -a ./build/classic-synthetic-icons/canopy-classic-spike --self-test-size 1200x750 --self-test-screenshot build/synthetic-icons-screenshot.png 2>&1 | tee build/synthetic-icons-run.log
+          grep -q "reviewed-resource-preview" build/synthetic-icons-run.log
+          python3 tools/check_screenshot.py build/synthetic-icons-screenshot.png 1200 750
       - name: Headless QML smoke test
         env:
           QT_QUICK_BACKEND: software

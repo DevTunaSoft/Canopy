@@ -58,7 +58,7 @@ wallpaper, icon or typeface. No Apple-owned visual assets may be imported.
 ## Runtime requirements and proof
 
 1. Qt 6 build must embed the SVG and install `qt6-svg-plugins` on the test
-   runner. Windows and Linux packaging must include the image-format plugin.
+   runner (Ubuntu 24.04: `libqt6svg6`, which contains `libqsvg.so`). Windows and Linux packaging must include the image-format plugin.
 2. Headless runtime must confirm `Image.Ready`; a plain fallback rectangle
    must **fail** the screenshot test instead of passing unnoticed.
 3. Capture actual screenshots of the compiled app at 760×500 and 1200×750.

@@ -23,6 +23,17 @@ Build a polished, familiar Linux desktop shell. Classic is macOS-inspired withou
 6. Commit and push verified changes to GitHub; never merge failing or unverified work. Continue to the next independent task only when safe.
 7. Record measured performance with machine details, methodology, and baseline; do not invent numbers.
 
+## Current isolated design experiment
+
+The unapproved `feature/classic-blue-current-wallpaper-20261120` branch
+introduces original embedded `assets/wallpapers/blue-current.svg` and a
+source+runtime validation gate. Read
+`docs/CLASSIC_VISUAL_REBUILD.md` before any design-related changes. The
+existing dock, folder tiles and Files UI still fail visual acceptance.
+**Do not conflate a passing SVG/Qt pipeline with owner approval.**
+Retain as an experimental, stacked draft only. Avoid attempting to
+merge a design branch while VISUAL_REVIEW_PENDING.
+
 ## Visual design correction (November 20, 2026)
 
 The user explicitly rejected the current PR #69 visual direction as **cheap**

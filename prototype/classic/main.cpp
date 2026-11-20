@@ -108,6 +108,13 @@ int main(int argc, char *argv[]) {
                 return;
             }
             const int dockTileCount = countVisualItems(dock, QStringLiteral("canopyDockTile"));
+            if (!wallpaper->property("imageReady").toBool()) {
+                qCritical() << "SELF_TEST_FAIL: Blue Current wallpaper image did not load"
+                            << "check Qt SVG plugin and embedded artwork";
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SELF_TEST_PASS: original SVG wallpaper image loaded";
             const QPointF wallpaperOrigin = wallpaper->mapToItem(window->contentItem(), QPointF(0, 0));
             const bool wallpaperFits = qAbs(wallpaperOrigin.x()) <= 1
                 && qAbs(wallpaperOrigin.y()) <= 1

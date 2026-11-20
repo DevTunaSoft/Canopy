@@ -18,9 +18,9 @@ def make_png(width=256, height=256, color_type=6):
                 + struct.pack(">I", zlib.crc32(kind + payload) & 0xFFFFFFFF))
     ihdr = struct.pack(">IIBBBBB", width, height, 8, color_type, 0, 0, 0)
     count = 4 if color_type == 6 else 3
-    scanline = b"\\x00" + bytes([90] * count * width)
+    scanline = b"\x00" + bytes([90] * count * width)
     pixels = zlib.compress(scanline * height)
-    return b"\\x89PNG\\r\\n\\x1a\\n" + chunk(b"IHDR", ihdr) + chunk(b"IDAT", pixels) + chunk(b"IEND", b"")
+    return b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", ihdr) + chunk(b"IDAT", pixels) + chunk(b"IEND", b"")
 
 
 class IconIngestionTests(unittest.TestCase):

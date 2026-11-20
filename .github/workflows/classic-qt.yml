@@ -82,9 +82,9 @@ jobs:
               return struct.pack(">I", len(content)) + kind + content + struct.pack(">I", zlib.crc32(kind + content) & 0xffffffff)
           def fixture(index):
               ihdr = struct.pack(">IIBBBBB", 256, 256, 8, 6, 0, 0, 0)
-              row = b"\\x00" + bytes((index * 23, 71, 201, 255)) * 256
+              row = b"\x00" + bytes((index * 23, 71, 201, 255)) * 256
               payload = zlib.compress(row * 256)
-              return (b"\\x89PNG\\r\\n\\x1a\\n" + chunk(b"IHDR", ihdr)
+              return (b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", ihdr)
                       + chunk(b"IDAT", payload) + chunk(b"IEND", b""))
           for number, item in enumerate(json.loads(MANIFEST.read_text())["icons"], 1):
               (src / f'{item["app"]}-option-{item["option"]}.png').write_bytes(fixture(number))

@@ -246,25 +246,38 @@ Rectangle {
                 font.pixelSize: 11
             }
 
-            Flow {
-                id: folders
+            Flickable {
+                id: folderScroller
+                objectName: "canopyFolderScroller"
                 anchors.top: subtitle.bottom
                 anchors.topMargin: preview.condensed ? 10 : 17
                 anchors.left: heading.left
                 anchors.right: parent.right
                 anchors.rightMargin: 10
-                spacing: preview.condensed ? 6 : 10
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 3
                 visible: preview.currentSection === "Home"
-                Repeater {
-                    model: preview.sampleFolders
-                    delegate: FolderTile {
-                        required property var modelData
-                        folderName: modelData.name
-                        folderTone: modelData.tone
-                        selected: preview.selectedFolder === folderName
-                        visible: folderName.toLowerCase().indexOf(
-                            preview.searchQuery.toLowerCase()) >= 0
-                        onClicked: preview.selectedFolder = folderName
+                clip: true
+                contentWidth: width
+                contentHeight: folders.childrenRect.height + 10
+                boundsBehavior: Flickable.StopAtBounds
+                flickableDirection: Flickable.VerticalFlick
+                ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+                Flow {
+                    id: folders
+                    width: folderScroller.width - 8
+                    spacing: preview.condensed ? 6 : 10
+                    Repeater {
+                        model: preview.sampleFolders
+                        delegate: FolderTile {
+                            required property var modelData
+                            folderName: modelData.name
+                            folderTone: modelData.tone
+                            selected: preview.selectedFolder === folderName
+                            visible: folderName.toLowerCase().indexOf(
+                                preview.searchQuery.toLowerCase()) >= 0
+                            onClicked: preview.selectedFolder = folderName
+                        }
                     }
                 }
             }
@@ -275,17 +288,7 @@ Rectangle {
                 color: "#75869a"
                 font.pixelSize: 12
             }
-            Label {
-                anchors.left: heading.left
-                anchors.top: folders.bottom
-                anchors.topMargin: 14
-                text: preview.searchQuery !== "" && preview.currentSection === "Home"
-                      ? "Search filters sample names only"
-                      : ""
-                visible: text !== "" && !preview.condensed
-                color: "#8292a3"
-                font.pixelSize: 11
-            }
+
         }
 
         Rectangle {

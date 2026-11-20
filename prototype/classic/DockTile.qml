@@ -77,8 +77,8 @@ Button {
                 ctx.lineTo(2, 8)
                 ctx.stroke()
                 ctx.beginPath()
-                ctx.ellipse(-4, 8, 6, 4, -0.2, 0, 2 * Math.PI)
-                ctx.ellipse(5, 5, 6, 4, -0.2, 0, 2 * Math.PI)
+                ctx.arc(-4, 8, 4, 0, 2 * Math.PI)
+                ctx.arc(5, 5, 4, 0, 2 * Math.PI)
                 ctx.fill()
             } else if (tile.iconName === "Files") {
                 ctx.moveTo(-12, -7)

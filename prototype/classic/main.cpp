@@ -330,8 +330,11 @@ int main(int argc, char *argv[]) {
             }
             const int dockTileCount = countVisualItems(dock, QStringLiteral("canopyDockTile"));
             if (!wallpaper->property("imageReady").toBool()) {
-                qCritical() << "SELF_TEST_FAIL: Blue Current wallpaper image did not load"
-                            << "check Qt SVG plugin and embedded artwork";
+                if (landscapeMode)
+                    qCritical() << "SELF_TEST_FAIL: validated landscape wallpaper did not decode";
+                else
+                    qCritical() << "SELF_TEST_FAIL: Blue Current wallpaper image did not load"
+                                << "check Qt SVG plugin and embedded artwork";
                 QCoreApplication::exit(1);
                 return;
             }

@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
             const bool previewFits = previewOrigin.x() >= 0
                 && previewOrigin.y() >= bar->height() - 1
                 && previewOrigin.x() + preview->width() <= window->width() + 1
-                && previewOrigin.y() + preview->height() <= dockOrigin.y() - 2
+                && previewOrigin.y() + preview->height() <= dockOrigin.y() - 12
                 && preview->width() >= 480 && preview->height() >= 250;
             if (!previewFits) {
                 qCritical() << "SELF_TEST_FAIL: preview overlaps desktop chrome or is too small"

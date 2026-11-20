@@ -20,7 +20,15 @@ Rectangle {
         anchors.right: parent.right
         anchors.top: parent.top
         height: 53
+        radius: 20
         color: "#e1dff3"
+        // Fill the lower radius to keep a flat join with the content area.
+        Rectangle {
+            anchors.bottom: parent.bottom
+            width: parent.width
+            height: 24
+            color: "#e1dff3"
+        }
         Row {
             anchors.left: parent.left
             anchors.leftMargin: 18

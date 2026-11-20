@@ -100,7 +100,9 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertNotIn("NumberAnimation", wallpaper)
         self.assertNotIn("ShaderEffect", wallpaper)
         self.assertIn('title: "Browser"', desktop)
-        self.assertIn('title: "Calendar"', desktop)
+        self.assertIn('title: "Terminal"', desktop)
+        self.assertIn('title: "Trash"', desktop)
+        self.assertIn('title: "Canopy"', desktop)
         self.assertIn('previewActive: modelData.title === "Files"', desktop)
         runtime = (ROOT / "main.cpp").read_text()
         self.assertIn("SELF_TEST_PASS: original wallpaper and seven dock icons present", runtime)
@@ -119,8 +121,8 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn("SELF_TEST_FAIL: folder artwork did not load", runtime)
         self.assertIn("SELF_TEST_FAIL: original dock artwork failed to load", runtime)
         self.assertIn("countReadyDockTiles", runtime)
-        for icon in ("home", "files", "browser", "photos", "mail",
-                     "calendar", "settings"):
+        for icon in ("canopy", "files", "browser", "photos", "settings",
+                     "terminal", "trash"):
             self.assertIn(f"assets/icons/{icon}.svg", cmake)
             self.assertTrue((ROOT / f"assets/icons/{icon}.svg").is_file())
         self.assertIn('objectName: "canopyFolderTile"', (ROOT / "FolderTile.qml").read_text())
@@ -151,6 +153,9 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn('objectName: "canopyTopBar"', qml)
         self.assertIn('objectName: "canopyDock"', qml)
         self.assertIn('objectName: "canopyLauncher"', qml)
+        self.assertIn('assets/brand/penguin-launcher.svg', qml)
+        self.assertIn('onClicked: launcherMenu.open()', qml)
+        self.assertIn('readonly property bool imageReady: penguinArt.status === Image.Ready', qml)
         self.assertIn("launcherFits", source)
         self.assertIn("SELF_TEST_FAIL: desktop chrome geometry invalid", source)
         self.assertIn("SELF_TEST_PASS: desktop chrome geometry", source)

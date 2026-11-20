@@ -15,7 +15,7 @@ class ClassicSourceTests(unittest.TestCase):
         qml = (ROOT / "Main.qml").read_text()
         theme = (ROOT / "Theme.qml").read_text()
         self.assertIn("Main.qml Theme.qml", cmake)
-        self.assertIn("Theme { id: palette }", qml)
+        self.assertIn("Theme { id: canopyTheme }", qml)\n        self.assertNotIn("palette.", qml)
         self.assertNotIn("Timer {", qml)
         self.assertNotIn("NumberAnimation", qml)
         self.assertIn("dockSurface", theme)

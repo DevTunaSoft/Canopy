@@ -4,6 +4,7 @@ Selections refer to reference artwork only; do not accidentally treat draft SVGs
 as the approved icons or claim that production icon resources are installed.
 """
 import json
+import re
 from pathlib import Path
 import unittest
 
@@ -42,6 +43,27 @@ class ApprovedClassicSelectionTests(unittest.TestCase):
             {entry["app"]: entry["option"] for entry in entries},
             APPROVED,
         )
+
+    def test_qt_dock_and_launcher_share_exactly_the_approved_catalog(self):
+        classic = ROOT / "prototype" / "classic"
+        main = (classic / "Main.qml").read_text(encoding="utf-8")
+        launcher = (classic / "LauncherOverlay.qml").read_text(encoding="utf-8")
+        # Restrict matches to the declarative catalog block, not comments or
+        # symbols used elsewhere in the presentation.
+        start = main.index("readonly property var classicApps: [")
+        end = main.index("]", start)
+        catalog = main[start:end]
+        shown = re.findall(
+            r'\\{ name: "([A-Za-z]+)", icon: "([A-Za-z]+)" \\}',
+            catalog,
+        )
+        expected = [item["app"].title() for item in self.manifest["icons"]]
+        self.assertEqual([name for name, _ in shown], expected)
+        self.assertEqual([icon for _, icon in shown], expected)
+        self.assertIn("model: root.classicApps", main)
+        self.assertIn("applications: root.classicApps", main)
+        self.assertIn("model: launcher.filteredApps", launcher)
+        self.assertNotIn("readonly property var applications: [", launcher)
 
     def test_no_selected_concept_is_misrepresented_as_shipped_asset(self):
         for entry in self.manifest["icons"]:

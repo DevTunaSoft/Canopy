@@ -26,7 +26,7 @@ class ClassicSourceTests(unittest.TestCase):
         dock = (ROOT / "DockTile.qml").read_text()
         self.assertIn('backgroundBottom: "#eef2f8"', theme)
         self.assertIn('foreground: "#273345"', theme)
-        self.assertIn('chrome: "#edf6f9fc"', theme)
+        self.assertIn('chrome: "#dd090f2d"', theme)
         self.assertIn('tile.iconName === "Home" ? "#d7e7fb"', dock)
 
     def test_dock_has_original_vector_artwork(self):
@@ -54,10 +54,23 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn("Landscape.qml", cmake)
         self.assertIn("Landscape {", desktop)
         self.assertIn('objectName: "canopyLandscape"', landscape)
-        self.assertIn('mountain("#587d87"', landscape)
+        self.assertIn('function ribbon(points, colors)', landscape)
+        self.assertIn('base.addColorStop(0, "#090c36")', landscape)
         self.assertNotIn("Timer {", landscape)
         self.assertNotIn("NumberAnimation", landscape)
         self.assertNotIn("ShaderEffect", landscape)
+
+    def test_reference_locked_visual_reset(self):
+        design = (ROOT.parents[1] / "docs" / "CLASSIC_VISUAL_RESET_REFERENCE.md").read_text()
+        qml = (ROOT / "Main.qml").read_text()
+        files = (ROOT / "PreviewWindow.qml").read_text()
+        self.assertIn("Mockup 2", design)
+        self.assertIn("Mockup 1", design)
+        self.assertIn('text: "Window"', qml)
+        self.assertIn('text: "Help"', qml)
+        self.assertIn('columns: preview.compact ? 2 : 4', files)
+        self.assertIn('color: "#eeeafa"', files)
+        self.assertNotIn("Timer {", files)
 
     def test_representative_preview_is_included(self):
         cmake = (ROOT / "CMakeLists.txt").read_text()

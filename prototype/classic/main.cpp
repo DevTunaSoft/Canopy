@@ -54,7 +54,8 @@ int main(int argc, char *argv[]) {
         QTimer::singleShot(1000, window, [window, screenshotPath]() {
             auto *bar = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBar"));
             auto *dock = window->findChild<QQuickItem *>(QStringLiteral("canopyDock"));
-            if (!bar || !dock) {
+            auto *launcher = window->findChild<QQuickItem *>(QStringLiteral("canopyLauncher"));
+            if (!bar || !dock || !launcher) {
                 qCritical() << "SELF_TEST_FAIL: missing required desktop chrome";
                 QCoreApplication::exit(1);
                 return;
@@ -67,10 +68,16 @@ int main(int argc, char *argv[]) {
                 && dockOrigin.x() + dock->width() <= window->width() + 1
                 && dockOrigin.y() + dock->height() <= window->height() + 1
                 && qAbs(dockOrigin.x() + dock->width() / 2 - window->width() / 2) <= 2;
-            if (!barFits || !dockFits) {
+            const QPointF launcherOrigin = launcher->mapToItem(window->contentItem(), QPointF(0, 0));
+            const bool launcherFits = launcher->width() >= 24 && launcher->height() >= 28
+                && launcherOrigin.x() >= 0 && launcherOrigin.y() >= 0
+                && launcherOrigin.x() + launcher->width() <= window->width()
+                && launcherOrigin.y() + launcher->height() <= bar->height() + 1;
+            if (!barFits || !dockFits || !launcherFits) {
                 qCritical() << "SELF_TEST_FAIL: desktop chrome geometry invalid"
                             << "window" << window->size() << "bar" << barOrigin << bar->size()
-                            << "dock" << dockOrigin << dock->size();
+                            << "dock" << dockOrigin << dock->size()
+                            << "launcher" << launcherOrigin << launcher->size();
                 QCoreApplication::exit(1);
                 return;
             }

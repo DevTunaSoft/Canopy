@@ -19,5 +19,18 @@ Record distro, Qt version, CPU, GPU, session type, and driver. Run cold and warm
 
 GitHub Actions on Ubuntu 24.04 compiles the Qt application and runs a five-second Xvfb smoke test that requires the QML root to create a visible window. This is automated headless startup verification, **not** a screenshot review, visual-quality certification, Linux Mint acceptance, desktop-session test, or performance measurement. See `.github/workflows/classic-qt.yml` and `docs/MINT_VM_ACCEPTANCE.md` for the remaining acceptance work.
 
+## Wallpaper asset candidate
+
+The draft Blue Current static SVG source is packaged in the Qt binary using
+`qt_add_resources`. On Linux systems Qt's SVG image-format plugin (Ubuntu:
+`qt6-svg-plugins`) is required at runtime. The screenshot self-test refuses
+the fallback solid background when SVG decoding fails. A plain Qt build does
+not establish that the wallpaper is visually acceptable or memory-efficient.
+
+The old Dock and folder demo art remains **explicitly rejected**. This is not
+an accepted redesign. See
+[`docs/CLASSIC_VISUAL_REBUILD.md`](../../docs/CLASSIC_VISUAL_REBUILD.md)
+for references, provenance, rollout criteria, and remaining work.
+
 ## Visual quality gate
 See [`docs/VISUAL_ACCEPTANCE.md`](../../docs/VISUAL_ACCEPTANCE.md) for visual-review and performance criteria. Successful headless screenshots verify capture, not visual polish.

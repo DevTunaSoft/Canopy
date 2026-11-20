@@ -9,6 +9,7 @@
 #include <QTimer>
 #include <QCoreApplication>
 #include <QImage>
+#include <QImageReader>
 #include <QStringList>
 #include <QRegularExpression>
 #include <QSet>
@@ -80,7 +81,7 @@ int main(int argc, char *argv[]) {
             return 2;
         }
         const QString screenshotPath = args.at(screenshotIndex + 1);
-        QTimer::singleShot(1000, window, [window, screenshotPath]() {
+        QTimer::singleShot(1000, window, [window, screenshotPath, reviewedIconsAvailable]() {
             auto *bar = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBar"));
             auto *dock = window->findChild<QQuickItem *>(QStringLiteral("canopyDock"));
             auto *launcher = window->findChild<QQuickItem *>(QStringLiteral("canopyLauncher"));
@@ -120,6 +121,48 @@ int main(int argc, char *argv[]) {
                 return;
             }
             qInfo() << "SELF_TEST_PASS: Classic eight-app dock and launcher catalog";
+            if (QCoreApplication::arguments().contains(QStringLiteral("--self-test-icons"))) {
+                if (!reviewedIconsAvailable) {
+                    qCritical() << "SELF_TEST_FAIL: reviewed icon resources not enabled";
+                    QCoreApplication::exit(1);
+                    return;
+                }
+                // Decode every compiled PNG rather than trusting resource path
+                // existence. This catches empty, corrupt and unsupported art.
+                for (const QString &appName : expectedApps) {
+                    const QString resource = QStringLiteral(":/canopy/classic/icons/")
+                        + appName.toLower() + QStringLiteral(".png");
+                    QImageReader reader(resource);
+                    const QImage decoded = reader.read();
+                    if (decoded.isNull() || decoded.width() < 256 || decoded.height() < 256
+                        || !decoded.hasAlphaChannel()) {
+                        qCritical() << "SELF_TEST_FAIL: reviewed icon decode" << resource << reader.errorString();
+                        QCoreApplication::exit(1);
+                        return;
+                    }
+                }
+                // Also inspect the actual instantiated QML Image nodes. The
+                // dock is always visible; the launcher may virtualize cells.
+                QSet<QString> qmlIconSources;
+                const auto iconImages = window->findChildren<QQuickItem *>(
+                    QStringLiteral("canopyReviewedIconImage"));
+                for (auto *iconImage : iconImages) {
+                    if (iconImage->property("status").toInt() == 1) {
+                        qmlIconSources.insert(iconImage->property("source").toUrl().toString());
+                    }
+                }
+                for (const QString &appName : expectedApps) {
+                    const QString url = QStringLiteral("qrc:/canopy/classic/icons/")
+                        + appName.toLower() + QStringLiteral(".png");
+                    if (!qmlIconSources.contains(url)) {
+                        qCritical() << "SELF_TEST_FAIL: reviewed icon QML image not ready"
+                                    << url << qmlIconSources;
+                        QCoreApplication::exit(1);
+                        return;
+                    }
+                }
+                qInfo() << "SELF_TEST_PASS: eight reviewed icon PNGs decoded and QML images ready";
+            }
             if (QCoreApplication::arguments().contains(QStringLiteral("--self-test-search"))) {
                 auto *searchField = window->findChild<QObject *>(
                     QStringLiteral("canopyLauncherSearch"));

@@ -6,7 +6,7 @@ ROOT = Path(__file__).resolve().parents[1] / "prototype" / "classic"
 
 class ClassicSourceTests(unittest.TestCase):
     def test_required_files(self):
-        for name in ("CMakeLists.txt", "main.cpp", "Main.qml", "Theme.qml", "DockTile.qml", "PreviewWindow.qml", "Landscape.qml", "README.md"):
+        for name in ("CMakeLists.txt", "main.cpp", "Main.qml", "Theme.qml", "DockTile.qml", "PreviewWindow.qml", "Landscape.qml", "LauncherOverlay.qml", "README.md"):
             with self.subTest(name=name):
                 self.assertTrue((ROOT / name).is_file())
 
@@ -108,6 +108,22 @@ class ClassicSourceTests(unittest.TestCase):
         workflow = (ROOT.parents[1] / ".github" / "workflows" / "classic-qt.yml").read_text()
         self.assertIn("classic-fullhd.png", workflow)
         self.assertIn("--self-test-size 1920x1080", workflow)
+
+    def test_launcher_is_interactive_but_never_executes_commands(self):
+        desktop = (ROOT / "Main.qml").read_text()
+        launcher = (ROOT / "LauncherOverlay.qml").read_text()
+        cmake = (ROOT / "CMakeLists.txt").read_text()
+        self.assertIn("LauncherOverlay.qml", cmake)
+        self.assertIn("LauncherOverlay {", desktop)
+        self.assertIn('sequence: "Ctrl+Space"', desktop)
+        self.assertIn('objectName: "canopyApplicationLauncher"', launcher)
+        self.assertIn('objectName: "canopyLauncherSearch"', launcher)
+        self.assertIn('objectName: "canopyLauncherGrid"', launcher)
+        self.assertIn('onCloseRequested: root.launcherOpen = false', desktop)
+        self.assertIn('filteredApps: applications.filter', launcher)
+        self.assertNotIn("Timer {", launcher)
+        self.assertNotIn("NumberAnimation", launcher)
+        self.assertNotIn("QProcess", launcher)
 
     def test_screenshot_rejects_uniform_frames(self):
         source = (ROOT / "main.cpp").read_text()

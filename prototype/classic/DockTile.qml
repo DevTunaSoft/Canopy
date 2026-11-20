@@ -5,6 +5,7 @@ import QtQuick.Controls
 // All painting is event-driven; there are no timers or continuous animations.
 Button {
     id: tile
+    objectName: "canopyDockTile"
     required property string iconName
     property bool previewActive: false
     width: 54

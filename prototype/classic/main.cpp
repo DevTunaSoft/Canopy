@@ -13,6 +13,16 @@
 
 // A Repeater can give its delegates QObject owners different from their
 // visual parents. Traverse the actual QQuickItem scene tree for UI assertions.
+static int countReadyFolderTiles(QQuickItem *parent) {
+    if (!parent)
+        return 0;
+    int ready = parent->objectName() == QStringLiteral("canopyFolderTile")
+                && parent->property("imageReady").toBool() ? 1 : 0;
+    for (QQuickItem *child : parent->childItems())
+        ready += countReadyFolderTiles(child);
+    return ready;
+}
+
 static int countReadyDockTiles(QQuickItem *parent) {
     if (!parent)
         return 0;
@@ -153,6 +163,14 @@ int main(int argc, char *argv[]) {
                 QCoreApplication::exit(1);
                 return;
             }
+            const int folderArtworkReady = countReadyFolderTiles(preview);
+            if (folderArtworkReady != 6) {
+                qCritical() << "SELF_TEST_FAIL: folder artwork did not load"
+                            << "ready sample folders" << folderArtworkReady;
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SELF_TEST_PASS: all six original sample folder images loaded";
             qInfo() << "SELF_TEST_PASS: six demo folders and one search control present";
             qInfo() << "SELF_TEST_PASS: original wallpaper and seven dock icons present";
             qInfo() << "SELF_TEST_PASS: preview window fits above dock" << previewOrigin

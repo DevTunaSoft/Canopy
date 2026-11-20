@@ -1,6 +1,6 @@
 # Canopy agent engineering contract
 
-Read README.md and docs/ARCHITECTURE.md and docs/QUALITY.md completely before making changes. Preserve existing project instructions; this file supplements rather than replaces them.
+Read README.md, docs/ARCHITECTURE.md, docs/QUALITY.md, and docs/PREMIUM_DESIGN_DIRECTION.md completely before making UI changes. Read all existing engineering guidance before making other changes. Preserve existing project instructions; this file supplements rather than replaces them.
 
 ## Mission
 Build a polished, familiar Linux desktop shell. Classic is macOS-inspired without copying proprietary artwork, assets, or trademarks. Modern is a later Windows-inspired presentation using shared services. Tagline: “The Familiar Feel. The Freedom of Linux.”
@@ -24,6 +24,7 @@ Build a polished, familiar Linux desktop shell. Classic is macOS-inspired withou
 7. Record measured performance with machine details, methodology, and baseline; do not invent numbers.
 
 ## Visual acceptance
+The existing Qt demo is **not** a premium shell skin. Never represent successful CI, nonblank screenshots, a palette swap, or four utility icon tiles as completed high-quality visual design. A representative interactive desktop scene, original art, window chrome, design review and actual Mint acceptance are required. Follow docs/PREMIUM_DESIGN_DIRECTION.md.
 Use a coherent design token system: typography, spacing, surfaces, elevation, icon sizes, motion, focus states, and high-DPI scaling. Maintain visual review screenshots for defined resolutions, light/dark modes, and reduced-motion mode. Premium appearance must not depend on constant blur or animated backgrounds.
 
 ## Definition of done

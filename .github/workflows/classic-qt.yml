@@ -35,6 +35,24 @@ jobs:
       - name: Compile
         timeout-minutes: 5
         run: cmake --build build/classic --parallel 2
+      - name: Reject missing approved icon assets (no substitution)
+        timeout-minutes: 1
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          set +e
+          ./build/classic/canopy-classic-spike --self-test-approved >test-missing-art.log 2>&1
+          code=$?
+          set -e
+          test "$code" -eq 2
+          grep -q 'APPROVED_ART_FAIL' test-missing-art.log
+          set +e
+          ./build/classic/canopy-classic-spike --approved-art-dir /tmp/canopy-missing-approved-art --self-test-approved >test-bad-art.log 2>&1
+          code=$?
+          set -e
+          test "$code" -eq 3
+          grep -q 'APPROVED_ART_FAIL' test-bad-art.log
+          echo "PASS: missing user-approved artwork rejected before Qt scene loads"
       - name: Autonomous UI screenshot test
         timeout-minutes: 2
         env:

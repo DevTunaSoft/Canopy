@@ -18,7 +18,41 @@ cannot silently lose entries. The internal folder pictogram is original
 `assets/ui/folder-blue.svg`; it is a generic file-content symbol,
 **not a substitute for the exact user-approved Files dock PNG**.
 
-## Exact approved artwork integration (new)
+## Landscape wallpaper override — latest requested visual direction
+
+The current owner reference is a **detailed mountain, forest, lake and
+sunset photographic composition**, not the earlier blue wave.
+Build the Qt spike, supply a locally stored original or license-cleared
+landscape PNG/JPEG (minimum 1920x1080), and run:
+
+```sh
+./build/classic/canopy-classic-spike \
+  --approved-art-dir /absolute/path/to/approved-art \
+  --landscape-wallpaper /absolute/path/to/landscape.png \
+  --self-test-approved --self-test-size 1200x750 \
+  --self-test-screenshot landscape-classic.png
+```
+
+The eight selected user PNG **icon** hashes are still validated exactly
+as before. The earlier blue-wave wallpaper file is not needed with the
+override, though it remains in the historical manifest. The custom photo
+must be a real PNG/JPEG, regular nonsymlinked local file, 24 MB or smaller,
+at least 1920x1080, 8192 pixels or fewer per axis, no more than 32 million
+pixels, and a landscape aspect ratio from 1.45 to 2.15. Files failing
+validation stop the Qt scene from loading; no silent fallback to the
+old wave. The wallpaper is a cached static image with crop-to-fill and no
+continuous animation or blur effects.
+
+The independent flag can also be tried without icon assets for
+**engineering previews only**, but that still shows rejected demo icon
+candidates and **does not constitute approved icon integration**.
+CI generates a synthetic, nonphotographic PNG solely to test the loader.
+It is not the wallpaper to ship. The actual user-referenced photographic
+asset, compiled screenshots, owner visual approval and Mint VM acceptance
+are outstanding.
+
+## Exact approved artwork integration (historical wave mode)
+
 
 The old six-icon SVG Dock remains an **unapproved legacy test scene** when
 this demo runs without art arguments. To launch the true eight-icon visual

@@ -26,7 +26,7 @@ class ClassicSourceTests(unittest.TestCase):
         dock = (ROOT / "DockTile.qml").read_text()
         self.assertIn('backgroundBottom: "#eef2f8"', theme)
         self.assertIn('foreground: "#273345"', theme)
-        self.assertIn('chrome: "#edf6f9fc"', theme)
+        self.assertIn('chrome: "#ed1f2326"', theme)
         self.assertIn('source: tile.iconUrl', dock)
 
     def test_dock_has_original_vector_artwork(self):
@@ -102,10 +102,10 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn('title: "Browser"', desktop)
         self.assertIn('title: "Terminal"', desktop)
         self.assertIn('title: "Trash"', desktop)
-        self.assertIn('title: "Canopy"', desktop)
+        self.assertNotIn('title: "Canopy"', desktop)
         self.assertIn('previewActive: modelData.title === "Files"', desktop)
         runtime = (ROOT / "main.cpp").read_text()
-        self.assertIn("SELF_TEST_PASS: original wallpaper and seven dock icons present", runtime)
+        self.assertIn("SELF_TEST_PASS: original wallpaper and six dock icon candidates present", runtime)
         self.assertIn("SELF_TEST_FAIL: wallpaper bounds or dock icon count invalid", runtime)
         self.assertIn("countVisualItems", runtime)
         self.assertIn("parent->childItems()", runtime)
@@ -114,14 +114,14 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn("SELF_TEST_PASS: wallpaper sky and foreground visually distinct", runtime)
         self.assertIn("SELF_TEST_FAIL: Blue Current wallpaper image did not load", runtime)
         self.assertIn("SELF_TEST_PASS: original SVG wallpaper image loaded", runtime)
-        self.assertIn("SELF_TEST_PASS: all seven original SVG dock icons loaded", runtime)
+        self.assertIn("SELF_TEST_PASS: all six SVG dock candidates loaded", runtime)
         self.assertIn("SELF_TEST_PASS: all six original sample folder images loaded", runtime)
         self.assertIn("SELF_TEST_PASS: compact folder scrolling viewport validated", runtime)
         self.assertIn("SELF_TEST_FAIL: sample folder scrolling unavailable", runtime)
         self.assertIn("SELF_TEST_FAIL: folder artwork did not load", runtime)
         self.assertIn("SELF_TEST_FAIL: original dock artwork failed to load", runtime)
         self.assertIn("countReadyDockTiles", runtime)
-        for icon in ("canopy", "files", "browser", "photos", "settings",
+        for icon in ("files", "browser", "photos", "settings",
                      "terminal", "trash"):
             self.assertIn(f"assets/icons/{icon}.svg", cmake)
             self.assertTrue((ROOT / f"assets/icons/{icon}.svg").is_file())

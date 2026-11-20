@@ -7,12 +7,12 @@ QtObject {
     readonly property color foreground: "#273345"
     readonly property color muted: "#69798b"
     readonly property color accent: "#537da4"
-    readonly property color chrome: "#edf6f9fc"
-    readonly property color dockSurface: "#cce7eef4"
-    readonly property color dockBorder: "#ccffffff"
+    readonly property color chrome: "#ed1f2326"
+    readonly property color dockSurface: "#d91f2326"
+    readonly property color dockBorder: "#80f7f5eb"
     readonly property color tile: "#e8eff8"
     readonly property color tileHover: "#d7e7f7"
-    readonly property color indicator: "#567aab"
+    readonly property color indicator: "#d8b87a"
     readonly property int barHeight: 32
     readonly property int dockSize: 88
     readonly property int dockPadding: 12

@@ -50,8 +50,8 @@ ApplicationWindow {
             anchors.rightMargin: root.compactLayout ? 14 : 22
             spacing: root.compactLayout ? 12 : 20
 
-            // Canopy's own penguin launcher, based on the approved brand
-            // direction. The original SVG is not an Apple logo.
+            // Restore the white silhouette from the archived reference PNG.
+            // No invented gold penguin, combined tree emblem, or Apple logo.
             ToolButton {
                 id: tuxMark
                 objectName: "canopyLauncher"
@@ -64,7 +64,7 @@ ApplicationWindow {
                 onClicked: launcherMenu.open()
                 background: Rectangle {
                     radius: 5
-                    color: tuxMark.hovered || launcherMenu.visible ? "#33ffffff" : "transparent"
+                    color: tuxMark.hovered || launcherMenu.visible ? "#44565d5a" : "transparent"
                 }
                 contentItem: Image {
                     id: penguinArt
@@ -89,7 +89,7 @@ ApplicationWindow {
             }
             Label {
                 text: "Files"
-                color: canopyTheme.foreground
+                color: "#f7f5eb"
                 font.pixelSize: 13
                 font.weight: Font.DemiBold
                 font.family: "Sans Serif"
@@ -118,7 +118,7 @@ ApplicationWindow {
                     }
                     contentItem: Label {
                         text: topMenuButton.text
-                        color: "#273345"
+                        color: "#f7f5eb"
                         font.pixelSize: 12
                         verticalAlignment: Text.AlignVCenter
                         horizontalAlignment: Text.AlignHCenter
@@ -160,7 +160,7 @@ ApplicationWindow {
             Item { Layout.fillWidth: true }
             Label {
                 text: Qt.formatDateTime(new Date(), "ddd d MMM")
-                color: canopyTheme.foreground
+                color: "#f7f5eb"
                 font.pixelSize: 12
                 font.weight: Font.Medium
             }
@@ -209,11 +209,10 @@ ApplicationWindow {
             spacing: canopyTheme.dockSpacing
             Repeater {
                 model: [
-                    { title: "Canopy" },
                     { title: "Files" },
                     { title: "Browser" },
-                    { title: "Photos" },
                     { title: "Settings" },
+                    { title: "Photos" },
                     { title: "Terminal" },
                     { title: "Trash" }
                 ]

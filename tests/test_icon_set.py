@@ -11,9 +11,9 @@ BRAND = ICONS.parent / "brand" / "penguin-launcher.svg"
 
 
 class IconSourceTests(unittest.TestCase):
-    def test_seven_icons_match_declared_set(self):
+    def test_six_reference_dock_categories_match(self):
         verify_icon_set(ICONS)
-        self.assertEqual(len(ICON_NAMES), 7)
+        self.assertEqual(len(ICON_NAMES), 6)
 
     def check_reject(self, changed_svg, message):
         with tempfile.TemporaryDirectory() as tmp:
@@ -25,7 +25,9 @@ class IconSourceTests(unittest.TestCase):
     def test_original_launcher_is_verified(self):
         verify_icon(BRAND)
         text = BRAND.read_text(encoding="utf-8")
-        self.assertIn("Canopy penguin launcher symbol", text)
+        self.assertIn("Canopy white Tux-inspired launcher reference silhouette", text)
+        self.assertIn('fill="#fff" fill-rule="evenodd"', text)
+        self.assertNotIn('fill="url(', text)
         self.assertNotIn("<image", text)
         self.assertNotIn("<script", text)
 
@@ -45,8 +47,8 @@ class IconSourceTests(unittest.TestCase):
                           "Unsupported icon attribute")
 
     def test_broken_gradient_not_allowed(self):
-        source = (ICONS / "canopy.svg").read_text(encoding="utf-8")
-        self.check_reject(source.replace("url(#bg)", "url(#notthere)", 1),
+        source = (ICONS / "browser.svg").read_text(encoding="utf-8")
+        self.check_reject(source.replace("url(#n)", "url(#notthere)", 1),
                           "undefined gradient")
 
     def test_missing_asset_fails_set(self):
@@ -54,7 +56,7 @@ class IconSourceTests(unittest.TestCase):
             destination = Path(tmp)
             for name in ICON_NAMES[:-1]:
                 (destination / f"{name}.svg").write_bytes((ICONS / f"{name}.svg").read_bytes())
-            with self.assertRaisesRegex(ValueError, "Expected exactly seven"):
+            with self.assertRaisesRegex(ValueError, "Expected exactly six"):
                 verify_icon_set(destination)
 
 

@@ -1,6 +1,6 @@
 # Classic Qt Quick technology spike
 
-This is a **standalone demonstration window**, not a Linux desktop session, window manager, dock replacement, installer, or completed product. Dock buttons are deliberately inert; no app-launch capability is claimed.
+This is a **standalone demonstration window**, not a Linux desktop session, window manager, dock replacement, installer, or completed product. Dock buttons are deliberately inert; no app-launch capability is claimed. The Files window is a nonfunctional visual composition with static demo folders; it cannot browse the disk. The screenshot self-test now rejects a missing, clipped or overlapping preview, but is not a human aesthetic review.
 
 ## Prerequisites
 CMake 3.21+, C++17 compiler, Qt 6.4+ with Qt Quick and Qt Quick Controls, a working graphical Linux session.

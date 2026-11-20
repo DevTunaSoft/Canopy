@@ -9,7 +9,7 @@ qt_add_executable(canopy-classic-spike main.cpp)
 qt_add_qml_module(canopy-classic-spike
     URI Canopy.Classic
     VERSION 1.0
-    QML_FILES Main.qml Theme.qml DockTile.qml PreviewWindow.qml
+    QML_FILES Main.qml Theme.qml DockTile.qml PreviewWindow.qml Landscape.qml
 )
 target_link_libraries(canopy-classic-spike PRIVATE Qt6::Quick Qt6::QuickControls2)
 install(TARGETS canopy-classic-spike RUNTIME DESTINATION bin)

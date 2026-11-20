@@ -15,43 +15,10 @@ ApplicationWindow {
     Theme { id: canopyTheme }
     readonly property bool compactLayout: width < 900
 
-    // Lightweight wallpaper composition: gradients and rectangles only.
-    // No shader effects, animation loops, timers or additional processes.
-    Rectangle {
+    // Original static landscape, never a live effect or background service.
+    Landscape {
         anchors.fill: parent
-        gradient: Gradient {
-            GradientStop { position: 0; color: canopyTheme.backgroundTop }
-            GradientStop { position: 1; color: canopyTheme.backgroundBottom }
-        }
     }
-    Rectangle {
-        width: root.width * 1.04
-        height: root.height * 0.78
-        x: root.width * 0.22
-        y: root.height * 0.25
-        rotation: -27
-        radius: height * 0.45
-        opacity: 0.73
-        gradient: Gradient {
-            GradientStop { position: 0; color: "#b2cdf0" }
-            GradientStop { position: 0.45; color: "#d1c5ef" }
-            GradientStop { position: 1; color: "#f8d4dd" }
-        }
-    }
-    Rectangle {
-        width: root.width * 0.83
-        height: root.height * 0.44
-        x: root.width * 0.40
-        y: root.height * 0.65
-        rotation: -16
-        radius: height * 0.45
-        opacity: 0.65
-        gradient: Gradient {
-            GradientStop { position: 0; color: "#99c6db" }
-            GradientStop { position: 1; color: "#e8e0f4" }
-        }
-    }
-
 
     // Visual-only composition: file management and window controls are not wired.
     // It scales down for screenshot checks; the floating dock remains unobscured.

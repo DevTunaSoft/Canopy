@@ -22,8 +22,8 @@ ApplicationWindow {
     // It scales down for screenshot checks; the floating dock remains unobscured.
     PreviewWindow {
         id: filesPreview
-        width: Math.min(root.width - 72, 780)
-        height: Math.min(root.height - canopyTheme.barHeight - 166, 420)
+        width: Math.min(root.width - 72, Math.max(780, root.width * 0.56))
+        height: Math.min(root.height - canopyTheme.barHeight - 166, Math.max(420, root.height * 0.56))
         x: Math.max(24, (root.width - width) / 2)
         y: canopyTheme.barHeight + Math.max(30, (root.height - canopyTheme.barHeight - canopyTheme.dockSize - height) / 2 - 10)
     }

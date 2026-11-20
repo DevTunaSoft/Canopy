@@ -111,7 +111,7 @@ FocusScope {
             model: launcher.filteredApps
             readonly property int columnCount: width < 535 ? 3 : width < 700 ? 4 : 6
             cellWidth: width / columnCount
-            cellHeight: 110
+            cellHeight: panel.height < 450 ? 83 : 110
             keyNavigationWraps: true
             activeFocusOnTab: true
             highlightFollowsCurrentItem: true
@@ -136,7 +136,7 @@ FocusScope {
                 Label {
                     text: modelData.name
                     anchors.top: parent.top
-                    anchors.topMargin: 66
+                    anchors.topMargin: panel.height < 450 ? 62 : 66
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width - 10
                     horizontalAlignment: Text.AlignHCenter

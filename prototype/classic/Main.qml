@@ -29,6 +29,13 @@ ApplicationWindow {
         y: canopyTheme.barHeight + Math.max(30, (root.height - canopyTheme.barHeight - canopyTheme.dockSize - height) / 2 - 10)
     }
 
+    // A genuine Qt control layer, not a rendered concept image.
+    AppLauncher {
+        id: appLauncher
+        anchors.fill: parent
+        onFilesPreviewRequested: filesPreview.visible = true
+    }
+
     Rectangle {
         id: topBar
         objectName: "canopyTopBar"
@@ -62,10 +69,10 @@ ApplicationWindow {
                 Layout.minimumHeight: 29
                 padding: 0
                 Accessible.name: "Canopy penguin launcher"
-                onClicked: launcherMenu.open()
+                onClicked: appLauncher.visible ? appLauncher.closeLauncher() : appLauncher.openLauncher()
                 background: Rectangle {
                     radius: 5
-                    color: tuxMark.hovered || launcherMenu.visible ? "#44565d5a" : "transparent"
+                    color: tuxMark.hovered || appLauncher.visible ? "#44565d5a" : "transparent"
                 }
                 contentItem: Image {
                     id: penguinArt
@@ -76,17 +83,7 @@ ApplicationWindow {
                     smooth: true
                 }
                 readonly property bool imageReady: penguinArt.status === Image.Ready
-                Menu {
-                    id: launcherMenu
-                    MenuItem {
-                        text: "About Canopy preview"
-                        onTriggered: aboutPopup.open()
-                    }
-                    MenuItem {
-                        text: "Show Files preview"
-                        onTriggered: filesPreview.visible = true
-                    }
-                }
+
             }
             Label {
                 text: "Files"

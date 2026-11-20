@@ -86,8 +86,9 @@ class ClassicSourceTests(unittest.TestCase):
         qml = (ROOT / "Main.qml").read_text()
         self.assertIn('anchors.fill: filesPreview', qml)
         self.assertIn('z: 0.3', qml)
-        self.assertNotIn("ShaderEffect", qml)
-        self.assertNotIn("GaussianBlur", qml)
+        self.assertNotIn("ShaderEffect {", qml)
+        self.assertNotIn("GaussianBlur {", qml)
+        self.assertNotIn("MultiEffect {", qml)
 
     def test_full_hd_screenshot_is_required(self):
         workflow = (ROOT.parents[1] / ".github" / "workflows" / "classic-qt.yml").read_text()

@@ -1,4 +1,10 @@
-# Canopy Classic — Visual Rebuild Track
+> **Reference correction:** The previous claim that a new dark/gold
+> penguin logo and composite tree icon reproduced the supplied icon artwork
+> was wrong. Only a white Tux-like source image has been recovered as an
+> explicit launcher shape reference. The current six dock artwork files
+> are candidates, not the user-provided master icons. Read
+> [VISUAL_REFERENCE_PROVENANCE.md](VISUAL_REFERENCE_PROVENANCE.md)
+> before making further icon changes.\n\n# Canopy Classic — Visual Rebuild Track
 
 **Gate:** VISUAL_REVIEW_PENDING. **Do not merge as approved UI.**
 **Base:** PR #69 is a failed visual direction retained as an engineering fixture.
@@ -47,7 +53,7 @@ product marks, proprietary fonts, or application code.
 | Asset | Source | License/ownership | Runtime | State |
 | --- | --- | --- | --- | --- |
 | Blue Current wallpaper | `prototype/classic/assets/wallpapers/blue-current.svg` | Original Canopy-authored curves, gradients, no third-party media | Embedded Qt resource, static SVG image decode via QtSvg image plugin | Candidate, **not yet approved** |
-| Original dock icon family (7) | `prototype/classic/assets/icons/*.svg` | Seven independently authored Canopy vectors; no copied Apple artwork | Embedded QtSvg images with per-tile readiness checks | **Candidate, unapproved** |
+| Original dock icon family (six candidates) | `prototype/classic/assets/icons/*.svg` | Six independently authored Canopy vectors; no copied Apple artwork | Embedded QtSvg images with per-tile readiness checks | **Candidate, unapproved** |
 | Previous dock glyphs | Replaced from `prototype/classic/DockTile.qml` | Old Canvas squares retired | No longer used on the icon candidate branch | **Rejected** |
 | Consistent sample folder artwork | `prototype/classic/FolderTile.qml` + `assets/icons/files.svg` | Reuses original blue Files SVG rather than random pastel blocks | Static embedded SVG image | **Candidate, unapproved** |
 | Previous pastel folder blocks | Retired from `FolderTile.qml` | Old rejected primitive shapes | Not active | **Rejected** |

@@ -18,7 +18,7 @@ Use a throwaway build directory; do not replace your normal desktop session.
 
 Open or close with **Ctrl+Space** or click the penguin at the top-left. Search filters the same eight-app preview catalog shown in the dock, and keyboard Up/Down, Enter and Escape work within the launcher. Enter or clicking an app only displays its preview selection; it never executes an application. The launcher covers (but does not destroy) the Files preview. Use Escape to return to the desktop.
 
-In CI, `--self-test-launcher --self-test-screenshot PATH` captures the real launcher under Xvfb at standard and compact resolutions and rejects dock overlap or truncated rows. These are geometry/runtime tests, not human visual approval.
+In CI, `--self-test-launcher --self-test-screenshot PATH` captures the real launcher under Xvfb at standard and compact resolutions and rejects dock overlap or truncated rows. An additional `--self-test-search --self-test-screenshot PATH` mode opens the launcher and checks case-insensitive matching (`mUsIc`), empty results for an unknown app, and restoration of all eight results before capturing the screenshot. These are geometry/runtime tests, not human visual approval.
 
 ## Acceptance and measurement
 Record distro, Qt version, CPU, GPU, session type, and driver. Run cold and warm starts; sample process proportional set size (PSS) via /proc/PID/smaps_rollup, CPU utilization over five minutes idle, and interaction responsiveness. Capture screenshots for 1080p, HiDPI, keyboard focus, and dark mode. Compare to a minimal GTK alternative before selecting a production toolkit.

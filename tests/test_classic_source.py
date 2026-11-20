@@ -139,6 +139,17 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn("cellHeight: panel.height < 360 ? 64 : 110", launcher)
         self.assertIn("height: Math.min(parent.height - 170, 405)", launcher)
 
+    def test_search_is_validated_from_live_qt_not_only_qml_source(self):
+        source = (ROOT / "main.cpp").read_text()
+        workflow = (ROOT.parents[1] / ".github" / "workflows" / "classic-qt.yml").read_text()
+        self.assertIn('QStringLiteral("--self-test-search")', source)
+        self.assertIn("SELF_TEST_PASS: Classic live application search", source)
+        self.assertIn("SELF_TEST_FAIL: Classic live application search", source)
+        self.assertIn('QStringLiteral("mUsIc")', source)
+        self.assertIn('QStringLiteral("zz-canopy-no-match")', source)
+        self.assertIn("--self-test-search --self-test-screenshot", workflow)
+        self.assertIn("classic-search-standard.png", workflow)
+
     def test_screenshot_rejects_uniform_frames(self):
         source = (ROOT / "main.cpp").read_text()
         self.assertIn("sampledColors.size() < 8", source)

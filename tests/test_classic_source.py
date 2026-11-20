@@ -6,7 +6,7 @@ ROOT = Path(__file__).resolve().parents[1] / "prototype" / "classic"
 
 class ClassicSourceTests(unittest.TestCase):
     def test_required_files(self):
-        for name in ("CMakeLists.txt", "main.cpp", "Main.qml", "Theme.qml", "DockTile.qml", "PreviewWindow.qml", "README.md"):
+        for name in ("CMakeLists.txt", "main.cpp", "Main.qml", "Theme.qml", "DockTile.qml", "PreviewWindow.qml", "Wallpaper.qml", "FolderTile.qml", "README.md"):
             with self.subTest(name=name):
                 self.assertTrue((ROOT / name).is_file())
 
@@ -27,7 +27,7 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn('backgroundBottom: "#eef2f8"', theme)
         self.assertIn('foreground: "#273345"', theme)
         self.assertIn('chrome: "#edf6f9fc"', theme)
-        self.assertIn('tile.iconName === "Home" ? "#d7e7fb"', dock)
+        self.assertIn('iconName === "Home" ? "#72b5e8"', dock)
 
     def test_dock_has_original_vector_artwork(self):
         cmake = (ROOT / "CMakeLists.txt").read_text()
@@ -35,7 +35,10 @@ class ClassicSourceTests(unittest.TestCase):
         dock = (ROOT / "DockTile.qml").read_text()
         self.assertIn("DockTile.qml", cmake)
         self.assertIn("delegate: DockTile", qml)
-        self.assertIn("contentItem: Canvas", dock)
+        self.assertIn("contentItem: Item", dock)
+        self.assertIn("Canvas {", dock)
+        self.assertIn('iconName === "Photos"', dock)
+        self.assertIn('iconName === "Calendar"', dock)
         self.assertNotIn("NumberAnimation", dock)
         self.assertNotIn("Timer {", dock)
         self.assertIn('tile.iconName === "Settings"', dock)
@@ -50,9 +53,45 @@ class ClassicSourceTests(unittest.TestCase):
         cpp = (ROOT / "main.cpp").read_text()
         self.assertIn("SELF_TEST_PASS: preview window fits above dock", cpp)
         self.assertIn("SELF_TEST_FAIL: preview overlaps desktop chrome or is too small", cpp)
-        self.assertIn('not a functional file manager', window)
+        self.assertIn("previewOrigin.y() + preview->height() <= dockOrigin.y() - 12", cpp)
+        self.assertIn("canopyTheme.barHeight - 148, 420", desktop)
+        self.assertIn('not a filesystem browser', window)
+        self.assertIn('FolderTile {', window)
+        self.assertIn('objectName: "canopyPreviewSearch"', window)
+        self.assertIn('onClicked: preview.selectedFolder = folderName', window)
+        self.assertIn('No local files are loaded in this preview.', window)
+        tiles = (ROOT / "FolderTile.qml").read_text()
+        self.assertIn("Accessible.description:", tiles)
+        self.assertNotIn("Timer {", tiles)
         self.assertNotIn("Timer {", window)
         self.assertNotIn("NumberAnimation", window)
+
+    def test_original_wallpaper_replaces_geometric_placeholders(self):
+        cmake = (ROOT / "CMakeLists.txt").read_text()
+        desktop = (ROOT / "Main.qml").read_text()
+        wallpaper = (ROOT / "Wallpaper.qml").read_text()
+        self.assertIn("Wallpaper.qml", cmake)
+        self.assertIn("Wallpaper { anchors.fill: parent }", desktop)
+        self.assertNotIn("root.width * 1.04", desktop)
+        self.assertNotIn("root.width * 0.83", desktop)
+        self.assertIn('objectName: "canopyWallpaper"', wallpaper)
+        self.assertIn("renderTarget: Canvas.Image", wallpaper)
+        self.assertNotIn("Timer {", wallpaper)
+        self.assertNotIn("NumberAnimation", wallpaper)
+        self.assertNotIn("ShaderEffect", wallpaper)
+        self.assertIn('title: "Browser"', desktop)
+        self.assertIn('title: "Calendar"', desktop)
+        self.assertIn('previewActive: modelData.title === "Files"', desktop)
+        runtime = (ROOT / "main.cpp").read_text()
+        self.assertIn("SELF_TEST_PASS: original wallpaper and seven dock icons present", runtime)
+        self.assertIn("SELF_TEST_FAIL: wallpaper bounds or dock icon count invalid", runtime)
+        self.assertIn("countVisualItems", runtime)
+        self.assertIn("parent->childItems()", runtime)
+        self.assertIn("SELF_TEST_PASS: six demo folders and one search control present", runtime)
+        self.assertIn("SELF_TEST_FAIL: sample Files preview content incomplete", runtime)
+        self.assertIn("SELF_TEST_PASS: wallpaper sky and foreground visually distinct", runtime)
+        self.assertIn('objectName: "canopyFolderTile"', (ROOT / "FolderTile.qml").read_text())
+        self.assertNotIn("dock->findChildren<QQuickItem *>", runtime)
 
     def test_screenshot_rejects_uniform_frames(self):
         source = (ROOT / "main.cpp").read_text()

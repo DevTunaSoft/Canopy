@@ -11,6 +11,17 @@
 #include <QRegularExpression>
 #include <QSet>
 
+// A Repeater can give its delegates QObject owners different from their
+// visual parents. Traverse the actual QQuickItem scene tree for UI assertions.
+static int countVisualItems(QQuickItem *parent, const QString &objectName) {
+    if (!parent)
+        return 0;
+    int count = parent->objectName() == objectName ? 1 : 0;
+    for (QQuickItem *child : parent->childItems())
+        count += countVisualItems(child, objectName);
+    return count;
+}
+
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
     QGuiApplication::setApplicationDisplayName(QStringLiteral("Canopy Classic Spike"));
@@ -56,7 +67,8 @@ int main(int argc, char *argv[]) {
             auto *dock = window->findChild<QQuickItem *>(QStringLiteral("canopyDock"));
             auto *launcher = window->findChild<QQuickItem *>(QStringLiteral("canopyLauncher"));
             auto *preview = window->findChild<QQuickItem *>(QStringLiteral("canopyPreviewWindow"));
-            if (!bar || !dock || !launcher || !preview) {
+            auto *wallpaper = window->findChild<QQuickItem *>(QStringLiteral("canopyWallpaper"));
+            if (!bar || !dock || !launcher || !preview || !wallpaper) {
                 qCritical() << "SELF_TEST_FAIL: missing required desktop chrome";
                 QCoreApplication::exit(1);
                 return;
@@ -86,7 +98,7 @@ int main(int argc, char *argv[]) {
             const bool previewFits = previewOrigin.x() >= 0
                 && previewOrigin.y() >= bar->height() - 1
                 && previewOrigin.x() + preview->width() <= window->width() + 1
-                && previewOrigin.y() + preview->height() <= dockOrigin.y() - 2
+                && previewOrigin.y() + preview->height() <= dockOrigin.y() - 12
                 && preview->width() >= 480 && preview->height() >= 250;
             if (!previewFits) {
                 qCritical() << "SELF_TEST_FAIL: preview overlaps desktop chrome or is too small"
@@ -95,6 +107,29 @@ int main(int argc, char *argv[]) {
                 QCoreApplication::exit(1);
                 return;
             }
+            const int dockTileCount = countVisualItems(dock, QStringLiteral("canopyDockTile"));
+            const QPointF wallpaperOrigin = wallpaper->mapToItem(window->contentItem(), QPointF(0, 0));
+            const bool wallpaperFits = qAbs(wallpaperOrigin.x()) <= 1
+                && qAbs(wallpaperOrigin.y()) <= 1
+                && qAbs(wallpaper->width() - window->width()) <= 1
+                && qAbs(wallpaper->height() - window->height()) <= 1;
+            if (!wallpaperFits || dockTileCount != 7) {
+                qCritical() << "SELF_TEST_FAIL: wallpaper bounds or dock icon count invalid"
+                            << "wallpaper" << wallpaperOrigin << wallpaper->size()
+                            << "icon count" << dockTileCount;
+                QCoreApplication::exit(1);
+                return;
+            }
+            const int folderCount = countVisualItems(preview, QStringLiteral("canopyFolderTile"));
+            const int searchCount = countVisualItems(preview, QStringLiteral("canopyPreviewSearch"));
+            if (folderCount != 6 || searchCount != 1) {
+                qCritical() << "SELF_TEST_FAIL: sample Files preview content incomplete"
+                            << "sample folders" << folderCount << "search inputs" << searchCount;
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SELF_TEST_PASS: six demo folders and one search control present";
+            qInfo() << "SELF_TEST_PASS: original wallpaper and seven dock icons present";
             qInfo() << "SELF_TEST_PASS: preview window fits above dock" << previewOrigin
                     << preview->size();
             qInfo() << "SELF_TEST_PASS: desktop chrome geometry" << window->size();
@@ -110,6 +145,22 @@ int main(int argc, char *argv[]) {
                     sampledColors.insert(frame.pixel(x, y));
                 }
             }
+            // Test the unobscured left edge, so a plain fallback desktop cannot
+            // be mistaken for the original artwork despite a nonuniform toolbar.
+            const int edgeX = qMax(2, frame.width() / 100);
+            const QRgb skyPixel = frame.pixel(edgeX, qMax(50, frame.height() / 7));
+            const QRgb foregroundPixel = frame.pixel(edgeX, frame.height() * 85 / 100);
+            const int artworkDifference =
+                qAbs(qRed(skyPixel) - qRed(foregroundPixel)) +
+                qAbs(qGreen(skyPixel) - qGreen(foregroundPixel)) +
+                qAbs(qBlue(skyPixel) - qBlue(foregroundPixel));
+            if (artworkDifference < 55) {
+                qCritical() << "SELF_TEST_FAIL: wallpaper regions unexpectedly uniform"
+                            << "color distance" << artworkDifference;
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SELF_TEST_PASS: wallpaper sky and foreground visually distinct";
             if (sampledColors.size() < 8) {
                 qCritical() << "SELF_TEST_FAIL: screenshot appears blank or uniform";
                 QCoreApplication::exit(1);

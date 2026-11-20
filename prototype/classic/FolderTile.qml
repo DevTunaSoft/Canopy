@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls
 
 // Files visual-only sample tile: reuse the SAME authored Canopy folder artwork
-// for each folder, as a real desktop file manager normally does. Avoid the
+// for each folder, as a normal file manager does. Avoid the
 // rejected random pastel folder treatment. No actual filesystem access.
 Button {
     id: folder
@@ -35,7 +35,7 @@ Button {
             anchors.horizontalCenter: parent.horizontalCenter
             width: 72
             height: 64
-            source: "qrc:/Canopy/Classic/assets/icons/files.svg"
+            source: "qrc:/Canopy/Classic/assets/ui/folder-blue.svg"
             sourceSize: Qt.size(128, 128)
             fillMode: Image.PreserveAspectFit
             cache: true

@@ -30,7 +30,28 @@ full SHA-256 of every crop appears in the committed
 `prototype/classic/assets/approved/manifest.json`. This manifest locks
 *the actual approved pixel data*, not merely labels or application categories.
 
-## Wallpaper
+## Wallpaper — updated owner direction (November 20, 2026)
+
+**Latest choice supersedes the old wave:** The owner supplied a reference
+showing a detailed snowcapped mountain/lake at sunset, deep pine forest,
+golden autumn trees, pink-purple clouds, reflections and foreground stones.
+A professionally produced original or appropriately licensed high-resolution
+**photographic** landscape with a similar composition is the target. The
+supplied UI screenshot is reference art, not a wallpaper file to crop or
+redistribute. No exact photographic wallpaper image has been delivered into
+this GitHub repository or visually approved yet. Do not call the historical
+wave the accepted current background.
+
+`--landscape-wallpaper /absolute/path/to/landscape.png` uses a supplied
+local PNG/JPEG with validated image headers, 1920x1080 minimum dimensions,
+safe maximum dimensions/pixels/file size, no symlinks and static Qt caching.
+With `--approved-art-dir`, eight icon SHA-256 checks remain mandatory;
+the legacy wave is **not required** when the new wallpaper flag is supplied.
+This preserves exact user-selected icons without coupling them to old art.
+Qt CI uses a synthetic color-band fixture for testing only, never as a
+design proposal. See `prototype/classic/README.md`.
+
+### Historical blue-wave reference (compatibility only)
 
 The latest user-liked desktop concept used the original saved blue wave
 reference file `canopy-wave-preview.png` (1280×720), previously produced

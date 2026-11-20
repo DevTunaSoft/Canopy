@@ -50,57 +50,41 @@ ApplicationWindow {
             anchors.rightMargin: root.compactLayout ? 14 : 22
             spacing: root.compactLayout ? 12 : 20
 
-            // Original, stylized white penguin silhouette, not Apple artwork.
-            Item {
+            // Canopy's own penguin launcher, based on the approved brand
+            // direction. The original SVG is not an Apple logo.
+            ToolButton {
                 id: tuxMark
                 objectName: "canopyLauncher"
-                Layout.preferredWidth: 26
-                Layout.preferredHeight: 30
-                Layout.minimumWidth: 26
-                Layout.minimumHeight: 30
-                Accessible.name: "Canopy penguin launcher placeholder"
-                // Original silhouette assembled from static vector primitives,
-                // avoiding Qt Canvas paint-surface scaling differences.
-                Rectangle {
-                    x: 3
-                    y: 1
-                    width: 20
-                    height: 27
-                    radius: 10
-                    color: "#34445d"
+                Layout.preferredWidth: 27
+                Layout.preferredHeight: 29
+                Layout.minimumWidth: 27
+                Layout.minimumHeight: 29
+                padding: 0
+                Accessible.name: "Canopy penguin launcher"
+                onClicked: launcherMenu.open()
+                background: Rectangle {
+                    radius: 5
+                    color: tuxMark.hovered || launcherMenu.visible ? "#33ffffff" : "transparent"
                 }
-                Rectangle {
-                    x: 7
-                    y: 12
-                    width: 12
-                    height: 15
-                    radius: 6
-                    color: "#f8fafc"
+                contentItem: Image {
+                    id: penguinArt
+                    source: "qrc:/Canopy/Classic/assets/brand/penguin-launcher.svg"
+                    sourceSize: Qt.size(128, 128)
+                    fillMode: Image.PreserveAspectFit
+                    cache: true
+                    smooth: true
                 }
-                Rectangle {
-                    x: 8
-                    y: 8
-                    width: 3
-                    height: 3
-                    radius: 1.5
-                    color: "#f8fafc"
-                }
-                Rectangle {
-                    x: 15
-                    y: 8
-                    width: 3
-                    height: 3
-                    radius: 1.5
-                    color: "#f8fafc"
-                }
-                Rectangle {
-                    x: 11
-                    y: 12
-                    width: 4
-                    height: 4
-                    radius: 1
-                    rotation: 45
-                    color: "#d7a268"
+                readonly property bool imageReady: penguinArt.status === Image.Ready
+                Menu {
+                    id: launcherMenu
+                    MenuItem {
+                        text: "About Canopy preview"
+                        onTriggered: aboutPopup.open()
+                    }
+                    MenuItem {
+                        text: "Show Files preview"
+                        onTriggered: filesPreview.visible = true
+                    }
                 }
             }
             Label {
@@ -225,13 +209,13 @@ ApplicationWindow {
             spacing: canopyTheme.dockSpacing
             Repeater {
                 model: [
-                    { title: "Home" },
+                    { title: "Canopy" },
                     { title: "Files" },
                     { title: "Browser" },
                     { title: "Photos" },
-                    { title: "Mail" },
-                    { title: "Calendar" },
-                    { title: "Settings" }
+                    { title: "Settings" },
+                    { title: "Terminal" },
+                    { title: "Trash" }
                 ]
                 delegate: DockTile {
                     required property var modelData

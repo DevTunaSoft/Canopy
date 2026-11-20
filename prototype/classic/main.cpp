@@ -56,7 +56,8 @@ int main(int argc, char *argv[]) {
             auto *dock = window->findChild<QQuickItem *>(QStringLiteral("canopyDock"));
             auto *launcher = window->findChild<QQuickItem *>(QStringLiteral("canopyLauncher"));
             auto *preview = window->findChild<QQuickItem *>(QStringLiteral("canopyPreviewWindow"));
-            if (!bar || !dock || !launcher || !preview) {
+            auto *wallpaper = window->findChild<QQuickItem *>(QStringLiteral("canopyWallpaper"));
+            if (!bar || !dock || !launcher || !preview || !wallpaper) {
                 qCritical() << "SELF_TEST_FAIL: missing required desktop chrome";
                 QCoreApplication::exit(1);
                 return;
@@ -95,6 +96,21 @@ int main(int argc, char *argv[]) {
                 QCoreApplication::exit(1);
                 return;
             }
+            const QList<QQuickItem *> dockTiles = dock->findChildren<QQuickItem *>(
+                QStringLiteral("canopyDockTile"));
+            const QPointF wallpaperOrigin = wallpaper->mapToItem(window->contentItem(), QPointF(0, 0));
+            const bool wallpaperFits = qAbs(wallpaperOrigin.x()) <= 1
+                && qAbs(wallpaperOrigin.y()) <= 1
+                && qAbs(wallpaper->width() - window->width()) <= 1
+                && qAbs(wallpaper->height() - window->height()) <= 1;
+            if (!wallpaperFits || dockTiles.size() != 7) {
+                qCritical() << "SELF_TEST_FAIL: wallpaper bounds or dock icon count invalid"
+                            << "wallpaper" << wallpaperOrigin << wallpaper->size()
+                            << "icon count" << dockTiles.size();
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SELF_TEST_PASS: original wallpaper and seven dock icons present";
             qInfo() << "SELF_TEST_PASS: preview window fits above dock" << previewOrigin
                     << preview->size();
             qInfo() << "SELF_TEST_PASS: desktop chrome geometry" << window->size();

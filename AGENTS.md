@@ -1,5 +1,25 @@
 # Canopy agent engineering contract
 
+## Latest canonical user-approved artwork (November 20, 2026)
+
+**READ FIRST: `docs/CLASSIC_CANONICAL_ARTWORK.md`.** The user's direct
+upload contains **eight exact app icons**, and the user explicitly selected
+these original PNG designs. Order: Browser Option 3, Mail Option 5, Files
+Option 2, Calendar Option 3, Photos Option 2, Music Option 3, Terminal Option 4,
+Settings Option 8. Their source bytes and SHA-256 digests are locked in
+`prototype/classic/assets/approved/manifest.json`. The blue-wave PNG
+used in the latest user-liked concept is also SHA-locked there. Do not
+replace artwork with approximations, icons invented from the old moodboard,
+different wallpaper art or self-drawn SVGs. The prior six-icon moodboard
+order is **SUPERSEDED** for Classic's approved icon collection.
+
+Use `--approved-art-dir PATH --self-test-approved` for true Qt approved-asset
+runs. If the artwork package is unavailable, mark exact-icon visual
+verification **BLOCKED** rather than showing old demo icons and claiming
+success. The approved artwork ZIP is preserved in the user's Canopy Library.
+Do not silently merge any draft or call the generated concept a Qt screenshot.
+
+
 Read README.md, docs/ARCHITECTURE.md, docs/QUALITY.md, and docs/PREMIUM_DESIGN_DIRECTION.md completely before making UI changes. Read all existing engineering guidance before making other changes. Preserve existing project instructions; this file supplements rather than replaces them.
 
 ## Mission

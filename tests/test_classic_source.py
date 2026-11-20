@@ -53,6 +53,8 @@ class ClassicSourceTests(unittest.TestCase):
         cpp = (ROOT / "main.cpp").read_text()
         self.assertIn("SELF_TEST_PASS: preview window fits above dock", cpp)
         self.assertIn("SELF_TEST_FAIL: preview overlaps desktop chrome or is too small", cpp)
+        self.assertIn("previewOrigin.y() + preview->height() <= dockOrigin.y() - 12", cpp)
+        self.assertIn("canopyTheme.barHeight - 148, 420", desktop)
         self.assertIn('not a filesystem browser', window)
         self.assertIn('FolderTile {', window)
         self.assertIn('objectName: "canopyPreviewSearch"', window)

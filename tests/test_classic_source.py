@@ -124,6 +124,9 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn("filesPreview.visible = !filesPreview.visible", source)
         self.assertIn("filesPreview.selectedFolder = \"\"", source)
         self.assertIn('title: "Canopy Classic Preview"', source)
+        self.assertIn("width: 360", source)
+        self.assertIn("implicitWidth: 290", source)
+        self.assertIn("anchors.fill: parent", source)
         self.assertNotIn("Timer {", source)
 
     def test_screenshot_rejects_uniform_frames(self):

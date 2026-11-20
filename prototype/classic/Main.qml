@@ -75,34 +75,56 @@ ApplicationWindow {
             spacing: root.compactLayout ? 12 : 20
 
             // Original, stylized white penguin silhouette, not Apple artwork.
-            Canvas {
+            Item {
                 id: tuxMark
-                Layout.preferredWidth: 23
-                Layout.preferredHeight: 28
-                Accessible.name: "Canopy launcher placeholder"
-                onPaint: {
-                    const ctx = getContext("2d")
-                    ctx.clearRect(0, 0, width, height)
-                    ctx.fillStyle = "#34445d"
-                    ctx.beginPath()
-                    ctx.ellipse(11.5, 15.5, 7.5, 11.8, 0, 0, 2 * Math.PI)
-                    ctx.fill()
-                    ctx.fillStyle = "#f8fafc"
-                    ctx.beginPath()
-                    ctx.ellipse(11.5, 18.5, 4.8, 7.5, 0, 0, 2 * Math.PI)
-                    ctx.fill()
-                    ctx.fillStyle = "#f7f9fd"
-                    ctx.beginPath()
-                    ctx.arc(9, 10, 1.3, 0, 2 * Math.PI)
-                    ctx.arc(14, 10, 1.3, 0, 2 * Math.PI)
-                    ctx.fill()
-                    ctx.fillStyle = "#d7a268"
-                    ctx.beginPath()
-                    ctx.moveTo(10, 12.5)
-                    ctx.lineTo(13, 12.5)
-                    ctx.lineTo(11.5, 15)
-                    ctx.closePath()
-                    ctx.fill()
+                objectName: "canopyLauncher"
+                Layout.preferredWidth: 26
+                Layout.preferredHeight: 30
+                Layout.minimumWidth: 26
+                Layout.minimumHeight: 30
+                Accessible.name: "Canopy penguin launcher placeholder"
+                // Original silhouette assembled from static vector primitives,
+                // avoiding Qt Canvas paint-surface scaling differences.
+                Rectangle {
+                    x: 3
+                    y: 1
+                    width: 20
+                    height: 27
+                    radius: 10
+                    color: "#34445d"
+                }
+                Rectangle {
+                    x: 7
+                    y: 12
+                    width: 12
+                    height: 15
+                    radius: 6
+                    color: "#f8fafc"
+                }
+                Rectangle {
+                    x: 8
+                    y: 8
+                    width: 3
+                    height: 3
+                    radius: 1.5
+                    color: "#f8fafc"
+                }
+                Rectangle {
+                    x: 15
+                    y: 8
+                    width: 3
+                    height: 3
+                    radius: 1.5
+                    color: "#f8fafc"
+                }
+                Rectangle {
+                    x: 11
+                    y: 12
+                    width: 4
+                    height: 4
+                    radius: 1
+                    rotation: 45
+                    color: "#d7a268"
                 }
             }
             Label {

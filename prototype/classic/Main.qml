@@ -14,6 +14,9 @@ ApplicationWindow {
 
     Theme { id: canopyTheme }
     readonly property bool compactLayout: width < 900
+    property bool launcherOpen: false
+    function toggleLauncher() { launcherOpen = !launcherOpen; if (launcherOpen) appLauncher.clearAndFocus() }
+    Shortcut { sequence: "Ctrl+Space"; onActivated: root.toggleLauncher() }
 
     // Original abstract wallpaper: cached image, never a live effect or service.
     Landscape {
@@ -30,6 +33,7 @@ ApplicationWindow {
         anchors.bottomMargin: -10
         radius: 18
         color: "#16344759"
+        visible: !root.launcherOpen
         z: 0.1
     }
     Rectangle {
@@ -40,6 +44,7 @@ ApplicationWindow {
         anchors.bottomMargin: -5
         radius: 16
         color: "#16344759"
+        visible: !root.launcherOpen
         z: 0.2
     }
 
@@ -47,6 +52,7 @@ ApplicationWindow {
     // It scales down for screenshot checks; the floating dock remains unobscured.
     PreviewWindow {
         id: filesPreview
+        visible: !root.launcherOpen
         z: 0.3
         width: Math.min(root.width - 72, 780)
         height: Math.min(root.height - canopyTheme.barHeight - 132, 480)
@@ -85,7 +91,8 @@ ApplicationWindow {
                 Layout.preferredHeight: 30
                 Layout.minimumWidth: 26
                 Layout.minimumHeight: 30
-                Accessible.name: "Canopy penguin launcher placeholder"
+                Accessible.name: "Open Canopy application launcher"
+                MouseArea { anchors.fill: parent; onClicked: root.toggleLauncher() }
                 // Original silhouette assembled from static vector primitives,
                 // avoiding Qt Canvas paint-surface scaling differences.
                 Rectangle {
@@ -152,7 +159,7 @@ ApplicationWindow {
             Label {
                 text: "View"
                 visible: !root.compactLayout
-                color: canopyTheme.foreground
+                color: canopyTheme.menuForeground
                 font.pixelSize: 13
             }
             Label {
@@ -181,6 +188,15 @@ ApplicationWindow {
                 font.weight: Font.Medium
             }
         }
+    }
+
+    // Real interactive launcher overlay; selection does NOT run processes.
+    LauncherOverlay {
+        id: appLauncher
+        z: 0.9
+        anchors.fill: parent
+        opened: root.launcherOpen
+        onCloseRequested: root.launcherOpen = false
     }
 
     // Dock controls are explicitly nonfunctional until session services exist.
@@ -217,6 +233,9 @@ ApplicationWindow {
                 delegate: DockTile {
                     required property var modelData
                     iconName: modelData.title
+                    onClicked: {
+                        if (modelData.title === "Search") root.toggleLauncher()
+                    }
                 }
             }
         }

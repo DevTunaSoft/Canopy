@@ -44,6 +44,12 @@ int main(int argc, char *argv[]) {
         }
         window->resize(width, height);
     }
+    if (args.contains(QStringLiteral("--self-test-launcher"))) {
+        if (!window->setProperty("launcherOpen", true)) {
+            qCritical() << "SELF_TEST_FAIL: launcher property unavailable";
+            return 2;
+        }
+    }
     const int screenshotIndex = args.indexOf(QStringLiteral("--self-test-screenshot"));
     if (screenshotIndex >= 0) {
         if (screenshotIndex + 1 >= args.size()) {
@@ -55,8 +61,9 @@ int main(int argc, char *argv[]) {
             auto *bar = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBar"));
             auto *dock = window->findChild<QQuickItem *>(QStringLiteral("canopyDock"));
             auto *launcher = window->findChild<QQuickItem *>(QStringLiteral("canopyLauncher"));
+            auto *appOverlay = window->findChild<QQuickItem *>(QStringLiteral("canopyApplicationLauncher"));
             auto *preview = window->findChild<QQuickItem *>(QStringLiteral("canopyPreviewWindow"));
-            if (!bar || !dock || !launcher || !preview) {
+            if (!bar || !dock || !launcher || !preview || !appOverlay) {
                 qCritical() << "SELF_TEST_FAIL: missing required desktop chrome";
                 QCoreApplication::exit(1);
                 return;
@@ -97,6 +104,28 @@ int main(int argc, char *argv[]) {
             }
             qInfo() << "SELF_TEST_PASS: preview window fits above dock" << previewOrigin
                     << preview->size();
+            if (QCoreApplication::arguments().contains(QStringLiteral("--self-test-launcher"))) {
+                auto *panel = window->findChild<QQuickItem *>(QStringLiteral("canopyLauncherPanel"));
+                auto *search = window->findChild<QQuickItem *>(QStringLiteral("canopyLauncherSearch"));
+                auto *grid = window->findChild<QQuickItem *>(QStringLiteral("canopyLauncherGrid"));
+                const QPointF panelOrigin = panel
+                    ? panel->mapToItem(window->contentItem(), QPointF(0, 0))
+                    : QPointF(-1, -1);
+                const bool panelFits = panel
+                    && panelOrigin.y() >= bar->height() + 2
+                    && panelOrigin.y() + panel->height() <= dockOrigin.y() - 2;
+                const bool allRowsFit = grid
+                    && grid->property("contentHeight").toDouble() <= grid->height() + 2;
+                if (!appOverlay->isVisible() || !panel || !search || !grid
+                    || panel->width() <= 400 || panel->height() <= 250
+                    || grid->width() < 300 || grid->height() < 100
+                    || !panelFits || !allRowsFit) {
+                    qCritical() << "SELF_TEST_FAIL: application launcher clipping, overlap, or geometry" << panelOrigin;
+                    QCoreApplication::exit(1);
+                    return;
+                }
+                qInfo() << "SELF_TEST_PASS: application launcher geometry";
+            }
             qInfo() << "SELF_TEST_PASS: desktop chrome geometry" << window->size();
             const QImage frame = window->grabWindow();
             if (frame.isNull() || frame.width() < 720 || frame.height() < 480) {

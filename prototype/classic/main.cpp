@@ -13,6 +13,16 @@
 
 // A Repeater can give its delegates QObject owners different from their
 // visual parents. Traverse the actual QQuickItem scene tree for UI assertions.
+static int countReadyDockTiles(QQuickItem *parent) {
+    if (!parent)
+        return 0;
+    int ready = parent->objectName() == QStringLiteral("canopyDockTile")
+                && parent->property("iconReady").toBool() ? 1 : 0;
+    for (QQuickItem *child : parent->childItems())
+        ready += countReadyDockTiles(child);
+    return ready;
+}
+
 static int countVisualItems(QQuickItem *parent, const QString &objectName) {
     if (!parent)
         return 0;
@@ -120,6 +130,14 @@ int main(int argc, char *argv[]) {
                 && qAbs(wallpaperOrigin.y()) <= 1
                 && qAbs(wallpaper->width() - window->width()) <= 1
                 && qAbs(wallpaper->height() - window->height()) <= 1;
+            const int iconReadyCount = countReadyDockTiles(dock);
+            if (iconReadyCount != 7) {
+                qCritical() << "SELF_TEST_FAIL: original dock artwork failed to load"
+                            << "ready icons" << iconReadyCount;
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SELF_TEST_PASS: all seven original SVG dock icons loaded";
             if (!wallpaperFits || dockTileCount != 7) {
                 qCritical() << "SELF_TEST_FAIL: wallpaper bounds or dock icon count invalid"
                             << "wallpaper" << wallpaperOrigin << wallpaper->size()

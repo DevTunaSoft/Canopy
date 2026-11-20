@@ -23,7 +23,7 @@ ApplicationWindow {
     PreviewWindow {
         id: filesPreview
         width: Math.min(root.width - 72, 780)
-        height: Math.min(root.height - canopyTheme.barHeight - 132, 480)
+        height: Math.min(root.height - canopyTheme.barHeight - 132, 420)
         x: Math.max(24, (root.width - width) / 2)
         y: canopyTheme.barHeight + Math.max(30, (root.height - canopyTheme.barHeight - canopyTheme.dockSize - height) / 2 - 10)
     }

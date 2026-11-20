@@ -23,7 +23,7 @@ ApplicationWindow {
     PreviewWindow {
         id: filesPreview
         width: Math.min(root.width - 72, 780)
-        height: Math.min(root.height - canopyTheme.barHeight - 148, 420)
+        height: Math.min(root.height - canopyTheme.barHeight - 166, 420)
         x: Math.max(24, (root.width - width) / 2)
         y: canopyTheme.barHeight + Math.max(30, (root.height - canopyTheme.barHeight - canopyTheme.dockSize - height) / 2 - 10)
     }
@@ -104,23 +104,74 @@ ApplicationWindow {
                 }
             }
             Label {
-                text: "Canopy"
+                text: "Files"
                 color: canopyTheme.foreground
-                font.pixelSize: 14
-                font.bold: true
+                font.pixelSize: 13
+                font.weight: Font.DemiBold
                 font.family: "Sans Serif"
             }
-            Label {
-                text: "File"
-                visible: !root.compactLayout
-                color: canopyTheme.foreground
-                font.pixelSize: 13
-            }
-            Label {
-                text: "View"
-                visible: !root.compactLayout
-                color: canopyTheme.foreground
-                font.pixelSize: 13
+
+            // Actual menu actions target only this standalone demo. No false
+            // desktop/system integration is implied by these controls.
+            Repeater {
+                model: ["File", "Edit", "View", "Go", "Window", "Help"]
+                delegate: Button {
+                    id: topMenuButton
+                    required property string modelData
+                    visible: !root.compactLayout
+                             || (modelData !== "Window" && modelData !== "Help")
+                    text: modelData
+                    hoverEnabled: true
+                    Layout.preferredHeight: 27
+                    padding: 6
+                    font.pixelSize: 12
+                    Accessible.name: modelData + " demo menu"
+                    onClicked: actionMenu.open()
+                    background: Rectangle {
+                        radius: 5
+                        color: topMenuButton.hovered || actionMenu.visible
+                               ? "#38ffffff" : "transparent"
+                    }
+                    contentItem: Label {
+                        text: topMenuButton.text
+                        color: "#273345"
+                        font.pixelSize: 12
+                        verticalAlignment: Text.AlignVCenter
+                        horizontalAlignment: Text.AlignHCenter
+                    }
+                    Menu {
+                        id: actionMenu
+                        MenuItem {
+                            text: topMenuButton.modelData === "Help"
+                                  ? "About this preview"
+                                  : topMenuButton.modelData === "Edit"
+                                  ? "Clear selection"
+                                  : topMenuButton.modelData === "View"
+                                  ? "Toggle Files window"
+                                  : "Show Files preview"
+                            onTriggered: {
+                                if (topMenuButton.modelData === "Help") {
+                                    aboutPopup.open()
+                                } else if (topMenuButton.modelData === "Edit") {
+                                    filesPreview.selectedFolder = ""
+                                } else if (topMenuButton.modelData === "View") {
+                                    filesPreview.visible = !filesPreview.visible
+                                } else {
+                                    filesPreview.visible = true
+                                    filesPreview.currentSection = "Home"
+                                }
+                            }
+                        }
+                        MenuItem {
+                            text: "Reset demo view"
+                            onTriggered: {
+                                filesPreview.visible = true
+                                filesPreview.currentSection = "Home"
+                                filesPreview.selectedFolder = ""
+                            }
+                        }
+                    }
+                }
             }
             Item { Layout.fillWidth: true }
             Label {
@@ -129,6 +180,21 @@ ApplicationWindow {
                 font.pixelSize: 12
                 font.weight: Font.Medium
             }
+        }
+    }
+
+    Dialog {
+        id: aboutPopup
+        title: "Canopy Classic Preview"
+        modal: false
+        anchors.centerIn: parent
+        standardButtons: Dialog.Ok
+        contentItem: Label {
+            text: "A standalone design experiment. App launching and real file browsing are not implemented."
+            wrapMode: Text.WordWrap
+            width: 270
+            font.pixelSize: 12
+            color: "#31475e"
         }
     }
 

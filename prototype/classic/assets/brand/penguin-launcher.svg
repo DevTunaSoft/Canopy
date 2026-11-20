@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+<title>Canopy penguin launcher symbol</title>
+<desc>Original high-contrast Linux penguin silhouette, sized for the Canopy top-left launcher.</desc>
+<defs>
+<linearGradient id="body" x1=".1" y1="0" x2=".9" y2="1"><stop offset="0" stop-color="#37463e"/><stop offset="1" stop-color="#081d17"/></linearGradient>
+<linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f7e3a0"/><stop offset="1" stop-color="#c18d3f"/></linearGradient>
+</defs>
+<path d="M50 13 C28 22 28 46 23 67 Q15 91 33 101 Q34 115 51 117 H76 Q92 114 94 101 Q111 89 104 67 C99 40 97 19 76 13 Q64 7 50 13Z" fill="url(#body)" stroke="#536d5b" stroke-width="1.5"/>
+<path d="M51 38 Q64 28 77 38 Q84 55 87 80 C89 105 79 110 64 110 Q40 108 41 82 C42 61 44 46 51 38Z" fill="#f7f5eb"/>
+<circle cx="53" cy="40" r="5" fill="#f8fff6"/><circle cx="75" cy="40" r="5" fill="#f8fff6"/>
+<circle cx="54" cy="40" r="2.2" fill="#263a31"/><circle cx="74" cy="40" r="2.2" fill="#263a31"/>
+<path d="M52 49 L64 55 L76 49 L64 63Z" fill="url(#gold)" stroke="#956a2b" stroke-width="1"/>
+<path d="M35 103 Q17 100 13 117 Q24 125 51 119 L52 112Z" fill="url(#gold)"/>
+<path d="M75 112 Q95 98 112 117 Q100 125 76 119Z" fill="url(#gold)"/>
+<path d="M23 69 Q17 87 29 91 M104 69 Q110 87 98 91" fill="none" stroke="#30463c" stroke-width="7" stroke-linecap="round"/>
+</svg>

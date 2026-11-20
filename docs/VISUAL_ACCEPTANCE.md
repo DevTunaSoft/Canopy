@@ -54,6 +54,17 @@ Use these to understand spatial and interaction conventions, not as sources
 of Apple imagery, logos, icon files, code or proprietary fonts. The final
 reference choice, assets and screenshots still require a user-approved review.
 
+## Independent redesign prototypes (still pending human approval)
+
+- PR #70: original Blue Current SVG wallpaper, package-level Qt SVG decoding
+  and source-safety validation. The old vector mountains are rejected.
+- Stacked icon candidate: seven original, differentiated SVG app symbols;
+  old Canvas glyph tiles are retired on the candidate branch. Test icon
+  readiness in Qt and compare real screenshots against the reference guide.
+- Neither new wallpaper nor icon family is **visually approved**. The existing
+  Files demo and global shell chrome are unfinished. Do not merge either art
+  candidate as a completed premium desktop.
+
 ## Design intent
 
 Canopy Classic must look deliberately composed and premium at both compact and standard

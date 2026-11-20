@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+<title>Canopy Calendar — original icon artwork</title>
+<desc>Original static 128-pixel Canopy Classic vector artwork, independent of commercial app icons.</desc>
+<defs><linearGradient id="p" x1="0" y1="0" x2=".95" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#f6fcff"/><stop offset="1" stop-color="#c9dce9"/></linearGradient></defs><rect x="19" y="18" width="90" height="96" rx="13" fill="#bdcad3" opacity=".65"/>
+<rect x="15" y="13" width="92" height="95" rx="13" fill="url(#p)" stroke="#9eb7ca" stroke-width="2"/>
+<path d="M28 13 H94 Q107 13 107 27 V42 H15 V27 Q15 13 28 13Z" fill="#d96557"/>
+<path d="M26 42 H97" stroke="#e8bdba" stroke-width="2"/>
+<rect x="29" y="8" width="9" height="19" rx="4" fill="#6685a4"/><rect x="85" y="8" width="9" height="19" rx="4" fill="#6685a4"/>
+<text x="61" y="87" text-anchor="middle" font-family="sans-serif" font-weight="650" font-size="51" fill="#274a67">20</text></svg>

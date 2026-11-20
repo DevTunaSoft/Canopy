@@ -88,7 +88,7 @@ Button {
                 ctx.lineTo(9, 6)
                 ctx.stroke()
             } else if (tile.iconName === "Photos") {
-                ctx.roundedRect(-12, -10, 24, 20, 3)
+                ctx.rect(-12, -10, 24, 20)
                 ctx.stroke()
                 ctx.beginPath()
                 ctx.arc(5, -4, 2.6, 0, 2 * Math.PI)
@@ -101,7 +101,7 @@ Button {
                 ctx.lineTo(11, 7)
                 ctx.stroke()
             } else if (tile.iconName === "Notes") {
-                ctx.roundedRect(-10, -12, 20, 24, 3)
+                ctx.rect(-10, -12, 20, 24)
                 ctx.stroke()
                 ctx.beginPath()
                 ctx.moveTo(-6, -5)
@@ -112,7 +112,7 @@ Button {
                 ctx.lineTo(3, 5)
                 ctx.stroke()
             } else if (tile.iconName === "Terminal") {
-                ctx.roundedRect(-13, -10, 26, 20, 3)
+                ctx.rect(-13, -10, 26, 20)
                 ctx.stroke()
                 ctx.beginPath()
                 ctx.moveTo(-8, -4)

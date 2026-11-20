@@ -1,7 +1,7 @@
 import QtQuick
 
-// Original, resolution-independent illustrated landscape.
-// One Canvas backing store, repainted on resize; no timers, motion, effects or services.
+// Canopy's original abstract wallpaper. One cached Canvas.Image surface,
+// repainted only for initial display and actual resize (not on an idle timer).
 Canvas {
     id: landscape
     objectName: "canopyLandscape"
@@ -12,65 +12,70 @@ Canvas {
 
     onPaint: {
         const c = getContext("2d")
-        const w = width
-        const h = height
-        if (w <= 0 || h <= 0)
+        if (width <= 0 || height <= 0)
             return
         c.reset()
         c.save()
-        c.scale(w, h)
+        c.scale(width, height)
 
-        // Light, airy mountain morning; authored specifically for Canopy.
-        let sky = c.createLinearGradient(0, 0, 0, 1)
-        sky.addColorStop(0, "#a9c9de")
-        sky.addColorStop(0.43, "#d6e6ee")
-        sky.addColorStop(0.72, "#f6e9dc")
-        sky.addColorStop(1, "#e5e5e2")
-        c.fillStyle = sky
+        let base = c.createLinearGradient(0, 0, 1, 1)
+        base.addColorStop(0, "#090c36")
+        base.addColorStop(0.36, "#19246a")
+        base.addColorStop(0.70, "#38236d")
+        base.addColorStop(1, "#07184d")
+        c.fillStyle = base
         c.fillRect(0, 0, 1, 1)
 
-        // Warm horizon glow: static radial gradient in the raster cache.
-        let glow = c.createRadialGradient(0.77, 0.45, 0.01, 0.77, 0.45, 0.42)
-        glow.addColorStop(0, "rgba(255,246,223,0.68)")
-        glow.addColorStop(1, "rgba(255,246,223,0)")
-        c.fillStyle = glow
-        c.fillRect(0, 0, 1, 1)
+        function bloom(x, y, r, inner) {
+            const g = c.createRadialGradient(x, y, 0, x, y, r)
+            g.addColorStop(0, inner)
+            g.addColorStop(1, "rgba(17,17,60,0)")
+            c.fillStyle = g
+            c.fillRect(0, 0, 1, 1)
+        }
+        bloom(0.29, 0.52, 0.56, "rgba(221,67,173,0.43)")
+        bloom(0.86, 0.35, 0.53, "rgba(148,64,226,0.47)")
+        bloom(0.63, 0.88, 0.54, "rgba(49,112,246,0.47)")
 
-        function mountain(color, points) {
+        // Three original broad flowing bands, built as filled bezier ribbons.
+        // No per-frame sampling, textures, blur effects or animation.
+        function ribbon(points, colors) {
+            const gradient = c.createLinearGradient(0, points[0][1], 1, points[1][1])
+            gradient.addColorStop(0, colors[0])
+            gradient.addColorStop(0.53, colors[1])
+            gradient.addColorStop(1, colors[2])
+            c.fillStyle = gradient
             c.beginPath()
-            c.moveTo(0, 1)
-            for (let i = 0; i < points.length; i++)
-                c.lineTo(points[i][0], points[i][1])
-            c.lineTo(1, 1)
+            c.moveTo(points[0][0], points[0][1])
+            c.bezierCurveTo(...points[2])
+            c.bezierCurveTo(...points[3])
+            c.bezierCurveTo(...points[4])
+            c.bezierCurveTo(...points[5])
             c.closePath()
-            c.fillStyle = color
             c.fill()
         }
 
-        mountain("#cedbe0", [[0,0.68],[0.10,0.57],[0.20,0.65],[0.34,0.45],
-            [0.45,0.60],[0.57,0.51],[0.70,0.66],[0.83,0.49],[1,0.66]])
-        mountain("#afc6cf", [[0,0.76],[0.11,0.70],[0.24,0.55],[0.34,0.71],
-            [0.48,0.58],[0.59,0.72],[0.73,0.56],[0.88,0.70],[1,0.60]])
-        mountain("#799eaa", [[0,0.87],[0.16,0.75],[0.28,0.85],[0.42,0.69],
-            [0.59,0.83],[0.75,0.71],[0.88,0.83],[1,0.76]])
-        mountain("#587d87", [[0,0.94],[0.16,0.88],[0.27,0.96],[0.41,0.81],
-            [0.56,0.92],[0.68,0.83],[0.83,0.93],[1,0.86]])
+        ribbon([[0,0.18],[1,0.34],
+            [0.17,0.10,0.17,0.63,0.48,0.57],
+            [0.74,0.52,0.80,0.22,1,0.17],
+            [1,0.34,0.76,0.76,0.53,0.73],
+            [0.28,0.68,0.16,0.35,0,0.42]],
+            ["#421b79","#9b3dba","#623ad7"])
+        ribbon([[0,0.55],[1,0.73],
+            [0.21,0.43,0.27,0.82,0.51,0.75],
+            [0.78,0.68,0.84,0.43,1,0.44],
+            [1,0.73,0.80,0.92,0.57,0.88],
+            [0.30,0.84,0.16,0.62,0,0.72]],
+            ["#151e72","#6a2db0","#284ede"])
+        ribbon([[0,0.85],[1,0.95],
+            [0.17,0.67,0.29,0.96,0.53,0.94],
+            [0.74,0.91,0.83,0.72,1,0.79],
+            [1,0.95,0.73,1.05,0.50,1.03],
+            [0.26,1.01,0.16,0.87,0,1.00]],
+            ["#063b95","#206ee1","#4228aa"])
 
-        // Foreground lake uses flat shapes with a restrained surface highlight.
-        let water = c.createLinearGradient(0, 0.86, 0, 1)
-        water.addColorStop(0, "#7da4ad")
-        water.addColorStop(1, "#476d7b")
-        c.fillStyle = water
-        c.beginPath()
-        c.moveTo(0, 0.93)
-        c.bezierCurveTo(0.26, 0.89, 0.49, 0.95, 0.72, 0.91)
-        c.bezierCurveTo(0.85, 0.89, 0.94, 0.92, 1, 0.91)
-        c.lineTo(1, 1)
-        c.lineTo(0, 1)
-        c.closePath()
-        c.fill()
-        // Keep the foreground calm: no repeated horizontal line marks behind
-        // the dock, which read as rendering artifacts in actual screenshots.
+        // A small soft glow along the curve is static and part of the cache.
+        bloom(0.15, 0.66, 0.36, "rgba(241,88,195,0.20)")
         c.restore()
     }
 }

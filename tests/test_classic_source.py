@@ -83,6 +83,9 @@ class ClassicSourceTests(unittest.TestCase):
         runtime = (ROOT / "main.cpp").read_text()
         self.assertIn("SELF_TEST_PASS: original wallpaper and seven dock icons present", runtime)
         self.assertIn("SELF_TEST_FAIL: wallpaper bounds or dock icon count invalid", runtime)
+        self.assertIn("countVisualItems", runtime)
+        self.assertIn("parent->childItems()", runtime)
+        self.assertNotIn("dock->findChildren<QQuickItem *>", runtime)
 
     def test_screenshot_rejects_uniform_frames(self):
         source = (ROOT / "main.cpp").read_text()

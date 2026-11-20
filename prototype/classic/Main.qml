@@ -14,6 +14,7 @@ ApplicationWindow {
 
     Theme { id: canopyTheme }
     readonly property bool compactLayout: width < 900
+    readonly property bool approvedAssetsActive: canopyApprovedMode
 
     // Original static artwork; no rotating placeholder rectangles.
     Wallpaper { anchors.fill: parent }
@@ -34,7 +35,7 @@ ApplicationWindow {
         anchors.top: parent.top
         width: parent.width
         height: canopyTheme.barHeight
-        color: canopyTheme.chrome
+        color: canopyApprovedMode ? "#995e89a9" : canopyTheme.chrome
 
         Rectangle {
             anchors.bottom: parent.bottom
@@ -195,8 +196,8 @@ ApplicationWindow {
         width: Math.min(root.width - 32, dockRow.implicitWidth + 2 * canopyTheme.dockPadding)
         height: canopyTheme.dockSize
         radius: canopyTheme.cornerRadius
-        color: canopyTheme.dockSurface
-        border.color: canopyTheme.dockBorder
+        color: canopyApprovedMode ? "#b0d6e8f6" : canopyTheme.dockSurface
+        border.color: canopyApprovedMode ? "#e1faffff" : canopyTheme.dockBorder
         border.width: 1
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
@@ -208,14 +209,25 @@ ApplicationWindow {
             anchors.centerIn: parent
             spacing: canopyTheme.dockSpacing
             Repeater {
-                model: [
-                    { title: "Files" },
-                    { title: "Browser" },
-                    { title: "Settings" },
-                    { title: "Photos" },
-                    { title: "Terminal" },
-                    { title: "Trash" }
-                ]
+                model: canopyApprovedMode
+                    ? [
+                        { title: "Browser" },
+                        { title: "Mail" },
+                        { title: "Files" },
+                        { title: "Calendar" },
+                        { title: "Photos" },
+                        { title: "Music" },
+                        { title: "Terminal" },
+                        { title: "Settings" }
+                    ]
+                    : [
+                        { title: "Files" },
+                        { title: "Browser" },
+                        { title: "Settings" },
+                        { title: "Photos" },
+                        { title: "Terminal" },
+                        { title: "Trash" }
+                    ]
                 delegate: DockTile {
                     required property var modelData
                     iconName: modelData.title

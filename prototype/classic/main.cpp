@@ -10,6 +10,15 @@
 #include <QStringList>
 #include <QRegularExpression>
 #include <QSet>
+#include <QQmlContext>
+#include <QCryptographicHash>
+#include <QFile>
+#include <QFileInfo>
+#include <QDir>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QUrl>
 
 // A Repeater can give its delegates QObject owners different from their
 // visual parents. Traverse the actual QQuickItem scene tree for UI assertions.
@@ -54,10 +63,117 @@ static int countVisualItems(QQuickItem *parent, const QString &objectName) {
     return count;
 }
 
+// An approved visual is never loaded from a guessed path or a replacement
+// file. The manifest is source-controlled, and all nine external PNGs must
+// match the exact source bytes before Qt is allowed to open the scene.
+static bool verifyExactArtwork(const QString &dirPath, QString *error) {
+    const QDir root(dirPath);
+    const QString canonicalRoot = root.canonicalPath();
+    if (canonicalRoot.isEmpty() || QFileInfo(dirPath).isSymLink()) {
+        *error = QStringLiteral("approved-art directory is missing or is a symlink");
+        return false;
+    }
+    QFile manifest(QStringLiteral(":/Canopy/Classic/assets/approved/manifest.json"));
+    if (!manifest.open(QIODevice::ReadOnly)) {
+        *error = QStringLiteral("embedded approved-art manifest missing");
+        return false;
+    }
+    QJsonParseError parseError;
+    const QJsonDocument json = QJsonDocument::fromJson(manifest.readAll(), &parseError);
+    if (parseError.error != QJsonParseError::NoError || !json.isObject()) {
+        *error = QStringLiteral("approved-art manifest failed to parse");
+        return false;
+    }
+    const QJsonObject config = json.object();
+    const QJsonArray icons = config.value(QStringLiteral("icons")).toArray();
+    const QJsonObject wallpaper = config.value(QStringLiteral("wallpaper")).toObject();
+    if (config.value(QStringLiteral("schema_version")).toInt() != 1 ||
+        icons.size() != 8 || wallpaper.isEmpty()) {
+        *error = QStringLiteral("approved manifest must contain exactly eight icons and one wallpaper");
+        return false;
+    }
+    QSet<QString> checkedPaths;
+    auto verify = [&](const QJsonObject &item) -> bool {
+        const QString relative = item.value(QStringLiteral("path")).toString();
+        const QString sha = item.value(QStringLiteral("sha256")).toString();
+        if (relative.isEmpty() || !relative.endsWith(QStringLiteral(".png")) ||
+            relative.startsWith(QLatin1Char('/')) ||
+            relative.contains(QLatin1Char('\\')) ||
+            relative.split(QLatin1Char('/')).contains(QStringLiteral("..")) ||
+            checkedPaths.contains(relative) || sha.size() != 64) {
+            *error = QStringLiteral("invalid or duplicate approved-art manifest entry");
+            return false;
+        }
+        checkedPaths.insert(relative);
+        const QFileInfo asset(root.filePath(relative));
+        if (!asset.exists() || !asset.isFile() || asset.isSymLink() ||
+            asset.size() > 12'000'000 ||
+            !asset.canonicalFilePath().startsWith(canonicalRoot + QLatin1Char('/'))) {
+            *error = QStringLiteral("approved image is missing, unsafe or outside approved directory: ") + relative;
+            return false;
+        }
+        QFile file(asset.absoluteFilePath());
+        if (!file.open(QIODevice::ReadOnly)) {
+            *error = QStringLiteral("cannot read approved art: ") + relative;
+            return false;
+        }
+        const QByteArray digest = QCryptographicHash::hash(
+            file.readAll(), QCryptographicHash::Sha256).toHex();
+        if (digest != sha.toLatin1()) {
+            *error = QStringLiteral("SHA-256 mismatch, refusing substitute: ") + relative;
+            return false;
+        }
+        return true;
+    };
+    for (const QJsonValue &item : icons) {
+        if (!item.isObject() || !verify(item.toObject()))
+            return false;
+    }
+    if (!verify(wallpaper) || checkedPaths.size() != 9) {
+        if (error->isEmpty())
+            *error = QStringLiteral("incomplete approved-art set");
+        return false;
+    }
+    return true;
+}
+
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
     QGuiApplication::setApplicationDisplayName(QStringLiteral("Canopy Classic Spike"));
+    const QStringList args = QCoreApplication::arguments();
+    const int approvedIndex = args.indexOf(QStringLiteral("--approved-art-dir"));
+    const bool approvedMode = approvedIndex >= 0;
+    const bool requireApproved = args.contains(QStringLiteral("--self-test-approved"));
+    if (requireApproved && !approvedMode) {
+        qCritical() << "APPROVED_ART_FAIL: --self-test-approved requires --approved-art-dir";
+        return 2;
+    }
+    QString approvedRoot;
+    if (approvedMode) {
+        if (approvedIndex + 1 >= args.size() || args.at(approvedIndex + 1).startsWith(QLatin1Char('-'))) {
+            qCritical() << "APPROVED_ART_FAIL: missing --approved-art-dir PATH";
+            return 2;
+        }
+        const QString requested = args.at(approvedIndex + 1);
+        QString error;
+        if (!verifyExactArtwork(requested, &error)) {
+            qCritical().noquote() << "APPROVED_ART_FAIL:" << error;
+            return 3;
+        }
+        approvedRoot = QDir(requested).canonicalPath();
+        qInfo() << "CANOPY_APPROVED_ART_VERIFIED: eight exact PNG icons and blue wave";
+    }
     QQmlApplicationEngine engine;
+    engine.rootContext()->setContextProperty(QStringLiteral("canopyApprovedMode"), approvedMode);
+    engine.rootContext()->setContextProperty(
+        QStringLiteral("canopyApprovedIconBase"),
+        approvedMode ? QUrl::fromLocalFile(approvedRoot + QStringLiteral("/icons/")).toString()
+                     : QString());
+    engine.rootContext()->setContextProperty(
+        QStringLiteral("canopyApprovedWallpaperUrl"),
+        approvedMode ? QUrl::fromLocalFile(
+            approvedRoot + QStringLiteral("/wallpaper/canopy-wave-preview.png")).toString()
+                     : QString());
     engine.load(QUrl(QStringLiteral("qrc:/Canopy/Classic/Main.qml")));
     if (engine.rootObjects().isEmpty())
         return 1;
@@ -67,7 +183,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     qInfo() << "CANOPY_CLASSIC_WINDOW_READY";
-    const QStringList args = QCoreApplication::arguments();
     const int sizeIndex = args.indexOf(QStringLiteral("--self-test-size"));
     if (sizeIndex >= 0) {
         if (sizeIndex + 1 >= args.size()) {
@@ -94,7 +209,7 @@ int main(int argc, char *argv[]) {
             return 2;
         }
         const QString screenshotPath = args.at(screenshotIndex + 1);
-        QTimer::singleShot(1000, window, [window, screenshotPath]() {
+        QTimer::singleShot(1000, window, [window, screenshotPath, approvedMode]() {
             auto *bar = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBar"));
             auto *dock = window->findChild<QQuickItem *>(QStringLiteral("canopyDock"));
             auto *launcher = window->findChild<QQuickItem *>(QStringLiteral("canopyLauncher"));
@@ -159,14 +274,17 @@ int main(int argc, char *argv[]) {
                 && qAbs(wallpaper->width() - window->width()) <= 1
                 && qAbs(wallpaper->height() - window->height()) <= 1;
             const int iconReadyCount = countReadyDockTiles(dock);
-            if (iconReadyCount != 6) {
+            if (iconReadyCount != (approvedMode ? 8 : 6)) {
                 qCritical() << "SELF_TEST_FAIL: original dock artwork failed to load"
                             << "ready icons" << iconReadyCount;
                 QCoreApplication::exit(1);
                 return;
             }
-            qInfo() << "SELF_TEST_PASS: all six SVG dock candidates loaded";
-            if (!wallpaperFits || dockTileCount != 6) {
+            if (approvedMode)
+                qInfo() << "SELF_TEST_PASS: all eight exact approved dock PNGs loaded";
+            else
+                qInfo() << "SELF_TEST_PASS: all six SVG dock candidates loaded (legacy demo only)";
+            if (!wallpaperFits || dockTileCount != (approvedMode ? 8 : 6)) {
                 qCritical() << "SELF_TEST_FAIL: wallpaper bounds or dock icon count invalid"
                             << "wallpaper" << wallpaperOrigin << wallpaper->size()
                             << "icon count" << dockTileCount;
@@ -206,7 +324,10 @@ int main(int argc, char *argv[]) {
             }
             qInfo() << "SELF_TEST_PASS: all six original sample folder images loaded";
             qInfo() << "SELF_TEST_PASS: six demo folders and one search control present";
-            qInfo() << "SELF_TEST_PASS: original wallpaper and six dock icon candidates present";
+            if (approvedMode)
+                qInfo() << "SELF_TEST_PASS: verified user-supplied blue wave and eight selected PNG icons present";
+            else
+                qInfo() << "SELF_TEST_PASS: original wallpaper and six dock icon candidates present";
             qInfo() << "SELF_TEST_PASS: preview window fits above dock" << previewOrigin
                     << preview->size();
             qInfo() << "SELF_TEST_PASS: desktop chrome geometry" << window->size();

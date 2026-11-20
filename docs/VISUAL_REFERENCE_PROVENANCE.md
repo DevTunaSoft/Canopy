@@ -1,5 +1,13 @@
 # Canopy Classic — reference provenance and locked corrections
 
+> **IMPORTANT: Historical record only for dock icon categories.** The user
+> subsequently supplied and approved **eight exact icon PNGs**, replacing
+> this document's six-category moodboard interpretation. The current source
+> of truth is [CLASSIC_CANONICAL_ARTWORK.md](CLASSIC_CANONICAL_ARTWORK.md),
+> plus `prototype/classic/assets/approved/manifest.json`.
+> The white penguin top-left launcher remains a separate brand choice.
+
+
 **Visual status:** VISUAL_REVIEW_PENDING. This file records evidence from archived
 images, not an implied user approval of every component in a generated board.
 

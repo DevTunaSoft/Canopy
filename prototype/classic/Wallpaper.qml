@@ -16,12 +16,15 @@ Item {
         id: blueCurrent
         objectName: "canopyWallpaperImage"
         anchors.fill: parent
-        source: "qrc:/Canopy/Classic/assets/wallpapers/blue-current.svg"
+        // The accepted concept uses this exact blue wave source PNG.
+        // Strict mode refuses missing/mismatched bytes before QML is loaded.
+        source: canopyApprovedMode ? canopyApprovedWallpaperUrl
+               : "qrc:/Canopy/Classic/assets/wallpapers/blue-current.svg"
         fillMode: Image.PreserveAspectCrop
         asynchronous: false
         cache: true
         smooth: true
-        sourceSize: Qt.size(1920, 1080)
+        sourceSize: canopyApprovedMode ? Qt.size(1280, 720) : Qt.size(1920, 1080)
         Accessible.name: "Static Blue Current wallpaper artwork"
     }
     readonly property bool imageReady: blueCurrent.status === Image.Ready

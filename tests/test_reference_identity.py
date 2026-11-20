@@ -28,12 +28,20 @@ class ReferenceIdentityTests(unittest.TestCase):
         self.assertIn("archived Minimalist White Penguin Silhouette.png",
                       (CLASSIC / "assets/brand/penguin-launcher.svg").read_text())
 
-    def test_six_reference_categories_with_no_invented_composite(self):
+    def test_approved_eight_icons_and_separate_legacy_fixture(self):
         desktop = (CLASSIC / "Main.qml").read_text()
         dock = desktop.split('id: dockRow', 1)[1]
-        names = re.findall(r'\{ title: "([^"]+)" \}', dock)
-        self.assertEqual(names, MOODBOARD_ORDER)
-        self.assertNotIn("Canopy", names)
+        self.assertIn("model: canopyApprovedMode", dock)
+        approved, legacy = dock.split('                    : [', 1)
+        approved_names = re.findall(r'\{ title: "([^"]+)" \}', approved)
+        legacy_names = re.findall(r'\{ title: "([^"]+)" \}', legacy)
+        self.assertEqual(
+            approved_names,
+            ["Browser", "Mail", "Files", "Calendar", "Photos",
+             "Music", "Terminal", "Settings"],
+        )
+        self.assertEqual(legacy_names, MOODBOARD_ORDER)
+        self.assertNotIn("Canopy", approved_names)
         self.assertFalse((CLASSIC / "assets/icons/canopy.svg").exists())
         self.assertIn("assets/brand/penguin-launcher.svg", desktop)
 

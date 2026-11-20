@@ -125,7 +125,8 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertNotIn("NumberAnimation", launcher)
         self.assertNotIn("QProcess", launcher)
         self.assertIn("visible: !root.launcherOpen", desktop)
-        self.assertIn("cellHeight: panel.height < 450 ? 83 : 110", launcher)
+        self.assertIn("cellHeight: panel.height < 360 ? 64 : 110", launcher)
+        self.assertIn("height: Math.min(parent.height - 170, 405)", launcher)
 
     def test_screenshot_rejects_uniform_frames(self):
         source = (ROOT / "main.cpp").read_text()

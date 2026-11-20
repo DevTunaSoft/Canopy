@@ -54,7 +54,7 @@ class ApprovedClassicSelectionTests(unittest.TestCase):
         end = main.index("]", start)
         catalog = main[start:end]
         shown = re.findall(
-            r'\\{ name: "([A-Za-z]+)", icon: "([A-Za-z]+)" \\}',
+            r'[{] name: "([A-Za-z]+)", icon: "([A-Za-z]+)" [}]',
             catalog,
         )
         expected = [item["app"].title() for item in self.manifest["icons"]]

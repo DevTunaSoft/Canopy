@@ -155,32 +155,14 @@ ApplicationWindow {
             spacing: canopyTheme.dockSpacing
             Repeater {
                 model: [
-                    { title: "Home", glyph: "⌂" },
-                    { title: "Search", glyph: "⌕" },
-                    { title: "Files", glyph: "▤" },
-                    { title: "Settings", glyph: "⚙" }
+                    { title: "Home" },
+                    { title: "Search" },
+                    { title: "Files" },
+                    { title: "Settings" }
                 ]
-                delegate: Button {
+                delegate: DockTile {
                     required property var modelData
-                    width: canopyTheme.tileSize
-                    height: canopyTheme.tileSize
-                    hoverEnabled: true
-                    Accessible.name: modelData.title + " (demonstration)"
-                    ToolTip.visible: hovered
-                    ToolTip.text: modelData.title + " — demonstration only"
-                    background: Rectangle {
-                        radius: 13
-                        color: parent.hovered ? canopyTheme.tileHover : canopyTheme.tile
-                        border.color: parent.hovered ? "#7797b4" : "#49617a"
-                        border.width: 1
-                    }
-                    contentItem: Label {
-                        text: modelData.glyph
-                        font.pixelSize: 26
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                        color: canopyTheme.foreground
-                    }
+                    iconName: modelData.title
                 }
             }
         }

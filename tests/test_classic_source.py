@@ -6,7 +6,7 @@ ROOT = Path(__file__).resolve().parents[1] / "prototype" / "classic"
 
 class ClassicSourceTests(unittest.TestCase):
     def test_required_files(self):
-        for name in ("CMakeLists.txt", "main.cpp", "Main.qml", "Theme.qml", "DockTile.qml", "PreviewWindow.qml", "README.md"):
+        for name in ("CMakeLists.txt", "main.cpp", "Main.qml", "Theme.qml", "DockTile.qml", "PreviewWindow.qml", "Landscape.qml", "README.md"):
             with self.subTest(name=name):
                 self.assertTrue((ROOT / name).is_file())
 
@@ -39,6 +39,18 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertNotIn("NumberAnimation", dock)
         self.assertNotIn("Timer {", dock)
         self.assertIn('tile.iconName === "Settings"', dock)
+
+    def test_original_wallpaper_is_static(self):
+        cmake = (ROOT / "CMakeLists.txt").read_text()
+        desktop = (ROOT / "Main.qml").read_text()
+        landscape = (ROOT / "Landscape.qml").read_text()
+        self.assertIn("Landscape.qml", cmake)
+        self.assertIn("Landscape {", desktop)
+        self.assertIn('objectName: "canopyLandscape"', landscape)
+        self.assertIn('mountain("#587d87"', landscape)
+        self.assertNotIn("Timer {", landscape)
+        self.assertNotIn("NumberAnimation", landscape)
+        self.assertNotIn("ShaderEffect", landscape)
 
     def test_representative_preview_is_included(self):
         cmake = (ROOT / "CMakeLists.txt").read_text()

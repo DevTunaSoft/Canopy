@@ -13,10 +13,10 @@ QtObject {
     readonly property color tile: "#e8eff8"
     readonly property color tileHover: "#d7e7f7"
     readonly property color indicator: "#567aab"
-    readonly property int barHeight: 40
-    readonly property int dockSize: 76
-    readonly property int dockPadding: 10
-    readonly property int dockSpacing: 10
+    readonly property int barHeight: 32
+    readonly property int dockSize: 88
+    readonly property int dockPadding: 12
+    readonly property int dockSpacing: 7
     readonly property int tileSize: 52
-    readonly property int cornerRadius: 21
+    readonly property int cornerRadius: 24
 }

@@ -44,7 +44,7 @@ class ClassicSourceTests(unittest.TestCase):
         for icon in ("Browser", "Mail", "Files", "Calendar", "Photos", "Music", "Terminal", "Settings"):
             with self.subTest(icon=icon):
                 self.assertIn('tile.iconName === "' + icon + '"', dock)
-        for icon in ("Web", "Photos", "Notes", "Terminal"):
+        for icon in ("Browser", "Mail", "Files", "Calendar", "Photos", "Music", "Terminal", "Settings"):
             self.assertIn('{ name: "' + icon + '", icon: "' + icon + '" }', qml)
         self.assertNotIn("roundedRect(", dock)
         self.assertIn("model: root.classicApps", qml)

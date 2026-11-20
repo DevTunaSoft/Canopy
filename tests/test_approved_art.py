@@ -81,6 +81,40 @@ class ApprovedArtworkTests(unittest.TestCase):
             with self.assertRaisesRegex(ArtworkError, "approved selection"):
                 read_manifest(fixture)
 
+    def test_complete_install_is_atomic_idempotent_and_byte_exact(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            icons = root / "sources"
+            icons.mkdir()
+            wallpaper = root / "wave.png"
+            data = read_manifest()
+            for i, entry in enumerate(data["icons"]):
+                payload = b"fixture-icon-for-installer-not-UI-" + str(i).encode()
+                (icons / Path(entry["path"]).name).write_bytes(payload)
+                entry["sha256"] = hashlib.sha256(payload).hexdigest()
+            wallpaper_bytes = b"fixture-wave-for-installer-only"
+            wallpaper.write_bytes(wallpaper_bytes)
+            data["wallpaper"]["sha256"] = hashlib.sha256(wallpaper_bytes).hexdigest()
+            fixture_manifest = root / "fixture.json"
+            fixture_manifest.write_text(json.dumps(data), encoding="utf-8")
+            output = root / "approved-art"
+            prepare(icons, wallpaper, output, fixture_manifest)
+            self.assertEqual(len(list((output / "icons").glob("*.png"))), 8)
+            self.assertEqual(
+                (output / "wallpaper/canopy-wave-preview.png").read_bytes(),
+                wallpaper_bytes,
+            )
+            for entry in data["icons"]:
+                self.assertEqual(
+                    (output / entry["path"]).read_bytes(),
+                    (icons / Path(entry["path"]).name).read_bytes(),
+                )
+            prepare(icons, wallpaper, output, fixture_manifest)  # Safe no-op.
+            corrupted = output / data["icons"][0]["path"]
+            corrupted.write_bytes(b"changed")
+            with self.assertRaisesRegex(ArtworkError, "no substitutions"):
+                prepare(icons, wallpaper, output, fixture_manifest)
+
     def test_reject_symlink_as_source(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

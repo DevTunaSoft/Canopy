@@ -51,6 +51,8 @@ class ClassicSourceTests(unittest.TestCase):
         qml = (ROOT / "Main.qml").read_text()
         self.assertIn('objectName: "canopyTopBar"', qml)
         self.assertIn('objectName: "canopyDock"', qml)
+        self.assertIn('objectName: "canopyLauncher"', qml)
+        self.assertIn("launcherFits", source)
         self.assertIn("SELF_TEST_FAIL: desktop chrome geometry invalid", source)
         self.assertIn("SELF_TEST_PASS: desktop chrome geometry", source)
 

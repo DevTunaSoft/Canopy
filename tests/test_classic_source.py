@@ -36,7 +36,9 @@ class ClassicSourceTests(unittest.TestCase):
         dock = (ROOT / "DockTile.qml").read_text()
         self.assertIn("DockTile.qml", cmake)
         self.assertIn("delegate: DockTile", qml)
-        self.assertIn("contentItem: Canvas", dock)
+        self.assertIn("contentItem: Item", dock)
+        self.assertIn("Canvas {", dock)
+        self.assertIn('objectName: "canopyReviewedIconImage"', dock)
         self.assertIn("NOT the user-approved high-detail icon artwork", dock)
         self.assertNotIn("NumberAnimation", dock)
         self.assertNotIn("Timer {", dock)
@@ -58,6 +60,26 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertNotIn('{ title: "Notes" }', qml)
         self.assertNotIn('{ title: "Search" }', qml)
 
+
+    def test_optional_reviewed_icon_assets_keep_safe_default_fallback(self):
+        cmake = (ROOT / "CMakeLists.txt").read_text()
+        dock = (ROOT / "DockTile.qml").read_text()
+        cpp = (ROOT / "main.cpp").read_text()
+        self.assertIn('set(CANOPY_REVIEWED_ICONS_DIR "" CACHE PATH', cmake)
+        self.assertIn("qt_add_resources(canopy-classic-spike", cmake)
+        workflow = (ROOT.parents[1] / ".github" / "workflows" / "classic-qt.yml").read_text()
+        self.assertIn("Compile and test opt-in synthetic icon resources", workflow)
+        self.assertIn("synthetic-reviewed-icon-stage", workflow)
+        self.assertIn("reviewed-resource-preview", workflow)
+        self.assertIn('scope STREQUAL "review_only_not_release_approved"', cmake)
+        self.assertIn("CANOPY_CLASSIC_ICON_MODE", cpp)
+        self.assertIn("canopyReviewedIconsAvailable", cpp)
+        self.assertIn("QFile::exists", cpp)
+        self.assertIn("visible: !tile.reviewedIconReady", dock)
+        self.assertIn("visible: tile.reviewedIconReady", dock)
+        self.assertIn("Image.PreserveAspectFit", dock)
+        self.assertNotIn("Timer {", dock)
+        self.assertNotIn("NumberAnimation", dock)
 
     def test_original_wallpaper_is_static(self):
         cmake = (ROOT / "CMakeLists.txt").read_text()

@@ -27,3 +27,16 @@ GitHub Actions on Ubuntu 24.04 is configured to compile the Qt application, capt
 
 ## Visual quality gate
 See [`docs/VISUAL_ACCEPTANCE.md`](../../docs/VISUAL_ACCEPTANCE.md) for visual-review and performance criteria. Successful headless screenshots verify capture, not visual polish.
+
+## Optional reviewed icon rendering (not production approval)
+
+Default builds use the existing low-cost Canvas fallback glyphs. After the eight exact selected original icon designs have been separately reconstructed, visually reviewed and staged with `python3 tools/prepare_classic_icons.py --source ... --output ...`, an explicit **review-only** build can embed them:
+
+```sh
+cmake -S prototype/classic -B build/classic-with-icons -DCMAKE_BUILD_TYPE=Release \\
+  -DCANOPY_REVIEWED_ICONS_DIR=/absolute/path/to/staged-icons
+cmake --build build/classic-with-icons --parallel 2
+./build/classic-with-icons/canopy-classic-spike
+```
+
+The dock **and launcher** reuse `DockTile.qml`, so the same compiled icon resources appear in both. A build without the complete set automatically stays on Canvas fallback; no external file fetches or runtime background services. This opt-in visual inspection path is not a legal/visual quality clearance or production asset integration, and source art is not supplied with this PR. Do not ship review-only imagery without IP/provenance, Tux attribution, high-resolution and Mint VM acceptance.

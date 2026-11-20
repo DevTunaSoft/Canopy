@@ -1,5 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
+#include <QFile>
 #include <QQuickWindow>
 #include <QQuickItem>
 #include <QtMath>
@@ -17,6 +19,24 @@ int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
     QGuiApplication::setApplicationDisplayName(QStringLiteral("Canopy Classic Spike"));
     QQmlApplicationEngine engine;
+    // All eight icon resources must exist before enabling the artwork path.
+    // Default builds remain self-contained and use lightweight Canvas glyphs.
+    const QStringList reviewedResourceNames = {
+        QStringLiteral("browser"), QStringLiteral("mail"),
+        QStringLiteral("files"), QStringLiteral("calendar"),
+        QStringLiteral("photos"), QStringLiteral("music"),
+        QStringLiteral("terminal"), QStringLiteral("settings")
+    };
+    bool reviewedIconsAvailable = true;
+    for (const QString &name : reviewedResourceNames) {
+        if (!QFile::exists(QStringLiteral(":/canopy/classic/icons/") + name + QStringLiteral(".png"))) {
+            reviewedIconsAvailable = false;
+            break;
+        }
+    }
+    engine.rootContext()->setContextProperty(
+        QStringLiteral("canopyReviewedIconsAvailable"), reviewedIconsAvailable);
+    qInfo() << "CANOPY_CLASSIC_ICON_MODE" << (reviewedIconsAvailable ? "reviewed-resource-preview" : "canvas-fallback");
     engine.load(QUrl(QStringLiteral("qrc:/Canopy/Classic/Main.qml")));
     if (engine.rootObjects().isEmpty())
         return 1;

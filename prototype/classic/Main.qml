@@ -20,6 +20,29 @@ ApplicationWindow {
         anchors.fill: parent
     }
 
+    // Two flat, static penumbra layers. No blur, ShaderEffect, particles,
+    // animation or separate texture. A modest depth cue even on software Qt.
+    Rectangle {
+        anchors.fill: filesPreview
+        anchors.leftMargin: -7
+        anchors.rightMargin: -7
+        anchors.topMargin: -4
+        anchors.bottomMargin: -10
+        radius: 18
+        color: "#16344759"
+        z: -0.5
+    }
+    Rectangle {
+        anchors.fill: filesPreview
+        anchors.leftMargin: -3
+        anchors.rightMargin: -3
+        anchors.topMargin: -2
+        anchors.bottomMargin: -5
+        radius: 16
+        color: "#16344759"
+        z: -0.25
+    }
+
     // Visual-only composition: file management and window controls are not wired.
     // It scales down for screenshot checks; the floating dock remains unobscured.
     PreviewWindow {

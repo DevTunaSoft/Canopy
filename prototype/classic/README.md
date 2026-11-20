@@ -22,8 +22,8 @@ GitHub Actions on Ubuntu 24.04 compiles the Qt application and runs a five-secon
 ## Wallpaper asset candidate
 
 The draft Blue Current static SVG source is packaged in the Qt binary using
-`qt_add_resources`. On Linux systems Qt's SVG image-format plugin (Ubuntu:
-`qt6-svg-plugins`) is required at runtime. The screenshot self-test refuses
+`qt_add_resources`. On Linux systems Qt's SVG image-format plugin (Ubuntu 24.04:
+`libqt6svg6`) is required at runtime. The screenshot self-test refuses
 the fallback solid background when SVG decoding fails. A plain Qt build does
 not establish that the wallpaper is visually acceptable or memory-efficient.
 

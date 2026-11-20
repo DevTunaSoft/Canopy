@@ -58,7 +58,7 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn("SELF_TEST_PASS: preview window fits above dock", cpp)
         self.assertIn("SELF_TEST_FAIL: preview overlaps desktop chrome or is too small", cpp)
         self.assertIn("previewOrigin.y() + preview->height() <= dockOrigin.y() - 12", cpp)
-        self.assertIn("canopyTheme.barHeight - 148, 420", desktop)
+        self.assertIn("canopyTheme.barHeight - 166, 420", desktop)
         self.assertIn('not a filesystem browser', window)
         self.assertIn('FolderTile {', window)
         self.assertIn('objectName: "canopyPreviewSearch"', window)
@@ -109,6 +109,16 @@ class ClassicSourceTests(unittest.TestCase):
             self.assertTrue((ROOT / f"assets/icons/{icon}.svg").is_file())
         self.assertIn('objectName: "canopyFolderTile"', (ROOT / "FolderTile.qml").read_text())
         self.assertNotIn("dock->findChildren<QQuickItem *>", runtime)
+
+    def test_contextual_menu_controls_are_real_demo_actions(self):
+        source = (ROOT / "Main.qml").read_text()
+        self.assertIn('model: ["File", "Edit", "View", "Go", "Window", "Help"]', source)
+        self.assertIn("onClicked: actionMenu.open()", source)
+        self.assertIn("onTriggered:", source)
+        self.assertIn("filesPreview.visible = !filesPreview.visible", source)
+        self.assertIn("filesPreview.selectedFolder = \"\"", source)
+        self.assertIn('title: "Canopy Classic Preview"', source)
+        self.assertNotIn("Timer {", source)
 
     def test_screenshot_rejects_uniform_frames(self):
         source = (ROOT / "main.cpp").read_text()

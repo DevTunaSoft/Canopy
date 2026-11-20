@@ -11,20 +11,8 @@ FocusScope {
     focus: opened
     signal closeRequested()
     property string selectionMessage: ""
-    readonly property var applications: [
-        { name: "Files", icon: "Files" },
-        { name: "Web", icon: "Web" },
-        { name: "Photos", icon: "Photos" },
-        { name: "Notes", icon: "Notes" },
-        { name: "Terminal", icon: "Terminal" },
-        { name: "Settings", icon: "Settings" },
-        { name: "Search", icon: "Search" },
-        { name: "Home", icon: "Home" },
-        { name: "Documents", icon: "Files" },
-        { name: "Pictures", icon: "Photos" },
-        { name: "Help", icon: "Search" },
-        { name: "System Monitor", icon: "Settings" }
-    ]
+    // Populated by Main.qml; one shared catalog prevents dock/launcher drift.
+    property var applications: []
     readonly property var filteredApps: applications.filter(function(app) {
         return app.name.toLowerCase().indexOf(searchField.text.toLowerCase().trim()) !== -1
     })

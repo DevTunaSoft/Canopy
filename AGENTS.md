@@ -23,6 +23,27 @@ Build a polished, familiar Linux desktop shell. Classic is macOS-inspired withou
 6. Commit and push verified changes to GitHub; never merge failing or unverified work. Continue to the next independent task only when safe.
 7. Record measured performance with machine details, methodology, and baseline; do not invent numbers.
 
+## Corrected icon source-of-truth (November 20, 2026)
+
+The user **rejected** the claimed PR #72 "approved" icon match: it substituted
+author-invented artwork for actual references. Before touching brand assets
+read `docs/VISUAL_REFERENCE_PROVENANCE.md` and check the real archived
+images. The explicitly requested top-left launcher is the **white solid
+Tux-like silhouette** from the recovered image, *not* the invented dark,
+ivory-and-gold penguin, nor a combined tree logo. The launcher SVG is a
+source-image vector TRACE, not a master supplied by the user.
+
+The recovered moodboard shows six dock app **categories** (Files, Browser,
+Settings, Photos, Terminal, Trash). These do not authorize copying Apple's
+lookalike icons or claiming the model-drawn versions are the user's files.
+Do not add an invented Canopy dock icon or alter the order without new
+verifiable instruction. No "approved", "exact copy", or "what you sent"
+claims without visual proof and explicit acceptance.
+
+Run the SVG safety checks, regression tests, Qt screenshot tests and Mint VM
+acceptance as distinct gates. Keep the visual changes on a separate DRAFT PR;
+do not merge to main. Maintain existing engineering/efficiency requirements.
+
 ## Current isolated design experiment
 
 The unapproved `feature/classic-blue-current-wallpaper-20261120` branch

@@ -32,7 +32,14 @@ Rectangle {
         anchors.top: parent.top
         width: parent.width
         height: 52
+        radius: 12
         color: "#eff3f7"
+        Rectangle {
+            anchors.bottom: parent.bottom
+            width: parent.width
+            height: parent.height - 12
+            color: titlebar.color
+        }
         Row {
             anchors.left: parent.left
             anchors.leftMargin: 18
@@ -72,7 +79,14 @@ Rectangle {
         anchors.left: parent.left
         anchors.bottom: parent.bottom
         width: preview.condensed ? 135 : 170
+        radius: 12
         color: "#edf2f7"
+        Rectangle {
+            anchors.top: parent.top
+            width: parent.width
+            height: parent.height - 12
+            color: sidebar.color
+        }
         Rectangle {
             anchors.right: parent.right
             width: 1
@@ -279,7 +293,14 @@ Rectangle {
             anchors.bottom: parent.bottom
             width: parent.width
             height: 27
+            radius: 12
             color: "#f9fbfd"
+            Rectangle {
+                anchors.top: parent.top
+                width: parent.width
+                height: parent.height - 12
+                color: statusBar.color
+            }
             Rectangle {
                 width: parent.width
                 height: 1

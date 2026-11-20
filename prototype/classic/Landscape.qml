@@ -69,15 +69,8 @@ Canvas {
         c.lineTo(0, 1)
         c.closePath()
         c.fill()
-        c.strokeStyle = "rgba(225,240,239,0.28)"
-        c.lineWidth = 0.0016
-        for (let i = 0; i < 8; i++) {
-            const y = 0.94 + i * 0.007
-            c.beginPath()
-            c.moveTo(0.36 - (i % 3) * 0.045, y)
-            c.lineTo(0.62 + (i % 2) * 0.075, y)
-            c.stroke()
-        }
+        // Keep the foreground calm: no repeated horizontal line marks behind
+        // the dock, which read as rendering artifacts in actual screenshots.
         c.restore()
     }
 }

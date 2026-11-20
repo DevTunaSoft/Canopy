@@ -82,6 +82,19 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertNotIn("Timer {", window)
         self.assertNotIn("NumberAnimation", window)
 
+    def test_low_cost_static_surface_depth(self):
+        qml = (ROOT / "Main.qml").read_text()
+        self.assertIn('anchors.fill: filesPreview', qml)
+        self.assertIn('z: 0.3', qml)
+        self.assertNotIn("ShaderEffect {", qml)
+        self.assertNotIn("GaussianBlur {", qml)
+        self.assertNotIn("MultiEffect {", qml)
+
+    def test_full_hd_screenshot_is_required(self):
+        workflow = (ROOT.parents[1] / ".github" / "workflows" / "classic-qt.yml").read_text()
+        self.assertIn("classic-fullhd.png", workflow)
+        self.assertIn("--self-test-size 1920x1080", workflow)
+
     def test_screenshot_rejects_uniform_frames(self):
         source = (ROOT / "main.cpp").read_text()
         self.assertIn("sampledColors.size() < 8", source)

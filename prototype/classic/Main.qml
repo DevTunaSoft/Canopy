@@ -10,7 +10,7 @@ ApplicationWindow {
     minimumHeight: 480
     visible: true
     title: "Canopy Classic — Technology Spike"
-    color: "#09111d"
+    color: "#eef2f8"
 
     Theme { id: canopyTheme }
     readonly property bool compactLayout: width < 900
@@ -31,11 +31,11 @@ ApplicationWindow {
         y: root.height * 0.25
         rotation: -27
         radius: height * 0.45
-        opacity: 0.50
+        opacity: 0.73
         gradient: Gradient {
-            GradientStop { position: 0; color: "#365a7a" }
-            GradientStop { position: 0.45; color: "#253c59" }
-            GradientStop { position: 1; color: "#0c1727" }
+            GradientStop { position: 0; color: "#b2cdf0" }
+            GradientStop { position: 0.45; color: "#d1c5ef" }
+            GradientStop { position: 1; color: "#f8d4dd" }
         }
     }
     Rectangle {
@@ -45,10 +45,10 @@ ApplicationWindow {
         y: root.height * 0.65
         rotation: -16
         radius: height * 0.45
-        opacity: 0.46
+        opacity: 0.65
         gradient: Gradient {
-            GradientStop { position: 0; color: "#537898" }
-            GradientStop { position: 1; color: "#17283c" }
+            GradientStop { position: 0; color: "#99c6db" }
+            GradientStop { position: 1; color: "#e8e0f4" }
         }
     }
 
@@ -64,7 +64,7 @@ ApplicationWindow {
             anchors.bottom: parent.bottom
             width: parent.width
             height: 1
-            color: "#3a5168"
+            color: "#c9d1da"
             opacity: 0.65
         }
 
@@ -83,11 +83,11 @@ ApplicationWindow {
                 onPaint: {
                     const ctx = getContext("2d")
                     ctx.clearRect(0, 0, width, height)
-                    ctx.fillStyle = "#f7f9fd"
+                    ctx.fillStyle = "#34445d"
                     ctx.beginPath()
                     ctx.ellipse(11.5, 15.5, 7.5, 11.8, 0, 0, 2 * Math.PI)
                     ctx.fill()
-                    ctx.fillStyle = "#25354a"
+                    ctx.fillStyle = "#f8fafc"
                     ctx.beginPath()
                     ctx.ellipse(11.5, 18.5, 4.8, 7.5, 0, 0, 2 * Math.PI)
                     ctx.fill()
@@ -96,7 +96,7 @@ ApplicationWindow {
                     ctx.arc(9, 10, 1.3, 0, 2 * Math.PI)
                     ctx.arc(14, 10, 1.3, 0, 2 * Math.PI)
                     ctx.fill()
-                    ctx.fillStyle = "#e7bd82"
+                    ctx.fillStyle = "#d7a268"
                     ctx.beginPath()
                     ctx.moveTo(10, 12.5)
                     ctx.lineTo(13, 12.5)
@@ -173,7 +173,7 @@ ApplicationWindow {
         anchors.rightMargin: 21
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 9
-        text: "CLASSIC PREVIEW"
+        text: "CANOPY CLASSIC · PREVIEW"
         color: canopyTheme.muted
         opacity: 0.64
         font.pixelSize: 9

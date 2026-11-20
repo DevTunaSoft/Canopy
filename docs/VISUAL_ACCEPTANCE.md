@@ -3,8 +3,9 @@
 Status: engineering specification; **not verified on Linux Mint**.
 
 **Mandatory visual brief:** [PREMIUM_DESIGN_DIRECTION.md](PREMIUM_DESIGN_DIRECTION.md).
-The current standalone preview is **not** an approved high-quality skin; its
-placeholder artwork and empty desktop must not be described as premium.
+The current standalone preview is **not** an approved high-quality skin. The new
+original lakeside wallpaper, seven-icon dock, and sample Files window are a first
+visual refinement, not proof that the result is premium or that demo controls work.
 
 ## Design intent
 
@@ -18,7 +19,9 @@ until actual session ownership, app launching, accessibility, and window managem
 
 Review captured evidence at 760x500 and 1200x750 first, then a real Linux Mint session
 at 1920x1080 and a high-DPI configuration. A successful PNG capture is **not** proof
-of attractive or correct rendering.
+of attractive or correct rendering. The runtime geometry tests additionally verify
+that the wallpaper covers the viewport and all seven dock tiles are instantiated;
+these checks cannot judge icon craft, layout aesthetics, contrast or composition.
 
 For each image, a reviewer must confirm:
 
@@ -37,7 +40,9 @@ Do not label automatic screenshot verification a visual review.
 
 ## Performance and resource budget
 
-Collect **actual** guest measurements before choosing numeric release thresholds:
+The original Canvas wallpaper allocates an image backing store and must be checked
+at native 1080p and high DPI (including software-rendering fallback). Collect **actual**
+guest measurements before choosing numeric release thresholds:
 cold/warm startup, 5-minute idle CPU, PSS from /proc/PID/smaps_rollup, and GPU
 behavior on software and accelerated backends. Preserve machine, compositor,
 Qt, resolution, scaling, and driver details beside each sample.

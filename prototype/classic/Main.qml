@@ -33,6 +33,7 @@ ApplicationWindow {
         anchors.bottomMargin: -10
         radius: 18
         color: "#16344759"
+        visible: !root.launcherOpen
         z: 0.1
     }
     Rectangle {
@@ -43,6 +44,7 @@ ApplicationWindow {
         anchors.bottomMargin: -5
         radius: 16
         color: "#16344759"
+        visible: !root.launcherOpen
         z: 0.2
     }
 
@@ -50,6 +52,7 @@ ApplicationWindow {
     // It scales down for screenshot checks; the floating dock remains unobscured.
     PreviewWindow {
         id: filesPreview
+        visible: !root.launcherOpen
         z: 0.3
         width: Math.min(root.width - 72, 780)
         height: Math.min(root.height - canopyTheme.barHeight - 132, 480)
@@ -190,7 +193,7 @@ ApplicationWindow {
     // Real interactive launcher overlay; selection does NOT run processes.
     LauncherOverlay {
         id: appLauncher
-        z: 2
+        z: 0.9
         anchors.fill: parent
         opened: root.launcherOpen
         onCloseRequested: root.launcherOpen = false

@@ -30,7 +30,7 @@ ApplicationWindow {
         anchors.bottomMargin: -10
         radius: 18
         color: "#16344759"
-        z: -0.5
+        z: 0.1
     }
     Rectangle {
         anchors.fill: filesPreview
@@ -40,13 +40,14 @@ ApplicationWindow {
         anchors.bottomMargin: -5
         radius: 16
         color: "#16344759"
-        z: -0.25
+        z: 0.2
     }
 
     // Visual-only composition: file management and window controls are not wired.
     // It scales down for screenshot checks; the floating dock remains unobscured.
     PreviewWindow {
         id: filesPreview
+        z: 0.3
         width: Math.min(root.width - 72, 780)
         height: Math.min(root.height - canopyTheme.barHeight - 132, 480)
         x: Math.max(24, (root.width - width) / 2)
@@ -55,6 +56,7 @@ ApplicationWindow {
 
     Rectangle {
         id: topBar
+        z: 1
         objectName: "canopyTopBar"
         anchors.top: parent.top
         width: parent.width
@@ -160,6 +162,7 @@ ApplicationWindow {
     // Dock controls are explicitly nonfunctional until session services exist.
     Rectangle {
         id: dock
+        z: 1
         objectName: "canopyDock"
         width: Math.min(root.width - 32, dockRow.implicitWidth + 2 * canopyTheme.dockPadding)
         height: canopyTheme.dockSize

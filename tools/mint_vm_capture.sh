@@ -93,10 +93,12 @@ else
     tee "$EVIDENCE/high-dpi-manual-review.txt"
 fi
 
-# Informational ten-second baseline using the default demo icon mode. It does
-# not replace the required five-minute real-session idle measurement.
-python3 "$ROOT/tools/measure_qt.py" "$APP" "$EVIDENCE/short-baseline.json" --seconds 10 \
-  >"$EVIDENCE/baseline.log" 2>&1 ||
+# Informational ten-second baseline using the actual selected wallpaper and
+# selected icon mode. This does not replace a five-minute Mint idle review.
+MEASURE=(python3 "$ROOT/tools/measure_qt.py" "$APP" "$EVIDENCE/short-baseline.json"
+         --seconds 10 --landscape-wallpaper "$WALLPAPER")
+if [[ -n "$ART" ]]; then MEASURE+=(--approved-art-dir "$ART"); fi
+"${MEASURE[@]}" >"$EVIDENCE/baseline.log" 2>&1 ||
   echo "WARN: informational baseline unavailable; see baseline.log" >&2
 
 printf '\nPASS: standalone Mint capture completed. Evidence: %s\n' "$EVIDENCE"

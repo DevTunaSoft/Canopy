@@ -108,10 +108,19 @@ int main(int argc, char *argv[]) {
                 auto *panel = window->findChild<QQuickItem *>(QStringLiteral("canopyLauncherPanel"));
                 auto *search = window->findChild<QQuickItem *>(QStringLiteral("canopyLauncherSearch"));
                 auto *grid = window->findChild<QQuickItem *>(QStringLiteral("canopyLauncherGrid"));
+                const QPointF panelOrigin = panel
+                    ? panel->mapToItem(window->contentItem(), QPointF(0, 0))
+                    : QPointF(-1, -1);
+                const bool panelFits = panel
+                    && panelOrigin.y() >= bar->height() + 2
+                    && panelOrigin.y() + panel->height() <= dockOrigin.y() - 2;
+                const bool allRowsFit = grid
+                    && grid->property("contentHeight").toDouble() <= grid->height() + 2;
                 if (!appOverlay->isVisible() || !panel || !search || !grid
                     || panel->width() <= 400 || panel->height() <= 250
-                    || grid->width() < 300 || grid->height() < 100) {
-                    qCritical() << "SELF_TEST_FAIL: application launcher missing or too small";
+                    || grid->width() < 300 || grid->height() < 100
+                    || !panelFits || !allRowsFit) {
+                    qCritical() << "SELF_TEST_FAIL: application launcher clipping, overlap, or geometry" << panelOrigin;
                     QCoreApplication::exit(1);
                     return;
                 }

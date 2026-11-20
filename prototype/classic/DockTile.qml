@@ -14,8 +14,8 @@ Button {
 
     background: Rectangle {
         radius: 13
-        color: tile.hovered ? "#405d7b" : "#2c425a"
-        border.color: tile.hovered ? "#7797b4" : "#49617a"
+        color: tile.hovered ? "#ffffff" : (tile.iconName === "Home" ? "#d7e7fb" : tile.iconName === "Search" ? "#e7dff8" : tile.iconName === "Files" ? "#d5edee" : "#f4e1df")
+        border.color: tile.hovered ? "#95a9c2" : "#d0d7e1"
         border.width: 1
     }
 
@@ -29,8 +29,8 @@ Button {
             ctx.save()
             ctx.translate(width / 2, height / 2)
             ctx.scale(Math.min(width, height) / 32, Math.min(width, height) / 32)
-            ctx.strokeStyle = "#f6f8fc"
-            ctx.fillStyle = "#f6f8fc"
+            ctx.strokeStyle = "#34445d"
+            ctx.fillStyle = "#34445d"
             ctx.lineWidth = 2.2
             ctx.lineCap = "round"
             ctx.lineJoin = "round"

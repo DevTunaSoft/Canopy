@@ -1,82 +1,56 @@
 import QtQuick
 import QtQuick.Controls
 
-// Original lightweight folder artwork used by the visual-only Files preview.
+// Files visual-only sample tile: reuse the SAME authored Canopy folder artwork
+// for each folder, as a real desktop file manager normally does. Avoid the
+// rejected random pastel folder treatment. No actual filesystem access.
 Button {
     id: folder
     objectName: "canopyFolderTile"
     required property string folderName
-    required property color folderTone
+    required property color folderTone // Legacy demo model input; not an icon tint.
     property bool selected: false
+    readonly property bool imageReady: folderIcon.status === Image.Ready
     width: 108
-    height: 84
+    height: 90
     implicitWidth: 108
-    implicitHeight: 84
+    implicitHeight: 90
     hoverEnabled: true
     padding: 0
     Accessible.name: folderName + " sample folder"
-    Accessible.description: "Selects a sample tile without reading files from disk"
-
+    Accessible.description: "Selects a sample item, no disk access"
     background: Rectangle {
         radius: 9
-        color: folder.selected ? "#e6f0fb"
-              : folder.hovered ? "#f1f6fc" : "transparent"
-        border.color: folder.selected ? "#a8c4e1" : "transparent"
-        border.width: 1
+        color: folder.selected ? "#dcecfb"
+              : folder.hovered ? "#f0f6fa" : "transparent"
+        border.color: folder.selected ? "#a7c7e4" : "transparent"
+        border.width: folder.selected ? 1 : 0
     }
     contentItem: Item {
-        Rectangle {
-            id: folderBody
-            anchors.horizontalCenter: parent.horizontalCenter
+        Image {
+            id: folderIcon
+            objectName: "canopyFolderArtwork"
             anchors.top: parent.top
-            anchors.topMargin: 11
-            width: 67
-            height: 44
-            radius: 7
-            gradient: Gradient {
-                GradientStop { position: 0; color: Qt.lighter(folder.folderTone, 1.26) }
-                GradientStop { position: 1; color: folder.folderTone }
-            }
-            border.color: Qt.darker(folder.folderTone, 1.14)
-            border.width: 1
-            Rectangle {
-                x: 5
-                y: -5
-                width: 25
-                height: 8
-                radius: 3
-                color: Qt.lighter(folder.folderTone, 1.18)
-            }
-            Rectangle {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.leftMargin: 6
-                anchors.rightMargin: 6
-                anchors.top: parent.top
-                anchors.topMargin: 8
-                height: 22
-                radius: 4
-                color: "#66ffffff"
-            }
-            Rectangle {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.leftMargin: 8
-                anchors.rightMargin: 8
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: 5
-                height: 1
-                color: "#66ffffff"
-            }
+            anchors.topMargin: 4
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: 72
+            height: 64
+            source: "qrc:/Canopy/Classic/assets/icons/files.svg"
+            sourceSize: Qt.size(128, 128)
+            fillMode: Image.PreserveAspectFit
+            cache: true
+            asynchronous: false
+            smooth: true
         }
         Label {
-            anchors.top: folderBody.bottom
-            anchors.topMargin: 7
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 4
             anchors.horizontalCenter: parent.horizontalCenter
             text: folder.folderName
             color: "#34465c"
             font.pixelSize: 11
             font.weight: folder.selected ? Font.DemiBold : Font.Normal
+            elide: Text.ElideRight
         }
     }
 }

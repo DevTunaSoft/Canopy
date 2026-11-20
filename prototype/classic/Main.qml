@@ -188,13 +188,19 @@ ApplicationWindow {
         title: "Canopy Classic Preview"
         modal: false
         anchors.centerIn: parent
+        width: 360
+        height: 185
         standardButtons: Dialog.Ok
-        contentItem: Label {
-            text: "A standalone design experiment. App launching and real file browsing are not implemented."
-            wrapMode: Text.WordWrap
-            width: 270
-            font.pixelSize: 12
-            color: "#31475e"
+        contentItem: Item {
+            implicitWidth: 290
+            implicitHeight: 68
+            Label {
+                anchors.fill: parent
+                text: "A standalone design experiment. App launching and real file browsing are not implemented."
+                wrapMode: Text.WordWrap
+                font.pixelSize: 12
+                color: "#31475e"
+            }
         }
     }
 

@@ -37,20 +37,29 @@ def measure(exe: Path, duration: float) -> dict:
     process = subprocess.Popen([str(exe)], stdout=subprocess.DEVNULL,
                                stderr=subprocess.PIPE, env=os.environ.copy())
     try:
+        # Read the pipe at the file-descriptor level. Buffered readline() can
+        # swallow several QML warnings and the readiness marker in one read,
+        # leaving select() waiting even though Python already buffered it.
+        import select
         deadline = time.monotonic() + 12
+        stderr_tail = bytearray()
         while time.monotonic() < deadline:
             if process.poll() is not None:
-                raise RuntimeError(f"Canopy exited early: {process.returncode}")
+                raise RuntimeError(f"Canopy exited early: {process.returncode}; stderr: {stderr_tail.decode(errors='replace')[-1000:]}")
             if process.stderr is None:
                 raise RuntimeError("Missing startup channel")
-            import select
-            ready, _, _ = select.select([process.stderr], [], [], 0.25)
+            ready, _, _ = select.select([process.stderr.fileno()], [], [], 0.25)
             if ready:
-                line = process.stderr.readline().decode("utf-8", errors="replace")
-                if "CANOPY_CLASSIC_WINDOW_READY" in line:
+                chunk = os.read(process.stderr.fileno(), 65536)
+                if not chunk:
+                    raise RuntimeError("Canopy closed startup channel")
+                stderr_tail.extend(chunk)
+                if len(stderr_tail) > 65536:
+                    del stderr_tail[:-65536]
+                if b"CANOPY_CLASSIC_WINDOW_READY" in stderr_tail:
                     break
         else:
-            raise TimeoutError("Canopy did not report window readiness")
+            raise TimeoutError(f"Canopy did not report window readiness; stderr: {stderr_tail.decode(errors='replace')[-1000:]}")
         ticks_start = read_cpu_ticks(process.pid)
         pss_start = read_pss_kib(process.pid)
         started = time.monotonic()

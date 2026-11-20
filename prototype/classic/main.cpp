@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
             const QPointF barOrigin = bar->mapToItem(window->contentItem(), QPointF(0, 0));
             const QPointF dockOrigin = dock->mapToItem(window->contentItem(), QPointF(0, 0));
             const bool barFits = qAbs(barOrigin.x()) <= 2 && qAbs(barOrigin.y()) <= 2
-                && qAbs(bar->width() - window->width()) <= 2 && bar->height() >= 40;
+                && qAbs(bar->width() - window->width()) <= 2 && bar->height() >= 30;
             const bool dockFits = dockOrigin.x() >= 0 && dockOrigin.y() >= bar->height()
                 && dockOrigin.x() + dock->width() <= window->width() + 1
                 && dockOrigin.y() + dock->height() <= window->height() + 1

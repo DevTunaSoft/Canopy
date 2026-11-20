@@ -16,6 +16,7 @@ FocusScope {
     readonly property var filteredApps: applications.filter(function(app) {
         return app.name.toLowerCase().indexOf(searchField.text.toLowerCase().trim()) !== -1
     })
+    readonly property int resultCount: filteredApps.length
     function clearAndFocus() {
         searchField.text = ""
         selectionMessage = ""

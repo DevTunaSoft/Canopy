@@ -100,6 +100,13 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn("SELF_TEST_PASS: wallpaper sky and foreground visually distinct", runtime)
         self.assertIn("SELF_TEST_FAIL: Blue Current wallpaper image did not load", runtime)
         self.assertIn("SELF_TEST_PASS: original SVG wallpaper image loaded", runtime)
+        self.assertIn("SELF_TEST_PASS: all seven original SVG dock icons loaded", runtime)
+        self.assertIn("SELF_TEST_FAIL: original dock artwork failed to load", runtime)
+        self.assertIn("countReadyDockTiles", runtime)
+        for icon in ("home", "files", "browser", "photos", "mail",
+                     "calendar", "settings"):
+            self.assertIn(f"assets/icons/{icon}.svg", cmake)
+            self.assertTrue((ROOT / f"assets/icons/{icon}.svg").is_file())
         self.assertIn('objectName: "canopyFolderTile"', (ROOT / "FolderTile.qml").read_text())
         self.assertNotIn("dock->findChildren<QQuickItem *>", runtime)
 

@@ -253,6 +253,11 @@ int main(int argc, char *argv[]) {
     // Open the real Qt launcher scene during CI screenshot runs. This exercises
     // the same QML path as a click on the Canopy penguin, without mouse synthesis.
     const bool launcherScreenshot = args.contains(QStringLiteral("--self-test-launcher"));
+    const bool launcherFilterTest = args.contains(QStringLiteral("--self-test-launcher-filter-files"));
+    if (launcherFilterTest && !launcherScreenshot) {
+        qCritical() << "SELF_TEST_FAIL: launcher filter test requires --self-test-launcher";
+        return 2;
+    }
     if (launcherScreenshot) {
         auto *launcherOverlay = window->findChild<QQuickItem *>(
             QStringLiteral("canopyAppLauncher"));
@@ -261,6 +266,14 @@ int main(int argc, char *argv[]) {
             return 1;
         }
         launcherOverlay->setVisible(true);
+        if (launcherFilterTest) {
+            auto *searchControl = window->findChild<QQuickItem *>(
+                QStringLiteral("canopyLauncherSearch"));
+            if (!searchControl || !searchControl->setProperty("text", "Files")) {
+                qCritical() << "SELF_TEST_FAIL: launcher search is not editable";
+                return 1;
+            }
+        }
     }
     qInfo() << "CANOPY_CLASSIC_WINDOW_READY";
     const int sizeIndex = args.indexOf(QStringLiteral("--self-test-size"));
@@ -289,7 +302,7 @@ int main(int argc, char *argv[]) {
             return 2;
         }
         const QString screenshotPath = args.at(screenshotIndex + 1);
-        QTimer::singleShot(1000, window, [window, screenshotPath, approvedMode, landscapeMode, launcherScreenshot]() {
+        QTimer::singleShot(1000, window, [window, screenshotPath, approvedMode, landscapeMode, launcherScreenshot, launcherFilterTest]() {
             auto *bar = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBar"));
             auto *dock = window->findChild<QQuickItem *>(QStringLiteral("canopyDock"));
             auto *launcher = window->findChild<QQuickItem *>(QStringLiteral("canopyLauncher"));
@@ -343,7 +356,7 @@ int main(int argc, char *argv[]) {
             if (launcherScreenshot) {
                 auto *launcherOverlay = window->findChild<QQuickItem *>(
                     QStringLiteral("canopyAppLauncher"));
-                const int expected = approvedMode ? 8 : 6;
+                const int expected = launcherFilterTest ? 1 : (approvedMode ? 8 : 6);
                 if (!launcherOverlay || !launcherOverlay->isVisible() ||
                     launcherOverlay->property("visibleIconCount").toInt() != expected ||
                     countVisualItems(launcherOverlay, QStringLiteral("canopyDockTile")) != expected ||

@@ -85,6 +85,7 @@ def assess(release, env, available, qt_version=None):
         "mint_identified": is_mint,
         "version_id": release.get("VERSION_ID", "unknown")[:30],
         "desktop_session_present": bool(desktop),
+        "cinnamon_identified": cinnamon,
         "graphical_display_present": has_display,
         "session_type": session if session in ("x11", "wayland") else "other-or-unknown",
         "qt6_core_version": qt_version,

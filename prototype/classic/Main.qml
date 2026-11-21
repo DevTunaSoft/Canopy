@@ -216,6 +216,7 @@ ApplicationWindow {
         anchors.fill: parent
         z: 20
         approvedMode: root.approvedAssetsActive
+        framingReviewMode: canopyIconFramingReview
         onApplicationSelected: function(applicationName) {
             if (applicationName === "Files")
                 filesPreview.visible = true

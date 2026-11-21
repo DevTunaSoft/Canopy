@@ -14,11 +14,25 @@ constexpr int kCanvasPixels = 192;
 constexpr int kInsetPixels = 12;
 constexpr int kRoundedRadius = 36;
 constexpr int kMaxRequestPixels = 256;
+
+// Directly reused measured, source-specific gutters from the earlier
+// isolated PR #109. This candidate is never the default renderer.
+// The chosen user PNG masters remain byte-exact and unmodified.
+const QHash<QString, int> kApprovedSourceTopGutters = {
+    {QStringLiteral("browser"), 9},
+    {QStringLiteral("mail"), 6},
+    {QStringLiteral("files"), 2},
+    {QStringLiteral("calendar"), 0},
+    {QStringLiteral("photos"), 0},
+    {QStringLiteral("music"), 5},
+    {QStringLiteral("terminal"), 14},
+    {QStringLiteral("settings"), 14},
+};
 }
 
 RoundedDockIconProvider::RoundedDockIconProvider(
     const QString &approvedRoot, const QString &terminalCandidatePath,
-    QString *error)
+    bool framingReviewMode, QString *error)
     : QQuickImageProvider(QQuickImageProvider::Image) {
     QFile manifest(QStringLiteral(":/Canopy/Classic/assets/approved/manifest.json"));
     if (!manifest.open(QIODevice::ReadOnly)) {
@@ -77,14 +91,38 @@ RoundedDockIconProvider::RoundedDockIconProvider(
         painter.setClipPath(outline);
         painter.fillPath(outline, QColor(QStringLiteral("#10203d")));
 
-        // Fit the WHOLE approved image instead of zooming or cropping it.
-        // Small transparent outer gutters keep artwork comfortably framed.
-        const QSize fitted = original.size().scaled(
-            face.size().toSize(), Qt::KeepAspectRatio);
-        const QRectF placement(face.center().x() - fitted.width() / 2.0,
-                               face.center().y() - fitted.height() / 2.0,
-                               fitted.width(), fitted.height());
-        painter.drawImage(placement, original);
+        const bool terminalDerivative =
+            !terminalCandidatePath.isEmpty() && sourcePath == terminalCandidatePath;
+        if (framingReviewMode && !terminalDerivative) {
+            // Review candidate A from PR #109, applied to the SAME shared Qt
+            // image provider used by BOTH the dock and searchable launcher.
+            // The outer 168px rounded face never moves. The approved original
+            // remains untouched; this is an in-memory square content sample.
+            if (!kApprovedSourceTopGutters.contains(id)) {
+                *error = QStringLiteral("unknown approved source icon for framing review");
+                m_images.clear();
+                return;
+            }
+            const int top = kApprovedSourceTopGutters.value(id);
+            const int side = original.height() - top;
+            if (top < 0 || top > 14 || side < 256 || original.width() < side) {
+                *error = QStringLiteral("approved image framing dimensions invalid");
+                m_images.clear();
+                return;
+            }
+            const int left = (original.width() - side) / 2;
+            const QRectF originalSample(left, top, side, side);
+            painter.drawImage(face, original, originalSample);
+        } else {
+            // ORIGINAL full-image fit remains the default. The optional
+            // independently approved Terminal derivative is never reframed.
+            const QSize fitted = original.size().scaled(
+                face.size().toSize(), Qt::KeepAspectRatio);
+            const QRectF placement(face.center().x() - fitted.width() / 2.0,
+                                   face.center().y() - fitted.height() / 2.0,
+                                   fitted.width(), fitted.height());
+            painter.drawImage(placement, original);
+        }
         painter.end();
         m_images.insert(id, rendered);
     }

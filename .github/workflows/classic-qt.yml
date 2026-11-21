@@ -14,6 +14,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Source regression tests (before Qt package installation)
         run: python3 -m unittest discover -s tests -p 'test_classic_source.py' -v
+      - name: Optical frame review source contracts and byte-exact PNG negative controls
+        run: python3 -m unittest tests.test_classic_shared_icon_framing tests.test_classic_icon_frame_diff -v
       - name: Verify immutable approved artwork manifest contract
         run: python3 -m unittest discover -s tests -p 'test_approved_manifest_contract.py' -v
       - name: Validate original vector wallpaper before Qt build
@@ -57,6 +59,15 @@ jobs:
           test "$code" -eq 3
           grep -q 'APPROVED_ART_FAIL' test-bad-art.log
           echo "PASS: missing user-approved artwork rejected before Qt scene loads"
+          # This experiment must never run without the exact SHA-locked
+          # owner's eight original icon masters. No private art in public CI.
+          set +e
+          ./build/classic/canopy-classic-spike --icon-framing-review >test-unsafe-icon-framing.log 2>&1
+          framing_code=$?
+          set -e
+          test "$framing_code" -eq 2
+          grep -q 'ICON_FRAMING_REVIEW_FAIL' test-unsafe-icon-framing.log
+          echo "PASS: unauthorized icon framing rejected before loading Qt scene"
       - name: Validate optional landscape wallpaper on real Qt runtime
         timeout-minutes: 3
         env:
@@ -106,6 +117,43 @@ jobs:
           python3 tools/check_screenshot.py test-artifacts/classic-compact.png 760 500
           timeout 30s xvfb-run -a -s '-screen 0 2048x1200x24' ./build/classic/canopy-classic-spike --self-test-size 1920x1080 --self-test-screenshot test-artifacts/classic-1080p.png
           python3 tools/check_screenshot.py test-artifacts/classic-1080p.png 1920 1080
+      - name: HiDPI actual Qt capture at 125, 150 and 200 percent
+        timeout-minutes: 4
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          for scale in 1.25 1.5 2.0; do
+            echo "Testing Qt physical screenshot DPI factor $scale"
+            QT_SCALE_FACTOR="$scale" timeout 35s xvfb-run -a -s '-screen 0 3200x2200x24' \
+              ./build/classic/canopy-classic-spike \
+              --self-test-size 1200x750 \
+              --self-test-screenshot "test-artifacts/classic-desktop-hidpi-$scale.png" \
+              --self-test-launcher-screenshot "test-artifacts/classic-launcher-hidpi-$scale.png"
+            python3 - "$scale" <<'PY'
+          import struct
+          import sys
+          from pathlib import Path
+          from tools.check_screenshot import verify_png
+          factor = float(sys.argv[1])
+          paths = (
+              Path(f"test-artifacts/classic-desktop-hidpi-{factor}.png"),
+              Path(f"test-artifacts/classic-launcher-hidpi-{factor}.png"),
+          )
+          dimensions = []
+          for path in paths:
+              blob = path.read_bytes()
+              assert blob.startswith(bytes((137, 80, 78, 71, 13, 10, 26, 10)))
+              width, height = struct.unpack_from(">II", blob, 16)
+              assert abs(width - round(1200 * factor)) <= 1, (path, width)
+              assert abs(height - round(750 * factor)) <= 1, (path, height)
+              verify_png(path, width, height)
+              dimensions.append((width, height))
+          assert dimensions[0] == dimensions[1], dimensions
+          assert paths[0].read_bytes() != paths[1].read_bytes()
+          print("HIDPI_QT_SCREENSHOT_PASS", factor, dimensions)
+          PY
+          done
       - name: Capture informational CPU and PSS baseline
         timeout-minutes: 2
         env:

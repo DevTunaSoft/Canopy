@@ -74,6 +74,19 @@ static int countReadyDockTiles(QQuickItem *parent) {
     return ready;
 }
 
+// A rendered launcher must contain actual ready QML Image objects.
+// A centered GridView rectangle or successful icon catalog lookup alone
+// does not prove that the approved resource decoded.
+static int countReadyLauncherImages(QQuickItem *parent) {
+    if (!parent)
+        return 0;
+    int ready = parent->objectName() == QStringLiteral("canopyLauncherIcon")
+                && parent->property("imageReady").toBool() ? 1 : 0;
+    for (QQuickItem *child : parent->childItems())
+        ready += countReadyLauncherImages(child);
+    return ready;
+}
+
 static int countVisualItems(QQuickItem *parent, const QString &objectName) {
     if (!parent)
         return 0;
@@ -206,6 +219,11 @@ int main(int argc, char *argv[]) {
     const QStringList args = QCoreApplication::arguments();
     const int approvedIndex = args.indexOf(QStringLiteral("--approved-art-dir"));
     const bool approvedMode = approvedIndex >= 0;
+    const bool framingReviewMode = args.contains(QStringLiteral("--icon-framing-review"));
+    if (framingReviewMode && !approvedMode) {
+        qCritical() << "ICON_FRAMING_REVIEW_FAIL: exact SHA-locked approved art required";
+        return 2;
+    }
     const bool requireApproved = args.contains(QStringLiteral("--self-test-approved"));
     const int landscapeIndex = args.indexOf(QStringLiteral("--landscape-wallpaper"));
     const bool landscapeMode = landscapeIndex >= 0;
@@ -288,7 +306,11 @@ int main(int argc, char *argv[]) {
         // Source PNGs were SHA-verified above; transform copies IN MEMORY
         // only. The files and their immutable manifest remain unchanged.
         QString roundedError;
-        auto *roundedIcons = new RoundedDockIconProvider(approvedRoot, terminalCandidatePath, &roundedError);
+        // The dock is locked to the existing original full-fit rendering.
+        // Experimental optical adjustments are isolated to a DIFFERENT
+        // QQuickImageProvider, instantiated only for an explicit review.
+        auto *roundedIcons = new RoundedDockIconProvider(
+            approvedRoot, terminalCandidatePath, false, &roundedError);
         if (!roundedIcons->isValid() || !roundedIcons->allCornersClipped()) {
             qCritical().noquote() << "APPROVED_ART_FAIL: rounded dock rendering:"
                                    << roundedError;
@@ -297,8 +319,28 @@ int main(int argc, char *argv[]) {
         }
         engine.addImageProvider(QStringLiteral("canopy-dock"), roundedIcons);
         qInfo() << "CANOPY_ROUNDED_DOCK_VERIFIED: eight original icons, padded, alpha-clipped";
+        if (framingReviewMode) {
+            QString reviewError;
+            auto *launcherReviewIcons = new RoundedDockIconProvider(
+                approvedRoot, terminalCandidatePath, true, &reviewError);
+            if (!launcherReviewIcons->isValid() ||
+                !launcherReviewIcons->allCornersClipped()) {
+                qCritical().noquote()
+                    << "ICON_FRAMING_REVIEW_FAIL: launcher-only rendering:"
+                    << reviewError;
+                delete launcherReviewIcons;
+                return 3;
+            }
+            engine.addImageProvider(QStringLiteral("canopy-launcher-review"),
+                                    launcherReviewIcons);
+            qInfo() << "ICON_FRAMING_REVIEW_ACTIVE: launcher-only source-content"
+                       " review, dock provider and original masters unchanged;"
+                       " owner visual approval NOT granted";
+        }
     }
     engine.rootContext()->setContextProperty(QStringLiteral("canopyApprovedMode"), approvedMode);
+    engine.rootContext()->setContextProperty(
+        QStringLiteral("canopyIconFramingReview"), framingReviewMode);
     engine.rootContext()->setContextProperty(
         QStringLiteral("canopyLandscapeWallpaperUrl"),
         landscapeMode ? QUrl::fromLocalFile(landscapePath).toString() : QString());
@@ -366,7 +408,7 @@ int main(int argc, char *argv[]) {
             ? args.at(launcherShotIndex + 1) : QString();
         QTimer::singleShot(1000, window,
             [window, screenshotPath, launcherScreenshotPath, approvedMode, landscapeMode,
-             terminalCandidateMode = !terminalCandidatePath.isEmpty()]() {
+             framingReviewMode, terminalCandidateMode = !terminalCandidatePath.isEmpty()]() {
             auto *bar = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBar"));
             auto *clock = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBarClock"));
             auto *dock = window->findChild<QQuickItem *>(QStringLiteral("canopyDock"));
@@ -424,6 +466,19 @@ int main(int argc, char *argv[]) {
                 QCoreApplication::exit(1);
                 return;
             }
+            // Inspect actual QML image components, not just catalog strings.
+            QCoreApplication::processEvents();
+            const int launcherImageCount = countVisualItems(
+                applicationLauncher, QStringLiteral("canopyLauncherIcon"));
+            if (launcherImageCount != (approvedMode ? 8 : 6)
+                || countReadyLauncherImages(applicationLauncher) != launcherImageCount) {
+                qCritical() << "SELF_TEST_FAIL: incomplete launcher image catalogue"
+                            << launcherImageCount;
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SELF_TEST_PASS: actual launcher image component count"
+                    << launcherImageCount;
             const bool selectedMatch =
                 applicationLauncher->setProperty("searchQuery", QStringLiteral("fIlEs"))
                 && applicationLauncher->property("filteredCount").toInt() == 1;
@@ -443,6 +498,8 @@ int main(int argc, char *argv[]) {
                 return;
             }
             qInfo() << "SELF_TEST_PASS: actual Qt launcher opens, searches and closes";
+            if (framingReviewMode)
+                qInfo() << "SELF_TEST_PASS: launcher-only Qt frame review enabled; dock frozen";
 
             const QPointF barOrigin = bar->mapToItem(window->contentItem(), QPointF(0, 0));
             const QPointF dockOrigin = dock->mapToItem(window->contentItem(), QPointF(0, 0));
@@ -767,14 +824,20 @@ int main(int argc, char *argv[]) {
                 // cannot obscure the owner's actual-open visual evidence.
                 QCursor::setPos(window->mapToGlobal(QPoint(
                     8, window->height() - 8)));
-                // Allow Qt Quick a frame to polish and paint the actual overlay.
+                // QQuickWindow::grabWindow() returns PHYSICAL pixels.
+                // Never compare those dimensions to logical QQuickWindow
+                // geometry: at 150% scale, a 1200x750 window is 1800x1125.
+                // Require both actual Qt captures to share the exact same
+                // pixel dimensions instead; this catches clipped/stale frames
+                // while allowing legitimate high-DPI device pixel ratios.
+                const QSize desktopPhysicalPixels = frame.size();
                 QTimer::singleShot(250, window,
-                    [window, applicationLauncher, launcherScreenshotPath]() {
+                    [window, applicationLauncher, launcherScreenshotPath,
+                     desktopPhysicalPixels]() {
                         const QImage launcherFrame = window->grabWindow();
                         if (!applicationLauncher->isVisible() ||
                             launcherFrame.isNull() ||
-                            launcherFrame.width() != window->width() ||
-                            launcherFrame.height() != window->height() ||
+                            launcherFrame.size() != desktopPhysicalPixels ||
                             !launcherFrame.save(launcherScreenshotPath, "PNG")) {
                             qCritical() << "SELF_TEST_FAIL: actual launcher screenshot unavailable";
                             QCoreApplication::exit(1);

@@ -398,6 +398,33 @@ int main(int argc, char *argv[]) {
                 return;
             }
             qInfo() << "SELF_TEST_PASS: Files close control and dock reopen";
+            // Trigger the QML shortcut signals directly to verify bindings;
+            // this does not claim OS-level keyboard dispatch or global hooks.
+            auto *closeShortcut = window->findChild<QObject *>(
+                QStringLiteral("canopyFilesCloseShortcut"));
+            auto *openShortcut = window->findChild<QObject *>(
+                QStringLiteral("canopyFilesOpenShortcut"));
+            if (!closeShortcut || !openShortcut ||
+                !closeShortcut->property("enabled").toBool() ||
+                !QMetaObject::invokeMethod(closeShortcut, "activated", Qt::DirectConnection)) {
+                qCritical() << "SELF_TEST_FAIL: Files keyboard close shortcut unavailable";
+                QCoreApplication::exit(1);
+                return;
+            }
+            QCoreApplication::processEvents();
+            if (preview->isVisible() || !openShortcut->property("enabled").toBool() ||
+                !QMetaObject::invokeMethod(openShortcut, "activated", Qt::DirectConnection)) {
+                qCritical() << "SELF_TEST_FAIL: Files keyboard shortcut close/open failed";
+                QCoreApplication::exit(1);
+                return;
+            }
+            QCoreApplication::processEvents();
+            if (!preview->isVisible() || !closeShortcut->property("enabled").toBool()) {
+                qCritical() << "SELF_TEST_FAIL: Files keyboard shortcut did not reopen preview";
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SELF_TEST_PASS: Files keyboard close and reopen bindings";
             const QImage frame = window->grabWindow();
             if (frame.isNull() || frame.width() < 720 || frame.height() < 480) {
                 qCritical() << "SELF_TEST_FAIL: invalid screenshot dimensions";

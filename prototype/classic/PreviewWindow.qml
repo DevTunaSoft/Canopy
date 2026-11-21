@@ -300,12 +300,17 @@ Rectangle {
                 boundsBehavior: Flickable.StopAtBounds
                 flickableDirection: Flickable.VerticalFlick
                 ScrollBar.vertical: ScrollBar {
-                    policy: preview.condensed ? ScrollBar.AlwaysOn : ScrollBar.AsNeeded
-                    active: preview.condensed
+                    // Avoid a permanent scrollbar when both compact rows fit.
+                    policy: ScrollBar.AsNeeded
+                    active: folderScroller.movingVertically
                 }
                 Flow {
                     id: folders
-                    width: folderScroller.width - 13
+                    // Four even columns at every target width: prevents the
+                    // 1920px 7+1 orphan row while preserving Finder-like left
+                    // alignment. A narrower content area still wraps safely.
+                    width: Math.min(folderScroller.width - 13,
+                                    4 * 108 + 3 * (preview.condensed ? 6 : 10))
                     spacing: preview.condensed ? 6 : 10
                     height: childrenRect.height
                     Repeater {
@@ -314,6 +319,7 @@ Rectangle {
                             required property var modelData
                             folderName: modelData.name
                             folderTone: modelData.tone
+                            compact: preview.condensed
                             selected: preview.selectedFolder === folderName
                             visible: folderName.toLowerCase().indexOf(
                                 preview.searchQuery.toLowerCase()) >= 0

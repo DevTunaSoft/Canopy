@@ -49,5 +49,5 @@ Prioritize finish/verify Classic, then Modern, then test switching/recovery
 and a third unrelated presentation, then consider LacOS distribution work.
 Preserve immutable user-selected artwork, original/licensed assets, measured
 performance, reversible Mint integration and human visual acceptance. Green
-CI never means visually rejected work is merge-ready. Coordinate with the
-owner's existing reviewers; do not recruit reviewers unrequested.
+CI never means visually rejected work is merge-ready. Welcome code review without limiting participation to a particular group.
+Do not publish unsolicited reviewer invitations or recruitment issues.

@@ -27,7 +27,7 @@ Hardware, distro, session/compositor and measurement method:
 
 Visual state: **NOT APPLICABLE / VISUAL REVIEW PENDING / REJECTED / APPROVED**
 Mint acceptance: **NOT RUN / BLOCKED / PASS**
-Independent reviewer(s): **NOT YET REQUESTED / REQUESTED / REVIEWED**
+Code review: **NOT YET REVIEWED / REVIEW IN PROGRESS / REVIEWED**
 
 ### Merge gate
 

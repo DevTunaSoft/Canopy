@@ -152,6 +152,13 @@ class ClassicPreviewMenuTests(unittest.TestCase):
             self.install()
         self.assertEqual(note.read_text(), "keep this")
 
+    def test_symlinked_binary_refused_even_if_executable(self):
+        alias = Path(self.temp.name) / "linked-canopy"
+        alias.symlink_to(self.binary)
+        with self.assertRaisesRegex(menu.RegistrationError, "non-symlink"):
+            self._try_binary(alias)
+        self.assertEqual(menu.status(self.home), "NOT_INSTALLED")
+
     def test_binary_must_be_executable(self):
         self.binary.chmod(0o644)
         with self.assertRaisesRegex(menu.RegistrationError, "not executable"):
@@ -162,7 +169,7 @@ class ClassicPreviewMenuTests(unittest.TestCase):
         for filename in ("relative-executable", str(self.home / "missing")):
             with self.subTest(filename=filename):
                 with self.assertRaises(menu.RegistrationError):
-                    self.install() if filename == "nothing" else self._try_binary(filename)
+                    self._try_binary(filename)
         self.assertEqual(menu.status(self.home), "NOT_INSTALLED")
 
     def _try_binary(self, binary):

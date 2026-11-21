@@ -23,6 +23,10 @@ ApplicationWindow {
     // It scales down for screenshot checks; the floating dock remains unobscured.
     PreviewWindow {
         id: filesPreview
+        // Hide demo window beneath the app launcher without altering its
+        // open/closed state, image loading, or user selection.
+        opacity: appLauncher.visible ? 0 : 1
+        enabled: !appLauncher.visible
         width: Math.min(root.width - 72, Math.max(780, root.width * 0.56))
         height: Math.min(root.height - canopyTheme.barHeight - 166, Math.max(420, root.height * 0.56))
         x: Math.max(24, (root.width - width) / 2)
@@ -86,7 +90,7 @@ ApplicationWindow {
 
             }
             Label {
-                text: "Files"
+                text: "Canopy"
                 color: "#f7f5eb"
                 font.pixelSize: 13
                 font.weight: Font.DemiBold

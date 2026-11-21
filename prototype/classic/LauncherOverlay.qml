@@ -7,6 +7,7 @@ FocusScope {
     id: launcher
     objectName: "canopyApplicationLauncher"
     property bool approvedMode: false
+    property bool nativeAppLaunchEnabled: false
     // Experimental optical corrections belong ONLY to this overlay.
     // The established dock uses image://canopy-dock/ and is never reframed.
     property bool framingReviewMode: false
@@ -51,11 +52,23 @@ FocusScope {
         else openLauncher()
     }
     function choose(name) {
+        // Real Linux desktop launch is strictly opt-in. Names come only
+        // from the fixed app catalogue; C++ GIO rechecks the exact allowlist
+        // and never constructs a shell command or accepts arbitrary Exec.
+        // The original dock remains completely unchanged.
+        if (nativeAppLaunchEnabled && canopySystemLauncher.launch(name)) {
+            closeLauncher()
+            return
+        }
+        // Preserve the approved default demo interaction when native
+        // services are disabled, unavailable or do not support a category.
         applicationSelected(name)
         if (name === "Files") {
             closeLauncher()
         } else {
-            selectionMessage = name + " is not connected in this preview"
+            selectionMessage = nativeAppLaunchEnabled
+                    ? name + " is not installed or could not start"
+                    : name + " is not connected in this preview"
         }
     }
 
@@ -208,7 +221,9 @@ FocusScope {
             height: 19
             text: launcher.selectionMessage.length > 0 ? launcher.selectionMessage :
                   launcher.filteredCount === 0 ? "No matching applications" :
-                  "Files opens the sample window · others are preview-only"
+                  (launcher.nativeAppLaunchEnabled
+                    ? "Open installed Linux applications · Files falls back to preview"
+                    : "Files opens the sample window · others are preview-only")
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
             color: "#657b90"

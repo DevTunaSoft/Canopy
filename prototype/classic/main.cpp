@@ -87,6 +87,31 @@ static int countReadyLauncherImages(QQuickItem *parent) {
     return ready;
 }
 
+// The previous tests centered dock tiles but never checked the actual
+// launcher's image position relative to its own clickable app button.
+// Inspect instantiated Qt Quick geometry at runtime, at each test size.
+static bool launcherButtonImagesAreCentered(QQuickItem *item, int *checked) {
+    if (!item)
+        return false;
+    if (item->objectName() == QStringLiteral("canopyLauncherAppButton")) {
+        auto *icon = findVisualItem(item, QStringLiteral("canopyLauncherIcon"));
+        if (!icon || !icon->isVisible() ||
+            !icon->property("imageReady").toBool())
+            return false;
+        const QPointF imageOrigin = icon->mapToItem(item, QPointF(0, 0));
+        const qreal imageMidX = imageOrigin.x() + icon->width() / 2;
+        if (qAbs(imageMidX - item->width() / 2) > 0.75 ||
+            imageOrigin.y() < -0.75 ||
+            imageOrigin.y() + icon->height() > item->height() + 0.75)
+            return false;
+        ++*checked;
+    }
+    for (QQuickItem *child : item->childItems())
+        if (!launcherButtonImagesAreCentered(child, checked))
+            return false;
+    return true;
+}
+
 static int countVisualItems(QQuickItem *parent, const QString &objectName) {
     if (!parent)
         return 0;
@@ -479,6 +504,18 @@ int main(int argc, char *argv[]) {
             }
             qInfo() << "SELF_TEST_PASS: actual launcher image component count"
                     << launcherImageCount;
+            int centeredLauncherButtons = 0;
+            if (!launcherButtonImagesAreCentered(applicationLauncher,
+                                                  &centeredLauncherButtons) ||
+                centeredLauncherButtons != launcherImageCount) {
+                qCritical() << "SELF_TEST_FAIL: launcher icon not centered"
+                            << "checked" << centeredLauncherButtons
+                            << "images" << launcherImageCount;
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SELF_TEST_PASS: actual launcher button image geometry centered"
+                    << centeredLauncherButtons;
             const bool selectedMatch =
                 applicationLauncher->setProperty("searchQuery", QStringLiteral("fIlEs"))
                 && applicationLauncher->property("filteredCount").toInt() == 1;

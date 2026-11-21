@@ -455,6 +455,19 @@ int main(int argc, char *argv[]) {
                 QCoreApplication::exit(1);
                 return;
             }
+            // Live Qt model must reflect the disposable installed entry;
+            // this tests the UI signal path, not just the C++ GIO helper.
+            const QVariantMap availability =
+                overlay->property("nativeAppAvailability").toMap();
+            if (!availability.value(QStringLiteral("Files")).toBool() ||
+                overlay->property("nativeAvailableCount").toInt() < 1) {
+                qCritical() << "SYSTEM_APP_UI_FIXTURE_FAIL: Qt model did not"
+                               " discover installed Nemo category";
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SYSTEM_APP_AVAILABILITY_PASS: Files detected in"
+                       " actual QML catalog when native opt-in active";
             // Files is initially open in the sample. A real successful GIO
             // activation must NOT reopen that demo window as a side effect.
             files->setVisible(false);
@@ -611,6 +624,14 @@ int main(int argc, char *argv[]) {
             }
             qInfo() << "SELF_TEST_PASS: actual launcher button image geometry centered"
                     << centeredLauncherButtons;
+            // Default preview must never query user-installed apps, and
+            // may never falsely claim native application availability.
+            if (!applicationLauncher->property("nativeAppLaunchEnabled").toBool() &&
+                applicationLauncher->property("nativeAvailableCount").toInt() != 0) {
+                qCritical() << "SELF_TEST_FAIL: preview invented native app availability";
+                QCoreApplication::exit(1);
+                return;
+            }
             const bool selectedMatch =
                 applicationLauncher->setProperty("searchQuery", QStringLiteral("fIlEs"))
                 && applicationLauncher->property("filteredCount").toInt() == 1;

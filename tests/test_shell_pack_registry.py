@@ -1,6 +1,8 @@
 """Metadata-only Shell Pack registry regression and negative-control tests."""
 
 import json
+import subprocess
+import sys
 from pathlib import Path
 import tempfile
 import unittest
@@ -188,6 +190,46 @@ class ShellPackRegistryTests(unittest.TestCase):
         self.assertEqual(len(report.packs), 1)
         self.assertEqual(report.packs[0].pack_id, "com.example.current")
         self.assertIn("unsupported shell_api", report.problems[0].reason)
+
+    def test_cli_json_discovers_multiple_packs_without_execution(self):
+        self.add_pack("classic", "com.example.classic")
+        self.add_pack("modern", "com.example.modern")
+        cmd = [sys.executable, "-m", "canopy_core", str(self.root), "--json"]
+        proc = subprocess.run(
+            cmd, capture_output=True, text=True, check=False,
+            cwd=Path(__file__).resolve().parents[1],
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        result = json.loads(proc.stdout)
+        self.assertEqual(result["count"], 2)
+        self.assertTrue(result["metadata_only"])
+        self.assertFalse(result["runtime_loading_enabled"])
+        self.assertTrue(all(not row["trusted"] for row in result["packs"]))
+        self.assertNotIn("directory", result["packs"][0])
+
+    def test_cli_invalid_pack_fails_closed_with_structured_problem(self):
+        folder, manifest = self.add_pack("bad", "com.example.bad")
+        manifest["permissions"] = ["root"]
+        self.write_manifest(folder, manifest)
+        proc = subprocess.run(
+            [sys.executable, "-m", "canopy_core", str(self.root), "--json"],
+            capture_output=True, text=True, check=False,
+            cwd=Path(__file__).resolve().parents[1],
+        )
+        self.assertEqual(proc.returncode, 1, proc.stderr)
+        report = json.loads(proc.stdout)
+        self.assertEqual(report["count"], 0)
+        self.assertIn("permissions", report["problems"][0]["reason"])
+
+    def test_cli_missing_catalog_nonzero(self):
+        proc = subprocess.run(
+            [sys.executable, "-m", "canopy_core",
+             str(self.root / "not-installed")],
+            capture_output=True, text=True, check=False,
+            cwd=Path(__file__).resolve().parents[1],
+        )
+        self.assertEqual(proc.returncode, 2)
+        self.assertIn("CANOPY_PACK_SCAN_FAIL", proc.stderr)
 
     def test_no_qml_execution_even_if_file_contains_executable_text(self):
         folder, manifest = self.add_pack("inert", "com.example.inert")

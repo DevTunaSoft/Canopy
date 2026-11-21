@@ -14,9 +14,9 @@ Button {
     property bool compact: false
     readonly property bool imageReady: folderIcon.status === Image.Ready
     width: 108
-    height: compact ? 70 : 90
+    height: compact ? 68 : 90
     implicitWidth: 108
-    implicitHeight: compact ? 70 : 90
+    implicitHeight: compact ? 68 : 90
     hoverEnabled: true
     padding: 0
     Accessible.name: folderName + " sample folder"
@@ -33,10 +33,10 @@ Button {
             id: folderIcon
             objectName: "canopyFolderArtwork"
             anchors.top: parent.top
-            anchors.topMargin: compact ? 0 : 4
+            anchors.topMargin: folder.compact ? 0 : 4
             anchors.horizontalCenter: parent.horizontalCenter
-            width: compact ? 64 : 72
-            height: compact ? 50 : 64
+            width: folder.compact ? 64 : 72
+            height: folder.compact ? 50 : 64
             source: "qrc:/Canopy/Classic/assets/ui/folder-blue.svg"
             sourceSize: Qt.size(128, 128)
             fillMode: Image.PreserveAspectFit
@@ -46,11 +46,11 @@ Button {
         }
         Label {
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: compact ? 2 : 4
+            anchors.bottomMargin: folder.compact ? 2 : 4
             anchors.horizontalCenter: parent.horizontalCenter
             text: folder.folderName
             color: "#34465c"
-            font.pixelSize: compact ? 10 : 11
+            font.pixelSize: folder.compact ? 10 : 11
             font.weight: folder.selected ? Font.DemiBold : Font.Normal
             elide: Text.ElideRight
         }

@@ -11,7 +11,7 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from canopy_supervisor import credentials, gitops, policy, state, worker
+from canopy_supervisor import credentials, gitops, policy, roadmap, state, worker
 from canopy_supervisor.cli import main as cli_main
 from canopy_supervisor.supervisor import DEFAULT_CONFIG, Supervisor
 from canopy_supervisor.worker import WorkerLauncher
@@ -159,6 +159,32 @@ class CredentialTests(unittest.TestCase):
             with patch.dict(os.environ, {}, clear=True):
                 with self.assertRaises(credentials.CredentialError):
                     credentials.get_opencode_api_key(data_home=Path(directory))
+
+
+class RoadmapTests(unittest.TestCase):
+    def test_refills_pipeline_without_duplicates(self):
+        items = [task_definition(f"road-{index}") for index in range(4)]
+        live = state.new_task(task_definition("road-0"), 2)
+        live["status"] = "running"
+        chosen = roadmap.next_tasks([live], items, 3)
+        self.assertEqual([task["id"] for task in chosen], ["road-1", "road-2"])
+
+    def test_conflicting_scope_and_unmet_dependency_are_skipped(self):
+        items = [
+            task_definition("first", scope=["docs/shared.md"]),
+            task_definition("second", scope=["docs/shared.md"]),
+            task_definition("third", depends_on=["first"]),
+        ]
+        chosen = roadmap.next_tasks([], items, 3)
+        self.assertEqual([task["id"] for task in chosen], ["first"])
+
+    def test_custom_roadmap_file_is_loaded(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "roadmap.json").write_text(json.dumps([task_definition("custom")]),
+                                               encoding="utf-8")
+            loaded = roadmap.load(root)
+        self.assertEqual([task["id"] for task in loaded], ["custom"])
 
 
 class GitOpsTests(unittest.TestCase):
@@ -532,6 +558,24 @@ class SupervisorTests(unittest.TestCase):
         self.assertEqual(task["status"], "interrupted")
         self.assertEqual(task["checkpoint"]["stage"], "clean-shutdown")
 
+    def test_step_auto_queues_successive_waves(self):
+        items = [task_definition(f"wave-{index}") for index in range(4)]
+        with patch.object(roadmap, "load", return_value=items):
+            self.supervisor.step()
+            first = self.store.load()["tasks"]
+            self.assertEqual([task["id"] for task in first], ["wave-0", "wave-1"])
+            data = self.store.load()
+            for task in data["tasks"]:
+                task["status"] = "awaiting_review"
+            self.store.save(data)
+            self.supervisor.step()
+            second = self.store.load()["tasks"]
+        self.assertEqual([task["id"] for task in second],
+                         ["wave-0", "wave-1", "wave-2", "wave-3"])
+        events = [json.loads(line)["event"]
+                  for line in self.store.history_path.read_text(encoding="utf-8").splitlines()]
+        self.assertEqual(events.count("auto_queued"), 4)
+
     def test_step_monitors_running_workers(self):
         self._add(task_definition("alpha"))
         self.supervisor.dispatch(self.store.load())
@@ -545,6 +589,21 @@ class SupervisorTests(unittest.TestCase):
         self.supervisor.step()
         self.assertTrue(self.store.dashboard_path.is_file())
         self.assertIn("alpha", self.store.dashboard_path.read_text(encoding="utf-8"))
+
+    def test_run_releases_lock_between_steps(self):
+        observed = []
+
+        def wait_between_steps(interval):
+            try:
+                with state.exclusive_lock(self.store.lock_path):
+                    observed.append("free")
+            except state.LockBusy:
+                observed.append("busy")
+            self.supervisor.stop()
+
+        self.supervisor._stop.wait = wait_between_steps
+        self.supervisor.run(interval=0)
+        self.assertEqual(observed, ["free"])
 
     def test_stop_file_requests_clean_shutdown(self):
         self._add(task_definition("alpha"))
@@ -590,6 +649,19 @@ class CliTests(unittest.TestCase):
             self.assertTrue((root / "PAUSED").exists())
             self.assertEqual(cli_main(common + ["resume"]), 0)
             self.assertFalse((root / "PAUSED").exists())
+
+    def test_cli_feed_enqueues_from_roadmap(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            repo = base / "repo"
+            (repo / ".git").mkdir(parents=True)
+            root = base / "state"
+            common = ["--state-root", str(root)]
+            cli_main(common + ["init", "--repo", str(repo)])
+            with patch.object(roadmap, "load", return_value=[task_definition("auto")]):
+                self.assertEqual(cli_main(common + ["feed"]), 0)
+            tasks = state.TaskStore(root).load()["tasks"]
+            self.assertEqual([task["id"] for task in tasks], ["auto"])
 
     def test_cli_rejects_protected_scope(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -103,11 +103,27 @@ Keep the state root outside the working tree in production. The default is
 | `status --json` | Print raw durable task state. |
 | `run` | Loop under the exclusive lock; dispatch, monitor, verify and publish. |
 | `run --once` | One coordination step; used for diagnostics and tests. Does not kill live workers. |
+| `feed` | Enqueue the next approved roadmap tasks once, under the same lock. |
+| `autofeed` | Continuously refill the pipeline; safe to run beside an existing supervisor. |
 | `pause` / `resume` | Stop or allow new dispatch; running workers continue. |
 | `stop` | Request clean shutdown after the current step; checkpoints active tasks. |
 | `recover` | Requeue tasks whose lease or worker process was lost. |
 | `prune` | Remove worktrees of terminal tasks; history and branches remain. |
 | `check` | Validate queue invariants without launching anything. |
+
+## Autonomous task waves
+
+`roadmap.json` in the state root holds the approved, bounded follow-up tasks.
+If absent, a small built-in catalog of Canopy evidence tasks is used. Each step
+refills the pipeline to `max_workers` non-terminal tasks, so when one worker
+finishes, the next approved task is queued without a human prompt. Task ids and
+owned scopes are unique; a task is never duplicated or assigned to overlapping
+paths. Dependencies, protected paths, leases and attempt limits still apply.
+
+An existing supervisor started before this feature can be upgraded without
+interrupting its workers: run `autofeed` beside it. Both processes use the same
+exclusive state lock, so the running supervisor simply picks up newly queued
+tasks on its next step.
 
 Restart is safe. Stop with `stop` or Ctrl+C, then run `run` again. Active tasks
 are checkpointed as `interrupted`; replay sends them to verification when

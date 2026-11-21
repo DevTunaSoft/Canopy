@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import shutil
 import sys
+import time
 
 from . import credentials, policy, state
 from .supervisor import DEFAULT_CONFIG, Supervisor
@@ -99,6 +100,10 @@ def make_parser() -> argparse.ArgumentParser:
     commands.add_parser("stop", help="request clean shutdown after the current step")
     commands.add_parser("pause", help="stop dispatching new tasks")
     commands.add_parser("resume", help="allow new task dispatch")
+    commands.add_parser("feed", help="enqueue next approved roadmap tasks once")
+    autofeed = commands.add_parser(
+        "autofeed", help="continuously refill the worker pipeline from the roadmap")
+    autofeed.add_argument("--interval", type=float, default=5.0)
     commands.add_parser("recover", help="requeue tasks with lost leases")
     commands.add_parser("prune", help="remove worktrees of finished tasks")
     return parser
@@ -203,6 +208,31 @@ def main(argv=None) -> int:
             store.set_paused(False)
             store.event("-", "resumed")
             print("RESUMED")
+            return 0
+
+        def feed_once():
+            supervisor = build_supervisor(config, store)
+            def action():
+                data = store.load()
+                count = supervisor.auto_queue(data)
+                if count:
+                    store.save(data)
+                    store.write_dashboard(data, config)
+                return count
+            return _locked_action(store, action)
+
+        if args.command == "feed":
+            print(f"QUEUED {feed_once()}")
+            return 0
+
+        if args.command == "autofeed":
+            try:
+                while not store.stop_path.exists():
+                    feed_once()
+                    time.sleep(max(0.5, args.interval))
+            except KeyboardInterrupt:
+                pass
+            print("AUTOFEED_STOP")
             return 0
 
         if args.command == "recover":

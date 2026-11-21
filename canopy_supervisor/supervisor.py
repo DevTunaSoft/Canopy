@@ -10,6 +10,7 @@ import time
 
 from . import gitops
 from . import policy
+from . import roadmap
 from . import state as state_module
 from .policy import PolicyError
 from .worker import WorkerError, evidence_path, progress_signature, read_evidence
@@ -29,6 +30,7 @@ DEFAULT_CONFIG = {
     "repo_slug": "DevTunaSoft/Canopy",
     "protected_paths": list(policy.PROTECTED_PATHS),
     "poll_seconds": 5,
+    "auto_queue": True,
 }
 
 SUCCESS_STATES = ("awaiting_review", "done")
@@ -325,11 +327,34 @@ class Supervisor:
                                  owner=None, pid=None, lease_expires_at=0.0)
             self.store.event(task["id"], "verification_failed", message, level="ERROR")
 
+    # ---------- autonomous roadmap ----------
+
+    def auto_queue(self, data: dict) -> int:
+        """Refill the pipeline from the approved roadmap under the state lock."""
+        if not self.config.get("auto_queue", True) or self.store.paused:
+            return 0
+        try:
+            items = roadmap.load(self.store.root)
+            additions = roadmap.next_tasks(
+                data["tasks"], items, self.config["max_workers"],
+                self.config.get("protected_paths"),
+            )
+        except (roadmap.RoadmapError, policy.PolicyError, OSError, ValueError) as exc:
+            self.store.event("-", "roadmap_error", str(exc), level="ERROR")
+            return 0
+        for definition in additions:
+            task = state_module.new_task(definition, self.config["max_attempts"])
+            data["tasks"].append(task)
+            self.store.event(task["id"], "auto_queued",
+                             "selected from approved roadmap", data={"scope": task["scope"]})
+        return len(additions)
+
     # ---------- loop ----------
 
     def step(self) -> dict:
         data = self.store.load()
         self.recover(data)
+        self.auto_queue(data)
         self.dispatch(data)
         self.monitor(data)
         self.verify(data)
@@ -353,28 +378,29 @@ class Supervisor:
 
     def run(self, *, once: bool = False, max_steps: int | None = None,
             interval: float | None = None) -> dict:
-        """Run under the exclusive supervisor lock with clean shutdown support."""
+        """Loop with a per-step lock so operators can feed tasks between steps."""
         interval = float(interval if interval is not None else self.config["poll_seconds"])
+        steps = 0
         with state_module.exclusive_lock(self.store.lock_path):
-            steps = 0
-            stop_requested = False
             self.store.event("-", "supervisor_start", "model=" + self.config["model"])
-            try:
-                while not self._stop.is_set() and not self.store.stop_path.exists():
+        try:
+            while not self._stop.is_set() and not self.store.stop_path.exists():
+                with state_module.exclusive_lock(self.store.lock_path):
                     self.step()
-                    steps += 1
-                    if once or (max_steps is not None and steps >= max_steps):
-                        break
-                    self._stop.wait(interval)
-            except KeyboardInterrupt:
-                self.stop()
-            finally:
-                stop_requested = self._stop.is_set()
-                # A one-shot diagnostic step must not kill live workers.
-                if stop_requested or self.store.stop_path.exists():
+                steps += 1
+                if once or (max_steps is not None and steps >= max_steps):
+                    break
+                self._stop.wait(interval)
+        except KeyboardInterrupt:
+            self.stop()
+        finally:
+            stop_requested = self._stop.is_set() or self.store.stop_path.exists()
+            # A one-shot diagnostic step must not kill live workers.
+            if stop_requested:
+                with state_module.exclusive_lock(self.store.lock_path):
                     self.shutdown()
-                    self.store.stop_path.unlink(missing_ok=True)
-            return self.store.load()
+                self.store.stop_path.unlink(missing_ok=True)
+        return self.store.load()
 
     def shutdown(self) -> None:
         """Checkpoint active tasks so a restart can recover them safely."""

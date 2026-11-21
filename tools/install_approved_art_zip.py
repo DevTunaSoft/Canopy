@@ -13,9 +13,14 @@ import stat
 import tempfile
 from zipfile import BadZipFile, ZipFile
 
-from tools.prepare_approved_art import (
-    ArtworkError, MANIFEST, check_exact, read_manifest,
-)
+if __package__:
+    from .prepare_approved_art import (
+        ArtworkError, MANIFEST, check_exact, read_manifest,
+    )
+else:
+    from prepare_approved_art import (
+        ArtworkError, MANIFEST, check_exact, read_manifest,
+    )
 
 MAX_ARCHIVE_BYTES = 30_000_000
 MAX_ASSET_BYTES = 12_000_000

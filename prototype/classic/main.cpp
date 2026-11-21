@@ -74,6 +74,19 @@ static int countReadyDockTiles(QQuickItem *parent) {
     return ready;
 }
 
+// A rendered launcher must contain actual ready QML Image objects.
+// A centered GridView rectangle or successful icon catalog lookup alone
+// does not prove that the approved resource decoded.
+static int countReadyLauncherImages(QQuickItem *parent) {
+    if (!parent)
+        return 0;
+    int ready = parent->objectName() == QStringLiteral("canopyLauncherIcon")
+                && parent->property("imageReady").toBool() ? 1 : 0;
+    for (QQuickItem *child : parent->childItems())
+        ready += countReadyLauncherImages(child);
+    return ready;
+}
+
 static int countVisualItems(QQuickItem *parent, const QString &objectName) {
     if (!parent)
         return 0;
@@ -437,7 +450,8 @@ int main(int argc, char *argv[]) {
             QCoreApplication::processEvents();
             const int launcherImageCount = countVisualItems(
                 applicationLauncher, QStringLiteral("canopyLauncherIcon"));
-            if (launcherImageCount != (approvedMode ? 8 : 6)) {
+            if (launcherImageCount != (approvedMode ? 8 : 6)
+                || countReadyLauncherImages(applicationLauncher) != launcherImageCount) {
                 qCritical() << "SELF_TEST_FAIL: incomplete launcher image catalogue"
                             << launcherImageCount;
                 QCoreApplication::exit(1);

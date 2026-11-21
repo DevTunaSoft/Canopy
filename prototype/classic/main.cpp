@@ -206,6 +206,11 @@ int main(int argc, char *argv[]) {
     const QStringList args = QCoreApplication::arguments();
     const int approvedIndex = args.indexOf(QStringLiteral("--approved-art-dir"));
     const bool approvedMode = approvedIndex >= 0;
+    const bool framingReviewMode = args.contains(QStringLiteral("--icon-framing-review"));
+    if (framingReviewMode && !approvedMode) {
+        qCritical() << "ICON_FRAMING_REVIEW_FAIL: exact SHA-locked approved art required";
+        return 2;
+    }
     const bool requireApproved = args.contains(QStringLiteral("--self-test-approved"));
     const int landscapeIndex = args.indexOf(QStringLiteral("--landscape-wallpaper"));
     const bool landscapeMode = landscapeIndex >= 0;
@@ -288,7 +293,8 @@ int main(int argc, char *argv[]) {
         // Source PNGs were SHA-verified above; transform copies IN MEMORY
         // only. The files and their immutable manifest remain unchanged.
         QString roundedError;
-        auto *roundedIcons = new RoundedDockIconProvider(approvedRoot, terminalCandidatePath, &roundedError);
+        auto *roundedIcons = new RoundedDockIconProvider(
+            approvedRoot, terminalCandidatePath, framingReviewMode, &roundedError);
         if (!roundedIcons->isValid() || !roundedIcons->allCornersClipped()) {
             qCritical().noquote() << "APPROVED_ART_FAIL: rounded dock rendering:"
                                    << roundedError;
@@ -297,6 +303,9 @@ int main(int argc, char *argv[]) {
         }
         engine.addImageProvider(QStringLiteral("canopy-dock"), roundedIcons);
         qInfo() << "CANOPY_ROUNDED_DOCK_VERIFIED: eight original icons, padded, alpha-clipped";
+        if (framingReviewMode)
+            qInfo() << "ICON_FRAMING_REVIEW_ACTIVE: source-content framing for shared"
+                       " dock and launcher provider; user visual approval NOT granted";
     }
     engine.rootContext()->setContextProperty(QStringLiteral("canopyApprovedMode"), approvedMode);
     engine.rootContext()->setContextProperty(
@@ -366,7 +375,7 @@ int main(int argc, char *argv[]) {
             ? args.at(launcherShotIndex + 1) : QString();
         QTimer::singleShot(1000, window,
             [window, screenshotPath, launcherScreenshotPath, approvedMode, landscapeMode,
-             terminalCandidateMode = !terminalCandidatePath.isEmpty()]() {
+             framingReviewMode, terminalCandidateMode = !terminalCandidatePath.isEmpty()]() {
             auto *bar = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBar"));
             auto *clock = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBarClock"));
             auto *dock = window->findChild<QQuickItem *>(QStringLiteral("canopyDock"));
@@ -424,6 +433,18 @@ int main(int argc, char *argv[]) {
                 QCoreApplication::exit(1);
                 return;
             }
+            // Inspect actual QML image components, not just catalog strings.
+            QCoreApplication::processEvents();
+            const int launcherImageCount = countVisualItems(
+                applicationLauncher, QStringLiteral("canopyLauncherIcon"));
+            if (launcherImageCount != (approvedMode ? 8 : 6)) {
+                qCritical() << "SELF_TEST_FAIL: incomplete launcher image catalogue"
+                            << launcherImageCount;
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SELF_TEST_PASS: actual launcher image component count"
+                    << launcherImageCount;
             const bool selectedMatch =
                 applicationLauncher->setProperty("searchQuery", QStringLiteral("fIlEs"))
                 && applicationLauncher->property("filteredCount").toInt() == 1;
@@ -443,6 +464,8 @@ int main(int argc, char *argv[]) {
                 return;
             }
             qInfo() << "SELF_TEST_PASS: actual Qt launcher opens, searches and closes";
+            if (framingReviewMode)
+                qInfo() << "SELF_TEST_PASS: shared Qt dock+launcher frame review enabled";
 
             const QPointF barOrigin = bar->mapToItem(window->contentItem(), QPointF(0, 0));
             const QPointF dockOrigin = dock->mapToItem(window->contentItem(), QPointF(0, 0));

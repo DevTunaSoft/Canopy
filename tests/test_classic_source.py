@@ -116,9 +116,12 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn("policy: ScrollBar.AsNeeded", window)
         # Compact Files cards must fit two rows without a forced scrollbar.
         self.assertIn("compact: preview.condensed", window)
-        self.assertIn("height: compact ? 70 : 90", tiles)
+        self.assertIn("height: compact ? 68 : 90", tiles)
         # A four-column cap prevents the 1920x1080 7+1 orphan row.
         self.assertIn("width: Math.min(folderScroller.width - 13", window)
+        self.assertIn('objectName: "canopyFolderFlow"', window)
+        self.assertIn("const bool fourColumnGrid = folderFlow", (ROOT / "prototype" / "classic" / "main.cpp").read_text())
+
         self.assertIn("4 * 108 + 3 * (preview.condensed ? 6 : 10)", window)
         tiles = (ROOT / "FolderTile.qml").read_text()
         self.assertIn("Accessible.description:", tiles)
@@ -170,8 +173,8 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn("SELF_TEST_PASS: original SVG wallpaper image loaded", runtime)
         self.assertIn("SELF_TEST_PASS: all six SVG dock candidates loaded", runtime)
         self.assertIn("SELF_TEST_PASS: all eight original sample folder images loaded", runtime)
-        self.assertIn("SELF_TEST_PASS: compact folder scrolling viewport validated", runtime)
-        self.assertIn("SELF_TEST_FAIL: sample folder scrolling unavailable", runtime)
+        self.assertIn("SELF_TEST_PASS: compact folder grid fits and four-column cap verified", runtime)
+        self.assertIn("SELF_TEST_FAIL: Files folder grid clipped or unbalanced", runtime)
         self.assertIn("SELF_TEST_FAIL: folder artwork did not load", runtime)
         self.assertIn("SELF_TEST_FAIL: original dock artwork failed to load", runtime)
         self.assertIn("countReadyDockTiles", runtime)

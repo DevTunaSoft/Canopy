@@ -45,14 +45,20 @@ def _nonfinite(token):
 
 def _real_file(path):
     p = Path(path)
-    if not p.is_absolute() or not p.is_file() or p.is_symlink():
-        raise EvidenceError("absolute, existing, regular report file required")
+    if not p.is_absolute():
+        raise EvidenceError("absolute evidence path required")
     current = Path(p.anchor)
     for part in p.parts[1:]:
         current /= part
         if current.is_symlink():
             raise EvidenceError("symlinked evidence path rejected")
-    with p.open("rb") as f:
+    # O_NOFOLLOW closes the final-component symlink race between checking
+    # the path and opening the report. No writes or network calls.
+    try:
+        fd = os.open(p, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+    except OSError as exc:
+        raise EvidenceError("evidence report missing or unsafe") from exc
+    with os.fdopen(fd, "rb") as f:
         if not stat.S_ISREG(os.fstat(f.fileno()).st_mode):
             raise EvidenceError("non-regular report file")
         data = f.read(MAX_REPORT_BYTES + 1)

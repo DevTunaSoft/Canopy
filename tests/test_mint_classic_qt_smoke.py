@@ -34,14 +34,42 @@ width, height = map(int, size.split("x"))
 if mode == "wrong_size":
     width += 1
 destination = Path(args[args.index("--self-test-screenshot") + 1])
-raw_row = bytes([0]) + bytes([32, 40, 52, 255]) * width
-pixels = raw_row * height
-image = (b"\\x89PNG\\r\\n\\x1a\\n"
-         + chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 6, 0, 0, 0))
-         + chunk(b"IDAT", zlib.compress(pixels))
-         + chunk(b"IEND", b""))
-destination.write_bytes(b"not a PNG" if mode == "bad_png" else image)
+raw_row = bytearray(bytes([0]) + bytes([32, 40, 52, 255]) * width)
+pixels = bytes(raw_row) * height
+if mode not in ("blank", "single_pixel"):
+    pixels = b"".join(
+        bytes(bytearray(raw_row[:5]) + bytes([33 + line % 2, 40, 52, 255])
+              + raw_row[9:])
+        for line in range(height)
+    )
+if mode == "single_pixel":
+    isolated_pixel = bytearray(raw_row)
+    isolated_pixel[5] = 33
+    pixels = bytes(isolated_pixel) + bytes(raw_row) * (height - 1)
+if mode == "transparent_variation":
+    transparent_row = bytearray([0])
+    for pixel in range(width):
+        transparent_row.extend([pixel % 2 * 255, 40, 52, 0])
+    pixels = bytes(transparent_row) * height
+image_header = chunk(
+    b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 6, 0, 0, 0),
+)
+compressed = b"not a zlib stream" if mode == "corrupt_idat" else zlib.compress(pixels)
+image = (b"\\x89PNG\\r\\n\\x1a\\n" + image_header
+         + chunk(b"IDAT", compressed) + chunk(b"IEND", b""))
+if mode == "missing_chunks":
+    image = (b"\\x89PNG\\r\\n\\x1a\\n" + image_header
+             + chunk(b"tEXt", b"fixture\\0padding")
+             + chunk(b"IEND", b""))
+if mode == "symlink_screenshot":
+    destination.symlink_to(Path(os.environ["CANOPY_FAKE_QT_TARGET"]))
+else:
+    destination.write_bytes(b"not a PNG" if mode == "bad_png" else image)
 print("SELF_TEST_PASS: all eight exact approved dock PNGs loaded")
+if mode == "repeated_marker":
+    print("SELF_TEST_PASS: all eight exact approved dock PNGs loaded")
+if mode == "secret_output":
+    print("PRIVATE_TOKEN=sensitive-example")
 print("SELF_TEST_PASS: dock icons horizontally/vertically centred")
 if mode != "missing_marker":
     print("SELF_TEST_PASS: nonuniform window screenshot captured")
@@ -133,6 +161,54 @@ class MintQtSmokeTests(unittest.TestCase):
             report = self.run_smoke()
         self.assertEqual(report["qt_smoke"], "FAIL")
 
+    def test_blank_but_structurally_valid_png_is_not_a_pass(self):
+        with patch.dict(os.environ, {"CANOPY_FAKE_QT_MODE": "blank"}):
+            report = self.run_smoke()
+        self.assertEqual(report["qt_smoke"], "FAIL")
+        self.assertEqual([row["screenshot_sha256"] for row in report["tests"]],
+                         [None] * 3)
+
+    def test_isolated_pixel_does_not_count_as_screenshot_variation(self):
+        with patch.dict(os.environ, {"CANOPY_FAKE_QT_MODE": "single_pixel"}):
+            report = self.run_smoke()
+        self.assertEqual(report["qt_smoke"], "FAIL")
+
+    def test_invisible_transparent_rgb_differences_do_not_count(self):
+        with patch.dict(os.environ, {
+            "CANOPY_FAKE_QT_MODE": "transparent_variation",
+        }):
+            report = self.run_smoke()
+        self.assertEqual(report["qt_smoke"], "FAIL")
+
+    def test_corrupt_idat_stream_is_not_a_pass(self):
+        with patch.dict(os.environ, {"CANOPY_FAKE_QT_MODE": "corrupt_idat"}):
+            report = self.run_smoke()
+        self.assertEqual(report["qt_smoke"], "FAIL")
+
+    def test_missing_png_chunks_are_not_a_pass(self):
+        with patch.dict(os.environ, {"CANOPY_FAKE_QT_MODE": "missing_chunks"}):
+            report = self.run_smoke()
+        self.assertEqual(report["qt_smoke"], "FAIL")
+
+    def test_repeated_self_test_marker_is_not_a_pass(self):
+        with patch.dict(os.environ, {"CANOPY_FAKE_QT_MODE": "repeated_marker"}):
+            report = self.run_smoke()
+        self.assertEqual(report["qt_smoke"], "FAIL")
+        self.assertEqual([row["markers_observed"] for row in report["tests"]],
+                         [4] * 3)
+
+    def test_symlinked_screenshot_is_not_hashed_or_reported_as_pass(self):
+        target = self.root / "private.png"
+        target.write_bytes(b"private screenshot")
+        with patch.dict(os.environ, {
+            "CANOPY_FAKE_QT_MODE": "symlink_screenshot",
+            "CANOPY_FAKE_QT_TARGET": str(target),
+        }):
+            report = self.run_smoke()
+        self.assertEqual(report["qt_smoke"], "FAIL")
+        self.assertEqual([row["screenshot_sha256"] for row in report["tests"]],
+                         [None] * 3)
+
     def test_png_crc_tampering_not_reported_valid(self):
         self.run_smoke()
         path = self.out / "qt-760x500.png"
@@ -179,7 +255,10 @@ class MintQtSmokeTests(unittest.TestCase):
         self.assertEqual([r["status"] for r in report["tests"]], ["FAIL"] * 3)
 
     def test_report_does_not_expose_full_asset_paths_or_env_secrets(self):
-        with patch.dict(os.environ, {"PRIVATE_TOKEN": "sensitive-example"}):
+        with patch.dict(os.environ, {
+            "PRIVATE_TOKEN": "sensitive-example",
+            "CANOPY_FAKE_QT_MODE": "secret_output",
+        }):
             report = self.run_smoke()
         raw = (self.out / "report.json").read_text(encoding="utf-8")
         self.assertNotIn(str(self.root), raw)
@@ -187,6 +266,16 @@ class MintQtSmokeTests(unittest.TestCase):
         self.assertNotIn("sensitive-example", raw)
         self.assertNotIn("DISPLAY", raw)
         self.assertEqual(report["declared_source_sha"], self.source_sha)
+
+    def test_report_writer_does_not_follow_symlink(self):
+        self.out.mkdir()
+        destination = self.out / "report.json"
+        protected = self.root / "protected-report.json"
+        protected.write_text("keep", encoding="utf-8")
+        destination.symlink_to(protected)
+        with self.assertRaises(FileExistsError):
+            smoke._write_report(destination, {"private": "do not serialize"})
+        self.assertEqual(protected.read_text(encoding="utf-8"), "keep")
 
     def test_existing_output_directory_is_never_overwritten(self):
         self.out.mkdir()
@@ -204,6 +293,12 @@ class MintQtSmokeTests(unittest.TestCase):
             self.run_smoke()
         self.assertEqual(list(other.iterdir()), [])
 
+    def test_output_under_symlinked_parent_is_rejected(self):
+        linked_parent = self.root / "linked-parent"
+        linked_parent.symlink_to(self.root, target_is_directory=True)
+        with self.assertRaises(smoke.MintSmokeError):
+            self.run_smoke(out=linked_parent / "evidence")
+
     def test_symlinked_binary_rejected(self):
         linked = self.root / "fake-qt-link"
         linked.symlink_to(self.binary)
@@ -211,10 +306,24 @@ class MintQtSmokeTests(unittest.TestCase):
             self.run_smoke(binary=linked)
         self.assertFalse(self.out.exists())
 
+    def test_symlinked_resource_parent_is_rejected(self):
+        linked_parent = self.root / "linked-assets"
+        linked_parent.symlink_to(self.root, target_is_directory=True)
+        with self.assertRaisesRegex(smoke.MintSmokeError, "non-symlink"):
+            self.run_smoke(art=linked_parent / self.art.name)
+        self.assertFalse(self.out.exists())
+
     def test_invalid_source_sha_rejected_before_output(self):
         with self.assertRaisesRegex(smoke.MintSmokeError, "40-character"):
             self.run_smoke(source_sha="unverified")
         self.assertFalse(self.out.exists())
+
+    def test_unreasonable_and_noninteger_timeouts_are_rejected(self):
+        for timeout in (31, 10**9, 2.5, True):
+            with self.subTest(timeout=timeout):
+                with self.assertRaisesRegex(smoke.MintSmokeError, "timeout"):
+                    self.run_smoke(timeout=timeout)
+                self.assertFalse(self.out.exists())
 
     def test_missing_art_directory_rejected(self):
         with self.assertRaises(smoke.MintSmokeError):

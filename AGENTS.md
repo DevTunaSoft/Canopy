@@ -1,5 +1,21 @@
 # Canopy agent engineering contract
 
+## Latest owner's dock and launcher correction (November 20, 2026 — supersedes white Tux)
+
+- Preserve the exact eight approved source PNGs and SHA-256 locks. Render them in
+  uniformly rounded, **alpha-clipped** icon cards, with some extra breathing room
+  so no source pixels escape the rounded outline and no pictogram is over-zoomed.
+- Source master images must never be recolored, substituted, recompressed, or
+  overwritten. The runtime `RoundedDockIconProvider` creates padded derivatives
+  **in memory once per launch** after verifying all original byte hashes.
+- The upper-left penguin launcher must now be a **full-color Tux-like icon**
+  (dark body, white belly, amber beak, golden feet), replacing the earlier
+  preference for a solid-white silhouette. Retain the reference-based shape.
+- Real Qt screenshots with the exact archived artwork and standalone alpine
+  background are the visual proof. A concept image or CI's synthetic fixtures
+  must not be described as real-design approval. Keep tests and low-RAM/CPU rules.
+
+
 ## Latest canonical user-approved artwork (November 20, 2026)
 
 **READ FIRST: `docs/CLASSIC_CANONICAL_ARTWORK.md`.** The user's direct
@@ -55,10 +71,10 @@ Build a polished, familiar Linux desktop shell. Classic is macOS-inspired withou
 The user **rejected** the claimed PR #72 "approved" icon match: it substituted
 author-invented artwork for actual references. Before touching brand assets
 read `docs/VISUAL_REFERENCE_PROVENANCE.md` and check the real archived
-images. The explicitly requested top-left launcher is the **white solid
-Tux-like silhouette** from the recovered image, *not* the invented dark,
-ivory-and-gold penguin, nor a combined tree logo. The launcher SVG is a
-source-image vector TRACE, not a master supplied by the user.
+images. The original top-left launcher was a **white solid Tux-like silhouette**,
+but the owner has now explicitly replaced that requirement with a
+**full-color Tux** based on the same traced contour, not a combined tree logo.
+The launcher SVG is a source-image derivative, not an external master file.
 
 The recovered moodboard shows six dock app **categories** (Files, Browser,
 Settings, Photos, Terminal, Trash). These do not authorize copying Apple's

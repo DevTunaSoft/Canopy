@@ -14,6 +14,10 @@ FocusScope {
     property bool opened: false
     property alias searchQuery: searchField.text
     property string selectionMessage: ""
+    // Populated only when the launcher opens with explicit native opt-in;
+    // never poll the GIO database or change the resting desktop/dock.
+    property var nativeAppAvailability: ({})
+    property int nativeAvailableCount: 0
     readonly property var applications: approvedMode
         ? [
             { title: "Browser" }, { title: "Mail" },
@@ -37,9 +41,30 @@ FocusScope {
     focus: opened
     Keys.onEscapePressed: closeLauncher()
 
+    function refreshNativeAvailability() {
+        if (!nativeAppLaunchEnabled) {
+            nativeAppAvailability = ({})
+            nativeAvailableCount = 0
+            return
+        }
+        const available = ({})
+        let count = 0
+        for (let i = 0; i < applications.length; i++) {
+            const title = applications[i].title
+            const installed = canopySystemLauncher.canLaunch(title)
+            available[title] = installed
+            if (installed)
+                count++
+        }
+        nativeAppAvailability = available
+        nativeAvailableCount = count
+    }
     function openLauncher() {
         searchField.text = ""
         selectionMessage = ""
+        // A newly installed app is discovered on the next open; there are
+        // no timers, background monitors, permissions or disk scans in QML.
+        refreshNativeAvailability()
         opened = true
         searchField.forceActiveFocus()
     }
@@ -202,6 +227,20 @@ FocusScope {
                         horizontalAlignment: Text.AlignHCenter
                         elide: Text.ElideRight
                     }
+                    Label {
+                        objectName: "canopyLauncherNativeAppState"
+                        visible: launcher.nativeAppLaunchEnabled
+                        width: appButton.width - 8
+                        text: launcher.nativeAppAvailability[appButton.modelData.title]
+                              ? "Installed"
+                              : appButton.modelData.title === "Files"
+                                ? "Preview only" : "Not installed"
+                        color: launcher.nativeAppAvailability[appButton.modelData.title]
+                               ? "#2c7059" : "#66798b"
+                        font.pixelSize: 10
+                        horizontalAlignment: Text.AlignHCenter
+                        elide: Text.ElideRight
+                    }
                 }
             }
             Keys.onEscapePressed: launcher.closeLauncher()
@@ -222,7 +261,7 @@ FocusScope {
             text: launcher.selectionMessage.length > 0 ? launcher.selectionMessage :
                   launcher.filteredCount === 0 ? "No matching applications" :
                   (launcher.nativeAppLaunchEnabled
-                    ? "Open installed Linux applications · Files falls back to preview"
+                    ? launcher.nativeAvailableCount + " installed application categories · Files falls back to preview"
                     : "Files opens the sample window · others are preview-only")
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight

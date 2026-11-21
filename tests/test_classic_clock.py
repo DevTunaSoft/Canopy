@@ -37,7 +37,7 @@ class ClassicClockContractTests(unittest.TestCase):
         self.assertNotIn("NumberAnimation", clock)
         self.assertNotIn("ShaderEffect", clock)
         self.assertNotIn("setInterval", clock)
-        self.assertEqual(len(re.findall(r"\\bTimer\\s*\\{", clock)), 1)
+        self.assertEqual(len(re.findall(r"\bTimer\s*\{", clock)), 1)
 
     def test_real_compiled_qt_test_exercises_binding_and_bounds(self):
         cpp = (ROOT / "main.cpp").read_text(encoding="utf-8")

@@ -159,11 +159,8 @@ ApplicationWindow {
                 }
             }
             Item { Layout.fillWidth: true }
-            Label {
-                text: Qt.formatDateTime(new Date(), "ddd d MMM")
-                color: "#f7f5eb"
-                font.pixelSize: 12
-                font.weight: Font.Medium
+            ClockLabel {
+                Layout.alignment: Qt.AlignVCenter
             }
         }
     }

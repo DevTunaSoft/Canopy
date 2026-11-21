@@ -1,0 +1,60 @@
+name: Classic preview user-menu registration
+
+# This is an Ubuntu CI validation of an application menu shortcut ONLY.
+# No Mint session, approved artwork, compositor or production install.
+on:
+  pull_request:
+    paths:
+      - 'tools/register_classic_preview.py'
+      - 'tests/test_classic_preview_menu.py'
+      - '.github/workflows/classic-user-menu.yml'
+      - 'docs/CLASSIC_USER_MENU_PREVIEW.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  desktop-menu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install freedesktop desktop-entry validator
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq desktop-file-utils
+      - name: Run complete registration negative-control tests
+        run: python -m unittest tests.test_classic_preview_menu -v
+      - name: Validate real desktop entry and remove it in disposable XDG home
+        shell: bash
+        run: |
+          set -euo pipefail
+          export XDG_DATA_HOME="$RUNNER_TEMP/canopy xdg menu test"
+          mkdir -p "$XDG_DATA_HOME"
+          python tools/register_classic_preview.py status | grep -q CANOPY_PREVIEW_NOT_INSTALLED
+          python tools/register_classic_preview.py install --binary /usr/bin/true
+          desktop-file-validate "$XDG_DATA_HOME/applications/org.canopy.ClassicPreview.desktop"
+          python tools/register_classic_preview.py status | grep -q CANOPY_PREVIEW_INSTALLED
+          python tools/register_classic_preview.py uninstall | grep -q CANOPY_PREVIEW_UNINSTALLED
+          python tools/register_classic_preview.py status | grep -q CANOPY_PREVIEW_NOT_INSTALLED
+          test ! -e "$XDG_DATA_HOME/applications/org.canopy.ClassicPreview.desktop"
+          echo "PASS: exact desktop entry validated, reversible; did not execute any application"
+      - name: Fail closed when a user modifies a registered desktop entry
+        shell: bash
+        run: |
+          set -euo pipefail
+          export XDG_DATA_HOME="$RUNNER_TEMP/canopy xdg modified"
+          mkdir -p "$XDG_DATA_HOME"
+          python tools/register_classic_preview.py install --binary /usr/bin/true
+          printf '\n# user-modified\n' >> "$XDG_DATA_HOME/applications/org.canopy.ClassicPreview.desktop"
+          if python tools/register_classic_preview.py uninstall; then
+            echo "FAIL: modified user file was removed" >&2
+            exit 1
+          fi
+          test -f "$XDG_DATA_HOME/applications/org.canopy.ClassicPreview.desktop"
+          python tools/register_classic_preview.py status | grep -q CANOPY_PREVIEW_MODIFIED_OR_UNMANAGED
+          echo "PASS: modified user file preserved; no destructive cleanup"

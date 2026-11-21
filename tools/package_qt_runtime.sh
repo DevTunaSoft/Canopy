@@ -31,6 +31,12 @@ done
 while IFS= read -r dependency; do
     case "$dependency" in
         /lib/*|/usr/lib/*)
+            # Never ship glibc from Ubuntu in a portable runtime. Mixing a
+            # foreign libc with the host loader breaks even compatible hosts.
+            case "$(basename "$dependency")" in
+                libc.so.*|libm.so.*|libpthread.so.*|libdl.so.*|librt.so.*|libresolv.so.*|libnss_*.so.*|libutil.so.*|ld-linux*.so.*)
+                    continue ;;
+            esac
             target="$destination/lib/$(basename "$dependency")"
             if [ ! -e "$target" ]; then
                 cp -L "$dependency" "$target"

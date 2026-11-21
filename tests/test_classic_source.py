@@ -47,6 +47,16 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertNotIn("Timer {", dock)
         self.assertIn('ToolTip.text: iconName + " — preview only"', dock)
 
+    def test_files_dock_button_toggles_preview_without_launching_apps(self):
+        dock = (ROOT / "DockTile.qml").read_text()
+        desktop = (ROOT / "Main.qml").read_text()
+        self.assertIn("signal activated(string applicationName)", dock)
+        self.assertIn("onClicked: tile.activated(tile.iconName)", dock)
+        self.assertIn('if (applicationName === "Files")', desktop)
+        self.assertIn("filesPreview.visible = !filesPreview.visible", desktop)
+        self.assertIn('previewActive: modelData.title === "Files" && filesPreview.visible', desktop)
+        self.assertNotIn('QProcess', (ROOT / "main.cpp").read_text())
+
     def test_representative_preview_is_included(self):
         cmake = (ROOT / "CMakeLists.txt").read_text()
         desktop = (ROOT / "Main.qml").read_text()

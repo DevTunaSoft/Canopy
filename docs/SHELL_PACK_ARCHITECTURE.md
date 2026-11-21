@@ -159,3 +159,18 @@ interfaces, adapt Classic, make Modern as the *second* pack, introduce the
 switcher and compatibility testing, then test third-party pack loading.
 **Much later:** LacOS distribution packaging and optional trusted pack
 catalog. No plugin marketplace, hot-swap runtime or distribution exists yet.
+
+## Bounded offline registry (implemented building block)
+
+`canopy_core.registry.scan_shell_packs(catalog)` enumerates a bounded local
+catalog, validates each direct pack folder against the v1 manifest contract,
+rejects symlinks, unsafe manifests and **all instances of duplicate IDs**, and
+returns immutable metadata plus separately reported errors. It does **not**
+import or instantiate UI code. `python3 -m canopy_core examples --json`
+emits a structured report with `trusted: false` and
+`runtime_loading_enabled: false`; errors cause a nonzero exit status.
+
+The registry is a tested **metadata discovery component**, not a shell loader,
+installer, trust evaluator, live mode switcher or authorization to execute
+third-party QML. A future host must verify packages and isolate/authorize
+execution before ever consuming catalog entries as runnable components.

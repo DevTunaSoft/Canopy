@@ -59,7 +59,7 @@ class SourceSheetFramingTests(unittest.TestCase):
         self.assertIn("const QSize fitted = original.size().scaled(", self.provider)
         self.assertIn("Qt::KeepAspectRatio", self.provider)
         self.assertIn("painter.drawImage(placement, original)", self.provider)
-        self.assertIn("framingReviewMode, &roundedError", self.main)
+        self.assertIn("frameReviewMode, &roundedError", self.main)
 
     def test_centered_image_frame_and_active_dot_never_shifted(self):
         self.assertIn("anchors.centerIn: parent", self.tile)

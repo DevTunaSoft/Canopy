@@ -48,6 +48,10 @@ Read README.md, docs/ARCHITECTURE.md, docs/QUALITY.md, and docs/PREMIUM_DESIGN_D
 ## Mission
 Build a polished, familiar Linux desktop shell. Classic is macOS-inspired without copying proprietary artwork, assets, or trademarks. Modern is a later Windows-inspired presentation using shared services. Tagline: “The Familiar Feel. The Freedom of Linux.”
 
+## Future product goal: LacOS and switchable experiences
+
+Read `docs/LACOS_VISION.md` for the future Linux Mint-based LacOS distribution goal. Preserve the project sequence: **finish and verify Canopy Classic**, build shared-core Windows-familiar Canopy Modern, make Classic/Modern freely switchable on demand (aim for in-session app/window preservation, with safe announced logout/login fallback when unavoidable), **then** build a separate optimized Mint-derived distribution. This is planned, not released. Do not create duplicate desktop daemons or compromise Mint security, stability, performance budgets, asset provenance, user-approved visual direction, or existing instructions. A live-switch claim requires real tests; do not invent evidence.
+
 ## Non-negotiables
 - Premium visual quality and accessibility with low idle CPU, RAM, GPU, and wakeups.
 - Original iconography and legally distributable assets only.

@@ -84,7 +84,7 @@ The separate \`.github/workflows/classic-qt.yml\` job, on the active
 The runner is \`python3 -m tools.classic_menu_runtime_smoke --binary
 /absolute/path/to/canopy-classic-spike --expected-binary-sha256
 <actual-64-hex-sha256>\`, normally inside a fresh disposable Xvfb display.
-Its nine negative-control tests include symlinked binaries, source-hash
+Its ten negative-control tests include symlinked binaries, source-hash
 mismatch, non-executables, missing DISPLAY, failed X11 window evidence,
 and lack of root privileges. The runner uses no shell, no root and
 no background service.

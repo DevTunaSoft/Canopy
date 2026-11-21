@@ -92,7 +92,7 @@ RoundedDockIconProvider::RoundedDockIconProvider(
         painter.fillPath(outline, QColor(QStringLiteral("#10203d")));
 
         const bool terminalDerivative =
-            id == QStringLiteral("terminal") && !terminalCandidatePath.isEmpty();
+            !terminalCandidatePath.isEmpty() && sourcePath == terminalCandidatePath;
         if (framingReviewMode && !terminalDerivative) {
             // Review candidate A from PR #109, applied to the SAME shared Qt
             // image provider used by BOTH the dock and searchable launcher.

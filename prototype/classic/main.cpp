@@ -204,7 +204,12 @@ int main(int argc, char *argv[]) {
     const QStringList args = QCoreApplication::arguments();
     const int approvedIndex = args.indexOf(QStringLiteral("--approved-art-dir"));
     const bool approvedMode = approvedIndex >= 0;
+    const bool opticalReviewMode = args.contains(QStringLiteral("--optical-review"));
     const bool requireApproved = args.contains(QStringLiteral("--self-test-approved"));
+    if (opticalReviewMode && !approvedMode) {
+        qCritical() << "OPTICAL_REVIEW_FAIL: --optical-review requires exact approved PNG masters";
+        return 2;
+    }
     const int landscapeIndex = args.indexOf(QStringLiteral("--landscape-wallpaper"));
     const bool landscapeMode = landscapeIndex >= 0;
     const int terminalRefinementIndex = args.indexOf(QStringLiteral("--terminal-refinement"));
@@ -298,6 +303,12 @@ int main(int argc, char *argv[]) {
     }
     engine.rootContext()->setContextProperty(QStringLiteral("canopyApprovedMode"), approvedMode);
     engine.rootContext()->setContextProperty(
+        QStringLiteral("canopyOpticalReviewMode"), opticalReviewMode);
+    engine.rootContext()->setContextProperty(
+        QStringLiteral("canopyTerminalRefinementMode"), !terminalCandidatePath.isEmpty());
+    if (opticalReviewMode)
+        qInfo() << "CANOPY_OPTICAL_REVIEW_ENABLED: opt-in image-slot corrections; original icons unchanged";
+    engine.rootContext()->setContextProperty(
         QStringLiteral("canopyLandscapeWallpaperUrl"),
         landscapeMode ? QUrl::fromLocalFile(landscapePath).toString() : QString());
     engine.rootContext()->setContextProperty(
@@ -345,7 +356,7 @@ int main(int argc, char *argv[]) {
         }
         const QString screenshotPath = args.at(screenshotIndex + 1);
         QTimer::singleShot(1000, window, [window, screenshotPath, approvedMode, landscapeMode,
-             terminalCandidateMode = !terminalCandidatePath.isEmpty()]() {
+             opticalReviewMode, terminalCandidateMode = !terminalCandidatePath.isEmpty()]() {
             auto *bar = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBar"));
             auto *dock = window->findChild<QQuickItem *>(QStringLiteral("canopyDock"));
             auto *launcher = window->findChild<QQuickItem *>(QStringLiteral("canopyLauncher"));
@@ -462,9 +473,18 @@ int main(int argc, char *argv[]) {
                     const qreal iconMidY = iconStart.y() + art->height() / 2;
                     const qreal buttonMidX = tileStart.x() + button->width() / 2;
                     const qreal buttonMidY = tileStart.y() + button->height() / 2;
-                    if (qAbs(iconMidX - buttonMidX) > 0.75 ||
-                        qAbs(iconMidY - buttonMidY) > 0.75 ||
-                        qAbs(iconMidY - dock->height() / 2) > 1.0 ||
+                    // In ordinary mode these remain EXACTLY 0; in the opt-in
+                    // approved-art review each tile may shift at most 2px.
+                    // Geometry checks verify the actual scene, not a static
+                    // assumption about centered image rectangles.
+                    const qreal expectedX = opticalReviewMode && approvedMode
+                        ? button->property("opticalOffsetX").toDouble() : 0.0;
+                    const qreal expectedY = opticalReviewMode && approvedMode
+                        ? button->property("opticalOffsetY").toDouble() : 0.0;
+                    if (qAbs(expectedX) > 2.01 || qAbs(expectedY) > 2.01 ||
+                        qAbs(iconMidX - buttonMidX - expectedX) > 0.75 ||
+                        qAbs(iconMidY - buttonMidY - expectedY) > 0.75 ||
+                        qAbs(iconMidY - dock->height() / 2 - expectedY) > 1.0 ||
                         iconStart.y() < 7 || iconStart.y() + art->height()
                              > dock->height() - 7 ||
                         tileStart.x() < previousRight ||
@@ -479,9 +499,14 @@ int main(int argc, char *argv[]) {
                     }
                     previousRight = tileStart.x() + button->width();
                 }
-                qInfo() << "SELF_TEST_PASS: dock icons horizontally/vertically centred"
-                        << "count" << names.size()
-                        << "with equal 54px art slots and 7px minimum dock insets";
+                if (opticalReviewMode && approvedMode)
+                    qInfo() << "SELF_TEST_PASS: dock optical-review offsets applied within 2px;"
+                               " byte-exact originals preserved; VISUAL APPROVAL STILL REQUIRED"
+                            << "count" << names.size();
+                else
+                    qInfo() << "SELF_TEST_PASS: dock icons horizontally/vertically centred"
+                            << "count" << names.size()
+                            << "with equal 54px art slots and 7px minimum dock insets";
             }
             if (!wallpaperFits || dockTileCount != (approvedMode ? 8 : 6)) {
                 qCritical() << "SELF_TEST_FAIL: wallpaper bounds or dock icon count invalid"

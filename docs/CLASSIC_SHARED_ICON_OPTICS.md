@@ -71,3 +71,32 @@ synthetic Ubuntu CI cannot judge this exact artwork.
 test, hash match or image centroid.** Only the owner can sign off after
 comparing real Qt images, and the final alpine wallpaper is a separate open
 requirement.
+
+## Repeatable byte-exact difference audit (stdlib only)
+
+After six actual Qt captures from **one and the same compiled executable**,
+with the original icons verified, put both modes' PNGs in a local directory.
+Use the exact naming scheme:
+`baseline-{desktop|launcher}-{760x500|1200x750|1920x1080}.png` and
+`framed-{desktop|launcher}-{760x500|1200x750|1920x1080}.png`.
+
+```sh
+python3 tools/check_classic_icon_frame_diff.py \
+  --evidence-dir /private/qt-optical-evidence \
+  --output /private/qt-optical-evidence/alignment-difference.json
+```
+
+The checker reuses the repository's bounded **stdlib RGBA PNG decoder**,
+verifies CRC, image dimensions, symlinks and non-empty changed icon slots,
+and refuses any changed pixel outside the exact fixed 54px QML icon
+rectangles. It compares **both dock and launcher at all three sizes**.
+The declared pixel centers are valid only for this branch's source layout;
+layout changes require a new recorded review, not an automatic geometry
+tolerance expansion. Eight synthetic PNG regression tests cover changed
+background pixels, wrong interface, wrong dimensions, truncation/CRC,
+symlinks and unchanged icons.
+
+This audit proves only that pixel changes are confined to icon slots,
+**not** that the artwork has become centered or that the new framing looks
+better. A nonuniform result is grounds to reject the candidate even if
+the six pixel-diff comparisons succeed.

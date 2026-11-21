@@ -373,6 +373,31 @@ int main(int argc, char *argv[]) {
                 return;
             }
             qInfo() << "SELF_TEST_PASS: Files dock hide/restore and activity indicator";
+            auto *closeControl = findVisualItem(preview, QStringLiteral("canopyPreviewClose"));
+            if (!closeControl ||
+                !QMetaObject::invokeMethod(closeControl, "clicked", Qt::DirectConnection)) {
+                qCritical() << "SELF_TEST_FAIL: Files close control missing or inactive";
+                QCoreApplication::exit(1);
+                return;
+            }
+            QCoreApplication::processEvents();
+            if (preview->isVisible() || filesTile->property("previewActive").toBool()) {
+                qCritical() << "SELF_TEST_FAIL: Files close control did not hide preview";
+                QCoreApplication::exit(1);
+                return;
+            }
+            if (!QMetaObject::invokeMethod(filesTile, "clicked", Qt::DirectConnection)) {
+                qCritical() << "SELF_TEST_FAIL: Files dock could not reopen closed preview";
+                QCoreApplication::exit(1);
+                return;
+            }
+            QCoreApplication::processEvents();
+            if (!preview->isVisible() || !filesTile->property("previewActive").toBool()) {
+                qCritical() << "SELF_TEST_FAIL: Files preview failed to reopen after close";
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SELF_TEST_PASS: Files close control and dock reopen";
             const QImage frame = window->grabWindow();
             if (frame.isNull() || frame.width() < 720 || frame.height() < 480) {
                 qCritical() << "SELF_TEST_FAIL: invalid screenshot dimensions";

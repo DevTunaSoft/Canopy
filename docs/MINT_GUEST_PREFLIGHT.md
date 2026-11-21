@@ -31,15 +31,15 @@ not evidence of Linux Mint compatibility.
 ## Session consistency checks
 
 The read-only preflight now requires Linux Mint identity, a declared Cinnamon
-desktop token (\`X-Cinnamon\` or \`Cinnamon\`, optionally inside a colon-separated
-desktop list), and a recognized session type. For \`x11\`, \`DISPLAY\` must be
-present; for \`wayland\`, \`WAYLAND_DISPLAY\` must be present. An unrelated
-display variable, a \`tty\` session, or another desktop does not count.
+desktop token (`X-Cinnamon` or `Cinnamon`, optionally inside a colon-separated
+desktop list), and a recognized session type. For `x11`, `DISPLAY` must be
+present; for `wayland`, `WAYLAND_DISPLAY` must be present. An unrelated
+display variable, a `tty` session, or another desktop does not count.
 Report fields identify only the category, never the raw environment values.
 
 These checks are **environment consistency hints**; they cannot authenticate
 the running compositor, establish that a display socket is usable, or prove
-Linux Mint compatibility. \`READY_FOR_TESTS\` remains a prerequisite, not
+Linux Mint compatibility. `READY_FOR_TESTS` remains a prerequisite, not
 a test pass. Real guest Qt compilation, runtime smoke, window behavior and
 human visual acceptance must be validated separately.
 

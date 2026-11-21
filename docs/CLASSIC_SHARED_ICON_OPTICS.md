@@ -15,15 +15,19 @@ same SHA-checked `image://canopy-dock/<app>` image provider. The imbalance
 therefore repeats at 760×500, 1200×750 and 1920×1080. Correcting QML tile
 positions alone would repeat the prior rejected whole-card shift (PR #108).
 
-## Strictly opt-in source-specific candidate B (launcher only)
+## Strictly opt-in source-specific candidate C (launcher only)
 
 The earlier top-gutter-only candidate A (PR #109) did **not** consistently
-improve visual centering; it worsened several icons. It is not a default.
+improve visual centering. Candidate B sampled 324×324 square crops and
+private source analysis showed that cropping would discard approximately
+3–7% of bright border pixels. Both approaches were rejected as defaults.
 
-The new `--icon-framing-review` flag selects a distinct **launcher-only**
-image provider. A fixed 324×324 square sample is centered on the approximate
-2%-98% bounding box of bright illustration pixels measured from each exact
-SHA-256 approved 345×333/334 source image. The measured (X,Y) centers are:
+The `--icon-framing-review` flag now selects a distinct **launcher-only**
+image provider. Candidate C draws the **entire original source image** into a
+5px-inset target within the existing fixed rounded face, with conservative
+per-icon offsets (1.75× the normalized brightness-bound center difference).
+This does not sample source subregions or alter the original SHA-256 verified
+345×333/334 masters. The measured (X,Y) guide centers are:
 
 | Browser | Mail | Files | Calendar | Photos | Music | Terminal | Settings |
 |---|---|---|---|---|---|---|---|
@@ -31,12 +35,14 @@ SHA-256 approved 345×333/334 source image. The measured (X,Y) centers are:
 
 These are a bounded visual hypothesis, **not a judgment of optical quality**.
 They preserve the existing 192×192 cached icon and fixed 168×168 rounded
-frame, but can change the illustration's scale and crop dark gutters.
-An artist's intentionally off-center penguin may remain intentionally
-off-center. Only the **launcher** can request the new provider. The frozen
-dock always uses the original image provider, with the original full-image
-fit, regardless of the flag. Both providers cache rendered images once,
-with no per-frame animation, background service, or asset substitution.
+frame. The entire image is drawn into the inset region without a source
+crop; this may change presentation size, but it must not clip extra source
+pixels beyond the existing corner mask. An artist's intentionally
+off-center penguin may remain intentionally off-center. Only the **launcher**
+can request the review provider. The frozen dock always uses the original
+image provider, with the original full-image fit, regardless of the flag.
+Both providers cache rendered images once, with no per-frame animation,
+background service, or asset substitution.
 
 **The candidate remains opt-in and has no owner visual approval.**
 

@@ -4,7 +4,6 @@ Source-only integrity checks; these do not claim images are available or approve
 runtime screenshots have been captured.
 """
 import json
-import re
 import unittest
 from pathlib import Path
 
@@ -51,7 +50,7 @@ class ApprovedManifestContractTests(unittest.TestCase):
             with self.subTest(path=entry["path"]):
                 path = entry["path"]
                 self.assertFalse(path.startswith("/"))
-                self.assertNotIn("\\\\", path)
+                self.assertNotIn(chr(92), path)
                 self.assertNotIn("..", Path(path).parts)
                 self.assertTrue(path.endswith(".png"))
                 self.assertRegex(entry["sha256"], r"^[0-9a-f]{64}$")

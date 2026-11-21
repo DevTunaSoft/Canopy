@@ -57,6 +57,33 @@ jobs:
           test "$code" -eq 3
           grep -q 'APPROVED_ART_FAIL' test-bad-art.log
           echo "PASS: missing user-approved artwork rejected before Qt scene loads"
+      - name: Validate optional landscape wallpaper on real Qt runtime
+        timeout-minutes: 3
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          mkdir -p test-artifacts
+          python3 tools/create_wallpaper_fixture.py test-artifacts/landscape-test-fixture.png
+          set +e
+          QT_QPA_PLATFORM=offscreen ./build/classic/canopy-classic-spike --landscape-wallpaper >test-landscape-missing-arg.log 2>&1
+          missing_code=$?
+          QT_QPA_PLATFORM=offscreen ./build/classic/canopy-classic-spike --landscape-wallpaper /tmp/canopy-no-such-wallpaper.png >test-landscape-missing-file.log 2>&1
+          missing_file_code=$?
+          printf 'malformed fake png' >test-artifacts/malformed.png
+          QT_QPA_PLATFORM=offscreen ./build/classic/canopy-classic-spike --landscape-wallpaper test-artifacts/malformed.png >test-landscape-malformed.log 2>&1
+          malformed_code=$?
+          set -e
+          test "$missing_code" -eq 2
+          test "$missing_file_code" -eq 3
+          test "$malformed_code" -eq 3
+          grep -q LANDSCAPE_WALLPAPER_FAIL test-landscape-missing-arg.log
+          grep -q LANDSCAPE_WALLPAPER_FAIL test-landscape-missing-file.log
+          grep -q LANDSCAPE_WALLPAPER_FAIL test-landscape-malformed.log
+          timeout 30s xvfb-run -a ./build/classic/canopy-classic-spike --landscape-wallpaper test-artifacts/landscape-test-fixture.png --self-test-size 1200x750 --self-test-screenshot test-artifacts/classic-landscape-fixture.png >test-landscape-qt.log 2>&1 || { cat test-landscape-qt.log; exit 1; }
+          grep -q 'SELF_TEST_PASS: validated custom landscape wallpaper loaded' test-landscape-qt.log
+          python3 tools/check_screenshot.py test-artifacts/classic-landscape-fixture.png 1200 750
+          echo 'PASS: independent high-res PNG validated and rendered by Qt; invalid images rejected'
       - name: Autonomous UI screenshot test
         timeout-minutes: 2
         env:

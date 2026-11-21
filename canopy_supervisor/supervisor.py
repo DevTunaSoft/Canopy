@@ -78,6 +78,8 @@ class Supervisor:
     def assignable(self, task: dict, tasks: list[dict]) -> bool:
         if task.get("status") != "queued":
             return False
+        if self.now() < float(task.get("next_attempt_at", 0)):
+            return False
         if task.get("attempts", 0) >= task.get("max_attempts", self.config["max_attempts"]):
             return False
         if not self._dependencies_met(task, tasks):
@@ -102,6 +104,11 @@ class Supervisor:
 
     def active_count(self, tasks: list[dict]) -> int:
         return sum(task.get("status") in state_module.ACTIVE_STATUSES for task in tasks)
+
+    @staticmethod
+    def backoff(attempts: int) -> float:
+        """Exponential delay, capped at five minutes."""
+        return min(300.0, 30.0 * (2 ** max(0, attempts - 1)))
 
     # ---------- worktree and recovery ----------
 
@@ -142,7 +149,8 @@ class Supervisor:
                     status, stage = "queued", "recovered"
                 state_module.advance(task, status, stage,
                                      "checkpoint replayed after restart",
-                                     owner=None, pid=None, lease_expires_at=0.0)
+                                     owner=None, pid=None, lease_expires_at=0.0,
+                                     next_attempt_at=0.0)
                 self.store.event(task["id"], "recovered", f"replayed {stage}", level="WARN")
                 recovered += 1
                 continue
@@ -164,8 +172,11 @@ class Supervisor:
                 state_module.advance(task, "blocked", "recovery-limit", message,
                                      owner=None, pid=None, lease_expires_at=0.0)
             else:
-                state_module.advance(task, "queued", "recovered", message,
-                                     owner=None, pid=None, lease_expires_at=0.0)
+                state_module.advance(
+                    task, "queued", "recovered", message, owner=None, pid=None,
+                    lease_expires_at=0.0,
+                    next_attempt_at=self.now() + self.backoff(task.get("attempts", 0)),
+                )
             self.store.event(task["id"], "recovered", message, level="WARN", worker=task.get("owner"))
             recovered += 1
         return recovered
@@ -214,8 +225,11 @@ class Supervisor:
                 started += 1
             except (WorkerError, PolicyError, gitops.GitError, OSError, ValueError) as exc:
                 message = f"dispatch failed: {type(exc).__name__}: {exc}"
-                state_module.advance(task, "failed", "dispatch-error", message,
-                                     owner=None, pid=None, lease_expires_at=0.0)
+                state_module.advance(
+                    task, "failed", "dispatch-error", message, owner=None, pid=None,
+                    lease_expires_at=0.0,
+                    next_attempt_at=self.now() + self.backoff(task.get("attempts", 0)),
+                )
                 self.store.event(task["id"], "failed", message, level="ERROR", worker=worker)
             self.store.save(data)
         return started
@@ -229,8 +243,11 @@ class Supervisor:
         attempts = task.get("attempts", 0)
         limit = task.get("max_attempts", self.config["max_attempts"])
         status = "blocked" if attempts >= limit else "queued"
-        state_module.advance(task, status, "interrupted", reason,
-                             owner=None, pid=None, lease_expires_at=0.0)
+        state_module.advance(
+            task, status, "interrupted", reason, owner=None, pid=None,
+            lease_expires_at=0.0,
+            next_attempt_at=self.now() + self.backoff(attempts) if status == "queued" else 0.0,
+        )
         self.store.event(task["id"], "interrupted", reason, level="WARN")
 
     def monitor(self, data: dict) -> int:
@@ -302,6 +319,12 @@ class Supervisor:
         try:
             evidence = read_evidence(Path(self.config["state_root"]), task["id"])
             pending = self.git.pending_files(worktree)
+            if not pending or task.get("publish") is False:
+                state_module.advance(task, "done", "no-publish", "",
+                                     owner=None, pid=None, lease_expires_at=0.0)
+                self.store.event(task["id"], "no_publish",
+                                 "no worktree diff or publish disabled; evidence retained")
+                return
             policy.validate_evidence(evidence, task, pending, pending_allowed=True)
             sha = self.git.commit_all(worktree, f"feat(supervisor): {task['title']}")
             changed = self.git.changed_files(worktree, base_sha)
@@ -323,8 +346,11 @@ class Supervisor:
             self.store.event(task["id"], "draft_pr", url, data={"sha": sha, "pr": number})
         except (WorkerError, PolicyError, gitops.GitError, OSError, ValueError) as exc:
             message = f"verification failed: {type(exc).__name__}: {exc}"
-            state_module.advance(task, "failed", "verification-error", message,
-                                 owner=None, pid=None, lease_expires_at=0.0)
+            state_module.advance(
+                task, "failed", "verification-error", message, owner=None, pid=None,
+                lease_expires_at=0.0,
+                next_attempt_at=self.now() + self.backoff(task.get("attempts", 0)),
+            )
             self.store.event(task["id"], "verification_failed", message, level="ERROR")
 
     # ---------- autonomous roadmap ----------
@@ -334,10 +360,9 @@ class Supervisor:
         if not self.config.get("auto_queue", True) or self.store.paused:
             return 0
         try:
-            items = roadmap.load(self.store.root)
-            additions = roadmap.next_tasks(
-                data["tasks"], items, self.config["max_workers"],
-                self.config.get("protected_paths"),
+            additions = roadmap.select(
+                data["tasks"], self.config["max_workers"], self.store.root,
+                protected=self.config.get("protected_paths"), now=self.now(),
             )
         except (roadmap.RoadmapError, policy.PolicyError, OSError, ValueError) as exc:
             self.store.event("-", "roadmap_error", str(exc), level="ERROR")

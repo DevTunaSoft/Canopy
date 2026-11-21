@@ -122,6 +122,10 @@ def validate_task(task: object, protected: object = None) -> dict:
     branch = task.get("branch", f"feat/canopy-supervisor-{task_id}")
     if not BRANCH.fullmatch(branch):
         raise PolicyError("invalid branch name")
+    extra = {}
+    for key in ("campaign", "kind", "publish"):
+        if key in task:
+            extra[key] = task[key]
     return {
         "id": task_id,
         "title": task["title"],
@@ -131,6 +135,7 @@ def validate_task(task: object, protected: object = None) -> dict:
         "base": base,
         "branch": branch,
         "tests_required": bool(task.get("tests_required", True)),
+        **extra,
     }
 
 

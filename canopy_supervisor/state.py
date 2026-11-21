@@ -177,8 +177,26 @@ class TaskStore:
                 f"| {task.get('attempts', 0)}/{task.get('max_attempts', 0)} "
                 f"| {pr.get('number') or '-'} |"
             )
-        lines += ["", "## Active checkpoints", ""]
         active = [t for t in tasks if t.get("status") in ACTIVE_STATUSES]
+        lines += ["", "## Active workers", ""]
+        if not active:
+            lines.append("- none")
+        for task in active:
+            lines.append(f"- {task.get('owner') or 'unassigned'}: {task['id']} "
+                         f"@ {task['checkpoint'].get('stage', '?')}")
+        published = [t for t in tasks if (t.get("pr") or {}).get("number")]
+        lines += ["", "## Completed tasks and PRs", ""]
+        if not published:
+            lines.append("- none")
+        for task in published:
+            lines.append(f"- {task['id']}: PR #{task['pr']['number']} "
+                         f"({task['status']}, draft)")
+        lines += ["", "## Next actions", ""]
+        queued = [t for t in tasks if t.get("status") == "queued"]
+        lines.append(f"- dispatch {len(queued)} queued task(s); roadmap refills "
+                     f"empty worker slots automatically")
+        lines.append(f"- {len(published)} draft PR(s) await human review; no merge is automated")
+        lines += ["", "## Active checkpoints", ""]
         if not active:
             lines.append("- none")
         for task in active:
@@ -220,6 +238,7 @@ def new_task(definition: dict, max_attempts: int) -> dict:
         "pid": None,
         "attempts": 0,
         "max_attempts": max_attempts,
+        "next_attempt_at": 0.0,
         "lease_expires_at": 0.0,
         "heartbeat_at": now,
         "created_at": now,

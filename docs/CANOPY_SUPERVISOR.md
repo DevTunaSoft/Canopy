@@ -113,12 +113,17 @@ Keep the state root outside the working tree in production. The default is
 
 ## Autonomous task waves
 
-`roadmap.json` in the state root holds the approved, bounded follow-up tasks.
-If absent, a small built-in catalog of Canopy evidence tasks is used. Each step
-refills the pipeline to `max_workers` non-terminal tasks, so when one worker
-finishes, the next approved task is queued without a human prompt. Task ids and
-owned scopes are unique; a task is never duplicated or assigned to overlapping
-paths. Dependencies, protected paths, leases and attempt limits still apply.
+With no `roadmap.json`, the supervisor uses an ordered, continuous campaign
+list: Qt toolchain enablement, real source compilation, runtime screenshots,
+original-icon verification, Mint acceptance and offline security/resource gates.
+Documentation is only the evidence format, not the goal. Each step refills the
+pipeline to `max_workers` non-terminal tasks, so the next campaign starts as
+soon as a worker finishes. Every campaign has a hard attempt cap and failed
+tasks get exponential backoff (30 s, 60 s, 120 s, capped at 300 s) before
+re-dispatch. Task ids and owned scopes are unique per attempt; a task is never
+duplicated or assigned to overlapping paths. A task with no worktree diff is
+recorded as `done` without opening a needless PR. Dependencies, protected
+paths and leases still apply.
 
 An existing supervisor started before this feature can be upgraded without
 interrupting its workers: run `autofeed` beside it. Both processes use the same

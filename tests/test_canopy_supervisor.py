@@ -178,6 +178,21 @@ class RoadmapTests(unittest.TestCase):
         chosen = roadmap.next_tasks([], items, 3)
         self.assertEqual([task["id"] for task in chosen], ["first"])
 
+    def test_generate_prioritizes_real_work_and_caps_campaigns(self):
+        first = roadmap.generate([], 3)
+        self.assertEqual([task["campaign"] for task in first], [
+            "qt-toolchain-enablement", "qt-source-build", "qt-runtime-screenshot",
+        ])
+        self.assertTrue(all(task["kind"] in ("build", "verify") for task in first))
+        exhausted = []
+        for number in (1, 2):
+            item = task_definition(f"mint-guest-acceptance-attempt-{number}")
+            item.update({"campaign": "mint-guest-acceptance", "status": "failed",
+                         "attempts": 1, "next_attempt_at": 0})
+            exhausted.append(item)
+        selected = roadmap.generate(exhausted, 3)
+        self.assertNotIn("mint-guest-acceptance", [task["campaign"] for task in selected])
+
     def test_custom_roadmap_file_is_loaded(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -558,23 +573,56 @@ class SupervisorTests(unittest.TestCase):
         self.assertEqual(task["status"], "interrupted")
         self.assertEqual(task["checkpoint"]["stage"], "clean-shutdown")
 
-    def test_step_auto_queues_successive_waves(self):
-        items = [task_definition(f"wave-{index}") for index in range(4)]
-        with patch.object(roadmap, "load", return_value=items):
-            self.supervisor.step()
-            first = self.store.load()["tasks"]
-            self.assertEqual([task["id"] for task in first], ["wave-0", "wave-1"])
-            data = self.store.load()
-            for task in data["tasks"]:
-                task["status"] = "awaiting_review"
-            self.store.save(data)
-            self.supervisor.step()
-            second = self.store.load()["tasks"]
-        self.assertEqual([task["id"] for task in second],
-                         ["wave-0", "wave-1", "wave-2", "wave-3"])
+    def test_failed_task_respects_backoff_before_redispatch(self):
+        self._add(task_definition("alpha"))
+        self._mutate("alpha", status="failed", attempts=1,
+                     next_attempt_at=self.supervisor.now() + 60)
+        data = self.store.load()
+        self.assertFalse(self.supervisor.assignable(data["tasks"][0], data["tasks"]))
+        self.assertEqual(self.supervisor.backoff(1), 30.0)
+
+    def test_no_diff_task_finishes_without_draft_pr(self):
+        self._add(task_definition("alpha"))
+        self.supervisor.dispatch(self.store.load())
+        self._write_evidence("alpha")
+        self.git.pending = []
+        self._mutate("alpha", status="verifying")
+        self.supervisor.verify(self.store.load())
+        self.assertEqual(self._get("alpha")["status"], "done")
+        self.assertFalse(any(call[0] == "draft_pr" for call in self.git.calls))
+
+    def test_dashboard_reports_workers_prs_and_next_actions(self):
+        self._add(task_definition("alpha"))
+        self.supervisor.dispatch(self.store.load())
+        data = self.store.load()
+        data["tasks"][0]["pr"] = {"number": 7, "url": "x", "draft": True}
+        self.store.save(data)
+        text = self.store.dashboard(data, self.config)
+        for section in ("## Active workers", "## Completed tasks and PRs", "## Next actions"):
+            self.assertIn(section, text)
+        self.assertIn("PR #7", text)
+
+    def test_step_auto_queues_successive_unattended_cycles(self):
+        items = [task_definition(f"wave-{index}") for index in range(6)]
+
+        def select(existing, max_workers, *args, **kwargs):
+            ids = {task["id"] for task in existing}
+            active = sum(task["status"] not in roadmap.TERMINAL for task in existing)
+            return [item for item in items if item["id"] not in ids][:max(0, max_workers - active)]
+
+        with patch.object(roadmap, "select", side_effect=select):
+            for wave in range(3):
+                self.supervisor.step()
+                data = self.store.load()
+                expected = 2 * (wave + 1)
+                self.assertEqual(len(data["tasks"]), expected)
+                for task in data["tasks"]:
+                    task["status"] = "awaiting_review"
+                self.store.save(data)
         events = [json.loads(line)["event"]
                   for line in self.store.history_path.read_text(encoding="utf-8").splitlines()]
-        self.assertEqual(events.count("auto_queued"), 4)
+        self.assertEqual(events.count("auto_queued"), 6)
+        self.assertEqual(len({task["id"] for task in self.store.load()["tasks"]}), 6)
 
     def test_step_monitors_running_workers(self):
         self._add(task_definition("alpha"))
@@ -658,7 +706,7 @@ class CliTests(unittest.TestCase):
             root = base / "state"
             common = ["--state-root", str(root)]
             cli_main(common + ["init", "--repo", str(repo)])
-            with patch.object(roadmap, "load", return_value=[task_definition("auto")]):
+            with patch.object(roadmap, "select", return_value=[task_definition("auto")]):
                 self.assertEqual(cli_main(common + ["feed"]), 0)
             tasks = state.TaskStore(root).load()["tasks"]
             self.assertEqual([task["id"] for task in tasks], ["auto"])

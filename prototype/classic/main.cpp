@@ -387,16 +387,23 @@ int main(int argc, char *argv[]) {
                 qInfo() << "SELF_TEST_PASS: all eight exact approved dock PNGs loaded";
             else
                 qInfo() << "SELF_TEST_PASS: all six SVG dock candidates loaded (legacy demo only)";
-            if (approvedMode) {
+            {
+                // Also exercise this geometry check in CI's six-icon legacy
+                // scene so the layout cannot regress when approved PNGs are
+                // unavailable on the runner. Full eight-icon QA runs locally.
                 // A successful icon decoder doesn't prove the dock looks aligned.
                 // Test all eight ACTUAL QML image rectangles in the running scene.
                 // Each 54px art slot must be centred on its 58x70px button,
                 // and its button must be centered vertically inside the dock.
-                const QStringList names {
+                const QStringList names = approvedMode ? QStringList{
                     QStringLiteral("Browser"), QStringLiteral("Mail"),
                     QStringLiteral("Files"), QStringLiteral("Calendar"),
                     QStringLiteral("Photos"), QStringLiteral("Music"),
                     QStringLiteral("Terminal"), QStringLiteral("Settings")
+                } : QStringList{
+                    QStringLiteral("Files"), QStringLiteral("Browser"),
+                    QStringLiteral("Settings"), QStringLiteral("Photos"),
+                    QStringLiteral("Terminal"), QStringLiteral("Trash")
                 };
                 qreal previousRight = -1;
                 for (const QString &name : names) {
@@ -431,7 +438,8 @@ int main(int argc, char *argv[]) {
                     }
                     previousRight = tileStart.x() + button->width();
                 }
-                qInfo() << "SELF_TEST_PASS: eight dock icons horizontally/vertically centred"
+                qInfo() << "SELF_TEST_PASS: dock icons horizontally/vertically centred"
+                        << "count" << names.size()
                         << "with equal 54px art slots and 7px minimum dock insets";
             }
             if (!wallpaperFits || dockTileCount != (approvedMode ? 8 : 6)) {

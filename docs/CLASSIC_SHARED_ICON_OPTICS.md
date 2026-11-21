@@ -168,3 +168,21 @@ between normal and candidate modes. This is stronger than the prior
 "changes only within any icon rectangle" policy, which wrongly permitted
 alteration of the dock. These gates do not endorse any optical candidate;
 the source portraits still require icon-by-icon design review.
+
+## Private source-boundary clipping check (rejected candidate B)
+
+A bright-pixel threshold (>145 in at least one RGB channel) applied to
+the same eight SHA-verified original PNG masters found this fraction of
+bright pixels **outside** candidate B's 324×324 source viewport:
+
+| Browser | Mail | Files | Calendar | Photos | Music | Terminal | Settings |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2.95% | 4.70% | 3.62% | 5.58% | 5.34% | 6.89% | 4.40% | 4.54% |
+
+This is a coarse brightness measure, not an artistic quality score and
+not proof that the pixels would be visible past the existing rounded mask.
+It did, however, expose a risk of cutting off source details. The new
+review-only candidate C therefore calls the whole-image QPainter overload
+without a sourceRect and checks that its destination fits the unchanged
+rounded icon face. There is **no authorization to change the dock or
+the eight original image files**.

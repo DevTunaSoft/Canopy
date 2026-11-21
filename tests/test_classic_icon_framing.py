@@ -55,7 +55,7 @@ class SourceSheetFramingTests(unittest.TestCase):
 
     def test_default_preserves_original_full_fit_and_terminal_v3(self):
         self.assertIn("if (framingReviewMode && !usesTerminalDerivative)", self.provider)
-        self.assertIn("!terminalCandidatePath.isEmpty()))", self.provider)
+        self.assertIn("!terminalCandidatePath.isEmpty() && sourcePath == terminalCandidatePath", self.provider)
         self.assertIn("const QSize fitted = original.size().scaled(", self.provider)
         self.assertIn("Qt::KeepAspectRatio", self.provider)
         self.assertIn("painter.drawImage(placement, original)", self.provider)

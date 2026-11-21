@@ -3,11 +3,12 @@
 Canopy is experimental. Passing automated checks alone does not establish
 production readiness, visual acceptance, security or Linux Mint compatibility.
 
-## Owner-selected reviewers only
+## Code review
 
-The project owner already has reviewers. **Do not solicit outside reviewers,
-create public recruitment issues or request unknown reviewers on the owner's
-behalf.** Prepare focused review packets for the owner's own reviewers.
+Code review is welcome from interested contributors and reviewers. The owner
+also has people who review the project. **No unsolicited public invitation or
+reviewer-recruitment campaign is necessary.** This is not a restriction on who
+may inspect, comment on, or review the public repository.
 
 Review perspectives worth covering:
 
@@ -26,8 +27,8 @@ Review perspectives worth covering:
 A review packet should include the exact commit SHA, linked issue and
 draft PR, affected files, reproducible commands, actual logs, comparison
 screenshots where appropriate, and PASS/FAIL/BLOCKED/NOT RUN results.
-The project owner routes the packet to existing reviewers; a report
-artifact is **not** a human reviewer signoff.
+Review packets can be shared with any reviewers the project works with;
+a report artifact is **not** a human reviewer signoff.
 
 ## Branch and merge gates
 
@@ -43,8 +44,8 @@ enable optional visual candidates. Owner-approved screenshot appearance
 remains a distinct gate from Qt compilation or pixel-bound geometry tests.
 
 Run regression and integration checks, verify real Qt and Mint evidence
-as applicable, obtain review from the owner's existing reviewers when
-needed, and never authorize a merge based on a green badge alone.
+as applicable, obtain appropriate code review when needed, and never authorize a merge
+based on a green badge alone.
 
 ## Shell Pack development
 

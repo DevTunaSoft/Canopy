@@ -15,9 +15,9 @@ class IconSourceTests(unittest.TestCase):
         verify_icon_set(ICONS)
         self.assertEqual(len(ICON_NAMES), 6)
 
-    def check_reject(self, changed_svg, message):
+    def check_reject(self, changed_svg, message, name="icon.svg"):
         with tempfile.TemporaryDirectory() as tmp:
-            path = Path(tmp) / "icon.svg"
+            path = Path(tmp) / name
             path.write_text(changed_svg, encoding="utf-8")
             with self.assertRaisesRegex(ValueError, message):
                 verify_icon(path)
@@ -37,7 +37,7 @@ class IconSourceTests(unittest.TestCase):
     def test_missing_tux_gold_accents_rejected(self):
         source = BRAND.read_text(encoding="utf-8")
         self.check_reject(source.replace('fill="#f4b523"', 'fill="#444444"'),
-                          "full-color Tux details")
+                          "full-color Tux details", name="penguin-launcher.svg")
 
     def test_corrupt_launcher_is_rejected(self):
         source = BRAND.read_text(encoding="utf-8")

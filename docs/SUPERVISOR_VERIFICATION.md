@@ -93,6 +93,33 @@ contains no merge operation.
   looked empty. It now checks pending files before commit and the real diff
   after commit, with a regression test for an out-of-scope pending file.
 
+## Autonomous roadmap waves (actual Canopy repository)
+
+Supervisor state root: `C:\Users\X1\AppData\Local\Temp\opencode\supervisor-canopy-state`.
+Configured repo: `C:\Users\X1\Projects\Canopy`; `base_branch` is this feature
+branch, so each worker PR is a bounded draft stacked on it. The live supervisor
+was restarted only between waves, never while workers were running; a host
+restart cancelled one idle step and recovery republished the finished worker
+without losing state.
+
+| Wave | Tasks | Worker / branch suffix | PR | Result |
+| --- | --- | --- | --- | --- |
+| 1 | qt-mint-evidence, visual-qa-evidence, regression-security-notes | worker-1..3 / qt-mint-evidence, visual-qa-evidence, regression-security-notes | #136, #137, #138 | awaiting_review; `foundation` PASS on each |
+| 2 | qt-build-blockers-followup, visual-evidence-gaps-followup, performance-security-followup | worker-1..3 / matching suffixes | #139, #140, #141 | awaiting_review; `foundation` PASS on each |
+| 3 | ci-queue-audit, recovery-evidence-followup, roadmap-handoff-summary | worker-1..3 / matching suffixes | #142, #143, #144 | awaiting_review; `foundation` PASS on each |
+
+`history.jsonl` has exactly one `auto_queued` event per task id. All nine task
+ids and branches are unique and no two task scopes conflict. No worker edited an
+approved icon, dock, wallpaper, Qt GUI, workflow or supervisor source file;
+each commit adds one bounded evidence document plus evidence JSON outside the
+worktree. All test commands and outputs are in the per-task logs and PR bodies.
+
+Wave 1 evidence explicitly records: no compiled Qt binary, no Qt toolchain, no
+Mint VM, no compiled-Qt screenshot and no owner visual signoff. Those remain
+BLOCKED/NOT RUN, not passed. Every worker PR is a draft; no PR was merged.
+Human code review, owner visual approval, real Mint acceptance and required
+approval stacks are not satisfied, so merging to `main` is not authorized.
+
 ## What this does not prove
 
 The implementation draft PR is

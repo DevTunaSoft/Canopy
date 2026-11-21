@@ -75,6 +75,15 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn('SELF_TEST_PASS: Files close control and dock reopen', cpp)
         self.assertIn('SELF_TEST_FAIL: Files preview failed to reopen after close', cpp)
 
+    def test_keyboard_shortcut_bindings_and_runtime_gate(self):
+        qml = (ROOT / "Main.qml").read_text()
+        runtime = (ROOT / "main.cpp").read_text()
+        self.assertIn('objectName: "canopyFilesCloseShortcut"', qml)
+        self.assertIn('sequence: "Ctrl+W"', qml)
+        self.assertIn('objectName: "canopyFilesOpenShortcut"', qml)
+        self.assertIn('sequence: "Ctrl+Shift+F"', qml)
+        self.assertIn('SELF_TEST_PASS: Files keyboard close and reopen bindings', runtime)
+
     def test_representative_preview_is_included(self):
         cmake = (ROOT / "CMakeLists.txt").read_text()
         desktop = (ROOT / "Main.qml").read_text()

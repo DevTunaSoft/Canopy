@@ -69,6 +69,18 @@ class ClassicNativeLauncherOnlyTests(unittest.TestCase):
         self.assertIn("nemo.desktop", workflow)
         self.assertIn("canopy-native-app-launched", workflow)
 
+    def test_real_qml_click_path_has_compiled_native_fixture(self):
+        workflow = (ROOT / ".github/workflows/classic-qt.yml").read_text(encoding="utf-8")
+        self.assertIn("--self-test-launcher-ui-fixture", self.cpp)
+        self.assertIn("SYSTEM_APP_UI_FIXTURE_PASS", self.cpp)
+        self.assertIn('QStringLiteral("canopyApplicationLauncher")', self.cpp)
+        self.assertIn('QMetaObject::invokeMethod(\n                overlay, "choose"', self.cpp)
+        self.assertIn("files->setVisible(false)", self.cpp)
+        self.assertIn("overlay->isVisible() || files->isVisible()", self.cpp)
+        self.assertIn("--self-test-launcher-ui-fixture", workflow)
+        self.assertIn("test-system-app-ui-fixture.log", workflow)
+        self.assertIn("compiled QML launcher activated disposable native GIO", workflow)
+
     def test_no_unrestricted_cli_or_generated_shell(self):
         self.assertIn("SYSTEM_APP_LAUNCH_TEST_PASS", self.cpp)
         self.assertIn("SYSTEM_APP_LAUNCH_FIXTURE_PASS", self.cpp)

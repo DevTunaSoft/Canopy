@@ -122,6 +122,24 @@ Before further cosmetic QML changes:
   future Classic/Modern separation, and safe incremental branch workflow.
   PR #69 is **visually rejected**, not merge-ready.
 
+## Visual QA escalation — owner correction (November 21, 2026)
+
+**Reject visually wrong output even when source checks, Qt compilation, geometry
+tests, and smoke tests pass.** Review actual screenshots at native size and
+at a meaningful close-up. In particular, measure/check both (a) icon image
+rectangles within dock controls and (b) the intrinsic artistic balance,
+zoom, edge clipping, consistency and optical centering *within the PNGs*.
+These are different acceptance gates. The earlier PR #80 only verified
+rounded corners while leaving icons 6px too high; this was rejected.
+
+When verified geometry passes but original icon masters remain
+compositionally unbalanced, record `VISUAL_REVIEW_PENDING`, explain the
+specific issue, and ask the owner before altering their explicitly
+selected PNG source artwork. Do not automatically declare success or
+silently replace masters. Produce screenshots from the real compiled Qt
+application using exact source hashes; static simulations are not
+proof of the running build.
+
 ## Visual acceptance
 The existing Qt demo is **not** a premium shell skin. Never represent successful CI, nonblank screenshots, a palette swap, or four utility icon tiles as completed high-quality visual design. A representative interactive desktop scene, original art, window chrome, design review and actual Mint acceptance are required. Follow docs/PREMIUM_DESIGN_DIRECTION.md.
 Use a coherent design token system: typography, spacing, surfaces, elevation, icon sizes, motion, focus states, and high-DPI scaling. Maintain visual review screenshots for defined resolutions, light/dark modes, and reduced-motion mode. Premium appearance must not depend on constant blur or animated backgrounds.

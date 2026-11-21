@@ -61,8 +61,9 @@ Repeat at 760×500 and 1920×1080. For private comparisons, measure:
 ## Automated CI vs visual acceptance
 
 `tests/test_classic_shared_icon_framing.py` verifies the explicit opt-in
-guard, identical outer rounded mask, untouched default path, shared provider
-usage, image readiness and exact eight measured gutter constants. Compiled Qt
+guard, identical outer rounded mask, untouched default path, separate
+dock and launcher image providers in opt-in mode, image readiness and exact
+eight measured gutter constants. Compiled Qt
 CI checks that `--icon-framing-review` without verified private originals
 fails closed. Private original-art runtime testing is separately necessary;
 synthetic Ubuntu CI cannot judge this exact artwork.
@@ -87,9 +88,10 @@ python3 tools/check_classic_icon_frame_diff.py \
 ```
 
 The checker reuses the repository's bounded **stdlib RGBA PNG decoder**,
-verifies CRC, image dimensions, symlinks and non-empty changed icon slots,
-and refuses any changed pixel outside the exact fixed 54px QML icon
-rectangles. It compares **both dock and launcher at all three sizes**.
+verifies CRC, image dimensions and symlinks. It requires the
+**entire closed desktop and dock to remain pixel-identical**, while the
+experimental launcher may change only within its eight fixed icon slots.
+It compares both interfaces at all three sizes.
 The declared pixel centers are valid only for this branch's source layout;
 layout changes require a new recorded review, not an automatic geometry
 tolerance expansion. Eight synthetic PNG regression tests cover changed
@@ -120,3 +122,18 @@ in `tests/test_classic_hidpi.py` preserve this behavior.
 This does not mean fonts, icons and accessibility are visually
 approved at HiDPI; those still need real-source, real-display and Linux
 Mint reviews independently.
+
+## Dock freeze, owner correction (November 21)
+
+The accepted dock placement and rendering must NOT participate in launcher
+experiments. The launcher overlay no longer toggles `canopyDock.visible`.
+The existing `image://canopy-dock` renderer is ALWAYS instantiated with
+`framingReviewMode=false`. An optional second, private
+`image://canopy-launcher-review` provider is created only with
+`--icon-framing-review` and used exclusively by LauncherOverlay.qml.
+
+A runtime or visual diff must reject **even one changed desktop pixel**
+between normal and candidate modes. This is stronger than the prior
+"changes only within any icon rectangle" policy, which wrongly permitted
+alteration of the dock. These gates do not endorse any optical candidate;
+the source portraits still require icon-by-icon design review.

@@ -44,7 +44,18 @@ def assess(release, env, available, qt_version=None):
     is_mint = distro == "linuxmint"
     desktop = env.get("XDG_CURRENT_DESKTOP", "")
     session = env.get("XDG_SESSION_TYPE", "")
-    has_display = bool(env.get("DISPLAY") or env.get("WAYLAND_DISPLAY"))
+    # The desktop field may be colon-separated, but individual entries
+    # must match Cinnamon exactly; substring matches would be unsafe.
+    cinnamon = (isinstance(desktop, str)
+                and any(name in ("X-Cinnamon", "Cinnamon")
+                        for name in desktop.split(":")))
+    # DISPLAY does not establish a Wayland session and WAYLAND_DISPLAY
+    # does not establish X11. These are readiness hints, not proof of a
+    # connected compositor or functioning user session.
+    has_display = (
+        bool(env.get("DISPLAY")) if session == "x11" else
+        bool(env.get("WAYLAND_DISPLAY")) if session == "wayland" else False
+    )
     commands = {name: bool(available.get(name, False)) for name in NEEDED}
     reasons = []
     if not is_mint:

@@ -338,6 +338,22 @@ int main(int argc, char *argv[]) {
         }
         window->resize(width, height);
     }
+    const int launcherShotIndex = args.indexOf(
+        QStringLiteral("--self-test-launcher-screenshot"));
+    if (launcherShotIndex >= 0 &&
+        (launcherShotIndex + 1 >= args.size() ||
+         !args.at(launcherShotIndex + 1).endsWith(QStringLiteral(".png")) ||
+         !args.contains(QStringLiteral("--self-test-screenshot")))) {
+        qCritical() << "Missing or invalid --self-test-launcher-screenshot PNG path";
+        return 2;
+    }
+    if (launcherShotIndex >= 0 &&
+        launcherShotIndex + 1 < args.size() &&
+        args.at(launcherShotIndex + 1) == args.value(
+            args.indexOf(QStringLiteral("--self-test-screenshot")) + 1)) {
+        qCritical() << "Launcher screenshot must not replace desktop screenshot";
+        return 2;
+    }
     const int screenshotIndex = args.indexOf(QStringLiteral("--self-test-screenshot"));
     if (screenshotIndex >= 0) {
         if (screenshotIndex + 1 >= args.size()) {
@@ -345,7 +361,10 @@ int main(int argc, char *argv[]) {
             return 2;
         }
         const QString screenshotPath = args.at(screenshotIndex + 1);
-        QTimer::singleShot(1000, window, [window, screenshotPath, approvedMode, landscapeMode,
+        const QString launcherScreenshotPath = launcherShotIndex >= 0
+            ? args.at(launcherShotIndex + 1) : QString();
+        QTimer::singleShot(1000, window,
+            [window, screenshotPath, launcherScreenshotPath, approvedMode, landscapeMode,
              terminalCandidateMode = !terminalCandidatePath.isEmpty()]() {
             auto *bar = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBar"));
             auto *clock = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBarClock"));
@@ -736,6 +755,32 @@ int main(int argc, char *argv[]) {
             }
             qInfo() << "SELF_TEST_PASS: nonuniform window screenshot captured" << frame.size()
                     << "sampled colors" << sampledColors.size();
+            if (!launcherScreenshotPath.isEmpty()) {
+                if (!QMetaObject::invokeMethod(applicationLauncher, "openLauncher",
+                                               Qt::DirectConnection)) {
+                    qCritical() << "SELF_TEST_FAIL: could not open launcher for capture";
+                    QCoreApplication::exit(1);
+                    return;
+                }
+                // Allow Qt Quick a frame to polish and paint the actual overlay.
+                QTimer::singleShot(250, window,
+                    [window, applicationLauncher, launcherScreenshotPath]() {
+                        const QImage launcherFrame = window->grabWindow();
+                        if (!applicationLauncher->isVisible() ||
+                            launcherFrame.isNull() ||
+                            launcherFrame.width() != window->width() ||
+                            launcherFrame.height() != window->height() ||
+                            !launcherFrame.save(launcherScreenshotPath, "PNG")) {
+                            qCritical() << "SELF_TEST_FAIL: actual launcher screenshot unavailable";
+                            QCoreApplication::exit(1);
+                            return;
+                        }
+                        qInfo() << "SELF_TEST_PASS: actual launcher overlay screenshot captured"
+                                << launcherFrame.size();
+                        QCoreApplication::quit();
+                    });
+                return;
+            }
             QCoreApplication::quit();
         });
     }

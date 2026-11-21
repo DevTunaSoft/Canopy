@@ -58,6 +58,7 @@ class ClassicLauncherContracts(unittest.TestCase):
         self.assertIn("--self-test-launcher-screenshot", cpp)
         self.assertIn("launcherFrame = window->grabWindow()", cpp)
         self.assertIn("QTimer::singleShot(250, window", cpp)
+        self.assertIn("QCursor::setPos(window->mapToGlobal", cpp)
         self.assertIn("SELF_TEST_PASS: actual launcher overlay screenshot captured", cpp)
         self.assertIn("classic-launcher-open.png", workflow)
         self.assertIn("classic-launcher-desktop.png", workflow)

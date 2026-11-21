@@ -6,10 +6,10 @@
 <!-- Static SVG vector details; no runtime animation, shaders or polling. -->
 <path fill="#f7f9fd" stroke="#cad4e1" stroke-width="0.8"
  d="M61 53 C52 53 46 62 44 75 C40 91 46 104 63 108 C79 107 87 97 84 80 C82 65 75 54 67 53 Z"/>
-<ellipse fill="#f9fbff" cx="57" cy="29" rx="5.1" ry="6.4"/>
-<ellipse fill="#f9fbff" cx="72" cy="29" rx="5.1" ry="6.4"/>
-<ellipse fill="#182236" cx="58.1" cy="29.6" rx="2.3" ry="3.3"/>
-<ellipse fill="#182236" cx="70.8" cy="29.6" rx="2.3" ry="3.3"/>
+<path fill="#f9fbff" d="M51.9 29 A5.1 6.4 0 1 0 62.1 29 A5.1 6.4 0 1 0 51.9 29 Z"/>
+<path fill="#f9fbff" d="M66.9 29 A5.1 6.4 0 1 0 77.1 29 A5.1 6.4 0 1 0 66.9 29 Z"/>
+<path fill="#182236" d="M55.8 29.6 A2.3 3.3 0 1 0 60.4 29.6 A2.3 3.3 0 1 0 55.8 29.6 Z"/>
+<path fill="#182236" d="M68.5 29.6 A2.3 3.3 0 1 0 73.1 29.6 A2.3 3.3 0 1 0 68.5 29.6 Z"/>
 <path fill="#ffca35" stroke="#c57b16" stroke-width="1.6"
  d="M52 40 Q64 35 76 40 Q74 43 65 48 Q62 49 59 47 Z"/>
 <path fill="#f7a51b" d="M57 43 Q64 46 72 43 Q65 51 62 49 Z"/>

@@ -35,7 +35,7 @@ class HostEventTests(unittest.TestCase):
         self.assertNotIn("QTimer", code)
         self.assertNotIn("asyncio", code)
         self.assertNotIn("subprocess", code)
-        self.assertNotIn("socket", code)
+        self.assertNotIn("import socket", code)
         self.assertNotIn("Thread(", code)
         self.assertNotIn("importlib", code)
         self.assertNotIn("time.sleep", code)

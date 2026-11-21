@@ -233,6 +233,64 @@ class ShellHostTests(unittest.TestCase):
         self.assertEqual(host.active_id, self.ident("modern"))
         self.assertEqual(sum(view.active for view in self.views), 1)
 
+    def test_prepare_failure_with_failed_disposal_requires_recovery(self):
+        self.failures["modern"] = {"prepare": True, "dispose": True}
+        host = self.host()
+        host.switch(self.ident("classic"))
+        result = host.switch(self.ident("modern"))
+        self.assertEqual(result.status, "RECOVERY_REQUIRED")
+        self.assertTrue(host.needs_recovery)
+        self.assertFalse(result.recovered)
+        self.assertEqual(host.active_id, self.ident("classic"))
+        self.assertEqual(host.switch(self.ident("minimal")).status,
+                         "RECOVERY_REQUIRED")
+
+    def test_old_deactivation_and_candidate_cleanup_failure_freezes_host(self):
+        self.failures["classic"] = {"deactivate": True}
+        self.failures["modern"] = {"dispose": True}
+        host = self.host()
+        host.switch(self.ident("classic"))
+        result = host.switch(self.ident("modern"))
+        self.assertEqual(result.status, "RECOVERY_REQUIRED")
+        self.assertTrue(host.needs_recovery)
+        self.assertEqual(host.active_id, self.ident("classic"))
+        self.assertNotIn(("modern", "activate"), self.events)
+
+    def test_activation_failure_and_candidate_dispose_failure_not_recovered(self):
+        self.failures["modern"] = {"activate": True, "dispose": True}
+        host = self.host()
+        host.switch(self.ident("classic"))
+        result = host.switch(self.ident("modern"))
+        self.assertEqual(result.status, "RECOVERY_REQUIRED")
+        self.assertFalse(result.recovered)
+        self.assertTrue(host.needs_recovery)
+        self.assertEqual(host.active_id, self.ident("classic"))
+
+    def test_cleanup_failure_prevents_accumulating_more_presentations(self):
+        self.failures["classic"] = {"dispose": True}
+        host = self.host()
+        host.switch(self.ident("classic"))
+        result = host.switch(self.ident("modern"))
+        self.assertEqual(result.status, "CLEANUP_FAILED")
+        self.assertTrue(host.needs_recovery)
+        self.assertEqual(host.active_id, self.ident("modern"))
+        before = len(self.views)
+        blocked = host.switch(self.ident("minimal"))
+        self.assertEqual(blocked.status, "RECOVERY_REQUIRED")
+        self.assertEqual(len(self.views), before)
+
+    def test_stop_disposal_failure_marks_recovery_without_false_pass(self):
+        self.failures["classic"] = {"dispose": True}
+        host = self.host()
+        host.switch(self.ident("classic"))
+        result = host.stop()
+        self.assertEqual(result.status, "CLEANUP_FAILED")
+        self.assertFalse(result.success)
+        self.assertTrue(host.needs_recovery)
+        self.assertIsNone(host.active_id)
+        self.assertEqual(host.switch(self.ident("modern")).status,
+                         "RECOVERY_REQUIRED")
+
     def test_stop_deactivation_failure_needs_recovery(self):
         self.failures["classic"] = {"deactivate": True}
         host = self.host()

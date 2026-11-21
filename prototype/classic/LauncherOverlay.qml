@@ -7,6 +7,9 @@ FocusScope {
     id: launcher
     objectName: "canopyApplicationLauncher"
     property bool approvedMode: false
+    // Experimental optical corrections belong ONLY to this overlay.
+    // The established dock uses image://canopy-dock/ and is never reframed.
+    property bool framingReviewMode: false
     property bool opened: false
     property alias searchQuery: searchField.text
     property string selectionMessage: ""
@@ -166,7 +169,9 @@ FocusScope {
                         width: 54
                         height: 54
                         source: launcher.approvedMode
-                                ? "image://canopy-dock/" + appButton.modelData.title.toLowerCase()
+                                ? (launcher.framingReviewMode
+                                   ? "image://canopy-launcher-review/"
+                                   : "image://canopy-dock/") + appButton.modelData.title.toLowerCase()
                                 : "qrc:/Canopy/Classic/assets/icons/"
                                   + appButton.modelData.title.toLowerCase() + ".svg"
                         sourceSize: Qt.size(192, 192)

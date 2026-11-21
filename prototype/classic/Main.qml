@@ -189,6 +189,20 @@ ApplicationWindow {
         }
     }
 
+    // Keyboard controls for this preview window; no global shortcuts or daemon.
+    Shortcut {
+        objectName: "canopyFilesCloseShortcut"
+        sequence: "Ctrl+W"
+        enabled: filesPreview.visible
+        onActivated: filesPreview.visible = false
+    }
+    Shortcut {
+        objectName: "canopyFilesOpenShortcut"
+        sequence: "Ctrl+Shift+F"
+        enabled: !filesPreview.visible
+        onActivated: filesPreview.visible = true
+    }
+
     // Dock controls are explicitly nonfunctional until session services exist.
     Rectangle {
         id: dock

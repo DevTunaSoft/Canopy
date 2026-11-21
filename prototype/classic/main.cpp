@@ -682,20 +682,30 @@ int main(int argc, char *argv[]) {
             }
             auto *folderScroller = findVisualItem(
                 preview, QStringLiteral("canopyFolderScroller"));
-            const bool compactMustScroll = window->width() <= 800;
-            if (!folderScroller || !folderScroller->clip()
-                || (compactMustScroll &&
-                    folderScroller->property("contentHeight").toDouble()
-                    <= folderScroller->height() + 5)) {
-                qCritical() << "SELF_TEST_FAIL: sample folder scrolling unavailable"
-                            << "compact" << compactMustScroll
+            // An always-visible scrollbar previously masked clipped folder
+            // rows at 760x500. Require two fully visible rows on compact
+            // captures and a four-column cap at larger resolutions.
+            auto *folderFlow = findVisualItem(
+                preview, QStringLiteral("canopyFolderFlow"));
+            const bool compactGrid = window->width() <= 800;
+            const bool folderGridFits = folderScroller &&
+                folderScroller->property("contentHeight").toDouble()
+                    <= folderScroller->height() + 3;
+            const bool fourColumnGrid = folderFlow &&
+                folderFlow->width() <= 462.5 &&
+                folderFlow->width() >= 449.5;
+            if (!folderScroller || !folderScroller->clip() || !fourColumnGrid
+                || (compactGrid && !folderGridFits)) {
+                qCritical() << "SELF_TEST_FAIL: Files folder grid clipped or unbalanced"
+                            << "compact" << compactGrid
                             << "viewport" << (folderScroller ? folderScroller->height() : 0)
                             << "content" << (folderScroller ?
-                                folderScroller->property("contentHeight").toDouble() : 0);
+                                folderScroller->property("contentHeight").toDouble() : 0)
+                            << "gridWidth" << (folderFlow ? folderFlow->width() : 0);
                 QCoreApplication::exit(1);
                 return;
             }
-            qInfo() << "SELF_TEST_PASS: compact folder scrolling viewport validated";
+            qInfo() << "SELF_TEST_PASS: compact folder grid fits and four-column cap verified";
             const int folderArtworkReady = countReadyFolderTiles(preview);
             if (folderArtworkReady != 8) {
                 qCritical() << "SELF_TEST_FAIL: folder artwork did not load"

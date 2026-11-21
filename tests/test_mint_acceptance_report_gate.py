@@ -1,6 +1,7 @@
 """Synthetic PNG contract tests only: NEVER claim real Mint guest execution."""
 import copy
 import hashlib
+import os
 import json
 from pathlib import Path
 import struct
@@ -129,6 +130,7 @@ class MintEvidenceGateTests(unittest.TestCase):
         with self.assertRaisesRegex(gate.EvidenceError, "schema"):
             self.check()
 
+    @unittest.skipIf(os.name == "nt", "POSIX symlink policy is not portable to Windows")
     def test_missing_image_and_symlinked_image_rejected(self):
         target = self.directory / self.rows[0]["screenshot"]
         backup = target.with_suffix(".saved")
@@ -158,6 +160,7 @@ class MintEvidenceGateTests(unittest.TestCase):
         finally:
             target.write_bytes(saved)
 
+    @unittest.skipIf(os.name == "nt", "POSIX symlink policy is not portable to Windows")
     def test_linked_report_rejected(self):
         path = self.directory / "report.json"
         other = self.directory / "other.json"

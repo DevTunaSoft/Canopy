@@ -14,6 +14,8 @@ from tools import register_classic_preview as menu
 ROOT = Path(__file__).resolve().parents[1]
 
 
+@unittest.skipIf(os.name == "nt",
+                 "Desktop Entry Exec quoting and execute-bit checks are POSIX-only")
 class ClassicPreviewMenuTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
@@ -33,11 +35,11 @@ class ClassicPreviewMenuTests(unittest.TestCase):
         self.terminal.write_bytes(b"simulated candidate")
 
     def install(self, **kwargs):
-        with patch("tools.register_classic_preview.os.geteuid", return_value=1000):
+        with patch.object(menu.os, "geteuid", return_value=1000, create=True):
             return menu.install(self.home, self.binary, **kwargs)
 
     def uninstall(self):
-        with patch("tools.register_classic_preview.os.geteuid", return_value=1000):
+        with patch.object(menu.os, "geteuid", return_value=1000, create=True):
             return menu.uninstall(self.home)
 
     def test_no_registration_initially(self):
@@ -173,7 +175,7 @@ class ClassicPreviewMenuTests(unittest.TestCase):
         self.assertEqual(menu.status(self.home), "NOT_INSTALLED")
 
     def _try_binary(self, binary):
-        with patch("tools.register_classic_preview.os.geteuid", return_value=1000):
+        with patch.object(menu.os, "geteuid", return_value=1000, create=True):
             return menu.install(self.home, binary)
 
     def test_terminal_candidate_requires_original_art(self):
@@ -188,7 +190,7 @@ class ClassicPreviewMenuTests(unittest.TestCase):
         self.assertEqual(menu.status(self.home), "NOT_INSTALLED")
 
     def test_root_install_and_uninstall_both_refused(self):
-        with patch("tools.register_classic_preview.os.geteuid", return_value=0):
+        with patch.object(menu.os, "geteuid", return_value=0, create=True):
             with self.assertRaisesRegex(menu.RegistrationError, "root"):
                 menu.install(self.home, self.binary)
             with self.assertRaisesRegex(menu.RegistrationError, "root"):

@@ -80,6 +80,8 @@ if mode == "bad_exit":
 '''
 
 
+@unittest.skipIf(os.name == "nt",
+                 "POSIX executable-bit and shell-script semantics are unavailable on Windows")
 class MintQtSmokeTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()

@@ -9,8 +9,28 @@ Start as a desktop shell/session on an existing Linux distribution, not as a for
 1. **Session integration:** login/session startup, lifecycle, crash recovery, settings integration.
 2. **Desktop services:** app launching, window/workspace integration, notifications, search, accessibility, power and display state; reuse system services where practical.
 3. **Shared shell state:** small event-driven state and IPC contracts with bounded queues and versioned interfaces.
-4. **Presentation adapters:** Classic (macOS-inspired) first; Modern (Windows-inspired) later, both consuming the same contracts.
+4. **Shell Pack presentation adapters:** Classic (macOS-inspired) first; Modern (Windows-inspired) later; future independent shell experiences using the same versioned host contracts without new core daemons.
 5. **Visual system:** original icon assets, typography, spacing, colors, motion, scaling, and focus states.
+
+## Extensible Shell Host boundary (planned)
+
+**Do not hardcode the shell selector to two options.** The host will eventually
+discover version-compatible, signed/approved installed **Shell Packs**
+defined by a versioned manifest, a clearly bounded UI entrypoint and a
+capability-negotiated host API. Every pack may implement a distinct desktop
+layout while sharing existing session, apps, windows, notifications,
+accessibility, settings and compositor integrations. The host owns active
+mode state, the one-active-shell lifecycle, low-memory shutdown of inactive
+presentations, crash recovery and permission enforcement.
+
+First release target: Qt/QML presentation adapters; additional UI engines
+need an explicitly designed IPC/embedding interface and measured feasibility,
+not arbitrary unmanaged toolkit processes. Full desktop environments and
+compositors are outside the hot-swap pack contract and may need a
+logout/login transition. The offline `tools/check_shell_pack.py` checker
+validates metadata but does **not** install, sandbox, trust, load or hot-swap
+any pack. Detailed capabilities, lifecycle, upgrade/rollback and developer
+starter: [Shell Pack design](SHELL_PACK_ARCHITECTURE.md).
 
 ## Technology decisions to validate
 Evaluate Qt 6/QML against GTK 4/libadwaita and native compositor integration with a working prototype. Compare measured idle memory, startup latency, animation frame pacing, accessibility, packaging, and maintenance cost. Do not lock a framework based on aesthetic assumptions alone.

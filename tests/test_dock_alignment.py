@@ -23,9 +23,9 @@ class DockAlignmentTests(unittest.TestCase):
     def test_all_eight_real_qt_image_boxes_are_checked(self):
         source = (ROOT / "main.cpp").read_text(encoding="utf-8")
         self.assertIn('findVisualItem(button, QStringLiteral("canopyDockIcon"))', source)
-        self.assertIn('qAbs(iconMidX - buttonMidX) > 0.75', source)
-        self.assertIn('qAbs(iconMidY - buttonMidY) > 0.75', source)
-        self.assertIn('qAbs(iconMidY - dock->height() / 2) > 1.0', source)
+        self.assertIn('qAbs(iconMidX - buttonMidX - expectedX) > 0.75', source)
+        self.assertIn('qAbs(iconMidY - buttonMidY - expectedY) > 0.75', source)
+        self.assertIn('qAbs(iconMidY - dock->height() / 2 - expectedY) > 1.0', source)
         self.assertIn('SELF_TEST_FAIL: dock icon optical alignment', source)
         self.assertIn('SELF_TEST_PASS: dock icons horizontally/vertically centred', source)
         self.assertIn('QStringLiteral("Trash")', source)

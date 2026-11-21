@@ -317,3 +317,24 @@ against an interactive working desktop while the user is relying on it.
 Ubuntu/Xvfb completion **does not establish** Linux Mint guest support,
 real GNOME/Cinnamon menu presentation, auto-login, compositing, an
 installable shell/session, accessibility, or owner visual approval.
+
+### Real installed-application status on launcher open
+
+When `--enable-system-apps` is set, opening **Applications** performs one
+bounded, synchronous read of the system's GIO `.desktop` database for the
+eight existing application categories. Each tile displays **Installed**,
+**Not installed**, or **Preview only** for Files when the native file
+manager is unavailable. The accessible description conveys the same
+distinction. The footer counts matching installed categories, not total
+installed desktop files. Reopening refreshes the snapshot after an app is
+installed or removed; there is no timer, background monitor, daemon,
+additional Qt process, or external HTTP call. This catalog never appears
+on the default preview when the native option is off.
+
+The existing isolated XDG `nemo.desktop` CI fixture now verifies that the
+**actual QML model** discovers installed Files before `choose("Files")`
+requests an end-to-end native activation. The default screenshot self-test
+rejects invented native availability. This still needs an ordinary user's
+Linux Mint interactive session for real installed-app behavior, accessibility
+signoff, and final visual acceptance. This enhancement does not change the
+settled dock or the SHA-verified approved artwork.

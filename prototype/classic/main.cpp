@@ -7,6 +7,7 @@
 #include <QTimer>
 #include <QCoreApplication>
 #include <QImage>
+#include <QImageReader>
 #include <QStringList>
 #include <QRegularExpression>
 #include <QSet>
@@ -80,7 +81,7 @@ static int countVisualItems(QQuickItem *parent, const QString &objectName) {
 // An approved visual is never loaded from a guessed path or a replacement
 // file. The manifest is source-controlled, and all nine external PNGs must
 // match the exact source bytes before Qt is allowed to open the scene.
-static bool verifyExactArtwork(const QString &dirPath, QString *error) {
+static bool verifyExactArtwork(const QString &dirPath, bool requireWave, QString *error) {
     const QDir root(dirPath);
     const QString canonicalRoot = root.canonicalPath();
     if (canonicalRoot.isEmpty() || QFileInfo(dirPath).isSymLink()) {
@@ -143,11 +144,54 @@ static bool verifyExactArtwork(const QString &dirPath, QString *error) {
         if (!item.isObject() || !verify(item.toObject()))
             return false;
     }
-    if (!verify(wallpaper) || checkedPaths.size() != 9) {
+    if ((requireWave && !verify(wallpaper)) ||
+        checkedPaths.size() != (requireWave ? 9 : 8)) {
         if (error->isEmpty())
             *error = QStringLiteral("incomplete approved-art set");
         return false;
     }
+    return true;
+}
+
+// Local photo only; never download artwork, follow symlinks, or decode an
+// unbounded image. QImageReader checks headers without allocating a bitmap.
+static bool verifyLandscapeWallpaper(const QString &filePath,
+                                     QString *canonicalPath, QString *error) {
+    const QFileInfo file(filePath);
+    if (!file.exists() || !file.isFile() || file.isSymLink() ||
+        file.size() <= 0 || file.size() > 24'000'000) {
+        *error = QStringLiteral("wallpaper must be a regular local image (up to 24 MB)");
+        return false;
+    }
+    const QString extension = file.suffix().toLower();
+    if (extension != QStringLiteral("png") &&
+        extension != QStringLiteral("jpg") &&
+        extension != QStringLiteral("jpeg")) {
+        *error = QStringLiteral("wallpaper must be PNG or JPEG");
+        return false;
+    }
+    const QString canonical = file.canonicalFilePath();
+    if (canonical.isEmpty()) {
+        *error = QStringLiteral("wallpaper path is invalid");
+        return false;
+    }
+    QImageReader reader(canonical);
+    const QByteArray format = reader.format().toLower();
+    if (!reader.canRead() ||
+        (format != "png" && format != "jpeg" && format != "jpg")) {
+        *error = QStringLiteral("wallpaper content is not a readable PNG/JPEG");
+        return false;
+    }
+    const QSize size = reader.size();
+    if (!size.isValid() || size.width() < 1920 || size.height() < 1080 ||
+        size.width() > 8192 || size.height() > 8192 ||
+        qint64(size.width()) * size.height() > 32'000'000 ||
+        double(size.width()) / size.height() < 1.45 ||
+        double(size.width()) / size.height() > 2.15) {
+        *error = QStringLiteral("wallpaper must be landscape, at least 1920x1080, at most 32 megapixels");
+        return false;
+    }
+    *canonicalPath = canonical;
     return true;
 }
 
@@ -158,6 +202,23 @@ int main(int argc, char *argv[]) {
     const int approvedIndex = args.indexOf(QStringLiteral("--approved-art-dir"));
     const bool approvedMode = approvedIndex >= 0;
     const bool requireApproved = args.contains(QStringLiteral("--self-test-approved"));
+    const int landscapeIndex = args.indexOf(QStringLiteral("--landscape-wallpaper"));
+    const bool landscapeMode = landscapeIndex >= 0;
+    QString landscapePath;
+    if (landscapeMode) {
+        if (landscapeIndex + 1 >= args.size() ||
+            args.at(landscapeIndex + 1).startsWith(QLatin1Char('-'))) {
+            qCritical() << "LANDSCAPE_WALLPAPER_FAIL: missing --landscape-wallpaper PATH";
+            return 2;
+        }
+        QString error;
+        if (!verifyLandscapeWallpaper(args.at(landscapeIndex + 1),
+                                      &landscapePath, &error)) {
+            qCritical().noquote() << "LANDSCAPE_WALLPAPER_FAIL:" << error;
+            return 3;
+        }
+        qInfo() << "CANOPY_LANDSCAPE_WALLPAPER_VERIFIED: local PNG/JPEG";
+    }
     if (requireApproved && !approvedMode) {
         qCritical() << "APPROVED_ART_FAIL: --self-test-approved requires --approved-art-dir";
         return 2;
@@ -170,15 +231,20 @@ int main(int argc, char *argv[]) {
         }
         const QString requested = args.at(approvedIndex + 1);
         QString error;
-        if (!verifyExactArtwork(requested, &error)) {
+        if (!verifyExactArtwork(requested, !landscapeMode, &error)) {
             qCritical().noquote() << "APPROVED_ART_FAIL:" << error;
             return 3;
         }
         approvedRoot = QDir(requested).canonicalPath();
-        qInfo() << "CANOPY_APPROVED_ART_VERIFIED: eight exact PNG icons and blue wave";
+        qInfo() << (landscapeMode ?
+            "CANOPY_APPROVED_ART_VERIFIED: eight exact PNG icons; landscape wallpaper separately checked" :
+            "CANOPY_APPROVED_ART_VERIFIED: eight exact PNG icons and legacy blue wave");
     }
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty(QStringLiteral("canopyApprovedMode"), approvedMode);
+    engine.rootContext()->setContextProperty(
+        QStringLiteral("canopyLandscapeWallpaperUrl"),
+        landscapeMode ? QUrl::fromLocalFile(landscapePath).toString() : QString());
     engine.rootContext()->setContextProperty(
         QStringLiteral("canopyApprovedIconBase"),
         approvedMode ? QUrl::fromLocalFile(approvedRoot + QStringLiteral("/icons/")).toString()
@@ -223,7 +289,7 @@ int main(int argc, char *argv[]) {
             return 2;
         }
         const QString screenshotPath = args.at(screenshotIndex + 1);
-        QTimer::singleShot(1000, window, [window, screenshotPath, approvedMode]() {
+        QTimer::singleShot(1000, window, [window, screenshotPath, approvedMode, landscapeMode]() {
             auto *bar = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBar"));
             auto *dock = window->findChild<QQuickItem *>(QStringLiteral("canopyDock"));
             auto *launcher = window->findChild<QQuickItem *>(QStringLiteral("canopyLauncher"));
@@ -276,12 +342,18 @@ int main(int argc, char *argv[]) {
             }
             const int dockTileCount = countVisualItems(dock, QStringLiteral("canopyDockTile"));
             if (!wallpaper->property("imageReady").toBool()) {
-                qCritical() << "SELF_TEST_FAIL: Blue Current wallpaper image did not load"
-                            << "check Qt SVG plugin and embedded artwork";
+                if (landscapeMode)
+                    qCritical() << "SELF_TEST_FAIL: validated landscape wallpaper did not decode";
+                else
+                    qCritical() << "SELF_TEST_FAIL: Blue Current wallpaper image did not load"
+                                << "check Qt SVG plugin and embedded artwork";
                 QCoreApplication::exit(1);
                 return;
             }
-            qInfo() << "SELF_TEST_PASS: original SVG wallpaper image loaded";
+            if (landscapeMode)
+                qInfo() << "SELF_TEST_PASS: validated custom landscape wallpaper loaded";
+            else
+                qInfo() << "SELF_TEST_PASS: original SVG wallpaper image loaded";
             const QPointF wallpaperOrigin = wallpaper->mapToItem(window->contentItem(), QPointF(0, 0));
             const bool wallpaperFits = qAbs(wallpaperOrigin.x()) <= 1
                 && qAbs(wallpaperOrigin.y()) <= 1
@@ -338,7 +410,9 @@ int main(int argc, char *argv[]) {
             }
             qInfo() << "SELF_TEST_PASS: all eight original sample folder images loaded";
             qInfo() << "SELF_TEST_PASS: eight demo folders and one search control present";
-            if (approvedMode)
+            if (approvedMode && landscapeMode)
+                qInfo() << "SELF_TEST_PASS: eight SHA-locked icon PNGs and separate landscape wallpaper present";
+            else if (approvedMode)
                 qInfo() << "SELF_TEST_PASS: verified user-supplied blue wave and eight selected PNG icons present";
             else
                 qInfo() << "SELF_TEST_PASS: original wallpaper and six dock icon candidates present";

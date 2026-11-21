@@ -59,7 +59,7 @@ class ApprovedManifestContractTests(unittest.TestCase):
         cpp = (ROOT / "prototype" / "classic" / "main.cpp").read_text(encoding="utf-8")
         dock = (ROOT / "prototype" / "classic" / "DockTile.qml").read_text(encoding="utf-8")
         wallpaper = (ROOT / "prototype" / "classic" / "Wallpaper.qml").read_text(encoding="utf-8")
-        self.assertIn("verifyExactArtwork(requested, &error)", cpp)
+        self.assertIn("verifyExactArtwork(requested, !landscapeMode, &error)", cpp)
         self.assertIn("QCryptographicHash::Sha256", cpp)
         self.assertIn("return 3;", cpp)
         self.assertIn("canopyApprovedMode", dock)

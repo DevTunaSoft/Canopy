@@ -24,7 +24,7 @@ class ReferenceIdentityTests(unittest.TestCase):
         self.assertGreaterEqual(len(paths), 5)
         self.assertEqual(paths[0].get("fill"), "#182236")
         self.assertEqual(paths[0].get("fill-rule"), "evenodd")
-        self.assertEqual(len(re.findall(r"\\bM\\s", paths[0].get("d", ""))), 4)
+        self.assertEqual(len(re.findall(r"\bM\s", paths[0].get("d", ""))), 4)
         source = src.read_text()
         for color in ("#f7f9fd", "#ffca35", "#f4b523", "#182236"):
             self.assertIn(color, source)

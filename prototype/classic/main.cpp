@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <QTimer>
 #include <QDateTime>
+#include <QCursor>
 #include <QCoreApplication>
 #include <QImage>
 #include <QImageReader>
@@ -762,6 +763,10 @@ int main(int argc, char *argv[]) {
                     QCoreApplication::exit(1);
                     return;
                 }
+                // Neutralize Xvfb's default pointer hover so transient tooltips
+                // cannot obscure the owner's actual-open visual evidence.
+                QCursor::setPos(window->mapToGlobal(QPoint(
+                    8, window->height() - 8)));
                 // Allow Qt Quick a frame to polish and paint the actual overlay.
                 QTimer::singleShot(250, window,
                     [window, applicationLauncher, launcherScreenshotPath]() {

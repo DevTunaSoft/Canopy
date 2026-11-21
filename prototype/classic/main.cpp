@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <QTimer>
 #include <QDateTime>
+#include <QCursor>
 #include <QCoreApplication>
 #include <QImage>
 #include <QImageReader>
@@ -338,6 +339,22 @@ int main(int argc, char *argv[]) {
         }
         window->resize(width, height);
     }
+    const int launcherShotIndex = args.indexOf(
+        QStringLiteral("--self-test-launcher-screenshot"));
+    if (launcherShotIndex >= 0 &&
+        (launcherShotIndex + 1 >= args.size() ||
+         !args.at(launcherShotIndex + 1).endsWith(QStringLiteral(".png")) ||
+         !args.contains(QStringLiteral("--self-test-screenshot")))) {
+        qCritical() << "Missing or invalid --self-test-launcher-screenshot PNG path";
+        return 2;
+    }
+    if (launcherShotIndex >= 0 &&
+        launcherShotIndex + 1 < args.size() &&
+        args.at(launcherShotIndex + 1) == args.value(
+            args.indexOf(QStringLiteral("--self-test-screenshot")) + 1)) {
+        qCritical() << "Launcher screenshot must not replace desktop screenshot";
+        return 2;
+    }
     const int screenshotIndex = args.indexOf(QStringLiteral("--self-test-screenshot"));
     if (screenshotIndex >= 0) {
         if (screenshotIndex + 1 >= args.size()) {
@@ -345,7 +362,10 @@ int main(int argc, char *argv[]) {
             return 2;
         }
         const QString screenshotPath = args.at(screenshotIndex + 1);
-        QTimer::singleShot(1000, window, [window, screenshotPath, approvedMode, landscapeMode,
+        const QString launcherScreenshotPath = launcherShotIndex >= 0
+            ? args.at(launcherShotIndex + 1) : QString();
+        QTimer::singleShot(1000, window,
+            [window, screenshotPath, launcherScreenshotPath, approvedMode, landscapeMode,
              terminalCandidateMode = !terminalCandidatePath.isEmpty()]() {
             auto *bar = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBar"));
             auto *clock = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBarClock"));
@@ -387,6 +407,42 @@ int main(int argc, char *argv[]) {
                 return;
             }
             qInfo() << "SELF_TEST_PASS: local top bar clock updates and fits";
+
+            // Exercise the integrated QML launcher on the actual compiled
+            // scene, then close it before capturing the resting desktop.
+            auto *applicationLauncher = findVisualItem(
+                window->contentItem(), QStringLiteral("canopyApplicationLauncher"));
+            auto *launcherSearch = findVisualItem(
+                window->contentItem(), QStringLiteral("canopyLauncherSearch"));
+            if (!applicationLauncher || !launcherSearch
+                || applicationLauncher->property("catalogCount").toInt() !=
+                    (approvedMode ? 8 : 6)
+                || !QMetaObject::invokeMethod(applicationLauncher, "openLauncher",
+                                               Qt::DirectConnection)
+                || !applicationLauncher->isVisible() || !dock->isVisible()) {
+                qCritical() << "SELF_TEST_FAIL: original application search failed to open";
+                QCoreApplication::exit(1);
+                return;
+            }
+            const bool selectedMatch =
+                applicationLauncher->setProperty("searchQuery", QStringLiteral("fIlEs"))
+                && applicationLauncher->property("filteredCount").toInt() == 1;
+            const bool emptyMatch =
+                applicationLauncher->setProperty("searchQuery", QStringLiteral("no-such-canopy-application"))
+                && applicationLauncher->property("filteredCount").toInt() == 0;
+            const bool restoredMatch =
+                applicationLauncher->setProperty("searchQuery", QString())
+                && applicationLauncher->property("filteredCount").toInt() ==
+                    (approvedMode ? 8 : 6);
+            const bool closed = QMetaObject::invokeMethod(
+                applicationLauncher, "closeLauncher", Qt::DirectConnection)
+                && !applicationLauncher->isVisible() && dock->isVisible();
+            if (!selectedMatch || !emptyMatch || !restoredMatch || !closed) {
+                qCritical() << "SELF_TEST_FAIL: launcher search or dismissal inconsistent";
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SELF_TEST_PASS: actual Qt launcher opens, searches and closes";
 
             const QPointF barOrigin = bar->mapToItem(window->contentItem(), QPointF(0, 0));
             const QPointF dockOrigin = dock->mapToItem(window->contentItem(), QPointF(0, 0));
@@ -700,6 +756,36 @@ int main(int argc, char *argv[]) {
             }
             qInfo() << "SELF_TEST_PASS: nonuniform window screenshot captured" << frame.size()
                     << "sampled colors" << sampledColors.size();
+            if (!launcherScreenshotPath.isEmpty()) {
+                if (!QMetaObject::invokeMethod(applicationLauncher, "openLauncher",
+                                               Qt::DirectConnection)) {
+                    qCritical() << "SELF_TEST_FAIL: could not open launcher for capture";
+                    QCoreApplication::exit(1);
+                    return;
+                }
+                // Neutralize Xvfb's default pointer hover so transient tooltips
+                // cannot obscure the owner's actual-open visual evidence.
+                QCursor::setPos(window->mapToGlobal(QPoint(
+                    8, window->height() - 8)));
+                // Allow Qt Quick a frame to polish and paint the actual overlay.
+                QTimer::singleShot(250, window,
+                    [window, applicationLauncher, launcherScreenshotPath]() {
+                        const QImage launcherFrame = window->grabWindow();
+                        if (!applicationLauncher->isVisible() ||
+                            launcherFrame.isNull() ||
+                            launcherFrame.width() != window->width() ||
+                            launcherFrame.height() != window->height() ||
+                            !launcherFrame.save(launcherScreenshotPath, "PNG")) {
+                            qCritical() << "SELF_TEST_FAIL: actual launcher screenshot unavailable";
+                            QCoreApplication::exit(1);
+                            return;
+                        }
+                        qInfo() << "SELF_TEST_PASS: actual launcher overlay screenshot captured"
+                                << launcherFrame.size();
+                        QCoreApplication::quit();
+                    });
+                return;
+            }
             QCoreApplication::quit();
         });
     }

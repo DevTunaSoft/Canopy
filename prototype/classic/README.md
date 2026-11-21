@@ -202,3 +202,35 @@ suspend/resume acceptance test. Source-only invariants are in
 This does not change any approved icon PNG, background, dock tile, source art
 hash or wallpaper selection. Visual signoff on the full desktop is still
 required.
+
+## On-demand original-icon application catalogue (new draft)
+
+The existing Tux menu now offers **Browse applications**. The standalone
+Classic preview also accepts **Ctrl+Space** to toggle a searchable, keyboard-
+accessible application overlay and **Escape** to dismiss it. The overlay
+reuses the verified original eight icons when approved-art mode is enabled;
+the non-approved fallback uses only its original six legacy icons. The dock remains visible and geometrically unchanged while the
+launcher overlays it; the launcher must never mutate dock state. Case-
+insensitive filtering, zero-match feedback, focus and keyboard selection are
+local QML operations that do not spawn processes, poll or require another
+daemon. Opening **Files** only reopens the existing sample Files window; all
+other entries clearly disclose that real launching is not connected.
+
+The default closed overlay does not change the user's wallpaper, dock tile
+placement, application list or desktop composition. Synthetic source-contract
+tests run in `tests/test_classic_launcher.py`. Compiled Qt smoke tests
+actually open the overlay, exercise the case-insensitive QML search binding,
+verify zero and restored matches, close it, then capture the original
+resting desktop at three resolutions. In addition, the real Qt build is run
+with `--self-test-launcher-screenshot` at 1200×750, capturing an **open
+launcher image** after the Qt frame repaints, alongside the closed desktop.
+The workflow validates both PNGs and rejects pixel-identical files. They are
+stored in the short-lived `canopy-classic-ui-evidence` GitHub Actions
+artifact; they are not AI-generated mockups. These CI images still use
+prototype art, **not the user's private approved icon/wallpaper bundle**.
+
+This is an adaptation of the earlier draft launcher prototype (PR #60)
+to the reviewed current Classic Qt branch, **not an endorsement of that
+earlier prototype's rejected artwork**. Real OS app launch integration is
+a different unmerged draft (PR #102); visuals and Mint acceptance are not
+approved by this integration.

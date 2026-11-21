@@ -15,6 +15,11 @@ ApplicationWindow {
     Theme { id: canopyTheme }
     readonly property bool compactLayout: width < 900
     readonly property bool approvedAssetsActive: canopyApprovedMode
+    // Keep the resting desktop composition unchanged until explicitly opened.
+    Shortcut {
+        sequence: "Ctrl+Space"
+        onActivated: appLauncher.toggleLauncher()
+    }
 
     // Original static artwork; no rotating placeholder rectangles.
     Wallpaper { anchors.fill: parent }
@@ -78,6 +83,10 @@ ApplicationWindow {
                 readonly property bool imageReady: penguinArt.status === Image.Ready
                 Menu {
                     id: launcherMenu
+                    MenuItem {
+                        text: "Browse applications"
+                        onTriggered: appLauncher.openLauncher()
+                    }
                     MenuItem {
                         text: "About Canopy preview"
                         onTriggered: aboutPopup.open()
@@ -198,6 +207,19 @@ ApplicationWindow {
         sequence: "Ctrl+Shift+F"
         enabled: !filesPreview.visible
         onActivated: filesPreview.visible = true
+    }
+
+    // Original-art application search opens only on request. No app launch
+    // service is silently enabled; Files alone reopens its sample preview.
+    LauncherOverlay {
+        id: appLauncher
+        anchors.fill: parent
+        z: 20
+        approvedMode: root.approvedAssetsActive
+        onApplicationSelected: function(applicationName) {
+            if (applicationName === "Files")
+                filesPreview.visible = true
+        }
     }
 
     // Dock controls are explicitly nonfunctional until session services exist.

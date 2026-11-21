@@ -10,7 +10,9 @@
 // into a small fixed cache; no shader, per-frame crop, or polling loop.
 class RoundedDockIconProvider final : public QQuickImageProvider {
 public:
-    explicit RoundedDockIconProvider(const QString &approvedRoot, QString *error);
+    explicit RoundedDockIconProvider(const QString &approvedRoot,
+                                     const QString &terminalCandidatePath,
+                                     QString *error);
 
     bool isValid() const { return m_images.size() == 8; }
     bool allCornersClipped() const;

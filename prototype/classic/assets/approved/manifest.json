@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "source": "The exact eight PNG crops of the user-supplied Canopy Classic approved selection sheet, 2026-11-20; the accompanying wave PNG was used in the subsequently accepted visual concept, not an Apple asset.",
+  "artwork_policy": "No redesign, recoloring, JPEG recompression or substitution. SHA-256 of original file bytes must match.",
+  "icons": [
+    {
+      "name": "Browser",
+      "path": "icons/Browser_Option_3.png",
+      "sha256": "28283672dec0621172f3cf793dc6f00174fdce944d986ff144a1d2d1a881469a"
+    },
+    {
+      "name": "Mail",
+      "path": "icons/Mail_Option_5.png",
+      "sha256": "7baad00f0ddd507b1def24dc067e949e32991e3db06d246bf3a61ec9eaf98b79"
+    },
+    {
+      "name": "Files",
+      "path": "icons/Files_Option_2.png",
+      "sha256": "aa659307d1a5273fdaa61a9df6f8f70546882d6e89b1380b23ff0f9eb59bf57b"
+    },
+    {
+      "name": "Calendar",
+      "path": "icons/Calendar_Option_3.png",
+      "sha256": "c99c3356a178f8d0a28c809fada712c8df571c12db8d0f3472521f732fa559b2"
+    },
+    {
+      "name": "Photos",
+      "path": "icons/Photos_Option_2.png",
+      "sha256": "8ed643b8f67e676ae1ffddfd997cc1156fbc859acfd1e9c935c2b9085e11fc5f"
+    },
+    {
+      "name": "Music",
+      "path": "icons/Music_Option_3.png",
+      "sha256": "57ca966467597ad0ea8485b51701d8856b2584dd3b28bd194010ffeed149c43f"
+    },
+    {
+      "name": "Terminal",
+      "path": "icons/Terminal_Option_4.png",
+      "sha256": "40473e715b42037d2619c87e37fa1757419b6a1cdf99cb9ce5236d6bbfd929a5"
+    },
+    {
+      "name": "Settings",
+      "path": "icons/Settings_Option_8.png",
+      "sha256": "7ee4434d0acf34c676a3d3d908ee363b2553228debd5f7157b3693f7faee6a79"
+    }
+  ],
+  "wallpaper": {
+    "name": "Blue wave visual reference",
+    "path": "wallpaper/canopy-wave-preview.png",
+    "sha256": "1efa6e83deee160ce9cf225db010025f4f162975f4dfc23e6da3f3ca0973528a"
+  }
+}

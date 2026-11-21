@@ -281,3 +281,39 @@ guest; that is a separate release acceptance test.
 See original independent GIO implementation PR #102. The work here adapts
 it to the current Classic launcher rather than blindly merging the old
 PR's **dock** interaction changes.
+
+## Launch this actual Qt build from a Linux application menu
+
+The project's existing stdlib registration utility on \`main\` provides
+**non-root, reversible user application menu integration**. Its installed
+\`.desktop\` entry points directly to a separately built Canopy Qt binary:
+
+\`\`\`sh
+python3 tools/register_classic_preview.py status
+python3 tools/register_classic_preview.py install \
+  --binary /absolute/path/to/canopy-classic-spike
+python3 tools/register_classic_preview.py status
+# When done (removes only its exact unmodified managed entry):
+python3 tools/register_classic_preview.py uninstall
+\`\`\`
+
+Optional \`--approved-art-dir\`, \`--landscape-wallpaper\`,
+\`--terminal-refinement\` and \`--enable-system-apps\` are forwarded to
+supported builds. Neither the desktop entry nor this utility replaces
+Cinnamon, switches sessions, starts a compositor, downloads software, or
+installs anything system-wide. The existing \`DockTile.qml\` remains frozen.
+
+\`tools/classic_menu_runtime_smoke.py\` now provides a separate **actual
+runtime launch test**. The CI builds the real Qt6 program, registers it
+in a disposable temporary \`XDG_DATA_HOME\`, validates the desktop entry,
+executes it through \`gio launch\` under a fresh Xvfb display, and requires
+both a process running that exact executable inode and a visible X11
+Canopy window. The test kills only the newly observed executable process,
+verifies ownership and unregisters the temporary menu entry; it never
+touches the real user's desktop menu or installed applications. The test
+is intentionally run as a normal, non-root user and must not be run
+against an interactive working desktop while the user is relying on it.
+
+Ubuntu/Xvfb completion **does not establish** Linux Mint guest support,
+real GNOME/Cinnamon menu presentation, auto-login, compositing, an
+installable shell/session, accessibility, or owner visual approval.

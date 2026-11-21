@@ -101,3 +101,12 @@ the compiled Qt Classic prototype at three sizes and save screenshot
 SHA-256 evidence without modifying Cinnamon or installing packages.
 It is **not yet proven on a real Mint guest**. Its local synthetic test
 harness is not a substitute for in-guest functional acceptance.
+
+### Review real Qt screenshot evidence without publishing artwork
+
+The [offline Classic visual review gallery](docs/CLASSIC_VISUAL_REVIEW.md)
+compares three actual baseline/candidate screenshot pairs from the same
+measured Qt binary using SHA-256-verified PNG copies. It does **not**
+generate screenshots, redistribute private approved assets, prove Linux Mint
+acceptance or grant visual signoff. Synthetic negative-control regressions:
+`python3 -m unittest tests.test_classic_visual_review -v`.

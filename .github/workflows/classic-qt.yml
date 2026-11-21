@@ -70,6 +70,14 @@ jobs:
           for i in 1 2 3 4 5; do test -f "$marker" && break; sleep 1; done
           test -f "$marker"
           echo "PASS: GIO launched disposable application marker via opt-in service without shell or real user apps"
+          # End-to-end: QML LauncherOverlay.choose("Files") must reach the
+          # same real GIO service, without changing the existing dock.
+          rm "$marker"
+          timeout 35s xvfb-run -a ./build/classic/canopy-classic-spike --enable-system-apps --self-test-launcher-ui-fixture >test-system-app-ui-fixture.log 2>&1 || { cat test-system-app-ui-fixture.log; exit 1; }
+          grep -q 'SYSTEM_APP_UI_FIXTURE_PASS' test-system-app-ui-fixture.log
+          for i in 1 2 3 4 5; do test -f "$marker" && break; sleep 1; done
+          test -f "$marker"
+          echo "PASS: compiled QML launcher activated disposable native GIO application"
       - name: Reject missing approved icon assets (no substitution)
         timeout-minutes: 1
         env:

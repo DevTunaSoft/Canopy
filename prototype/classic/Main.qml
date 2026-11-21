@@ -231,7 +231,12 @@ ApplicationWindow {
                 delegate: DockTile {
                     required property var modelData
                     iconName: modelData.title
-                    previewActive: modelData.title === "Files"
+                    previewActive: modelData.title === "Files" && filesPreview.visible
+                    onActivated: function(applicationName) {
+                        if (applicationName === "Files") {
+                            filesPreview.visible = !filesPreview.visible
+                        }
+                    }
                 }
             }
         }

@@ -45,7 +45,25 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn('assets/icons/', dock)
         self.assertNotIn("NumberAnimation", dock)
         self.assertNotIn("Timer {", dock)
-        self.assertIn('ToolTip.text: iconName + " — preview only"', dock)
+        self.assertIn('ToolTip.text: iconName === "Files" ? "Toggle Files preview" : iconName + " — preview only"', dock)
+
+    def test_files_dock_button_toggles_preview_without_launching_apps(self):
+        dock = (ROOT / "DockTile.qml").read_text()
+        desktop = (ROOT / "Main.qml").read_text()
+        self.assertIn("signal activated(string applicationName)", dock)
+        self.assertIn("onClicked: tile.activated(tile.iconName)", dock)
+        self.assertIn('if (applicationName === "Files")', desktop)
+        self.assertIn("filesPreview.visible = !filesPreview.visible", desktop)
+        self.assertIn('previewActive: modelData.title === "Files" && filesPreview.visible', desktop)
+        self.assertNotIn('QProcess', (ROOT / "main.cpp").read_text())
+
+    def test_runtime_dock_toggle_is_checked_in_screenshot_smoke(self):
+        cpp = (ROOT / "main.cpp").read_text()
+        self.assertIn('findDockTile(dock, QStringLiteral("Files"))', cpp)
+        self.assertIn('QMetaObject::invokeMethod(filesTile, "clicked", Qt::DirectConnection)', cpp)
+        self.assertIn('SELF_TEST_FAIL: Files dock did not hide preview', cpp)
+        self.assertIn('SELF_TEST_FAIL: Files dock did not restore preview', cpp)
+        self.assertIn('SELF_TEST_PASS: Files dock hide/restore and activity indicator', cpp)
 
     def test_representative_preview_is_included(self):
         cmake = (ROOT / "CMakeLists.txt").read_text()

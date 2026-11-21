@@ -181,7 +181,9 @@ ApplicationWindow {
             implicitHeight: 68
             Label {
                 anchors.fill: parent
-                text: "A standalone design experiment. App launching and real file browsing are not implemented."
+                text: canopySystemLaunchEnabled
+                      ? "Canopy Classic preview with optional native Linux application launching. File browsing inside this sample window is not implemented."
+                      : "A standalone design experiment. Native app launching is disabled; real file browsing is not implemented."
                 wrapMode: Text.WordWrap
                 font.pixelSize: 12
                 color: "#31475e"
@@ -203,7 +205,8 @@ ApplicationWindow {
         onActivated: filesPreview.visible = true
     }
 
-    // Dock controls are explicitly nonfunctional until session services exist.
+    // Default dock remains a visual preview. Native Linux app launching is
+    // available only with the explicit --enable-system-apps opt-in.
     Rectangle {
         id: dock
         objectName: "canopyDock"
@@ -247,9 +250,12 @@ ApplicationWindow {
                     iconName: modelData.title
                     previewActive: modelData.title === "Files" && filesPreview.visible
                     onActivated: function(applicationName) {
-                        if (applicationName === "Files") {
-                            filesPreview.visible = !filesPreview.visible
+                        if (canopySystemLaunchEnabled) {
+                            if (canopySystemLauncher.launch(applicationName))
+                                return
                         }
+                        if (applicationName === "Files")
+                            filesPreview.visible = !filesPreview.visible
                     }
                 }
             }

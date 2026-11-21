@@ -3,7 +3,7 @@ import QtQuick.Controls
 
 // Artist-authored, original SVG per application. Icons are pre-rendered/cached
 // by Qt's SVG image plugin; no Canvas paint loops, effects or animation timers.
-// These tiles remain visual demos until app launching is really implemented.
+// Native Linux app launching requires --enable-system-apps; default is preview.
 Button {
     id: tile
     objectName: "canopyDockTile"
@@ -27,9 +27,13 @@ Button {
     hoverEnabled: true
     onClicked: tile.activated(tile.iconName)
     Accessible.name: iconName + " preview"
-    Accessible.description: "Original demonstration artwork, not a working app launcher"
+    Accessible.description: canopySystemLaunchEnabled
+        ? "Launch installed Linux application if available; otherwise preview only"
+        : "Original demonstration artwork; native launching disabled"
     ToolTip.visible: hovered
-    ToolTip.text: iconName === "Files" ? "Toggle Files preview" : iconName + " — preview only"
+    ToolTip.text: canopySystemLaunchEnabled
+        ? iconName + " — launch installed Linux application if available"
+        : iconName === "Files" ? "Toggle Files preview" : iconName + " — preview only"
     background: Item {
         Rectangle {
             // Align the hover/focus halo with the icon, not the top of

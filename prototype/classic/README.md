@@ -181,3 +181,41 @@ continuous animation is added.
 CI uses a synthetic test PNG only to prove actual Qt decoding and screenshot
 behavior, **not** to establish aesthetic approval. The Linux Mint VM and
 real-icon/real-landscape screenshots remain mandatory release gates.
+
+## Opt-in native application launch — functional prototype
+
+The standalone Classic dock can now ask the *existing* Linux desktop to
+launch certain installed apps using GIO desktop-entry APIs, without
+starting a second compositor, shell command interpreter, app index, polling
+service or new login session:
+
+```sh
+./build/classic/canopy-classic-spike --enable-system-apps
+```
+
+This flag is **off by default** to preserve all existing approved-screenshot
+review and preview behavior. With the flag, dock buttons use a strict
+hardcoded mapping of app categories to standard Linux `.desktop` IDs,
+for example Files → Nemo, Browser → Firefox and Terminal → GNOME/MATE
+Terminal. Only desktop entries visible to the current desktop are
+accepted. Absent or failing entries do not run fallback shell commands.
+An unavailable Files app falls back to the existing internal sample
+preview; other unavailable apps log a bounded warning.
+
+The original user-approved eight PNGs, the Terminal refinement candidate,
+dock spacing, wallpaper and window geometry are unchanged by this feature.
+The dock remains an interactive *application window*, not an OS-owned dock.
+GIO does the real application launch; Canopy does not yet track window
+state, global shortcuts or task-switching. A successful GIO launch request
+is **not proof** that every Linux Mint app variant appears correctly.
+
+GitHub Actions compiles the modified Qt/C++ app and tests:
+- default-off, invalid-action rejection, and no-actual-app negative checks;
+- a **harmless isolated XDG_DATA_HOME** containing a test `nemo.desktop`
+  whose command creates a disposable marker;
+- a successful actual GIO desktop-entry launch confirmed by the marker;
+- all existing source, screenshot geometry and Qt runtime smoke tests.
+
+Still required: launch a real Nemo / Firefox / Terminal inside a genuine
+Mint VM; verify focus, interaction, exit and no duplicate background
+services. That is a separate functional acceptance gate.

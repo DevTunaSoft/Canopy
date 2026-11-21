@@ -116,8 +116,8 @@ except the reversible Ponytail mode file:
 
 No duplicate hook was found to be active. ~/.config/opencode/plugins/caveman-native.js
 exists but is not referenced by opencode.json; it was left untouched because there is
-no demonstrated runtime problem. The plugin and plugins keys in opencode.json
-serve different OpenCode plugin-loading paths and were not changed.
+no demonstrated runtime problem. The plugin and plugins keys in opencode.json were left unchanged because no
+demonstrated loading failure or configuration drift was identified.
 
 ## Current three-worker supervisor state
 

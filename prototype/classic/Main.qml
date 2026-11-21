@@ -217,6 +217,7 @@ ApplicationWindow {
         z: 20
         approvedMode: root.approvedAssetsActive
         framingReviewMode: canopyIconFramingReview
+        nativeAppLaunchEnabled: canopySystemLaunchEnabled
         onApplicationSelected: function(applicationName) {
             if (applicationName === "Files")
                 filesPreview.visible = true

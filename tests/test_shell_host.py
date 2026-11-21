@@ -1,5 +1,6 @@
 """Host lifecycle tests with inert in-memory presenters (no QML execution)."""
 
+import random
 import unittest
 
 from canopy_core.registry import PackScan, ShellPackInfo
@@ -177,6 +178,22 @@ class ShellHostTests(unittest.TestCase):
         self.assertEqual(host.active_id, self.ident("classic"))
         self.assertNotIn("confidential", result.note)
 
+    def test_factory_reusing_active_presentation_preserves_live_instance(self):
+        host = self.host()
+        host.switch(self.ident("classic"))
+        active = self.views[0]
+        host._factories[self.ident("modern")] = lambda: active
+
+        before_events = list(self.events)
+        result = host.switch(self.ident("modern"))
+
+        self.assertEqual(result.status, "FACTORY_FAILED")
+        self.assertTrue(result.recovered)
+        self.assertEqual(host.active_id, self.ident("classic"))
+        self.assertTrue(active.active)
+        self.assertEqual(sum(view.active for view in self.views), 1)
+        self.assertEqual(self.events, before_events)
+
     def test_activation_failure_rolls_back_old_view(self):
         self.failures["modern"] = {"activate": True}
         host = self.host()
@@ -310,6 +327,30 @@ class ShellHostTests(unittest.TestCase):
         self.assertTrue(result.success)
         self.assertEqual(self.created, {"classic": 1})
 
+    def test_reentrant_switch_and_stop_are_blocked_in_each_callback(self):
+        host = self.host()
+        callbacks = []
+
+        def reenter():
+            with self.assertRaises(SwitchBusy):
+                host.switch(self.ident("minimal"))
+            with self.assertRaises(SwitchBusy):
+                host.stop()
+            callbacks.append(True)
+
+        self.failures["classic"] = {
+            method: reenter
+            for method in ("prepare", "activate", "deactivate", "dispose")
+        }
+
+        self.assertTrue(host.switch(self.ident("classic")).success)
+        self.assertTrue(host.switch(self.ident("modern")).success)
+
+        self.assertEqual(len(callbacks), 4)
+        self.assertEqual(host.active_id, self.ident("modern"))
+        self.assertFalse(host.needs_recovery)
+        self.assertEqual(sum(view.active for view in self.views), 1)
+
     def test_exception_notes_do_not_expose_secret_strings(self):
         self.failures["classic"] = {"prepare": True}
         host = self.host()
@@ -322,6 +363,121 @@ class ShellHostTests(unittest.TestCase):
         self.assertEqual(host.stop().status, "STOPPED")
         self.assertIsNone(host.active_id)
         self.assertEqual(self.events, [])
+
+    def test_seeded_fault_sequences_preserve_invariants_and_recovery_freeze(self):
+        rng = random.Random(0xC0FFEE)
+        names = ("classic", "modern", "minimal")
+        fault_points = set()
+        recovery_count = 0
+
+        def inject(name, failures):
+            self.failures[name] = failures
+            for view in self.views:
+                if view.name == name:
+                    view.failures = failures
+
+        for _ in range(24):
+            self.events.clear()
+            self.views.clear()
+            self.created.clear()
+            self.failures.clear()
+            host = self.host()
+            self.assertTrue(host.switch(self.ident("classic")).success)
+
+            for _ in range(20):
+                for configured in self.failures.values():
+                    configured.clear()
+                self.failures.clear()
+
+                active_name = (
+                    host.active_id.removeprefix("com.example.")
+                    if host.active_id is not None else None
+                )
+                stop = active_name is not None and rng.randrange(6) == 0
+                target = rng.choice(names)
+
+                if stop:
+                    failure = rng.choice(("deactivate", "dispose", None))
+                    if failure:
+                        inject(active_name, {failure: True})
+                        fault_points.add(f"stop_{failure}")
+                    result = host.stop()
+                else:
+                    if target != active_name:
+                        failure = rng.choice((
+                            "prepare",
+                            "activate",
+                            "old_deactivate",
+                            "old_dispose",
+                            "candidate_dispose",
+                            "candidate_deactivate",
+                            None,
+                        ))
+                        if failure == "prepare":
+                            inject(target, {"prepare": True})
+                            fault_points.add(failure)
+                        elif failure == "activate":
+                            inject(target, {"activate": True})
+                            fault_points.add(failure)
+                        elif failure == "old_deactivate":
+                            if active_name is not None:
+                                inject(active_name, {"deactivate": True})
+                                fault_points.add(failure)
+                        elif failure == "old_dispose":
+                            if active_name is not None:
+                                inject(active_name, {"dispose": True})
+                                fault_points.add(failure)
+                        elif failure == "candidate_dispose":
+                            inject(target, {"prepare": True, "dispose": True})
+                            fault_points.add(failure)
+                        elif failure == "candidate_deactivate":
+                            inject(target, {"activate": True, "deactivate": True})
+                            fault_points.add(failure)
+                    result = host.switch(self.ident(target))
+
+                active_views = [view for view in self.views if view.active]
+                self.assertLessEqual(len(active_views), 1)
+                if not host.needs_recovery:
+                    if host.active_id is None:
+                        self.assertEqual(active_views, [])
+                    else:
+                        self.assertEqual(len(active_views), 1)
+                        self.assertEqual(
+                            active_views[0].name,
+                            host.active_id.removeprefix("com.example."),
+                        )
+
+                if host.needs_recovery:
+                    recovery_count += 1
+                    self.assertIn(
+                        result.status,
+                        ("RECOVERY_REQUIRED", "CLEANUP_FAILED"),
+                    )
+                    before_events = list(self.events)
+                    before_views = len(self.views)
+                    self.assertEqual(
+                        host.switch(self.ident(rng.choice(names))).status,
+                        "RECOVERY_REQUIRED",
+                    )
+                    self.assertEqual(host.stop().status, "RECOVERY_REQUIRED")
+                    self.assertEqual(self.events, before_events)
+                    self.assertEqual(len(self.views), before_views)
+                    break
+
+        self.assertEqual(
+            fault_points,
+            {
+                "prepare",
+                "activate",
+                "old_deactivate",
+                "old_dispose",
+                "candidate_dispose",
+                "candidate_deactivate",
+                "stop_deactivate",
+                "stop_dispose",
+            },
+        )
+        self.assertGreater(recovery_count, 0)
 
 
 if __name__ == "__main__":

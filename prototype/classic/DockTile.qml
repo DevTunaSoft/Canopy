@@ -19,6 +19,28 @@ Button {
           + iconName.toLowerCase() + ".svg"
     readonly property bool roundedArtActive: canopyApprovedMode
     readonly property bool iconReady: iconArt.status === Image.Ready
+    // Deliberately small optical-review offsets in final 54px screen pixels.
+    // The artwork in the verified original PNG crops is not uniformly
+    // composed, even though the QML image boxes are geometrically centered.
+    // This OPTIONAL preview moves the full cached image only; it does not
+    // edit, regenerate, zoom or overwrite any of the eight source masters.
+    // A visual review is still required before adopting these corrections.
+    readonly property var opticalOffsets: ({
+        "Browser": [1, 0],
+        "Mail": [0, -1],
+        "Files": [-1, -1],
+        "Calendar": [-2, 1],
+        "Photos": [0, -1],
+        "Music": [0, 1],
+        "Terminal": canopyTerminalRefinementMode ? [-1, 0] : [-2, 2],
+        "Settings": [-2, 1]
+    })
+    readonly property real opticalOffsetX:
+        canopyApprovedMode && canopyOpticalReviewMode
+            ? (opticalOffsets[iconName] || [0, 0])[0] : 0
+    readonly property real opticalOffsetY:
+        canopyApprovedMode && canopyOpticalReviewMode
+            ? (opticalOffsets[iconName] || [0, 0])[1] : 0
     width: 58
     height: 70
     implicitWidth: 58
@@ -60,6 +82,8 @@ Button {
             id: iconArt
             objectName: "canopyDockIcon"
             anchors.centerIn: parent
+            anchors.horizontalCenterOffset: tile.opticalOffsetX
+            anchors.verticalCenterOffset: tile.opticalOffsetY
             // A centered 54px image inside a 70px dock tile leaves 8px
             // on top and bottom. The old topMargin: 2 pushed every icon
             // visually high, despite having correct rounded corners.

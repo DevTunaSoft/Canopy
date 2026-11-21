@@ -24,15 +24,14 @@ to the Canopy stacked-PR queue. No Canopy Qt, artwork or CI file was changed.
 | Supervisor unit tests | PASS — 42 tests | `py -3 -m unittest tests.test_canopy_supervisor -q` |
 | Regression suite (Windows-applicable modules) | PASS — 221 tests | `py -3 -m unittest -q <all tests except three POSIX-only modules>` |
 | Byte compile | PASS | `py -3 -m compileall -q canopy_supervisor tools/canopy_supervisor.py tests/test_canopy_supervisor.py` |
-| Full discovery on Windows | BLOCKED — pre-existing failures | `py -3 -m unittest discover -s tests -q` |
-| Canopy draft PR #135 `foundation` check | PASS — 16 s, Ubuntu, commit `bbd9c40` | `gh pr checks 135 --repo DevTunaSoft/Canopy` |
+| Full discovery on Windows after isolation | PASS — 282 tests, 53 POSIX-only skips | `py -3 -m unittest discover -s tests -q` |
+| Canopy draft PR #135 `foundation` check | PASS — 25 s, Ubuntu, commit `250257d` | `gh pr checks 135 --repo DevTunaSoft/Canopy` |
+| Canopy draft PR #135 `desktop-menu` check | PASS — 12 s, Ubuntu, commit `250257d` | `gh pr checks 135 --repo DevTunaSoft/Canopy` |
 
-The full Windows run reports errors in `test_classic_preview_menu` because it
-patches `os.geteuid`, which does not exist on Windows, and in
-`test_mint_classic_qt_smoke` / `test_mint_acceptance_report_gate` because they
-assume POSIX executable bits. Those modules are untouched by this branch. CI on
-Ubuntu (`foundation.yml` runs `unittest discover`) is the authoritative place
-for them. No CI workflow was added or duplicated by this change.
+POSIX-only cases were isolated in commit `250257d`: the `geteuid` patch uses
+`create=True`, Desktop Entry quoting and execute-bit cases skip on Windows, and
+symlink-policy cases skip on Windows. Linux CI still runs all of them. No CI
+workflow was added or duplicated by this change.
 
 ## Live coordination run
 

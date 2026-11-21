@@ -11,6 +11,7 @@ from pathlib import Path
 import re
 import struct
 import subprocess
+import zlib
 import sys
 
 from tools.mint_guest_preflight import collect as mint_preflight
@@ -48,22 +49,57 @@ def safe_resource(path, kind, *, directory=False, executable=False):
 
 
 def png_size(path):
+    """Verify the PNG chunk stream, CRCs, required data and dimensions.
+
+    Checking just the signature/IHDR risks reporting a truncated or
+    corrupted screenshot as a successful Qt render.
+    """
     path = Path(path)
     if path.is_symlink() or not path.is_file():
         raise MintSmokeError("screenshot missing or unsafe")
     size = path.stat().st_size
     if size < 100 or size > 40_000_000:
         raise MintSmokeError("screenshot file outside safe size limits")
+    dimensions = None
+    has_image_data = False
     with path.open("rb") as stream:
-        data = stream.read(33)
-    if (len(data) < 33 or data[:8] != PNG_SIGNATURE
-            or struct.unpack_from(">I", data, 8)[0] != 13
-            or data[12:16] != b"IHDR"):
-        raise MintSmokeError("screenshot is not a PNG with an IHDR header")
-    width, height = struct.unpack_from(">II", data, 16)
-    if width < 1 or height < 1 or width > 3840 or height > 2160:
-        raise MintSmokeError("unexpected PNG screenshot dimensions")
-    return width, height
+        if stream.read(8) != PNG_SIGNATURE:
+            raise MintSmokeError("invalid PNG signature")
+        while True:
+            header = stream.read(8)
+            if len(header) != 8:
+                raise MintSmokeError("truncated PNG chunk header")
+            length, kind = struct.unpack(">I4s", header)
+            if length > 40_000_000:
+                raise MintSmokeError("oversized PNG chunk")
+            payload = stream.read(length)
+            check_bytes = stream.read(4)
+            if len(payload) != length or len(check_bytes) != 4:
+                raise MintSmokeError("truncated PNG chunk")
+            expected_crc = struct.unpack(">I", check_bytes)[0]
+            if zlib.crc32(kind + payload) & 0xffffffff != expected_crc:
+                raise MintSmokeError("corrupt PNG chunk CRC")
+            if dimensions is None:
+                if kind != b"IHDR" or length != 13:
+                    raise MintSmokeError("missing PNG image header")
+                width, height, depth, color, compression, filtering, interlace = (
+                    struct.unpack(">IIBBBBB", payload)
+                )
+                if (width < 1 or height < 1 or width > 3840 or height > 2160
+                        or depth != 8 or color not in (2, 6)
+                        or compression != 0 or filtering != 0 or interlace != 0):
+                    raise MintSmokeError("unsupported PNG screenshot encoding")
+                dimensions = width, height
+            elif kind == b"IHDR":
+                raise MintSmokeError("duplicate PNG image header")
+            if kind == b"IDAT":
+                has_image_data = True
+            if kind == b"IEND":
+                if length or stream.read(1):
+                    raise MintSmokeError("invalid PNG ending or trailing bytes")
+                if not has_image_data:
+                    raise MintSmokeError("PNG has no image data")
+                return dimensions
 
 
 def run_mint_smoke(*, binary, approved_art, wallpaper, output_dir, source_sha,

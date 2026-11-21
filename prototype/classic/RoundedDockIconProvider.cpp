@@ -14,11 +14,28 @@ constexpr int kCanvasPixels = 192;
 constexpr int kInsetPixels = 12;
 constexpr int kRoundedRadius = 36;
 constexpr int kMaxRequestPixels = 256;
+
+// Source-sheet crop gutters differ across the immutable user-selected PNGs.
+// These integers were measured from the *original crop's* bright top frame
+// transition, never from a generated or third-party replacement image.
+// This is an optical review EXPERIMENT, not an approved default or alteration
+// to any original artist file. Applying the crop inside a fixed square mask
+// keeps every rounded card's *outer frame exactly centered* in its dock slot.
+const QHash<QString, int> kSourceSheetTopGutters = {
+    {QStringLiteral("browser"), 9},
+    {QStringLiteral("mail"), 6},
+    {QStringLiteral("files"), 2},
+    {QStringLiteral("calendar"), 0},
+    {QStringLiteral("photos"), 0},
+    {QStringLiteral("music"), 5},
+    {QStringLiteral("terminal"), 14},
+    {QStringLiteral("settings"), 14},
+};
 }
 
 RoundedDockIconProvider::RoundedDockIconProvider(
     const QString &approvedRoot, const QString &terminalCandidatePath,
-    QString *error)
+    bool framingReviewMode, QString *error)
     : QQuickImageProvider(QQuickImageProvider::Image) {
     QFile manifest(QStringLiteral(":/Canopy/Classic/assets/approved/manifest.json"));
     if (!manifest.open(QIODevice::ReadOnly)) {
@@ -77,14 +94,44 @@ RoundedDockIconProvider::RoundedDockIconProvider(
         painter.setClipPath(outline);
         painter.fillPath(outline, QColor(QStringLiteral("#10203d")));
 
-        // Fit the WHOLE approved image instead of zooming or cropping it.
-        // Small transparent outer gutters keep artwork comfortably framed.
-        const QSize fitted = original.size().scaled(
-            face.size().toSize(), Qt::KeepAspectRatio);
-        const QRectF placement(face.center().x() - fitted.width() / 2.0,
-                               face.center().y() - fitted.height() / 2.0,
-                               fitted.width(), fitted.height());
-        painter.drawImage(placement, original);
+        if (framingReviewMode && !(id == QStringLiteral("terminal") &&
+                                    !terminalCandidatePath.isEmpty())) {
+            // The eight original contact-sheet crops are 345px wide but only
+            // 333-334px high, and contain different baked dark top gutters.
+            // Normalise that *content* in memory, INSIDE an identical
+            // centered 168px square card and mask. Do not move the QML tile
+            // or shift the entire card, as rejected visual PR #108 did.
+            //
+            // Crop a square strictly inside each already SHA-locked master:
+            // only a narrow source-sheet gutter is discarded (<=14px from
+            // top, <=13px per horizontal edge). No master file is modified.
+            if (!kSourceSheetTopGutters.contains(id)) {
+                *error = QStringLiteral("unrecognised approved icon");
+                m_images.clear();
+                return;
+            }
+            const int top = kSourceSheetTopGutters.value(id);
+            const int side = original.height() - top;
+            if (side < 256 || original.width() < side ||
+                top < 0 || top > 14) {
+                *error = QStringLiteral("approved image framing dimensions invalid");
+                m_images.clear();
+                return;
+            }
+            const int left = (original.width() - side) / 2;
+            const QRectF sourceRect(left, top, side, side);
+            painter.drawImage(face, original, sourceRect);
+        } else {
+            // Unmodified original-fit rendering remains the DEFAULT.
+            // A separately supplied Terminal-v3 derivative already has a
+            // transparent, square canvas and needs no source-sheet trimming.
+            const QSize fitted = original.size().scaled(
+                face.size().toSize(), Qt::KeepAspectRatio);
+            const QRectF placement(face.center().x() - fitted.width() / 2.0,
+                                   face.center().y() - fitted.height() / 2.0,
+                                   fitted.width(), fitted.height());
+            painter.drawImage(placement, original);
+        }
         painter.end();
         m_images.insert(id, rendered);
     }

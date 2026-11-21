@@ -51,6 +51,19 @@ class ClassicLauncherContracts(unittest.TestCase):
         self.assertNotIn("gio launch", code)
         self.assertNotIn("XMLHttpRequest", code)
 
+    def test_open_launcher_uses_real_qt_capture_not_generated_art(self):
+        cpp = (ROOT / "main.cpp").read_text(encoding="utf-8")
+        workflow = (ROOT.parents[1] / ".github" / "workflows" /
+                    "classic-qt.yml").read_text(encoding="utf-8")
+        self.assertIn("--self-test-launcher-screenshot", cpp)
+        self.assertIn("launcherFrame = window->grabWindow()", cpp)
+        self.assertIn("QTimer::singleShot(250, window", cpp)
+        self.assertIn("SELF_TEST_PASS: actual launcher overlay screenshot captured", cpp)
+        self.assertIn("classic-launcher-open.png", workflow)
+        self.assertIn("classic-launcher-desktop.png", workflow)
+        self.assertIn("cmp -s", workflow)
+        self.assertIn("python3 tools/check_screenshot.py test-artifacts/classic-launcher-open.png 1200 750", workflow)
+
     def test_compiled_runtime_checks_search_and_close(self):
         code = (ROOT / "main.cpp").read_text(encoding="utf-8")
         self.assertIn('QStringLiteral("canopyApplicationLauncher")', code)

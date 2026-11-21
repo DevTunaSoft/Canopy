@@ -18,7 +18,7 @@ APPROVED_MANIFEST_GIT_BLOB_SHA1 = "b120dc891a614ddbc5ef863514424112c02efee6"
 
 def git_blob_sha1(content):
     return hashlib.sha1(b"blob " + str(len(content)).encode() +
-                        b"\\0" + content).hexdigest()
+                        b"\0" + content).hexdigest()
 
 
 def fnv1a64(content):
@@ -38,8 +38,8 @@ class FrozenClassicDockTests(unittest.TestCase):
 
     def test_dock_main_qml_geometry_and_behavior_locked(self):
         source = (CLASSIC / "Main.qml").read_text(encoding="utf-8")
-        start = source.index("    Rectangle {\\n        id: dock")
-        end = source.index("    Label {\\n        anchors.right:", start)
+        start = source.index("    Rectangle {\n        id: dock")
+        end = source.index("    Label {\n        anchors.right:", start)
         dock = source[start:end]
         self.assertEqual(fnv1a64(dock.encode("ascii")),
                          APPROVED_DOCK_FNV64)

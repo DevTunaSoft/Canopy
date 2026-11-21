@@ -11,6 +11,7 @@
 #include <QStringList>
 #include <QRegularExpression>
 #include <QSet>
+#include <QVector>
 #include <QQmlContext>
 #include <QCryptographicHash>
 #include <QFile>
@@ -511,22 +512,38 @@ int main(int argc, char *argv[]) {
                     sampledColors.insert(frame.pixel(x, y));
                 }
             }
-            // Test the unobscured left edge, so a plain fallback desktop cannot
-            // be mistaken for the original artwork despite a nonuniform toolbar.
+            // Prove the *visible wallpaper* varies, without trusting just one
+            // chosen sky/foreground pair. Scenic photos may give two similar
+            // colors at a narrow display's left edge; both outer strips remain
+            // unobscured by the central demo Files window at supported sizes.
             const int edgeX = qMax(2, frame.width() / 100);
-            const QRgb skyPixel = frame.pixel(edgeX, qMax(50, frame.height() / 7));
-            const QRgb foregroundPixel = frame.pixel(edgeX, frame.height() * 85 / 100);
-            const int artworkDifference =
-                qAbs(qRed(skyPixel) - qRed(foregroundPixel)) +
-                qAbs(qGreen(skyPixel) - qGreen(foregroundPixel)) +
-                qAbs(qBlue(skyPixel) - qBlue(foregroundPixel));
-            if (artworkDifference < 55) {
+            const int edgeXs[] = { edgeX, frame.width() - edgeX - 1 };
+            QVector<QRgb> wallpaperSamples;
+            for (int x : edgeXs) {
+                for (int y = qMax(50, frame.height() / 8);
+                     y < frame.height() - 10;
+                     y += qMax(1, frame.height() / 10)) {
+                    wallpaperSamples.append(frame.pixel(x, y));
+                }
+            }
+            int maxArtworkDifference = 0;
+            for (int i = 0; i < wallpaperSamples.size(); ++i) {
+                for (int j = 0; j < i; ++j) {
+                    const QRgb a = wallpaperSamples.at(i);
+                    const QRgb b = wallpaperSamples.at(j);
+                    maxArtworkDifference = qMax(maxArtworkDifference,
+                        qAbs(qRed(a) - qRed(b)) +
+                        qAbs(qGreen(a) - qGreen(b)) +
+                        qAbs(qBlue(a) - qBlue(b)));
+                }
+            }
+            if (maxArtworkDifference < 55) {
                 qCritical() << "SELF_TEST_FAIL: wallpaper regions unexpectedly uniform"
-                            << "color distance" << artworkDifference;
+                            << "maximum color distance" << maxArtworkDifference;
                 QCoreApplication::exit(1);
                 return;
             }
-            qInfo() << "SELF_TEST_PASS: wallpaper sky and foreground visually distinct";
+            qInfo() << "SELF_TEST_PASS: wallpaper regions visually distinct";
             if (sampledColors.size() < 8) {
                 qCritical() << "SELF_TEST_FAIL: screenshot appears blank or uniform";
                 QCoreApplication::exit(1);

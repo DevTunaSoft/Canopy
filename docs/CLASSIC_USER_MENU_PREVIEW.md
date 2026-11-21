@@ -64,3 +64,35 @@ Potential administrative/recovery concern: if a power loss occurs between
 writing a desktop entry and its ownership marker, status reports
 MODIFIED_OR_UNMANAGED and refuses destructive cleanup. That is intentional
 fail-closed behavior, not automatic crash recovery.
+
+## Actual compiled Qt launch proof in the Classic Qt draft
+
+The separate \`.github/workflows/classic-qt.yml\` job, on the active
+**draft** Classic Qt stack, extends the baseline synthetic-menu checks:
+
+1. Builds the actual C++/QML Canopy Classic executable in Ubuntu CI.
+2. Creates an isolated temporary XDG application-menu folder.
+3. Uses this **same existing** \`register_classic_preview.py\` to register
+   the compiled binary directly, verifying its executable SHA-256.
+4. Validates the real freedesktop entry and runs \`gio launch\` under Xvfb.
+5. Requires a *new current-user process matching the original executable
+   inode* and a visible X11 window with Canopy's actual application title.
+6. Stops only the newly observed exact executable process, unregisters
+   only the exact-owned temporary desktop entry, and removes the isolated
+   test folder. It never modifies the user's actual application menu.
+
+The runner is \`python3 -m tools.classic_menu_runtime_smoke --binary
+/absolute/path/to/canopy-classic-spike --expected-binary-sha256
+<actual-64-hex-sha256>\`, normally inside a fresh disposable Xvfb display.
+Its nine negative-control tests include symlinked binaries, source-hash
+mismatch, non-executables, missing DISPLAY, failed X11 window evidence,
+and lack of root privileges. The runner uses no shell, no root and
+no background service.
+
+**Interpretation:** A passing Ubuntu/Xvfb GIO→Qt launch and window test
+means the binary is capable of starting as an ordinary menu application.
+It does **not** mean the installer is a full shell/session integration,
+or that Linux Mint Cinnamon displays the menu item, launches it correctly,
+or supports full focus/window management. These remain separately required
+in a real guest. The app icon, wallpaper and launcher art are still subject
+to user visual approval.

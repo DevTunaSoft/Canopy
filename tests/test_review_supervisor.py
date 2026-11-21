@@ -124,6 +124,8 @@ class ReviewSupervisorTests(unittest.TestCase):
         self.assertEqual(runs[p["head"]["sha"]], [check()])
         self.assertEqual(len(calls), 3)
         self.assertTrue(all("/repos/DevTunaSoft/Canopy/" in path for path in calls))
+        self.assertIn("/pulls?state=open&per_page=25", calls[0])
+        self.assertIn("/issues?state=open&per_page=30", calls[1])
 
     def test_invalid_sha_rejected_without_following_untrusted_head(self):
         with patch.object(supervisor, "github_get", side_effect=[

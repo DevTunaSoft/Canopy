@@ -153,8 +153,10 @@ def make_report(pulls, issues, checks_by_sha, *, generated_at, limit=MAX_REVIEW_
 
 def collect(token):
     base = f"/repos/{OWNER_REPO}"
-    pulls = github_get(f"{base}/pulls?state=open&per_page=100", token)
-    issues = github_get(f"{base}/issues?state=open&per_page=100", token)
+    # Live smoke evidence: fetching 100 PRs exceeded the 1.2 MB response
+    # guard. Request at most the bounded review queue, never unbounded data.
+    pulls = github_get(f"{base}/pulls?state=open&per_page={MAX_REVIEW_PRS}", token)
+    issues = github_get(f"{base}/issues?state=open&per_page=30", token)
     if not isinstance(pulls, list) or not isinstance(issues, list):
         raise SupervisorError("unexpected GitHub API response")
     checked = {}

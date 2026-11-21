@@ -216,6 +216,7 @@ ApplicationWindow {
         anchors.fill: parent
         z: 20
         approvedMode: root.approvedAssetsActive
+        framingReviewMode: canopyIconFramingReview
         onApplicationSelected: function(applicationName) {
             if (applicationName === "Files")
                 filesPreview.visible = true
@@ -226,9 +227,6 @@ ApplicationWindow {
     Rectangle {
         id: dock
         objectName: "canopyDock"
-        // Avoid a partially visible dock beneath the modal launcher at
-        // 760×500; the original dock returns unchanged when it closes.
-        visible: !appLauncher.opened
         width: Math.min(root.width - 32, dockRow.implicitWidth + 2 * canopyTheme.dockPadding)
         height: canopyTheme.dockSize
         radius: canopyTheme.cornerRadius

@@ -196,3 +196,16 @@ own real compositor windows or preserve app state, sandbox plugins, verify
 signed packages, execute QML or deliver end-user live switching. The future
 Qt host will need an equivalent verified lifecycle/API implementation with
 real crash/restart, window, display and memory tests.
+
+## Local starter generation (implemented developer tool)
+
+`python3 -m canopy_core.scaffold CATALOG --id com.example.focus
+--name "Focus Desktop"` safely creates a local sample pack folder from the
+repository's checked-in Qt/QML starter. It validates identity, naming,
+capabilities, existing catalog health and output manifest, refuses
+overwrites and symlinked catalogs, and cleans up partial output if a file
+write fails. The template and existing Classic art are unchanged.
+
+A new directory is **not** a signed package, trusted installation,
+sandboxed plugin, live running shell, or evidence that Qt windows will
+survive switching. No runtime loader is enabled by this tool.

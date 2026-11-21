@@ -17,7 +17,8 @@ constexpr int kMaxRequestPixels = 256;
 }
 
 RoundedDockIconProvider::RoundedDockIconProvider(
-    const QString &approvedRoot, QString *error)
+    const QString &approvedRoot, const QString &terminalCandidatePath,
+    QString *error)
     : QQuickImageProvider(QQuickImageProvider::Image) {
     QFile manifest(QStringLiteral(":/Canopy/Classic/assets/approved/manifest.json"));
     if (!manifest.open(QIODevice::ReadOnly)) {
@@ -48,7 +49,12 @@ RoundedDockIconProvider::RoundedDockIconProvider(
 
         // Source verification, including SHA-256, has already succeeded in
         // verifyExactArtwork() before this constructor can be called.
-        QImageReader reader(root.filePath(relative));
+        // Only Terminal may use an explicitly supplied visual candidate.
+        // All eight immutable masters were verified BEFORE the provider runs.
+        const QString sourcePath =
+            id == QStringLiteral("terminal") && !terminalCandidatePath.isEmpty()
+                ? terminalCandidatePath : root.filePath(relative);
+        QImageReader reader(sourcePath);
         const QImage original = reader.read();
         if (original.isNull()) {
             *error = QStringLiteral("verified icon cannot be decoded: ") + id;

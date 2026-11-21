@@ -5,10 +5,10 @@ production readiness, visual acceptance, security or Linux Mint compatibility.
 
 ## Code review
 
-Code review is welcome from interested contributors and reviewers. The owner
-also has people who review the project. **No unsolicited public invitation or
-reviewer-recruitment campaign is necessary.** This is not a restriction on who
-may inspect, comment on, or review the public repository.
+Code review is welcome from interested contributors and reviewers. **Do not
+create unsolicited public reviewer invitations or recruitment campaigns.**
+This is not a restriction on who may inspect, comment on, or review the
+public repository.
 
 Review perspectives worth covering:
 

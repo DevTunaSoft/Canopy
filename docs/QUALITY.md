@@ -17,6 +17,20 @@
 - Keyboard-only navigation, screen reader where supported, high contrast, reduced motion.
 - Session restart, service failure, lock/unlock, suspend/resume, unplugged display, and unexpected exit.
 
+## Additional Shell Pack quality gate (planned)
+
+For each newly added presentation pack: strict manifest/API compatibility and
+capability review; supply actual screenshots, source and license records,
+keyboard/screen-reader and HiDPI evidence. Compare incremental idle and switch
+cost against the verified baseline with **one active presentation only**.
+Once the switcher exists, stress-test repeated A→B→A transitions, crash
+recovery, accessibility focus, application/window preservation and cleanup
+of old subscriptions/memory. Do not claim seamless switching, safe
+third-party execution or plugin installation until the corresponding
+integration/security tests exist. A green offline manifest check tests
+metadata only, not trust, UI or runtime behavior. See
+[Shell Pack architecture](SHELL_PACK_ARCHITECTURE.md).
+
 ## Validation evidence
 Record commit SHA, hardware, distro/kernel, graphics driver, compositor, commands, duration, before/after metrics, screenshots, and PASS/FAIL/BLOCKED/NOT RUN. Never report a target as a measurement.
 

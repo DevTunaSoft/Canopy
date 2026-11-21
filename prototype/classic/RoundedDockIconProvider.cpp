@@ -15,13 +15,12 @@ constexpr int kInsetPixels = 12;
 constexpr int kRoundedRadius = 36;
 constexpr int kMaxRequestPixels = 256;
 
-// Experimental launcher-only sampling of SHA-locked 345x333/334 sources.
-// Centers are rounded from 2%-98% bounds of bright illustration pixels,
-// measured independently for each private original PNG. This centers the
-// major visible artwork rather than only chopping a source-sheet TOP gutter.
-// It is NOT applied to the existing dock or enabled without an explicit
-// opt-in. No immutable original artwork bytes are changed.
-constexpr int kOpticalSampleSize = 324;
+// Measured center points of each original icon's brighter illustration
+// pixels (2%-98% bounds). They are a review-only optical guide, NOT a
+// judgment of aesthetics. Keep the complete original source rectangle:
+// the prior 324px-square trial clipped some bright border pixels.
+constexpr int kReviewInsetPixels = 5;
+constexpr qreal kReviewOffsetGain = 1.75;
 const QHash<QString, QPointF> kLauncherOpticalCenters = {
     {QStringLiteral("browser"), QPointF(170, 170)},
     {QStringLiteral("mail"), QPointF(172, 162)},
@@ -98,30 +97,44 @@ RoundedDockIconProvider::RoundedDockIconProvider(
         const bool terminalDerivative =
             !terminalCandidatePath.isEmpty() && sourcePath == terminalCandidatePath;
         if (framingReviewMode && !terminalDerivative) {
-            // Candidate B: source-specific bright-illustration bounds, not
-            // uniform top trimming. The unchanged fixed 168px mask remains
-            // centered. Only the launcher may instantiate this mode; dock
-            // uses framingReviewMode=false and its exact original renderer.
+            // Candidate C is launcher-only. Never sample a sub-rectangle
+            // from the approved PNG: the last 324px source crop was found to
+            // discard 3-7% of bright edge pixels. Instead fit the ENTIRE
+            // source image in a slightly inset, centered target and shift
+            // its content conservatively using measured bright-art centers.
+            // Dock always takes the full-fit ELSE branch below.
             if (!kLauncherOpticalCenters.contains(id) ||
                 original.width() != 345 ||
                 (original.height() != 333 && original.height() != 334)) {
-                *error = QStringLiteral("launcher optical sample input mismatch");
+                *error = QStringLiteral("launcher optical review input mismatch");
                 m_images.clear();
                 return;
             }
-            const QPointF center = kLauncherOpticalCenters.value(id);
-            const QRectF originalSample(
-                center.x() - kOpticalSampleSize / 2.0,
-                center.y() - kOpticalSampleSize / 2.0,
-                kOpticalSampleSize, kOpticalSampleSize);
-            if (originalSample.left() < 0 || originalSample.top() < 0 ||
-                originalSample.right() > original.width() ||
-                originalSample.bottom() > original.height()) {
-                *error = QStringLiteral("launcher sample exceeds original bounds");
+            const QPointF contentCenter = kLauncherOpticalCenters.value(id);
+            const QPointF canvasCenter((original.width() - 1.0) / 2.0,
+                                       (original.height() - 1.0) / 2.0);
+            const QRectF insetFace = face.adjusted(
+                kReviewInsetPixels, kReviewInsetPixels,
+                -kReviewInsetPixels, -kReviewInsetPixels);
+            const QSize fitted = original.size().scaled(
+                insetFace.size().toSize(), Qt::KeepAspectRatio);
+            const QPointF offset(
+                (canvasCenter.x() - contentCenter.x()) * kReviewOffsetGain *
+                    fitted.width() / original.width(),
+                (canvasCenter.y() - contentCenter.y()) * kReviewOffsetGain *
+                    fitted.height() / original.height());
+            const QRectF reviewPlacement(
+                face.center().x() - fitted.width() / 2.0 + offset.x(),
+                face.center().y() - fitted.height() / 2.0 + offset.y(),
+                fitted.width(), fitted.height());
+            if (!face.contains(reviewPlacement)) {
+                *error = QStringLiteral("launcher placement exceeds rounded card face");
                 m_images.clear();
                 return;
             }
-            painter.drawImage(face, original, originalSample);
+            // Full source image: no sourceRect, no hidden clipping from
+            // viewport cropping. The existing rounded mask remains in force.
+            painter.drawImage(reviewPlacement, original);
         } else {
             // ORIGINAL full-image fit remains the default. The optional
             // independently approved Terminal derivative is never reframed.

@@ -15,15 +15,30 @@ same SHA-checked `image://canopy-dock/<app>` image provider. The imbalance
 therefore repeats at 760×500, 1200×750 and 1920×1080. Correcting QML tile
 positions alone would repeat the prior rejected whole-card shift (PR #108).
 
-## Strictly opt-in candidate from prior experiment PR #109
+## Strictly opt-in source-specific candidate B (launcher only)
 
-`--icon-framing-review` selects an alternative *in-memory* source sample
-inside an identical centered rounded image frame (192×192 cache with an
-unchanged 168×168 clipped face). The test reuses the source-specific top
-gutter measurements from #109: Browser 9px; Mail 6px; Files 2px; Calendar
-0px; Photos 0px; Music 5px; Terminal 14px; Settings 14px. It is only a
-candidate: trimming source gutters can alter subject size or trim baked
-illustration edges. **It is never enabled by default.**
+The earlier top-gutter-only candidate A (PR #109) did **not** consistently
+improve visual centering; it worsened several icons. It is not a default.
+
+The new `--icon-framing-review` flag selects a distinct **launcher-only**
+image provider. A fixed 324×324 square sample is centered on the approximate
+2%-98% bounding box of bright illustration pixels measured from each exact
+SHA-256 approved 345×333/334 source image. The measured (X,Y) centers are:
+
+| Browser | Mail | Files | Calendar | Photos | Music | Terminal | Settings |
+|---|---|---|---|---|---|---|---|
+| (170,170) | (172,162) | (174,164) | (173,165) | (171,166) | (172,169) | (171,170) | (175,165) |
+
+These are a bounded visual hypothesis, **not a judgment of optical quality**.
+They preserve the existing 192×192 cached icon and fixed 168×168 rounded
+frame, but can change the illustration's scale and crop dark gutters.
+An artist's intentionally off-center penguin may remain intentionally
+off-center. Only the **launcher** can request the new provider. The frozen
+dock always uses the original image provider, with the original full-image
+fit, regardless of the flag. Both providers cache rendered images once,
+with no per-frame animation, background service, or asset substitution.
+
+**The candidate remains opt-in and has no owner visual approval.**
 
 The command immediately refuses the option unless the complete **eight
 exact SHA-256 approved original images** are verified. Neither the manifest

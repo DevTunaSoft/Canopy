@@ -52,3 +52,22 @@ shell switcher or permission to run community QML.
 ```sh
 python3 -m unittest tests.test_shell_host -v
 ```
+
+### Create a new local Shell Pack starter
+
+Developers can now generate a third (or later) original presentation without
+touching Canopy's shared-core code or existing Classic artwork:
+
+```sh
+mkdir -p /tmp/canopy-packs
+python3 -m canopy_core.scaffold /tmp/canopy-packs \
+  --id com.example.focus --name "Focus Desktop" \
+  --capability app-launcher
+python3 -m canopy_core /tmp/canopy-packs --json
+python3 -m unittest tests.test_shell_scaffold -v
+```
+
+This only creates a locally validated `manifest.json`, QML placeholder and
+README. It refuses unsafe or existing directories, invalid IDs and
+capabilities, and invalid catalogs. **It does not install or run** a desktop
+presentation; runtime loading and same-session switching are still future work.

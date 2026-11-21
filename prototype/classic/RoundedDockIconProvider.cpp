@@ -15,18 +15,22 @@ constexpr int kInsetPixels = 12;
 constexpr int kRoundedRadius = 36;
 constexpr int kMaxRequestPixels = 256;
 
-// Directly reused measured, source-specific gutters from the earlier
-// isolated PR #109. This candidate is never the default renderer.
-// The chosen user PNG masters remain byte-exact and unmodified.
-const QHash<QString, int> kApprovedSourceTopGutters = {
-    {QStringLiteral("browser"), 9},
-    {QStringLiteral("mail"), 6},
-    {QStringLiteral("files"), 2},
-    {QStringLiteral("calendar"), 0},
-    {QStringLiteral("photos"), 0},
-    {QStringLiteral("music"), 5},
-    {QStringLiteral("terminal"), 14},
-    {QStringLiteral("settings"), 14},
+// Experimental launcher-only sampling of SHA-locked 345x333/334 sources.
+// Centers are rounded from 2%-98% bounds of bright illustration pixels,
+// measured independently for each private original PNG. This centers the
+// major visible artwork rather than only chopping a source-sheet TOP gutter.
+// It is NOT applied to the existing dock or enabled without an explicit
+// opt-in. No immutable original artwork bytes are changed.
+constexpr int kOpticalSampleSize = 324;
+const QHash<QString, QPointF> kLauncherOpticalCenters = {
+    {QStringLiteral("browser"), QPointF(170, 170)},
+    {QStringLiteral("mail"), QPointF(172, 162)},
+    {QStringLiteral("files"), QPointF(174, 164)},
+    {QStringLiteral("calendar"), QPointF(173, 165)},
+    {QStringLiteral("photos"), QPointF(171, 166)},
+    {QStringLiteral("music"), QPointF(172, 169)},
+    {QStringLiteral("terminal"), QPointF(171, 170)},
+    {QStringLiteral("settings"), QPointF(175, 165)},
 };
 }
 
@@ -94,24 +98,29 @@ RoundedDockIconProvider::RoundedDockIconProvider(
         const bool terminalDerivative =
             !terminalCandidatePath.isEmpty() && sourcePath == terminalCandidatePath;
         if (framingReviewMode && !terminalDerivative) {
-            // Review candidate A from PR #109, applied to the SAME shared Qt
-            // image provider used by BOTH the dock and searchable launcher.
-            // The outer 168px rounded face never moves. The approved original
-            // remains untouched; this is an in-memory square content sample.
-            if (!kApprovedSourceTopGutters.contains(id)) {
-                *error = QStringLiteral("unknown approved source icon for framing review");
+            // Candidate B: source-specific bright-illustration bounds, not
+            // uniform top trimming. The unchanged fixed 168px mask remains
+            // centered. Only the launcher may instantiate this mode; dock
+            // uses framingReviewMode=false and its exact original renderer.
+            if (!kLauncherOpticalCenters.contains(id) ||
+                original.width() != 345 ||
+                (original.height() != 333 && original.height() != 334)) {
+                *error = QStringLiteral("launcher optical sample input mismatch");
                 m_images.clear();
                 return;
             }
-            const int top = kApprovedSourceTopGutters.value(id);
-            const int side = original.height() - top;
-            if (top < 0 || top > 14 || side < 256 || original.width() < side) {
-                *error = QStringLiteral("approved image framing dimensions invalid");
+            const QPointF center = kLauncherOpticalCenters.value(id);
+            const QRectF originalSample(
+                center.x() - kOpticalSampleSize / 2.0,
+                center.y() - kOpticalSampleSize / 2.0,
+                kOpticalSampleSize, kOpticalSampleSize);
+            if (originalSample.left() < 0 || originalSample.top() < 0 ||
+                originalSample.right() > original.width() ||
+                originalSample.bottom() > original.height()) {
+                *error = QStringLiteral("launcher sample exceeds original bounds");
                 m_images.clear();
                 return;
             }
-            const int left = (original.width() - side) / 2;
-            const QRectF originalSample(left, top, side, side);
             painter.drawImage(face, original, originalSample);
         } else {
             // ORIGINAL full-image fit remains the default. The optional

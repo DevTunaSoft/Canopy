@@ -65,6 +65,25 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn('SELF_TEST_FAIL: Files dock did not restore preview', cpp)
         self.assertIn('SELF_TEST_PASS: Files dock hide/restore and activity indicator', cpp)
 
+    def test_preview_close_button_and_dock_reopen_runtime_gate(self):
+        window = (ROOT / "PreviewWindow.qml").read_text()
+        cpp = (ROOT / "main.cpp").read_text()
+        self.assertIn('objectName: "canopyPreviewClose"', window)
+        self.assertIn('Accessible.name: "Close Files preview"', window)
+        self.assertIn("onClicked: preview.visible = false", window)
+        self.assertIn('findVisualItem(preview, QStringLiteral("canopyPreviewClose"))', cpp)
+        self.assertIn('SELF_TEST_PASS: Files close control and dock reopen', cpp)
+        self.assertIn('SELF_TEST_FAIL: Files preview failed to reopen after close', cpp)
+
+    def test_keyboard_shortcut_bindings_and_runtime_gate(self):
+        qml = (ROOT / "Main.qml").read_text()
+        runtime = (ROOT / "main.cpp").read_text()
+        self.assertIn('objectName: "canopyFilesCloseShortcut"', qml)
+        self.assertIn('sequence: "Ctrl+W"', qml)
+        self.assertIn('objectName: "canopyFilesOpenShortcut"', qml)
+        self.assertIn('sequence: "Ctrl+Shift+F"', qml)
+        self.assertIn('SELF_TEST_PASS: Files keyboard close and reopen bindings', runtime)
+
     def test_representative_preview_is_included(self):
         cmake = (ROOT / "CMakeLists.txt").read_text()
         desktop = (ROOT / "Main.qml").read_text()

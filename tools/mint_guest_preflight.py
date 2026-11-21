@@ -27,7 +27,9 @@ def parse_release(data):
         if key not in ("ID", "VERSION_ID", "PRETTY_NAME"):
             continue
         value = value.strip()
-        if value and value[0] in ("'", '"') and value[-1] == value[0]:
+        if value.startswith(("'", '"')) or value.endswith(("'", '"')):
+            if len(value) < 2 or value[0] != value[-1]:
+                continue
             value = value[1:-1]
         # Avoid logging arbitrary control characters or excessively long data.
         if not value or len(value) > 120 or any(ord(c) < 32 for c in value):

@@ -113,7 +113,13 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn("clip: true", window)
         self.assertIn("contentHeight: Math.max(height, folders.height + 10)", window)
         self.assertIn("height: childrenRect.height", window)
-        self.assertIn("ScrollBar.AlwaysOn", window)
+        self.assertIn("policy: ScrollBar.AsNeeded", window)
+        # Compact Files cards must fit two rows without a forced scrollbar.
+        self.assertIn("compact: preview.condensed", window)
+        self.assertIn("height: compact ? 70 : 90", tiles)
+        # A four-column cap prevents the 1920x1080 7+1 orphan row.
+        self.assertIn("width: Math.min(folderScroller.width - 13", window)
+        self.assertIn("4 * 108 + 3 * (preview.condensed ? 6 : 10)", window)
         tiles = (ROOT / "FolderTile.qml").read_text()
         self.assertIn("Accessible.description:", tiles)
         self.assertIn("source: \"qrc:/Canopy/Classic/assets/ui/folder-blue.svg\"", tiles)

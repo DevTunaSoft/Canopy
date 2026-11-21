@@ -6,7 +6,9 @@ import QtQuick
 Item {
     id: wallpaper
     objectName: "canopyWallpaper"
-    Accessible.name: "Canopy Blue Current, original flowing blue abstract wallpaper"
+    Accessible.name: canopyLandscapeWallpaperUrl.length > 0
+                     ? "Canopy mountain and lake landscape wallpaper"
+                     : "Canopy Blue Current wallpaper"
 
     Rectangle {
         anchors.fill: parent
@@ -16,16 +18,24 @@ Item {
         id: blueCurrent
         objectName: "canopyWallpaperImage"
         anchors.fill: parent
-        // The accepted concept uses this exact blue wave source PNG.
-        // Strict mode refuses missing/mismatched bytes before QML is loaded.
-        source: canopyApprovedMode ? canopyApprovedWallpaperUrl
-               : "qrc:/Canopy/Classic/assets/wallpapers/blue-current.svg"
+        // A validated landscape photo takes precedence over the historical
+        // blue-wave reference. Eight user-chosen icon hashes are unchanged.
+        source: canopyLandscapeWallpaperUrl.length > 0
+                ? canopyLandscapeWallpaperUrl
+                : (canopyApprovedMode ? canopyApprovedWallpaperUrl
+                                      : "qrc:/Canopy/Classic/assets/wallpapers/blue-current.svg")
         fillMode: Image.PreserveAspectCrop
         asynchronous: false
         cache: true
         smooth: true
-        sourceSize: canopyApprovedMode ? Qt.size(1280, 720) : Qt.size(1920, 1080)
-        Accessible.name: "Static Blue Current wallpaper artwork"
+        // The native photo is cached at a bounded resolution for HiDPI.
+        // No shaders, per-frame blur, pollers, or wallpaper animation.
+        sourceSize: canopyLandscapeWallpaperUrl.length > 0
+                    ? Qt.size(Math.min(3840, Math.ceil(wallpaper.width * 2)),
+                              Math.min(2160, Math.ceil(wallpaper.height * 2)))
+                    : (canopyApprovedMode ? Qt.size(1280, 720) : Qt.size(1920, 1080))
+        Accessible.name: "Static desktop wallpaper artwork"
     }
+    readonly property bool landscapeActive: canopyLandscapeWallpaperUrl.length > 0
     readonly property bool imageReady: blueCurrent.status === Image.Ready
 }

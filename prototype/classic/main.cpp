@@ -204,7 +204,12 @@ int main(int argc, char *argv[]) {
     const QStringList args = QCoreApplication::arguments();
     const int approvedIndex = args.indexOf(QStringLiteral("--approved-art-dir"));
     const bool approvedMode = approvedIndex >= 0;
+    const bool frameReviewMode = args.contains(QStringLiteral("--icon-framing-review"));
     const bool requireApproved = args.contains(QStringLiteral("--self-test-approved"));
+    if (frameReviewMode && !approvedMode) {
+        qCritical() << "ICON_FRAMING_REVIEW_FAIL: must supply SHA-locked approved art first";
+        return 2;
+    }
     const int landscapeIndex = args.indexOf(QStringLiteral("--landscape-wallpaper"));
     const bool landscapeMode = landscapeIndex >= 0;
     const int terminalRefinementIndex = args.indexOf(QStringLiteral("--terminal-refinement"));
@@ -286,7 +291,8 @@ int main(int argc, char *argv[]) {
         // Source PNGs were SHA-verified above; transform copies IN MEMORY
         // only. The files and their immutable manifest remain unchanged.
         QString roundedError;
-        auto *roundedIcons = new RoundedDockIconProvider(approvedRoot, terminalCandidatePath, &roundedError);
+        auto *roundedIcons = new RoundedDockIconProvider(approvedRoot, terminalCandidatePath,
+                                                         frameReviewMode, &roundedError);
         if (!roundedIcons->isValid() || !roundedIcons->allCornersClipped()) {
             qCritical().noquote() << "APPROVED_ART_FAIL: rounded dock rendering:"
                                    << roundedError;
@@ -295,8 +301,13 @@ int main(int argc, char *argv[]) {
         }
         engine.addImageProvider(QStringLiteral("canopy-dock"), roundedIcons);
         qInfo() << "CANOPY_ROUNDED_DOCK_VERIFIED: eight original icons, padded, alpha-clipped";
+        if (frameReviewMode)
+            qInfo() << "ICON_FRAMING_REVIEW_ACTIVE: source-sheet gutters normalized"
+                       " within fixed centered card masks; original masters unchanged;"
+                       " owner visual acceptance NOT granted";
     }
     engine.rootContext()->setContextProperty(QStringLiteral("canopyApprovedMode"), approvedMode);
+    engine.rootContext()->setContextProperty(QStringLiteral("canopyIconFramingReview"), frameReviewMode);
     engine.rootContext()->setContextProperty(
         QStringLiteral("canopyLandscapeWallpaperUrl"),
         landscapeMode ? QUrl::fromLocalFile(landscapePath).toString() : QString());
@@ -345,7 +356,7 @@ int main(int argc, char *argv[]) {
         }
         const QString screenshotPath = args.at(screenshotIndex + 1);
         QTimer::singleShot(1000, window, [window, screenshotPath, approvedMode, landscapeMode,
-             terminalCandidateMode = !terminalCandidatePath.isEmpty()]() {
+             frameReviewMode, terminalCandidateMode = !terminalCandidatePath.isEmpty()]() {
             auto *bar = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBar"));
             auto *dock = window->findChild<QQuickItem *>(QStringLiteral("canopyDock"));
             auto *launcher = window->findChild<QQuickItem *>(QStringLiteral("canopyLauncher"));
@@ -422,6 +433,9 @@ int main(int argc, char *argv[]) {
                 QCoreApplication::exit(1);
                 return;
             }
+            if (approvedMode && frameReviewMode)
+                qInfo() << "SELF_TEST_PASS: opt-in icon source framing verified;"
+                           " outer Qt tile positions unchanged; owner approval pending";
             if (approvedMode && terminalCandidateMode)
                 qInfo() << "SELF_TEST_PASS: seven original dock PNGs plus one Terminal candidate loaded";
             else if (approvedMode)

@@ -94,8 +94,9 @@ RoundedDockIconProvider::RoundedDockIconProvider(
         painter.setClipPath(outline);
         painter.fillPath(outline, QColor(QStringLiteral("#10203d")));
 
-        if (framingReviewMode && !(id == QStringLiteral("terminal") &&
-                                    !terminalCandidatePath.isEmpty())) {
+        const bool usesTerminalDerivative =
+            !terminalCandidatePath.isEmpty() && sourcePath == terminalCandidatePath;
+        if (framingReviewMode && !usesTerminalDerivative) {
             // The eight original contact-sheet crops are 345px wide but only
             // 333-334px high, and contain different baked dark top gutters.
             // Normalise that *content* in memory, INSIDE an identical

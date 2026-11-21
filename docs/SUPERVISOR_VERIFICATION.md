@@ -25,6 +25,7 @@ to the Canopy stacked-PR queue. No Canopy Qt, artwork or CI file was changed.
 | Regression suite (Windows-applicable modules) | PASS — 221 tests | `py -3 -m unittest -q <all tests except three POSIX-only modules>` |
 | Byte compile | PASS | `py -3 -m compileall -q canopy_supervisor tools/canopy_supervisor.py tests/test_canopy_supervisor.py` |
 | Full discovery on Windows | BLOCKED — pre-existing failures | `py -3 -m unittest discover -s tests -q` |
+| Canopy draft PR #135 `foundation` check | PASS — 16 s, Ubuntu, commit `bbd9c40` | `gh pr checks 135 --repo DevTunaSoft/Canopy` |
 
 The full Windows run reports errors in `test_classic_preview_menu` because it
 patches `os.geteuid`, which does not exist on Windows, and in
@@ -95,8 +96,10 @@ contains no merge operation.
 
 ## What this does not prove
 
-No claim is made about Linux Mint guest acceptance, real Qt screenshots, owner
-visual approval, low-resource targets, Shell Pack runtime loading, or safety of
-any community package. Those gates remain documented in `docs/QUALITY.md` and
+The implementation draft PR is
+[#135](https://github.com/DevTunaSoft/Canopy/pull/135). No claim is made about
+Linux Mint guest acceptance, real Qt screenshots, owner visual approval,
+low-resource targets, Shell Pack runtime loading, or safety of any community
+package. Those gates remain documented in `docs/QUALITY.md` and
 `docs/RELIABILITY_99_GATE_AUDIT.md`. Green CI or a draft PR is not merge
 authorization.

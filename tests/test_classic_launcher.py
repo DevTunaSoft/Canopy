@@ -38,6 +38,7 @@ class ClassicLauncherContracts(unittest.TestCase):
         self.assertIn('sequence: "Ctrl+Space"', main)
         self.assertIn("onActivated: appLauncher.toggleLauncher()", main)
         self.assertIn("z: 20", main)
+        self.assertIn("visible: !appLauncher.opened", main)
         self.assertIn("if (applicationName === \"Files\")", main)
         self.assertIn("filesPreview.visible = true", main)
 
@@ -72,6 +73,8 @@ class ClassicLauncherContracts(unittest.TestCase):
         self.assertIn('QStringLiteral("fIlEs")', code)
         self.assertIn("approvedMode ? 8 : 6", code)
         self.assertIn('"openLauncher"', code)
+        self.assertIn("!applicationLauncher->isVisible() && dock->isVisible()", code)
+        self.assertIn("!applicationLauncher->isVisible() || dock->isVisible()", code)
         self.assertIn('"closeLauncher"', code)
         self.assertIn("SELF_TEST_FAIL: launcher search or dismissal inconsistent", code)
         self.assertIn("SELF_TEST_PASS: actual Qt launcher opens, searches and closes", code)

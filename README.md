@@ -71,3 +71,11 @@ This only creates a locally validated `manifest.json`, QML placeholder and
 README. It refuses unsafe or existing directories, invalid IDs and
 capabilities, and invalid catalogs. **It does not install or run** a desktop
 presentation; runtime loading and same-session switching are still future work.
+
+### Classic dock artwork optical QA
+
+The standalone [icon optical audit](docs/ICON_OPTICAL_REVIEW.md) helps
+reviewers quantify why centered image rectangles can still contain
+off-center artwork. It reads **externally supplied, SHA-verified** original
+PNG masters and generates a non-mutating heuristic report. No source
+icons are included, uploaded, transformed or approved by this tool.

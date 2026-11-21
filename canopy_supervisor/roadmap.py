@@ -75,6 +75,24 @@ class RoadmapError(ValueError):
     """Roadmap catalog is invalid."""
 
 
+def campaign_status(task: dict, state_root: Path) -> str:
+    """Judge a finished campaign from its evidence, never from its PR alone."""
+    path = Path(state_root) / "evidence" / task["id"] / "evidence.json"
+    if not path.is_file():
+        return "pending"
+    try:
+        evidence = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, ValueError):
+        return "failed"
+    results = {row.get("result") for row in evidence.get("tests", [])
+               if isinstance(row, dict)}
+    if "FAIL" in results:
+        return "failed"
+    if "BLOCKED" in results or "NOT RUN" in results:
+        return "blocked"
+    return "success"
+
+
 def load(state_root: Path) -> list[dict]:
     """Honor an explicit roadmap.json; otherwise return the continuous list."""
     path = Path(state_root) / "roadmap.json"
@@ -89,8 +107,8 @@ def load(state_root: Path) -> list[dict]:
     return [dict(policy.validate_task(item)) for item in data]
 
 
-def _attempt_number(campaign: str, existing: list[dict]) -> int | None:
-    """Return next attempt number, or None when campaign is finished."""
+def _attempt_number(campaign: str, existing: list[dict], state_root: Path) -> int | None:
+    """Return next attempt number, or None when campaign is finished or paused."""
     attempts = [task for task in existing if task.get("campaign") == campaign]
     cap = next((item.get("max_attempts", 3) for item in CAMPAIGNS
                 if item["id"] == campaign), 3)
@@ -98,15 +116,14 @@ def _attempt_number(campaign: str, existing: list[dict]) -> int | None:
         return None
     if any(task.get("status") in ACTIVE for task in attempts):
         return None
-    if any(task.get("status") in SUCCESS for task in attempts):
-        return None
-    if any(task.get("status") == "blocked" for task in attempts):
+    outcomes = [campaign_status(task, state_root) for task in attempts]
+    if "success" in outcomes or "blocked" in outcomes:
         return None
     return len(attempts) + 1
 
 
 def generate(existing: list[dict], max_workers: int, *, protected=None,
-             now: float | None = None) -> list[dict]:
+             now: float | None = None, state_root: Path | None = None) -> list[dict]:
     """Refill the pipeline with the highest-priority eligible campaigns."""
     if not isinstance(max_workers, int) or max_workers < 1:
         raise RoadmapError("invalid worker limit")
@@ -121,7 +138,7 @@ def generate(existing: list[dict], max_workers: int, *, protected=None,
         campaign_id = campaign["id"]
         if campaign_id in used:
             continue
-        number = _attempt_number(campaign_id, existing)
+        number = _attempt_number(campaign_id, existing, state_root or Path("."))
         if number is None:
             continue
         attempts = [task for task in existing if task.get("campaign") == campaign_id]
@@ -176,4 +193,5 @@ def select(existing: list[dict], max_workers: int, state_root: Path,
     path = Path(state_root) / "roadmap.json"
     if path.exists():
         return next_tasks(existing, load(state_root), max_workers, protected)
-    return generate(existing, max_workers, protected=protected, now=now)
+    return generate(existing, max_workers, protected=protected, now=now,
+                    state_root=state_root)

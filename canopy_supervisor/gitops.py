@@ -5,6 +5,7 @@ merge, force-push, approval or label command in this module.
 """
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path
 import re
@@ -107,6 +108,27 @@ def commit_all(worktree: Path, message: str) -> str:
 
 def push_branch(worktree: Path, branch: str, remote: str = "origin") -> None:
     run(["git", "push", "--set-upstream", remote, branch], cwd=worktree, timeout=240)
+
+
+def find_open_pr(worktree: Path, *, repo_slug: str, head: str) -> str | None:
+    """Return an existing open PR URL for a branch, so retries cannot duplicate it."""
+    try:
+        output = run([
+            "gh", "pr", "list", "--repo", repo_slug, "--head", head,
+            "--state", "open", "--json", "number,url", "--limit", "5",
+        ], cwd=worktree, timeout=90)
+    except GitError:
+        return None
+    if not output:
+        return None
+    try:
+        rows = json.loads(output)
+    except ValueError:
+        return None
+    if isinstance(rows, list) and rows and isinstance(rows[0], dict):
+        url = rows[0].get("url")
+        return str(url) if isinstance(url, str) and url else None
+    return None
 
 
 def create_draft_pr(worktree: Path, *, repo_slug: str, base: str, head: str,

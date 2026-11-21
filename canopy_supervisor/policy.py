@@ -123,9 +123,11 @@ def validate_task(task: object, protected: object = None) -> dict:
     if not BRANCH.fullmatch(branch):
         raise PolicyError("invalid branch name")
     extra = {}
-    for key in ("campaign", "kind", "publish"):
+    for key in ("campaign", "kind", "publish", "artifacts"):
         if key in task:
             extra[key] = task[key]
+    if task.get("kind") == "implementation" and not task.get("artifacts"):
+        raise PolicyError("implementation tasks require verifiable artifacts")
     return {
         "id": task_id,
         "title": task["title"],

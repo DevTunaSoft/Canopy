@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -312,32 +313,83 @@ class Supervisor:
             "evidence remain separate gates.",
         ])
 
+    @staticmethod
+    def _evidence_outcome(evidence: dict) -> str:
+        """BLOCKED and NOT RUN are never successful campaign completions."""
+        results = {row.get("result") for row in evidence.get("tests", [])
+                   if isinstance(row, dict)}
+        if "FAIL" in results:
+            return "failed"
+        if "BLOCKED" in results or "NOT RUN" in results:
+            return "blocked"
+        return "success"
+
+    def _verify_artifacts(self, task: dict, evidence: dict, worktree: Path) -> None:
+        """Implementation tasks must name real files with matching SHA-256."""
+        if task.get("kind") != "implementation":
+            return
+        artifacts = evidence.get("artifacts")
+        if not isinstance(artifacts, list) or not artifacts:
+            raise PolicyError("implementation task has no verifiable artifacts")
+        for item in artifacts:
+            if not isinstance(item, dict) or not isinstance(item.get("path"), str):
+                raise PolicyError("invalid artifact entry")
+            path = worktree / item["path"]
+            if not path.is_file():
+                raise PolicyError("artifact missing: " + item["path"])
+            expected = item.get("sha256")
+            if isinstance(expected, str):
+                digest = hashlib.sha256(path.read_bytes()).hexdigest()
+                if digest != expected:
+                    raise PolicyError("artifact SHA-256 mismatch: " + item["path"])
+
     def publish(self, task: dict) -> None:
         """Verify claims, commit, push and open a draft PR. Never merge."""
         worktree = Path(task["worktree"])
         base_sha = task["base_sha"]
         try:
             evidence = read_evidence(Path(self.config["state_root"]), task["id"])
+            outcome = self._evidence_outcome(evidence)
             pending = self.git.pending_files(worktree)
+            if outcome == "blocked":
+                sha = ""
+                if pending:
+                    sha = self.git.commit_all(worktree, f"evidence(supervisor): {task['title']}")
+                    self.git.push_branch(worktree, task["branch"], self.config["remote"])
+                state_module.advance(
+                    task, "blocked", "prerequisites-blocked",
+                    str(evidence.get("notes", ""))[:500], sha=sha, owner=None, pid=None,
+                    lease_expires_at=0.0,
+                )
+                self.store.event(task["id"], "blocked_no_pr",
+                                 "BLOCKED/NOT RUN is not success; no PR opened", level="WARN")
+                return
+            if outcome == "failed":
+                raise PolicyError("worker reported FAIL")
             if not pending or task.get("publish") is False:
                 state_module.advance(task, "done", "no-publish", "",
                                      owner=None, pid=None, lease_expires_at=0.0)
                 self.store.event(task["id"], "no_publish",
                                  "no worktree diff or publish disabled; evidence retained")
                 return
+            self._verify_artifacts(task, evidence, worktree)
             policy.validate_evidence(evidence, task, pending, pending_allowed=True)
             sha = self.git.commit_all(worktree, f"feat(supervisor): {task['title']}")
             changed = self.git.changed_files(worktree, base_sha)
             evidence["commit_sha"] = sha
+            self._verify_artifacts(task, evidence, worktree)
             policy.validate_evidence(evidence, task, changed)
             self.git.push_branch(worktree, task["branch"], self.config["remote"])
-            url = self.git.create_draft_pr(
-                worktree, repo_slug=self.config["repo_slug"],
-                base=self.config["base_branch"], head=task["branch"],
-                title="DRAFT: " + task["title"],
-                body=self._pr_body(task, evidence, sha),
-                body_dir=Path(self.config["state_root"]) / "evidence" / task["id"],
-            )
+            url = self.git.find_open_pr(worktree, repo_slug=self.config["repo_slug"],
+                                        head=task["branch"])
+            if not url:
+                url = self.git.create_draft_pr(
+                    worktree, repo_slug=self.config["repo_slug"],
+                    base=self.config["base_branch"], head=task["branch"],
+                    title="DRAFT: " + task["title"],
+                    body=self._pr_body(task, evidence, sha),
+                    body_dir=Path(self.config["state_root"]) / "evidence" / task["id"],
+                )
             number = url.rstrip("/").rsplit("/", 1)[-1]
             task["evidence"] = evidence
             task["pr"] = {"number": number, "url": url, "draft": True}

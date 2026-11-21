@@ -178,6 +178,20 @@ class RoadmapTests(unittest.TestCase):
         chosen = roadmap.next_tasks([], items, 3)
         self.assertEqual([task["id"] for task in chosen], ["first"])
 
+    def test_blocked_campaign_is_paused_not_replaced(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            task = state.new_task(task_definition("blocked-task"), 2)
+            task.update({"campaign": "qt-toolchain-enablement", "status": "awaiting_review"})
+            evidence = root / "evidence" / "blocked-task"
+            evidence.mkdir(parents=True)
+            (evidence / "evidence.json").write_text(json.dumps({
+                "tests": [{"result": "BLOCKED", "command": "probe"}],
+            }), encoding="utf-8")
+            self.assertEqual(roadmap.campaign_status(task, root), "blocked")
+            chosen = roadmap.generate([task], 3, state_root=root)
+            self.assertNotIn("qt-toolchain-enablement", [t["campaign"] for t in chosen])
+
     def test_generate_prioritizes_real_work_and_caps_campaigns(self):
         first = roadmap.generate([], 3)
         self.assertEqual([task["campaign"] for task in first], [
@@ -355,6 +369,10 @@ class FakeGit:
     def push_branch(self, worktree, branch, remote):
         self.calls.append(("push", branch, remote))
 
+    def find_open_pr(self, worktree, **kwargs):
+        self.calls.append(("find_pr", kwargs["head"]))
+        return None
+
     def create_draft_pr(self, worktree, **kwargs):
         self.calls.append(("draft_pr", kwargs["head"], kwargs["base"]))
         return self.pr_url
@@ -420,16 +438,16 @@ class SupervisorTests(unittest.TestCase):
         task.update(fields)
         self.store.save(data)
 
-    def _write_evidence(self, task_id, commit="PENDING"):
+    def _write_evidence(self, task_id, commit="PENDING", result="PASS", extra=None):
         directory = self.root / "evidence" / task_id
         directory.mkdir(parents=True, exist_ok=True)
         (directory / "evidence.json").write_text(json.dumps({
             "task_id": task_id, "branch": f"feat/canopy-supervisor-{task_id}",
             "commit_sha": commit,
-            "tests": [{"command": "python -m unittest tests.test_x", "result": "PASS",
+            "tests": [{"command": "python -m unittest tests.test_x", "result": result,
                        "output_excerpt": "OK"}],
             "changed_files": [f"docs/{task_id}.md"], "draft": True,
-            "notes": "bounded task",
+            "notes": "bounded task", **(extra or {}),
         }), encoding="utf-8")
 
     def test_dispatch_reserves_workers_and_respects_limit(self):
@@ -580,6 +598,45 @@ class SupervisorTests(unittest.TestCase):
         data = self.store.load()
         self.assertFalse(self.supervisor.assignable(data["tasks"][0], data["tasks"]))
         self.assertEqual(self.supervisor.backoff(1), 30.0)
+
+    def test_blocked_evidence_never_counts_as_success_or_pr(self):
+        self._add(task_definition("alpha"))
+        self.supervisor.dispatch(self.store.load())
+        self._write_evidence("alpha", result="BLOCKED")
+        self._mutate("alpha", status="verifying")
+        self.supervisor.verify(self.store.load())
+        blocked = self._get("alpha")
+        self.assertEqual(blocked["status"], "blocked")
+        self.assertEqual(blocked["checkpoint"]["stage"], "prerequisites-blocked")
+        self.assertFalse(any(call[0] == "draft_pr" for call in self.git.calls))
+
+    def test_not_run_evidence_blocks_campaign(self):
+        self.assertEqual(self.supervisor._evidence_outcome(
+            {"tests": [{"result": "NOT RUN"}]}), "blocked")
+
+    def test_implementation_requires_verifiable_artifact(self):
+        definition = task_definition("alpha")
+        definition["kind"] = "implementation"
+        definition["artifacts"] = [{"path": "build/app", "sha256": "a" * 64}]
+        clean = policy.validate_task(definition)
+        self._add(clean)
+        self.supervisor.dispatch(self.store.load())
+        self._write_evidence("alpha", extra={"artifacts": [
+            {"path": "build/app", "sha256": "a" * 64}]})
+        self._mutate("alpha", status="verifying")
+        self.supervisor.verify(self.store.load())
+        self.assertEqual(self._get("alpha")["status"], "failed")
+        self.assertFalse(any(call[0] == "draft_pr" for call in self.git.calls))
+
+    def test_existing_open_pr_is_reused_without_duplicate(self):
+        self._add(task_definition("alpha"))
+        self.supervisor.dispatch(self.store.load())
+        self._write_evidence("alpha")
+        self._mutate("alpha", status="verifying")
+        self.git.find_open_pr = lambda *a, **k: self.git.pr_url
+        self.supervisor.verify(self.store.load())
+        self.assertEqual(self._get("alpha")["pr"]["number"], "55")
+        self.assertFalse(any(call[0] == "draft_pr" for call in self.git.calls))
 
     def test_no_diff_task_finishes_without_draft_pr(self):
         self._add(task_definition("alpha"))

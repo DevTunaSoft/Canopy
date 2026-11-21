@@ -284,29 +284,29 @@ PR's **dock** interaction changes.
 
 ## Launch this actual Qt build from a Linux application menu
 
-The project's existing stdlib registration utility on \`main\` provides
+The project's existing stdlib registration utility on `main` provides
 **non-root, reversible user application menu integration**. Its installed
-\`.desktop\` entry points directly to a separately built Canopy Qt binary:
+`.desktop` entry points directly to a separately built Canopy Qt binary:
 
-\`\`\`sh
+```sh
 python3 tools/register_classic_preview.py status
 python3 tools/register_classic_preview.py install \
   --binary /absolute/path/to/canopy-classic-spike
 python3 tools/register_classic_preview.py status
 # When done (removes only its exact unmodified managed entry):
 python3 tools/register_classic_preview.py uninstall
-\`\`\`
+```
 
-Optional \`--approved-art-dir\`, \`--landscape-wallpaper\`,
-\`--terminal-refinement\` and \`--enable-system-apps\` are forwarded to
+Optional `--approved-art-dir`, `--landscape-wallpaper`,
+`--terminal-refinement` and `--enable-system-apps` are forwarded to
 supported builds. Neither the desktop entry nor this utility replaces
 Cinnamon, switches sessions, starts a compositor, downloads software, or
-installs anything system-wide. The existing \`DockTile.qml\` remains frozen.
+installs anything system-wide. The existing `DockTile.qml` remains frozen.
 
-\`tools/classic_menu_runtime_smoke.py\` now provides a separate **actual
+`tools/classic_menu_runtime_smoke.py` now provides a separate **actual
 runtime launch test**. The CI builds the real Qt6 program, registers it
-in a disposable temporary \`XDG_DATA_HOME\`, validates the desktop entry,
-executes it through \`gio launch\` under a fresh Xvfb display, and requires
+in a disposable temporary `XDG_DATA_HOME`, validates the desktop entry,
+executes it through `gio launch` under a fresh Xvfb display, and requires
 both a process running that exact executable inode and a visible X11
 Canopy window. The test kills only the newly observed executable process,
 verifies ownership and unregisters the temporary menu entry; it never

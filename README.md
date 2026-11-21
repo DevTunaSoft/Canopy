@@ -40,3 +40,15 @@ python3 -m unittest tests.test_shell_pack_registry -v
 **Important:** metadata discovery does not install, approve or launch packs.
 The actual Shell Host/runtime, permissions and session switching remain future
 engineering milestones.
+
+### Shared presentation lifecycle prototype
+
+`canopy_core.shell_host.ShellHost` also has a tested **in-memory,
+host-registered** adapter lifecycle: prepare → deactivate old → activate
+new → dispose old, with rollback and visible recovery failures. It is a
+non-Qt simulation of the host-side transition logic, not an end-user
+shell switcher or permission to run community QML.
+
+```sh
+python3 -m unittest tests.test_shell_host -v
+```

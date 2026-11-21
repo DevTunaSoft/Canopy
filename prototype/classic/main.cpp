@@ -419,7 +419,7 @@ int main(int argc, char *argv[]) {
                     (approvedMode ? 8 : 6)
                 || !QMetaObject::invokeMethod(applicationLauncher, "openLauncher",
                                                Qt::DirectConnection)
-                || !applicationLauncher->isVisible()) {
+                || !applicationLauncher->isVisible() || dock->isVisible()) {
                 qCritical() << "SELF_TEST_FAIL: original application search failed to open";
                 QCoreApplication::exit(1);
                 return;
@@ -436,7 +436,7 @@ int main(int argc, char *argv[]) {
                     (approvedMode ? 8 : 6);
             const bool closed = QMetaObject::invokeMethod(
                 applicationLauncher, "closeLauncher", Qt::DirectConnection)
-                && !applicationLauncher->isVisible();
+                && !applicationLauncher->isVisible() && dock->isVisible();
             if (!selectedMatch || !emptyMatch || !restoredMatch || !closed) {
                 qCritical() << "SELF_TEST_FAIL: launcher search or dismissal inconsistent";
                 QCoreApplication::exit(1);

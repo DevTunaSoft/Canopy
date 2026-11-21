@@ -143,7 +143,7 @@ jobs:
           dimensions = []
           for path in paths:
               blob = path.read_bytes()
-              assert blob.startswith(b"\\x89PNG\\r\\n\\x1a\\n")
+              assert blob.startswith(bytes((137, 80, 78, 71, 13, 10, 26, 10)))
               width, height = struct.unpack_from(">II", blob, 16)
               assert abs(width - round(1200 * factor)) <= 1, (path, width)
               assert abs(height - round(750 * factor)) <= 1, (path, height)

@@ -209,7 +209,9 @@ The existing Tux menu now offers **Browse applications**. The standalone
 Classic preview also accepts **Ctrl+Space** to toggle a searchable, keyboard-
 accessible application overlay and **Escape** to dismiss it. The overlay
 reuses the verified original eight icons when approved-art mode is enabled;
-the non-approved fallback uses only its original six legacy icons. Case-
+the non-approved fallback uses only its original six legacy icons. On compact
+screens, the dock is hidden while the modal search is open so no clipped row
+peeks beneath it; closing the overlay restores the unchanged dock. Case-
 insensitive filtering, zero-match feedback, focus and keyboard selection are
 local QML operations that do not spawn processes, poll or require another
 daemon. Opening **Files** only reopens the existing sample Files window; all

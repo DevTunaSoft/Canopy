@@ -1,7 +1,9 @@
-#include "SystemAppLauncher.h"
-
+// GIO headers must be parsed BEFORE Qt defines its "signals" macro.
+// GLib's GDBus structs legitimately contain a member called "signals".
 #include <gio/gdesktopappinfo.h>
 #include <gio/gio.h>
+
+#include "SystemAppLauncher.h"
 
 #include <QHash>
 #include <QDebug>

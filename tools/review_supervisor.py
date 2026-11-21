@@ -17,7 +17,7 @@ from urllib.request import Request, urlopen
 OWNER_REPO = "DevTunaSoft/Canopy"
 MAX_REVIEW_PRS = 25
 MAX_OPEN_ISSUES = 15
-SUCCESS_RESULTS = frozenset({"success", "neutral", "skipped"})
+REQUIRED_CHECKS_BRANCH = "main"
 
 
 class SupervisorError(RuntimeError):
@@ -49,9 +49,13 @@ def github_get(path, token):
         raise SupervisorError(f"GitHub API retrieval failed: {type(exc).__name__}") from exc
 
 
-def check_summary(checks):
+def check_summary(checks, required_checks=None):
     """Report checks without conflating a green badge with merge authorization."""
-    if not isinstance(checks, list) or not checks:
+    if not isinstance(checks, list):
+        return "CHECK DATA INVALID"
+    if not checks:
+        if required_checks:
+            return "NO CHECK EVIDENCE (REQUIRED CHECKS MISSING)"
         return "NO CHECK EVIDENCE"
     if any(not isinstance(row, dict) for row in checks):
         return "CHECK DATA INVALID"
@@ -60,18 +64,46 @@ def check_summary(checks):
         return "CHECKS FAIL/BLOCKED"
     if any(row.get("status") != "completed" for row in checks):
         return "CHECKS IN PROGRESS"
-    if all(row.get("conclusion") in SUCCESS_RESULTS for row in checks):
-        # "skipped"/"neutral" are not evidence that a test ever ran.
-        # Check runs are also not proof that all *required* workflows were
-        # scheduled. Never advertise a green test suite without success.
-        successful = sum(row.get("conclusion") == "success" for row in checks)
-        if successful == 0:
-            return "NO SUCCESSFUL CHECKS"
-        return "CHECKS GREEN (coverage not verified; not approval)"
+    skipped_only = all(row.get("conclusion") == "skipped" for row in checks)
+    if required_checks:
+        missing = False
+        unsuccessful = False
+        for context, app_id in required_checks:
+            matching = [
+                row for row in checks
+                if row.get("name") == context and
+                (app_id is None or
+                 (isinstance(row.get("app"), dict) and
+                  isinstance(row["app"].get("id"), int) and
+                  not isinstance(row["app"].get("id"), bool) and
+                  row["app"].get("id") == app_id))
+            ]
+            if not matching:
+                missing = True
+            elif any(row.get("conclusion") != "success" for row in matching):
+                unsuccessful = True
+        if skipped_only:
+            if missing:
+                return "SKIPPED-ONLY CHECKS; REQUIRED CHECKS MISSING"
+            return "SKIPPED-ONLY CHECKS (NO SUCCESS)"
+        if missing:
+            return "REQUIRED CHECKS MISSING"
+        if unsuccessful:
+            return "REQUIRED CHECKS NOT SUCCESSFUL"
+        return "REQUIRED CHECKS PASSED (NO MERGE AUTHORITY)"
+    if skipped_only:
+        return "SKIPPED-ONLY CHECKS (NO SUCCESS)"
+    successful = sum(row.get("conclusion") == "success" for row in checks)
+    if successful == 1:
+        return "SINGLE CHECK SUCCESS (REQUIRED COVERAGE UNKNOWN; NOT APPROVAL)"
+    if successful > 1:
+        return "CHECKS SUCCESSFUL (REQUIRED COVERAGE UNKNOWN; NOT APPROVAL)"
+    if any(row.get("conclusion") in ("neutral", "skipped") for row in checks):
+        return "NO SUCCESSFUL CHECKS"
     return "CHECKS UNKNOWN"
 
 
-def classify(pr, checks):
+def classify(pr, checks, required_checks=None):
     """Present review blockers in priority order; never return 'safe to merge'."""
     title = str(pr.get("title") or "").upper()
     body = str(pr.get("body") or "").upper()
@@ -82,9 +114,9 @@ def classify(pr, checks):
         return "STACKED / REBASE REVIEW"
     if pr.get("draft"):
         return "DRAFT / REVIEW REQUIRED"
-    status = check_summary(checks)
-    if status.startswith("CHECKS GREEN"):
-        return "CHECKS PASSED / COVERAGE + HUMAN REVIEW REQUIRED"
+    status = check_summary(checks, required_checks)
+    if status.startswith("REQUIRED CHECKS PASSED"):
+        return "REQUIRED CHECKS PASSED / HUMAN REVIEW REQUIRED"
     return "REVIEW / CI REQUIRED"
 
 
@@ -95,7 +127,8 @@ def safe_text(value, max_chars=140):
     return text[:max_chars]
 
 
-def make_report(pulls, issues, checks_by_sha, *, generated_at, limit=MAX_REVIEW_PRS):
+def make_report(pulls, issues, checks_by_sha, *, generated_at, limit=MAX_REVIEW_PRS,
+                required_checks=None, incomplete_check_shas=None):
     """Build non-authoritative review queue from exact GitHub API snapshots."""
     if not isinstance(pulls, list) or not isinstance(issues, list):
         raise SupervisorError("unexpected repository collection shape")
@@ -118,13 +151,15 @@ def make_report(pulls, issues, checks_by_sha, *, generated_at, limit=MAX_REVIEW_
             raise SupervisorError("unexpected pull request entry")
         sha = str(pr.get("head", {}).get("sha") or "")
         checks = checks_by_sha.get(sha, [])
+        coverage = required_checks if pr.get("base", {}).get("ref") == REQUIRED_CHECKS_BRANCH \
+            and sha not in (incomplete_check_shas or set()) else None
         number = pr.get("number")
         lines.append(
             f"| [#{number}](https://github.com/{OWNER_REPO}/pull/{number}) "
             f"| {safe_text(pr.get('title'))} "
             f"| {safe_text(pr.get('base', {}).get('ref'), 70)} "
-            f"| {check_summary(checks)} "
-            f"| {classify(pr, checks)} |"
+            f"| {check_summary(checks, coverage)} "
+            f"| {classify(pr, checks, coverage)} |"
         )
     if len(pulls) > limit:
         lines.append(f"\nAdditional {len(pulls) - limit} open PRs not individually inspected.")
@@ -166,18 +201,56 @@ def collect(token):
     if not isinstance(pulls, list) or not isinstance(issues, list):
         raise SupervisorError("unexpected GitHub API response")
     checked = {}
+    incomplete_check_shas = set()
+    has_main_base = False
     for pr in pulls[:MAX_REVIEW_PRS]:
         sha = pr.get("head", {}).get("sha", "")
         if not isinstance(sha, str) or len(sha) != 40 or \
                 any(c not in "0123456789abcdef" for c in sha.lower()):
             raise SupervisorError("invalid pull request head SHA")
+        has_main_base |= pr.get("base", {}).get("ref") == REQUIRED_CHECKS_BRANCH
         response = github_get(
             f"{base}/commits/{sha}/check-runs?per_page=100", token
         )
         if not isinstance(response, dict) or not isinstance(response.get("check_runs"), list):
             raise SupervisorError("unexpected check-runs response")
         checked[sha] = response["check_runs"]
-    return pulls, issues, checked
+        total_count = response.get("total_count")
+        if not isinstance(total_count, int) or isinstance(total_count, bool) or \
+                total_count != len(response["check_runs"]):
+            incomplete_check_shas.add(sha)
+    required_checks = None
+    if has_main_base:
+        try:
+            protection = github_get(
+                f"{base}/branches/{REQUIRED_CHECKS_BRANCH}/protection/required_status_checks",
+                token,
+            )
+        except SupervisorError:
+            # The workflow token may not be allowed to read branch protection.
+            # Unknown configuration must never be treated as verified coverage.
+            protection = None
+        if isinstance(protection, dict):
+            contexts = protection.get("contexts")
+            checks = protection.get("checks")
+            if isinstance(contexts, list) and isinstance(checks, list):
+                configured = [(name, None) for name in contexts
+                              if isinstance(name, str) and name]
+                valid = len(configured) == len(contexts)
+                for item in checks:
+                    if not isinstance(item, dict) or not isinstance(item.get("context"), str) \
+                            or not item["context"]:
+                        valid = False
+                        break
+                    app_id = item.get("app_id")
+                    if app_id is not None and (not isinstance(app_id, int) or
+                                               isinstance(app_id, bool)):
+                        valid = False
+                        break
+                    configured.append((item["context"], app_id))
+                if valid and configured:
+                    required_checks = configured
+    return pulls, issues, checked, required_checks, incomplete_check_shas
 
 
 def main(argv=None):
@@ -189,10 +262,12 @@ def main(argv=None):
         print("SUPERVISOR_FAIL: GITHUB_TOKEN not supplied", file=sys.stderr)
         return 2
     try:
-        pulls, issues, checks = collect(token)
+        pulls, issues, checks, required_checks, incomplete_check_shas = collect(token)
         report = make_report(
             pulls, issues, checks,
             generated_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            required_checks=required_checks,
+            incomplete_check_shas=incomplete_check_shas,
         )
         args.out.write_text(report, encoding="utf-8")
     except (SupervisorError, OSError, ValueError) as exc:

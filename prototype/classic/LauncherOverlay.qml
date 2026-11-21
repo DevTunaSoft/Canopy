@@ -141,6 +141,7 @@ FocusScope {
             activeFocusOnTab: true
             delegate: Button {
                 id: appButton
+                objectName: "canopyLauncherAppButton"
                 required property var modelData
                 required property int index
                 width: grid.cellWidth

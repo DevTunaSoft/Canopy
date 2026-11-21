@@ -36,6 +36,15 @@ class NativeAppLauncherTests(unittest.TestCase):
                        "fork(", "execvp(", "system("):
             self.assertNotIn(unsafe, source)
 
+    def test_gio_headers_precede_qt_signals_macro(self):
+        # Real Qt6 build initially failed because Qt's "signals" macro
+        # rewrote GLib's GDBusSignalInfo::signals member declaration.
+        source = (CLASSIC / "SystemAppLauncher.cpp").read_text()
+        self.assertLess(
+            source.index("#include <gio/gdesktopappinfo.h>"),
+            source.index('#include "SystemAppLauncher.h"'),
+        )
+
     def test_launcher_does_not_contain_new_background_services(self):
         source = (CLASSIC / "SystemAppLauncher.cpp").read_text()
         self.assertNotIn("QTimer", source)

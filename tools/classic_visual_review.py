@@ -6,9 +6,11 @@ Does not run Qt, change image pixels, upload screenshots or grant visual approva
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import shutil
+import stat
 import sys
 
 from tools.mint_classic_qt_smoke import png_size
@@ -28,6 +30,19 @@ def sha256(path):
         for block in iter(lambda: stream.read(1024 * 1024), b""):
             h.update(block)
     return h.hexdigest()
+
+
+def copy_verified(source, target, digest):
+    """Copy a regular screenshot without following source links on Linux."""
+    fd = os.open(source, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+    with os.fdopen(fd, "rb") as src:
+        if not stat.S_ISREG(os.fstat(src.fileno()).st_mode):
+            raise ReviewError("screenshot is not a regular file")
+        with target.open("xb") as dst:
+            shutil.copyfileobj(src, dst, 1024 * 1024)
+    target.chmod(0o600)
+    if sha256(target) != digest:
+        raise ReviewError("copied screenshot hash mismatch")
 
 
 def read_capture(directory, expected_framing):
@@ -99,10 +114,7 @@ def make_gallery(baseline, candidate, output):
         for sub, path, digest in (("before", old_path, old_hash),
                                   ("after", new_path, new_hash)):
             copied = destination / sub / name
-            shutil.copyfile(path, copied, follow_symlinks=False)
-            copied.chmod(0o600)
-            if sha256(copied) != digest:
-                raise ReviewError("copied screenshot hash mismatch")
+            copy_verified(path, copied, digest)
         resolution = f"{width} × {height}"
         rows.append(f'''<section><h2>{resolution}</h2><div class="comparison">
 <figure><a href="before/{name}"><img src="before/{name}" width="{width}" height="{height}" alt="Baseline actual Qt capture, {resolution}"></a><figcaption>Baseline · original framing</figcaption></figure>

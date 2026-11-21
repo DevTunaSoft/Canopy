@@ -44,26 +44,33 @@ class IconFrameDifferenceTests(unittest.TestCase):
         self.after.write_bytes(make_rgba_png(760, 500, changes))
         return compare_pair(self.before, self.after, "760x500", scene)
 
-    def test_all_eight_icon_edits_pass_without_outside_changes(self):
-        for scene in ("desktop", "launcher"):
-            with self.subTest(scene=scene):
-                report = self.simulate(CENTERS[self.size][scene], scene)
-                self.assertEqual(report["outside_icon_pixels"], 0)
-                self.assertEqual(report["changed_pixels"], 8)
-                self.assertEqual(len(report["per_icon_changed_pixels"]), 8)
+    def test_all_eight_launcher_icon_edits_pass_without_outside_changes(self):
+        report = self.simulate(CENTERS[self.size]["launcher"], "launcher")
+        self.assertEqual(report["outside_icon_pixels"], 0)
+        self.assertEqual(report["changed_pixels"], 8)
+        self.assertEqual(len(report["per_icon_changed_pixels"]), 8)
+
+    def test_closed_desktop_identical_even_when_launcher_review_enabled(self):
+        report = self.simulate([], "desktop")
+        self.assertEqual(report["changed_pixels"], 0)
+        self.assertEqual(report["before_sha256"], report["after_sha256"])
+
+    def test_no_dock_pixel_change_permitted(self):
+        with self.assertRaisesRegex(ComparisonError, "frozen dock/desktop pixel changed"):
+            self.simulate(CENTERS[self.size]["desktop"], "desktop")
 
     def test_single_changed_icon_is_not_misreported_as_all_pass(self):
         with self.assertRaisesRegex(ComparisonError, "every icon"):
-            self.simulate(CENTERS[self.size]["desktop"][:1])
+            self.simulate(CENTERS[self.size]["launcher"][:1], "launcher")
 
     def test_external_non_icon_pixel_rejected(self):
-        altered = CENTERS[self.size]["desktop"] + [(8, 100)]
+        altered = CENTERS[self.size]["launcher"] + [(8, 100)]
         with self.assertRaisesRegex(ComparisonError, "outside exactly one"):
-            self.simulate(altered)
+            self.simulate(altered, "launcher")
 
     def test_eight_icon_changes_cannot_pass_with_wrong_scene(self):
         with self.assertRaisesRegex(ComparisonError, "outside exactly one"):
-            self.simulate(CENTERS[self.size]["desktop"], "launcher")
+            self.simulate(CENTERS[self.size]["launcher"], "desktop")
 
     def test_invalid_screenshot_dimensions_rejected(self):
         self.after.write_bytes(make_rgba_png(720, 480))
@@ -91,7 +98,7 @@ class IconFrameDifferenceTests(unittest.TestCase):
     def test_same_image_never_counts_as_framing_improvement(self):
         self.after.write_bytes(self.before.read_bytes())
         with self.assertRaisesRegex(ComparisonError, "every icon"):
-            compare_pair(self.before, self.after, self.size, "desktop")
+            compare_pair(self.before, self.after, self.size, "launcher")
 
 
 if __name__ == "__main__":

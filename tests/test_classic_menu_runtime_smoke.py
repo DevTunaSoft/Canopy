@@ -73,6 +73,13 @@ class ClassicMenuRuntimeTests(unittest.TestCase):
                     smoke.run(self.executable)
                 install.assert_not_called()
 
+    def test_root_user_rejected_before_any_launch_or_menu_mutation(self):
+        with mock.patch.object(smoke.os, "geteuid", return_value=0):
+            with mock.patch.object(smoke.menu, "install") as install:
+                with self.assertRaisesRegex(smoke.MenuRuntimeError, "root"):
+                    smoke.run(self.executable)
+                install.assert_not_called()
+
     def test_timeout_outside_bounded_range_rejected(self):
         with mock.patch.object(smoke.os, "geteuid", return_value=1000):
             with mock.patch.dict(os.environ, {"DISPLAY": ":99"}):

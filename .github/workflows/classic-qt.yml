@@ -124,6 +124,15 @@ jobs:
             echo 'FAIL: fixed-clock launcher identical to resting desktop' >&2
             exit 1
           fi
+          # No approval is inferred, but a stable Qt scene and fixed clock
+          # should give identical resting-desktop PNGs across two runs.
+          # This catches nondeterministic screenshot evidence before private
+          # art reviews use it to assert the dock was not altered.
+          timeout 30s xvfb-run -a ./build/classic/canopy-classic-spike --self-test-fixed-clock --self-test-size 1200x750 --self-test-screenshot test-artifacts/classic-fixed-clock-desktop-repeat.png --self-test-launcher-screenshot test-artifacts/classic-fixed-clock-launcher-repeat.png
+          python3 tools/check_screenshot.py test-artifacts/classic-fixed-clock-desktop-repeat.png 1200 750
+          python3 tools/check_screenshot.py test-artifacts/classic-fixed-clock-launcher-repeat.png 1200 750
+          cmp test-artifacts/classic-fixed-clock-desktop.png test-artifacts/classic-fixed-clock-desktop-repeat.png
+          echo 'PASS: independent compiled Qt fixed-clock resting desktops byte-identical'
           timeout 30s xvfb-run -a ./build/classic/canopy-classic-spike --self-test-size 760x500 --self-test-screenshot test-artifacts/classic-compact.png
           python3 tools/check_screenshot.py test-artifacts/classic-compact.png 760 500
           timeout 30s xvfb-run -a -s '-screen 0 2048x1200x24' ./build/classic/canopy-classic-spike --self-test-size 1920x1080 --self-test-screenshot test-artifacts/classic-1080p.png

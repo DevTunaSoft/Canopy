@@ -69,7 +69,7 @@ class IconFrameDifferenceTests(unittest.TestCase):
             self.simulate(altered, "launcher")
 
     def test_eight_icon_changes_cannot_pass_with_wrong_scene(self):
-        with self.assertRaisesRegex(ComparisonError, "outside exactly one"):
+        with self.assertRaisesRegex(ComparisonError, "frozen dock/desktop pixel changed"):
             self.simulate(CENTERS[self.size]["launcher"], "desktop")
 
     def test_invalid_screenshot_dimensions_rejected(self):

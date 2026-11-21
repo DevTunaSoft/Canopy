@@ -100,7 +100,7 @@ class MintGuestPreflightTests(unittest.TestCase):
     def test_bad_release_values_ignored(self):
         self.assertEqual(parse_release("ID=\"linuxmint\nVERSION_ID=22.3"),
                          {"VERSION_ID": "22.3"})
-        self.assertEqual(parse_release("ID=\\x00"), {"ID": "\\x00"})
+        self.assertEqual(parse_release("ID=" + chr(0)), {})
         self.assertNotIn("PRETTY_NAME",
                          parse_release("PRETTY_NAME=" + "x" * 121))
 

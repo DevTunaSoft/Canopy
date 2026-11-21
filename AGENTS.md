@@ -51,3 +51,17 @@ Preserve immutable user-selected artwork, original/licensed assets, measured
 performance, reversible Mint integration and human visual acceptance. Green
 CI never means visually rejected work is merge-ready. Welcome code review without limiting participation to a particular group.
 Do not publish unsolicited reviewer invitations or recruitment issues.
+
+## Reliability evidence checklist: 99 independent gates
+
+Before claiming a component is production-ready or merging a high-risk
+user-facing feature, consult
+`docs/RELIABILITY_99_GATE_AUDIT.md`. It enumerates 99 **review questions**,
+not 99 completed tests. Only mark a gate as passed with exact commit SHA,
+actual environment, reproducible command, logs and screenshots when relevant.
+P0 gaps require explicit resolution or a clearly documented blocked state.
+
+"CI-SCOPED" means tested only in the stated source/Ubuntu Actions context;
+it is not a whole-product success or proof of Mint, compositor, usability,
+security or visual correctness. Keep tests honest (all-skipped is not green),
+use negative controls and fail-closed cleanup in every shell lifecycle.

@@ -35,3 +35,13 @@ preservation, failed-switch rollback, session recovery, memory cleanup
 and proof that inactive packs do not run independent desktop services.
 Metadata validation is not runtime, sandbox or security verification.
 See [Shell Pack architecture](SHELL_PACK_ARCHITECTURE.md).
+
+## Multi-angle reliability review (initial 99 gates)
+
+Use the [99-angle reliability matrix](RELIABILITY_99_GATE_AUDIT.md) for
+cross-functional acceptance. It identifies real Linux Mint/compositor work,
+power-failure recovery, QML trust boundaries, app lifecycle management,
+optical visual signoff, accessibility, 5-minute resources, and packaging
+as separate test gates. The matrix is intentionally not a percent-complete
+score: most P0 user-facing requirements are still unverified or unbuilt.
+Don't turn a single green workflow into a release claim.

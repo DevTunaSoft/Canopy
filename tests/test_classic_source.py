@@ -57,6 +57,14 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn('previewActive: modelData.title === "Files" && filesPreview.visible', desktop)
         self.assertNotIn('QProcess', (ROOT / "main.cpp").read_text())
 
+    def test_runtime_dock_toggle_is_checked_in_screenshot_smoke(self):
+        cpp = (ROOT / "main.cpp").read_text()
+        self.assertIn('findDockTile(dock, QStringLiteral("Files"))', cpp)
+        self.assertIn('QMetaObject::invokeMethod(filesTile, "clicked", Qt::DirectConnection)', cpp)
+        self.assertIn('SELF_TEST_FAIL: Files dock did not hide preview', cpp)
+        self.assertIn('SELF_TEST_FAIL: Files dock did not restore preview', cpp)
+        self.assertIn('SELF_TEST_PASS: Files dock hide/restore and activity indicator', cpp)
+
     def test_representative_preview_is_included(self):
         cmake = (ROOT / "CMakeLists.txt").read_text()
         desktop = (ROOT / "Main.qml").read_text()

@@ -45,7 +45,8 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn('assets/icons/', dock)
         self.assertNotIn("NumberAnimation", dock)
         self.assertNotIn("Timer {", dock)
-        self.assertIn('ToolTip.text: iconName === "Files" ? "Toggle Files preview" : iconName + " — preview only"', dock)
+        self.assertIn('iconName === "Files" ? "Toggle Files preview"', dock)
+        self.assertIn('canopySystemLaunchEnabled', dock)
 
     def test_files_dock_button_toggles_preview_without_launching_apps(self):
         dock = (ROOT / "DockTile.qml").read_text()

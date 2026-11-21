@@ -54,7 +54,7 @@ class SourceSheetFramingTests(unittest.TestCase):
         self.assertNotIn("QFile::remove", src)
 
     def test_default_preserves_original_full_fit_and_terminal_v3(self):
-        self.assertIn("if (framingReviewMode && !(id == QStringLiteral(\"terminal\")", self.provider)
+        self.assertIn("if (framingReviewMode && !usesTerminalDerivative)", self.provider)
         self.assertIn("!terminalCandidatePath.isEmpty()))", self.provider)
         self.assertIn("const QSize fitted = original.size().scaled(", self.provider)
         self.assertIn("Qt::KeepAspectRatio", self.provider)

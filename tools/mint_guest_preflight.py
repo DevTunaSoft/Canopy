@@ -61,11 +61,15 @@ def assess(release, env, available, qt_version=None):
     if not is_mint:
         reasons.append("guest is not verified as Linux Mint")
     if not has_display:
-        reasons.append("no graphical session display")
+        reasons.append("no graphical display for declared session")
     if not desktop:
         reasons.append("desktop session identity not provided")
+    elif not cinnamon:
+        reasons.append("Cinnamon desktop not identified")
     if not session:
         reasons.append("session type not provided")
+    elif session not in ("x11", "wayland"):
+        reasons.append("unsupported graphical session type")
     for name, present in commands.items():
         if not present:
             reasons.append(f"required build/smoke tool not found: {name}")

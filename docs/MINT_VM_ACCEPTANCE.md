@@ -15,6 +15,31 @@ Use the dedicated Canopy-Test-Mint VirtualBox VM, not a production host. Confirm
 7. Record process PSS from `/proc/<pid>/smaps_rollup`, idle CPU over five minutes, launch time, and any QML warnings. Use repeatable commands and store raw measurements.
 8. Restart guest, verify Mint still logs in normally, and revert snapshot if any unexpected change occurs.
 
+## Repeatable guest capture (new helper)
+
+After configuring the dedicated Linux Mint VM and manually installing the
+required Qt packages, run **inside its actual graphical session**:
+
+```sh
+bash tools/mint_vm_capture.sh /path/to/original-landscape.png /path/to/approved-art ~/canopy-mint-evidence
+```
+
+Omit the approved-art argument only for unapproved six-icon engineering tests
+(you can specify a custom output path only when all preceding arguments are
+provided). The helper refuses non-Mint hosts and headless sessions, builds in
+`build/mint-vm-acceptance/`, validates the photo using the C++ loader, captures
+desktop, launcher, compact and filtered-search screenshots, and collects a
+short CPU/PSS baseline with the **same photo and icon mode**. It does not
+install packages, replace your session, set wallpaper preferences, touch login
+services or reboot. It may skip full HD if the guest display does not advertise
+1920×1080.
+
+Successful helper output establishes repeatable standalone Qt rendering only.
+**Still required manually:** VM snapshot/revert, Mint reboot checks, HiDPI
+and visual assessment, real interaction, five-minute CPU/PSS measurements,
+license review, explicit owner visual acceptance, and eventual shell-session
+integration. No Mint guest execution evidence exists yet.
+
 ## Evidence template
 - Commit SHA:
 - Guest and host environment:

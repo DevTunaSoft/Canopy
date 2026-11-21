@@ -9,6 +9,7 @@ Button {
     objectName: "canopyDockTile"
     required property string iconName
     property bool previewActive: false
+    property int artworkPixels: 54  // 54 in dock; 62 in the app launcher
     readonly property string approvedFileName:
         iconName === "Browser" ? "Browser_Option_3.png" :
         iconName === "Mail" ? "Mail_Option_5.png" :
@@ -23,10 +24,10 @@ Button {
         : "qrc:/Canopy/Classic/assets/icons/"
           + iconName.toLowerCase() + ".svg"
     readonly property bool iconReady: iconArt.status === Image.Ready
-    width: 58
-    height: 70
-    implicitWidth: 58
-    implicitHeight: 70
+    width: artworkPixels + 4
+    height: artworkPixels + 16
+    implicitWidth: artworkPixels + 4
+    implicitHeight: artworkPixels + 16
     padding: 0
     hoverEnabled: true
     Accessible.name: iconName + " preview"
@@ -37,8 +38,8 @@ Button {
         Rectangle {
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
-            width: 56
-            height: 56
+            width: tile.artworkPixels + 2
+            height: tile.artworkPixels + 2
             radius: 13
             visible: tile.hovered || tile.activeFocus
             color: tile.hovered ? "#30ffffff" : "#18ffffff"
@@ -63,8 +64,8 @@ Button {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
             anchors.topMargin: 2
-            width: 54
-            height: 54
+            width: tile.artworkPixels
+            height: tile.artworkPixels
             source: tile.iconUrl
             sourceSize: Qt.size(128, 128)
             fillMode: Image.PreserveAspectFit

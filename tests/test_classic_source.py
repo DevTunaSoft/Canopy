@@ -165,7 +165,7 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn('objectName: "canopyDock"', qml)
         self.assertIn('objectName: "canopyLauncher"', qml)
         self.assertIn('assets/brand/penguin-launcher.svg', qml)
-        self.assertIn('onClicked: launcherMenu.open()', qml)
+        self.assertIn('onClicked: appLauncher.visible ? appLauncher.closeLauncher() : appLauncher.openLauncher()', qml)
         self.assertIn('readonly property bool imageReady: penguinArt.status === Image.Ready', qml)
         self.assertIn("launcherFits", source)
         self.assertIn("SELF_TEST_FAIL: desktop chrome geometry invalid", source)

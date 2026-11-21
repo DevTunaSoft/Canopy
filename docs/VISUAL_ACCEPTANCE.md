@@ -2,6 +2,19 @@
 
 Status: engineering specification; **not verified on Linux Mint**.
 
+## Newest wallpaper requirement (November 20, 2026)
+
+The owner supplied a desktop screenshot that establishes a new
+mountain/lake/forest/sunset wallpaper direction, explicitly rejecting the
+blue-wave choice. A high-resolution, genuinely photo-quality original
+landscape is required; the crude flat-vector landscape was already rejected.
+The screenshot itself contains application UI, so do not crop and ship it
+as a wallpaper. Implemented independently validated local PNG/JPEG loading
+is an engineering feature, **not an assertion that the photographic master
+asset is packaged or that the screenshot matches the owner's concept**.
+Eight icon image choices remain hash-locked and unchanged.
+
+
 **Mandatory visual brief:** [PREMIUM_DESIGN_DIRECTION.md](PREMIUM_DESIGN_DIRECTION.md).
 The current standalone preview is **not** an approved high-quality skin. The new
 original lakeside wallpaper, seven-icon dock, and sample Files window are a first

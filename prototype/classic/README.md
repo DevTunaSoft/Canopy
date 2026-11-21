@@ -18,7 +18,41 @@ cannot silently lose entries. The internal folder pictogram is original
 `assets/ui/folder-blue.svg`; it is a generic file-content symbol,
 **not a substitute for the exact user-approved Files dock PNG**.
 
-## Exact approved artwork integration (new)
+## Landscape wallpaper override — latest requested visual direction
+
+The current owner reference is a **detailed mountain, forest, lake and
+sunset photographic composition**, not the earlier blue wave.
+Build the Qt spike, supply a locally stored original or license-cleared
+landscape PNG/JPEG (minimum 1920x1080), and run:
+
+```sh
+./build/classic/canopy-classic-spike \
+  --approved-art-dir /absolute/path/to/approved-art \
+  --landscape-wallpaper /absolute/path/to/landscape.png \
+  --self-test-approved --self-test-size 1200x750 \
+  --self-test-screenshot landscape-classic.png
+```
+
+The eight selected user PNG **icon** hashes are still validated exactly
+as before. The earlier blue-wave wallpaper file is not needed with the
+override, though it remains in the historical manifest. The custom photo
+must be a real PNG/JPEG, regular nonsymlinked local file, 24 MB or smaller,
+at least 1920x1080, 8192 pixels or fewer per axis, no more than 32 million
+pixels, and a landscape aspect ratio from 1.45 to 2.15. Files failing
+validation stop the Qt scene from loading; no silent fallback to the
+old wave. The wallpaper is a cached static image with crop-to-fill and no
+continuous animation or blur effects.
+
+The independent flag can also be tried without icon assets for
+**engineering previews only**, but that still shows rejected demo icon
+candidates and **does not constitute approved icon integration**.
+CI generates a synthetic, nonphotographic PNG solely to test the loader.
+It is not the wallpaper to ship. The actual user-referenced photographic
+asset, compiled screenshots, owner visual approval and Mint VM acceptance
+are outstanding.
+
+## Exact approved artwork integration (historical wave mode)
+
 
 The old six-icon SVG Dock remains an **unapproved legacy test scene** when
 this demo runs without art arguments. To launch the true eight-icon visual
@@ -43,7 +77,24 @@ runner. See [canonical artwork](../../docs/CLASSIC_CANONICAL_ARTWORK.md).
 
 
 
-This is a **standalone demonstration window**, not a Linux desktop session, window manager, dock replacement, installer, or completed product. Dock buttons are deliberately inert; no app-launch capability is claimed. The Files window is an interactive visual-only composition: sidebar navigation, sample-folder selection and name filtering work on local demonstration data, but no live directory browsing or disk access is implemented. The screenshot self-test rejects a missing, clipped or overlapping preview, verifies the original wallpaper fills the window and that all seven dock icons exist, but is not a human aesthetic review. The original Canopy launcher and the seven dock concepts are visual-only; no app launch or desktop services are implied.
+This is a **standalone demonstration window**, not a Linux desktop session, window manager, dock replacement, installer, or completed product. Dock buttons are deliberately inert; no app-launch capability is claimed. The Files window is an interactive visual-only composition: sidebar navigation, sample-folder selection and name filtering work on local demonstration data, but no live directory browsing or disk access is implemented. The screenshot self-test rejects a missing, clipped or overlapping preview, verifies the wallpaper fills the window and the expected six legacy or eight approved dock icons load, but is not a human aesthetic review. The Canopy penguin now opens a searchable Qt application panel; icons are still previews only, and no Linux application process is launched.
+
+## Searchable application launcher (Qt preview only)
+
+Click the original Canopy penguin at the top left to open an interactive
+launcher overlay. Type into the search field to filter the same six legacy
+demonstration icons or, when `--approved-art-dir` is supplied, the eight
+SHA-locked approved icon choices. Escape or clicking outside closes it.
+Selecting Files returns to the sample Files window. Other tiles deliberately
+show an honest "not connected" message rather than pretend to launch software.
+
+No app-service backend, polling loop, shader blur, background network call,
+or extra icon pipeline is introduced. CI compiles the real `AppLauncher.qml`,
+captures 1200x750 and 760x500 screenshots, checks every icon decode, and uses
+`--self-test-launcher --self-test-launcher-filter-files` to verify that the
+live Qt text field reduces the grid to exactly one icon. This is runtime
+functional evidence, **not** proof that the design has passed visual review.
+The wallpaper fixture used by CI remains synthetic, not the desired photo.
 
 ## Prerequisites
 CMake 3.21+, C++17 compiler, Qt 6.4+ with Qt Quick and Qt Quick Controls, a working graphical Linux session.
@@ -74,7 +125,7 @@ The main preview now has lightweight *working demo menus* for showing/hiding
 the sample Files window, resetting sample selection and opening an About
 dialog. These actions do not control the Linux desktop. Sample folders reuse
 one consistent authored blue folder SVG rather than the rejected pastel tiles.
-There is no real file browser, launcher or system menu integration.
+There is no real file browser, Linux application-launch integration, or system menu integration.
 
 The older Canvas dock artwork was rejected and replaced on the separate icon
 candidate branch with six original source-controlled SVG candidates. The new

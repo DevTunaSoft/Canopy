@@ -23,10 +23,21 @@ ApplicationWindow {
     // It scales down for screenshot checks; the floating dock remains unobscured.
     PreviewWindow {
         id: filesPreview
+        // Hide demo window beneath the app launcher without altering its
+        // open/closed state, image loading, or user selection.
+        opacity: appLauncher.visible ? 0 : 1
+        enabled: !appLauncher.visible
         width: Math.min(root.width - 72, Math.max(780, root.width * 0.56))
         height: Math.min(root.height - canopyTheme.barHeight - 166, Math.max(420, root.height * 0.56))
         x: Math.max(24, (root.width - width) / 2)
         y: canopyTheme.barHeight + Math.max(30, (root.height - canopyTheme.barHeight - canopyTheme.dockSize - height) / 2 - 10)
+    }
+
+    // A genuine Qt control layer, not a rendered concept image.
+    AppLauncher {
+        id: appLauncher
+        anchors.fill: parent
+        onFilesPreviewRequested: filesPreview.visible = true
     }
 
     Rectangle {
@@ -62,10 +73,10 @@ ApplicationWindow {
                 Layout.minimumHeight: 29
                 padding: 0
                 Accessible.name: "Canopy penguin launcher"
-                onClicked: launcherMenu.open()
+                onClicked: appLauncher.visible ? appLauncher.closeLauncher() : appLauncher.openLauncher()
                 background: Rectangle {
                     radius: 5
-                    color: tuxMark.hovered || launcherMenu.visible ? "#44565d5a" : "transparent"
+                    color: tuxMark.hovered || appLauncher.visible ? "#44565d5a" : "transparent"
                 }
                 contentItem: Image {
                     id: penguinArt
@@ -76,20 +87,10 @@ ApplicationWindow {
                     smooth: true
                 }
                 readonly property bool imageReady: penguinArt.status === Image.Ready
-                Menu {
-                    id: launcherMenu
-                    MenuItem {
-                        text: "About Canopy preview"
-                        onTriggered: aboutPopup.open()
-                    }
-                    MenuItem {
-                        text: "Show Files preview"
-                        onTriggered: filesPreview.visible = true
-                    }
-                }
+
             }
             Label {
-                text: "Files"
+                text: "Canopy"
                 color: "#f7f5eb"
                 font.pixelSize: 13
                 font.weight: Font.DemiBold

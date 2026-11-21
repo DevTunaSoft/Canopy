@@ -31,10 +31,10 @@ def read_cpu_ticks(pid: int) -> int:
     return int(fields_after_comm[11]) + int(fields_after_comm[12])
 
 
-def measure(exe: Path, duration: float) -> dict:
+def measure(exe: Path, duration: float, app_args: tuple[str, ...] = ()) -> dict:
     if not exe.is_file():
         raise FileNotFoundError(exe)
-    process = subprocess.Popen([str(exe)], stdout=subprocess.DEVNULL,
+    process = subprocess.Popen([str(exe), *app_args], stdout=subprocess.DEVNULL,
                                stderr=subprocess.PIPE, env=os.environ.copy())
     try:
         # Read the pipe at the file-descriptor level. Buffered readline() can
@@ -94,11 +94,20 @@ def main() -> int:
     parser.add_argument("executable", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--seconds", type=float, default=5)
+    parser.add_argument("--landscape-wallpaper", type=Path)
+    parser.add_argument("--approved-art-dir", type=Path)
     args = parser.parse_args()
     if not 1 <= args.seconds <= 30:
         parser.error("--seconds must be between 1 and 30")
     try:
-        data = measure(args.executable.resolve(), args.seconds)
+        app_args = []
+        if args.landscape_wallpaper:
+            app_args.extend(("--landscape-wallpaper", str(args.landscape_wallpaper.resolve())))
+        if args.approved_art_dir:
+            app_args.extend(("--approved-art-dir", str(args.approved_art_dir.resolve())))
+        data = measure(args.executable.resolve(), args.seconds, tuple(app_args))
+        data["artwork_mode"] = "external-landscape" if args.landscape_wallpaper else "legacy-demo"
+        data["approved_icon_mode"] = bool(args.approved_art_dir)
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
     except (OSError, ValueError, RuntimeError, TimeoutError) as exc:

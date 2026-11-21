@@ -1,5 +1,31 @@
 # Canopy agent engineering contract
 
+## Latest owner wallpaper decision (November 20, 2026) — overrides wave choice
+
+The user supplied a macOS-inspired Canopy desktop reference with an **alpine
+mountain/lake landscape at sunset**: high-detail snow-covered peaks,
+golden trees, dark evergreens, colorful skies and water reflections.
+The user explicitly rejected the earlier wallpaper and wants **something
+similar to that landscape**, not the prior blue-wave artwork.
+
+This wallpaper direction SUPERSEDES the historical blue-wave visual choice.
+Preserve the eight exact selected original app icon PNGs and all original
+engineering rules. Implement photographic landscape art as a high-resolution,
+original or redistribution-licensed standalone wallpaper (minimum 1920x1080).
+Do NOT crop a copyrighted screenshot, copy macOS wallpapers, use cartoon
+mountains, or paint cheap QML gradients to imitate a photograph.
+
+The Classic spike supports `--landscape-wallpaper /path/to/original.png`
+(or .jpg/.jpeg); this checks path, dimensions, pixel count, actual image
+format and size before creating QML. With `--approved-art-dir`, it keeps
+the eight icon hash checks but deliberately does **not require the old
+blue-wave file**. The archived wave manifest is retained for compatibility
+only. Do not claim visual approval of an image or actual Qt appearance until
+the original high-resolution photographic asset is packaged, rendered and
+reviewed by the owner. Keep the branch draft. Documentation must not revert
+to treating the wave as the latest desired desktop background.
+
+
 ## Latest canonical user-approved artwork (November 20, 2026)
 
 **READ FIRST: `docs/CLASSIC_CANONICAL_ARTWORK.md`.** The user's direct

@@ -207,6 +207,18 @@ int main(int argc, char *argv[]) {
     // prototype. All default screenshot and demo behavior remains unchanged.
     const bool enableSystemApps = args.contains(QStringLiteral("--enable-system-apps"));
     SystemAppLauncher systemLauncher(enableSystemApps);
+    if (args.contains(QStringLiteral("--self-test-system-apps-fixture"))) {
+        // CI provides a disposable XDG_DATA_HOME containing a nemo.desktop
+        // whose Exec touches a temporary marker. This tests the actual GIO
+        // launch path without launching any real user application.
+        if (!enableSystemApps || !systemLauncher.canLaunch(QStringLiteral("Files"))
+            || !systemLauncher.launch(QStringLiteral("Files"))) {
+            qCritical() << "SYSTEM_APP_LAUNCH_FIXTURE_FAIL: GIO desktop launch unsuccessful";
+            return 1;
+        }
+        qInfo() << "SYSTEM_APP_LAUNCH_FIXTURE_PASS: GIO accepted isolated desktop entry";
+        return 0;
+    }
     if (args.contains(QStringLiteral("--self-test-system-apps"))) {
         // Self-test deliberately never executes a valid desktop application.
         // Verify unknown IDs, shell metacharacters and free-form input cannot

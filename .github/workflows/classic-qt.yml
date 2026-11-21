@@ -115,6 +115,15 @@ jobs:
             echo 'FAIL: launcher image identical to closed desktop' >&2
             exit 1
           fi
+          # Fixed self-test date is ONLY for reproducible artwork comparisons,
+          # never the normal live top-bar clock in an interactive session.
+          timeout 30s xvfb-run -a ./build/classic/canopy-classic-spike --self-test-fixed-clock --self-test-size 1200x750 --self-test-screenshot test-artifacts/classic-fixed-clock-desktop.png --self-test-launcher-screenshot test-artifacts/classic-fixed-clock-launcher.png
+          python3 tools/check_screenshot.py test-artifacts/classic-fixed-clock-desktop.png 1200 750
+          python3 tools/check_screenshot.py test-artifacts/classic-fixed-clock-launcher.png 1200 750
+          if cmp -s test-artifacts/classic-fixed-clock-desktop.png test-artifacts/classic-fixed-clock-launcher.png; then
+            echo 'FAIL: fixed-clock launcher identical to resting desktop' >&2
+            exit 1
+          fi
           timeout 30s xvfb-run -a ./build/classic/canopy-classic-spike --self-test-size 760x500 --self-test-screenshot test-artifacts/classic-compact.png
           python3 tools/check_screenshot.py test-artifacts/classic-compact.png 760 500
           timeout 30s xvfb-run -a -s '-screen 0 2048x1200x24' ./build/classic/canopy-classic-spike --self-test-size 1920x1080 --self-test-screenshot test-artifacts/classic-1080p.png

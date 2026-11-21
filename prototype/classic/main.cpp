@@ -7,6 +7,7 @@
 #include <QtMath>
 #include <QDebug>
 #include <QTimer>
+#include <QDateTime>
 #include <QCoreApplication>
 #include <QImage>
 #include <QImageReader>
@@ -347,6 +348,7 @@ int main(int argc, char *argv[]) {
         QTimer::singleShot(1000, window, [window, screenshotPath, approvedMode, landscapeMode,
              terminalCandidateMode = !terminalCandidatePath.isEmpty()]() {
             auto *bar = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBar"));
+            auto *clock = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBarClock"));
             auto *dock = window->findChild<QQuickItem *>(QStringLiteral("canopyDock"));
             auto *launcher = window->findChild<QQuickItem *>(QStringLiteral("canopyLauncher"));
             auto *preview = window->findChild<QQuickItem *>(QStringLiteral("canopyPreviewWindow"));
@@ -356,6 +358,36 @@ int main(int argc, char *argv[]) {
                 QCoreApplication::exit(1);
                 return;
             }
+            // Exercise the real QML binding and the one-minute wakeup contract
+            // without waiting in CI. Restore the current value before capture.
+            if (!clock || !clock->isVisible()
+                || !clock->property("refreshScheduled").toBool()) {
+                qCritical() << "SELF_TEST_FAIL: local date/time clock absent or inactive";
+                QCoreApplication::exit(1);
+                return;
+            }
+            const QVariant originalTime = clock->property("currentTime");
+            const QString originalText = clock->property("text").toString();
+            const QDateTime controlledMoment(QDate(2037, 4, 5), QTime(9, 41));
+            const bool injected = clock->setProperty("currentTime", controlledMoment);
+            const QString updatedText = clock->property("text").toString();
+            clock->setProperty("currentTime", originalTime);
+            if (!injected || originalText.isEmpty() || updatedText == originalText
+                || !updatedText.contains(QStringLiteral("9:41"))) {
+                qCritical() << "SELF_TEST_FAIL: local clock text is frozen";
+                QCoreApplication::exit(1);
+                return;
+            }
+            const QPointF clockOrigin = clock->mapToItem(window->contentItem(), QPointF(0, 0));
+            if (clockOrigin.x() < 0 || clockOrigin.y() < 0
+                || clockOrigin.x() + clock->width() > window->width()
+                || clockOrigin.y() + clock->height() > bar->height() + 1) {
+                qCritical() << "SELF_TEST_FAIL: local clock clipped outside top bar";
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SELF_TEST_PASS: local top bar clock updates and fits";
+
             const QPointF barOrigin = bar->mapToItem(window->contentItem(), QPointF(0, 0));
             const QPointF dockOrigin = dock->mapToItem(window->contentItem(), QPointF(0, 0));
             const bool barFits = qAbs(barOrigin.x()) <= 2 && qAbs(barOrigin.y()) <= 2

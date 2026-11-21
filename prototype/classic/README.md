@@ -181,3 +181,24 @@ continuous animation is added.
 CI uses a synthetic test PNG only to prove actual Qt decoding and screenshot
 behavior, **not** to establish aesthetic approval. The Linux Mint VM and
 real-icon/real-landscape screenshots remain mandatory release gates.
+
+## Live top-bar date/time (isolated functional improvement)
+
+The Classic preview top bar now displays the machine's local date **and
+time**, rather than a date value frozen at application startup.
+`ClockLabel.qml` uses one **single-shot** timer aligned to the next wall-clock
+minute. It recalculates and rearms once per minute, stops when hidden, and
+refreshes when the Qt application becomes active again after a pause. There
+is no second process, per-second polling, animated clock, background daemon,
+location request or network call. The value has an accessible text label.
+
+For this bounded prototype, the compiled Qt screenshot self-test changes
+the QML clock's date property, verifies the displayed text reacts and fits
+inside the top bar, then restores the original time before screenshot capture.
+This is a real Qt binding test, **not** a full Linux Mint accessibility or
+suspend/resume acceptance test. Source-only invariants are in
+`tests/test_classic_clock.py`.
+
+This does not change any approved icon PNG, background, dock tile, source art
+hash or wallpaper selection. Visual signoff on the full desktop is still
+required.

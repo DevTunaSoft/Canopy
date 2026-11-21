@@ -56,13 +56,13 @@ wallpaper, capture BOTH desktop and open launcher before and after:
 ```sh
 # baseline (the current visual behaviour)
 canopy-classic-spike --approved-art-dir /private/approved-art \
-    --self-test-approved --self-test-size 1200x750 \
+    --self-test-approved --self-test-fixed-clock --self-test-size 1200x750 \
     --self-test-screenshot /private/baseline-desktop.png \
     --self-test-launcher-screenshot /private/baseline-launcher.png
 
 # opt-in alternative (must keep the same original input bytes)
 canopy-classic-spike --approved-art-dir /private/approved-art \
-    --icon-framing-review --self-test-approved --self-test-size 1200x750 \
+    --icon-framing-review --self-test-approved --self-test-fixed-clock --self-test-size 1200x750 \
     --self-test-screenshot /private/candidate-desktop.png \
     --self-test-launcher-screenshot /private/candidate-launcher.png
 ```
@@ -123,6 +123,16 @@ This audit proves only that pixel changes are confined to icon slots,
 **not** that the artwork has become centered or that the new framing looks
 better. A nonuniform result is grounds to reject the candidate even if
 the six pixel-diff comparisons succeed.
+
+## Reproducible clock for independent visual-diff acceptance
+
+Use `--self-test-fixed-clock` with `--self-test-screenshot` in *both*
+baseline and optical-candidate runs. It pins the test-only clock to the
+same known instant after runtime clock-binding assertions, preventing
+unrelated minute changes from generating false-positive differences.
+It is rejected without screenshot mode; the normal interactive UI always
+retains its live local clock. The CI suite renders actual Qt screenshots
+with this flag and validates both images.
 
 ## Independent fractional high-DPI issue exposed during this review
 

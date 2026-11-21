@@ -187,6 +187,13 @@ FocusScope {
                 padding: 0
                 hoverEnabled: true
                 Accessible.name: "Select " + modelData.title
+                Accessible.description: !launcher.nativeAppLaunchEnabled
+                    ? "Application preview"
+                    : launcher.nativeAppAvailability[modelData.title]
+                      ? "Installed Linux application"
+                      : modelData.title === "Files"
+                        ? "Native Files unavailable; sample preview available"
+                        : "No matching installed Linux application"
                 ToolTip.visible: hovered
                 ToolTip.text: modelData.title
                 onClicked: launcher.choose(modelData.title)

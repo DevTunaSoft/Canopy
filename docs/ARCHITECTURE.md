@@ -27,3 +27,24 @@ A shell is not automatically a window manager or compositor. Prefer a proven Way
 
 ## Boundaries
 No Apple logos, copied macOS icons, or proprietary assets. Similar interaction patterns may be researched; implement original designs. Avoid background polling, duplicated daemons, and unbounded caches.
+
+## Extensible Shell Host boundary (future)
+
+Presentation modes are **Shell Packs**, with Classic and Modern as initial
+examples, not an exhaustive pair. The shared Shell Host owns session
+lifecycle, window state, compositor integration, notifications, app discovery,
+settings, version/capability compatibility and crash recovery. Individual
+packs own original artwork and UI layout, never duplicate a system service
+or start a parallel compositor.
+
+The future mode switch should be transactional: validate trusted installed
+pack and API, prepare target with bounded memory, transfer presentation
+ownership without affecting apps/windows, clean up old resources, and
+roll back safely on failure. Compositor/session changes may require explicit
+logout/login. No live switch is implemented today.
+
+The first draft metadata format covers Qt/QML `presentation` packs, but
+other UI engines may need an independently designed and measured IPC/embedding
+adapter. A validated JSON manifest must not be treated as permission to load
+untrusted QML. See [Shell Pack design](SHELL_PACK_ARCHITECTURE.md) and the
+[LacOS vision](LACOS_VISION.md).

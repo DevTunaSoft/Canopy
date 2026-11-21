@@ -11,3 +11,20 @@ Status legend: PLANNED / IN PROGRESS / VERIFIED / BLOCKED.
 7. **Distribution — PLANNED:** signed releases, reproducible builds, user guide, support matrix.
 
 No milestone is VERIFIED until implementation and evidence are recorded.
+
+## Expandable desktop experiences — FOUNDATION
+
+- **FOUNDATION:** versioned Shell Pack manifest, strict read-only checker,
+  developer starter and regression tests, isolated from unapproved Classic
+  visual history. Documentation and metadata checks do not implement loading.
+- **PLANNED:** implement stable host service contracts and an actual
+  secure/runtime-approved pack lifecycle.
+- **PLANNED:** complete and test Classic; build Modern using shared services;
+  prove app-preserving switching or clearly warn when logout is required.
+- **PLANNED:** support a **third entirely different presentation** without
+  changing the core; test accessibility, modes, rollback and memory cleanup.
+- **LATER:** validated separate LacOS Linux Mint-derived distribution with
+  measurable optimization, security/update and VM/hardware evidence.
+
+See [Shell Pack architecture](SHELL_PACK_ARCHITECTURE.md) and
+[LacOS product vision](LACOS_VISION.md).

@@ -1,0 +1,16 @@
+{
+  "manifest_version": 1,
+  "id": "org.example.canopy.minimal",
+  "name": "Minimal Example",
+  "description": "Starter manifest for an original Canopy presentation pack; not an installed shell.",
+  "shell_api": 1,
+  "kind": "presentation",
+  "ui_engine": "qt-qml",
+  "entrypoint": "ui/Main.qml",
+  "capabilities": [
+    "app-launcher",
+    "workspace-list"
+  ],
+  "switch_strategy": "same-session",
+  "permissions": []
+}

@@ -100,3 +100,23 @@ This audit proves only that pixel changes are confined to icon slots,
 **not** that the artwork has become centered or that the new framing looks
 better. A nonuniform result is grounds to reject the candidate even if
 the six pixel-diff comparisons succeed.
+
+## Independent fractional high-DPI issue exposed during this review
+
+At `QT_SCALE_FACTOR=1.5`, the *old compiled* desktop captured the real
+1200×750 logical window as an **1800×1125 physical-pixel PNG**, then
+falsely rejected the open launcher because it compared its physical
+screenshot dimensions against the unscaled logical window dimensions.
+This was a test-instrumentation defect, not proof the icon image failed
+to load.
+
+The patch now compares the two **actual QImage pixel sizes from the same
+run** instead, preserving a strict equality check without assuming 1×
+device pixel ratio. A compiled Qt Actions step captures and validates
+desktop+launcher images at **125%, 150%, and 200% scale**, checks full
+PNG content and verifies the pair is not byte-identical. Source guards
+in `tests/test_classic_hidpi.py` preserve this behavior.
+
+This does not mean fonts, icons and accessibility are visually
+approved at HiDPI; those still need real-source, real-display and Linux
+Mint reviews independently.

@@ -9,6 +9,7 @@ Button {
     objectName: "canopyDockTile"
     required property string iconName
     property bool previewActive: false
+    signal activated(string applicationName)
     readonly property string approvedFileName:
         iconName === "Browser" ? "Browser_Option_3.png" :
         iconName === "Mail" ? "Mail_Option_5.png" :
@@ -29,10 +30,11 @@ Button {
     implicitHeight: 70
     padding: 0
     hoverEnabled: true
+    onClicked: tile.activated(tile.iconName)
     Accessible.name: iconName + " preview"
     Accessible.description: "Original demonstration artwork, not a working app launcher"
     ToolTip.visible: hovered
-    ToolTip.text: iconName + " — preview only"
+    ToolTip.text: iconName === "Files" ? "Toggle Files preview" : iconName + " — preview only"
     background: Item {
         Rectangle {
             anchors.top: parent.top

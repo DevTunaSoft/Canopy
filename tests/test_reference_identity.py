@@ -15,18 +15,22 @@ MOODBOARD_ORDER = ["Files", "Browser", "Settings",
 
 
 class ReferenceIdentityTests(unittest.TestCase):
-    def test_launcher_is_white_reference_trace_with_three_cutouts(self):
+    def test_launcher_uses_full_color_with_original_silhouette(self):
+        """The user superseded the former monochrome launcher requirement."""
         src = (CLASSIC / "assets/brand/penguin-launcher.svg")
         tree = ET.parse(src)
         root = tree.getroot()
         paths = list(root.iter(NS + "path"))
-        self.assertEqual(len(paths), 1)
-        self.assertEqual(paths[0].get("fill"), "#fff")
+        self.assertGreaterEqual(len(paths), 5)
+        self.assertEqual(paths[0].get("fill"), "#182236")
         self.assertEqual(paths[0].get("fill-rule"), "evenodd")
         self.assertEqual(len(re.findall(r"\bM\s", paths[0].get("d", ""))), 4)
-        self.assertEqual(len(list(root.iter(NS + "linearGradient"))), 0)
-        self.assertIn("archived Minimalist White Penguin Silhouette.png",
-                      (CLASSIC / "assets/brand/penguin-launcher.svg").read_text())
+        source = src.read_text()
+        for color in ("#f7f9fd", "#ffca35", "#f4b523", "#182236"):
+            self.assertIn(color, source)
+        self.assertIn("Full-color treatment of Canopy's archived silhouette", source)
+        self.assertNotIn("NumberAnimation", source)
+        self.assertNotIn("ShaderEffect", source)
 
     def test_approved_eight_icons_and_separate_legacy_fixture(self):
         desktop = (CLASSIC / "Main.qml").read_text()

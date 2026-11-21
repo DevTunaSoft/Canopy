@@ -15,9 +15,9 @@ class IconSourceTests(unittest.TestCase):
         verify_icon_set(ICONS)
         self.assertEqual(len(ICON_NAMES), 6)
 
-    def check_reject(self, changed_svg, message):
+    def check_reject(self, changed_svg, message, name="icon.svg"):
         with tempfile.TemporaryDirectory() as tmp:
-            path = Path(tmp) / "icon.svg"
+            path = Path(tmp) / name
             path.write_text(changed_svg, encoding="utf-8")
             with self.assertRaisesRegex(ValueError, message):
                 verify_icon(path)
@@ -25,11 +25,19 @@ class IconSourceTests(unittest.TestCase):
     def test_original_launcher_is_verified(self):
         verify_icon(BRAND)
         text = BRAND.read_text(encoding="utf-8")
-        self.assertIn("Canopy white Tux-inspired launcher reference silhouette", text)
-        self.assertIn('fill="#fff" fill-rule="evenodd"', text)
+        self.assertIn("Canopy full-color Tux-inspired penguin launcher", text)
+        self.assertIn('fill="#182236"', text)
+        self.assertIn('fill-rule="evenodd"', text)
+        self.assertIn('fill="#f4b523"', text)
+        self.assertIn('fill="#f7f9fd"', text)
         self.assertNotIn('fill="url(', text)
         self.assertNotIn("<image", text)
         self.assertNotIn("<script", text)
+
+    def test_missing_tux_gold_accents_rejected(self):
+        source = BRAND.read_text(encoding="utf-8")
+        self.check_reject(source.replace('fill="#f4b523"', 'fill="#444444"'),
+                          "full-color Tux details", name="penguin-launcher.svg")
 
     def test_corrupt_launcher_is_rejected(self):
         source = BRAND.read_text(encoding="utf-8")

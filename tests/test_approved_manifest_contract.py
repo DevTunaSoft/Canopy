@@ -63,7 +63,7 @@ class ApprovedManifestContractTests(unittest.TestCase):
         self.assertIn("QCryptographicHash::Sha256", cpp)
         self.assertIn("return 3;", cpp)
         self.assertIn("canopyApprovedMode", dock)
-        self.assertIn("canopyApprovedIconBase + approvedFileName", dock)
+        self.assertIn("image://canopy-dock/", dock)
         self.assertIn("canopyApprovedWallpaperUrl", wallpaper)
 
 

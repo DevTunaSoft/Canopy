@@ -43,7 +43,7 @@ class ApprovedArtworkTests(unittest.TestCase):
         qml = (REPO / "prototype/classic/DockTile.qml").read_text()
         wallpaper = (REPO / "prototype/classic/Wallpaper.qml").read_text()
         self.assertIn("canopyApprovedMode", qml)
-        self.assertIn("canopyApprovedIconBase + approvedFileName", qml)
+        self.assertIn("image://canopy-dock/", qml)
         self.assertIn("canopyApprovedWallpaperUrl", wallpaper)
         self.assertNotIn("ShaderEffect", wallpaper)
 

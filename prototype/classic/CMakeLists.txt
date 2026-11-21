@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt6 6.4 REQUIRED COMPONENTS Quick QuickControls2)
 qt_standard_project_setup()
-qt_add_executable(canopy-classic-spike main.cpp)
+qt_add_executable(canopy-classic-spike main.cpp RoundedDockIconProvider.cpp RoundedDockIconProvider.h)
 qt_add_qml_module(canopy-classic-spike
     URI Canopy.Classic
     VERSION 1.0

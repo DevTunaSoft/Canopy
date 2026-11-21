@@ -51,14 +51,14 @@ ApplicationWindow {
             anchors.rightMargin: root.compactLayout ? 14 : 22
             spacing: root.compactLayout ? 12 : 20
 
-            // Restore the white silhouette from the archived reference PNG.
-            // No invented gold penguin, combined tree emblem, or Apple logo.
+            // User-requested full-color Tux: charcoal, white, amber and gold.
+            // Retains the reference silhouette, never an Apple-owned logo.
             ToolButton {
                 id: tuxMark
                 objectName: "canopyLauncher"
-                Layout.preferredWidth: 27
+                Layout.preferredWidth: 30
                 Layout.preferredHeight: 29
-                Layout.minimumWidth: 27
+                Layout.minimumWidth: 30
                 Layout.minimumHeight: 29
                 padding: 0
                 Accessible.name: "Canopy penguin launcher"

@@ -4,7 +4,27 @@
 > white-on-dark penguin launcher from a recovered reference image and
 > six moodboard application *categories* (not verified master artwork).
 > See [VISUAL_REFERENCE_PROVENANCE.md](../../docs/VISUAL_REFERENCE_PROVENANCE.md).
-> Visual sign-off remains pending.\n\n# Classic Qt Quick technology spike
+> Visual sign-off remains pending.\n\n## November 20 visual refinement — compiled Qt rendering
+
+The owner requested fully **rounded** dock images with no pixels escaping
+their rounded boundaries, less over-zoomed artwork, and a **full-color**
+penguin at upper left. The source-locked eight PNGs are unchanged. On
+approved-art startup the app validates their SHA-256 hashes, then creates
+an antialiased 192px rounded **in-memory** image for each icon, using a
+12px transparent inset and `Qt::KeepAspectRatio` (no cropping or zoom-to-fill).
+`image://canopy-dock/<name>` supplies these cached images to QML. If any
+source or clipping check fails, approved mode stops before creating the
+desktop. No permanent derivative files, shader masks, render timers or
+additional background services are introduced. The top-left icon uses a
+static, original full-color SVG based on the earlier silhouette contour.
+
+This is **not** visual acceptance: compile and screenshot the actual Qt
+application with the original ZIP plus a cleared alpine wallpaper. Run
+`--approved-art-dir DIR --landscape-wallpaper FILE --self-test-approved`
+at 760×500, 1200×750 and 1920×1080. Review at native resolution. Linux
+Mint VM tests and real desktop integration remain separate release gates.
+
+# Classic Qt Quick technology spike
 
 ## Files window content alignment
 

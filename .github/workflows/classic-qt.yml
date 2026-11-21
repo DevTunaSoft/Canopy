@@ -14,6 +14,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Source regression tests (before Qt package installation)
         run: python3 -m unittest discover -s tests -p 'test_classic_source.py' -v
+      - name: Verify immutable approved artwork manifest contract
+        run: python3 -m unittest discover -s tests -p 'test_approved_manifest_contract.py' -v
       - name: Validate original vector wallpaper before Qt build
         run: python3 tools/check_art_asset.py prototype/classic/assets/wallpapers/blue-current.svg
       - name: Validate original dock icons before Qt build

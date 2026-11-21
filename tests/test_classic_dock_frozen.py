@@ -39,8 +39,11 @@ class FrozenClassicDockTests(unittest.TestCase):
     def test_dock_main_qml_geometry_and_behavior_locked(self):
         source = (CLASSIC / "Main.qml").read_text(encoding="utf-8")
         start = source.index("    Rectangle {\n        id: dock")
-        end = source.index("    Label {\n        anchors.right:", start)
-        dock = source[start:end]
+        # The dock is the final child in this approved Main.qml. Include
+        # the final root brace in the frozen fingerprint; only the trailing
+        # newline is excluded to match the reviewed baseline snapshot.
+        self.assertTrue(source.endswith("\n}\n"))
+        dock = source[start:-1]
         self.assertEqual(fnv1a64(dock.encode("ascii")),
                          APPROVED_DOCK_FNV64)
         self.assertNotIn("visible: !appLauncher.opened", source)

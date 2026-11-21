@@ -40,6 +40,28 @@ centerline, spacing, and vertical bounds. Bad alignment must fail CI
 rather than being presented to the owner as approved. An aesthetic review
 of the actual high-resolution screenshot is still required.
 
+## Terminal icon — isolated visual candidate (not automatically approved)
+
+The latest review narrows the remaining visual problem to **Terminal only**.
+Keep Browser, Mail, Files, Calendar, Photos, Music, and Settings as-is and
+preserve the SHA-locked original Terminal PNG. An optional candidate may be
+loaded *only* for Terminal, after verifying all eight original master hashes:
+
+```sh
+./build/classic/canopy-classic-spike \
+  --approved-art-dir /path/to/exact/approved-art \
+  --landscape-wallpaper /path/to/alpine-landscape.png \
+  --terminal-refinement /path/to/Canopy_Terminal_Candidate_Only.png \
+  --self-test-approved --self-test-size 1920x1080 \
+  --self-test-screenshot /path/to/terminal-real-qt.png
+```
+
+The candidate must be a local, square 256–2048px PNG with transparent outer
+corners, no symlinks, at most 5 MB. It is *not* the new master icon and is
+never loaded by default; the other seven original icons are never touched.
+This is a bounded visual comparison, not visual approval or Mint acceptance.
+Treat a mismatched, overglossy or off-center Terminal rendering as rejected.
+
 # Classic Qt Quick technology spike
 
 ## Files window content alignment

@@ -1,0 +1,48 @@
+name: Canopy read-only engineering supervisor
+
+# Minimal, bounded status report. This workflow never runs an AI model,
+# assigns issues, edits code, approves PRs, merges, or uses paid credentials.
+# Scheduled workflows work only once this file is merged to default branch.
+on:
+  schedule:
+    - cron: "17 10 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  checks: read
+  issues: read
+  pull-requests: read
+
+concurrency:
+  group: canopy-readonly-supervisor
+  cancel-in-progress: true
+
+jobs:
+  review-queue:
+    name: Review PR health (read only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Check out trusted default-branch code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate supervisor regression tests
+        run: python -m unittest tests.test_review_supervisor -v
+      - name: Generate bounded review report
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python tools/review_supervisor.py --out canopy-review-report.md
+      - name: Publish read-only report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: canopy-review-report
+          path: canopy-review-report.md
+          retention-days: 14
+          if-no-files-found: error

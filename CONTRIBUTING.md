@@ -1,73 +1,62 @@
-# Contributing to Canopy
+# Canopy engineering and review policy
 
-Thank you for helping make Linux welcoming to people migrating from macOS
-and Windows. Canopy is open source but **experimental**. Neither a green
-build nor a beautiful preview proves a production-ready desktop shell.
+Canopy is experimental. Passing automated checks alone does not establish
+production readiness, visual acceptance, security or Linux Mint compatibility.
 
-## Independent review is welcome
+## Owner-selected reviewers only
 
-Please review focused draft or review-ready pull requests and add specific,
-reproducible comments. Start with the [review queue](https://github.com/DevTunaSoft/Canopy/pulls)
-or [QA issue](https://github.com/DevTunaSoft/Canopy/issues/88).
+The project owner already has reviewers. **Do not solicit outside reviewers,
+create public recruitment issues or request unknown reviewers on the owner's
+behalf.** Prepare focused review packets for the owner's own reviewers.
 
-Priority review perspectives:
+Review perspectives worth covering:
 
-- **Security and trust:** inspect asset provenance, path handling, arbitrary
-  QML execution, privilege boundaries, token handling and dependency updates.
-- **Performance and reliability:** check shell-owned CPU/PSS/wakeups,
-  orphan processes, memory/cache cleanup, crash recovery, startup/shutdown,
-  and whether tests verify failure modes.
-- **Visual and accessibility QA:** compare screenshot evidence from the
-  *compiled Qt app* at 1920×1080, 1200×750 and 760×500; inspect optical
-  centering of artwork, clipping, focus, keyboard access and high DPI.
-- **Architecture and extensibility:** confirm Classic, Modern and future
-  Shell Packs share one service core rather than duplicating daemons or
-  compositor responsibilities; guard API compatibility.
-- **Linux Mint:** test on a real Mint session/VM with an independent
-  rollback and non-disruptive installer path; do not treat Ubuntu CI
-  smoke tests as Mint acceptance.
+- **Security and supply chain:** permissions, code execution, filesystem
+  paths, secrets, dependencies and original/licensed artwork provenance.
+- **Reliability and performance:** idle CPU/PSS/wakeups, bounded caches,
+  startup/recovery, memory cleanup and real failure-mode regressions.
+- **Visual quality and accessibility:** real compiled Qt screenshots at
+  1920×1080, 1200×750 and 760×500; optical art centering, clipping,
+  keyboard navigation, scaling and accessible focus.
+- **Architecture:** shared shell services, extensible versioned Shell Pack
+  contracts, no duplicate compositors or background daemons.
+- **Linux Mint acceptance:** actual Mint VM or hardware tests with safe
+  session selection, rollback, failure recovery and evidence.
 
-Each report should include the affected PR/commit SHA, file/line,
-expected vs. observed behavior, reproduction steps and severity. Actual
-test logs and screenshots are far more useful than "looks good".
+A review packet should include the exact commit SHA, linked issue and
+draft PR, affected files, reproducible commands, actual logs, comparison
+screenshots where appropriate, and PASS/FAIL/BLOCKED/NOT RUN results.
+The project owner routes the packet to existing reviewers; a report
+artifact is **not** a human reviewer signoff.
 
-## Branches and review gates
+## Branch and merge gates
 
-The main branch is intentionally conservative. Historic PRs are **stacked**
-and several contain deliberately rejected visual work. Before a PR is
-considered merge-ready:
+The historical Canopy PRs are **stacked**, and several ancestors were
+visually rejected. Do not merge a green descendant if it imports
+unapproved ancestors. First rebase or independently backport bounded,
+verified changes onto current `main`, inspect the entire proposed diff,
+and test that exact code.
 
-1. Rebase or independently backport onto current `main` without silently
-   importing rejected upstream commits. Review exact file list and diff.
-2. Keep functional, documentation, icon/visual and test-lab work separate.
-3. Run GitHub Actions, unit tests, Qt runtime tests and Mint VM tests as
-   applicable; explicitly note gates that remain BLOCKED/NOT RUN.
-4. Never replace SHA-locked original artwork or hide an optional image
-   candidate inside the default asset set without user visual acceptance.
-5. Obtain independent review for security-sensitive or session-changing
-   code. The author should not treat their own review as independent.
-6. Do **not** automatically merge based on green CI alone.
+Keep UI/artwork, shared core, VM integration, and QA in separate branches.
+Do not substitute the eight SHA-locked original icon masters or silently
+enable optional visual candidates. Owner-approved screenshot appearance
+remains a distinct gate from Qt compilation or pixel-bound geometry tests.
 
-Final aesthetic acceptance comes from the project owner, not an AI-generated
-concept, geometric bounding-box test or a successful nonblank screenshot.
+Run regression and integration checks, verify real Qt and Mint evidence
+as applicable, obtain review from the owner's existing reviewers when
+needed, and never authorize a merge based on a green badge alone.
 
-## For new Shell Pack contributors
+## Shell Pack development
 
-Read [Shell Pack architecture on its draft branch](https://github.com/DevTunaSoft/Canopy/blob/feature/extensible-shell-pack-contract-20261121/docs/SHELL_PACK_ARCHITECTURE.md).
-Pack metadata validation alone is not a secure loader or a working live
-switch. Use original or properly licensed icons and wallpaper. Never run a
-community pack in a privileged desktop session without explicit sandbox,
-trust and capability review.
+The draft [Shell Pack architecture](https://github.com/DevTunaSoft/Canopy/blob/feature/extensible-shell-pack-contract-20261121/docs/SHELL_PACK_ARCHITECTURE.md)
+describes future presentations and versioned host boundaries.
+The manifest checker is metadata validation only, not an implemented
+loader, sandbox or live switcher. Keep packages and artwork original
+or properly licensed, and never execute untrusted community UI in a
+privileged desktop session without separate security review.
 
-## How to participate from GitHub or mobile
+## Automated review reports
 
-Use GitHub's Files changed tab to leave inline review comments and
-a **Review changes** summary. Any GitHub user can inspect public code and
-open an issue with reproduction steps. Formal reviewer requests require
-permission/eligibility; we won't invent an external reviewer or claim
-their signoff when no one has reviewed the code.
-
-The scheduled `Canopy read-only engineering supervisor` will produce a
-GitHub Actions report with the open PR/CI queue after it is merged to
-`main`. This report doesn't write to GitHub or automatically review
-source code.
+The [Canopy read-only supervisor](.github/workflows/review-supervisor.yml)
+periodically records CI/PR status in a GitHub artifact. It does not
+request outside reviewers, edit PRs, approve code or merge.

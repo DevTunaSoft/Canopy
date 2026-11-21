@@ -34,6 +34,20 @@ static QQuickItem *findVisualItem(QQuickItem *parent, const QString &name) {
     return nullptr;
 }
 
+// Find the named dock control in the *visual* tree, including Repeater items.
+static QQuickItem *findDockTile(QQuickItem *parent, const QString &iconName) {
+    if (!parent)
+        return nullptr;
+    if (parent->objectName() == QStringLiteral("canopyDockTile") &&
+        parent->property("iconName").toString() == iconName)
+        return parent;
+    for (QQuickItem *child : parent->childItems()) {
+        if (auto *match = findDockTile(child, iconName))
+            return match;
+    }
+    return nullptr;
+}
+
 static int countReadyFolderTiles(QQuickItem *parent) {
     if (!parent)
         return 0;
@@ -331,6 +345,34 @@ int main(int argc, char *argv[]) {
             qInfo() << "SELF_TEST_PASS: preview window fits above dock" << previewOrigin
                     << preview->size();
             qInfo() << "SELF_TEST_PASS: desktop chrome geometry" << window->size();
+            // Exercise the actual QML Button clicked signal, not only source strings.
+            // Toggle twice so the screenshot remains the original visible scene.
+            auto *filesTile = findDockTile(dock, QStringLiteral("Files"));
+            if (!filesTile || !preview->isVisible() ||
+                !filesTile->property("previewActive").toBool() ||
+                !QMetaObject::invokeMethod(filesTile, "clicked", Qt::DirectConnection)) {
+                qCritical() << "SELF_TEST_FAIL: Files dock click setup invalid";
+                QCoreApplication::exit(1);
+                return;
+            }
+            QCoreApplication::processEvents();
+            if (preview->isVisible() || filesTile->property("previewActive").toBool()) {
+                qCritical() << "SELF_TEST_FAIL: Files dock did not hide preview";
+                QCoreApplication::exit(1);
+                return;
+            }
+            if (!QMetaObject::invokeMethod(filesTile, "clicked", Qt::DirectConnection)) {
+                qCritical() << "SELF_TEST_FAIL: Files dock second click failed";
+                QCoreApplication::exit(1);
+                return;
+            }
+            QCoreApplication::processEvents();
+            if (!preview->isVisible() || !filesTile->property("previewActive").toBool()) {
+                qCritical() << "SELF_TEST_FAIL: Files dock did not restore preview";
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SELF_TEST_PASS: Files dock hide/restore and activity indicator";
             const QImage frame = window->grabWindow();
             if (frame.isNull() || frame.width() < 720 || frame.height() < 480) {
                 qCritical() << "SELF_TEST_FAIL: invalid screenshot dimensions";

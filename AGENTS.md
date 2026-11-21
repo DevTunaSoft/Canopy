@@ -28,3 +28,26 @@ Use a coherent design token system: typography, spacing, surfaces, elevation, ic
 
 ## Definition of done
 Functional behavior, accessibility, no known regressions, documented resource measurements, reproducible build/test steps, and a PR with evidence.
+
+## Owner-approved roadmap expansion: LacOS and future Shell Packs
+
+Classic is the first desktop presentation, Modern a planned second, and
+there must be **no hardcoded two-shell limit**. Read
+`docs/LACOS_VISION.md` and `docs/SHELL_PACK_ARCHITECTURE.md`.
+New Shell Packs should share one versioned Shell Host for window/session
+ownership, app launching, notifications, settings and accessibility rather
+than duplicating compositors or background daemons. Keep inactive modes
+unloaded whenever safe, with bounded memory and subscription cleanup.
+
+The v1 offline `tools/check_shell_pack.py` is metadata validation **only**;
+it is not a runtime loader, permission sandbox, security approval or evidence
+of same-session switching. The Qt starter is not installable. Future community
+packages require separately verified provenance, signed package mechanisms,
+runtime isolation and capability enforcement.
+
+Prioritize finish/verify Classic, then Modern, then test switching/recovery
+and a third unrelated presentation, then consider LacOS distribution work.
+Preserve immutable user-selected artwork, original/licensed assets, measured
+performance, reversible Mint integration and human visual acceptance. Green
+CI never means visually rejected work is merge-ready. Coordinate with the
+owner's existing reviewers; do not recruit reviewers unrequested.

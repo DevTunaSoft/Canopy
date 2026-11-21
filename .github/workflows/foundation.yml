@@ -17,5 +17,7 @@ jobs:
           python-version: '3.12'
       - name: Check engineering contract
         run: python tools/check_foundation.py
+      - name: Validate extensible Shell Pack starter (metadata only)
+        run: python tools/check_shell_pack.py examples/shell-pack-starter
       - name: Run regression tests
         run: python -m unittest discover -s tests -v

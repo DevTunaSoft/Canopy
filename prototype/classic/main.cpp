@@ -419,7 +419,7 @@ int main(int argc, char *argv[]) {
                     (approvedMode ? 8 : 6)
                 || !QMetaObject::invokeMethod(applicationLauncher, "openLauncher",
                                                Qt::DirectConnection)
-                || !applicationLauncher->isVisible() || dock->isVisible()) {
+                || !applicationLauncher->isVisible() || !dock->isVisible()) {
                 qCritical() << "SELF_TEST_FAIL: original application search failed to open";
                 QCoreApplication::exit(1);
                 return;

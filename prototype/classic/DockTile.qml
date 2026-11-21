@@ -10,19 +10,14 @@ Button {
     required property string iconName
     property bool previewActive: false
     signal activated(string applicationName)
-    readonly property string approvedFileName:
-        iconName === "Browser" ? "Browser_Option_3.png" :
-        iconName === "Mail" ? "Mail_Option_5.png" :
-        iconName === "Files" ? "Files_Option_2.png" :
-        iconName === "Calendar" ? "Calendar_Option_3.png" :
-        iconName === "Photos" ? "Photos_Option_2.png" :
-        iconName === "Music" ? "Music_Option_3.png" :
-        iconName === "Terminal" ? "Terminal_Option_4.png" :
-        iconName === "Settings" ? "Settings_Option_8.png" : ""
+    // Approved icon bytes are verified first, then drawn into a single
+    // cached rounded-alpha image with a consistent inset and full-image fit.
+    // This avoids square corners and keeps all imagery within the card.
     readonly property string iconUrl: canopyApprovedMode
-        ? canopyApprovedIconBase + approvedFileName
+        ? "image://canopy-dock/" + iconName.toLowerCase()
         : "qrc:/Canopy/Classic/assets/icons/"
           + iconName.toLowerCase() + ".svg"
+    readonly property bool roundedArtActive: canopyApprovedMode
     readonly property bool iconReady: iconArt.status === Image.Ready
     width: 58
     height: 70
@@ -68,7 +63,7 @@ Button {
             width: 54
             height: 54
             source: tile.iconUrl
-            sourceSize: Qt.size(128, 128)
+            sourceSize: Qt.size(192, 192)
             fillMode: Image.PreserveAspectFit
             asynchronous: false
             cache: true

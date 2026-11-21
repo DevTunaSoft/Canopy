@@ -27,7 +27,8 @@ class DockAlignmentTests(unittest.TestCase):
         self.assertIn('qAbs(iconMidY - buttonMidY) > 0.75', source)
         self.assertIn('qAbs(iconMidY - dock->height() / 2) > 1.0', source)
         self.assertIn('SELF_TEST_FAIL: dock icon optical alignment', source)
-        self.assertIn('SELF_TEST_PASS: eight dock icons horizontally/vertically centred', source)
+        self.assertIn('SELF_TEST_PASS: dock icons horizontally/vertically centred', source)
+        self.assertIn('QStringLiteral("Trash")', source)
         self.assertIn('QStringLiteral("Settings")', source)
         self.assertIn('QStringLiteral("Browser")', source)
 

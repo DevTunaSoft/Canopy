@@ -117,6 +117,43 @@ jobs:
           python3 tools/check_screenshot.py test-artifacts/classic-compact.png 760 500
           timeout 30s xvfb-run -a -s '-screen 0 2048x1200x24' ./build/classic/canopy-classic-spike --self-test-size 1920x1080 --self-test-screenshot test-artifacts/classic-1080p.png
           python3 tools/check_screenshot.py test-artifacts/classic-1080p.png 1920 1080
+      - name: HiDPI actual Qt capture at 125, 150 and 200 percent
+        timeout-minutes: 4
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          for scale in 1.25 1.5 2.0; do
+            echo "Testing Qt physical screenshot DPI factor $scale"
+            QT_SCALE_FACTOR="$scale" timeout 35s xvfb-run -a -s '-screen 0 3200x2200x24' \
+              ./build/classic/canopy-classic-spike \
+              --self-test-size 1200x750 \
+              --self-test-screenshot "test-artifacts/classic-desktop-hidpi-$scale.png" \
+              --self-test-launcher-screenshot "test-artifacts/classic-launcher-hidpi-$scale.png"
+            python3 - "$scale" <<'PY'
+          import struct
+          import sys
+          from pathlib import Path
+          from tools.check_screenshot import verify_png
+          factor = float(sys.argv[1])
+          paths = (
+              Path(f"test-artifacts/classic-desktop-hidpi-{factor}.png"),
+              Path(f"test-artifacts/classic-launcher-hidpi-{factor}.png"),
+          )
+          dimensions = []
+          for path in paths:
+              blob = path.read_bytes()
+              assert blob.startswith(b"\\x89PNG\\r\\n\\x1a\\n")
+              width, height = struct.unpack_from(">II", blob, 16)
+              assert abs(width - round(1200 * factor)) <= 1, (path, width)
+              assert abs(height - round(750 * factor)) <= 1, (path, height)
+              verify_png(path, width, height)
+              dimensions.append((width, height))
+          assert dimensions[0] == dimensions[1], dimensions
+          assert paths[0].read_bytes() != paths[1].read_bytes()
+          print("HIDPI_QT_SCREENSHOT_PASS", factor, dimensions)
+          PY
+          done
       - name: Capture informational CPU and PSS baseline
         timeout-minutes: 2
         env:

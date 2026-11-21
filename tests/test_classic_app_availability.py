@@ -33,6 +33,9 @@ class AppAvailabilityTests(unittest.TestCase):
 
     def test_all_labels_disclose_installed_or_preview_status_when_opted_in(self):
         q = self.qml
+        self.assertIn("Accessible.description: !launcher.nativeAppLaunchEnabled", q)
+        self.assertIn('"Installed Linux application"', q)
+        self.assertIn('"No matching installed Linux application"', q)
         self.assertIn('objectName: "canopyLauncherNativeAppState"', q)
         self.assertIn("visible: launcher.nativeAppLaunchEnabled", q)
         self.assertIn('"Installed"', q)

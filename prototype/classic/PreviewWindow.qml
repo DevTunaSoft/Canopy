@@ -47,8 +47,28 @@ Rectangle {
             anchors.leftMargin: 18
             anchors.verticalCenter: parent.verticalCenter
             spacing: 8
+            Button {
+                id: closePreviewButton
+                objectName: "canopyPreviewClose"
+                width: 12
+                height: 12
+                implicitWidth: 12
+                implicitHeight: 12
+                padding: 0
+                hoverEnabled: true
+                Accessible.name: "Close Files preview"
+                ToolTip.visible: hovered
+                ToolTip.text: "Close Files preview"
+                onClicked: preview.visible = false
+                background: Rectangle {
+                    radius: 6
+                    color: "#e7817a"
+                    border.color: "#66717a"
+                    border.width: 0.5
+                }
+            }
             Repeater {
-                model: ["#e7817a", "#e6bc6d", "#79bd91"]
+                model: ["#e6bc6d", "#79bd91"]
                 delegate: Rectangle {
                     required property string modelData
                     width: 12

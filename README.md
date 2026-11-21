@@ -79,3 +79,16 @@ reviewers quantify why centered image rectangles can still contain
 off-center artwork. It reads **externally supplied, SHA-verified** original
 PNG masters and generates a non-mutating heuristic report. No source
 icons are included, uploaded, transformed or approved by this tool.
+
+### Try Classic without replacing your desktop
+
+A limited, user-level [Classic preview menu registration](docs/CLASSIC_USER_MENU_PREVIEW.md)
+lets you add or remove the **compiled Qt preview** as an application inside
+your existing Linux desktop. It uses no root access, login manager changes,
+compositor changes, network service or background daemon. It verifies
+ownership before removing its exact desktop entry; modified user files
+are preserved.
+
+The registration script does **not** install a real desktop session, bundle
+a Qt binary, or prove Linux Mint GUI acceptance. Run its tests with
+python3 -m unittest tests.test_classic_preview_menu -v.

@@ -61,7 +61,13 @@ def check_summary(checks):
     if any(row.get("status") != "completed" for row in checks):
         return "CHECKS IN PROGRESS"
     if all(row.get("conclusion") in SUCCESS_RESULTS for row in checks):
-        return "CHECKS GREEN (not approval)"
+        # "skipped"/"neutral" are not evidence that a test ever ran.
+        # Check runs are also not proof that all *required* workflows were
+        # scheduled. Never advertise a green test suite without success.
+        successful = sum(row.get("conclusion") == "success" for row in checks)
+        if successful == 0:
+            return "NO SUCCESSFUL CHECKS"
+        return "CHECKS GREEN (coverage not verified; not approval)"
     return "CHECKS UNKNOWN"
 
 
@@ -78,7 +84,7 @@ def classify(pr, checks):
         return "DRAFT / REVIEW REQUIRED"
     status = check_summary(checks)
     if status.startswith("CHECKS GREEN"):
-        return "CHECKS GREEN / HUMAN REVIEW REQUIRED"
+        return "CHECKS PASSED / COVERAGE + HUMAN REVIEW REQUIRED"
     return "REVIEW / CI REQUIRED"
 
 

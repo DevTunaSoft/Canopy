@@ -22,8 +22,8 @@ def check(status="completed", conclusion="success"):
 class ReviewSupervisorTests(unittest.TestCase):
     def test_green_not_approval(self):
         self.assertEqual(supervisor.check_summary([check()]),
-                         "CHECKS GREEN (not approval)")
-        self.assertIn("HUMAN REVIEW REQUIRED",
+                         "CHECKS GREEN (coverage not verified; not approval)")
+        self.assertIn("COVERAGE + HUMAN REVIEW REQUIRED",
                       supervisor.classify(pr(draft=False), [check()]))
 
     def test_failure_and_running_checks_not_green(self):
@@ -33,6 +33,37 @@ class ReviewSupervisorTests(unittest.TestCase):
             supervisor.check_summary([check(status="in_progress", conclusion=None)]),
             "CHECKS IN PROGRESS"
         )
+
+    def test_skipped_only_is_not_green(self):
+        self.assertEqual(
+            supervisor.check_summary([check(conclusion="skipped")]),
+            "NO SUCCESSFUL CHECKS"
+        )
+        self.assertEqual(
+            supervisor.classify(pr(draft=False), [check(conclusion="skipped")]),
+            "REVIEW / CI REQUIRED"
+        )
+
+    def test_neutral_only_is_not_green(self):
+        self.assertEqual(
+            supervisor.check_summary([check(conclusion="neutral")]),
+            "NO SUCCESSFUL CHECKS"
+        )
+
+    def test_skipped_and_neutral_without_success_do_not_pass(self):
+        self.assertEqual(
+            supervisor.check_summary([check(conclusion="neutral"),
+                                      check(conclusion="skipped")]),
+            "NO SUCCESSFUL CHECKS"
+        )
+
+    def test_one_real_success_still_marks_coverage_unverified(self):
+        status = supervisor.check_summary([
+            check(conclusion="success"),
+            check(conclusion="skipped"),
+        ])
+        self.assertIn("coverage not verified", status)
+        self.assertNotIn("safe to merge", status.lower())
 
     def test_empty_check_data_never_green(self):
         self.assertEqual(supervisor.check_summary([]), "NO CHECK EVIDENCE")
@@ -61,7 +92,7 @@ class ReviewSupervisorTests(unittest.TestCase):
 
     def test_human_review_required_even_when_ready_and_green(self):
         result = supervisor.classify(pr(draft=False), [check()])
-        self.assertEqual(result, "CHECKS GREEN / HUMAN REVIEW REQUIRED")
+        self.assertEqual(result, "CHECKS PASSED / COVERAGE + HUMAN REVIEW REQUIRED")
 
     def test_report_escapes_markdown_tables_and_keeps_review_warning(self):
         p = pr(title="Injected | fake\n| row")

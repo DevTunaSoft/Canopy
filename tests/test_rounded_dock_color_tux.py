@@ -23,7 +23,7 @@ class RoundedDockAndColorTuxTests(unittest.TestCase):
         self.assertIn('engine.addImageProvider(QStringLiteral("canopy-dock"), roundedIcons)', cpp)
         self.assertLess(cpp.index('verifyExactArtwork(requested, !landscapeMode, &error)'),
                         cpp.index('new RoundedDockIconProvider('))
-        self.assertIn('QImageReader reader(root.filePath(relative))', provider)
+        self.assertIn('QImageReader reader(sourcePath)', provider)
         self.assertNotIn('QFile::remove', provider)
         self.assertNotIn('QImage::save', provider)
         self.assertNotIn('QProcess', provider)

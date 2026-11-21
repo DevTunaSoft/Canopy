@@ -1,4 +1,5 @@
 #include "RoundedDockIconProvider.h"
+#include "SystemAppLauncher.h"
 
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
@@ -242,6 +243,48 @@ int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
     QGuiApplication::setApplicationDisplayName(QStringLiteral("Canopy Classic Spike"));
     const QStringList args = QCoreApplication::arguments();
+    // Native Linux app launching is explicitly opt-in for this standalone
+    // prototype. All default screenshot and demo behavior remains unchanged.
+    const bool enableSystemApps = args.contains(QStringLiteral("--enable-system-apps"));
+    SystemAppLauncher systemLauncher(enableSystemApps);
+    if (args.contains(QStringLiteral("--self-test-system-apps-fixture"))) {
+        // CI provides a disposable XDG_DATA_HOME containing a nemo.desktop
+        // whose Exec touches a temporary marker. This tests the actual GIO
+        // launch path without launching any real user application.
+        if (!enableSystemApps || !systemLauncher.canLaunch(QStringLiteral("Files"))
+            || !systemLauncher.launch(QStringLiteral("Files"))) {
+            qCritical() << "SYSTEM_APP_LAUNCH_FIXTURE_FAIL: GIO desktop launch unsuccessful";
+            return 1;
+        }
+        qInfo() << "SYSTEM_APP_LAUNCH_FIXTURE_PASS: GIO accepted isolated desktop entry";
+        return 0;
+    }
+    if (args.contains(QStringLiteral("--self-test-system-apps"))) {
+        // Self-test deliberately never executes a valid desktop application.
+        // Verify unknown IDs, shell metacharacters and free-form input cannot
+        // cross the fixed dock-name allowlist, even with launching enabled.
+        const QStringList denied = {
+            QStringLiteral("sh -c 'touch /tmp/canopy-bad'"),
+            QStringLiteral("../firefox.desktop"),
+            QStringLiteral("Browser;echo hacked"),
+            QStringLiteral("firefox.desktop"),
+            QStringLiteral(""),
+            QStringLiteral("Unknown")
+        };
+        for (const QString &value : denied) {
+            if (systemLauncher.canLaunch(value) || systemLauncher.launch(value)) {
+                qCritical() << "SYSTEM_APP_LAUNCH_TEST_FAIL: arbitrary launch accepted";
+                return 1;
+            }
+        }
+        if (!enableSystemApps && (systemLauncher.canLaunch(QStringLiteral("Browser"))
+                                  || systemLauncher.launch(QStringLiteral("Browser")))) {
+            qCritical() << "SYSTEM_APP_LAUNCH_TEST_FAIL: launch not opt-in";
+            return 1;
+        }
+        qInfo() << "SYSTEM_APP_LAUNCH_TEST_PASS: unknown or dangerous actions refused, no application executed";
+        return 0;
+    }
     const int approvedIndex = args.indexOf(QStringLiteral("--approved-art-dir"));
     const bool approvedMode = approvedIndex >= 0;
     const bool framingReviewMode = args.contains(QStringLiteral("--icon-framing-review"));
@@ -364,6 +407,10 @@ int main(int argc, char *argv[]) {
         }
     }
     engine.rootContext()->setContextProperty(QStringLiteral("canopyApprovedMode"), approvedMode);
+    engine.rootContext()->setContextProperty(
+        QStringLiteral("canopySystemLaunchEnabled"), enableSystemApps);
+    engine.rootContext()->setContextProperty(
+        QStringLiteral("canopySystemLauncher"), &systemLauncher);
     engine.rootContext()->setContextProperty(
         QStringLiteral("canopyIconFramingReview"), framingReviewMode);
     engine.rootContext()->setContextProperty(

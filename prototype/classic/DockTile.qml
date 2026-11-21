@@ -1,88 +1,77 @@
-﻿import QtQuick
+import QtQuick
 import QtQuick.Controls
 
-// Original vector dock icons; no external fonts, assets, shaders or animation.
+// Artist-authored, original SVG per application. Icons are pre-rendered/cached
+// by Qt's SVG image plugin; no Canvas paint loops, effects or animation timers.
+// These tiles remain visual demos until app launching is really implemented.
 Button {
     id: tile
+    objectName: "canopyDockTile"
     required property string iconName
-    width: 52
-    height: 52
+    property bool previewActive: false
+    signal activated(string applicationName)
+    // Approved icon bytes are verified first, then drawn into a single
+    // cached rounded-alpha image with a consistent inset and full-image fit.
+    // This avoids square corners and keeps all imagery within the card.
+    readonly property string iconUrl: canopyApprovedMode
+        ? "image://canopy-dock/" + iconName.toLowerCase()
+        : "qrc:/Canopy/Classic/assets/icons/"
+          + iconName.toLowerCase() + ".svg"
+    readonly property bool roundedArtActive: canopyApprovedMode
+    readonly property bool iconReady: iconArt.status === Image.Ready
+    width: 58
+    height: 70
+    implicitWidth: 58
+    implicitHeight: 70
+    padding: 0
     hoverEnabled: true
-    Accessible.name: iconName + " (demonstration)"
+    onClicked: tile.activated(tile.iconName)
+    Accessible.name: iconName + " preview"
+    Accessible.description: "Original demonstration artwork, not a working app launcher"
     ToolTip.visible: hovered
-    ToolTip.text: iconName + " ΓÇö demonstration only"
-
-    background: Rectangle {
-        radius: 13
-        color: tile.hovered ? "#ffffff" : (tile.iconName === "Home" ? "#d7e7fb" : tile.iconName === "Search" ? "#e7dff8" : tile.iconName === "Files" ? "#d5edee" : "#f4e1df")
-        border.color: tile.hovered ? "#95a9c2" : "#d0d7e1"
-        border.width: 1
+    ToolTip.text: iconName === "Files" ? "Toggle Files preview" : iconName + " — preview only"
+    background: Item {
+        Rectangle {
+            // Align the hover/focus halo with the icon, not the top of
+            // the tall (70px) button. Keep an equal visual gap on both
+            // sides of the 88px dock, at every tested resolution.
+            anchors.centerIn: parent
+            width: 56
+            height: 56
+            radius: 16
+            visible: tile.hovered || tile.activeFocus
+            color: tile.hovered ? "#30ffffff" : "#18ffffff"
+            border.color: tile.activeFocus ? "#aac9f2ff" : "transparent"
+            border.width: tile.activeFocus ? 2 : 0
+        }
+        Rectangle {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 2
+            width: 5
+            height: 5
+            radius: 2.5
+            color: "#2f4f69"
+            visible: tile.previewActive
+        }
     }
-
-    contentItem: Canvas {
-        id: artwork
-        width: 30
-        height: 30
-        onPaint: {
-            const ctx = getContext("2d")
-            ctx.clearRect(0, 0, width, height)
-            ctx.save()
-            ctx.translate(width / 2, height / 2)
-            ctx.scale(Math.min(width, height) / 32, Math.min(width, height) / 32)
-            ctx.strokeStyle = "#34445d"
-            ctx.fillStyle = "#34445d"
-            ctx.lineWidth = 2.2
-            ctx.lineCap = "round"
-            ctx.lineJoin = "round"
-            ctx.beginPath()
-            if (tile.iconName === "Home") {
-                ctx.moveTo(-11, -1)
-                ctx.lineTo(0, -11)
-                ctx.lineTo(11, -1)
-                ctx.moveTo(-8, -3)
-                ctx.lineTo(-8, 10)
-                ctx.lineTo(8, 10)
-                ctx.lineTo(8, -3)
-                ctx.moveTo(-3, 10)
-                ctx.lineTo(-3, 2)
-                ctx.lineTo(3, 2)
-                ctx.lineTo(3, 10)
-                ctx.stroke()
-            } else if (tile.iconName === "Search") {
-                ctx.arc(-3, -3, 8, 0, 2 * Math.PI)
-                ctx.moveTo(3, 3)
-                ctx.lineTo(12, 12)
-                ctx.stroke()
-            } else if (tile.iconName === "Files") {
-                ctx.moveTo(-12, -7)
-                ctx.lineTo(-3, -7)
-                ctx.lineTo(0, -4)
-                ctx.lineTo(11, -4)
-                ctx.lineTo(11, 9)
-                ctx.lineTo(-12, 9)
-                ctx.closePath()
-                ctx.stroke()
-                ctx.beginPath()
-                ctx.moveTo(-12, -3)
-                ctx.lineTo(-12, -10)
-                ctx.lineTo(-4, -10)
-                ctx.lineTo(-1, -7)
-                ctx.stroke()
-            } else if (tile.iconName === "Settings") {
-                ctx.arc(0, 0, 9, 0, 2 * Math.PI)
-                ctx.stroke()
-                ctx.beginPath()
-                ctx.arc(0, 0, 3.3, 0, 2 * Math.PI)
-                ctx.stroke()
-                for (let i = 0; i < 8; ++i) {
-                    const angle = i * Math.PI / 4
-                    ctx.beginPath()
-                    ctx.moveTo(Math.cos(angle) * 10, Math.sin(angle) * 10)
-                    ctx.lineTo(Math.cos(angle) * 13, Math.sin(angle) * 13)
-                    ctx.stroke()
-                }
-            }
-            ctx.restore()
+    contentItem: Item {
+        Image {
+            id: iconArt
+            objectName: "canopyDockIcon"
+            anchors.centerIn: parent
+            // A centered 54px image inside a 70px dock tile leaves 8px
+            // on top and bottom. The old topMargin: 2 pushed every icon
+            // visually high, despite having correct rounded corners.
+            width: 54
+            height: 54
+            source: tile.iconUrl
+            sourceSize: Qt.size(192, 192)
+            fillMode: Image.PreserveAspectFit
+            asynchronous: false
+            cache: true
+            smooth: true
+            Accessible.name: tile.iconName + " original dock artwork"
         }
     }
 }

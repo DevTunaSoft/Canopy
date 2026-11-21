@@ -18,8 +18,11 @@ class ClassicQtSourceTests(unittest.TestCase):
         text = (SOURCE / "CMakeLists.txt").read_text(encoding="utf-8")
         self.assertIn("cmake_minimum_required(VERSION 3.21)", text)
         self.assertIn("find_package(Qt6 6.4 REQUIRED", text)
-        self.assertIn("qt_add_executable(canopy-classic-spike main.cpp)", text)
-        for qml in ("Main.qml", "Theme.qml", "DockTile.qml"):
+        self.assertIn("RoundedDockIconProvider.cpp", text)
+        self.assertIn("qt_add_resources", text)
+        for qml in ("Main.qml", "Theme.qml", "DockTile.qml", "ClockLabel.qml",
+                    "LauncherOverlay.qml", "PreviewWindow.qml", "Wallpaper.qml",
+                    "FolderTile.qml"):
             self.assertIn(qml, text)
 
     def test_main_has_runtime_and_screenshot_contract(self):
@@ -31,12 +34,22 @@ class ClassicQtSourceTests(unittest.TestCase):
 
     def test_frozen_visual_constants_are_unchanged(self):
         text = (SOURCE / "Theme.qml").read_text(encoding="utf-8")
-        for constant in ("barHeight: 40", "dockSize: 76", "tileSize: 52",
-                         "cornerRadius: 21", "dockSpacing: 10"):
+        for constant in ("barHeight: 32", "dockSize: 88", "tileSize: 52",
+                         "cornerRadius: 24", "dockSpacing: 7", "dockPadding: 12"):
             self.assertIn(constant, text)
         main = (SOURCE / "Main.qml").read_text(encoding="utf-8")
         for name in ("canopyTopBar", "canopyDock", "canopyLauncher"):
             self.assertIn(name, main)
+        for icon in ("Browser", "Mail", "Files", "Calendar", "Photos", "Music",
+                     "Terminal", "Settings"):
+            self.assertIn('title: "' + icon + '"', main)
+
+    def test_approved_artwork_matches_locked_manifest(self):
+        from tools.prepare_approved_art import check_exact, read_manifest
+        manifest = read_manifest()
+        base = SOURCE / "assets" / "approved"
+        for entry in [*manifest["icons"], manifest["wallpaper"]]:
+            check_exact(base / entry["path"], entry["sha256"])
 
     def test_workflow_captures_three_resolutions_and_five_minute_sample(self):
         text = (ROOT / ".github" / "workflows" / "classic-qt.yml").read_text(encoding="utf-8")

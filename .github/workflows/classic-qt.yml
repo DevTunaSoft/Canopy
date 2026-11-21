@@ -46,6 +46,9 @@ jobs:
         timeout-minutes: 6
         run: cmake --build build/classic --parallel 2
 
+      - name: Verify approved eight-icon artwork
+        run: python3 -m unittest tests.test_approved_art tests.test_approved_manifest_contract tests.test_approved_art_zip -v
+
       - name: Headless startup smoke test
         timeout-minutes: 2
         env:
@@ -60,11 +63,11 @@ jobs:
           LIBGL_ALWAYS_SOFTWARE: "1"
         run: |
           mkdir -p test-artifacts
-          timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike --self-test-size 1920x1080 --self-test-screenshot test-artifacts/classic-1920x1080.png
+          timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike --approved-art-dir prototype/classic/assets/approved --self-test-approved --self-test-size 1920x1080 --self-test-screenshot test-artifacts/classic-1920x1080.png
           python3 tools/check_screenshot.py test-artifacts/classic-1920x1080.png 1920 1080
-          timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike --self-test-size 1200x750 --self-test-screenshot test-artifacts/classic-1200x750.png
+          timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike --approved-art-dir prototype/classic/assets/approved --self-test-approved --self-test-size 1200x750 --self-test-screenshot test-artifacts/classic-1200x750.png
           python3 tools/check_screenshot.py test-artifacts/classic-1200x750.png 1200 750
-          timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike --self-test-size 760x500 --self-test-screenshot test-artifacts/classic-760x500.png
+          timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike --approved-art-dir prototype/classic/assets/approved --self-test-approved --self-test-size 760x500 --self-test-screenshot test-artifacts/classic-760x500.png
           python3 tools/check_screenshot.py test-artifacts/classic-760x500.png 760 500
           sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
 

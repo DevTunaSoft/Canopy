@@ -1,4 +1,4 @@
-﻿import QtQuick
+import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
@@ -9,47 +9,29 @@ ApplicationWindow {
     minimumWidth: 720
     minimumHeight: 480
     visible: true
-    title: "Canopy Classic ΓÇö Technology Spike"
+    title: "Canopy Classic — Technology Spike"
     color: "#eef2f8"
 
     Theme { id: canopyTheme }
     readonly property bool compactLayout: width < 900
+    readonly property bool approvedAssetsActive: canopyApprovedMode
+    // Keep the resting desktop composition unchanged until explicitly opened.
+    Shortcut {
+        sequence: "Ctrl+Space"
+        onActivated: appLauncher.toggleLauncher()
+    }
 
-    // Lightweight wallpaper composition: gradients and rectangles only.
-    // No shader effects, animation loops, timers or additional processes.
-    Rectangle {
-        anchors.fill: parent
-        gradient: Gradient {
-            GradientStop { position: 0; color: canopyTheme.backgroundTop }
-            GradientStop { position: 1; color: canopyTheme.backgroundBottom }
-        }
-    }
-    Rectangle {
-        width: root.width * 1.04
-        height: root.height * 0.78
-        x: root.width * 0.22
-        y: root.height * 0.25
-        rotation: -27
-        radius: height * 0.45
-        opacity: 0.73
-        gradient: Gradient {
-            GradientStop { position: 0; color: "#b2cdf0" }
-            GradientStop { position: 0.45; color: "#d1c5ef" }
-            GradientStop { position: 1; color: "#f8d4dd" }
-        }
-    }
-    Rectangle {
-        width: root.width * 0.83
-        height: root.height * 0.44
-        x: root.width * 0.40
-        y: root.height * 0.65
-        rotation: -16
-        radius: height * 0.45
-        opacity: 0.65
-        gradient: Gradient {
-            GradientStop { position: 0; color: "#99c6db" }
-            GradientStop { position: 1; color: "#e8e0f4" }
-        }
+    // Original static artwork; no rotating placeholder rectangles.
+    Wallpaper { anchors.fill: parent }
+
+    // Visual-only composition: file management and window controls are not wired.
+    // It scales down for screenshot checks; the floating dock remains unobscured.
+    PreviewWindow {
+        id: filesPreview
+        width: Math.min(root.width - 72, Math.max(780, root.width * 0.56))
+        height: Math.min(root.height - canopyTheme.barHeight - 166, Math.max(420, root.height * 0.56))
+        x: Math.max(24, (root.width - width) / 2)
+        y: canopyTheme.barHeight + Math.max(30, (root.height - canopyTheme.barHeight - canopyTheme.dockSize - height) / 2 - 10)
     }
 
     Rectangle {
@@ -58,7 +40,7 @@ ApplicationWindow {
         anchors.top: parent.top
         width: parent.width
         height: canopyTheme.barHeight
-        color: canopyTheme.chrome
+        color: canopyApprovedMode ? "#995e89a9" : canopyTheme.chrome
 
         Rectangle {
             anchors.bottom: parent.bottom
@@ -74,85 +56,170 @@ ApplicationWindow {
             anchors.rightMargin: root.compactLayout ? 14 : 22
             spacing: root.compactLayout ? 12 : 20
 
-            // Original, stylized white penguin silhouette, not Apple artwork.
-            Item {
+            // User-requested full-color Tux: charcoal, white, amber and gold.
+            // Retains the reference silhouette, never an Apple-owned logo.
+            ToolButton {
                 id: tuxMark
                 objectName: "canopyLauncher"
-                Layout.preferredWidth: 26
-                Layout.preferredHeight: 30
-                Layout.minimumWidth: 26
-                Layout.minimumHeight: 30
-                Accessible.name: "Canopy penguin launcher placeholder"
-                // Original silhouette assembled from static vector primitives,
-                // avoiding Qt Canvas paint-surface scaling differences.
-                Rectangle {
-                    x: 3
-                    y: 1
-                    width: 20
-                    height: 27
-                    radius: 10
-                    color: "#34445d"
+                Layout.preferredWidth: 30
+                Layout.preferredHeight: 29
+                Layout.minimumWidth: 30
+                Layout.minimumHeight: 29
+                padding: 0
+                Accessible.name: "Canopy penguin launcher"
+                onClicked: launcherMenu.open()
+                background: Rectangle {
+                    radius: 5
+                    color: tuxMark.hovered || launcherMenu.visible ? "#44565d5a" : "transparent"
                 }
-                Rectangle {
-                    x: 7
-                    y: 12
-                    width: 12
-                    height: 15
-                    radius: 6
-                    color: "#f8fafc"
+                contentItem: Image {
+                    id: penguinArt
+                    source: "qrc:/Canopy/Classic/assets/brand/penguin-launcher.svg"
+                    sourceSize: Qt.size(128, 128)
+                    fillMode: Image.PreserveAspectFit
+                    cache: true
+                    smooth: true
                 }
-                Rectangle {
-                    x: 8
-                    y: 8
-                    width: 3
-                    height: 3
-                    radius: 1.5
-                    color: "#f8fafc"
-                }
-                Rectangle {
-                    x: 15
-                    y: 8
-                    width: 3
-                    height: 3
-                    radius: 1.5
-                    color: "#f8fafc"
-                }
-                Rectangle {
-                    x: 11
-                    y: 12
-                    width: 4
-                    height: 4
-                    radius: 1
-                    rotation: 45
-                    color: "#d7a268"
+                readonly property bool imageReady: penguinArt.status === Image.Ready
+                Menu {
+                    id: launcherMenu
+                    MenuItem {
+                        text: "Browse applications"
+                        onTriggered: appLauncher.openLauncher()
+                    }
+                    MenuItem {
+                        text: "About Canopy preview"
+                        onTriggered: aboutPopup.open()
+                    }
+                    MenuItem {
+                        text: "Show Files preview"
+                        onTriggered: filesPreview.visible = true
+                    }
                 }
             }
             Label {
-                text: "Canopy"
-                color: canopyTheme.foreground
-                font.pixelSize: 14
-                font.bold: true
+                text: "Files"
+                color: "#f7f5eb"
+                font.pixelSize: 13
+                font.weight: Font.DemiBold
                 font.family: "Sans Serif"
             }
-            Label {
-                text: "File"
-                visible: !root.compactLayout
-                color: canopyTheme.foreground
-                font.pixelSize: 13
-            }
-            Label {
-                text: "View"
-                visible: !root.compactLayout
-                color: canopyTheme.foreground
-                font.pixelSize: 13
+
+            // Actual menu actions target only this standalone demo. No false
+            // desktop/system integration is implied by these controls.
+            Repeater {
+                model: ["File", "Edit", "View", "Go", "Window", "Help"]
+                delegate: Button {
+                    id: topMenuButton
+                    required property string modelData
+                    visible: !root.compactLayout
+                             || (modelData !== "Window" && modelData !== "Help")
+                    text: modelData
+                    hoverEnabled: true
+                    Layout.preferredHeight: 27
+                    padding: 6
+                    font.pixelSize: 12
+                    Accessible.name: modelData + " demo menu"
+                    onClicked: actionMenu.open()
+                    background: Rectangle {
+                        radius: 5
+                        color: topMenuButton.hovered || actionMenu.visible
+                               ? "#38ffffff" : "transparent"
+                    }
+                    contentItem: Label {
+                        text: topMenuButton.text
+                        color: "#f7f5eb"
+                        font.pixelSize: 12
+                        verticalAlignment: Text.AlignVCenter
+                        horizontalAlignment: Text.AlignHCenter
+                    }
+                    Menu {
+                        id: actionMenu
+                        MenuItem {
+                            text: topMenuButton.modelData === "Help"
+                                  ? "About this preview"
+                                  : topMenuButton.modelData === "Edit"
+                                  ? "Clear selection"
+                                  : topMenuButton.modelData === "View"
+                                  ? "Toggle Files window"
+                                  : "Show Files preview"
+                            onTriggered: {
+                                if (topMenuButton.modelData === "Help") {
+                                    aboutPopup.open()
+                                } else if (topMenuButton.modelData === "Edit") {
+                                    filesPreview.selectedFolder = ""
+                                } else if (topMenuButton.modelData === "View") {
+                                    filesPreview.visible = !filesPreview.visible
+                                } else {
+                                    filesPreview.visible = true
+                                    filesPreview.currentSection = "Home"
+                                }
+                            }
+                        }
+                        MenuItem {
+                            text: "Reset demo view"
+                            onTriggered: {
+                                filesPreview.visible = true
+                                filesPreview.currentSection = "Home"
+                                filesPreview.selectedFolder = ""
+                            }
+                        }
+                    }
+                }
             }
             Item { Layout.fillWidth: true }
-            Label {
-                text: Qt.formatDateTime(new Date(), "ddd d MMM")
-                color: canopyTheme.foreground
-                font.pixelSize: 12
-                font.weight: Font.Medium
+            ClockLabel {
+                Layout.alignment: Qt.AlignVCenter
             }
+        }
+    }
+
+    Dialog {
+        id: aboutPopup
+        title: "Canopy Classic Preview"
+        modal: false
+        anchors.centerIn: parent
+        width: 360
+        height: 185
+        standardButtons: Dialog.Ok
+        contentItem: Item {
+            implicitWidth: 290
+            implicitHeight: 68
+            Label {
+                anchors.fill: parent
+                text: "A standalone design experiment. App launching and real file browsing are not implemented."
+                wrapMode: Text.WordWrap
+                font.pixelSize: 12
+                color: "#31475e"
+            }
+        }
+    }
+
+    // Keyboard controls for this preview window; no global shortcuts or daemon.
+    Shortcut {
+        objectName: "canopyFilesCloseShortcut"
+        sequence: "Ctrl+W"
+        enabled: filesPreview.visible
+        onActivated: filesPreview.visible = false
+    }
+    Shortcut {
+        objectName: "canopyFilesOpenShortcut"
+        sequence: "Ctrl+Shift+F"
+        enabled: !filesPreview.visible
+        onActivated: filesPreview.visible = true
+    }
+
+    // Original-art application search opens only on request. No app launch
+    // service is silently enabled; Files alone reopens its sample preview.
+    LauncherOverlay {
+        id: appLauncher
+        anchors.fill: parent
+        z: 20
+        approvedMode: root.approvedAssetsActive
+        framingReviewMode: canopyIconFramingReview
+        onApplicationSelected: function(applicationName) {
+            if (applicationName === "Files")
+                filesPreview.visible = true
         }
     }
 
@@ -163,8 +230,8 @@ ApplicationWindow {
         width: Math.min(root.width - 32, dockRow.implicitWidth + 2 * canopyTheme.dockPadding)
         height: canopyTheme.dockSize
         radius: canopyTheme.cornerRadius
-        color: canopyTheme.dockSurface
-        border.color: canopyTheme.dockBorder
+        color: canopyApprovedMode ? "#b0d6e8f6" : canopyTheme.dockSurface
+        border.color: canopyApprovedMode ? "#e1faffff" : canopyTheme.dockBorder
         border.width: 1
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
@@ -176,30 +243,37 @@ ApplicationWindow {
             anchors.centerIn: parent
             spacing: canopyTheme.dockSpacing
             Repeater {
-                model: [
-                    { title: "Home" },
-                    { title: "Search" },
-                    { title: "Files" },
-                    { title: "Settings" }
-                ]
+                model: canopyApprovedMode
+                    ? [
+                        { title: "Browser" },
+                        { title: "Mail" },
+                        { title: "Files" },
+                        { title: "Calendar" },
+                        { title: "Photos" },
+                        { title: "Music" },
+                        { title: "Terminal" },
+                        { title: "Settings" }
+                    ]
+                    : [
+                        { title: "Files" },
+                        { title: "Browser" },
+                        { title: "Settings" },
+                        { title: "Photos" },
+                        { title: "Terminal" },
+                        { title: "Trash" }
+                    ]
                 delegate: DockTile {
                     required property var modelData
                     iconName: modelData.title
+                    previewActive: modelData.title === "Files" && filesPreview.visible
+                    onActivated: function(applicationName) {
+                        if (applicationName === "Files") {
+                            filesPreview.visible = !filesPreview.visible
+                        }
+                    }
                 }
             }
         }
     }
 
-    Label {
-        anchors.right: parent.right
-        anchors.rightMargin: 21
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 9
-        text: "CANOPY CLASSIC ┬╖ PREVIEW"
-        color: canopyTheme.muted
-        opacity: 0.64
-        font.pixelSize: 9
-        font.letterSpacing: 2
-        visible: root.width > 900
-    }
 }

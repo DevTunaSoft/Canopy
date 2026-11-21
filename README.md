@@ -92,3 +92,12 @@ are preserved.
 The registration script does **not** install a real desktop session, bundle
 a Qt binary, or prove Linux Mint GUI acceptance. Run its tests with
 python3 -m unittest tests.test_classic_preview_menu -v.
+
+### Real Linux Mint Qt smoke evidence (when guest is available)
+
+After the [read-only Mint preflight](docs/MINT_GUEST_PREFLIGHT.md), the
+[guest-only Qt smoke runner](docs/MINT_CLASSIC_QT_SMOKE.md) can execute
+the compiled Qt Classic prototype at three sizes and save screenshot
+SHA-256 evidence without modifying Cinnamon or installing packages.
+It is **not yet proven on a real Mint guest**. Its local synthetic test
+harness is not a substitute for in-guest functional acceptance.

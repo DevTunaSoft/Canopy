@@ -40,3 +40,16 @@ not evidence of Linux Mint compatibility.
 The preflight reports no home directory, tokens, raw environment or user
 data. Only categories, readiness booleans and generic Qt version are logged.
 No VM pass may be claimed until an actual guest has been accessed and tested.
+
+## Next in-guest smoke step
+
+Once this preflight is READY_FOR_TESTS, use the dedicated
+[Qt Classic guest smoke runner](MINT_CLASSIC_QT_SMOKE.md) with the *actual*
+compiled prototype and exact original user-approved artwork. It captures
+three resolution screenshots and source/binary hashes in an isolated
+output folder. Unlike the preflight, it does launch the Qt preview for
+a bounded self-test; it never changes default session ownership.
+
+A green unit test of that script is **not actual Mint acceptance**.
+Full functional, compositor, window-focus, stress, installation and
+visual signoff remain separate release blockers.

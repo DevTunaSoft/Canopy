@@ -116,3 +116,13 @@ jobs:
           QT_QUICK_BACKEND: software
           LIBGL_ALWAYS_SOFTWARE: "1"
         run: xvfb-run -a python3 tools/qt_smoke.py build/classic/canopy-classic-spike
+      - name: Package exact compiled Qt6 runtime for independent screenshot reproduction
+        timeout-minutes: 3
+        run: bash tools/package_qt_runtime.sh build/classic/canopy-classic-spike build/canopy-qt6-portable
+      - name: Upload compiled Qt6 runtime (not a visual approval)
+        uses: actions/upload-artifact@v4
+        with:
+          name: canopy-qt6-compiled-runtime
+          path: build/canopy-qt6-portable/
+          if-no-files-found: error
+          retention-days: 3

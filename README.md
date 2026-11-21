@@ -6,6 +6,15 @@ Canopy is a planned lightweight Linux desktop shell with a macOS-inspired Classi
 
 Status: planning; no working desktop shell yet.
 
+## Bounded multi-agent supervisor (under verification)
+
+A Windows-compatible pilot coordinates up to three OpenCode workers in separate
+Git worktrees with a durable task queue, ownership locks, evidence gates and
+draft PRs. It never merges to main and does not change the approved Classic
+artwork or Qt GUI. Setup, commands and honest verification status:
+[Canopy supervisor](docs/CANOPY_SUPERVISOR.md) and
+[verification evidence](docs/SUPERVISOR_VERIFICATION.md).
+
 ## LacOS and expandable Canopy Shell Packs — future goals
 
 Canopy Classic is our first macOS-familiar experience; Canopy Modern will be

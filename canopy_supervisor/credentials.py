@@ -1,0 +1,69 @@
+"""Read the existing authenticated OpenCode credential without exposing it.
+
+The token is passed directly to worker processes through the environment.
+It is never written to supervisor state, logs, dashboard or exceptions.
+"""
+from __future__ import annotations
+
+import json
+import os
+from pathlib import Path
+import sqlite3
+
+
+class CredentialError(RuntimeError):
+    """No usable OpenCode credential found."""
+
+
+def _token_from_blob(value: str) -> str:
+    data = json.loads(value)
+    if not isinstance(data, dict):
+        raise ValueError("credential is not an object")
+    for key in ("access", "refresh", "token", "apiKey", "key"):
+        token = data.get(key)
+        if isinstance(token, str) and token.strip():
+            return token.strip()
+    raise ValueError("credential has no token field")
+
+
+def get_opencode_api_key(explicit: str | None = None, data_home: Path | None = None) -> str:
+    """Return an OpenCode API token from env, auth.json or the installed DB.
+
+    Precedence: explicit argument, OPENCODE_API_KEY, auth.json, SQLite DB.
+    """
+    token = explicit or os.environ.get("OPENCODE_API_KEY", "")
+    if token.strip():
+        return token.strip()
+
+    base = Path(data_home or os.environ.get("OPENCODE_DATA_HOME") or
+                (Path.home() / ".local" / "share" / "opencode"))
+    auth_file = base / "auth.json"
+    if auth_file.is_file():
+        try:
+            raw = json.loads(auth_file.read_text(encoding="utf-8"))
+            for value in raw.values():
+                if isinstance(value, dict) and isinstance(value.get("access"), str):
+                    return _token_from_blob(json.dumps(value))
+        except (OSError, ValueError):
+            pass
+
+    database = base / "opencode.db"
+    if not database.is_file():
+        raise CredentialError("no authenticated OpenCode installation found")
+    uri = "file:" + str(database).replace("\\", "/") + "?mode=ro"
+    try:
+        connection = sqlite3.connect(uri, uri=True, timeout=5)
+        try:
+            rows = connection.execute(
+                "select value from credential where integration_id='opencode' and active=1"
+            ).fetchall()
+        finally:
+            connection.close()
+    except sqlite3.Error as exc:
+        raise CredentialError(f"cannot read OpenCode credential store: {type(exc).__name__}") from exc
+    for (value,) in rows:
+        try:
+            return _token_from_blob(value)
+        except (ValueError, TypeError):
+            continue
+    raise CredentialError("authenticated OpenCode account has no active token")

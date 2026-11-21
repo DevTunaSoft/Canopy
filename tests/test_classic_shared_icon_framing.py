@@ -28,21 +28,30 @@ class SharedIconFramingTests(unittest.TestCase):
         self.assertIn("true, &reviewError", self.cpp)
         self.assertNotIn("framingReviewMode = true", self.cpp)
 
-    def test_reuses_existing_eight_gutter_measurements_without_deleting_any(self):
-        start = self.provider.split("kApprovedSourceTopGutters = {")[1].split("};")[0]
-        terms = dict((name, int(number)) for name, number in
-                     re.findall(r'\{QStringLiteral\("([a-z]+)"\), (\d+)\}', start))
+    def test_measured_centers_stay_within_original_source_bounds(self):
+        start = self.provider.split("kLauncherOpticalCenters = {")[1].split("};")[0]
+        terms = dict((name, (int(x), int(y))) for name, x, y in
+                     re.findall(r'\{QStringLiteral\("([a-z]+)"\), QPointF\((\d+), (\d+)\)\}', start))
         self.assertEqual(terms, {
-            "browser": 9, "mail": 6, "files": 2, "calendar": 0,
-            "photos": 0, "music": 5, "terminal": 14, "settings": 14,
+            "browser": (170, 170), "mail": (172, 162),
+            "files": (174, 164), "calendar": (173, 165),
+            "photos": (171, 166), "music": (172, 169),
+            "terminal": (171, 170), "settings": (175, 165),
         })
+        self.assertIn("constexpr int kOpticalSampleSize = 324", self.provider)
+        self.assertTrue(all(x >= 162 and x + 162 <= 345 and
+                            y >= 162 and y + 162 <= 333
+                            for x, y in terms.values()))
 
     def test_fixed_outer_card_mask_unmodified_and_no_whole_card_shift(self):
         self.assertIn("outline.addRoundedRect(face, kRoundedRadius", self.provider)
         self.assertIn("painter.setClipPath(outline)", self.provider)
         self.assertIn("painter.fillPath(outline", self.provider)
-        self.assertIn("const int side = original.height() - top", self.provider)
-        self.assertIn("const int left = (original.width() - side) / 2", self.provider)
+        self.assertIn("const QRectF originalSample(", self.provider)
+        self.assertIn("center.x() - kOpticalSampleSize / 2.0", self.provider)
+        self.assertIn("center.y() - kOpticalSampleSize / 2.0", self.provider)
+        self.assertIn("launcher optical sample input mismatch", self.provider)
+        self.assertIn("launcher sample exceeds original bounds", self.provider)
         self.assertIn("painter.drawImage(face, original, originalSample)", self.provider)
         self.assertNotIn("painter.translate(", self.provider)
         self.assertNotIn("QFile::remove(", self.provider)

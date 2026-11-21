@@ -38,7 +38,8 @@ class SharedIconFramingTests(unittest.TestCase):
             "photos": (171, 166), "music": (172, 169),
             "terminal": (171, 170), "settings": (175, 165),
         })
-        self.assertIn("constexpr int kOpticalSampleSize = 324", self.provider)
+        self.assertIn("constexpr int kReviewInsetPixels = 5", self.provider)
+        self.assertIn("constexpr qreal kReviewOffsetGain = 1.75", self.provider)
         self.assertTrue(all(x >= 162 and x + 162 <= 345 and
                             y >= 162 and y + 162 <= 333
                             for x, y in terms.values()))
@@ -47,12 +48,14 @@ class SharedIconFramingTests(unittest.TestCase):
         self.assertIn("outline.addRoundedRect(face, kRoundedRadius", self.provider)
         self.assertIn("painter.setClipPath(outline)", self.provider)
         self.assertIn("painter.fillPath(outline", self.provider)
-        self.assertIn("const QRectF originalSample(", self.provider)
-        self.assertIn("center.x() - kOpticalSampleSize / 2.0", self.provider)
-        self.assertIn("center.y() - kOpticalSampleSize / 2.0", self.provider)
-        self.assertIn("launcher optical sample input mismatch", self.provider)
-        self.assertIn("launcher sample exceeds original bounds", self.provider)
-        self.assertIn("painter.drawImage(face, original, originalSample)", self.provider)
+        self.assertIn("const QRectF insetFace = face.adjusted(", self.provider)
+        self.assertIn("const QRectF reviewPlacement(", self.provider)
+        self.assertIn("face.contains(reviewPlacement)", self.provider)
+        self.assertIn("launcher optical review input mismatch", self.provider)
+        self.assertIn("launcher placement exceeds rounded card face", self.provider)
+        self.assertIn("painter.drawImage(reviewPlacement, original)", self.provider)
+        self.assertNotIn("painter.drawImage(face, original, originalSample)", self.provider)
+        self.assertNotIn("QRectF originalSample(", self.provider)
         self.assertNotIn("painter.translate(", self.provider)
         self.assertNotIn("QFile::remove(", self.provider)
         self.assertIn("anchors.centerIn: parent", self.tile)

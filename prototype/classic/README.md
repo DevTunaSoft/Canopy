@@ -235,3 +235,46 @@ to the reviewed current Classic Qt branch, **not an endorsement of that
 earlier prototype's rejected artwork**. Real OS app launch integration is
 a different unmerged draft (PR #102); visuals and Mint acceptance are not
 approved by this integration.
+
+## Native Linux applications from the searchable launcher (opt-in)
+
+The **searchable application overlay only** now supports requesting an installed
+Linux desktop application through GLib/GIO, using the reviewed
+`SystemAppLauncher` from draft PR #102. Use:
+
+```sh
+./canopy-classic-spike --enable-system-apps
+```
+
+**Without that flag**, every launcher category behaves exactly as in the
+existing sample: Files opens the demonstration Files view, and other
+categories say that real launching is not connected. With the flag, choosing
+a known application name in the searchable overlay asks the host-owned GIO
+service to launch one of a fixed allowlist of available `.desktop` IDs.
+There is no user-supplied `Exec`, shell, URL bridge, external API, background
+service, or arbitrary path input. If the system app is unavailable or fails,
+Files still opens the sample view and other categories say why they did not
+start. The app cannot claim a successful UI launch merely because GIO exists.
+
+The **dock is intentionally and explicitly untouched**: no Qt appearance,
+position, hover, size, art provider, clicking behavior or interaction in
+`DockTile.qml` or the `canopyDock` section of `Main.qml` was modified.
+This isolates launcher functionality from the owner-approved dock. The
+original eight source PNG hashes are unchanged, and the experimental
+launcher-only optical adjustments remain disabled by default.
+
+### Automated verification
+
+The Qt6 CI build links `gio-unix-2.0`, checks that malformed names and
+injection-like category strings are rejected, then installs an isolated
+temporary `nemo.desktop` under a disposable `XDG_DATA_HOME` whose `Exec`
+only creates a harmless temp marker. It verifies that the **actual GIO**
+launch request executes; no real user's browser, mail or other desktop app
+is launched in CI. `tests/test_classic_native_launcher_only.py` guards the
+no-dock-change contract and the opt-in behavior. This does **not** prove
+Nemo/Firefox/other apps can be visibly opened/focused inside a real Mint
+guest; that is a separate release acceptance test.
+
+See original independent GIO implementation PR #102. The work here adapts
+it to the current Classic launcher rather than blindly merging the old
+PR's **dock** interaction changes.

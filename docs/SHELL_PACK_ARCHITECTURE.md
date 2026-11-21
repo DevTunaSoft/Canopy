@@ -174,3 +174,25 @@ The registry is a tested **metadata discovery component**, not a shell loader,
 installer, trust evaluator, live mode switcher or authorization to execute
 third-party QML. A future host must verify packages and isolate/authorize
 execution before ever consuming catalog entries as runnable components.
+
+## Trusted-host lifecycle coordinator (prototype, no Qt integration)
+
+`canopy_core.shell_host.ShellHost` now implements an **in-memory lifecycle
+state machine for explicitly host-registered, reviewed presenters only**.
+It validates target metadata and requested capabilities against the catalog
+and host allowlist, prepares a candidate, deactivates the old view before
+activating the new one, disposes the old view, and attempts rollback if
+activation fails. Three distinct mock presentations are tested without
+hardcoding Classic/Modern. Reentrant transitions are rejected. Unknown or
+untrusted metadata entries **cannot** make the host load arbitrary code.
+
+A failed partial activation or failed rollback sets a recovery-required
+state rather than pretending a seamless switch worked; failure to dispose
+an old presenter is surfaced as a cleanup failure, not a false green result.
+
+**Limits:** this is a pure-Python prototype with inert test presenters. It is
+not connected to the compiled Qt application or Mint session; it does not
+own real compositor windows or preserve app state, sandbox plugins, verify
+signed packages, execute QML or deliver end-user live switching. The future
+Qt host will need an equivalent verified lifecycle/API implementation with
+real crash/restart, window, display and memory tests.

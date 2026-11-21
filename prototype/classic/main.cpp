@@ -1,5 +1,6 @@
 #include "RoundedDockIconProvider.h"
 #include "SystemAppLauncher.h"
+#include <QVariant>
 
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
@@ -434,6 +435,43 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     qInfo() << "CANOPY_CLASSIC_WINDOW_READY";
+    if (args.contains(QStringLiteral("--self-test-launcher-ui-fixture"))) {
+        // Exercise the SAME QML choose(name) path as a human selecting Files,
+        // using a throwaway XDG_DATA_HOME desktop entry in CI. No real
+        // installed user application is executed, and the dock isn't used.
+        if (!enableSystemApps) {
+            qCritical() << "SYSTEM_APP_UI_FIXTURE_FAIL: explicit opt-in required";
+            return 2;
+        }
+        QTimer::singleShot(350, window, [window]() {
+            auto *overlay = findVisualItem(
+                window->contentItem(), QStringLiteral("canopyApplicationLauncher"));
+            auto *files = findVisualItem(
+                window->contentItem(), QStringLiteral("canopyPreviewWindow"));
+            if (!overlay || !files ||
+                !QMetaObject::invokeMethod(overlay, "openLauncher", Qt::DirectConnection) ||
+                !overlay->isVisible()) {
+                qCritical() << "SYSTEM_APP_UI_FIXTURE_FAIL: actual launcher unavailable";
+                QCoreApplication::exit(1);
+                return;
+            }
+            // Files is initially open in the sample. A real successful GIO
+            // activation must NOT reopen that demo window as a side effect.
+            files->setVisible(false);
+            const bool chose = QMetaObject::invokeMethod(
+                overlay, "choose", Qt::DirectConnection,
+                Q_ARG(QVariant, QVariant(QStringLiteral("Files"))));
+            if (!chose || overlay->isVisible() || files->isVisible()) {
+                qCritical() << "SYSTEM_APP_UI_FIXTURE_FAIL: QML activation fell back"
+                               " or failed to dismiss overlay";
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SYSTEM_APP_UI_FIXTURE_PASS: actual QML launcher"
+                       " triggered GIO without touching dock";
+            QCoreApplication::quit();
+        });
+    }
     const int sizeIndex = args.indexOf(QStringLiteral("--self-test-size"));
     if (sizeIndex >= 0) {
         if (sizeIndex + 1 >= args.size()) {

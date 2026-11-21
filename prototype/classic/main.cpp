@@ -247,10 +247,11 @@ int main(int argc, char *argv[]) {
     if (approvedMode) {
         // Source PNGs were SHA-verified above; transform copies IN MEMORY
         // only. The files and their immutable manifest remain unchanged.
-        auto *roundedIcons = new RoundedDockIconProvider(approvedRoot, &error);
+        QString roundedError;
+        auto *roundedIcons = new RoundedDockIconProvider(approvedRoot, &roundedError);
         if (!roundedIcons->isValid() || !roundedIcons->allCornersClipped()) {
             qCritical().noquote() << "APPROVED_ART_FAIL: rounded dock rendering:"
-                                   << error;
+                                   << roundedError;
             delete roundedIcons;
             return 3;
         }

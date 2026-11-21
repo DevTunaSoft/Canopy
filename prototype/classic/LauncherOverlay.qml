@@ -1,18 +1,24 @@
 import QtQuick
 import QtQuick.Controls
 
-// Classic's opt-in on-screen application catalogue, adapted from the prior
-// launcher prototype. No process execution, network, daemon or added art assets.
+// Isolated on-screen application catalogue, reusing original approved icons.
+// Native GIO activation occurs only on explicit --enable-system-apps and click;
+// there is no arbitrary Exec, network access, daemon, polling or extra art.
 FocusScope {
     id: launcher
     objectName: "canopyApplicationLauncher"
     property bool approvedMode: false
+    property bool nativeAppLaunchEnabled: false
     // Experimental optical corrections belong ONLY to this overlay.
     // The established dock uses image://canopy-dock/ and is never reframed.
     property bool framingReviewMode: false
     property bool opened: false
     property alias searchQuery: searchField.text
     property string selectionMessage: ""
+    // Populated only when the launcher opens with explicit native opt-in;
+    // never poll the GIO database or change the resting desktop/dock.
+    property var nativeAppAvailability: ({})
+    property int nativeAvailableCount: 0
     readonly property var applications: approvedMode
         ? [
             { title: "Browser" }, { title: "Mail" },
@@ -36,9 +42,30 @@ FocusScope {
     focus: opened
     Keys.onEscapePressed: closeLauncher()
 
+    function refreshNativeAvailability() {
+        if (!nativeAppLaunchEnabled) {
+            nativeAppAvailability = ({})
+            nativeAvailableCount = 0
+            return
+        }
+        const available = ({})
+        let count = 0
+        for (let i = 0; i < applications.length; i++) {
+            const title = applications[i].title
+            const installed = canopySystemLauncher.canLaunch(title)
+            available[title] = installed
+            if (installed)
+                count++
+        }
+        nativeAppAvailability = available
+        nativeAvailableCount = count
+    }
     function openLauncher() {
         searchField.text = ""
         selectionMessage = ""
+        // A newly installed app is discovered on the next open; there are
+        // no timers, background monitors, permissions or disk scans in QML.
+        refreshNativeAvailability()
         opened = true
         searchField.forceActiveFocus()
     }
@@ -51,11 +78,23 @@ FocusScope {
         else openLauncher()
     }
     function choose(name) {
+        // Real Linux desktop launch is strictly opt-in. Names come only
+        // from the fixed app catalogue; C++ GIO rechecks the exact allowlist
+        // and never constructs a shell command or accepts arbitrary Exec.
+        // The original dock remains completely unchanged.
+        if (nativeAppLaunchEnabled && canopySystemLauncher.launch(name)) {
+            closeLauncher()
+            return
+        }
+        // Preserve the approved default demo interaction when native
+        // services are disabled, unavailable or do not support a category.
         applicationSelected(name)
         if (name === "Files") {
             closeLauncher()
         } else {
-            selectionMessage = name + " is not connected in this preview"
+            selectionMessage = nativeAppLaunchEnabled
+                    ? name + " is not installed or could not start"
+                    : name + " is not connected in this preview"
         }
     }
 
@@ -149,6 +188,13 @@ FocusScope {
                 padding: 0
                 hoverEnabled: true
                 Accessible.name: "Select " + modelData.title
+                Accessible.description: !launcher.nativeAppLaunchEnabled
+                    ? "Application preview"
+                    : launcher.nativeAppAvailability[modelData.title]
+                      ? "Installed Linux application"
+                      : modelData.title === "Files"
+                        ? "Native Files unavailable; sample preview available"
+                        : "No matching installed Linux application"
                 ToolTip.visible: hovered
                 ToolTip.text: modelData.title
                 onClicked: launcher.choose(modelData.title)
@@ -189,6 +235,20 @@ FocusScope {
                         horizontalAlignment: Text.AlignHCenter
                         elide: Text.ElideRight
                     }
+                    Label {
+                        objectName: "canopyLauncherNativeAppState"
+                        visible: launcher.nativeAppLaunchEnabled
+                        width: appButton.width - 8
+                        text: launcher.nativeAppAvailability[appButton.modelData.title]
+                              ? "Installed"
+                              : appButton.modelData.title === "Files"
+                                ? "Preview only" : "Not installed"
+                        color: launcher.nativeAppAvailability[appButton.modelData.title]
+                               ? "#2c7059" : "#66798b"
+                        font.pixelSize: 10
+                        horizontalAlignment: Text.AlignHCenter
+                        elide: Text.ElideRight
+                    }
                 }
             }
             Keys.onEscapePressed: launcher.closeLauncher()
@@ -208,7 +268,9 @@ FocusScope {
             height: 19
             text: launcher.selectionMessage.length > 0 ? launcher.selectionMessage :
                   launcher.filteredCount === 0 ? "No matching applications" :
-                  "Files opens the sample window · others are preview-only"
+                  (launcher.nativeAppLaunchEnabled
+                    ? launcher.nativeAvailableCount + " installed application categories · Files falls back to preview"
+                    : "Files opens the sample window · others are preview-only")
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
             color: "#657b90"

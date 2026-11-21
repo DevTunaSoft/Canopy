@@ -18,6 +18,8 @@ jobs:
         run: python3 -m unittest tests.test_classic_dock_frozen -v
       - name: Optical frame review source contracts and byte-exact PNG negative controls
         run: python3 -m unittest tests.test_classic_shared_icon_framing tests.test_classic_icon_frame_diff -v
+      - name: Menu-to-real-Qt X11 source and safety negative controls
+        run: python3 -m unittest tests.test_classic_menu_runtime_smoke -v
       - name: Verify immutable approved artwork manifest contract
         run: python3 -m unittest discover -s tests -p 'test_approved_manifest_contract.py' -v
       - name: Validate original vector wallpaper before Qt build
@@ -32,7 +34,7 @@ jobs:
           sudo sed -i 's@http://us-east-2.ec2.archive.ubuntu.com/ubuntu@http://archive.ubuntu.com/ubuntu@g' /etc/apt/sources.list.d/ubuntu.sources
           sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 update
           sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 install -y --no-install-recommends \
-            build-essential cmake ninja-build xvfb \
+            build-essential cmake ninja-build xvfb pkg-config libglib2.0-dev libglib2.0-bin desktop-file-utils x11-utils \
             qt6-base-dev qt6-declarative-dev qt6-declarative-dev-tools libqt6svg6 \
             qml6-module-qtquick qml6-module-qtquick-controls \
             qml6-module-qtquick-layouts qml6-module-qtquick-window \
@@ -43,6 +45,57 @@ jobs:
       - name: Compile
         timeout-minutes: 5
         run: cmake --build build/classic --parallel 2
+      - name: Verify compiled Classic launches from disposable user menu in X11
+        timeout-minutes: 2
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+          XDG_CURRENT_DESKTOP: Cinnamon
+        run: |
+          set -euo pipefail
+          binary="$PWD/build/classic/canopy-classic-spike"
+          sha256="$(sha256sum "$binary" | cut -d' ' -f1)"
+          timeout 50s xvfb-run -a -s '-screen 0 1600x1000x24' \
+            python3 -m tools.classic_menu_runtime_smoke \
+              --binary "$binary" \
+              --expected-binary-sha256 "$sha256" \
+              --timeout 8
+          echo "PASS: actual compiled Qt launched from temporary GIO application menu"
+      - name: Validate opt-in Linux app launcher without executing an application
+        timeout-minutes: 1
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          set -euo pipefail
+          ./build/classic/canopy-classic-spike --self-test-system-apps >test-system-apps.log 2>&1
+          grep -q "SYSTEM_APP_LAUNCH_TEST_PASS" test-system-apps.log
+          ./build/classic/canopy-classic-spike --enable-system-apps --self-test-system-apps >test-system-apps-enabled.log 2>&1
+          grep -q "SYSTEM_APP_LAUNCH_TEST_PASS" test-system-apps-enabled.log
+          echo "PASS: invalid launcher actions rejected; no apps launched by this test"
+      - name: Verify real native GIO launching via isolated XDG fixture
+        timeout-minutes: 2
+        env:
+          QT_QPA_PLATFORM: offscreen
+          XDG_CURRENT_DESKTOP: Cinnamon
+        run: |
+          set -euo pipefail
+          export XDG_DATA_HOME="$RUNNER_TEMP/canopy-app-launcher-xdg"
+          mkdir -p "$XDG_DATA_HOME/applications"
+          marker="$RUNNER_TEMP/canopy-native-app-launched"
+          printf '[Desktop Entry]\nType=Application\nName=Canopy Isolated Test\nExec=/usr/bin/touch %s\nTerminal=false\nNoDisplay=false\n' "$marker" > "$XDG_DATA_HOME/applications/nemo.desktop"
+          ./build/classic/canopy-classic-spike --enable-system-apps --self-test-system-apps-fixture >test-system-app-fixture.log 2>&1 || { cat test-system-app-fixture.log; exit 1; }
+          grep -q 'SYSTEM_APP_LAUNCH_FIXTURE_PASS' test-system-app-fixture.log
+          for i in 1 2 3 4 5; do test -f "$marker" && break; sleep 1; done
+          test -f "$marker"
+          echo "PASS: GIO launched disposable application marker via opt-in service without shell or real user apps"
+          # End-to-end: QML LauncherOverlay.choose("Files") must reach the
+          # same real GIO service, without changing the existing dock.
+          rm "$marker"
+          timeout 35s xvfb-run -a ./build/classic/canopy-classic-spike --enable-system-apps --self-test-launcher-ui-fixture >test-system-app-ui-fixture.log 2>&1 || { cat test-system-app-ui-fixture.log; exit 1; }
+          grep -q 'SYSTEM_APP_UI_FIXTURE_PASS' test-system-app-ui-fixture.log
+          for i in 1 2 3 4 5; do test -f "$marker" && break; sleep 1; done
+          test -f "$marker"
+          echo "PASS: compiled QML launcher activated disposable native GIO application"
       - name: Reject missing approved icon assets (no substitution)
         timeout-minutes: 1
         env:

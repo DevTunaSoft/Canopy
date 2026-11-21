@@ -235,3 +235,106 @@ to the reviewed current Classic Qt branch, **not an endorsement of that
 earlier prototype's rejected artwork**. Real OS app launch integration is
 a different unmerged draft (PR #102); visuals and Mint acceptance are not
 approved by this integration.
+
+## Native Linux applications from the searchable launcher (opt-in)
+
+The **searchable application overlay only** now supports requesting an installed
+Linux desktop application through GLib/GIO, using the reviewed
+`SystemAppLauncher` from draft PR #102. Use:
+
+```sh
+./canopy-classic-spike --enable-system-apps
+```
+
+**Without that flag**, every launcher category behaves exactly as in the
+existing sample: Files opens the demonstration Files view, and other
+categories say that real launching is not connected. With the flag, choosing
+a known application name in the searchable overlay asks the host-owned GIO
+service to launch one of a fixed allowlist of available `.desktop` IDs.
+There is no user-supplied `Exec`, shell, URL bridge, external API, background
+service, or arbitrary path input. If the system app is unavailable or fails,
+Files still opens the sample view and other categories say why they did not
+start. The app cannot claim a successful UI launch merely because GIO exists.
+
+The **dock is intentionally and explicitly untouched**: no Qt appearance,
+position, hover, size, art provider, clicking behavior or interaction in
+`DockTile.qml` or the `canopyDock` section of `Main.qml` was modified.
+This isolates launcher functionality from the owner-approved dock. The
+original eight source PNG hashes are unchanged, and the experimental
+launcher-only optical adjustments remain disabled by default.
+
+### Automated verification
+
+The Qt6 CI build links `gio-unix-2.0`, checks that malformed names and
+injection-like category strings are rejected, then installs an isolated
+temporary `nemo.desktop` under a disposable `XDG_DATA_HOME` whose `Exec`
+only creates a harmless temp marker. It verifies that the **actual GIO**
+launch request executes; no real user's browser, mail or other desktop app
+is launched in CI. A **second real Qt/Xvfb test** opens the on-screen QML
+launcher, calls its same `choose("Files")` action used by mouse or keyboard,
+and verifies the disposable `nemo.desktop` runs and the sample Files
+window is not accidentally reopened. `tests/test_classic_native_launcher_only.py` guards the
+no-dock-change contract and the opt-in behavior. This does **not** prove
+Nemo/Firefox/other apps can be visibly opened/focused inside a real Mint
+guest; that is a separate release acceptance test.
+
+See original independent GIO implementation PR #102. The work here adapts
+it to the current Classic launcher rather than blindly merging the old
+PR's **dock** interaction changes.
+
+## Launch this actual Qt build from a Linux application menu
+
+The project's existing stdlib registration utility on `main` provides
+**non-root, reversible user application menu integration**. Its installed
+`.desktop` entry points directly to a separately built Canopy Qt binary:
+
+```sh
+python3 tools/register_classic_preview.py status
+python3 tools/register_classic_preview.py install \
+  --binary /absolute/path/to/canopy-classic-spike
+python3 tools/register_classic_preview.py status
+# When done (removes only its exact unmodified managed entry):
+python3 tools/register_classic_preview.py uninstall
+```
+
+Optional `--approved-art-dir`, `--landscape-wallpaper`,
+`--terminal-refinement` and `--enable-system-apps` are forwarded to
+supported builds. Neither the desktop entry nor this utility replaces
+Cinnamon, switches sessions, starts a compositor, downloads software, or
+installs anything system-wide. The existing `DockTile.qml` remains frozen.
+
+`tools/classic_menu_runtime_smoke.py` now provides a separate **actual
+runtime launch test**. The CI builds the real Qt6 program, registers it
+in a disposable temporary `XDG_DATA_HOME`, validates the desktop entry,
+executes it through `gio launch` under a fresh Xvfb display, and requires
+both a process running that exact executable inode and a visible X11
+Canopy window. The test kills only the newly observed executable process,
+verifies ownership and unregisters the temporary menu entry; it never
+touches the real user's desktop menu or installed applications. The test
+is intentionally run as a normal, non-root user and must not be run
+against an interactive working desktop while the user is relying on it.
+
+Ubuntu/Xvfb completion **does not establish** Linux Mint guest support,
+real GNOME/Cinnamon menu presentation, auto-login, compositing, an
+installable shell/session, accessibility, or owner visual approval.
+
+### Real installed-application status on launcher open
+
+When `--enable-system-apps` is set, opening **Applications** performs one
+bounded, synchronous read of the system's GIO `.desktop` database for the
+eight existing application categories. Each tile displays **Installed**,
+**Not installed**, or **Preview only** for Files when the native file
+manager is unavailable. The accessible description conveys the same
+distinction. The footer counts matching installed categories, not total
+installed desktop files. Reopening refreshes the snapshot after an app is
+installed or removed; there is no timer, background monitor, daemon,
+additional Qt process, or external HTTP call. This catalog never appears
+on the default preview when the native option is off.
+
+The existing isolated XDG `nemo.desktop` CI fixture now verifies that the
+**actual QML model** discovers installed Files before `choose("Files")`
+requests an end-to-end native activation. The default screenshot self-test
+rejects invented native availability. This still needs an ordinary user's
+Linux Mint interactive session for real installed-app behavior, accessibility
+signoff, and final visual acceptance. This enhancement does not change the
+settled dock or the SHA-verified approved artwork.

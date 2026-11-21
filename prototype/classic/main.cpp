@@ -1,4 +1,6 @@
 #include "RoundedDockIconProvider.h"
+#include "SystemAppLauncher.h"
+#include <QVariant>
 
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
@@ -242,6 +244,48 @@ int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
     QGuiApplication::setApplicationDisplayName(QStringLiteral("Canopy Classic Spike"));
     const QStringList args = QCoreApplication::arguments();
+    // Native Linux app launching is explicitly opt-in for this standalone
+    // prototype. All default screenshot and demo behavior remains unchanged.
+    const bool enableSystemApps = args.contains(QStringLiteral("--enable-system-apps"));
+    SystemAppLauncher systemLauncher(enableSystemApps);
+    if (args.contains(QStringLiteral("--self-test-system-apps-fixture"))) {
+        // CI provides a disposable XDG_DATA_HOME containing a nemo.desktop
+        // whose Exec touches a temporary marker. This tests the actual GIO
+        // launch path without launching any real user application.
+        if (!enableSystemApps || !systemLauncher.canLaunch(QStringLiteral("Files"))
+            || !systemLauncher.launch(QStringLiteral("Files"))) {
+            qCritical() << "SYSTEM_APP_LAUNCH_FIXTURE_FAIL: GIO desktop launch unsuccessful";
+            return 1;
+        }
+        qInfo() << "SYSTEM_APP_LAUNCH_FIXTURE_PASS: GIO accepted isolated desktop entry";
+        return 0;
+    }
+    if (args.contains(QStringLiteral("--self-test-system-apps"))) {
+        // Self-test deliberately never executes a valid desktop application.
+        // Verify unknown IDs, shell metacharacters and free-form input cannot
+        // cross the fixed dock-name allowlist, even with launching enabled.
+        const QStringList denied = {
+            QStringLiteral("sh -c 'touch /tmp/canopy-bad'"),
+            QStringLiteral("../firefox.desktop"),
+            QStringLiteral("Browser;echo hacked"),
+            QStringLiteral("firefox.desktop"),
+            QStringLiteral(""),
+            QStringLiteral("Unknown")
+        };
+        for (const QString &value : denied) {
+            if (systemLauncher.canLaunch(value) || systemLauncher.launch(value)) {
+                qCritical() << "SYSTEM_APP_LAUNCH_TEST_FAIL: arbitrary launch accepted";
+                return 1;
+            }
+        }
+        if (!enableSystemApps && (systemLauncher.canLaunch(QStringLiteral("Browser"))
+                                  || systemLauncher.launch(QStringLiteral("Browser")))) {
+            qCritical() << "SYSTEM_APP_LAUNCH_TEST_FAIL: launch not opt-in";
+            return 1;
+        }
+        qInfo() << "SYSTEM_APP_LAUNCH_TEST_PASS: unknown or dangerous actions refused, no application executed";
+        return 0;
+    }
     const int approvedIndex = args.indexOf(QStringLiteral("--approved-art-dir"));
     const bool approvedMode = approvedIndex >= 0;
     const bool framingReviewMode = args.contains(QStringLiteral("--icon-framing-review"));
@@ -365,6 +409,10 @@ int main(int argc, char *argv[]) {
     }
     engine.rootContext()->setContextProperty(QStringLiteral("canopyApprovedMode"), approvedMode);
     engine.rootContext()->setContextProperty(
+        QStringLiteral("canopySystemLaunchEnabled"), enableSystemApps);
+    engine.rootContext()->setContextProperty(
+        QStringLiteral("canopySystemLauncher"), &systemLauncher);
+    engine.rootContext()->setContextProperty(
         QStringLiteral("canopyIconFramingReview"), framingReviewMode);
     engine.rootContext()->setContextProperty(
         QStringLiteral("canopyLandscapeWallpaperUrl"),
@@ -387,6 +435,56 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     qInfo() << "CANOPY_CLASSIC_WINDOW_READY";
+    if (args.contains(QStringLiteral("--self-test-launcher-ui-fixture"))) {
+        // Exercise the SAME QML choose(name) path as a human selecting Files,
+        // using a throwaway XDG_DATA_HOME desktop entry in CI. No real
+        // installed user application is executed, and the dock isn't used.
+        if (!enableSystemApps) {
+            qCritical() << "SYSTEM_APP_UI_FIXTURE_FAIL: explicit opt-in required";
+            return 2;
+        }
+        QTimer::singleShot(350, window, [window]() {
+            auto *overlay = findVisualItem(
+                window->contentItem(), QStringLiteral("canopyApplicationLauncher"));
+            auto *files = findVisualItem(
+                window->contentItem(), QStringLiteral("canopyPreviewWindow"));
+            if (!overlay || !files ||
+                !QMetaObject::invokeMethod(overlay, "openLauncher", Qt::DirectConnection) ||
+                !overlay->isVisible()) {
+                qCritical() << "SYSTEM_APP_UI_FIXTURE_FAIL: actual launcher unavailable";
+                QCoreApplication::exit(1);
+                return;
+            }
+            // Live Qt model must reflect the disposable installed entry;
+            // this tests the UI signal path, not just the C++ GIO helper.
+            const QVariantMap availability =
+                overlay->property("nativeAppAvailability").toMap();
+            if (!availability.value(QStringLiteral("Files")).toBool() ||
+                overlay->property("nativeAvailableCount").toInt() < 1) {
+                qCritical() << "SYSTEM_APP_UI_FIXTURE_FAIL: Qt model did not"
+                               " discover installed Nemo category";
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SYSTEM_APP_AVAILABILITY_PASS: Files detected in"
+                       " actual QML catalog when native opt-in active";
+            // Files is initially open in the sample. A real successful GIO
+            // activation must NOT reopen that demo window as a side effect.
+            files->setVisible(false);
+            const bool chose = QMetaObject::invokeMethod(
+                overlay, "choose", Qt::DirectConnection,
+                Q_ARG(QVariant, QVariant(QStringLiteral("Files"))));
+            if (!chose || overlay->isVisible() || files->isVisible()) {
+                qCritical() << "SYSTEM_APP_UI_FIXTURE_FAIL: QML activation fell back"
+                               " or failed to dismiss overlay";
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SYSTEM_APP_UI_FIXTURE_PASS: actual QML launcher"
+                       " triggered GIO without touching dock";
+            QCoreApplication::quit();
+        });
+    }
     const int sizeIndex = args.indexOf(QStringLiteral("--self-test-size"));
     if (sizeIndex >= 0) {
         if (sizeIndex + 1 >= args.size()) {
@@ -526,6 +624,14 @@ int main(int argc, char *argv[]) {
             }
             qInfo() << "SELF_TEST_PASS: actual launcher button image geometry centered"
                     << centeredLauncherButtons;
+            // Default preview must never query user-installed apps, and
+            // may never falsely claim native application availability.
+            if (!applicationLauncher->property("nativeAppLaunchEnabled").toBool() &&
+                applicationLauncher->property("nativeAvailableCount").toInt() != 0) {
+                qCritical() << "SELF_TEST_FAIL: preview invented native app availability";
+                QCoreApplication::exit(1);
+                return;
+            }
             const bool selectedMatch =
                 applicationLauncher->setProperty("searchQuery", QStringLiteral("fIlEs"))
                 && applicationLauncher->property("filteredCount").toInt() == 1;

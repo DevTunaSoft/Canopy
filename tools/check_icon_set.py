@@ -67,7 +67,7 @@ def verify_icon(path: Path) -> None:
         if (not 10 <= shapes <= 16 or original_outline is None
                 or original_outline.get("fill") != "#182236"
                 or original_outline.get("fill-rule") != "evenodd"
-                or len(re.findall(r"\\bM\\s",
+                or len(re.findall(r"\bM\s",
                                   original_outline.get("d", ""))) != 4
                 or not {"#f7f9fd", "#ffca35", "#f4b523"}.issubset(colors)):
             raise ValueError("Launcher must preserve the reference contour and full-color Tux details")

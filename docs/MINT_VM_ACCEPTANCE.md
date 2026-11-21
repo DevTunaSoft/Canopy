@@ -29,3 +29,22 @@ Use the dedicated Canopy-Test-Mint VirtualBox VM, not a production host. Confirm
 
 ## Exit criteria
 No critical visual or session failures, no undocumented persistent host changes, reproducible build, and baseline metrics. This validates only a standalone window; a real Canopy session needs separate acceptance tests.
+
+## Optional installed-application launch acceptance (new)
+
+This is **not yet executed in a genuine Linux Mint guest**. After building
+Canopy Classic and preserving the normal Cinnamon session, first test the
+default preview remains isolated. Then, in the same guest session:
+
+```sh
+./build/classic/canopy-classic-spike --enable-system-apps
+```
+
+Confirm the Files dock opens installed Nemo (or reports it unavailable),
+Browser opens the installed Firefox (or reports unavailable), and Terminal
+launches a visible installed terminal. Distinguish GIO `launch accepted`
+from actually functioning, focused application windows. Close each app
+normally, relaunch repeatedly, and confirm Mint Cinnamon retains complete
+session ownership. Check shortcuts, keyboard navigation, errors, idle
+CPU/PSS, a reboot and rollback. No automated Ubuntu Xvfb smoke test can
+replace this Mint evidence.

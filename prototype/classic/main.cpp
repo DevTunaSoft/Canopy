@@ -370,6 +370,24 @@ int main(int argc, char *argv[]) {
                     QCoreApplication::exit(1);
                     return;
                 }
+                auto *launcherPanel = findVisualItem(
+                    launcherOverlay, QStringLiteral("canopyLauncherPanel"));
+                const QPointF panelOrigin = launcherPanel
+                    ? launcherPanel->mapToItem(window->contentItem(), QPointF(0, 0))
+                    : QPointF(-1, -1);
+                if (!launcherPanel || preview->opacity() > 0.01 ||
+                    panelOrigin.x() < 0 || panelOrigin.y() < bar->height() - 1 ||
+                    panelOrigin.x() + launcherPanel->width() > window->width() + 1 ||
+                    panelOrigin.y() + launcherPanel->height() > dockOrigin.y() - 8 ||
+                    qAbs(panelOrigin.x() + launcherPanel->width() / 2 -
+                         window->width() / 2) > 2) {
+                    qCritical() << "SELF_TEST_FAIL: launcher overlays dock or Files preview"
+                                << "panel origin" << panelOrigin
+                                << "Files opacity" << preview->opacity();
+                    QCoreApplication::exit(1);
+                    return;
+                }
+                qInfo() << "SELF_TEST_PASS: launcher panel contained and Files preview hidden";
                 qInfo() << "SELF_TEST_PASS: searchable application launcher rendered with"
                         << expected << "original icons";
             }

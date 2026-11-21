@@ -306,6 +306,7 @@ Rectangle {
                 }
                 Flow {
                     id: folders
+                    objectName: "canopyFolderFlow"
                     // Four even columns at every target width: prevents the
                     // 1920px 7+1 orphan row while preserving Finder-like left
                     // alignment. A narrower content area still wraps safely.

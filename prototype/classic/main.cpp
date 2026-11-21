@@ -207,6 +207,7 @@ int main(int argc, char *argv[]) {
     const bool requireApproved = args.contains(QStringLiteral("--self-test-approved"));
     const int landscapeIndex = args.indexOf(QStringLiteral("--landscape-wallpaper"));
     const bool landscapeMode = landscapeIndex >= 0;
+    const int terminalRefinementIndex = args.indexOf(QStringLiteral("--terminal-refinement"));
     QString landscapePath;
     if (landscapeMode) {
         if (landscapeIndex + 1 >= args.size() ||
@@ -243,12 +244,49 @@ int main(int argc, char *argv[]) {
             "CANOPY_APPROVED_ART_VERIFIED: eight exact PNG icons; landscape wallpaper separately checked" :
             "CANOPY_APPROVED_ART_VERIFIED: eight exact PNG icons and legacy blue wave");
     }
+    // The new art is a proposal only; verify it separately and never
+    // overwrite or bypass the eight SHA-locked, user-approved master PNGs.
+    QString terminalCandidatePath;
+    if (terminalRefinementIndex >= 0) {
+        if (!approvedMode || terminalRefinementIndex + 1 >= args.size() ||
+            args.at(terminalRefinementIndex + 1).startsWith(QLatin1Char('-'))) {
+            qCritical() << "TERMINAL_REFINEMENT_FAIL: requires approved art and a PNG path";
+            return 2;
+        }
+        const QFileInfo candidate(args.at(terminalRefinementIndex + 1));
+        if (!candidate.exists() || !candidate.isFile() || candidate.isSymLink() ||
+            candidate.size() < 256 || candidate.size() > 5'000'000) {
+            qCritical() << "TERMINAL_REFINEMENT_FAIL: unsafe or missing PNG";
+            return 3;
+        }
+        const QString filePath = candidate.canonicalFilePath();
+        QImageReader reader(filePath);
+        const QSize dimensions = reader.size();
+        if (!reader.canRead() || reader.format().toLower() != "png" ||
+            !dimensions.isValid() || dimensions.width() < 256 ||
+            dimensions.width() > 2048 || dimensions.height() != dimensions.width()) {
+            qCritical() << "TERMINAL_REFINEMENT_FAIL: expected square 256-2048px PNG";
+            return 3;
+        }
+        const QImage image = reader.read();
+        if (image.isNull() || !image.hasAlphaChannel() ||
+            image.pixelColor(0, 0).alpha() > 32 ||
+            image.pixelColor(image.width() - 1, 0).alpha() > 32 ||
+            image.pixelColor(0, image.height() - 1).alpha() > 32 ||
+            image.pixelColor(image.width() - 1,
+                             image.height() - 1).alpha() > 32) {
+            qCritical() << "TERMINAL_REFINEMENT_FAIL: image lacks transparent corners";
+            return 3;
+        }
+        terminalCandidatePath = filePath;
+        qInfo() << "CANOPY_TERMINAL_CANDIDATE_VERIFIED: optional, Terminal only";
+    }
     QQmlApplicationEngine engine;
     if (approvedMode) {
         // Source PNGs were SHA-verified above; transform copies IN MEMORY
         // only. The files and their immutable manifest remain unchanged.
         QString roundedError;
-        auto *roundedIcons = new RoundedDockIconProvider(approvedRoot, &roundedError);
+        auto *roundedIcons = new RoundedDockIconProvider(approvedRoot, terminalCandidatePath, &roundedError);
         if (!roundedIcons->isValid() || !roundedIcons->allCornersClipped()) {
             qCritical().noquote() << "APPROVED_ART_FAIL: rounded dock rendering:"
                                    << roundedError;
@@ -306,7 +344,8 @@ int main(int argc, char *argv[]) {
             return 2;
         }
         const QString screenshotPath = args.at(screenshotIndex + 1);
-        QTimer::singleShot(1000, window, [window, screenshotPath, approvedMode, landscapeMode]() {
+        QTimer::singleShot(1000, window, [window, screenshotPath, approvedMode, landscapeMode,
+             terminalCandidateMode = !terminalCandidatePath.isEmpty()]() {
             auto *bar = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBar"));
             auto *dock = window->findChild<QQuickItem *>(QStringLiteral("canopyDock"));
             auto *launcher = window->findChild<QQuickItem *>(QStringLiteral("canopyLauncher"));
@@ -383,7 +422,9 @@ int main(int argc, char *argv[]) {
                 QCoreApplication::exit(1);
                 return;
             }
-            if (approvedMode)
+            if (approvedMode && terminalCandidateMode)
+                qInfo() << "SELF_TEST_PASS: seven original dock PNGs plus one Terminal candidate loaded";
+            else if (approvedMode)
                 qInfo() << "SELF_TEST_PASS: all eight exact approved dock PNGs loaded";
             else
                 qInfo() << "SELF_TEST_PASS: all six SVG dock candidates loaded (legacy demo only)";

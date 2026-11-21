@@ -29,6 +29,13 @@ jobs:
         run: sudo apt-get update -qq && sudo apt-get install -y -qq desktop-file-utils
       - name: Run complete registration negative-control tests
         run: python -m unittest tests.test_classic_preview_menu -v
+      - name: Prepare real executable fixture, not a symlink
+        run: |
+          set -euo pipefail
+          cp --dereference /usr/bin/true "$RUNNER_TEMP/canopy-menu-test-binary"
+          chmod 0700 "$RUNNER_TEMP/canopy-menu-test-binary"
+          test -f "$RUNNER_TEMP/canopy-menu-test-binary"
+          test ! -L "$RUNNER_TEMP/canopy-menu-test-binary"
       - name: Validate real desktop entry and remove it in disposable XDG home
         shell: bash
         run: |
@@ -36,7 +43,7 @@ jobs:
           export XDG_DATA_HOME="$RUNNER_TEMP/canopy xdg menu test"
           mkdir -p "$XDG_DATA_HOME"
           python tools/register_classic_preview.py status | grep -q CANOPY_PREVIEW_NOT_INSTALLED
-          python tools/register_classic_preview.py install --binary /usr/bin/true
+          python tools/register_classic_preview.py install --binary "$RUNNER_TEMP/canopy-menu-test-binary"
           desktop-file-validate "$XDG_DATA_HOME/applications/org.canopy.ClassicPreview.desktop"
           python tools/register_classic_preview.py status | grep -q CANOPY_PREVIEW_INSTALLED
           python tools/register_classic_preview.py uninstall | grep -q CANOPY_PREVIEW_UNINSTALLED
@@ -49,7 +56,7 @@ jobs:
           set -euo pipefail
           export XDG_DATA_HOME="$RUNNER_TEMP/canopy xdg modified"
           mkdir -p "$XDG_DATA_HOME"
-          python tools/register_classic_preview.py install --binary /usr/bin/true
+          python tools/register_classic_preview.py install --binary "$RUNNER_TEMP/canopy-menu-test-binary"
           printf '\n# user-modified\n' >> "$XDG_DATA_HOME/applications/org.canopy.ClassicPreview.desktop"
           if python tools/register_classic_preview.py uninstall; then
             echo "FAIL: modified user file was removed" >&2

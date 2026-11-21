@@ -27,3 +27,11 @@ A shell is not automatically a window manager or compositor. Prefer a proven Way
 
 ## Boundaries
 No Apple logos, copied macOS icons, or proprietary assets. Similar interaction patterns may be researched; implement original designs. Avoid background polling, duplicated daemons, and unbounded caches.
+
+## Canopy presentation switching (future goal)
+
+Keep Classic and Modern as independently styled adapters on the same session/window-management integration and shared state. The *goal* is an accessible in-session mode switch, preserving application/window state and per-style customization without reboot, reinstall or parallel desktop daemons. Specify and test ownership transfer, event subscriptions, lifecycle cleanup, memory recovery, crash fallback and recovery to the previous mode. A compositor/session or third-party desktop-environment change may require logout/login; protect user work and clearly distinguish this from the Canopy live-switch target. No seamless switch is currently implemented or verified. See [LacOS vision](LACOS_VISION.md).
+
+## LacOS distribution boundary (later phase)
+
+Canopy first remains a reusable desktop shell/session. **Only after** Mint acceptance and visual/performance signoff, LacOS may be developed as a separate Mint-based distribution consuming the shared Canopy engine with both Classic and Modern experiences. Preserve upstream Mint security/update/hardware compatibility; optimize whole-system resources with before/after measurements and reversible changes. Add functionality without duplicate services or resource-heavy defaults. Maintain the existing Canopy performance, original-artwork, and engineering rules. See [LacOS vision](LACOS_VISION.md).

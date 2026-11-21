@@ -22,3 +22,16 @@ Record commit SHA, hardware, distro/kernel, graphics driver, compositor, command
 
 ## PR acceptance
 Unit and integration tests green, no unexplained performance regression, original asset licensing checked, docs current, and user-visible visuals reviewed. Keep PR draft until evidence exists.
+
+## Additional Shell Pack release checks (planned)
+
+Each new desktop experience needs version/capability compatibility,
+independent user visual approval, original or licensed assets, keyboard
+and screen-reader evidence, real Qt or applicable UI-engine screenshots
+and measured resource overhead versus the existing Classic reference.
+
+Once switching exists, require repeated A→B→A transitions, app/window state
+preservation, failed-switch rollback, session recovery, memory cleanup
+and proof that inactive packs do not run independent desktop services.
+Metadata validation is not runtime, sandbox or security verification.
+See [Shell Pack architecture](SHELL_PACK_ARCHITECTURE.md).

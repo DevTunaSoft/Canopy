@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify Qt screenshots changed ONLY inside the eight icon artwork slots.
+"""Verify frozen dock is pixel-identical, launcher changes only its icons.
 
 This is reproducible image evidence, not visual approval or automatic
 optical correction. Images must come from separately verified same-binary
@@ -67,6 +67,23 @@ def compare_pair(before, after, size, scene):
         raise ComparisonError("unsupported Qt screenshot geometry")
     width, height, orig, before_hash = _read_png(before, size)
     _, _, modified, after_hash = _read_png(after, size)
+    # The dock and every other desktop pixel are frozen. A launcher-only
+    # experiment is invalid if even one closed-desktop pixel differs.
+    if scene == "desktop":
+        if orig != modified:
+            for offset in range(0, len(orig), 4):
+                if orig[offset:offset + 4] != modified[offset:offset + 4]:
+                    pixel = offset // 4
+                    raise ComparisonError(
+                        f"frozen dock/desktop pixel changed at "
+                        f"({pixel % width}, {pixel // width}) in {size}"
+                    )
+        return {
+            "resolution": size, "scene": scene,
+            "changed_pixels": 0, "outside_icon_pixels": 0,
+            "per_icon_changed_pixels": dict.fromkeys(APPS, 0),
+            "before_sha256": before_hash, "after_sha256": after_hash,
+        }
     counts = [0] * len(APPS)
     for i in range(0, len(orig), 4):
         if (orig[i] == modified[i] and orig[i + 1] == modified[i + 1]
@@ -130,7 +147,7 @@ def main(argv=None):
         else:
             print(payload, end="")
         print("CANOPY_ICON_FRAME_DIFF_PASS: six Qt screenshot comparisons, "
-              "zero changes outside 54px icon slots", file=sys.stderr)
+              "frozen dock byte-identical; launcher edits inside 54px icon slots", file=sys.stderr)
         return 0
     except (AuditError, ComparisonError, OSError) as exc:
         print("CANOPY_ICON_FRAME_DIFF_FAIL:", exc, file=sys.stderr)

@@ -804,14 +804,20 @@ int main(int argc, char *argv[]) {
                 // cannot obscure the owner's actual-open visual evidence.
                 QCursor::setPos(window->mapToGlobal(QPoint(
                     8, window->height() - 8)));
-                // Allow Qt Quick a frame to polish and paint the actual overlay.
+                // QQuickWindow::grabWindow() returns PHYSICAL pixels.
+                // Never compare those dimensions to logical QQuickWindow
+                // geometry: at 150% scale, a 1200x750 window is 1800x1125.
+                // Require both actual Qt captures to share the exact same
+                // pixel dimensions instead; this catches clipped/stale frames
+                // while allowing legitimate high-DPI device pixel ratios.
+                const QSize desktopPhysicalPixels = frame.size();
                 QTimer::singleShot(250, window,
-                    [window, applicationLauncher, launcherScreenshotPath]() {
+                    [window, applicationLauncher, launcherScreenshotPath,
+                     desktopPhysicalPixels]() {
                         const QImage launcherFrame = window->grabWindow();
                         if (!applicationLauncher->isVisible() ||
                             launcherFrame.isNull() ||
-                            launcherFrame.width() != window->width() ||
-                            launcherFrame.height() != window->height() ||
+                            launcherFrame.size() != desktopPhysicalPixels ||
                             !launcherFrame.save(launcherScreenshotPath, "PNG")) {
                             qCritical() << "SELF_TEST_FAIL: actual launcher screenshot unavailable";
                             QCoreApplication::exit(1);

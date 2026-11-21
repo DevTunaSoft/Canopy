@@ -14,6 +14,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Source regression tests (before Qt package installation)
         run: python3 -m unittest discover -s tests -p 'test_classic_source.py' -v
+      - name: Verify optical-review offsets and original default geometry
+        run: python3 -m unittest tests.test_classic_optical_offsets tests.test_dock_alignment -v
       - name: Verify immutable approved artwork manifest contract
         run: python3 -m unittest discover -s tests -p 'test_approved_manifest_contract.py' -v
       - name: Validate original vector wallpaper before Qt build
@@ -57,6 +59,13 @@ jobs:
           test "$code" -eq 3
           grep -q 'APPROVED_ART_FAIL' test-bad-art.log
           echo "PASS: missing user-approved artwork rejected before Qt scene loads"
+          set +e
+          ./build/classic/canopy-classic-spike --optical-review >test-optical-missing-approved.log 2>&1
+          optical_code=$?
+          set -e
+          test "$optical_code" -eq 2
+          grep -q 'OPTICAL_REVIEW_FAIL' test-optical-missing-approved.log
+          echo "PASS: optical preview cannot run without exactly approved artwork"
       - name: Validate optional landscape wallpaper on real Qt runtime
         timeout-minutes: 3
         env:

@@ -52,6 +52,33 @@ Build a polished, familiar Linux desktop shell. Classic is macOS-inspired withou
 
 Read `docs/LACOS_VISION.md` for the future Linux Mint-based LacOS distribution goal. Preserve the project sequence: **finish and verify Canopy Classic**, build shared-core Windows-familiar Canopy Modern, make Classic/Modern freely switchable on demand (aim for in-session app/window preservation, with safe announced logout/login fallback when unavoidable), **then** build a separate optimized Mint-derived distribution. This is planned, not released. Do not create duplicate desktop daemons or compromise Mint security, stability, performance budgets, asset provenance, user-approved visual direction, or existing instructions. A live-switch claim requires real tests; do not invent evidence.
 
+## Open-ended Shell Packs — latest owner requirement
+
+Canopy must accept an **unbounded number of future desktop presentation
+styles**. Classic and Modern are starting Shell Packs, not the only two.
+Read `docs/SHELL_PACK_ARCHITECTURE.md` before changing shell architecture.
+
+- Build and preserve a versioned, documented **Shell Host** contract. New
+  packs get their own UI/branding/preferences but consume shared
+  apps/windows/notifications/settings/accessibility/session services.
+- One active presentation, no duplicate compositor, daemons, background
+  indexing, notification services or hidden always-on inactive shell.
+- Keep Classic's user-approved live Qt visual direction, exact approved icon
+  provenance and quality gates. New adapters must not degrade its visuals.
+- Offer a simple SDK/starter, strict schema validation and compatibility
+  checking; test that a third independent presentation can integrate
+  without editing core business logic when a loader is actually built.
+- Treat downloaded pack code as **untrusted**: offline manifest validation
+  is never permission enforcement, package verification or safe execution.
+  Future community packs require signed/reviewed installation and isolation.
+- Target app/window-preserving in-session switching only when demonstrated.
+  Clearly warn and safely fall back to logout/login where compositor/session
+  requirements make a hot swap unsafe; recover from failed switches.
+- Maintain current performance budgets, readability, modular code, CI,
+  regression coverage, VM tests, stable APIs and accessibility. Do not
+  announce a running marketplace, pack host, third-party loader or switcher:
+  these are still planned.
+
 ## Non-negotiables
 - Premium visual quality and accessibility with low idle CPU, RAM, GPU, and wakeups.
 - Original iconography and legally distributable assets only.

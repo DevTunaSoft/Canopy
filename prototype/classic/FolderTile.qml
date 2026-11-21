@@ -10,11 +10,13 @@ Button {
     required property string folderName
     required property color folderTone // Legacy demo model input; not an icon tint.
     property bool selected: false
+    // Compact only the Files sample grid; approved dock artwork is untouched.
+    property bool compact: false
     readonly property bool imageReady: folderIcon.status === Image.Ready
     width: 108
-    height: 90
+    height: compact ? 70 : 90
     implicitWidth: 108
-    implicitHeight: 90
+    implicitHeight: compact ? 70 : 90
     hoverEnabled: true
     padding: 0
     Accessible.name: folderName + " sample folder"
@@ -31,10 +33,10 @@ Button {
             id: folderIcon
             objectName: "canopyFolderArtwork"
             anchors.top: parent.top
-            anchors.topMargin: 4
+            anchors.topMargin: compact ? 0 : 4
             anchors.horizontalCenter: parent.horizontalCenter
-            width: 72
-            height: 64
+            width: compact ? 64 : 72
+            height: compact ? 50 : 64
             source: "qrc:/Canopy/Classic/assets/ui/folder-blue.svg"
             sourceSize: Qt.size(128, 128)
             fillMode: Image.PreserveAspectFit
@@ -44,11 +46,11 @@ Button {
         }
         Label {
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 4
+            anchors.bottomMargin: compact ? 2 : 4
             anchors.horizontalCenter: parent.horizontalCenter
             text: folder.folderName
             color: "#34465c"
-            font.pixelSize: 11
+            font.pixelSize: compact ? 10 : 11
             font.weight: folder.selected ? Font.DemiBold : Font.Normal
             elide: Text.ElideRight
         }

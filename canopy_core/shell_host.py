@@ -130,6 +130,11 @@ class ShellHost:
             return SwitchResult(previous_id, pack_id, "FACTORY_FAILED",
                                 previous_id, bool(previous_id), type(exc).__name__)
 
+        if candidate is self._active_view:
+            return SwitchResult(previous_id, pack_id, "FACTORY_FAILED",
+                                previous_id, True,
+                                "trusted adapter factory reused the active instance")
+
         prepared_error = self._attempt(candidate, "prepare")
         if prepared_error:
             cleanup_error = self._attempt(candidate, "dispose")

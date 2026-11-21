@@ -387,6 +387,61 @@ int main(int argc, char *argv[]) {
                 qInfo() << "SELF_TEST_PASS: all eight exact approved dock PNGs loaded";
             else
                 qInfo() << "SELF_TEST_PASS: all six SVG dock candidates loaded (legacy demo only)";
+            {
+                // Also exercise this geometry check in CI's six-icon legacy
+                // scene so the layout cannot regress when approved PNGs are
+                // unavailable on the runner. Full eight-icon QA runs locally.
+                // A successful icon decoder doesn't prove the dock looks aligned.
+                // Test all eight ACTUAL QML image rectangles in the running scene.
+                // Each 54px art slot must be centred on its 58x70px button,
+                // and its button must be centered vertically inside the dock.
+                const QStringList names = approvedMode ? QStringList{
+                    QStringLiteral("Browser"), QStringLiteral("Mail"),
+                    QStringLiteral("Files"), QStringLiteral("Calendar"),
+                    QStringLiteral("Photos"), QStringLiteral("Music"),
+                    QStringLiteral("Terminal"), QStringLiteral("Settings")
+                } : QStringList{
+                    QStringLiteral("Files"), QStringLiteral("Browser"),
+                    QStringLiteral("Settings"), QStringLiteral("Photos"),
+                    QStringLiteral("Terminal"), QStringLiteral("Trash")
+                };
+                qreal previousRight = -1;
+                for (const QString &name : names) {
+                    auto *button = findDockTile(dock, name);
+                    auto *art = button ? findVisualItem(button, QStringLiteral("canopyDockIcon"))
+                                       : nullptr;
+                    if (!button || !art) {
+                        qCritical() << "SELF_TEST_FAIL: dock centering missing control" << name;
+                        QCoreApplication::exit(1);
+                        return;
+                    }
+                    const QPointF iconStart = art->mapToItem(dock, QPointF(0, 0));
+                    const QPointF tileStart = button->mapToItem(dock, QPointF(0, 0));
+                    const qreal iconMidX = iconStart.x() + art->width() / 2;
+                    const qreal iconMidY = iconStart.y() + art->height() / 2;
+                    const qreal buttonMidX = tileStart.x() + button->width() / 2;
+                    const qreal buttonMidY = tileStart.y() + button->height() / 2;
+                    if (qAbs(iconMidX - buttonMidX) > 0.75 ||
+                        qAbs(iconMidY - buttonMidY) > 0.75 ||
+                        qAbs(iconMidY - dock->height() / 2) > 1.0 ||
+                        iconStart.y() < 7 || iconStart.y() + art->height()
+                             > dock->height() - 7 ||
+                        tileStart.x() < previousRight ||
+                        art->width() < 50 || art->width() > 56 ||
+                        art->height() != art->width()) {
+                        qCritical() << "SELF_TEST_FAIL: dock icon optical alignment"
+                                    << name << "image" << iconStart << art->size()
+                                    << "tile" << tileStart << button->size()
+                                    << "dock" << dock->size();
+                        QCoreApplication::exit(1);
+                        return;
+                    }
+                    previousRight = tileStart.x() + button->width();
+                }
+                qInfo() << "SELF_TEST_PASS: dock icons horizontally/vertically centred"
+                        << "count" << names.size()
+                        << "with equal 54px art slots and 7px minimum dock insets";
+            }
             if (!wallpaperFits || dockTileCount != (approvedMode ? 8 : 6)) {
                 qCritical() << "SELF_TEST_FAIL: wallpaper bounds or dock icon count invalid"
                             << "wallpaper" << wallpaperOrigin << wallpaper->size()

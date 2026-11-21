@@ -32,11 +32,13 @@ Button {
     ToolTip.text: iconName === "Files" ? "Toggle Files preview" : iconName + " — preview only"
     background: Item {
         Rectangle {
-            anchors.top: parent.top
-            anchors.horizontalCenter: parent.horizontalCenter
+            // Align the hover/focus halo with the icon, not the top of
+            // the tall (70px) button. Keep an equal visual gap on both
+            // sides of the 88px dock, at every tested resolution.
+            anchors.centerIn: parent
             width: 56
             height: 56
-            radius: 13
+            radius: 16
             visible: tile.hovered || tile.activeFocus
             color: tile.hovered ? "#30ffffff" : "#18ffffff"
             border.color: tile.activeFocus ? "#aac9f2ff" : "transparent"
@@ -57,9 +59,10 @@ Button {
         Image {
             id: iconArt
             objectName: "canopyDockIcon"
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.top
-            anchors.topMargin: 2
+            anchors.centerIn: parent
+            // A centered 54px image inside a 70px dock tile leaves 8px
+            // on top and bottom. The old topMargin: 2 pushed every icon
+            // visually high, despite having correct rounded corners.
             width: 54
             height: 54
             source: tile.iconUrl

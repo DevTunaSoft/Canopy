@@ -220,7 +220,13 @@ placement, application list or desktop composition. Synthetic source-contract
 tests run in `tests/test_classic_launcher.py`. Compiled Qt smoke tests
 actually open the overlay, exercise the case-insensitive QML search binding,
 verify zero and restored matches, close it, then capture the original
-resting desktop at three resolutions.
+resting desktop at three resolutions. In addition, the real Qt build is run
+with `--self-test-launcher-screenshot` at 1200×750, capturing an **open
+launcher image** after the Qt frame repaints, alongside the closed desktop.
+The workflow validates both PNGs and rejects pixel-identical files. They are
+stored in the short-lived `canopy-classic-ui-evidence` GitHub Actions
+artifact; they are not AI-generated mockups. These CI images still use
+prototype art, **not the user's private approved icon/wallpaper bundle**.
 
 This is an adaptation of the earlier draft launcher prototype (PR #60)
 to the reviewed current Classic Qt branch, **not an endorsement of that

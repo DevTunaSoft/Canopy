@@ -1,3 +1,5 @@
+#include "RoundedDockIconProvider.h"
+
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
@@ -242,6 +244,19 @@ int main(int argc, char *argv[]) {
             "CANOPY_APPROVED_ART_VERIFIED: eight exact PNG icons and legacy blue wave");
     }
     QQmlApplicationEngine engine;
+    if (approvedMode) {
+        // Source PNGs were SHA-verified above; transform copies IN MEMORY
+        // only. The files and their immutable manifest remain unchanged.
+        auto *roundedIcons = new RoundedDockIconProvider(approvedRoot, &error);
+        if (!roundedIcons->isValid() || !roundedIcons->allCornersClipped()) {
+            qCritical().noquote() << "APPROVED_ART_FAIL: rounded dock rendering:"
+                                   << error;
+            delete roundedIcons;
+            return 3;
+        }
+        engine.addImageProvider(QStringLiteral("canopy-dock"), roundedIcons);
+        qInfo() << "CANOPY_ROUNDED_DOCK_VERIFIED: eight original icons, padded, alpha-clipped";
+    }
     engine.rootContext()->setContextProperty(QStringLiteral("canopyApprovedMode"), approvedMode);
     engine.rootContext()->setContextProperty(
         QStringLiteral("canopyLandscapeWallpaperUrl"),

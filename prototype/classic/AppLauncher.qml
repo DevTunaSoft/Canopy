@@ -55,8 +55,8 @@ Item {
     Rectangle {
         id: panel
         objectName: "canopyLauncherPanel"
-        width: Math.min(968, launcher.width - 36)
-        height: Math.min(548, Math.max(295, launcher.height - 170))
+        width: Math.min(880, launcher.width - 36)
+        height: Math.min(450, Math.max(295, launcher.height - 170))
         x: (launcher.width - width) / 2
         y: 32 + Math.max(0, (launcher.height - 142 - height) / 2)
         radius: 28
@@ -104,39 +104,43 @@ Item {
             }
         }
 
-        Grid {
+        // Center each row independently: a six-icon fallback, eight-icon
+        // approved set, or a one-result search must all remain balanced.
+        Column {
             id: appGrid
             objectName: "canopyLauncherGrid"
             anchors.horizontalCenter: parent.horizontalCenter
-            width: Math.min(panel.width - 44, 720)
+            width: Math.min(panel.width - 48, 720)
             y: Math.max(searchField.y + searchField.height + 18,
-                        (panel.height - implicitHeight) / 2 + 22)
-            columns: 4
-            columnSpacing: Math.min(23, Math.max(8, (width - 440) / 3))
-            rowSpacing: panel.height < 360 ? 4 : 22
+                        (panel.height - implicitHeight) / 2 + 20)
+            spacing: panel.height < 360 ? 4 : 22
 
-            Repeater {
-                model: launcher.filteredNames
-                delegate: Column {
-                    required property string modelData
-                    width: (appGrid.width - appGrid.columnSpacing * 3) / 4
-                    height: 100
-                    spacing: 1
-
-                    DockTile {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        iconName: parent.modelData
-                        previewActive: false
-                        onClicked: launcher.selectApp(iconName)
+            Row {
+                id: firstRow
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: Math.min(24, Math.max(8, (appGrid.width - 520) / 3))
+                Repeater {
+                    model: launcher.filteredNames.slice(0, 4)
+                    delegate: LauncherTile {
+                        required property string modelData
+                        iconName: modelData
+                        width: Math.min(142, (appGrid.width - 3 * firstRow.spacing) / 4)
+                        onActivated: function(name) { launcher.selectApp(name) }
                     }
-                    Label {
-                        width: parent.width
-                        text: parent.modelData
-                        color: "#fafbff"
-                        horizontalAlignment: Text.AlignHCenter
-                        elide: Text.ElideRight
-                        font.pixelSize: 12
-                        font.weight: Font.Medium
+                }
+            }
+            Row {
+                id: secondRow
+                visible: launcher.visibleIconCount > 4
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: firstRow.spacing
+                Repeater {
+                    model: launcher.filteredNames.slice(4)
+                    delegate: LauncherTile {
+                        required property string modelData
+                        iconName: modelData
+                        width: Math.min(142, (appGrid.width - 3 * secondRow.spacing) / 4)
+                        onActivated: function(name) { launcher.selectApp(name) }
                     }
                 }
             }

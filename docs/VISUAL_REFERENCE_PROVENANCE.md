@@ -1,5 +1,12 @@
 # Canopy Classic — reference provenance and locked corrections
 
+> **Current correction (November 20, 2026):** The owner now explicitly
+> requires a **full-color** Tux upper-left launcher and rounded, padded
+> clipping of the exact eight approved dock PNGs. The former white-only
+> launcher instruction below is preserved as historical provenance,
+> **not** an active design requirement. See `AGENTS.md` and
+> `RoundedDockIconProvider.cpp`.
+
 > **IMPORTANT: Historical record only for dock icon categories.** The user
 > subsequently supplied and approved **eight exact icon PNGs**, replacing
 > this document's six-category moodboard interpretation. The current source
@@ -14,9 +21,10 @@ images, not an implied user approval of every component in a generated board.
 ## Confirmed user instructions
 - Default Classic layout should feel extremely familiar to macOS, while
   avoiding copied Apple artwork or trademarks.
-- Upper-left launcher is a **complete white Tux-inspired penguin silhouette**
-  like a simple white logo on a black/dark background. No yellow feet,
-  gold beak, green tree, gradient body or substitute penguin character.
+- **Superseded historical request:** upper-left launcher was a complete
+  white Tux-inspired penguin silhouette. The latest explicit direction is
+  **full-color Tux**: charcoal/white penguin, gold feet and amber beak;
+  preserve the original reference-traced contour, not a tree logo.
 - Resource-efficient but premium and meticulously aligned, not "lightweight
   mode" cartoon art. Real Qt screenshots must be visually reviewed.
 - Official product tagline for copy only is:

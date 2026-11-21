@@ -270,7 +270,10 @@ injection-like category strings are rejected, then installs an isolated
 temporary `nemo.desktop` under a disposable `XDG_DATA_HOME` whose `Exec`
 only creates a harmless temp marker. It verifies that the **actual GIO**
 launch request executes; no real user's browser, mail or other desktop app
-is launched in CI. `tests/test_classic_native_launcher_only.py` guards the
+is launched in CI. A **second real Qt/Xvfb test** opens the on-screen QML
+launcher, calls its same `choose("Files")` action used by mouse or keyboard,
+and verifies the disposable `nemo.desktop` runs and the sample Files
+window is not accidentally reopened. `tests/test_classic_native_launcher_only.py` guards the
 no-dock-change contract and the opt-in behavior. This does **not** prove
 Nemo/Firefox/other apps can be visibly opened/focused inside a real Mint
 guest; that is a separate release acceptance test.

@@ -139,12 +139,17 @@ unattended cycles; `test_generate_prioritizes_real_work_and_caps_campaigns`
 and `test_failed_task_respects_backoff_before_redispatch` cover priority and
 bounded retries. Full suite: 292 tests PASS (53 POSIX-only skips).
 
-Live persistent supervisor: started from `C:\Users\X1\Projects\Canopy` with
+Live persistent supervisor: process PID `15576`, started from
+`C:\Users\X1\Projects\Canopy` with
 `py -3 tools/canopy_supervisor.py --state-root C:\Users\X1\AppData\Local\Temp\opencode\supervisor-canopy-state run`,
-stdout/stderr redirected to `supervisor.log` in that state root. First
-continuous campaign launched `qt-toolchain-enablement-attempt-1`,
+stdout/stderr redirected to
+`C:\Users\X1\AppData\Local\Temp\opencode\supervisor-canopy-state\supervisor.log`.
+First continuous campaign launched `qt-toolchain-enablement-attempt-1`,
 `qt-source-build-attempt-1` and `qt-runtime-screenshot-attempt-1` on
-`worker-1..3` in separate worktrees.
+`worker-1..3` in separate worktrees. When the toolchain task finished, draft PR
+#145 opened (`foundation` PASS) and `original-icon-verification-attempt-1` was
+queued automatically on `worker-1` with no further prompt. The supervisor was
+left running; no fixed wave limit remains.
 
 ## What this does not prove
 

@@ -423,6 +423,11 @@ int main(int argc, char *argv[]) {
         return 2;
     }
     const int screenshotIndex = args.indexOf(QStringLiteral("--self-test-screenshot"));
+    const bool fixedCaptureClock = args.contains(QStringLiteral("--self-test-fixed-clock"));
+    if (fixedCaptureClock && screenshotIndex < 0) {
+        qCritical() << "SELF_TEST_FAIL: --self-test-fixed-clock requires a screenshot";
+        return 2;
+    }
     if (screenshotIndex >= 0) {
         if (screenshotIndex + 1 >= args.size()) {
             qCritical() << "Missing screenshot output path";
@@ -433,7 +438,8 @@ int main(int argc, char *argv[]) {
             ? args.at(launcherShotIndex + 1) : QString();
         QTimer::singleShot(1000, window,
             [window, screenshotPath, launcherScreenshotPath, approvedMode, landscapeMode,
-             framingReviewMode, terminalCandidateMode = !terminalCandidatePath.isEmpty()]() {
+             framingReviewMode, fixedCaptureClock,
+             terminalCandidateMode = !terminalCandidatePath.isEmpty()]() {
             auto *bar = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBar"));
             auto *clock = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBarClock"));
             auto *dock = window->findChild<QQuickItem *>(QStringLiteral("canopyDock"));
@@ -458,7 +464,11 @@ int main(int argc, char *argv[]) {
             const QDateTime controlledMoment(QDate(2037, 4, 5), QTime(9, 41));
             const bool injected = clock->setProperty("currentTime", controlledMoment);
             const QString updatedText = clock->property("text").toString();
-            clock->setProperty("currentTime", originalTime);
+            // Deterministic approved-art comparison snapshots must not
+            // differ solely because two runs crossed a clock minute.
+            // Normal application operation ALWAYS restores the live clock.
+            if (!fixedCaptureClock)
+                clock->setProperty("currentTime", originalTime);
             if (!injected || originalText.isEmpty() || updatedText == originalText
                 || !updatedText.contains(QStringLiteral("9:41"))) {
                 qCritical() << "SELF_TEST_FAIL: local clock text is frozen";

@@ -24,6 +24,22 @@ application with the original ZIP plus a cleared alpine wallpaper. Run
 at 760×500, 1200×750 and 1920×1080. Review at native resolution. Linux
 Mint VM tests and real desktop integration remain separate release gates.
 
+## Dock alignment QA update
+
+The earlier round-corner pass was **not sufficient to accept the visual**:
+the 54px images were anchored 2px from the top of 70px buttons, leaving
+unequal optical padding inside the 88px dock. It was too easy to confuse
+successful PNG decode and corner clipping with good alignment.
+
+The artwork and alpha-clipping logic stay unchanged. The app now centers
+all eight QML image rectangles inside their buttons, centers the
+hover/focus halo on the same position, and retains the separate active
+indicator. In the **compiled Qt runtime** the screenshot self-test explicitly
+checks the eight image midpoints against their tile centers, the dock
+centerline, spacing, and vertical bounds. Bad alignment must fail CI
+rather than being presented to the owner as approved. An aesthetic review
+of the actual high-resolution screenshot is still required.
+
 # Classic Qt Quick technology spike
 
 ## Files window content alignment

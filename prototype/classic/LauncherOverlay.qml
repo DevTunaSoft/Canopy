@@ -160,6 +160,8 @@ FocusScope {
                     anchors.centerIn: parent
                     spacing: 6
                     Image {
+                        objectName: "canopyLauncherIcon"
+                        readonly property bool imageReady: status === Image.Ready
                         anchors.horizontalCenter: parent.horizontalCenter
                         width: 54
                         height: 54

@@ -17,6 +17,8 @@ class AppLauncherTests(unittest.TestCase):
         self.assertIn("id: appLauncher", main)
         self.assertIn("onClicked: appLauncher.visible ?", main)
         self.assertIn("onFilesPreviewRequested: filesPreview.visible = true", main)
+        self.assertIn("opacity: appLauncher.visible ? 0 : 1", main)
+        self.assertIn('text: "Canopy"', main)
 
     def test_search_and_keyboard_without_background_work(self):
         qml = (ROOT / "prototype/classic/AppLauncher.qml").read_text()
@@ -24,7 +26,10 @@ class AppLauncherTests(unittest.TestCase):
         self.assertIn('objectName: "canopyLauncherSearch"', qml)
         self.assertIn("applicationNames.filter(", qml)
         self.assertIn("Keys.onEscapePressed: launcher.closeLauncher()", qml)
-        self.assertIn("DockTile {", qml)
+        self.assertIn("LauncherTile {", qml)
+        tile = (ROOT / "prototype/classic/LauncherTile.qml").read_text()
+        self.assertIn("DockTile {", tile)
+        self.assertIn("LauncherTile.qml", (ROOT / "prototype/classic/CMakeLists.txt").read_text())
         self.assertIn("canopyApprovedMode", qml)
         self.assertNotIn("ShaderEffect", qml)
         self.assertNotIn("Timer {", qml)

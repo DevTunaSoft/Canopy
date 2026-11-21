@@ -14,6 +14,37 @@ Build a premium, familiar Linux experience for people migrating from **macOS or 
 - **Fallback:** if an underlying compositor/session must change or a third-party desktop environment is selected, safely offer a logout/login transition with clear notice. Never silently terminate user apps or promise universal cross-DE live swaps.
 - Switching failure must recover the prior usable presentation without data loss; switching must not require a continuously running second shell.
 
+## Unlimited future desktop experiences: Shell Packs
+
+**Classic and Modern are starting examples, not a two-mode ceiling.** Canopy
+should welcome people to Linux by offering new, original and accessible
+presentation options over time: minimal, creator-focused, education-friendly,
+accessibility-first or community-designed experiences. Anyone building a new
+experience should work on a **Shell Pack**, not fork LacOS or duplicate a
+desktop services stack.
+
+A future Shell Pack must declare a unique identity, compatible versioned host
+API and UI entrypoint, requested UI capabilities and intended switch model.
+The host discovers compatible, trusted installed packs and presents a
+clear, accessible chooser with screenshots and the ability to revert.
+Inactive packs consume no persistent desktop services. Classic remains the
+default proven reference until other modes pass their own acceptance.
+
+Keep core app launching, window/session ownership, notifications, settings,
+system status, power/lock state and permission checks in one shared host.
+Future packs own their own visual layout, artwork and per-pack preferences.
+Use a versioned, toolkit-neutral contract where practical; v1's Qt/QML
+adapter is a starting implementation, not a permanent requirement for every
+future toolkit. Untrusted community contributions must not execute or gain
+privileges merely because a manifest is valid.
+
+Switch between compatible presentation packs in-session when real compositor,
+state and lifecycle tests prove it. Third-party full DE/compositor changes may
+require a warned logout/login transition; do not mislabel them as seamless
+shell swaps. Plugin discovery/loading, live switching and a community catalog
+are future work, not implemented features. See
+[the Shell Pack architecture](SHELL_PACK_ARCHITECTURE.md).
+
 ## Resource efficiency and added functionality
 - Prioritize **measured idle RAM/CPU/GPU use, wakeups, startup, responsiveness, sustained memory growth, battery/power behavior**, and cold/warm transitions. Compare LacOS with stock Mint on the **same hardware and workload**, with methodology and exclusions recorded.
 - Preserve Mint's package ecosystem, security updates, accessibility, hardware support, recovery paths, and user data. Remove or replace a component only after dependency review, performance evidence, rollback planning, and regression testing.
@@ -24,7 +55,7 @@ Build a premium, familiar Linux experience for people migrating from **macOS or 
 ## Sequencing and delivery gates
 1. **Finish Canopy Classic first:** working, high-quality, validated shell/session with approved visual assets, real Mint VM and hardware acceptance, performance/regression evidence.
 2. **Build Canopy Modern:** reuse the Classic core; validate Windows-familiar behavior, accessibility, performance and styling independently.
-3. **Implement and verify the shell-mode switcher:** session-preserving Classic/Modern live-switch target, safe fallback, rollback, persistent mode-specific preferences, no duplicate services.
+3. **Implement and verify the Shell Pack switcher:** session-preserving Classic/Modern and later additional approved packs, safe fallback, rollback, persistent per-pack preferences, no duplicate services.
 4. **Branch LacOS as a separate distribution:** a maintained Mint-derived installer/image with both modes, appropriate installer onboarding, upgrade/recovery tooling and measured optimizations.
 5. **Release only after acceptance:** reproducible builds, security/update compatibility, real hardware coverage, low-end and modern systems, repeatable stock-Mint comparison, both modes and repeated switch/restore stress tests.
 

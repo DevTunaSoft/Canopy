@@ -133,6 +133,29 @@ class MintQtSmokeTests(unittest.TestCase):
             report = self.run_smoke()
         self.assertEqual(report["qt_smoke"], "FAIL")
 
+    def test_png_crc_tampering_not_reported_valid(self):
+        self.run_smoke()
+        path = self.out / "qt-760x500.png"
+        bits = bytearray(path.read_bytes())
+        bits[48] ^= 1
+        path.write_bytes(bits)
+        with self.assertRaisesRegex(smoke.MintSmokeError, "CRC"):
+            smoke.png_size(path)
+
+    def test_truncated_png_does_not_pass(self):
+        self.run_smoke()
+        path = self.out / "qt-760x500.png"
+        path.write_bytes(path.read_bytes()[:-12])
+        with self.assertRaises(smoke.MintSmokeError):
+            smoke.png_size(path)
+
+    def test_padding_after_iend_is_rejected(self):
+        self.run_smoke()
+        path = self.out / "qt-760x500.png"
+        path.write_bytes(path.read_bytes() + b"padding")
+        with self.assertRaisesRegex(smoke.MintSmokeError, "trailing bytes"):
+            smoke.png_size(path)
+
     def test_missing_actual_qt_marker_is_a_failure(self):
         with patch.dict(os.environ, {"CANOPY_FAKE_QT_MODE": "missing_marker"}):
             report = self.run_smoke()

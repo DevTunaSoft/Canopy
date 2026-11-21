@@ -102,3 +102,34 @@ low-resource targets, Shell Pack runtime loading, or safety of any community
 package. Those gates remain documented in `docs/QUALITY.md` and
 `docs/RELIABILITY_99_GATE_AUDIT.md`. Green CI or a draft PR is not merge
 authorization.
+
+## Plugin verification (2026-11-21)
+
+Host-side plugin state was checked without reinstalling or reconfiguring anything
+except the reversible Ponytail mode file:
+
+| Plugin | Evidence | Result |
+| --- | --- | --- |
+| Caveman | ~/.config/opencode/plugins/caveman plus MCP server ~/.caveman/bin/caveman-mcp.exe; caveman_stats returned a valid session payload; .caveman-active present | Available and functioning |
+| Ponytail 5.3.3 | OpenCode plugin @dietrichgebert/ponytail cached under ~/.cache/opencode/npm/.../5.3.3; active mode switched from full to lite in ~/.config/opencode/.ponytail-active | Available; lite mode supported and selected |
+| Claude Mem | MCP server ~/.claude/plugins/marketplaces/thedotmack/.../mcp-server.cjs plus plugin ~/.config/opencode/plugins/claude-mem.js; claude_mem_search("Canopy supervisor") returned 257 observations | Available and functioning |
+
+No duplicate hook was found to be active. ~/.config/opencode/plugins/caveman-native.js
+exists but is not referenced by opencode.json; it was left untouched because there is
+no demonstrated runtime problem. The plugin and plugins keys in opencode.json
+serve different OpenCode plugin-loading paths and were not changed.
+
+## Current three-worker supervisor state
+
+The three Canopy worker tasks are complete and awaiting review:
+
+| Task | Worker | Branch | PR | Check |
+| --- | --- | --- | --- | --- |
+| qt-mint-evidence | worker-1 | feat/canopy-supervisor-qt-mint-evidence | #136 | foundation PASS |
+| visual-qa-evidence | worker-2 | feat/canopy-supervisor-visual-qa-evidence | #137 | foundation PASS |
+| regression-security-notes | worker-3 | feat/canopy-supervisor-regression-security-notes | #138 | foundation PASS |
+
+Distinct ownership, worktrees, branches, commits and evidence files were verified.
+No worker was restarted. Qt build, Qt screenshots, and Linux Mint guest acceptance
+remain blocked or not run as documented in the worker PRs; they are not claimed as
+passed.

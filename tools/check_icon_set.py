@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only source gate for the seven original Canopy Classic dock SVG icons.
+"""Read-only source gate for original Canopy Classic SVG icons and the color Tux launcher.
 
 Checks security and source dimensions, not whether the artwork looks premium.
 """
@@ -61,12 +61,16 @@ def verify_icon(path: Path) -> None:
         if tag in {"rect", "path", "circle"}:
             shapes += 1
     if path.name == "penguin-launcher.svg":
-        if shapes != 1 or not any(
-                element.tag == NS + "path"
-                and element.get("fill") == "#fff"
-                and element.get("fill-rule") == "evenodd"
-                for element in root.iter()):
-            raise ValueError("Launcher must preserve the single white reference silhouette")
+        paths = list(root.iter(NS + "path"))
+        original_outline = paths[0] if paths else None
+        colors = {path.get("fill") for path in paths}
+        if (not 10 <= shapes <= 16 or original_outline is None
+                or original_outline.get("fill") != "#182236"
+                or original_outline.get("fill-rule") != "evenodd"
+                or len(re.findall(r"\\bM\\s",
+                                  original_outline.get("d", ""))) != 4
+                or not {"#f7f9fd", "#ffca35", "#f4b523"}.issubset(colors)):
+            raise ValueError("Launcher must preserve the reference contour and full-color Tux details")
     elif shapes < 3:
         raise ValueError("Icon does not have sufficient authored geometry")
     if not set(refs).issubset(defs):
@@ -92,7 +96,7 @@ def main() -> int:
         verify_icon_set(args.directory)
     except (OSError, ValueError) as exc:
         parser.exit(1, f"FAIL: {exc}\n")
-    print("PASS: six Canopy dock SVG candidates plus reference-traced white penguin launcher")
+    print("PASS: six Canopy dock SVG candidates plus reference-contour full-color Tux launcher")
     return 0
 
 

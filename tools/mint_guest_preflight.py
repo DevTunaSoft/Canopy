@@ -44,17 +44,32 @@ def assess(release, env, available, qt_version=None):
     is_mint = distro == "linuxmint"
     desktop = env.get("XDG_CURRENT_DESKTOP", "")
     session = env.get("XDG_SESSION_TYPE", "")
-    has_display = bool(env.get("DISPLAY") or env.get("WAYLAND_DISPLAY"))
+    # The desktop field may be colon-separated, but individual entries
+    # must match Cinnamon exactly; substring matches would be unsafe.
+    cinnamon = (isinstance(desktop, str)
+                and any(name in ("X-Cinnamon", "Cinnamon")
+                        for name in desktop.split(":")))
+    # DISPLAY does not establish a Wayland session and WAYLAND_DISPLAY
+    # does not establish X11. These are readiness hints, not proof of a
+    # connected compositor or functioning user session.
+    has_display = (
+        bool(env.get("DISPLAY")) if session == "x11" else
+        bool(env.get("WAYLAND_DISPLAY")) if session == "wayland" else False
+    )
     commands = {name: bool(available.get(name, False)) for name in NEEDED}
     reasons = []
     if not is_mint:
         reasons.append("guest is not verified as Linux Mint")
     if not has_display:
-        reasons.append("no graphical session display")
+        reasons.append("no graphical display for declared session")
     if not desktop:
         reasons.append("desktop session identity not provided")
+    elif not cinnamon:
+        reasons.append("Cinnamon desktop not identified")
     if not session:
         reasons.append("session type not provided")
+    elif session not in ("x11", "wayland"):
+        reasons.append("unsupported graphical session type")
     for name, present in commands.items():
         if not present:
             reasons.append(f"required build/smoke tool not found: {name}")
@@ -70,6 +85,7 @@ def assess(release, env, available, qt_version=None):
         "mint_identified": is_mint,
         "version_id": release.get("VERSION_ID", "unknown")[:30],
         "desktop_session_present": bool(desktop),
+        "cinnamon_identified": cinnamon,
         "graphical_display_present": has_display,
         "session_type": session if session in ("x11", "wayland") else "other-or-unknown",
         "qt6_core_version": qt_version,

@@ -63,6 +63,67 @@ class MintGuestPreflightTests(unittest.TestCase):
         env.pop("XDG_SESSION_TYPE")
         self.assertEqual(self.probe(env=env)["status"], "BLOCKED")
 
+    def test_session_display_consistency_negative_controls(self):
+        x11 = dict(self.env)
+        wayland = {
+            "XDG_CURRENT_DESKTOP": "X-Cinnamon",
+            "XDG_SESSION_TYPE": "wayland",
+            "WAYLAND_DISPLAY": "wayland-0",
+        }
+        invalid = [
+            dict(x11, DISPLAY="", WAYLAND_DISPLAY="wayland-0"),
+            dict(wayland, WAYLAND_DISPLAY="", DISPLAY=":0"),
+            dict(x11, XDG_SESSION_TYPE="tty"),
+            dict(x11, XDG_SESSION_TYPE="unspecified"),
+            dict(x11, XDG_CURRENT_DESKTOP="GNOME"),
+            dict(x11, XDG_CURRENT_DESKTOP="XFCE"),
+            dict(x11, XDG_CURRENT_DESKTOP="NotX-Cinnamon"),
+            dict(x11, XDG_CURRENT_DESKTOP="X-Cinnamon-Fake"),
+        ]
+        for env in invalid:
+            with self.subTest(session=env.get("XDG_SESSION_TYPE"),
+                              desktop=env.get("XDG_CURRENT_DESKTOP")):
+                report = self.probe(env=env)
+                self.assertEqual(report["status"], "BLOCKED")
+                self.assertEqual(report["mint_guest_acceptance"], "NOT_RUN")
+
+    def test_supported_cinnamon_session_variants(self):
+        cases = [
+            dict(self.env, XDG_CURRENT_DESKTOP="Cinnamon"),
+            dict(self.env, XDG_CURRENT_DESKTOP="X-Cinnamon:GNOME"),
+            {
+                "XDG_CURRENT_DESKTOP": "GNOME:X-Cinnamon",
+                "XDG_SESSION_TYPE": "wayland",
+                "WAYLAND_DISPLAY": "wayland-0",
+            },
+        ]
+        for env in cases:
+            with self.subTest(env_session=env["XDG_SESSION_TYPE"]):
+                report = self.probe(env=env)
+                self.assertTrue(report["cinnamon_identified"])
+                self.assertTrue(report["graphical_display_present"])
+                self.assertEqual(report["status"], "READY_FOR_TESTS")
+                self.assertEqual(report["visual_acceptance"], "NOT_RUN")
+
+    def test_missing_or_unrecognized_session_does_not_borrow_other_display(self):
+        env = dict(self.env)
+        env["XDG_SESSION_TYPE"] = ""
+        self.assertEqual(self.probe(env=env)["status"], "BLOCKED")
+        env["XDG_SESSION_TYPE"] = "wayland"
+        self.assertEqual(self.probe(env=env)["status"], "BLOCKED")
+        self.assertFalse(self.probe(env=env)["graphical_display_present"])
+
+    def test_report_does_not_leak_raw_display_or_desktop_values(self):
+        env = dict(self.env)
+        env["DISPLAY"] = ":77-private-token"
+        env["XDG_CURRENT_DESKTOP"] = "GNOME:hidden-value"
+        report = self.probe(env=env)
+        serialized = json.dumps(report)
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertFalse(report["cinnamon_identified"])
+        self.assertNotIn(":77-private-token", serialized)
+        self.assertNotIn("hidden-value", serialized)
+
     def test_missing_each_tool_is_reported(self):
         for tool in NEEDED:
             with self.subTest(tool=tool):

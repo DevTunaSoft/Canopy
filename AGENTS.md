@@ -7,14 +7,21 @@ upload contains **eight exact app icons**, and the user explicitly selected
 these original PNG designs. Order: Browser Option 3, Mail Option 5, Files
 Option 2, Calendar Option 3, Photos Option 2, Music Option 3, Terminal Option 4,
 Settings Option 8. Their source bytes and SHA-256 digests are locked in
-`prototype/classic/assets/approved/manifest.json`. The blue-wave PNG
-used in the latest user-liked concept is also SHA-locked there. Do not
-replace artwork with approximations, icons invented from the old moodboard,
-different wallpaper art or self-drawn SVGs. The prior six-icon moodboard
+`prototype/classic/assets/approved/manifest.json`. The archived blue-wave
+PNG is also SHA-locked for legacy provenance, but it is **not** the current
+wallpaper target. The owner's latest direction is a photorealistic alpine lake,
+autumn trees and snowy mountains similar to the supplied reference screenshot;
+an original or properly cleared standalone image has not yet been packaged.
+Do not replace the exact eight approved icons with approximations, old
+moodboard interpretations or invented SVGs. The prior six-icon moodboard
 order is **SUPERSEDED** for Classic's approved icon collection.
 
-Use `--approved-art-dir PATH --self-test-approved` for true Qt approved-asset
-runs. If the artwork package is unavailable, mark exact-icon visual
+Use `python tools/install_approved_art_zip.py --archive ZIP --destination DIR`
+to safely install original SHA-locked PNG bytes from the archived user ZIP.
+For current landscape captures, use `--approved-art-dir PATH
+--landscape-wallpaper PATH --self-test-approved`; the landscape must be a
+cleared original standalone asset, not the reference screenshot or CI fixture.
+ If the artwork package is unavailable, mark exact-icon visual
 verification **BLOCKED** rather than showing old demo icons and claiming
 success. The approved artwork ZIP is preserved in the user's Canopy Library.
 Do not silently merge any draft or call the generated concept a Qt screenshot.

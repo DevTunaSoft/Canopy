@@ -1,6 +1,6 @@
-# CANONICAL: Canopy Classic approved icon artwork + blue wave
+# CANONICAL: Canopy Classic exact icon artwork + current landscape direction
 
-**Updated November 20, 2026. Applies to current Classic visual target.**
+**Updated November 20, 2026. Icon selection is locked; the wallpaper direction has subsequently changed.**
 **Status:** Eight app icon choices approved by the user; latest macOS-inspired
 desktop concept described as "Looking much better" (directional approval,
 not proof the compiled Qt application matches the render).
@@ -32,16 +32,19 @@ full SHA-256 of every crop appears in the committed
 
 ## Wallpaper
 
-The latest user-liked desktop concept used the original saved blue wave
-reference file `canopy-wave-preview.png` (1280×720), previously produced
-during this project's design work. The manifest records the SHA-256 of this
-**actual PNG**. Avoid using the earlier hand-coded SVG `blue-current.svg`
-in the approved rendering path; its art differs from this wave reference.
+**Current direction (November 20, 2026):** The owner requested a
+photographic-quality **alpine lake / autumn trees / snowy peaks / sunset**
+landscape similar to the supplied reference screenshot. The prior blue wave
+is *superseded as a visual target*; it remains SHA-locked in the historical
+artwork manifest and ZIP for byte provenance and compatibility only.
+The screenshot contains desktop UI overlays and is **not** itself a clean,
+licensed, distributable wallpaper. An original or redistribution-cleared,
+standalone high-resolution landscape asset is still required.
 
-This does not prove the blue wave was the same as an earlier unnamed upload.
-Do not claim an earlier upload's identity unless its exact bytes can be checked.
-A future explicitly supplied different background is a separate approved
-reference update; do not replace the locked image on an assumption.
+Use `--landscape-wallpaper PATH` together with `--approved-art-dir PATH`
+for current-direction Qt captures. Do not show synthetic test wallpaper,
+the archived blue wave, or flat SVG landscapes as though they fulfill this
+current visual direction.
 
 ## Preservation and delivery
 
@@ -55,20 +58,35 @@ code, NOT the raw approved PNGs**. The GitHub connector cannot publish large
 local binary assets as part of normal UTF-8 `update_file` calls. This is an
 explicit packaging block, not license to replace the art with generated SVGs.
 
-For a real source checkout, extract the ZIP to a local directory (without
-rewriting its images), then run:
+For a real source checkout, install the **unaltered** original ZIP
+directly, without a manual unzip or file rearrangement step:
+
+```sh
+python tools/install_approved_art_zip.py \
+  --archive /absolute/path/to/Canopy_Classic_Exact_Artwork_Runtime.zip \
+  --destination /absolute/path/to/approved-art
+```
+
+This validates the archive paths and provenance manifest, rejects duplicate,
+symlinked, unexpected or tampered contents, then publishes all nine exact
+SHA-locked PNGs atomically. An already-correct destination is a no-op; a
+modified destination is rejected, never silently overwritten. The ninth
+image is the *archived wave reference*, not the current alpine target.
+
+After supplying a **separately cleared** alpine landscape image, run:
 
 ```sh
 cmake -S prototype/classic -B build/classic -DCMAKE_BUILD_TYPE=Release
 cmake --build build/classic --parallel 2
 ./build/classic/canopy-classic-spike \
   --approved-art-dir /absolute/path/to/approved-art \
+  --landscape-wallpaper /absolute/path/to/cleared-alpine-landscape.png \
   --self-test-approved --self-test-size 1200x750 \
   --self-test-screenshot approved-classic.png
 ```
 
-The CLI verifies all 8 PNG SHA-256 digests + wave hash **before showing any
-window**. Missing, modified, substituted or unsafe assets cause an error.
+The CLI verifies all eight PNG SHA-256 digests and validates the selected
+landscape image **before showing any window**. Missing, modified, substituted or unsafe assets cause an error.
 It cannot silently load the old demo art in this strict mode.
 The no-flag code path is the old **unapproved engineering fixture** only;
 its screenshots never establish approved look.
@@ -83,7 +101,8 @@ any checksum mismatch.
 1. Exact artwork: preserve PNG source bytes and hashes, don't crop again or
    generate lookalike versions. Do not use the six SVG demo icons for release.
 2. Qt runtime: `--self-test-approved` must load **eight** actual app icons
-   plus the wave wallpaper in the desired desktop scene.
+   plus an independently supplied, validated alpine landscape in the desired
+   desktop scene. The archived wave is not the current design target.
 3. Test screenshots: real compiled Qt images at 760×500, 1200×750, 1920×1080
    and HiDPI, compared against the approved concept at 100% scale.
 4. Visual review by the user: typography, light glass material, spacing,

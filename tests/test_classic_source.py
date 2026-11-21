@@ -159,7 +159,7 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn("parent->childItems()", runtime)
         self.assertIn("SELF_TEST_PASS: eight demo folders and one search control present", runtime)
         self.assertIn("SELF_TEST_FAIL: sample Files preview content incomplete", runtime)
-        self.assertIn("SELF_TEST_PASS: wallpaper sky and foreground visually distinct", runtime)
+        self.assertIn("SELF_TEST_PASS: wallpaper regions visually distinct", runtime)
         self.assertIn("SELF_TEST_FAIL: Blue Current wallpaper image did not load", runtime)
         self.assertIn("SELF_TEST_PASS: original SVG wallpaper image loaded", runtime)
         self.assertIn("SELF_TEST_PASS: all six SVG dock candidates loaded", runtime)
@@ -194,6 +194,13 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn("sampledColors.size() < 8", source)
         self.assertIn("SELF_TEST_FAIL: screenshot appears blank or uniform", source)
         self.assertIn("SELF_TEST_PASS: nonuniform window screenshot captured", source)
+
+    def test_wallpaper_visual_gate_samples_both_unobscured_edges(self):
+        source = (ROOT / "main.cpp").read_text()
+        self.assertIn("QVector<QRgb> wallpaperSamples", source)
+        self.assertIn("frame.width() - edgeX - 1", source)
+        self.assertIn("maxArtworkDifference", source)
+        self.assertIn('SELF_TEST_FAIL: wallpaper regions unexpectedly uniform', source)
 
     def test_chrome_geometry_is_runtime_verified(self):
         source = (ROOT / "main.cpp").read_text()

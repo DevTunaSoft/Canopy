@@ -87,3 +87,39 @@ for references, provenance, rollout criteria, and remaining work.
 
 ## Visual quality gate
 See [`docs/VISUAL_ACCEPTANCE.md`](../../docs/VISUAL_ACCEPTANCE.md) for visual-review and performance criteria. Successful headless screenshots verify capture, not visual polish.
+
+
+## Exact icons + current alpine wallpaper integration
+
+The latest owner-supplied wallpaper reference is a scenic alpine lake,
+autumn-tree and snowy-mountain landscape, **not** the historical blue-wave
+image. The screenshot reference contains desktop overlays and cannot be
+redistributed as a standalone wallpaper. A separately original or properly
+licensed photo-quality landscape is still required.
+
+The exact eight selected app-icon PNG masters live in the archived
+`Canopy_Classic_Exact_Artwork_Runtime.zip`. Install them without manual ZIP
+extraction:
+
+```sh
+python tools/install_approved_art_zip.py \
+  --archive /absolute/path/to/Canopy_Classic_Exact_Artwork_Runtime.zip \
+  --destination /absolute/path/to/approved-art
+
+./build/classic/canopy-classic-spike \
+  --approved-art-dir /absolute/path/to/approved-art \
+  --landscape-wallpaper /absolute/path/to/licensed-alpine-landscape.png \
+  --self-test-approved --self-test-size 1200x750 \
+  --self-test-screenshot /absolute/path/to/classic-real-qt.png
+```
+
+The ZIP importer verifies hashes, ZIP member safety, the archived manifest,
+and atomic extraction. The Qt runtime separately verifies eight exact
+icon hashes and the optional landscape file's actual PNG/JPEG format,
+dimensions, size and path before creating the scene. Landscape rendering is
+static and cached with bounded HiDPI dimensions; no background service or
+continuous animation is added.
+
+CI uses a synthetic test PNG only to prove actual Qt decoding and screenshot
+behavior, **not** to establish aesthetic approval. The Linux Mint VM and
+real-icon/real-landscape screenshots remain mandatory release gates.

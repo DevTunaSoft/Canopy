@@ -306,8 +306,11 @@ int main(int argc, char *argv[]) {
         // Source PNGs were SHA-verified above; transform copies IN MEMORY
         // only. The files and their immutable manifest remain unchanged.
         QString roundedError;
+        // The dock is locked to the existing original full-fit rendering.
+        // Experimental optical adjustments are isolated to a DIFFERENT
+        // QQuickImageProvider, instantiated only for an explicit review.
         auto *roundedIcons = new RoundedDockIconProvider(
-            approvedRoot, terminalCandidatePath, framingReviewMode, &roundedError);
+            approvedRoot, terminalCandidatePath, false, &roundedError);
         if (!roundedIcons->isValid() || !roundedIcons->allCornersClipped()) {
             qCritical().noquote() << "APPROVED_ART_FAIL: rounded dock rendering:"
                                    << roundedError;
@@ -316,11 +319,28 @@ int main(int argc, char *argv[]) {
         }
         engine.addImageProvider(QStringLiteral("canopy-dock"), roundedIcons);
         qInfo() << "CANOPY_ROUNDED_DOCK_VERIFIED: eight original icons, padded, alpha-clipped";
-        if (framingReviewMode)
-            qInfo() << "ICON_FRAMING_REVIEW_ACTIVE: source-content framing for shared"
-                       " dock and launcher provider; user visual approval NOT granted";
+        if (framingReviewMode) {
+            QString reviewError;
+            auto *launcherReviewIcons = new RoundedDockIconProvider(
+                approvedRoot, terminalCandidatePath, true, &reviewError);
+            if (!launcherReviewIcons->isValid() ||
+                !launcherReviewIcons->allCornersClipped()) {
+                qCritical().noquote()
+                    << "ICON_FRAMING_REVIEW_FAIL: launcher-only rendering:"
+                    << reviewError;
+                delete launcherReviewIcons;
+                return 3;
+            }
+            engine.addImageProvider(QStringLiteral("canopy-launcher-review"),
+                                    launcherReviewIcons);
+            qInfo() << "ICON_FRAMING_REVIEW_ACTIVE: launcher-only source-content"
+                       " review, dock provider and original masters unchanged;"
+                       " owner visual approval NOT granted";
+        }
     }
     engine.rootContext()->setContextProperty(QStringLiteral("canopyApprovedMode"), approvedMode);
+    engine.rootContext()->setContextProperty(
+        QStringLiteral("canopyIconFramingReview"), framingReviewMode);
     engine.rootContext()->setContextProperty(
         QStringLiteral("canopyLandscapeWallpaperUrl"),
         landscapeMode ? QUrl::fromLocalFile(landscapePath).toString() : QString());
@@ -441,7 +461,7 @@ int main(int argc, char *argv[]) {
                     (approvedMode ? 8 : 6)
                 || !QMetaObject::invokeMethod(applicationLauncher, "openLauncher",
                                                Qt::DirectConnection)
-                || !applicationLauncher->isVisible() || dock->isVisible()) {
+                || !applicationLauncher->isVisible() || !dock->isVisible()) {
                 qCritical() << "SELF_TEST_FAIL: original application search failed to open";
                 QCoreApplication::exit(1);
                 return;
@@ -479,7 +499,7 @@ int main(int argc, char *argv[]) {
             }
             qInfo() << "SELF_TEST_PASS: actual Qt launcher opens, searches and closes";
             if (framingReviewMode)
-                qInfo() << "SELF_TEST_PASS: shared Qt dock+launcher frame review enabled";
+                qInfo() << "SELF_TEST_PASS: launcher-only Qt frame review enabled; dock frozen";
 
             const QPointF barOrigin = bar->mapToItem(window->contentItem(), QPointF(0, 0));
             const QPointF dockOrigin = dock->mapToItem(window->contentItem(), QPointF(0, 0));

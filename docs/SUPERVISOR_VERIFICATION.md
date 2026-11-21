@@ -120,6 +120,32 @@ BLOCKED/NOT RUN, not passed. Every worker PR is a draft; no PR was merged.
 Human code review, owner visual approval, real Mint acceptance and required
 approval stacks are not satisfied, so merging to `main` is not authorized.
 
+## Continuous scheduling fix (after three waves)
+
+Root cause of the idle state: the built-in roadmap was a finite six-task list.
+All six tasks were consumed, so `next_tasks()` correctly returned an empty list
+and the supervisor kept polling with nothing to dispatch.
+
+Fix, on branch commit `4f77407`: `roadmap.generate()` supplies an ordered,
+continuous campaign list (Qt toolchain, real source build, runtime screenshots,
+icon verification, Mint acceptance, security/resource gates). Each campaign has
+a hard attempt cap, failed tasks wait through exponential backoff, scope/branch
+uniqueness is per attempt, and tasks with no worktree diff finish as `done`
+without opening a PR. The dashboard now reports active workers, PRs, failures
+and next actions.
+
+`test_step_auto_queues_successive_unattended_cycles` drives three consecutive
+unattended cycles; `test_generate_prioritizes_real_work_and_caps_campaigns`
+and `test_failed_task_respects_backoff_before_redispatch` cover priority and
+bounded retries. Full suite: 292 tests PASS (53 POSIX-only skips).
+
+Live persistent supervisor: started from `C:\Users\X1\Projects\Canopy` with
+`py -3 tools/canopy_supervisor.py --state-root C:\Users\X1\AppData\Local\Temp\opencode\supervisor-canopy-state run`,
+stdout/stderr redirected to `supervisor.log` in that state root. First
+continuous campaign launched `qt-toolchain-enablement-attempt-1`,
+`qt-source-build-attempt-1` and `qt-runtime-screenshot-attempt-1` on
+`worker-1..3` in separate worktrees.
+
 ## What this does not prove
 
 The implementation draft PR is

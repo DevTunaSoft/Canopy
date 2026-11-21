@@ -24,7 +24,8 @@ class SharedIconFramingTests(unittest.TestCase):
         self.assertIn("if (framingReviewMode && !approvedMode)", self.cpp)
         self.assertIn("ICON_FRAMING_REVIEW_FAIL", self.cpp)
         self.assertIn("verifyExactArtwork(requested, !landscapeMode, &error)", self.cpp)
-        self.assertIn("framingReviewMode, &roundedError", self.cpp)
+        self.assertIn("false, &roundedError", self.cpp)
+        self.assertIn("true, &reviewError", self.cpp)
         self.assertNotIn("framingReviewMode = true", self.cpp)
 
     def test_reuses_existing_eight_gutter_measurements_without_deleting_any(self):
@@ -58,10 +59,14 @@ class SharedIconFramingTests(unittest.TestCase):
         self.assertIn("bool framingReviewMode, QString *error", self.provider)
         self.assertIn("bool framingReviewMode, QString *error", self.header)
 
-    def test_single_shared_provider_feeds_dock_and_launcher(self):
+    def test_dock_and_launcher_use_separate_providers_during_review(self):
         self.assertIn('engine.addImageProvider(QStringLiteral("canopy-dock"), roundedIcons)', self.cpp)
         self.assertIn('"image://canopy-dock/" + iconName.toLowerCase()', self.tile)
-        self.assertIn('"image://canopy-dock/" + appButton.modelData.title.toLowerCase()', self.launcher)
+        self.assertIn('"image://canopy-launcher-review/"', self.launcher)
+        self.assertIn('"image://canopy-dock/"', self.launcher)
+        self.assertIn('engine.addImageProvider(QStringLiteral("canopy-launcher-review")', self.cpp)
+        self.assertIn('framingReviewMode: canopyIconFramingReview', (ROOT / "Main.qml").read_text())
+        self.assertIn('false, &roundedError', self.cpp)
         self.assertIn('objectName: "canopyLauncherIcon"', self.launcher)
         self.assertIn("readonly property bool imageReady: status === Image.Ready", self.launcher)
         self.assertIn('QStringLiteral("canopyLauncherIcon")', self.cpp)
@@ -70,7 +75,7 @@ class SharedIconFramingTests(unittest.TestCase):
         self.assertNotIn("Timer {", self.launcher)
 
     def test_real_qt_mode_and_independent_image_readiness_gates_exist(self):
-        self.assertIn("SELF_TEST_PASS: shared Qt dock+launcher frame review enabled", self.cpp)
+        self.assertIn("SELF_TEST_PASS: launcher-only Qt frame review enabled; dock frozen", self.cpp)
         self.assertIn("SELF_TEST_FAIL: incomplete launcher image catalogue", self.cpp)
         self.assertIn("SELF_TEST_PASS: actual launcher image component count", self.cpp)
         self.assertIn("SELF_TEST_PASS: dock icons horizontally/vertically centred", self.cpp)

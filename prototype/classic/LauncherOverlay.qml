@@ -1,8 +1,9 @@
 import QtQuick
 import QtQuick.Controls
 
-// Classic's opt-in on-screen application catalogue, adapted from the prior
-// launcher prototype. No process execution, network, daemon or added art assets.
+// Isolated on-screen application catalogue, reusing original approved icons.
+// Native GIO activation occurs only on explicit --enable-system-apps and click;
+// there is no arbitrary Exec, network access, daemon, polling or extra art.
 FocusScope {
     id: launcher
     objectName: "canopyApplicationLauncher"

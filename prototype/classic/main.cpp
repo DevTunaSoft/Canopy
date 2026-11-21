@@ -388,6 +388,42 @@ int main(int argc, char *argv[]) {
             }
             qInfo() << "SELF_TEST_PASS: local top bar clock updates and fits";
 
+            // Exercise the integrated QML launcher on the actual compiled
+            // scene, then close it before capturing the resting desktop.
+            auto *applicationLauncher = findVisualItem(
+                window->contentItem(), QStringLiteral("canopyApplicationLauncher"));
+            auto *launcherSearch = findVisualItem(
+                window->contentItem(), QStringLiteral("canopyLauncherSearch"));
+            if (!applicationLauncher || !launcherSearch
+                || applicationLauncher->property("catalogCount").toInt() !=
+                    (approvedMode ? 8 : 6)
+                || !QMetaObject::invokeMethod(applicationLauncher, "openLauncher",
+                                               Qt::DirectConnection)
+                || !applicationLauncher->isVisible()) {
+                qCritical() << "SELF_TEST_FAIL: original application search failed to open";
+                QCoreApplication::exit(1);
+                return;
+            }
+            const bool selectedMatch =
+                applicationLauncher->setProperty("searchQuery", QStringLiteral("fIlEs"))
+                && applicationLauncher->property("filteredCount").toInt() == 1;
+            const bool emptyMatch =
+                applicationLauncher->setProperty("searchQuery", QStringLiteral("no-such-canopy-application"))
+                && applicationLauncher->property("filteredCount").toInt() == 0;
+            const bool restoredMatch =
+                applicationLauncher->setProperty("searchQuery", QString())
+                && applicationLauncher->property("filteredCount").toInt() ==
+                    (approvedMode ? 8 : 6);
+            const bool closed = QMetaObject::invokeMethod(
+                applicationLauncher, "closeLauncher", Qt::DirectConnection)
+                && !applicationLauncher->isVisible();
+            if (!selectedMatch || !emptyMatch || !restoredMatch || !closed) {
+                qCritical() << "SELF_TEST_FAIL: launcher search or dismissal inconsistent";
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SELF_TEST_PASS: actual Qt launcher opens, searches and closes";
+
             const QPointF barOrigin = bar->mapToItem(window->contentItem(), QPointF(0, 0));
             const QPointF dockOrigin = dock->mapToItem(window->contentItem(), QPointF(0, 0));
             const bool barFits = qAbs(barOrigin.x()) <= 2 && qAbs(barOrigin.y()) <= 2

@@ -135,7 +135,13 @@ class ShellHost:
             cleanup_error = self._attempt(candidate, "dispose")
             note = f"prepare: {prepared_error}"
             if cleanup_error:
-                note += f"; cleanup: {cleanup_error}"
+                # Candidate cleanup did not complete. An old presentation may
+                # still be active, but a second presenter could hold resources.
+                # Do not allow more switches before an out-of-band recovery.
+                self._needs_recovery = True
+                return SwitchResult(previous_id, pack_id, "RECOVERY_REQUIRED",
+                                    previous_id, False,
+                                    note + f"; cleanup: {cleanup_error}")
             return SwitchResult(previous_id, pack_id, "PREPARE_FAILED",
                                 previous_id, bool(previous_id), note)
 
@@ -143,13 +149,15 @@ class ShellHost:
         if old_view is not None:
             error = self._attempt(old_view, "deactivate")
             if error:
-                self._attempt(candidate, "dispose")
+                cleanup_error = self._attempt(candidate, "dispose")
                 recovered_error = self._attempt(old_view, "activate")
-                if recovered_error:
+                if recovered_error or cleanup_error:
+                    # A failed dispose cannot be interpreted as rollback,
+                    # even when the old presentation was reactivated.
                     self._needs_recovery = True
                     return SwitchResult(previous_id, pack_id, "RECOVERY_REQUIRED",
                                         previous_id, False,
-                                        "old adapter deactivation and restoration failed")
+                                        "deactivation, cleanup or restoration incomplete")
                 return SwitchResult(previous_id, pack_id, "DEACTIVATE_FAILED",
                                     previous_id, True, error)
 
@@ -163,7 +171,7 @@ class ShellHost:
                 return SwitchResult(previous_id, pack_id, "RECOVERY_REQUIRED",
                                     previous_id, False,
                                     "candidate activation and deactivation failed")
-            self._attempt(candidate, "dispose")
+            cleanup_error = self._attempt(candidate, "dispose")
             if old_view is not None:
                 old_restore_error = self._attempt(old_view, "activate")
                 if old_restore_error:
@@ -171,6 +179,11 @@ class ShellHost:
                     return SwitchResult(previous_id, pack_id, "RECOVERY_REQUIRED",
                                         previous_id, False,
                                         "old presentation restore failed")
+            if cleanup_error:
+                self._needs_recovery = True
+                return SwitchResult(previous_id, pack_id, "RECOVERY_REQUIRED",
+                                    previous_id, False,
+                                    "candidate activation failed and cleanup incomplete")
             return SwitchResult(previous_id, pack_id, "ACTIVATE_FAILED",
                                 previous_id, True, activated_error)
 
@@ -179,6 +192,9 @@ class ShellHost:
         if old_view is not None:
             dispose_error = self._attempt(old_view, "dispose")
             if dispose_error:
+                # New presentation is active, but old resources might remain.
+                # Freeze further transitions rather than accumulate leaks.
+                self._needs_recovery = True
                 return SwitchResult(previous_id, pack_id, "CLEANUP_FAILED",
                                     pack_id, False, "old adapter dispose failed")
         return SwitchResult(previous_id, pack_id, "SWITCHED", pack_id, True)
@@ -203,6 +219,7 @@ class ShellHost:
             self._active_id = None
             dispose_error = self._attempt(old_view, "dispose")
             if dispose_error:
+                self._needs_recovery = True
                 return SwitchResult(previous_id, None, "CLEANUP_FAILED", None,
                                     False, "adapter dispose failed")
             return SwitchResult(previous_id, None, "STOPPED", None, True)

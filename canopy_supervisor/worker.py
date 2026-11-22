@@ -29,7 +29,13 @@ def redact(text: str) -> str:
 
 
 def evidence_path(state_root: Path, task_id: str) -> Path:
+    """Supervisor-owned, durable evidence (never writable by a worker)."""
     return Path(state_root) / "evidence" / task_id / "evidence.json"
+
+
+def worker_evidence_path(worktree: Path) -> Path:
+    """Temporary evidence within the worker's permitted Git worktree."""
+    return Path(worktree) / ".canopy-worker-evidence.json"
 
 
 def build_prompt(task: dict, worktree: Path, evidence: Path, protected: tuple[str, ...]) -> str:
@@ -52,9 +58,12 @@ def build_prompt(task: dict, worktree: Path, evidence: Path, protected: tuple[st
         "3. Do not git commit, push, create a PR, merge, or change branch. The supervisor publishes.",
         f"4. {tests} Use real commands and report PASS/FAIL/BLOCKED/NOT RUN with short output excerpts. "
         "Never invent evidence.",
-        f"5. Write evidence JSON to {evidence} with keys: task_id, branch, commit_sha (use "
-        "\"PENDING\"), tests (list of {{command,result,output_excerpt}}), changed_files, "
-        "draft (true), notes.",
+        f"5. Write evidence JSON ONLY to {evidence} inside your current worktree, "
+        "using keys: task_id, branch, commit_sha (use \"PENDING\"), tests (list of "
+        "{command,result,output_excerpt}), changed_files, draft (true), notes. "
+        "This temporary JSON is not a project artifact. Do not write or run tools "
+        "in C:\\CanopySupervisor or any external directory. The trusted supervisor "
+        "will copy this evidence after you exit.",
         "6. If blocked, mark this task BLOCKED with the exact missing dependency. "
         "Do not fabricate assets or approval. The supervisor owns task rollover; "
         "do not stall or keep retrying this task indefinitely.",
@@ -94,7 +103,7 @@ class WorkerLauncher:
             raise WorkerError("worktree missing: " + str(worktree))
         log_path.parent.mkdir(parents=True, exist_ok=True)
         protected = tuple(self.config.get("protected_paths", ()))
-        prompt = build_prompt(task, worktree, evidence_path(self.root, task["id"]), protected)
+        prompt = build_prompt(task, worktree, worker_evidence_path(worktree), protected)
         arguments = [
             self.exe, "--pure", "run",
             "--model", str(self.config.get("model", "opencode-go/hy4-flash-free")),

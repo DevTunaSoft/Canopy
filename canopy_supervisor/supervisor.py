@@ -518,6 +518,15 @@ class Supervisor:
 
     def run(self, *, once: bool = False, until_idle: bool = False,
             max_steps: int | None = None, interval: float | None = None) -> dict:
+        """Hold a second lock for runner lifetime; state mutations remain per-step."""
+        with state_module.exclusive_lock(self.store.root / "locks" / "runner.lock"):
+            return self._run_loop(
+                once=once, until_idle=until_idle,
+                max_steps=max_steps, interval=interval,
+            )
+
+    def _run_loop(self, *, once: bool = False, until_idle: bool = False,
+                  max_steps: int | None = None, interval: float | None = None) -> dict:
         """Loop with a per-step lock so operators can feed tasks between steps."""
         interval = float(interval if interval is not None else self.config["poll_seconds"])
         steps = 0

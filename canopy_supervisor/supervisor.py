@@ -255,13 +255,29 @@ class Supervisor:
             try:
                 base_sha = self.git.rev_parse(Path(self.config["repo"]), base_ref)
             except gitops.GitError as exc:
-                self.store.event(task["id"], "dispatch_blocked",
-                                 f"base ref unavailable: {base_ref}: {exc}", level="ERROR")
+                # Never spin on a missing remote branch forever. Preserve the
+                # task, allow a bounded retry with backoff, then quarantine it
+                # while other independent work keeps progressing.
+                failures = int(task.get("preflight_failures", 0)) + 1
+                limit = int(self.config.get("base_preflight_attempts", 2))
+                task["preflight_failures"] = failures
+                reason = f"base ref unavailable: {base_ref}: {exc}"
+                blocked = failures >= limit
+                state_module.advance(
+                    task, "blocked" if blocked else "queued",
+                    "base-ref-blocked" if blocked else "base-ref-retry",
+                    reason, owner=None, pid=None,
+                    next_attempt_at=0.0 if blocked else self.now() + self.backoff(failures),
+                )
+                self.store.event(
+                    task["id"], "base_ref_blocked" if blocked else "base_ref_retry",
+                    reason, level="ERROR" if blocked else "WARN",
+                )
                 continue
             state_module.advance(
                 task, "assigned", "assigned", "", owner=worker,
                 lease_expires_at=self.now() + self.config["lease_minutes"] * 60,
-                base_sha=base_sha, last_error="",
+                base_sha=base_sha, last_error="", preflight_failures=0,
             )
             # Reserve the worker slot on disk before any slow worktree operation.
             self.store.save(data)
@@ -338,6 +354,11 @@ class Supervisor:
             worktree = Path(task.get("worktree", ""))
             log = Path(self.config["state_root"]) / "logs" / (task["id"] + ".log")
             signature = list(progress_signature(worktree, log)) if worktree.is_dir() else []
+            # The absolute time budget takes precedence over log progress.
+            # Otherwise a noisy hung process could keep logging forever.
+            if now - float(task.get("started_at", now)) > self.config["task_timeout_minutes"] * 60:
+                self._interrupt(task, "worker exceeded task time limit")
+                continue
             if signature != task.get("progress_signature"):
                 task["progress_signature"] = signature
                 task["last_progress_at"] = now
@@ -345,8 +366,6 @@ class Supervisor:
             last = float(task.get("last_progress_at", now))
             if now - last > self.config["stall_minutes"] * 60:
                 self._interrupt(task, "worker stalled: no log or file progress")
-            elif now - float(task.get("started_at", now)) > self.config["task_timeout_minutes"] * 60:
-                self._interrupt(task, "worker exceeded task time limit")
         return finished
 
     # ---------- verification and publishing ----------
@@ -469,6 +488,35 @@ class Supervisor:
 
     # ---------- autonomous roadmap ----------
 
+    def block_broken_dependencies(self, data: dict) -> int:
+        """Quarantine impossible tasks rather than leaving the queue stuck.
+
+        A queued task with a missing, failed, blocked or cancelled prerequisite
+        cannot make progress. Do not rerun dependencies or relabel success.
+        """
+        changed = 0
+        by_id = {row["id"]: row for row in data["tasks"]}
+        for task in data["tasks"]:
+            if task.get("status") != "queued":
+                continue
+            failures = []
+            for dep_id in task.get("depends_on", []):
+                dep = by_id.get(dep_id)
+                if dep is None:
+                    # An explicit custom catalog may queue a dependent before
+                    # its prerequisite. That is normal; defer until enqueued.
+                    continue
+                if dep.get("status") in ("blocked", "failed", "cancelled"):
+                    failures.append(dep_id)
+            if failures:
+                reason = "blocked prerequisites: " + ", ".join(failures)
+                state_module.advance(task, "blocked", "dependency-blocked", reason,
+                                     owner=None, pid=None)
+                self.store.event(task["id"], "dependency_blocked", reason,
+                                 level="WARN")
+                changed += 1
+        return changed
+
     def auto_queue(self, data: dict) -> int:
         """Refill the pipeline from the approved roadmap under the state lock."""
         if not self.config.get("auto_queue", True) or self.store.paused:
@@ -494,6 +542,7 @@ class Supervisor:
         data = self.store.load()
         self.recover(data)
         self.auto_queue(data)
+        self.block_broken_dependencies(data)
         self.dispatch(data)
         self.monitor(data)
         self.verify(data)

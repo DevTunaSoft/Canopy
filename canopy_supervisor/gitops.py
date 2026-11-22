@@ -158,15 +158,27 @@ def is_pid_alive(pid: int) -> bool:
         return False
     if os.name == "nt":
         import ctypes
-        process = ctypes.windll.kernel32.OpenProcess(0x1000, False, pid)
+        from ctypes import wintypes
+
+        # Win32 HANDLE is pointer-sized. ctypes defaults to a 32-bit c_int
+        # return value unless restype is declared; truncating OpenProcess's
+        # handle on a 64-bit host falsely reports live workers as dead.
+        kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel.OpenProcess.argtypes = (wintypes.DWORD, wintypes.BOOL, wintypes.DWORD)
+        kernel.OpenProcess.restype = wintypes.HANDLE
+        kernel.GetExitCodeProcess.argtypes = (wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD))
+        kernel.GetExitCodeProcess.restype = wintypes.BOOL
+        kernel.CloseHandle.argtypes = (wintypes.HANDLE,)
+        kernel.CloseHandle.restype = wintypes.BOOL
+        process = kernel.OpenProcess(0x1000, False, pid)
         if not process:
             return False
         try:
-            code = ctypes.c_ulong()
-            ok = ctypes.windll.kernel32.GetExitCodeProcess(process, ctypes.byref(code))
+            code = wintypes.DWORD()
+            ok = kernel.GetExitCodeProcess(process, ctypes.byref(code))
             return bool(ok) and code.value == 259  # STILL_ACTIVE
         finally:
-            ctypes.windll.kernel32.CloseHandle(process)
+            kernel.CloseHandle(process)
     try:
         os.kill(pid, 0)
         return True

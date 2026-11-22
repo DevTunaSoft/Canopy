@@ -192,6 +192,37 @@ class RoadmapTests(unittest.TestCase):
             chosen = roadmap.generate([task], 3, state_root=root)
             self.assertNotIn("qt-toolchain-enablement", [t["campaign"] for t in chosen])
 
+    def test_blocked_prerequisites_roll_over_to_unblocked_code_tasks(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            prior = []
+            for index, campaign in enumerate(roadmap.CAMPAIGNS[:6]):
+                task_id = f"blocked-prereq-{index}"
+                item = state.new_task(task_definition(task_id), 2)
+                item.update({"campaign": campaign["id"], "status": "blocked"})
+                folder = root / "evidence" / task_id
+                folder.mkdir(parents=True)
+                (folder / "evidence.json").write_text(
+                    json.dumps({"tests": [{"command": "probe", "result": "BLOCKED"}]}),
+                    encoding="utf-8")
+                prior.append(item)
+            chosen = roadmap.generate(prior, 3, state_root=root)
+            self.assertEqual([item["campaign"] for item in chosen], [
+                "shared-event-queue", "shell-host-fault-matrix",
+                "registry-negative-controls",
+            ])
+            self.assertTrue(all(item["kind"] == "implementation" for item in chosen))
+            self.assertTrue(all(item["artifacts"] for item in chosen))
+            scopes = [path for item in chosen for path in item["scope"]]
+            self.assertEqual(len(scopes), len(set(scopes)))
+            # Once dispatched, independently owned scopes aren't assigned again.
+            active = [state.new_task(item, 2) for item in chosen]
+            for item in active:
+                item["status"] = "running"
+            follow_up = roadmap.generate(prior + active, 4, state_root=root)
+            self.assertEqual([item["campaign"] for item in follow_up],
+                             ["screenshot-provenance-gate"])
+
     def test_generate_prioritizes_real_work_and_caps_campaigns(self):
         first = roadmap.generate([], 3)
         self.assertEqual([task["campaign"] for task in first], [
@@ -272,6 +303,18 @@ class WorkerTests(unittest.TestCase):
         self.assertIn(task["branch"], prompt)
         self.assertIn("Do not load full git history", prompt)
         self.assertNotIn("git log", prompt)
+
+    def test_implementation_prompt_requires_file_hash_evidence(self):
+        task = policy.validate_task({
+            **task_definition("code"),
+            "kind": "implementation",
+            "artifacts": ["canopy_core/event_queue.py"],
+        })
+        prompt = worker.build_prompt(task, Path("/worktree"), Path("/evidence.json"),
+                                     tuple(policy.PROTECTED_PATHS))
+        self.assertIn("array of {path, sha256} objects", prompt)
+        self.assertIn("supervisor owns task rollover", prompt)
+        self.assertIn("Do not fabricate assets or approval", prompt)
 
     def test_environment_is_isolated_per_worker(self):
         with tempfile.TemporaryDirectory() as directory:

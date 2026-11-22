@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import sys
@@ -11,7 +12,7 @@ import time
 
 from . import credentials, gitops, policy, state
 from .supervisor import DEFAULT_CONFIG, Supervisor
-from .worker import WorkerLauncher, evidence_path, worker_evidence_path
+from .worker import WorkerLauncher, evidence_path, worker_evidence_path, read_evidence
 
 
 def default_state_root() -> Path:
@@ -111,6 +112,12 @@ def make_parser() -> argparse.ArgumentParser:
     )
     retry.add_argument("--id", action="append", required=True,
                        help="exact task ID (repeat --id for separate tasks)")
+    reverify = commands.add_parser(
+        "retry-verification",
+        help="Reverify existing evidence after a generated Python-cache scope failure",
+    )
+    reverify.add_argument("--id", action="append", required=True,
+                          help="exact task ID (repeat for independent reports)")
     commands.add_parser("prune", help="remove worktrees of finished tasks")
     return parser
 
@@ -302,6 +309,60 @@ def main(argv=None) -> int:
             print(f"REQUEUED {_locked_action(store, action)}")
             return 0
 
+        if args.command == "retry-verification":
+            # Explicit operator repair of an established false positive only.
+            # Reuse the completed tests and preserved source changes rather
+            # than spending another model run or resetting attempt counts.
+            cache_error = re.compile(
+                r"verification failed: PolicyError: changed file outside task scope: "
+                r"[^\\r\\n]*/__pycache__/[^/\\r\\n]+\\.py[co]$"
+            )
+            def action():
+                if not store.paused:
+                    raise ValueError("pause dispatch before retrying verification")
+                data = store.load()
+                by_id = {task["id"]: task for task in data["tasks"]}
+                requested = list(dict.fromkeys(args.id))
+                for task_id in requested:
+                    task = by_id.get(task_id)
+                    if task is None:
+                        raise ValueError("task not found: " + task_id)
+                    if (task.get("status") != "failed" or
+                            task.get("checkpoint", {}).get("stage") != "verification-error"):
+                        raise ValueError("task is not a failed verification: " + task_id)
+                    if not cache_error.fullmatch(str(task.get("last_error", ""))):
+                        raise ValueError("failure is not an approved Python cache error: " + task_id)
+                    if task.get("pr"):
+                        raise ValueError("task already has a PR: " + task_id)
+                    if task.get("pid") and gitops.is_pid_alive(task["pid"]):
+                        raise ValueError("worker is still active: " + task_id)
+                    worktree = Path(task.get("worktree") or "")
+                    if not worktree.is_dir() or not task.get("worktree"):
+                        raise ValueError("task worktree is missing: " + task_id)
+                    if gitops.run(["git", "branch", "--show-current"],
+                                  cwd=worktree) != task["branch"]:
+                        raise ValueError("worktree branch mismatch: " + task_id)
+                    report = read_evidence(store.root, task_id)
+                    if (report.get("task_id") != task_id or
+                            report.get("branch") != task["branch"] or
+                            report.get("commit_sha") != "PENDING"):
+                        raise ValueError("ineligible or mismatched evidence: " + task_id)
+                    if not gitops.pending_files(worktree):
+                        raise ValueError("no source changes remain to verify: " + task_id)
+                for task_id in requested:
+                    task = by_id[task_id]
+                    state.advance(task, "verifying", "cache-reverification",
+                                  owner=None, pid=None, lease_expires_at=0.0)
+                    task["last_error"] = ""
+                    store.event(task_id, "cache_reverification",
+                                "reusing existing evidence; no model rerun",
+                                level="WARN")
+                store.save(data)
+                store.write_dashboard(data, config)
+                return len(requested)
+            print(f"REVERIFY_READY {_locked_action(store, action)}")
+            return 0
+
         if args.command == "prune":
             supervisor = build_supervisor(config, store)
             print(f"PRUNED {supervisor.prune()}")
@@ -313,7 +374,8 @@ def main(argv=None) -> int:
             active = sum(task.get("status") in state.ACTIVE_STATUSES for task in data["tasks"])
             print(f"RUN_DONE active={active} dashboard={store.dashboard_path}")
             return 0
-    except (ValueError, policy.PolicyError, state.LockBusy, credentials.CredentialError) as exc:
+    except (ValueError, policy.PolicyError, state.LockBusy, credentials.CredentialError,
+            gitops.GitError) as exc:
         print(f"SUPERVISOR_FAIL: {exc}", file=sys.stderr)
         return 2
     return 2

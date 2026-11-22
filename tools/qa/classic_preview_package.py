@@ -10,7 +10,8 @@ It builds on existing project mechanisms and changes none of them:
   * CMake target ``canopy-classic-spike`` in prototype/classic/CMakeLists.txt
     owns compilation and any RUNTIME DESTINATION install. This helper never
     builds, downloads or installs system-wide; it requires an already-compiled
-    binary supplied explicitly with --binary.
+    binary supplied explicitly with --binary plus an explicit SHA-256 pin via
+    --binary-sha256. An unstated or mismatched pin stages nothing.
 
   * tools/prepare_approved_art.py owns the exact-art manifest and the nine
     SHA-locked source PNGs. No substitute or generated art is ever accepted.
@@ -54,6 +55,13 @@ PACKAGE_KIND = "canopy-classic-preview-package"
 
 class PackageError(ValueError):
     pass
+
+
+def _require_pin(value, label):
+    """A caller-supplied digest is mandatory; computed hashes are never a pin."""
+    if not isinstance(value, str) or not HASH64.fullmatch(value):
+        raise PackageError(label + " must be 64 lowercase hex characters")
+    return value
 
 
 def _euid():
@@ -111,12 +119,35 @@ def _contained(root, child):
     return child_r == root_r or root_r in child_r.parents
 
 
+def _no_symlink_components(path):
+    """Reject a symlink anywhere in an input path, not only the final node."""
+    target = Path(path)
+    current = Path(target.anchor)
+    for part in target.parts[1:]:
+        current /= part
+        if current.is_symlink():
+            raise PackageError("path contains a symlink component: " + str(target))
+
+
+def _safe_home(home):
+    """Only the ordinary user's XDG_DATA_HOME tree may hold staged files."""
+    path = Path(home)
+    if not path.is_absolute():
+        raise PackageError("package home must be absolute")
+    expected = data_home()
+    if path != expected and not _contained(expected, path):
+        raise PackageError("package home must be under XDG_DATA_HOME")
+    _no_symlink_components(path)
+    return path
+
+
 def _safe_binary(binary):
     path = Path(binary)
     if not path.is_absolute():
         raise PackageError("compiled binary path must be absolute")
     if path.is_symlink():
         raise PackageError("compiled binary must be a regular file, not a symlink")
+    _no_symlink_components(path)
     if not path.is_file():
         raise PackageError("compiled binary is missing")
     size = path.stat().st_size
@@ -128,6 +159,7 @@ def _safe_binary(binary):
 
 
 def _approved_entries(manifest_path):
+    _no_symlink_components(manifest_path)
     try:
         manifest = art.read_manifest(Path(manifest_path))
     except art.ArtworkError as exc:
@@ -152,6 +184,7 @@ def _safe_art_dir(art_dir, entries):
         raise PackageError("approved-art directory must be absolute")
     if directory.is_symlink() or not directory.is_dir():
         raise PackageError("approved-art directory must be a real directory")
+    _no_symlink_components(directory)
     for item in entries:
         source = directory / item["path"]
         if not _contained(directory, source):
@@ -183,9 +216,14 @@ def _command(binary, art_dir, wallpaper=None):
     return " ".join(_quote(item) for item in args)
 
 
-def _target(home, binary, art_dir, *, manifest_path=art.MANIFEST):
+def _target(home, binary, art_dir, *, manifest_path=art.MANIFEST,
+            binary_sha256=None):
     p = package_paths(home)
+    pin = _require_pin(binary_sha256, "prebuilt binary SHA-256")
     source_binary = _safe_binary(binary)
+    actual_sha = _sha256_file(source_binary)
+    if actual_sha != pin:
+        raise PackageError("prebuilt binary SHA-256 mismatch; nothing staged")
     manifest, entries = _approved_entries(manifest_path)
     source_art = _safe_art_dir(art_dir, entries)
     wallpaper_rel = manifest["wallpaper"]["path"]
@@ -194,7 +232,7 @@ def _target(home, binary, art_dir, *, manifest_path=art.MANIFEST):
     command = _command(staged_binary, staged_art, staged_art / wallpaper_rel)
     return {
         "binary": source_binary,
-        "binary_sha256": _sha256_file(source_binary),
+        "binary_sha256": actual_sha,
         "art": source_art,
         "entries": entries,
         "wallpaper_rel": wallpaper_rel,
@@ -202,11 +240,14 @@ def _target(home, binary, art_dir, *, manifest_path=art.MANIFEST):
     }
 
 
-def make_plan(home, binary, art_dir, *, manifest_path=art.MANIFEST):
+def make_plan(home, binary, art_dir, *, manifest_path=art.MANIFEST,
+              binary_sha256=None):
     """Validate inputs and describe the package without writing anything."""
     _require_unprivileged()
+    home = _safe_home(home)
     p = package_paths(home)
-    info = _target(home, binary, art_dir, manifest_path=manifest_path)
+    info = _target(home, binary, art_dir, manifest_path=manifest_path,
+                   binary_sha256=binary_sha256)
     return {
         "schema": SCHEMA,
         "kind": "dry-run",
@@ -390,11 +431,13 @@ def _register(home, info):
         raise
 
 
-def install(home, binary, art_dir, *, manifest_path=art.MANIFEST):
+def install(home, binary, art_dir, *, manifest_path=art.MANIFEST,
+            binary_sha256=None):
     _require_unprivileged()
-    home = Path(home)
+    home = _safe_home(home)
     p = package_paths(home)
-    info = _target(home, binary, art_dir, manifest_path=manifest_path)
+    info = _target(home, binary, art_dir, manifest_path=manifest_path,
+                   binary_sha256=binary_sha256)
     _safe_roots(p)
     if status(home) != "NOT_INSTALLED":
         raise PackageError("existing package or registration: refusing overwrite")
@@ -422,7 +465,7 @@ def install(home, binary, art_dir, *, manifest_path=art.MANIFEST):
 
 def uninstall(home):
     _require_unprivileged()
-    home = Path(home)
+    home = _safe_home(home)
     p = package_paths(home)
     if status(home) != "INSTALLED":
         raise PackageError("not exact-byte owned; removed nothing")
@@ -442,6 +485,8 @@ def main(argv=None):
     for name in ("plan", "install"):
         node = sub.add_parser(name)
         node.add_argument("--binary", type=Path, required=True)
+        node.add_argument("--binary-sha256", required=True,
+                          help="explicit SHA-256 of the prebuilt binary")
         node.add_argument("--approved-art-dir", type=Path, required=True)
         node.add_argument("--manifest", type=Path, default=art.MANIFEST)
     sub.add_parser("status")
@@ -451,11 +496,13 @@ def main(argv=None):
         home = data_home()
         if args.command == "plan":
             result = make_plan(home, args.binary, args.approved_art_dir,
-                               manifest_path=args.manifest)
+                               manifest_path=args.manifest,
+                               binary_sha256=args.binary_sha256)
             print(json.dumps(result, sort_keys=True, indent=2))
         elif args.command == "install":
             result = install(home, args.binary, args.approved_art_dir,
-                             manifest_path=args.manifest)
+                             manifest_path=args.manifest,
+                             binary_sha256=args.binary_sha256)
             print("CANOPY_PACKAGE_INSTALLED:", result)
         elif args.command == "status":
             print("CANOPY_PACKAGE_" + status(home))

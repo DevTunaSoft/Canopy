@@ -38,12 +38,16 @@ class ClassicPreviewPackageTests(unittest.TestCase):
         self.base = Path(self.tmp.name)
         self.home = self.base / "xdg data with spaces"
         self.home.mkdir()
+        env = patch.dict(os.environ, {"XDG_DATA_HOME": str(self.home)})
+        env.start()
+        self.addCleanup(env.stop)
         self.binary = self.base / "canopy-classic-spike"
         self.binary.write_bytes(b"\x7fELF synthetic compiled binary fixture\n")
         # Linux requires the executable bit; Windows does not. The fixture
         # models a prebuilt executable while production validation remains
         # strict and test_nonexecutable_binary_rejected stays unchanged.
         self.binary.chmod(self.binary.stat().st_mode | 0o111)
+        self.binary_sha256 = hashlib.sha256(self.binary.read_bytes()).hexdigest()
         self.art_dir, self.manifest_path = self._build_fixtures()
 
     def _build_fixtures(self):
@@ -79,12 +83,14 @@ class ClassicPreviewPackageTests(unittest.TestCase):
     def plan(self, **kwargs):
         with self._uid():
             return pkg.make_plan(self.home, self.binary, self.art_dir,
-                                 manifest_path=self.manifest_path, **kwargs)
+                                 manifest_path=self.manifest_path,
+                                 binary_sha256=self.binary_sha256, **kwargs)
 
     def install(self, **kwargs):
         with self._uid():
             return pkg.install(self.home, self.binary, self.art_dir,
-                               manifest_path=self.manifest_path, **kwargs)
+                               manifest_path=self.manifest_path,
+                               binary_sha256=self.binary_sha256, **kwargs)
 
     def uninstall(self):
         with self._uid():
@@ -144,7 +150,8 @@ class ClassicPreviewPackageTests(unittest.TestCase):
         with self._uid():
             with self.assertRaises(pkg.PackageError):
                 pkg.make_plan(home, self.binary, self.art_dir,
-                              manifest_path=self.manifest_path)
+                              manifest_path=self.manifest_path,
+                              binary_sha256=self.binary_sha256)
         self.assertFalse((home / "canopy").exists())
 
     def test_install_uninstall_round_trip_owns_only_expected_paths(self):
@@ -228,7 +235,8 @@ class ClassicPreviewPackageTests(unittest.TestCase):
         with self._uid(0):
             with self.assertRaisesRegex(pkg.PackageError, "root"):
                 pkg.install(self.home, self.binary, self.art_dir,
-                            manifest_path=self.manifest_path)
+                            manifest_path=self.manifest_path,
+                            binary_sha256=self.binary_sha256)
             with self.assertRaisesRegex(pkg.PackageError, "root"):
                 pkg.uninstall(self.home)
 
@@ -241,16 +249,71 @@ class ClassicPreviewPackageTests(unittest.TestCase):
                 with self._uid():
                     with self.assertRaises(pkg.PackageError):
                         pkg.install(self.home, candidate, self.art_dir,
-                                    manifest_path=self.manifest_path)
+                                    manifest_path=self.manifest_path,
+                                    binary_sha256=self.binary_sha256)
         self.assertEqual(self.status(), "NOT_INSTALLED")
         self.assertTrue(self.binary.is_file())
+
+    def test_explicit_binary_sha_pin_is_mandatory_and_checked(self):
+        for pin in (None, "short", "A" * 64, "0" * 64):
+            with self.subTest(pin=pin):
+                with self._uid():
+                    with self.assertRaisesRegex(pkg.PackageError,
+                                                "SHA-256"):
+                        pkg.install(self.home, self.binary, self.art_dir,
+                                    manifest_path=self.manifest_path,
+                                    binary_sha256=pin)
+                with self._uid():
+                    with self.assertRaisesRegex(pkg.PackageError,
+                                                "SHA-256"):
+                        pkg.make_plan(self.home, self.binary, self.art_dir,
+                                      manifest_path=self.manifest_path,
+                                      binary_sha256=pin)
+        self.assertEqual(self.status(), "NOT_INSTALLED")
+        self.assertFalse((self.home / "canopy").exists())
+
+    def test_mismatched_binary_pin_rejects_different_binary(self):
+        replacement = self.base / "different-binary"
+        replacement.write_bytes(b"different prebuilt bytes")
+        with self._uid():
+            with self.assertRaisesRegex(pkg.PackageError, "mismatch"):
+                pkg.install(self.home, replacement, self.art_dir,
+                            manifest_path=self.manifest_path,
+                            binary_sha256=self.binary_sha256)
+        self.assertEqual(self.status(), "NOT_INSTALLED")
+        self.assertTrue(replacement.is_file())
+
+    def test_symlink_component_in_binary_or_art_path_rejected(self):
+        linked_dir = self.base / "linked-dir"
+        linked_dir.symlink_to(self.base, target_is_directory=True)
+        hidden_binary = linked_dir / "canopy-classic-spike"
+        hidden_art = linked_dir / "approved art"
+        for binary, art_dir in ((hidden_binary, self.art_dir),
+                                (self.binary, hidden_art)):
+            with self.subTest(binary=binary, art=art_dir):
+                with self._uid():
+                    with self.assertRaisesRegex(pkg.PackageError, "symlink"):
+                        pkg.install(self.home, binary, art_dir,
+                                    manifest_path=self.manifest_path,
+                                    binary_sha256=self.binary_sha256)
+        self.assertEqual(self.status(), "NOT_INSTALLED")
+
+    def test_home_outside_xdg_data_home_is_refused(self):
+        outside = self.fresh_home("outside-xdg")
+        with self._uid():
+            with self.assertRaisesRegex(pkg.PackageError, "XDG_DATA_HOME"):
+                pkg.install(outside, self.binary, self.art_dir,
+                            manifest_path=self.manifest_path,
+                            binary_sha256=self.binary_sha256)
+        self.assertFalse((outside / "canopy").exists())
 
     def test_nonexecutable_binary_rejected(self):
         with patch.object(pkg, "_is_executable", return_value=False):
             with self._uid():
                 with self.assertRaisesRegex(pkg.PackageError, "executable"):
                     pkg.install(self.home, self.binary, self.art_dir,
-                                manifest_path=self.manifest_path)
+                                manifest_path=self.manifest_path,
+                                binary_sha256=self.binary_sha256)
         self.assertEqual(self.status(), "NOT_INSTALLED")
 
     def test_unsafe_art_directories_rejected(self):
@@ -261,7 +324,8 @@ class ClassicPreviewPackageTests(unittest.TestCase):
                 with self._uid():
                     with self.assertRaises(pkg.PackageError):
                         pkg.install(self.home, self.binary, candidate,
-                                    manifest_path=self.manifest_path)
+                                    manifest_path=self.manifest_path,
+                                    binary_sha256=self.binary_sha256)
         self.assertEqual(self.status(), "NOT_INSTALLED")
 
     def test_missing_and_tampered_art_is_rejected_before_writes(self):
@@ -269,13 +333,15 @@ class ClassicPreviewPackageTests(unittest.TestCase):
         with self._uid():
             with self.assertRaises(pkg.PackageError):
                 pkg.install(self.home, self.binary, self.art_dir,
-                            manifest_path=self.manifest_path)
+                            manifest_path=self.manifest_path,
+                            binary_sha256=self.binary_sha256)
         self.assertFalse((self.home / "canopy").exists())
         (self.art_dir / "icons" / "Files_Option_2.png").write_bytes(b"tampered")
         with self._uid():
             with self.assertRaises(pkg.PackageError):
                 pkg.install(self.home, self.binary, self.art_dir,
-                            manifest_path=self.manifest_path)
+                            manifest_path=self.manifest_path,
+                            binary_sha256=self.binary_sha256)
         self.assertEqual(self.status(), "NOT_INSTALLED")
 
     def test_traversal_in_approved_manifest_is_rejected(self):
@@ -286,7 +352,8 @@ class ClassicPreviewPackageTests(unittest.TestCase):
         with self._uid():
             with self.assertRaises(pkg.PackageError):
                 pkg.install(self.home, self.binary, self.art_dir,
-                            manifest_path=bad)
+                            manifest_path=bad,
+                            binary_sha256=self.binary_sha256)
         self.assertEqual(self.status(), "NOT_INSTALLED")
 
     def test_wrong_artwork_manifest_names_are_rejected(self):
@@ -297,7 +364,8 @@ class ClassicPreviewPackageTests(unittest.TestCase):
         with self._uid():
             with self.assertRaises(pkg.PackageError):
                 pkg.install(self.home, self.binary, self.art_dir,
-                            manifest_path=bad)
+                            manifest_path=bad,
+                            binary_sha256=self.binary_sha256)
         self.assertEqual(self.status(), "NOT_INSTALLED")
 
     def test_symlinked_package_root_is_unsafe_and_refused(self):
@@ -402,6 +470,7 @@ class ClassicPreviewPackageTests(unittest.TestCase):
         self.assertIn("CANOPY_PACKAGE_NOT_INSTALLED", status.stdout)
 
         plan = run("plan", "--binary", str(self.binary),
+                   "--binary-sha256", self.binary_sha256,
                    "--approved-art-dir", str(self.art_dir),
                    "--manifest", str(self.manifest_path))
         self.assertEqual(plan.returncode, 0, plan.stderr)
@@ -409,6 +478,7 @@ class ClassicPreviewPackageTests(unittest.TestCase):
         self.assertIn("classic-preview-package", plan.stdout)
 
         installed = run("install", "--binary", str(self.binary),
+                        "--binary-sha256", self.binary_sha256,
                         "--approved-art-dir", str(self.art_dir),
                         "--manifest", str(self.manifest_path))
         self.assertEqual(installed.returncode, 0, installed.stderr)
@@ -429,6 +499,26 @@ class ClassicPreviewPackageTests(unittest.TestCase):
             cwd=ROOT, env=env, capture_output=True, text=True, check=False)
         self.assertEqual(proc.returncode, 1)
         self.assertIn("absolute", proc.stderr)
+
+
+    def test_cli_rejects_missing_or_wrong_binary_pin(self):
+        env = dict(os.environ)
+        env["XDG_DATA_HOME"] = str(self.home)
+        cli = [sys.executable, str(ROOT / "tools" / "qa"
+                                   / "classic_preview_package.py")]
+        base = ["install", "--binary", str(self.binary),
+                "--approved-art-dir", str(self.art_dir),
+                "--manifest", str(self.manifest_path)]
+        for extra, expected_code in (([], 2), (["--binary-sha256", "0" * 64], 1)):
+            with self.subTest(extra=extra):
+                proc = subprocess.run(cli + base + extra, cwd=ROOT, env=env,
+                                      capture_output=True, text=True,
+                                      check=False)
+                self.assertEqual(proc.returncode, expected_code, proc.stderr)
+                self.assertTrue(proc.stderr.strip())
+                if extra:
+                    self.assertIn("CANOPY_PACKAGE_FAIL", proc.stderr)
+        self.assertEqual(self.status(), "NOT_INSTALLED")
 
 
 if __name__ == "__main__":

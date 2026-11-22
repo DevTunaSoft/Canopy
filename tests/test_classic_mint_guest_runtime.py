@@ -9,6 +9,7 @@ import io
 import json
 from pathlib import Path
 import subprocess
+import tempfile
 import unittest
 from unittest.mock import patch
 
@@ -32,6 +33,9 @@ UBUNTU_JSON = json.dumps({
     "status": "BLOCKED",
 }).encode("utf-8")
 VMS = b'"MintGuest" {11111111-1111-1111-1111-111111111111}\n'
+RUNNING_INFO = b'VMState="running"\r\nGuestAdditionsVersion="7.0.12"\r\n'
+POWEROFF_INFO = b'VMState="poweroff"\r\n'
+NO_ADDITIONS_INFO = b'VMState="running"\r\n'
 
 
 class Result:
@@ -60,6 +64,16 @@ class QueueRunner:
         if isinstance(item, BaseException):
             raise item
         return item
+
+
+class FakeBinary:
+    """Create one small local file so the runner can hash a 'compiled' binary."""
+
+    def __init__(self, test_case):
+        directory = tempfile.TemporaryDirectory()
+        test_case.addCleanup(directory.cleanup)
+        self.path = Path(directory.name) / "canopy-classic"
+        self.path.write_bytes(b"fake compiled Classic Qt binary")
 
 
 class RuntimeHelpersTests(unittest.TestCase):
@@ -143,9 +157,35 @@ class RuntimeHelpersTests(unittest.TestCase):
         self.assertIn(SOURCE, smoke_remote)
         self.assertEqual(preflight.collect.__module__, "tools.mint_guest_preflight")
 
+    def test_resolve_vboxmanage_prefers_path_but_never_runs_it(self):
+        self.assertEqual(
+            runtime.resolve_vboxmanage(which=which_for({runtime.VBOX_BIN})),
+            "/usr/bin/VBoxManage",
+        )
+        with patch.object(runtime, "_which", which_for(set())):
+            resolved = runtime.resolve_vboxmanage()
+        self.assertIsInstance(resolved, str)
+        self.assertTrue(resolved)
+
+    def test_detect_ssh_keys_reports_only_private_key_names(self):
+        keys = runtime.detect_ssh_keys(
+            home="/nonexistent",
+            exists=lambda path: path.name == "id_ed25519",
+        )
+        self.assertEqual(keys, ["id_ed25519"])
+
+    def test_verify_compiled_binary_reuses_repository_hash(self):
+        binary = FakeBinary(self)
+        info = runtime.verify_compiled_binary(str(binary.path))
+        self.assertEqual(info["sha256"], qt.file_sha256(binary.path))
+        self.assertIsNone(runtime.verify_compiled_binary(None))
+        with self.assertRaises(runtime.RuntimeSafetyError):
+            runtime.verify_compiled_binary("relative/binary")
+
 
 class PlanTests(unittest.TestCase):
     def setUp(self):
+        self.binary = FakeBinary(self)
         self.kwargs = {
             "guest_host": "192.168.1.10",
             "guest_user": "tester",
@@ -155,13 +195,20 @@ class PlanTests(unittest.TestCase):
             "wallpaper": "/opt/canopy/alpine.png",
             "evidence_dir": "/tmp/canopy-mint-evidence",
             "source_sha": SOURCE,
+            "compiled_binary": str(self.binary.path),
         }
         self.both = which_for({runtime.VBOX_BIN, runtime.SSH_BIN})
+        self.vm = "MintGuest"
 
-    def plan(self, **changes):
+    def plan(self, info=RUNNING_INFO, **changes):
         values = dict(self.kwargs)
         values.update(changes)
-        return runtime.build_plan(which=self.both, runner=QueueRunner([Result(0, VMS)]), **values)
+        vm_name = values.pop("vbox_vm", self.vm)
+        runner = QueueRunner([Result(0, VMS), Result(0, info)])
+        return runtime.build_plan(
+            which=self.both, runner=runner, vbox_vm=vm_name,
+            ssh_key_checker=lambda: ["id_ed25519"], **values,
+        )
 
     def test_dry_run_is_default_and_never_executes(self):
         runner = QueueRunner([Result(0, VMS)])
@@ -177,6 +224,7 @@ class PlanTests(unittest.TestCase):
         self.assertFalse(report["authentic_logs_captured"])
         self.assertIsNotNone(report["commands"]["guest_preflight"])
         self.assertIsNotNone(report["commands"]["guest_smoke"])
+        self.assertTrue(any("SSH private key" in b for b in report["blockers"]))
 
     def test_discover_only_reports_not_run_when_guest_unavailable(self):
         report = runtime.discover_report(
@@ -187,6 +235,8 @@ class PlanTests(unittest.TestCase):
         self.assertFalse(report["host"]["vboxmanage"]["available"])
         self.assertFalse(report["host"]["ssh"]["available"])
         self.assertEqual(report["mint_guest_acceptance"], "NOT_RUN")
+        self.assertIn("VBoxManage not found on host", report["blockers"])
+        self.assertIn("ssh client not found on host", report["blockers"])
 
     def test_invalid_paths_rejected_before_any_command(self):
         for field in ("guest_repo_dir", "binary", "art_dir", "wallpaper", "evidence_dir"):
@@ -226,10 +276,46 @@ class PlanTests(unittest.TestCase):
         self.assertIn("VM not found", " ".join(report["blockers"]))
         self.assertEqual(report["guest_runtime_acceptance"], "NOT_RUN")
 
+    def test_poweroff_vm_and_missing_additions_report_exact_blockers(self):
+        report = self.plan(mode="execute", info=POWEROFF_INFO)
+        self.assertIn("VM state is 'poweroff'; requires 'running'", report["blockers"])
+        self.assertIn("no Guest Additions evidence in VM info", report["blockers"])
+        self.assertEqual(report["status"], runtime.BLOCKED)
+        self.assertIsNone(report["execution"])
+
+        report = self.plan(mode="execute", info=NO_ADDITIONS_INFO)
+        self.assertIn("no Guest Additions evidence in VM info", report["blockers"])
+        self.assertNotIn("VM state is 'running'; requires 'running'", report["blockers"])
+
+    def test_missing_ssh_key_and_compiled_binary_report_exact_blockers(self):
+        values = dict(self.kwargs)
+        values.pop("compiled_binary")
+        report = runtime.build_plan(
+            which=self.both, runner=QueueRunner([Result(0, VMS), Result(0, RUNNING_INFO)]),
+            vbox_vm=self.vm, ssh_key_checker=lambda: [], **values,
+        )
+        self.assertIn(
+            "no SSH private key in ~/.ssh (checked: " + ", ".join(runtime.SSH_KEY_NAMES) + ")",
+            report["blockers"],
+        )
+        self.assertIn(
+            "no compiled Classic Qt binary with verified SHA-256",
+            report["blockers"],
+        )
+
+    def test_execute_does_not_attempt_ssh_while_gates_block(self):
+        report = self.plan(mode="execute", info=POWEROFF_INFO)
+        runner = QueueRunner([])
+        result = runtime.run_plan(report, runner=runner)
+        self.assertEqual(runner.calls, [])
+        self.assertIs(result["execution"]["attempted"], False)
+        self.assertEqual(result["status"], runtime.BLOCKED)
+        self.assertTrue(result["execution"]["reasons"])
+
     def test_discover_host_reads_vm_inventory_and_state(self):
         runner = QueueRunner([
             Result(0, VMS),
-            Result(0, b'VMState="running"\n'),
+            Result(0, RUNNING_INFO),
         ])
         host = runtime.discover_host(
             which=self.both, runner=runner, vbox_vm="MintGuest",
@@ -238,7 +324,17 @@ class PlanTests(unittest.TestCase):
             "name": "MintGuest",
             "uuid": "11111111-1111-1111-1111-111111111111",
             "state": "running",
+            "guest_additions": {"Version": "7.0.12"},
         }])
+        self.assertIs(host["vm"], host["vms"][0])
+        lf_runner = QueueRunner([
+            Result(0, VMS),
+            Result(0, RUNNING_INFO.replace(b"\r\n", b"\n")),
+        ])
+        lf_host = runtime.discover_host(
+            which=self.both, runner=lf_runner, vbox_vm="MintGuest",
+        )
+        self.assertEqual(lf_host["vm"]["state"], "running")
         self.assertTrue(
             all(call[0][1] in runtime.ALLOWED_VBOX_SUBCOMMANDS for call in runner.calls)
         )
@@ -257,6 +353,7 @@ class PlanTests(unittest.TestCase):
 
 class ExecutionTests(unittest.TestCase):
     def setUp(self):
+        self.binary = FakeBinary(self)
         self.kwargs = {
             "guest_host": "192.168.1.10",
             "guest_user": "tester",
@@ -266,15 +363,25 @@ class ExecutionTests(unittest.TestCase):
             "wallpaper": "/opt/canopy/alpine.png",
             "evidence_dir": "/tmp/canopy-mint-evidence",
             "source_sha": SOURCE,
+            "compiled_binary": str(self.binary.path),
         }
         self.both = which_for({runtime.VBOX_BIN, runtime.SSH_BIN})
+        self.vm = "MintGuest"
 
-    def execute(self, results, which=None, vbox_vm=None, timeout=runtime.DEFAULT_TIMEOUT):
-        runner = QueueRunner(results)
+    def execute(self, results, which=None, vbox_vm=None, info=RUNNING_INFO,
+                timeout=runtime.DEFAULT_TIMEOUT, ssh_keys=None,
+                include_binary=True):
+        values = dict(self.kwargs)
+        if not include_binary:
+            values.pop("compiled_binary")
+        keys = ["id_ed25519"] if ssh_keys is None else ssh_keys
+        plan_runner = QueueRunner([Result(0, VMS), Result(0, info)])
         report = runtime.build_plan(
-            which=which or self.both, runner=QueueRunner([Result(0, VMS)]),
-            mode="execute", vbox_vm=vbox_vm, **self.kwargs,
+            which=which or self.both, runner=plan_runner,
+            mode="execute", vbox_vm=self.vm if vbox_vm is None else vbox_vm,
+            ssh_key_checker=lambda: keys, **values,
         )
+        runner = QueueRunner(results)
         return runtime.run_plan(report, runner=runner, timeout=timeout), runner
 
     def happy_results(self, smoke_stdout=None, preflight=READY_JSON):
@@ -319,6 +426,7 @@ class ExecutionTests(unittest.TestCase):
         self.assertEqual(report["real_application_launch"], "PASS")
         self.assertEqual(report["mint_guest_acceptance"], "NOT_RUN")
         self.assertEqual(report["visual_owner_approval"], "NOT_RUN")
+        self.assertEqual(report["blockers"], [])
         self.assertIsInstance(smoke_step["command"], list)
         self.assertIn("tools.mint_classic_qt_smoke", smoke_step["command"][-1])
 
@@ -328,6 +436,8 @@ class ExecutionTests(unittest.TestCase):
         self.assertEqual(len(report["execution"]["steps"]), 1)
         self.assertFalse(report["guest_ran_qt_binary"])
         self.assertEqual(report["guest_runtime_acceptance"], "NOT_RUN")
+        self.assertTrue(any("preflight status is 'BLOCKED'" in b
+                            for b in report["blockers"]))
 
     def test_invalid_preflight_json_skips_qt_smoke(self):
         report, runner = self.execute(self.happy_results(preflight=b"not json"))
@@ -345,6 +455,8 @@ class ExecutionTests(unittest.TestCase):
         self.assertIn("timed out", step["error"])
         self.assertFalse(report["guest_ran_qt_binary"])
         self.assertEqual(report["guest_runtime_acceptance"], "NOT_RUN")
+        self.assertTrue(any("guest preflight failed: command timed out" in b
+                            for b in report["blockers"]))
 
     def test_smoke_timeout_is_failure_not_false_success(self):
         report, _ = self.execute([
@@ -356,6 +468,8 @@ class ExecutionTests(unittest.TestCase):
         self.assertFalse(report["guest_ran_qt_binary"])
         self.assertEqual(report["status"], runtime.FAIL)
         self.assertEqual(report["guest_runtime_acceptance"], "NOT_RUN")
+        self.assertTrue(any("guest Qt self-test failed: command timed out" in b
+                            for b in report["blockers"]))
 
     def test_smoke_nonzero_exit_is_not_success(self):
         report, _ = self.execute([
@@ -365,6 +479,7 @@ class ExecutionTests(unittest.TestCase):
         self.assertEqual(report["execution"]["steps"][1]["exit_code"], 4)
         self.assertFalse(report["guest_ran_qt_binary"])
         self.assertEqual(report["guest_runtime_acceptance"], "NOT_RUN")
+        self.assertTrue(any("exit code 4" in b for b in report["blockers"]))
 
     def test_smoke_without_pass_marker_is_not_success(self):
         report, _ = self.execute([
@@ -374,6 +489,7 @@ class ExecutionTests(unittest.TestCase):
         self.assertFalse(report["execution"]["steps"][1]["smoke_pass_marker"])
         self.assertFalse(report["guest_ran_qt_binary"])
         self.assertEqual(report["guest_runtime_acceptance"], "NOT_RUN")
+        self.assertTrue(any("missing pass marker" in b for b in report["blockers"]))
 
     def test_oserror_is_recorded_without_claiming_acceptance(self):
         report, _ = self.execute([Result(0, READY_JSON), OSError("gone")])
@@ -400,6 +516,9 @@ class ExecutionTests(unittest.TestCase):
 
 
 class CliTests(unittest.TestCase):
+    def setUp(self):
+        self.binary = FakeBinary(self)
+
     def base_args(self):
         return [
             "--guest-host", "192.168.1.10",
@@ -409,6 +528,8 @@ class CliTests(unittest.TestCase):
             "--landscape-wallpaper", "/opt/canopy/alpine.png",
             "--evidence-dir", "/tmp/canopy-mint-evidence",
             "--source-sha", SOURCE,
+            "--vbox-vm", "MintGuest",
+            "--compiled-binary", str(self.binary.path),
         ]
 
     def test_cli_discover_only_without_guest_is_zero_and_not_run(self):
@@ -417,8 +538,9 @@ class CliTests(unittest.TestCase):
                 patch.object(runtime, "_run", QueueRunner([])), \
                 contextlib.redirect_stdout(buffer):
             code = runtime.main(["--discover-only", "--json"])
-        self.assertEqual(json.loads(buffer.getvalue())[
-            "mint_guest_acceptance"], "NOT_RUN")
+        data = json.loads(buffer.getvalue())
+        self.assertEqual(data["mint_guest_acceptance"], "NOT_RUN")
+        self.assertTrue(data["blockers"])
         self.assertEqual(code, 0)
 
     def test_cli_dry_run_requires_guest_arguments(self):
@@ -433,21 +555,31 @@ class CliTests(unittest.TestCase):
             code = runtime.main(args)
         self.assertEqual(code, 2)
 
+    def test_cli_rejects_missing_compiled_binary(self):
+        args = self.base_args()
+        args[args.index(str(self.binary.path))] = str(self.binary.path) + ".missing"
+        with contextlib.redirect_stderr(io.StringIO()):
+            code = runtime.main(args)
+        self.assertEqual(code, 2)
+
     def test_cli_execute_end_to_end_with_fake_guest(self):
         runner = QueueRunner([
-            Result(0, VMS), Result(0, READY_JSON),
+            Result(0, VMS), Result(0, RUNNING_INFO),
+            Result(0, READY_JSON),
             Result(0, runtime.SMOKE_PASS_MARKER.encode() + b"\n"),
         ])
         buffer = io.StringIO()
         with patch.object(runtime, "_which", which_for(
                 {runtime.VBOX_BIN, runtime.SSH_BIN})), \
+                patch.object(runtime, "detect_ssh_keys", lambda: ["id_ed25519"]), \
                 patch.object(runtime, "_run", runner), \
                 contextlib.redirect_stdout(buffer):
             code = runtime.main(self.base_args() + ["--execute", "--json"])
         self.assertEqual(code, 0)
-        self.assertEqual(json.loads(buffer.getvalue())[
-            "guest_runtime_acceptance"], runtime.EVIDENCE_PENDING)
-        self.assertEqual(len(runner.calls), 3)
+        data = json.loads(buffer.getvalue())
+        self.assertEqual(data["guest_runtime_acceptance"], runtime.EVIDENCE_PENDING)
+        self.assertEqual(data["blockers"], [])
+        self.assertEqual(len(runner.calls), 4)
 
     def test_cli_guest_unavailable_is_zero_with_not_run(self):
         with contextlib.redirect_stdout(io.StringIO()):

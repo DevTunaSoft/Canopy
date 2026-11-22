@@ -8,6 +8,7 @@ recorded command, exit status and logs.
 """
 import argparse
 import json
+import os
 from pathlib import Path
 import re
 import shlex
@@ -27,9 +28,15 @@ MAX_VBOX_BYTES = 65536
 MAX_PATH_LENGTH = 4096
 VBOX_BIN = "VBoxManage"
 SSH_BIN = "ssh"
+VBOX_WINDOWS_PATH = r"C:\Program Files\Oracle\VirtualBox\VBoxManage.exe"
+SSH_KEY_NAMES = ("id_rsa", "id_ed25519", "id_ecdsa", "id_dsa")
+MAX_BINARY_BYTES = 200_000_000
 ALLOWED_VBOX_SUBCOMMANDS = ("list", "showvminfo")
 VM_LINE = re.compile(r'"([^"]+)"\s+\{([^}]+)\}')
-STATE_LINE = re.compile(r'^VMState="([^"]+)"$', re.MULTILINE)
+STATE_LINE = re.compile(r'^VMState="([^"]+)"\r?$', re.MULTILINE)
+ADDITIONS_LINE = re.compile(
+    r'^GuestAdditions([A-Za-z0-9_]*)="([^"]*)"\r?$', re.MULTILINE,
+)
 SMOKE_PASS_MARKER = "MINT_CLASSIC_QT_SMOKE_PASS"
 HOST_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,252}\Z")
 USER_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_-]{0,31}\Z")
@@ -53,6 +60,42 @@ def _reject_constant(token):
 
 def _which(name):
     return shutil.which(name)
+
+
+def resolve_vboxmanage(which=None):
+    """Locate VBoxManage without starting or modifying any VM."""
+    found = (which or _which)(VBOX_BIN)
+    if found:
+        return found
+    if os.name == "nt" and Path(VBOX_WINDOWS_PATH).is_file():
+        return VBOX_WINDOWS_PATH
+    return VBOX_BIN
+
+
+def detect_ssh_keys(home=None, exists=None):
+    """Report only private-key filenames present in ~/.ssh; never read contents."""
+    base = Path(home) if home is not None else Path.home()
+    exists = exists or (lambda path: Path(path).is_file())
+    directory = base / ".ssh"
+    return [name for name in SSH_KEY_NAMES if exists(directory / name)]
+
+
+def verify_compiled_binary(path):
+    """Hash an existing local binary with the repository's own smoke helper."""
+    if path is None:
+        return None
+    if not isinstance(path, str) or not path:
+        raise RuntimeSafetyError("compiled binary must be a non-empty path")
+    target = Path(path)
+    if not target.is_absolute() or not target.is_file():
+        raise RuntimeSafetyError("compiled binary must be an existing absolute file")
+    if target.stat().st_size > MAX_BINARY_BYTES:
+        raise RuntimeSafetyError("compiled binary exceeds safe size limit")
+    return {"path": str(target), "sha256": qt.file_sha256(target)}
+
+
+def _dedupe(items):
+    return list(dict.fromkeys(items))
 
 
 def _run(argv, timeout):
@@ -176,17 +219,25 @@ def build_commands(*, guest_host, guest_user, guest_repo_dir, binary, art_dir,
 
 
 def discover_host(*, which=None, runner=None, timeout=DEFAULT_TIMEOUT,
-                  vbox_vm=None):
+                  vbox_vm=None, vboxmanage=None):
     which = which or _which
     runner = runner or _run
+    vboxmanage = vboxmanage or VBOX_BIN
+    vbox_binary = which(VBOX_BIN) or (
+        vboxmanage if Path(vboxmanage).is_file() else None
+    )
     host = {
-        "vboxmanage": {"available": which(VBOX_BIN) is not None},
+        "vboxmanage": {
+            "available": vbox_binary is not None,
+            "path": vbox_binary,
+        },
         "ssh": {"available": which(SSH_BIN) is not None},
         "vms": [],
+        "vm": None,
         "errors": [],
     }
     if host["vboxmanage"]["available"]:
-        argv = vbox_command("list", "vms")
+        argv = vbox_command("list", "vms", binary=vbox_binary)
         try:
             result = runner(argv, validate_timeout(timeout))
             output = getattr(result, "stdout", b"") or b""
@@ -195,9 +246,15 @@ def discover_host(*, which=None, runner=None, timeout=DEFAULT_TIMEOUT,
                 host["errors"].append("VBoxManage output exceeded safe limit")
             else:
                 for name, uuid in VM_LINE.findall(text):
-                    item = {"name": name, "uuid": uuid, "state": None}
+                    item = {
+                        "name": name, "uuid": uuid, "state": None,
+                        "guest_additions": {},
+                    }
                     if vbox_vm == name:
-                        info = vbox_command("showvminfo", name, "--machinereadable")
+                        info = vbox_command(
+                            "showvminfo", name, "--machinereadable",
+                            binary=vbox_binary,
+                        )
                         try:
                             info_result = runner(info, validate_timeout(timeout))
                             info_text, _ = _bounded_text(
@@ -205,6 +262,11 @@ def discover_host(*, which=None, runner=None, timeout=DEFAULT_TIMEOUT,
                             )
                             state = STATE_LINE.search(info_text)
                             item["state"] = state.group(1) if state else "unknown"
+                            item["guest_additions"] = {
+                                key: value
+                                for key, value in ADDITIONS_LINE.findall(info_text)
+                            }
+                            host["vm"] = item
                         except (OSError, subprocess.TimeoutExpired) as exc:
                             host["errors"].append(
                                 "showvminfo failed: " + exc.__class__.__name__
@@ -236,6 +298,38 @@ def _base_report(mode):
     }
 
 
+def host_blockers(report):
+    """Collect exact, read-only reasons why a guest run cannot be trusted."""
+    host = report.get("host") or {}
+    guest = report.get("guest") or {}
+    blockers = []
+    if not host.get("vboxmanage", {}).get("available"):
+        blockers.append("VBoxManage not found on host")
+    if not host.get("ssh", {}).get("available"):
+        blockers.append("ssh client not found on host")
+    for error in host.get("errors", []):
+        blockers.append("host discovery error: " + error)
+    vm = host.get("vm")
+    configured_vm = guest.get("vm")
+    if configured_vm is not None and vm is None:
+        blockers.append("VM not found in inventory: " + str(configured_vm))
+    if report["mode"] == "execute" and configured_vm is None:
+        blockers.append("no VM configured for guest acceptance")
+    if vm is not None:
+        state = vm.get("state")
+        if state != "running":
+            blockers.append("VM state is " + repr(state) + "; requires 'running'")
+        if not vm.get("guest_additions"):
+            blockers.append("no Guest Additions evidence in VM info")
+    if not guest.get("ssh_keys"):
+        blockers.append(
+            "no SSH private key in ~/.ssh (checked: " + ", ".join(SSH_KEY_NAMES) + ")"
+        )
+    if not (guest.get("compiled_binary") or {}).get("sha256"):
+        blockers.append("no compiled Classic Qt binary with verified SHA-256")
+    return _dedupe(blockers)
+
+
 def finalize(report):
     report["notes"] = [
         "Read-only discovery and dry-run are the default; guest run is opt-in.",
@@ -243,77 +337,94 @@ def finalize(report):
         "Owner visual approval and independent Mint provenance stay separate gates.",
         "No passwords are read or accepted; SSH is forced non-interactive.",
     ]
-    execution = report.get("execution")
-    host = report.get("host") or {}
-    missing = []
-    if not host.get("vboxmanage", {}).get("available"):
-        missing.append("VBoxManage not found on host")
-    if not host.get("ssh", {}).get("available"):
-        missing.append("ssh client not found on host")
-    for error in host.get("errors", []):
-        missing.append("host discovery error: " + error)
-    blockers = list(report.get("blockers", []))
-    if report["mode"] == "discover":
-        report["status"] = DRY_RUN
-        return report
+    execution = report.get("execution") or {}
+    blockers = host_blockers(report)
     if report["mode"] != "execute":
         report["status"] = DRY_RUN
+        report["blockers"] = blockers
         return report
-    if execution is None or not execution.get("attempted"):
+    steps = {step["name"]: step for step in execution.get("steps", [])}
+    preflight_step = steps.get("guest_preflight")
+    smoke_step = steps.get("guest_smoke")
+    preflight_info = (preflight_step or {}).get("preflight") or {}
+    if preflight_step is not None and not preflight_step.get("ok"):
+        detail = preflight_step.get("error") or (
+            "exit code " + str(preflight_step.get("exit_code"))
+        )
+        blockers.append("guest preflight failed: " + detail)
+    elif preflight_step is not None and preflight_info.get("status") != "READY_FOR_TESTS":
+        blockers.append(
+            "guest preflight status is " + repr(preflight_info.get("status"))
+        )
+    if smoke_step is not None:
+        if not smoke_step.get("ok"):
+            detail = smoke_step.get("error") or (
+                "exit code " + str(smoke_step.get("exit_code"))
+            )
+            blockers.append("guest Qt self-test failed: " + detail)
+        elif not smoke_step.get("smoke_pass_marker"):
+            blockers.append(
+                "guest Qt self-test missing pass marker " + SMOKE_PASS_MARKER
+            )
+    if not execution.get("attempted"):
         report["status"] = BLOCKED
-        report["blockers"] = blockers + missing
+        report["blockers"] = _dedupe(blockers + list(execution.get("reasons", [])))
         return report
-    steps = {step["name"]: step for step in execution["steps"]}
-    preflight_step = steps.get("guest_preflight", {})
-    smoke_step = steps.get("guest_smoke", {})
-    preflight_info = preflight_step.get("preflight") or {}
     guest_running_mint = (
-        preflight_step.get("ok") is True
+        preflight_step is not None
+        and preflight_step.get("ok") is True
         and preflight_info.get("status") == "READY_FOR_TESTS"
         and preflight_info.get("mint_identified") is True
         and preflight_info.get("probe_only") is True
     )
     smoke_ok = (
-        smoke_step.get("ok") is True
+        smoke_step is not None
+        and smoke_step.get("ok") is True
         and smoke_step.get("smoke_pass_marker") is True
     )
     report["guest_ran_qt_binary"] = smoke_ok
     report["authentic_logs_captured"] = (
-        smoke_step.get("ok") is True
+        smoke_step is not None
+        and smoke_step.get("ok") is True
         and isinstance(smoke_step.get("command"), list)
         and smoke_step.get("exit_code") is not None
         and isinstance(smoke_step.get("stdout"), str)
     )
-    if smoke_ok and guest_running_mint and report["authentic_logs_captured"]:
+    if (smoke_ok and guest_running_mint
+            and report["authentic_logs_captured"] and not blockers):
         report["status"] = EVIDENCE_PENDING
         report["guest_runtime_acceptance"] = EVIDENCE_PENDING
         report["real_application_launch"] = "PASS"
         report["mint_guest_acceptance"] = NOT_RUN
+        report["blockers"] = []
         report["notes"].append(
             "Guest Qt run evidence captured; Mint acceptance still NOT RUN "
             "pending independent provenance and owner visual review."
         )
     else:
         report["status"] = FAIL
-        reasons = []
+        reasons = list(execution.get("reasons", []))
         if not guest_running_mint:
             reasons.append("no authentic READY_FOR_TESTS Mint preflight from guest")
         if not smoke_ok:
             reasons.append("no successful guest Qt self-test with pass marker")
-        report["blockers"] = blockers + missing + reasons
+        report["blockers"] = _dedupe(blockers + reasons)
     return report
 
 
 def build_plan(*, guest_host, guest_user, guest_repo_dir, binary, art_dir,
                wallpaper, evidence_dir, source_sha, timeout=DEFAULT_TIMEOUT,
                connect_timeout=None, framing_review=False, vbox_vm=None,
-               mode="dry-run", which=None, runner=None):
+               mode="dry-run", which=None, runner=None, compiled_binary=None,
+               ssh_key_checker=None, vboxmanage=None):
     if mode not in ("dry-run", "execute"):
         raise RuntimeSafetyError("mode must be dry-run or execute")
     connect_timeout = validate_timeout(
         connect_timeout if connect_timeout is not None else timeout
     )
     validate_timeout(timeout)
+    compiled = verify_compiled_binary(compiled_binary)
+    ssh_keys = list((ssh_key_checker or detect_ssh_keys)() or [])
     commands = build_commands(
         guest_host=guest_host, guest_user=guest_user,
         guest_repo_dir=guest_repo_dir, binary=binary, art_dir=art_dir,
@@ -321,7 +432,10 @@ def build_plan(*, guest_host, guest_user, guest_repo_dir, binary, art_dir,
         timeout=timeout, connect_timeout=connect_timeout,
         framing_review=framing_review,
     )
-    host = discover_host(which=which, runner=runner, timeout=timeout, vbox_vm=vbox_vm)
+    host = discover_host(
+        which=which, runner=runner, timeout=timeout, vbox_vm=vbox_vm,
+        vboxmanage=vboxmanage,
+    )
     report = _base_report(mode)
     report["host"] = host
     report["guest"] = {
@@ -329,22 +443,24 @@ def build_plan(*, guest_host, guest_user, guest_repo_dir, binary, art_dir,
         "user": guest_user,
         "repo_dir": guest_repo_dir,
         "vm": vbox_vm,
+        "ssh_keys": ssh_keys,
+        "compiled_binary": compiled,
     }
     report["commands"] = commands
-    report["blockers"] = []
-    if vbox_vm is not None and not any(
-        vm["name"] == vbox_vm for vm in host["vms"]
-    ):
-        report["blockers"].append("configured VM not found in VBoxManage inventory")
     return finalize(report)
 
 
 def discover_report(*, which=None, runner=None, timeout=DEFAULT_TIMEOUT,
-                    vbox_vm=None):
+                    vbox_vm=None, ssh_key_checker=None, vboxmanage=None):
     report = _base_report("discover")
     report["host"] = discover_host(
         which=which, runner=runner, timeout=timeout, vbox_vm=vbox_vm,
+        vboxmanage=vboxmanage,
     )
+    report["guest"] = {
+        "vm": vbox_vm,
+        "ssh_keys": list((ssh_key_checker or detect_ssh_keys)() or []),
+    }
     return finalize(report)
 
 
@@ -405,15 +521,11 @@ def run_plan(report, *, runner=None, timeout=DEFAULT_TIMEOUT):
     if report.get("mode") != "execute":
         return finalize(report)
     validate_timeout(timeout)
-    blockers = list(report.get("blockers", []))
-    host = report.get("host") or {}
-    if not host.get("vboxmanage", {}).get("available"):
-        blockers.append("VBoxManage not found on host")
-    if not host.get("ssh", {}).get("available"):
-        blockers.append("ssh client not found on host")
+    blockers = host_blockers(report)
     if blockers:
-        report["blockers"] = blockers
-        report["execution"] = {"attempted": False, "reasons": blockers, "steps": []}
+        report["execution"] = {
+            "attempted": False, "reasons": blockers, "steps": [],
+        }
         return finalize(report)
 
     execution = {"attempted": True, "reasons": [], "steps": []}
@@ -452,6 +564,8 @@ def main(argv=None):
     parser.add_argument("--evidence-dir")
     parser.add_argument("--source-sha")
     parser.add_argument("--vbox-vm")
+    parser.add_argument("--vboxmanage")
+    parser.add_argument("--compiled-binary")
     parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT)
     parser.add_argument("--connect-timeout", type=int)
     parser.add_argument("--icon-framing-review", action="store_true")
@@ -461,9 +575,11 @@ def main(argv=None):
     options = parser.parse_args(argv)
 
     try:
+        vboxmanage = options.vboxmanage or resolve_vboxmanage()
         if options.discover_only:
             report = discover_report(
                 timeout=options.timeout, vbox_vm=options.vbox_vm,
+                vboxmanage=vboxmanage,
             )
         else:
             required = {
@@ -487,7 +603,8 @@ def main(argv=None):
                 source_sha=options.source_sha, timeout=options.timeout,
                 connect_timeout=options.connect_timeout,
                 framing_review=options.icon_framing_review,
-                vbox_vm=options.vbox_vm,
+                vbox_vm=options.vbox_vm, vboxmanage=vboxmanage,
+                compiled_binary=options.compiled_binary,
                 mode="execute" if options.execute else "dry-run",
             )
             if options.execute:

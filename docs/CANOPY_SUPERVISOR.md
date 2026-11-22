@@ -334,6 +334,76 @@ in separate terminals or applications.
 A new single-runner lock prevents overlapping modern supervisor loops, but
 the older supervisor predates that protection: close it first.
 
+## 100-task autonomous engineering backlog (2026-11-21)
+
+The owner has approved **100 planned engineering assignments**, but only
+**three** simultaneous OpenCode Go free-model workers. The backlog covers
+launcher, dock integration models, app launching, window management, Linux
+Mint guest tooling, installer safety, reliability, security, performance and
+accessibility (10 tasks in each category). The jobs are independently scoped,
+bounded, reproducible and targeted to the compiled Qt Classic prototype
+feature branch. They **do not** modify approved artwork, frozen dock layout,
+wallpaper, QML/C++, OS settings or existing protected files. A completed
+modular job does NOT mean its live Qt integration or the entire shell is
+complete; reviews and integration remain separate gates.
+
+The catalog source of truth is tools/canopy_backlog_100.py. The script
+validates exactly 100 unique task IDs and 200 owned file paths before changing
+state. It **appends** new jobs to the current optional roadmap.json without
+resetting the ledger, deleting drafts or rewriting old work. A normal state
+with the previous three Qt wave entries becomes a 103-entry roadmap; the new
+explicit safety cap is 128. Run twice safely: the second run adds zero tasks.
+No task is allowed to merge or claim approval from green tests alone.
+
+**Recovery and no silent stalls:** worker logs and worktree file changes form
+progress signatures. Inactivity longer than stall_minutes (default six) or
+absolute elapsed runtime longer than task_timeout_minutes (default 45)
+interrupts the worker, even if it is still writing logs. Saved checkpoints
+allow at most max_attempts (default two) with exponential cooldown; then
+the worker becomes BLOCKED and independent assignments continue. Missing
+remote base branches receive at most two preflight retries, checkpointed to
+disk. Impossible queued dependencies are quarantined. Dashboard shows
+roadmap planned, pending and active counts. An incomplete wave is explicitly
+reported as INCOMPLETE, never FINISHED green. This prevents **silent infinite
+waiting**, not all external failures: network outages, free-model quota,
+computer shutdown, and legitimate missing Mint/visual approval still require
+resolution. If PowerShell closes, it does NOT continue invisibly or survive
+reboot; relaunch from checkpoint after verifying no workers are active.
+
+**To start on Windows** when the prior supervisor loop is stopped and zero
+workers are active, run these commands in a single PowerShell window:
+
+~~~powershell
+$ErrorActionPreference = 'Stop'
+$w = 'C:\Users\X1\Projects\Canopy-Supervisor'
+$s = 'C:\CanopySupervisor\state'
+py -3 "$w\tools\canopy_supervisor.py" --state-root $s pause
+if ($LASTEXITCODE -ne 0) { throw 'Could not pause' }
+if (git -C $w status --porcelain) { throw 'Local supervisor changes exist; do not overwrite' }
+git -C $w fetch origin
+if ($LASTEXITCODE -ne 0) { throw 'Fetch failed' }
+git -C $w switch --detach origin/feat/windows-multi-agent-supervisor-20261121
+if ($LASTEXITCODE -ne 0) { throw 'Update failed' }
+Push-Location $w
+try {
+    py -3 -m unittest tests.test_canopy_backlog_100 tests.test_canopy_supervisor -q > "$s\backlog-100-preflight.log" 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Get-Content "$s\backlog-100-preflight.log" -Tail 60
+        throw 'Supervisor safety tests failed'
+    }
+    py -3 .\tools\canopy_backlog_100.py --state-root $s --start
+    if ($LASTEXITCODE -ne 0) { throw 'Backlog finished with blockers or incomplete work; review dashboard' }
+} finally {
+    Pop-Location
+}
+~~~
+
+Minimize the PowerShell window and keep the PC on. Do not start the same
+supervisor in another process; the lifetime runner.lock prevents competing
+new runners. To inspect progress in a separate brief terminal, use
+canopy_supervisor.py status, or read C:\CanopySupervisor\state\dashboard.md.
+No automatic merges or unattended changes to Windows startup are performed.
+
 ## Task and evidence contract
 
 Tasks are appended with `add-task`, or edited in `tasks.json` while the

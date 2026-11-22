@@ -159,7 +159,7 @@ void FileModel::reload()
                     QDir::NoDotAndDotDot | QDir::AllEntries | QDir::Readable,
                     QDirIterator::NoIteratorFlags);
     while (it.hasNext() && m_all.size() < kMaxEntries) {
-        const QFileInfo info = it.next();
+        const QFileInfo info(it.next());
         Entry entry;
         entry.name = info.fileName();
         entry.path = info.absoluteFilePath();

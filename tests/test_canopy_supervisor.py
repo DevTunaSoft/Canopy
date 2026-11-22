@@ -822,6 +822,62 @@ class SupervisorTests(unittest.TestCase):
         self.assertEqual(interrupted["status"], "queued")
         self.assertEqual(interrupted["checkpoint"]["stage"], "interrupted")
 
+    def test_hard_timeout_interrupts_noisy_worker_even_when_log_grows(self):
+        self._add(task_definition("alpha"))
+        self.supervisor.dispatch(self.store.load())
+        record = self._get("alpha")
+        self._mutate(
+            "alpha",
+            started_at=self.supervisor.now() - 3600,
+            last_progress_at=self.supervisor.now(),
+            progress_signature=[-1, -1, -1],
+        )
+        data = self.store.load()
+        self.supervisor.monitor(data)
+        self.store.save(data)
+        task = self._get("alpha")
+        self.assertEqual(task["status"], "queued")
+        self.assertIn("exceeded task time limit", task["last_error"])
+        self.assertIn(("terminate", record["pid"]), self.git.calls)
+
+    def test_missing_base_is_bounded_and_does_not_starve_other_tasks(self):
+        qt_base = "feat/classic-qt-port-buildable-20261121"
+        self._add(task_definition("alpha", base=qt_base))
+        self._add(task_definition("beta"))
+        original = self.git.rev_parse
+
+        def missing_feature(repo, ref):
+            if ref.startswith("origin/"):
+                raise gitops.GitError("no remote branch")
+            return original(repo, ref)
+
+        with patch.object(self.git, "rev_parse", side_effect=missing_feature):
+            self.assertEqual(self.supervisor.dispatch(self.store.load()), 1)
+            self.assertEqual(self._get("alpha")["preflight_failures"], 1)
+            self.assertEqual(self._get("alpha")["status"], "queued")
+            self._mutate("alpha", next_attempt_at=0.0)
+            self.assertEqual(self.supervisor.dispatch(self.store.load()), 0)
+        failed = self._get("alpha")
+        self.assertEqual(failed["status"], "blocked")
+        self.assertIn("base ref unavailable", failed["last_error"])
+        self.assertEqual(failed["attempts"], 0)
+        self.assertEqual(self._get("beta")["status"], "running")
+        self.assertFalse(any(row[0] == "worktree_add" and
+                             row[1].endswith("alpha") for row in self.git.calls))
+
+    def test_broken_dependency_is_quarantined_without_stopping_other_jobs(self):
+        self._add(task_definition("alpha"))
+        self._add(task_definition("beta", depends_on=["alpha"]))
+        self._add(task_definition("gamma"))
+        self._mutate("alpha", status="blocked", last_error="real prerequisite missing")
+        data = self.store.load()
+        self.assertEqual(self.supervisor.block_broken_dependencies(data), 1)
+        self.store.save(data)
+        self.assertEqual(self._get("beta")["status"], "blocked")
+        self.assertIn("alpha", self._get("beta")["last_error"])
+        self.assertEqual(self.supervisor.dispatch(self.store.load()), 1)
+        self.assertEqual(self._get("gamma")["status"], "running")
+
     def test_orphan_exit_with_evidence_is_verified_not_discarded(self):
         self._add(task_definition("alpha"))
         self.supervisor.dispatch(self.store.load())

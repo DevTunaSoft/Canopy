@@ -315,7 +315,7 @@ def main(argv=None) -> int:
             # than spending another model run or resetting attempt counts.
             cache_error = re.compile(
                 r"verification failed: PolicyError: changed file outside task scope: "
-                r"[^\\r\\n]*/__pycache__/[^/\\r\\n]+\\.py[co]$"
+                r"[^\r\n]*/__pycache__/[^/\r\n]+\.py[co]$"
             )
             def action():
                 if not store.paused:

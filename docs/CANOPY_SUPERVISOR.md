@@ -7,6 +7,57 @@ results. This document supplements, and does not replace, `AGENTS.md`,
 `README.md`, `docs/ARCHITECTURE.md`, `docs/QUALITY.md` and the coordination
 ledger proposed in PR #133.
 
+## Recommended: one-click Windows Autopilot (no recurring PowerShell)
+
+The repository now includes `tools/Enable-Canopy-Autopilot.cmd`.
+**Download it and double-click once** under the existing Windows user
+account. It uses standard Git and the existing Python launcher to prepare
+a **separate clean checkout** under
+`%LOCALAPPDATA%\\CanopyAutopilot\\supervisor`. It does not overwrite
+`C:\\Users\\X1\\Projects\\Canopy`, the previous supervisor checkout,
+the task ledger or anyone's feature worktree.
+
+The one-time installer copies a stable `Canopy-Watchdog.pyw` into the
+per-user application directory and registers a single Task Scheduler entry
+named `Canopy-Autopilot-<12-digit-hash>`:
+
+- Every five minutes, Windows launches the watchdog under the **current
+  user's limited permissions**. It starts immediately following installation.
+- It refuses to compete with an already active supervisor or watchdog. When
+  idle, it safely updates only its clean isolated checkout, appends any
+  missing 100-backlog jobs idempotently and calls the existing supervisor.
+- The supervisor retains the three-agent cap, task retries and watchdog
+  timeout; draft PRs still require independent review. The launched Python
+  process does not need the original PowerShell console to remain open.
+- Exceptions are recorded in
+  `C:\\CanopySupervisor\\state\\autopilot-status.json` and
+  `autopilot-history.jsonl`. It reports the actual 100-task counts rather
+  than treating idle workers as completed engineering.
+- An explicit pause is honored; the installer unpauses only once when the
+  operator chooses to enable it. A network outage can reuse the current
+  checkout but can block new remote refs, so the next scheduled attempt
+  retries. Missing OpenCode credentials, free-model quota, unavailable Mint
+  VM, failed CI and required human visual approval remain real blockers,
+  not success.
+- The task has **no admin privilege**, does not require a password,
+  does not merge PRs, does not touch approved art and does not disable
+  operating-system defenses.
+- The monitor runs while Windows is running with the user's session and
+  Task Scheduler available; it is not a cloud agent and does not execute
+  while the PC is powered off.
+- Uninstall through
+  `py -3 tools/canopy_autopilot.py uninstall --settings
+  %LOCALAPPDATA%\\CanopyAutopilot\\autopilot.json`.
+  Uninstall removes only the owned scheduled task and settings, preserving
+  work history. This command is documented for support, not required for
+  routine operation.
+
+This remains a Windows-specific integration. Unit tests/CI can validate the
+scheduler invocation and recovery logic, but cannot assert that Task
+Scheduler registration succeeded on the user's real PC until the one-click
+installer actually runs there. On setup failure it opens the local setup log
+in Notepad, with no copy/paste troubleshooting required.
+
 ## What it is
 
 `canopy_supervisor` is a Windows-compatible, standard-library-only coordinator

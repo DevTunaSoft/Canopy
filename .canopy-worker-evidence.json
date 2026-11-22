@@ -1,0 +1,28 @@
+{
+  "task_id": "c100-dock-click-intents-r2",
+  "branch": "feat/canopy-supervisor-c100-dock-click-intents-r2",
+  "commit_sha": "PENDING",
+  "tests": [
+    {
+      "command": "py -3 -m unittest tests.test_c100_dock_click_intents -v",
+      "result": "PASS",
+      "output_excerpt": "Ran 14 tests in 0.105s\n\nOK\nEXITCODE=0"
+    }
+  ],
+  "changed_files": [
+    "canopy_features/dock/click_intents.py",
+    "tests/test_c100_dock_click_intents.py"
+  ],
+  "artifacts": [
+    {
+      "path": "canopy_features/dock/click_intents.py",
+      "sha256": "268ac1bcd0c37ee23ccb450dfcba869031f7fce1271885de65fad08889065a3f"
+    },
+    {
+      "path": "tests/test_c100_dock_click_intents.py",
+      "sha256": "7963308d71495cb3110dab8ddaaae2dfd20a25121f6e4993b6ae40b2ca40163a"
+    }
+  ],
+  "draft": true,
+  "notes": "Implemented a pure, offline DockClickMapper: maps a raw QML activated(string) to immutable ClickIntent (LAUNCH/FOCUS/REJECT/IGNORE). Fixed eight-label allowlist mirrors prototype/classic/SystemAppLauncher.cpp. Untrusted IDs, case/path/command/injection variants and non-str inputs REJECT untrusted-id with no state change. Approved-but-missing targets and disabled launcher REJECT missing-target. Running target FOCUSes; installed+not-running LAUNCHes; a second click while a launch is pending returns IGNORE so no duplicate launch occurs. Host reports state via observe(); no polling, threads, network, OS/Qt imports, privileged calls or unbounded state (all sets bounded by 8 labels). Tests cover untrusted IDs, missing targets, repeated clicks and bounded state. Ran on Windows host only; behavior is platform-neutral by construction (pure Python, no OS/Qt dependency). No test of real Linux Mint, a compiled Qt binary, or a live desktop was run; do not claim one. Future integration still needed: wire this component into the compiled Qt application (connect DockTile.activated to the host launcher/window focus) to prove a working desktop. No protected paths, artwork, QML, C++, wallpaper, workflows or main touched. No commit, push, PR or branch change performed; supervisor publishes."
+}

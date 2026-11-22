@@ -74,11 +74,16 @@ def scheduled_command(pythonw: Path, entry: Path, settings: Path) -> str:
     )
 
 
-def scheduler_create(task: str, action: str, *, runner=subprocess.run) -> None:
+def scheduler_create(task: str, action: str, *, replace_existing: bool = False,
+                     runner=subprocess.run) -> None:
     # No /RU password, /RP, /RL HIGHEST or admin permission.
     args = ["schtasks.exe", "/Create", "/TN", task, "/SC", "MINUTE",
             "/MO", str(TASK_INTERVAL_MINUTES), "/RL", "LIMITED",
-            "/TR", action, "/F"]
+            "/TR", action]
+    if replace_existing:
+        # Only an installer-owned task with a verified settings record may
+        # be replaced. Never overwrite an unrelated Task Scheduler entry.
+        args.append("/F")
     result = runner(args, capture_output=True, text=True, timeout=45)
     if result.returncode != 0:
         raise RuntimeError("Task Scheduler refused per-user registration"
@@ -293,7 +298,8 @@ def install(root: Path, checkout: Path, *,
         "schema": 1, "state_root": str(root), "checkout": str(checkout),
         "task": task, "installed_at": utc_now(), "model": "existing-supervisor",
     }
-    if settings.exists():
+    owned_task = settings.exists()
+    if owned_task:
         old = load_settings(settings)
         if (old["state_root"], old["checkout"], old["task"]) != (
                 str(root), str(checkout), task):
@@ -304,7 +310,8 @@ def install(root: Path, checkout: Path, *,
     if source != entry:
         shutil.copy2(source, entry)
     settings.write_text(json.dumps(stored, indent=2) + "\n", encoding="utf-8")
-    scheduler_create(task, scheduled_command(pythonw, entry, settings), runner=runner)
+    scheduler_create(task, scheduled_command(pythonw, entry, settings),
+                     replace_existing=owned_task, runner=runner)
     # An explicit initial installation authorizes resuming the idle queue.
     sys.path.insert(0, str(checkout))
     from canopy_supervisor import state

@@ -137,6 +137,51 @@ A worker that exits between supervisor restarts is also verified from real
 evidence, never assumed successful. Worktrees are reused only when they are
 still registered on the assigned branch.
 
+## Continue after a blocked task (2026-11-21)
+
+**A missing owner asset is a task blocker, not a stop signal for the project.**
+The active GUI OpenCode conversation / a single `opencode run` invocation is
+one task and may exit after reporting BLOCKED. Only the separate, running
+`canopy_supervisor run` loop can keep launching different workers. A chat
+prompt cannot restart a process that has already exited.
+
+This supervisor now has **four independent coding/testing campaigns** after
+the original six bounded platform-probe campaigns: bounded shared event
+queue, Shell Host failure matrix, registry negative controls, and offline
+screenshot provenance checks. They have disjoint file ownership, do not
+modify the frozen Classic dock, and require reproducible test evidence.
+They are finite, meaningful fallback work; they are not an unlimited task
+generator or permission to invent assets. The queue selects the next
+eligible task as an earlier campaign becomes BLOCKED or is exhausted.
+
+To resume a previously initialized state from the **supervisor checkout**
+(not from the `main` branch where these scripts have not been merged):
+
+```powershell
+$state = 'C:\CanopySupervisor\state'
+py -3 tools/canopy_supervisor.py --state-root $state check
+py -3 tools/canopy_supervisor.py --state-root $state status
+py -3 tools/canopy_supervisor.py --state-root $state run
+```
+
+`run` stays active and automatically queues tasks until explicitly stopped
+or the process is terminated. Run it in a persistent terminal under the
+Windows user account with access to Git, GitHub and OpenCode. Keep the PC
+awake and avoid starting a second supervisor on the same state root. Use
+`status` from a separate terminal to inspect owners and task progress.
+Existing exhausted campaigns remain in the ledger. Running `feed` is not
+a replacement for `run`.
+
+When all bounded campaigns are done or blocked, the supervisor remains
+alive but cannot make further meaningful changes without a new, reviewed
+non-overlapping backlog. An idle queue must be reported as **EXHAUSTED**
+rather than as "coding" or "autonomous progress." Prefer extending the
+roadmap with new concrete coding tasks and acceptance criteria, not
+creating more status-only documentation PRs.
+
+Human visual approval and actual Mint guest acceptance remain separate
+gates. Never merge to `main` automatically.
+
 ## Task and evidence contract
 
 Tasks are appended with `add-task`, or edited in `tasks.json` while the

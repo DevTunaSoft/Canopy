@@ -1,0 +1,38 @@
+{
+  "task_id": "c100-dock-keyboard-navigation-r2",
+  "branch": "feat/canopy-supervisor-c100-dock-keyboard-navigation-r2",
+  "commit_sha": "PENDING",
+  "tests": [
+    {
+      "command": "py -3 -m unittest tests.test_c100_dock_keyboard_navigation -v",
+      "result": "PASS",
+      "output_excerpt": "Ran 12 tests in 0.004s\n\nOK\n(covers empty dock, wrapping on/off, reduced motion, focus by id, atomic bounded item validation, immutable order/transition, read-only frozen QML order check, no polling/threads/network/IO)"
+    },
+    {
+      "command": "py -3 -m unittest tests.test_classic_dock_frozen tests.test_dock_alignment -v",
+      "result": "PASS",
+      "output_excerpt": "Ran 8 tests in 1.702s\n\nOK\n(frozen dock geometry, asset bytes and alignment checks unchanged)"
+    },
+    {
+      "command": "Linux Mint guest / compiled Qt runtime acceptance",
+      "result": "NOT RUN",
+      "output_excerpt": "No Mint guest or compiled Qt runtime available in this Windows-host worktree. Pure-Python module verified on Windows with Python 3.14.10; platform-neutral by design. No real Mint or compiled Qt claim made."
+    }
+  ],
+  "changed_files": [
+    "canopy_features/dock/keyboard_navigation.py",
+    "tests/test_c100_dock_keyboard_navigation.py"
+  ],
+  "draft": true,
+  "notes": "Implemented DockFocusOrder and immutable FocusTransition: ordered focus by id, next/previous with optional wrap, first/last/clear, bounded unique item ids (MAX_ITEMS=64), atomic set_items preserving focus only when id survives, and reduced_motion forcing duration_ms=0. No geometry, QML, artwork, Qt, timers, threads, polling, network, I/O or background services. No __init__.py added; Python 3 namespace packages import cleanly. Frozen dock regression tests green. Future integration still needed: wire returned FocusTransition values into QML key handlers and the focus-highlight animation; this modular component alone does not prove a working desktop. One test reads prototype/classic/Main.qml read-only to confirm the model reproduces the approved eight-item Repeater order.",
+  "artifacts": [
+    {
+      "path": "canopy_features/dock/keyboard_navigation.py",
+      "sha256": "3a6f446df132f3ab8122d8b87cbc8a61774385c24115988884d9059cf4f08ac8"
+    },
+    {
+      "path": "tests/test_c100_dock_keyboard_navigation.py",
+      "sha256": "4050248c5888456648774f7910c119ff4e3d74027528beaf9e75a2b5d53300d6"
+    }
+  ]
+}

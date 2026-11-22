@@ -55,7 +55,15 @@ def build_prompt(task: dict, worktree: Path, evidence: Path, protected: tuple[st
         f"5. Write evidence JSON to {evidence} with keys: task_id, branch, commit_sha (use "
         "\"PENDING\"), tests (list of {{command,result,output_excerpt}}), changed_files, "
         "draft (true), notes.",
-        "6. If blocked, stop and explain in notes. End with a one-line summary.",
+        "6. If blocked, mark this task BLOCKED with the exact missing dependency. "
+        "Do not fabricate assets or approval. The supervisor owns task rollover; "
+        "do not stall or keep retrying this task indefinitely.",
+        ("7. For implementation tasks, include artifacts in evidence.json as an array "
+         "of {path, sha256} objects for every required authored file; compute actual "
+         "SHA-256 after writing files. Do not report PASS with missing artifacts."
+         if task.get("kind") == "implementation" else
+         "7. Report any next independent follow-up candidates in notes."),
+        "8. End with a one-line factual summary; other workers will continue independent tasks.",
     ])
 
 

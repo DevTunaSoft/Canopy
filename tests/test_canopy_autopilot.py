@@ -105,6 +105,7 @@ class AutopilotTests(unittest.TestCase):
 
     def test_prevents_replacement_of_other_checkout(self):
         self.install()
+        (self.base / "other" / ".git").mkdir(parents=True)
         with self.assertRaisesRegex(ValueError, "different checkout"):
             auto.install(self.root, self.base / "other", runner=self.fake_runner,
                          popen=self.fake_popen, pythonexe=self.pyw,

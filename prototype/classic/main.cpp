@@ -248,6 +248,14 @@ int main(int argc, char *argv[]) {
     const bool enableSystemApps = args.contains(QStringLiteral("--enable-system-apps"));
     SystemAppLauncher systemLauncher(enableSystemApps);
     const bool launcherFixture = args.contains(QStringLiteral("--self-test-launcher-launch-fixture"));
+    if (args.contains(QStringLiteral("--self-test-system-apps-capability"))) {
+#ifdef CANOPY_HAVE_GIO
+        qInfo() << "CANOPY_GIO_ENABLED";
+#else
+        qInfo() << "CANOPY_GIO_DISABLED";
+#endif
+        return 0;
+    }
     if (args.contains(QStringLiteral("--self-test-system-apps-fixture"))) {
         // CI supplies a disposable XDG_DATA_HOME with a nemo.desktop whose
         // Exec touches a marker. This exercises the real GIO launch path and

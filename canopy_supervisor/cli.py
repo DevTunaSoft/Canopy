@@ -9,9 +9,9 @@ import shutil
 import sys
 import time
 
-from . import credentials, policy, state
+from . import credentials, gitops, policy, state
 from .supervisor import DEFAULT_CONFIG, Supervisor
-from .worker import WorkerLauncher
+from .worker import WorkerLauncher, evidence_path, worker_evidence_path
 
 
 def default_state_root() -> Path:
@@ -105,6 +105,12 @@ def make_parser() -> argparse.ArgumentParser:
         "autofeed", help="continuously refill the worker pipeline from the roadmap")
     autofeed.add_argument("--interval", type=float, default=5.0)
     commands.add_parser("recover", help="requeue tasks with lost leases")
+    retry = commands.add_parser(
+        "retry-evidence-permission",
+        help="Safely requeue selected tasks whose old reports were blocked by external_directory",
+    )
+    retry.add_argument("--id", action="append", required=True,
+                       help="exact task ID (repeat --id for separate tasks)")
     commands.add_parser("prune", help="remove worktrees of finished tasks")
     return parser
 
@@ -244,6 +250,56 @@ def main(argv=None) -> int:
                 store.write_dashboard(data, config)
                 return count
             print(f"RECOVERED {_locked_action(store, action)}")
+            return 0
+
+        if args.command == "retry-evidence-permission":
+            # Repair only tasks whose historical logs prove the specific
+            # external evidence write refusal. Never clear general failures,
+            # live workers, already verified reports or a draft PR.
+            def action():
+                if not store.paused:
+                    raise ValueError("pause dispatch before repairing permission-blocked tasks")
+                data = store.load()
+                by_id = {task["id"]: task for task in data["tasks"]}
+                requested = list(dict.fromkeys(args.id))
+                for task_id in requested:
+                    task = by_id.get(task_id)
+                    if task is None:
+                        raise ValueError("task not found: " + task_id)
+                    if task.get("status") not in (
+                        "queued", "failed", "blocked", "interrupted"
+                    ):
+                        raise ValueError("task is active or finished: " + task_id)
+                    if task.get("pr"):
+                        raise ValueError("task already has a PR: " + task_id)
+                    if task.get("pid") and gitops.is_pid_alive(task["pid"]):
+                        raise ValueError("worker PID is still active: " + task_id)
+                    if evidence_path(store.root, task_id).exists():
+                        raise ValueError("durable evidence already exists: " + task_id)
+                    worktree = task.get("worktree")
+                    if worktree and worker_evidence_path(Path(worktree)).exists():
+                        raise ValueError("local evidence should be collected first: " + task_id)
+                    log_file = store.root / "logs" / (task_id + ".log")
+                    if not log_file.is_file():
+                        raise ValueError("no failure log to justify retry: " + task_id)
+                    with log_file.open("rb") as fh:
+                        fh.seek(max(0, log_file.stat().st_size - 1048576))
+                        tail = fh.read().decode("utf-8", errors="replace").lower()
+                    if "external_directory" not in tail or "auto-rejecting" not in tail:
+                        raise ValueError("no external-directory rejection in log: " + task_id)
+                for task_id in requested:
+                    task = by_id[task_id]
+                    state.advance(task, "queued", "permission-retry",
+                                  owner=None, pid=None, attempts=0,
+                                  next_attempt_at=0.0, lease_expires_at=0.0)
+                    task["last_error"] = ""
+                    store.event(task_id, "permission_retry_queued",
+                                "requeued after confirmed external_directory rejection",
+                                level="WARN")
+                store.save(data)
+                store.write_dashboard(data, config)
+                return len(requested)
+            print(f"REQUEUED {_locked_action(store, action)}")
             return 0
 
         if args.command == "prune":

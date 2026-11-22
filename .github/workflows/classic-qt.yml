@@ -33,7 +33,7 @@ jobs:
           sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 update
           sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 install -y --no-install-recommends \
             build-essential cmake ninja-build xvfb \
-            qt6-base-dev qt6-declarative-dev qt6-declarative-dev-tools libqt6svg6 \
+            qt6-base-dev qt6-declarative-dev qt6-declarative-dev-tools libqt6svg6 libglib2.0-dev \
             qml6-module-qtquick qml6-module-qtquick-controls \
             qml6-module-qtquick-layouts qml6-module-qtquick-window \
             qml6-module-qtquick-templates qml6-module-qtqml \
@@ -45,6 +45,22 @@ jobs:
       - name: Compile
         timeout-minutes: 6
         run: cmake --build build/classic --parallel 2
+
+      - name: Verify real GIO launcher path and opt-in safety
+        timeout-minutes: 3
+        run: |
+          set -e
+          capability=$(xvfb-run -a ./build/classic/canopy-classic-spike --self-test-system-apps-capability)
+          echo "$capability"
+          echo "$capability" | grep -q 'CANOPY_GIO_ENABLED'
+          xvfb-run -a ./build/classic/canopy-classic-spike --enable-system-apps --self-test-system-apps
+          mkdir -p test-artifacts/gio-xdg/applications
+          marker="$PWD/test-artifacts/gio-launch-marker"
+          rm -f "$marker"
+          printf '[Desktop Entry]\nType=Application\nName=Canopy GIO Fixture\nExec=/bin/sh -c "touch %s"\nNoDisplay=false\nTerminal=false\n' "$marker" > test-artifacts/gio-xdg/applications/nemo.desktop
+          XDG_DATA_HOME="$PWD/test-artifacts/gio-xdg" XDG_DATA_DIRS="$PWD/test-artifacts/gio-xdg:/usr/share/applications" \
+            xvfb-run -a ./build/classic/canopy-classic-spike --enable-system-apps --self-test-system-apps-fixture
+          test -f "$marker"
 
       - name: Verify approved eight-icon artwork
         run: python3 -m unittest tests.test_approved_art tests.test_approved_manifest_contract tests.test_approved_art_zip -v

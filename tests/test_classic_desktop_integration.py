@@ -55,6 +55,7 @@ class ClassicDesktopIntegrationTests(unittest.TestCase):
         for marker in ("--enable-system-apps",
                        "--self-test-system-apps",
                        "--self-test-system-apps-fixture",
+                       "--self-test-system-apps-capability",
                        "--self-test-launcher-launch-fixture",
                        "SYSTEM_APP_LAUNCH_FIXTURE_PASS",
                        "SYSTEM_APP_LAUNCH_TEST_PASS",

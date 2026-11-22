@@ -141,8 +141,11 @@ def prepare_wave(root: Path) -> int:
             if not isinstance(catalog, list):
                 raise ValueError("roadmap.json must be an array")
         else:
-            # The operator must not unknowingly replace the default catalog.
-            raise ValueError("existing roadmap.json required; refusing to replace default")
+            # The built-in catalog is already exhausted in the task ledger;
+            # an optional roadmap.json need not exist. Start a new explicit
+            # catalog containing *only* these next-wave jobs. Old task state,
+            # evidence and draft PRs are preserved in tasks.json.
+            catalog = []
         by_id = {row.get("id"): row for row in catalog if isinstance(row, dict)}
         if len(by_id) != len(catalog):
             raise ValueError("invalid or duplicate IDs in existing roadmap")

@@ -516,6 +516,54 @@ class SupervisorTests(unittest.TestCase):
         self.store.set_paused(True)
         self.assertEqual(self.supervisor.dispatch(self.store.load()), 0)
 
+    def test_known_worker_exit_is_verified_before_pid_loss_recovery(self):
+        self._add(task_definition("alpha"))
+        self.supervisor.dispatch(self.store.load())
+        self._write_evidence("alpha")
+        self.launcher.exit_code = 0
+        # The child exited just before this supervisor tick. The OS no
+        # longer considers the PID live, but Popen still knows its exit code.
+        with patch.object(self.launcher, "knows", return_value=True):
+            data = self.store.load()
+            self.assertEqual(self.supervisor.recover(data), 0)
+            self.assertEqual(self.supervisor.monitor(data), 1)
+            self.assertEqual(data["tasks"][0]["status"], "verifying")
+            self.assertEqual(data["tasks"][0]["exit_code"], 0)
+            self.supervisor.verify(data)
+        self.store.save(data)
+        self.assertEqual(self._get("alpha")["status"], "awaiting_review")
+        self.assertFalse(any(row[0] == "terminate" for row in self.git.calls))
+        self.assertEqual(self._get("alpha")["attempts"], 1)
+
+    def test_known_worker_crash_keeps_real_exit_code_instead_of_retrying(self):
+        self._add(task_definition("alpha"))
+        self.supervisor.dispatch(self.store.load())
+        self.launcher.exit_code = 7
+        with patch.object(self.launcher, "knows", return_value=True):
+            data = self.store.load()
+            self.assertEqual(self.supervisor.recover(data), 0)
+            self.assertEqual(self.supervisor.monitor(data), 1)
+            self.assertEqual(data["tasks"][0]["exit_code"], 7)
+            self.supervisor.verify(data)
+        self.store.save(data)
+        task = self._get("alpha")
+        self.assertEqual(task["status"], "failed")
+        self.assertIn("worker did not write evidence JSON", task["last_error"])
+        self.assertEqual(task["attempts"], 1)
+        self.assertFalse(any(call[0] == "draft_pr" for call in self.git.calls))
+
+    def test_verifying_state_survives_exited_pid_during_recovery(self):
+        self._add(task_definition("alpha"))
+        self.supervisor.dispatch(self.store.load())
+        self._write_evidence("alpha")
+        self._mutate("alpha", status="verifying", pid=555, lease_expires_at=0.0)
+        data = self.store.load()
+        self.assertEqual(self.supervisor.recover(data), 0)
+        self.assertEqual(data["tasks"][0]["status"], "verifying")
+        self.supervisor.verify(data)
+        self.store.save(data)
+        self.assertEqual(self._get("alpha")["status"], "awaiting_review")
+
     def test_recovery_requeues_expired_lease_with_checkpoint(self):
         self._add(task_definition("alpha"))
         self.supervisor.dispatch(self.store.load())

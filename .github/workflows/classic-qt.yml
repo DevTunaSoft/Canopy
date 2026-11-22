@@ -46,6 +46,25 @@ jobs:
         timeout-minutes: 6
         run: cmake --build build/classic --parallel 2
 
+      - name: Verify user-level preview package with real compiled binary
+        timeout-minutes: 2
+        run: |
+          set -e
+          binary="$PWD/build/classic/canopy-classic-spike"
+          art="$PWD/prototype/classic/assets/approved"
+          sha=$(sha256sum "$binary" | cut -d' ' -f1)
+          export XDG_DATA_HOME="$PWD/test-artifacts/preview-xdg"
+          mkdir -p "$XDG_DATA_HOME"
+          python3 -m tools.qa.classic_preview_package plan \
+            --binary "$binary" --binary-sha256 "$sha" --approved-art-dir "$art"
+          python3 -m tools.qa.classic_preview_package install \
+            --binary "$binary" --binary-sha256 "$sha" --approved-art-dir "$art"
+          python3 -m tools.qa.classic_preview_package status
+          desktop=$(find "$XDG_DATA_HOME" -name '*.desktop' -print -quit)
+          test -n "$desktop"
+          python3 -m tools.qa.classic_preview_package uninstall
+          python3 -m tools.qa.classic_preview_package status
+
       - name: Verify approved eight-icon artwork
         run: python3 -m unittest tests.test_approved_art tests.test_approved_manifest_contract tests.test_approved_art_zip -v
 

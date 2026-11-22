@@ -157,9 +157,21 @@ class Supervisor:
                 continue
             if task.get("status") not in state_module.ACTIVE_STATUSES:
                 continue
+            if task.get("status") in ("verifying", "publishing"):
+                # These stages are durable checkpoints, not live worker
+                # processes. A child may have exited already; verify() owns
+                # the result even after a supervisor restart.
+                continue
             pid = task.get("pid")
-            alive = bool(pid) and self.git.is_pid_alive(pid)
             expired = now >= float(task.get("lease_expires_at", 0))
+            # On the current supervisor instance, Popen is authoritative for
+            # exit status. A process may have finished between loop ticks:
+            # checking raw PID liveness first would discard its exit code,
+            # skip evidence verification and consume a retry incorrectly.
+            knows = getattr(self.launcher, "knows", lambda value: False)(pid)
+            if task.get("status") == "running" and knows and not expired:
+                continue  # monitor() will call poll() and verify the exit
+            alive = bool(pid) and self.git.is_pid_alive(pid)
             if not expired and (not pid or alive):
                 continue
             if not alive and evidence_path(self.store.root, task["id"]).is_file():

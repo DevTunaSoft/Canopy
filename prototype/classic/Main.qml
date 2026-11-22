@@ -24,14 +24,22 @@ ApplicationWindow {
     // Original static artwork; no rotating placeholder rectangles.
     Wallpaper { anchors.fill: parent }
 
-    // Visual-only composition: file management and window controls are not wired.
-    // It scales down for screenshot checks; the floating dock remains unobscured.
+    // The Files window owns navigation state. Main only shows it and forwards
+    // menu requests through its explicit interface. Geometry stays unchanged.
     PreviewWindow {
         id: filesPreview
         width: Math.min(root.width - 72, Math.max(780, root.width * 0.56))
         height: Math.min(root.height - canopyTheme.barHeight - 166, Math.max(420, root.height * 0.56))
         x: Math.max(24, (root.width - width) / 2)
         y: canopyTheme.barHeight + Math.max(30, (root.height - canopyTheme.barHeight - canopyTheme.dockSize - height) / 2 - 10)
+        onClosed: filesPreview.visible = false
+    }
+
+    ShellMenuBar {
+        id: shellMenus
+        filesWindow: filesPreview
+        onShowLauncherRequested: appLauncher.openLauncher()
+        onAboutRequested: aboutPopup.open()
     }
 
     Rectangle {
@@ -88,11 +96,11 @@ ApplicationWindow {
                         onTriggered: appLauncher.openLauncher()
                     }
                     MenuItem {
-                        text: "About Canopy preview"
+                        text: "About Canopy Classic"
                         onTriggered: aboutPopup.open()
                     }
                     MenuItem {
-                        text: "Show Files preview"
+                        text: "Show Files"
                         onTriggered: filesPreview.visible = true
                     }
                 }
@@ -105,13 +113,14 @@ ApplicationWindow {
                 font.family: "Sans Serif"
             }
 
-            // Actual menu actions target only this standalone demo. No false
-            // desktop/system integration is implied by these controls.
+            // Menu definitions live in ShellMenuBar. The buttons keep the
+            // approved top-bar geometry and open the matching real menu.
             Repeater {
                 model: ["File", "Edit", "View", "Go", "Window", "Help"]
                 delegate: Button {
                     id: topMenuButton
                     required property string modelData
+                    readonly property var actionMenu: shellMenus.menuFor(modelData)
                     visible: !root.compactLayout
                              || (modelData !== "Window" && modelData !== "Help")
                     text: modelData
@@ -119,7 +128,7 @@ ApplicationWindow {
                     Layout.preferredHeight: 27
                     padding: 6
                     font.pixelSize: 12
-                    Accessible.name: modelData + " demo menu"
+                    Accessible.name: modelData + " menu"
                     onClicked: actionMenu.open()
                     background: Rectangle {
                         radius: 5
@@ -132,38 +141,6 @@ ApplicationWindow {
                         font.pixelSize: 12
                         verticalAlignment: Text.AlignVCenter
                         horizontalAlignment: Text.AlignHCenter
-                    }
-                    Menu {
-                        id: actionMenu
-                        MenuItem {
-                            text: topMenuButton.modelData === "Help"
-                                  ? "About this preview"
-                                  : topMenuButton.modelData === "Edit"
-                                  ? "Clear selection"
-                                  : topMenuButton.modelData === "View"
-                                  ? "Toggle Files window"
-                                  : "Show Files preview"
-                            onTriggered: {
-                                if (topMenuButton.modelData === "Help") {
-                                    aboutPopup.open()
-                                } else if (topMenuButton.modelData === "Edit") {
-                                    filesPreview.selectedFolder = ""
-                                } else if (topMenuButton.modelData === "View") {
-                                    filesPreview.visible = !filesPreview.visible
-                                } else {
-                                    filesPreview.visible = true
-                                    filesPreview.currentSection = "Home"
-                                }
-                            }
-                        }
-                        MenuItem {
-                            text: "Reset demo view"
-                            onTriggered: {
-                                filesPreview.visible = true
-                                filesPreview.currentSection = "Home"
-                                filesPreview.selectedFolder = ""
-                            }
-                        }
                     }
                 }
             }
@@ -187,7 +164,7 @@ ApplicationWindow {
             implicitHeight: 68
             Label {
                 anchors.fill: parent
-                text: "A standalone design experiment. App launching and real file browsing are not implemented."
+                text: "A familiar desktop design preview. Files navigation and application launching run only inside this window."
                 wrapMode: Text.WordWrap
                 font.pixelSize: 12
                 color: "#31475e"
@@ -200,7 +177,7 @@ ApplicationWindow {
         objectName: "canopyFilesCloseShortcut"
         sequence: "Ctrl+W"
         enabled: filesPreview.visible
-        onActivated: filesPreview.visible = false
+        onActivated: filesPreview.requestClose()
     }
     Shortcut {
         objectName: "canopyFilesOpenShortcut"
@@ -209,8 +186,8 @@ ApplicationWindow {
         onActivated: filesPreview.visible = true
     }
 
-    // Original-art application search opens only on request. No app launch
-    // service is silently enabled; Files alone reopens its sample preview.
+    // Original-art application catalogue opens only on request. Native launch
+    // stays opt-in through the host bridge; fallback keeps the local preview.
     LauncherOverlay {
         id: appLauncher
         anchors.fill: parent
@@ -223,7 +200,8 @@ ApplicationWindow {
         }
     }
 
-    // Dock controls are explicitly nonfunctional until session services exist.
+    // The Files dock tile toggles the preview; other tiles keep the approved
+    // visual composition without claiming session-level actions.
     Rectangle {
         id: dock
         objectName: "canopyDock"

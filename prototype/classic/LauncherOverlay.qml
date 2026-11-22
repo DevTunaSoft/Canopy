@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Controls
 
-// Classic's opt-in on-screen application catalogue, adapted from the prior
-// launcher prototype. No process execution, network, daemon or added art assets.
+// Classic's opt-in application catalogue. Native launch goes through the
+// host-owned GIO bridge; no copied launch code, network or added art assets.
 FocusScope {
     id: launcher
     objectName: "canopyApplicationLauncher"
@@ -30,7 +30,12 @@ FocusScope {
     })
     readonly property int catalogCount: applications.length
     readonly property int filteredCount: filteredApps.length
+    // Availability comes from the host bridge, never from a local guess.
     signal applicationSelected(string applicationName)
+
+    function isInstalled(name) {
+        return canopySystemLaunchEnabled && canopySystemLauncher.canLaunch(name)
+    }
 
     visible: opened
     focus: opened
@@ -51,9 +56,7 @@ FocusScope {
         else openLauncher()
     }
     function choose(name) {
-        // Opt-in native launch runs first. On success the overlay closes and
-        // the sample preview signal is not emitted, so default visuals and the
-        // frozen dock bytes stay untouched. Fallback keeps the old behaviour.
+        // Opt-in native launch runs first. A failed launch never claims success.
         if (canopySystemLaunchEnabled && canopySystemLauncher.launch(name)) {
             closeLauncher()
             return
@@ -61,9 +64,12 @@ FocusScope {
         applicationSelected(name)
         if (name === "Files") {
             closeLauncher()
-        } else {
-            selectionMessage = name + " is not connected in this preview"
+            return
         }
+        selectionMessage = name + " is not connected in this preview"
+        // Distinguish an installed app that failed from one not present.
+        if (isInstalled(name))
+            selectionMessage = name + " could not be launched"
     }
 
     Rectangle {
@@ -156,6 +162,9 @@ FocusScope {
                 padding: 0
                 hoverEnabled: true
                 Accessible.name: "Select " + modelData.title
+                Accessible.description: launcher.isInstalled(modelData.title)
+                        ? "Launches with the system application bridge"
+                        : "Not installed on this system"
                 ToolTip.visible: hovered
                 ToolTip.text: modelData.title
                 onClicked: launcher.choose(modelData.title)
@@ -203,6 +212,10 @@ FocusScope {
                 if (currentIndex >= 0 && currentIndex < launcher.filteredCount)
                     launcher.choose(launcher.filteredApps[currentIndex].title)
             }
+            Keys.onUpPressed: {
+                if (currentIndex < grid.columns)
+                    searchField.forceActiveFocus()
+            }
             Keys.onBacktabPressed: searchField.forceActiveFocus()
         }
         Label {
@@ -215,7 +228,9 @@ FocusScope {
             height: 19
             text: launcher.selectionMessage.length > 0 ? launcher.selectionMessage :
                   launcher.filteredCount === 0 ? "No matching applications" :
-                  "Files opens the sample window · others are preview-only"
+                  canopySystemLaunchEnabled
+                  ? "Select an installed application to launch"
+                  : "Files opens the in-preview window · native launch is opt-in"
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
             color: "#657b90"

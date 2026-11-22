@@ -14,6 +14,7 @@ qt_add_qml_module(canopy-classic-spike
     URI Canopy.Classic
     VERSION 1.0
     QML_FILES Main.qml Theme.qml ClockLabel.qml LauncherOverlay.qml DockTile.qml PreviewWindow.qml Wallpaper.qml FolderTile.qml
+    SOURCES FileModel.cpp FileModel.h
 )
 qt_add_resources(canopy-classic-spike "canopy-original-art"
     PREFIX "/Canopy/Classic"

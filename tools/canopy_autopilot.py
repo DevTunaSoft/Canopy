@@ -20,6 +20,11 @@ import subprocess
 import sys
 import time
 
+# The dedicated checkout is automatically refreshed. Never contaminate it
+# with untracked Python cache files during scheduled imports.
+sys.dont_write_bytecode = True
+os.environ.setdefault("PYTHONDONTWRITEBYTECODE", "1")
+
 BRANCH = "feat/windows-multi-agent-supervisor-20261121"
 REPO = "DevTunaSoft/Canopy"
 WORKERS = 3

@@ -406,17 +406,17 @@ class Supervisor:
             outcome = self._evidence_outcome(evidence)
             pending = self.git.pending_files(worktree)
             if outcome == "blocked":
-                sha = ""
-                if pending:
-                    sha = self.git.commit_all(worktree, f"evidence(supervisor): {task['title']}")
-                    self.git.push_branch(worktree, task["branch"], self.config["remote"])
+                # Preserve incomplete edits in the worker's local worktree.
+                # Never commit or push a BLOCKED/NOT RUN task: its diff has
+                # not passed the scope, artifact and test evidence gates.
                 state_module.advance(
                     task, "blocked", "prerequisites-blocked",
-                    str(evidence.get("notes", ""))[:500], sha=sha, owner=None, pid=None,
+                    str(evidence.get("notes", ""))[:500], owner=None, pid=None,
                     lease_expires_at=0.0,
                 )
                 self.store.event(task["id"], "blocked_no_pr",
-                                 "BLOCKED/NOT RUN is not success; no PR opened", level="WARN")
+                                 "unverified edits preserved locally; no push or PR",
+                                 level="WARN")
                 return
             if outcome == "failed":
                 raise PolicyError("worker reported FAIL")

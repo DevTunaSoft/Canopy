@@ -609,6 +609,29 @@ class Supervisor:
                                            "verifying", "publishing", "interrupted")
                     for task in data["tasks"]
                 ):
+                    # A quiet worker pool is NOT proof the approved roadmap
+                    # was consumed. Failed validation or dispatch can leave
+                    # many planned jobs never entered in the task ledger.
+                    path = self.store.root / "roadmap.json"
+                    if path.is_file():
+                        catalog = roadmap.load(self.store.root)
+                        recorded = {task["id"] for task in data["tasks"]}
+                        undispatched = [
+                            item["id"] for item in catalog
+                            if item["id"] not in recorded
+                        ]
+                        if undispatched:
+                            sample = ", ".join(undispatched[:4])
+                            reason = (
+                                f"roadmap stalled: {len(undispatched)} planned tasks "
+                                f"not dispatched; first: {sample}. "
+                                "Inspect dashboard and latest roadmap_error or "
+                                "dispatch_blocked events."
+                            )
+                            with state_module.exclusive_lock(self.store.lock_path):
+                                self.store.event("-", "roadmap_incomplete",
+                                                 reason, level="ERROR")
+                            raise ValueError(reason)
                     break
                 self._stop.wait(interval)
         except KeyboardInterrupt:

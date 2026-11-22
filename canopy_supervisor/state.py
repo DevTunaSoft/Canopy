@@ -169,6 +169,22 @@ class TaskStore:
             "| Task | Status | Worker | Branch | Attempt | PR |",
             "| --- | --- | --- | --- | --- | --- |",
         ]
+        roadmap_path = self.root / "roadmap.json"
+        if roadmap_path.is_file():
+            try:
+                catalog = json.loads(roadmap_path.read_text(encoding="utf-8"))
+            except (OSError, UnicodeError, ValueError):
+                catalog = None
+            if isinstance(catalog, list):
+                registered = {str(item.get("id")) for item in tasks}
+                pending = sum(1 for item in catalog
+                              if isinstance(item, dict)
+                              and item.get("id") not in registered)
+                lines.insert(6,
+                    f"Roadmap: {len(catalog)} planned | {pending} not yet dispatched | "
+                    f"{len(tasks)} recorded | {len([t for t in tasks if t.get('status') == 'running'])} active workers")
+            else:
+                lines.insert(6, "Roadmap: INVALID (no silent replacement)")
         for task in sorted(tasks, key=lambda item: str(item.get("id"))):
             pr = task.get("pr") or {}
             lines.append(

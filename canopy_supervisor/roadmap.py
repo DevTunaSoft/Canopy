@@ -64,6 +64,45 @@ CAMPAIGNS = [
         "scope": ["docs/security_performance_attempt_{n}.md"],
         "max_attempts": 2,
     },
+    # Independent engineering work follows blocked/exhausted art and Mint
+    # prerequisites. Each campaign has distinct owned paths and requires real
+    # code/test evidence; do not create another blocker-only documentation PR.
+    {
+        "id": "shared-event-queue",
+        "kind": "implementation",
+        "title": "Implement bounded shared shell event queue",
+        "objective": "Implement a small dependency-free, event-driven and versioned in-process shell event queue for trusted shell-core producers/consumers, with deterministic bounded storage and no timers, polling loops, network or workers. Define explicit overflow and invalid-event handling; write exhaustive unit tests including large input and overflow. Do not integrate into a live compositor or change existing Classic Qt or owner artwork. Work only in owned paths; test with py -3 -m unittest tests.test_event_queue -v and record output and SHA-256 of both authored files.",
+        "scope": ["canopy_core/event_queue.py", "tests/test_event_queue.py"],
+        "artifacts": ["canopy_core/event_queue.py", "tests/test_event_queue.py"],
+        "max_attempts": 2,
+    },
+    {
+        "id": "shell-host-fault-matrix",
+        "kind": "implementation",
+        "title": "Exercise trusted Shell Host failure and recovery paths",
+        "objective": "Add meaningful fault-injection regression tests against the existing ShellHost trusted-adapter lifecycle: factory failures, preparation, activation, deactivation, disposal, rollback and repeated switching. Verify state and resource cleanup invariants without loading untrusted QML. Do not rewrite or modify shell_host.py; if tests find a genuine host defect, record the exact failing reproduction as BLOCKED and leave a separate fix recommendation rather than falsifying PASS. Work only in owned test file; run py -3 -m unittest tests.test_shell_host_fault_matrix -v and record exact output and SHA-256.",
+        "scope": ["tests/test_shell_host_fault_matrix.py"],
+        "artifacts": ["tests/test_shell_host_fault_matrix.py"],
+        "max_attempts": 2,
+    },
+    {
+        "id": "registry-negative-controls",
+        "kind": "implementation",
+        "title": "Expand Shell Pack registry security negative controls",
+        "objective": "Write independent regression tests for the existing read-only Shell Pack registry: invalid catalog shapes, malformed manifests, path traversal, symlink escapes, duplicate IDs, path normalization and hostile metadata lengths where supported. Use temporary directories and local files; do not execute community pack code or modify registry implementation. Record real failures as BLOCKED with reproducible details. Work only in owned test file; run py -3 -m unittest tests.test_registry_negative_controls -v and record output and SHA-256.",
+        "scope": ["tests/test_registry_negative_controls.py"],
+        "artifacts": ["tests/test_registry_negative_controls.py"],
+        "max_attempts": 2,
+    },
+    {
+        "id": "screenshot-provenance-gate",
+        "kind": "implementation",
+        "title": "Validate screenshot evidence provenance metadata offline",
+        "objective": "Implement a standard-library-only offline validator for a JSON screenshot evidence manifest describing exact PNG paths, expected dimensions, SHA-256 checksums, source commit, and Qt capture command. Fail closed on corrupt PNG, unsupported dimensions, path escapes, symlinks, duplicate entries and mismatched hashes; add negative regression tests. Explicitly state that metadata validation alone does NOT prove the screenshot came from compiled Qt or grant visual approval. Do not create/change any screenshot, wallpaper, icon, dock or GUI. Work only in owned files; run py -3 -m unittest tests.test_screenshot_provenance -v and record output and SHA-256.",
+        "scope": ["tools/check_screenshot_provenance.py", "tests/test_screenshot_provenance.py"],
+        "artifacts": ["tools/check_screenshot_provenance.py", "tests/test_screenshot_provenance.py"],
+        "max_attempts": 2,
+    },
 ]
 
 TERMINAL = ("awaiting_review", "done", "blocked", "failed", "cancelled")

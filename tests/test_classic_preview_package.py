@@ -40,6 +40,10 @@ class ClassicPreviewPackageTests(unittest.TestCase):
         self.home.mkdir()
         self.binary = self.base / "canopy-classic-spike"
         self.binary.write_bytes(b"\x7fELF synthetic compiled binary fixture\n")
+        # Linux requires the executable bit; Windows does not. The fixture
+        # models a prebuilt executable while production validation remains
+        # strict and test_nonexecutable_binary_rejected stays unchanged.
+        self.binary.chmod(self.binary.stat().st_mode | 0o111)
         self.art_dir, self.manifest_path = self._build_fixtures()
 
     def _build_fixtures(self):

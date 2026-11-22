@@ -273,6 +273,9 @@ class Supervisor:
                     task["id"], "base_ref_blocked" if blocked else "base_ref_retry",
                     reason, level="ERROR" if blocked else "WARN",
                 )
+                # Durable checkpoint is essential before the next task:
+                # dispatch() can be invoked without step() in CLI/test runs.
+                self.store.save(data)
                 continue
             state_module.advance(
                 task, "assigned", "assigned", "", owner=worker,

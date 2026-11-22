@@ -51,6 +51,13 @@ FocusScope {
         else openLauncher()
     }
     function choose(name) {
+        // Opt-in native launch runs first. On success the overlay closes and
+        // the sample preview signal is not emitted, so default visuals and the
+        // frozen dock bytes stay untouched. Fallback keeps the old behaviour.
+        if (canopySystemLaunchEnabled && canopySystemLauncher.launch(name)) {
+            closeLauncher()
+            return
+        }
         applicationSelected(name)
         if (name === "Files") {
             closeLauncher()

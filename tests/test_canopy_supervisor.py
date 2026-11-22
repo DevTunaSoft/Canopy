@@ -991,6 +991,7 @@ class SupervisorTests(unittest.TestCase):
         self.assertIn("alpha", self.store.dashboard_path.read_text(encoding="utf-8"))
 
     def test_runner_process_lock_prevents_second_concurrent_loop(self):
+        self.supervisor.config["auto_queue"] = False
         lock = self.root / "locks" / "runner.lock"
         with state.exclusive_lock(lock):
             with self.assertRaises(state.LockBusy):

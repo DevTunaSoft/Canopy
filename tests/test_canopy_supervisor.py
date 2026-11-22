@@ -953,6 +953,71 @@ class CliTests(unittest.TestCase):
             self.assertEqual(cli_main(common + ["resume"]), 0)
             self.assertFalse((root / "PAUSED").exists())
 
+    def test_cli_retry_permission_rejection_preserves_worktree_and_requeues(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            repo = base / "repo"
+            (repo / ".git").mkdir(parents=True)
+            root = base / "state"
+            common = ["--state-root", str(root)]
+            self.assertEqual(cli_main(common + ["init", "--repo", str(repo)]), 0)
+            store = state.TaskStore(root)
+            worktree = root / "worktrees" / "alpha"
+            worktree.mkdir(parents=True)
+            changed = worktree / "docs" / "alpha.md"
+            changed.parent.mkdir()
+            changed.write_text("valuable existing code\n", encoding="utf-8")
+            task = state.new_task(task_definition("alpha"), 2)
+            task.update({"status": "blocked", "attempts": 2, "worktree": str(worktree),
+                         "owner": None, "pid": None})
+            data = store.load()
+            data["tasks"].append(task)
+            store.save(data)
+            (root / "logs").mkdir()
+            (root / "logs" / "alpha.log").write_text(
+                "permission requested: external_directory ... auto-rejecting\n",
+                encoding="utf-8")
+            retry = common + ["retry-evidence-permission", "--id", "alpha"]
+            self.assertEqual(cli_main(retry), 2, "repair must require paused state")
+            self.assertEqual(cli_main(common + ["pause"]), 0)
+            self.assertEqual(cli_main(retry), 0)
+            updated = store.load()["tasks"][0]
+            self.assertEqual(updated["status"], "queued")
+            self.assertEqual(updated["attempts"], 0)
+            self.assertEqual(updated["worktree"], str(worktree))
+            self.assertEqual(changed.read_text(), "valuable existing code\n")
+
+    def test_cli_retry_permission_rejects_unproven_or_live_work(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            repo = base / "repo"
+            (repo / ".git").mkdir(parents=True)
+            root = base / "state"
+            common = ["--state-root", str(root)]
+            self.assertEqual(cli_main(common + ["init", "--repo", str(repo)]), 0)
+            store = state.TaskStore(root)
+            task = state.new_task(task_definition("alpha"), 2)
+            task.update({"status": "blocked", "attempts": 2})
+            data = store.load()
+            data["tasks"].append(task)
+            store.save(data)
+            self.assertEqual(cli_main(common + ["pause"]), 0)
+            retry = common + ["retry-evidence-permission", "--id", "alpha"]
+            self.assertEqual(cli_main(retry), 2, "missing log cannot justify retry")
+            (root / "logs").mkdir()
+            log = root / "logs" / "alpha.log"
+            log.write_text("some other error", encoding="utf-8")
+            self.assertEqual(cli_main(retry), 2, "unrelated failure cannot justify retry")
+            log.write_text("external_directory: auto-rejecting", encoding="utf-8")
+            data = store.load()
+            data["tasks"][0]["status"] = "running"
+            store.save(data)
+            self.assertEqual(cli_main(retry), 2, "live task cannot be requeued")
+            data["tasks"][0]["status"] = "blocked"
+            data["tasks"][0]["pr"] = {"number": "88"}
+            store.save(data)
+            self.assertEqual(cli_main(retry), 2, "published PR cannot be requeued")
+
     def test_cli_feed_enqueues_from_roadmap(self):
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)

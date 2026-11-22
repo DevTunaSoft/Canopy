@@ -600,6 +600,42 @@ class SupervisorTests(unittest.TestCase):
         owners = [self._get(name)["owner"] for name in ("alpha", "beta")]
         self.assertEqual(len(set(owners)), 2)
 
+    def test_stacked_qt_task_uses_remote_base_and_targets_same_draft_branch(self):
+        qt_base = "feat/classic-qt-port-buildable-20261121"
+        self._add(task_definition("alpha", base=qt_base))
+        data = self.store.load()
+        self.assertEqual(self.supervisor.dispatch(data), 1)
+        task = self._get("alpha")
+        self.assertEqual(task["base"], qt_base)
+        self.assertEqual(task["base_sha"], "b" * 40)
+        self.assertIn(("rev_parse", "origin/" + qt_base), self.git.calls)
+        self._write_evidence("alpha")
+        self._mutate("alpha", status="verifying")
+        self.supervisor.verify(self.store.load())
+        self.assertIn(("draft_pr", "feat/canopy-supervisor-alpha", qt_base),
+                      self.git.calls)
+        self.assertEqual(self._get("alpha")["status"], "awaiting_review")
+
+    def test_missing_stacked_base_never_launches_worker_or_loses_task(self):
+        qt_base = "feat/classic-qt-port-buildable-20261121"
+        self._add(task_definition("alpha", base=qt_base))
+        self._add(task_definition("beta"))
+        original = self.git.rev_parse
+
+        def fail_feature_base(repo, ref):
+            if ref.startswith("origin/"):
+                raise gitops.GitError("missing remote branch")
+            return original(repo, ref)
+
+        with patch.object(self.git, "rev_parse", side_effect=fail_feature_base):
+            self.assertEqual(self.supervisor.dispatch(self.store.load()), 1)
+        self.assertEqual(self._get("alpha")["status"], "queued")
+        self.assertEqual(self._get("alpha")["attempts"], 0)
+        self.assertEqual(self._get("beta")["status"], "running")
+        self.assertFalse(any(item[0] == "worktree_add" and
+                             item[1] == "feat/canopy-supervisor-alpha"
+                             for item in self.git.calls))
+
     def test_dispatch_blocks_scope_conflict_and_pending_dependency(self):
         self._add(task_definition("alpha", scope=["docs/shared.md"]))
         self._add(task_definition("beta", scope=["docs/shared.md"], depends_on=["alpha"]))

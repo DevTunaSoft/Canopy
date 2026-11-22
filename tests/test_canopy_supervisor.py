@@ -419,6 +419,8 @@ class WorkerTests(unittest.TestCase):
         self.assertEqual(env_a["OPENCODE_API_KEY"], "test-token")
         self.assertNotEqual(env_a["XDG_DATA_HOME"], env_b["XDG_DATA_HOME"])
         self.assertIn("worker-1", env_a["XDG_DATA_HOME"])
+        self.assertEqual(env_a["PYTHONDONTWRITEBYTECODE"], "1")
+        self.assertEqual(env_b["PYTHONDONTWRITEBYTECODE"], "1")
 
     def test_launch_uses_opencode_run_with_go_model(self):
         calls = []

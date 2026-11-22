@@ -275,6 +275,7 @@ class ClassicPreviewPackageTests(unittest.TestCase):
     def test_mismatched_binary_pin_rejects_different_binary(self):
         replacement = self.base / "different-binary"
         replacement.write_bytes(b"different prebuilt bytes")
+        replacement.chmod(replacement.stat().st_mode | 0o111)
         with self._uid():
             with self.assertRaisesRegex(pkg.PackageError, "mismatch"):
                 pkg.install(self.home, replacement, self.art_dir,

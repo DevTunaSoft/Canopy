@@ -182,13 +182,68 @@ creating more status-only documentation PRs.
 Human visual approval and actual Mint guest acceptance remain separate
 gates. Never merge to `main` automatically.
 
+## Recover from external-directory evidence rejection (2026-11-21)
+
+The original Windows workers passed tests but were auto-denied when trying
+to write their evidence JSON outside the worktree. In a **separate terminal**,
+pause and stop the old supervisor before updating its detached checkout:
+
+```powershell
+$exe = 'C:\Users\X1\Projects\Canopy-Supervisor\tools\canopy_supervisor.py'
+$state = 'C:\CanopySupervisor\state'
+py -3 $exe --state-root $state pause
+py -3 $exe --state-root $state stop
+```
+
+Wait for the original supervisor terminal to return to its PowerShell prompt
+and save its logs/checkpoints. DO NOT delete/recreate the state root or
+worker worktrees. If the detached supervisor checkout has local edits, do not
+switch refs or discard files.
+
+```powershell
+Set-Location 'C:\Users\X1\Projects\Canopy-Supervisor'
+git status --short
+git fetch origin
+git switch --detach origin/feat/windows-multi-agent-supervisor-20261121
+py -3 -m unittest tests.test_canopy_supervisor -v
+py -3 .\tools\canopy_supervisor.py --state-root $state check
+```
+
+Only after tests are green, explicitly requeue the three **known** tasks
+whose logs show `external_directory` and `auto-rejecting`. This command
+requires the queue to be paused, rejects still-live workers or existing PRs,
+does not overwrite a validated report, never deletes source edits or
+worktrees, and records each reset in the audit history. It is not a general
+purpose override of failed work:
+
+```powershell
+py -3 .\tools\canopy_supervisor.py --state-root $state retry-evidence-permission `
+  --id shared-event-queue `
+  --id shell-host-fault-matrix `
+  --id registry-negative-controls
+py -3 .\tools\canopy_supervisor.py --state-root $state resume
+py -3 .\tools\canopy_supervisor.py --state-root $state run
+```
+
+The code then retains each worker's existing uncommitted source changes and
+starts any retry from its registered worktree. Passing Ubuntu CI tests alone
+does not prove actual unattended OpenCode runtime recovery on Windows.
+Verify real exit/evidence logs and a draft PR before marking this resolved.
+
 ## Task and evidence contract
 
 Tasks are appended with `add-task`, or edited in `tasks.json` while the
 supervisor is stopped. Fields: `id`, `title`, `objective`, `scope`,
 `depends_on`, `base`, `branch`, `tests_required`.
 
-The worker writes `<state>/evidence/<task-id>/evidence.json`:
+The worker writes **`<worktree>/.canopy-worker-evidence.json` only**.
+OpenCode's restricted worker cannot write to the supervisor-owned `state/evidence`
+directory, even when both locations share a parent path. When the worker exits,
+the trusted supervisor checks a 128 KiB bound, rejects symlinks and mismatched
+task/branch identities, atomically copies the JSON into
+`<state>/evidence/<task-id>/evidence.json`, then removes the temporary
+worktree file **before checking the Git diff or opening any PR**. This does
+not disable OpenCode permission checks. The JSON format is:
 
 ```json
 {

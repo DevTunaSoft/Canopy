@@ -79,11 +79,23 @@ def changed_files(worktree: Path, base_sha: str) -> list[str]:
     return [line.strip() for line in output.splitlines() if line.strip()]
 
 
+# Exclude only untracked interpreter-generated cache data. A tracked or
+# already-staged .pyc remains in the tracked diff and fails normal scope policy.
+# Do not ignore arbitrary out-of-scope worker files or source code.
+PYTHON_CACHE_EXCLUDES = ("--exclude=__pycache__/", "--exclude=*.py[cod]")
+PYTHON_CACHE_PATHSPECS = (
+    ":(exclude,glob)**/__pycache__/**",
+    ":(exclude,glob)**/*.py[cod]",
+)
+
+
 def pending_files(worktree: Path) -> list[str]:
-    """List uncommitted tracked and untracked files in a worker worktree."""
-    tracked = run(["git", "diff", "--name-only", "--no-renames"], cwd=worktree)
-    untracked = run(["git", "ls-files", "--others", "--exclude-standard"], cwd=worktree)
-    return [line.strip() for line in (tracked + "\n" + untracked).splitlines() if line.strip()]
+    """All tracked edits (including staged) plus meaningful untracked files."""
+    tracked = run(["git", "diff", "HEAD", "--name-only", "--no-renames"], cwd=worktree)
+    untracked = run(["git", "ls-files", "--others", "--exclude-standard",
+                     *PYTHON_CACHE_EXCLUDES], cwd=worktree)
+    return sorted(set(line.strip() for line in (tracked + "\n" + untracked).splitlines()
+                      if line.strip()))
 
 
 def status_porcelain(worktree: Path) -> list[str]:
@@ -92,9 +104,14 @@ def status_porcelain(worktree: Path) -> list[str]:
 
 
 def commit_all(worktree: Path, message: str) -> str:
-    if not status_porcelain(worktree):
-        raise GitError("worktree has no changes to commit")
-    run(["git", "add", "-A"], cwd=worktree)
+    if not pending_files(worktree):
+        raise GitError("worktree has no meaningful changes to commit")
+    # Never stage untracked generated Python caches, even when the worker's
+    # branch predates the supervisor branch's .gitignore. Tracked/staged cache
+    # edits remain visible to pending_files() and fail scope verification.
+    run(["git", "add", "-A", "--", ".", *PYTHON_CACHE_PATHSPECS], cwd=worktree)
+    if not run(["git", "diff", "--cached", "--name-only"], cwd=worktree):
+        raise GitError("no meaningful files staged for commit")
     # Identity is injected via -c so no global git configuration is required.
     run([
         "git", "-c", "user.name=Canopy Supervisor",

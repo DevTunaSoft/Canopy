@@ -569,16 +569,19 @@ class Supervisor:
         self._stop.set()
 
     def run(self, *, once: bool = False, until_idle: bool = False,
-            max_steps: int | None = None, interval: float | None = None) -> dict:
+            max_steps: int | None = None, interval: float | None = None,
+            progress_every: int = 0) -> dict:
         """Hold a second lock for runner lifetime; state mutations remain per-step."""
         with state_module.exclusive_lock(self.store.root / "locks" / "runner.lock"):
             return self._run_loop(
                 once=once, until_idle=until_idle,
                 max_steps=max_steps, interval=interval,
+                progress_every=progress_every,
             )
 
     def _run_loop(self, *, once: bool = False, until_idle: bool = False,
-                  max_steps: int | None = None, interval: float | None = None) -> dict:
+                  max_steps: int | None = None, interval: float | None = None,
+                  progress_every: int = 0) -> dict:
         """Loop with a per-step lock so operators can feed tasks between steps."""
         interval = float(interval if interval is not None else self.config["poll_seconds"])
         steps = 0
@@ -589,6 +592,13 @@ class Supervisor:
                 with state_module.exclusive_lock(self.store.lock_path):
                     data = self.step()
                 steps += 1
+                if progress_every > 0 and (steps == 1 or steps % progress_every == 0):
+                    statuses: dict[str, int] = {}
+                    for task in data["tasks"]:
+                        status = task.get("status", "unknown")
+                        statuses[status] = statuses.get(status, 0) + 1
+                    print("CANOPY_PROGRESS " + json.dumps(statuses, sort_keys=True),
+                          flush=True)
                 if once or (max_steps is not None and steps >= max_steps):
                     break
                 # Explicit bounded-wave mode ends only after the approved

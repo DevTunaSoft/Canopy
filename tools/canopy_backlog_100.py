@@ -273,7 +273,14 @@ def main(argv=None) -> int:
                 if item["id"] in ids:
                     statuses[item["status"]] = statuses.get(item["status"], 0) + 1
             print("CANOPY_100_FINISHED " + json.dumps(statuses, sort_keys=True), flush=True)
-            if any(statuses.get(key) for key in ("blocked", "failed")):
+            counted = sum(statuses.values())
+            if counted != 100:
+                print(f"CANOPY_100_INCOMPLETE: only {counted}/100 tasks reached the ledger; "
+                      "inspect roadmap dependencies and supervisor dashboard",
+                      file=sys.stderr)
+                return 1
+            if any(statuses.get(key) for key in ("blocked", "failed", "queued",
+                                                 "assigned", "running", "interrupted")):
                 return 1
         return 0
     except (ValueError, OSError, TypeError, gitops.GitError,

@@ -332,6 +332,28 @@ class WorkerTests(unittest.TestCase):
         self.assertIn("supervisor owns task rollover", prompt)
         self.assertIn("Do not fabricate assets or approval", prompt)
 
+    def test_worker_prompt_uses_in_worktree_evidence_only(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            worktree = root / "worktree"
+            worktree.mkdir()
+            task = policy.validate_task(task_definition())
+            launcher = WorkerLauncher(
+                {"model": "opencode-go/hy4-flash-free"}, root,
+                credential=lambda: "test-token", opencode_exe="opencode",
+                spawner=lambda args, **kw: SimpleNamespace(pid=1234),
+            )
+            launcher.launch(task, "worker-1", worktree, root / "worker.log")
+            text = (root / "worker.log").read_text(encoding="utf-8")
+            self.assertIn("LAUNCH", text)
+            prompt = worker.build_prompt(
+                task, worktree, worker.worker_evidence_path(worktree),
+                tuple(policy.PROTECTED_PATHS),
+            )
+            self.assertIn(str(worktree / ".canopy-worker-evidence.json"), prompt)
+            self.assertNotIn(str(root / "evidence" / task["id"]), prompt)
+            self.assertIn("Never write outside", prompt)
+
     def test_environment_is_isolated_per_worker(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -579,6 +601,75 @@ class SupervisorTests(unittest.TestCase):
         self.supervisor.verify(data)
         self.store.save(data)
         self.assertEqual(self._get("alpha")["status"], "awaiting_review")
+
+    def test_worktree_evidence_is_staged_and_deleted_before_publish(self):
+        self._add(task_definition("alpha"))
+        self.supervisor.config["auto_queue"] = False
+        self.supervisor.dispatch(self.store.load())
+        worktree = Path(self._get("alpha")["worktree"])
+        source = worker.worker_evidence_path(worktree)
+        source.write_text(json.dumps({
+            "task_id": "alpha",
+            "branch": "feat/canopy-supervisor-alpha",
+            "commit_sha": "PENDING",
+            "tests": [{"command": "python -m unittest", "result": "PASS",
+                       "output_excerpt": "OK"}],
+            "changed_files": ["docs/alpha.md"], "draft": True,
+            "notes": "actual test result",
+        }), encoding="utf-8")
+        self.launcher.exit_code = 0
+        data = self.supervisor.step()
+        self.assertEqual(data["tasks"][0]["status"], "awaiting_review")
+        self.assertFalse(source.exists(), "ephemeral worktree evidence must be removed")
+        durable = worker.evidence_path(self.root, "alpha")
+        self.assertTrue(durable.is_file())
+        self.assertEqual(json.loads(durable.read_text())["task_id"], "alpha")
+        self.assertIn(("draft_pr", "feat/canopy-supervisor-alpha", "main"),
+                      self.git.calls)
+
+    def test_interrupted_worker_local_evidence_recovers_without_retry(self):
+        self._add(task_definition("alpha"))
+        self.supervisor.dispatch(self.store.load())
+        worktree = Path(self._get("alpha")["worktree"])
+        source = worker.worker_evidence_path(worktree)
+        source.write_text(json.dumps({
+            "task_id": "alpha", "branch": "feat/canopy-supervisor-alpha",
+            "commit_sha": "PENDING",
+            "tests": [{"command": "test", "result": "PASS",
+                       "output_excerpt": "OK"}],
+            "changed_files": ["docs/alpha.md"], "draft": True,
+        }), encoding="utf-8")
+        self._mutate("alpha", status="interrupted", owner=None, pid=None)
+        data = self.store.load()
+        self.assertEqual(self.supervisor.recover(data), 1)
+        self.assertEqual(data["tasks"][0]["status"], "verifying")
+        self.assertFalse(source.exists())
+        self.supervisor.verify(data)
+        self.store.save(data)
+        self.assertEqual(self._get("alpha")["status"], "awaiting_review")
+        self.assertEqual(self._get("alpha")["attempts"], 1)
+
+    def test_rejects_mismatched_worker_evidence_without_trusting_it(self):
+        self._add(task_definition("alpha"))
+        self.supervisor.dispatch(self.store.load())
+        task = self._get("alpha")
+        source = worker.worker_evidence_path(Path(task["worktree"]))
+        source.write_text(json.dumps({
+            "task_id": "different", "branch": task["branch"],
+            "tests": [], "draft": True,
+        }), encoding="utf-8")
+        self.assertFalse(self.supervisor._collect_worker_evidence(task))
+        self.assertTrue(source.exists(), "preserve rejected report for diagnosis")
+        self.assertFalse(worker.evidence_path(self.root, "alpha").exists())
+
+    def test_rejects_oversized_worker_evidence(self):
+        self._add(task_definition("alpha"))
+        self.supervisor.dispatch(self.store.load())
+        task = self._get("alpha")
+        source = worker.worker_evidence_path(Path(task["worktree"]))
+        source.write_bytes(b"x" * 131073)
+        self.assertFalse(self.supervisor._collect_worker_evidence(task))
+        self.assertFalse(worker.evidence_path(self.root, "alpha").exists())
 
     def test_recovery_requeues_expired_lease_with_checkpoint(self):
         self._add(task_definition("alpha"))

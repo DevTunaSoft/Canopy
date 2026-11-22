@@ -61,9 +61,9 @@ def build_prompt(task: dict, worktree: Path, evidence: Path, protected: tuple[st
         f"5. Write evidence JSON ONLY to {evidence} inside your current worktree, "
         "using keys: task_id, branch, commit_sha (use \"PENDING\"), tests (list of "
         "{command,result,output_excerpt}), changed_files, draft (true), notes. "
-        "This temporary JSON is not a project artifact. Do not write or run tools "
-        "in C:\\CanopySupervisor or any external directory. The trusted supervisor "
-        "will copy this evidence after you exit.",
+        "This temporary JSON is not a project artifact. Never write outside "
+        "your assigned worktree or into the supervisor's sibling evidence "
+        "directory. The trusted supervisor will copy it after you exit.",
         "6. If blocked, mark this task BLOCKED with the exact missing dependency. "
         "Do not fabricate assets or approval. The supervisor owns task rollover; "
         "do not stall or keep retrying this task indefinitely.",

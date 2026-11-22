@@ -267,13 +267,69 @@ class GitOpsTests(unittest.TestCase):
 
     def test_commit_all_stages_and_commits_with_local_identity(self):
         calls = []
-        with patch.object(gitops, "status_porcelain", return_value=[" M docs/a.md"]), \
-                patch.object(gitops, "run", side_effect=lambda args, **kw: calls.append(args) or
-                             ("a" * 40 if args[-1] == "HEAD" else "")):
+
+        def fake_run(args, **kw):
+            calls.append(args)
+            if args == ["git", "diff", "--cached", "--name-only"]:
+                return "docs/a.md"
+            return "a" * 40 if args[-1] == "HEAD" else ""
+
+        with patch.object(gitops, "pending_files", return_value=["docs/a.md"]), \
+                patch.object(gitops, "run", side_effect=fake_run):
             sha = gitops.commit_all(Path("."), "test commit")
         self.assertEqual(sha, "a" * 40)
-        self.assertIn(["git", "add", "-A"], calls)
+        self.assertIn(["git", "add", "-A", "--", ".", *gitops.PYTHON_CACHE_PATHSPECS], calls)
         self.assertTrue(any("user.name=Canopy Supervisor" in arg for call in calls for arg in call))
+
+    def test_python_cache_ignored_only_when_untracked_and_never_staged(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            gitops.run(["git", "init"], cwd=root)
+            gitops.run(["git", "-c", "user.name=Test", "-c", "user.email=t@t",
+                        "commit", "--allow-empty", "-m", "initial"], cwd=root)
+            code = root / "canopy_core" / "event_queue.py"
+            code.parent.mkdir()
+            code.write_text("def enqueue(): return True\n", encoding="utf-8")
+            cache = root / "canopy_core" / "__pycache__" / "__init__.cpython-314.pyc"
+            cache.parent.mkdir()
+            cache.write_bytes(b"garbage-bytecode")
+            other = root / "canopy_core" / "unexpected.py"
+            other.write_text("unexpected change\n", encoding="utf-8")
+            self.assertEqual(gitops.pending_files(root),
+                             ["canopy_core/event_queue.py", "canopy_core/unexpected.py"])
+            other.unlink()
+            self.assertEqual(gitops.pending_files(root), ["canopy_core/event_queue.py"])
+            gitops.commit_all(root, "feat: event queue")
+            self.assertIn("canopy_core/event_queue.py",
+                          gitops.run(["git", "show", "--pretty=format:", "--name-only", "HEAD"],
+                                     cwd=root).splitlines())
+            self.assertNotIn("canopy_core/__pycache__/__init__.cpython-314.pyc",
+                             gitops.run(["git", "show", "--pretty=format:", "--name-only", "HEAD"],
+                                        cwd=root).splitlines())
+            self.assertTrue(cache.exists(), "do not delete the user's cache files")
+
+    def test_staged_out_of_scope_file_remains_visible_to_policy(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            gitops.run(["git", "init"], cwd=root)
+            gitops.run(["git", "-c", "user.name=Test", "-c", "user.email=t@t",
+                        "commit", "--allow-empty", "-m", "initial"], cwd=root)
+            own = root / "docs" / "alpha.md"
+            own.parent.mkdir()
+            own.write_text("safe change", encoding="utf-8")
+            secret = root / "canopy" / "assets" / "art.png"
+            secret.parent.mkdir(parents=True)
+            secret.write_bytes(b"not approved")
+            gitops.run(["git", "add", str(secret.relative_to(root))], cwd=root)
+            changed = gitops.pending_files(root)
+            self.assertIn("canopy/assets/art.png", changed)
+            task = policy.validate_task(task_definition("alpha"))
+            evidence = {"task_id": "alpha", "branch": task["branch"],
+                        "commit_sha": "PENDING",
+                        "tests": [{"command": "python -m unittest", "result": "PASS",
+                                   "output_excerpt": "OK"}], "draft": True}
+            with self.assertRaises(policy.PolicyError):
+                policy.validate_evidence(evidence, task, changed, pending_allowed=True)
 
     def test_worktree_add_uses_branch_and_base_commit(self):
         calls = []

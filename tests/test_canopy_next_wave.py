@@ -114,13 +114,24 @@ class WaveTests(unittest.TestCase):
         self.assertNotIn(canopy_next_wave.TASKS[0]["id"],
                          [item["id"] for item in items])
 
-    def test_run_until_idle_returns_without_waiting_on_finished_work(self):
+    def test_run_until_idle_returns_after_completed_approved_roadmap(self):
         from canopy_supervisor.supervisor import Supervisor
         config = {**DEFAULT_CONFIG, "repo": str(self.repo),
                   "state_root": str(self.root), "auto_queue": False}
+        # A quiet worker pool with an undispatched catalog is NOT finished.
+        # Supply an actually completed task to model legitimate idle exit.
+        definition = policy.validate_task(json.loads(
+            self.roadmap.read_text(encoding="utf-8")
+        )[0])
+        finished = state.new_task(definition, 2)
+        finished["status"] = "awaiting_review"
+        data = self.store.load()
+        data["tasks"] = [finished]
+        self.store.save(data)
         instance = Supervisor(config, self.store, object())
         result = instance.run(until_idle=True)
-        self.assertEqual(result["tasks"], [])
+        self.assertEqual([item["status"] for item in result["tasks"]],
+                         ["awaiting_review"])
 
 
 if __name__ == "__main__":

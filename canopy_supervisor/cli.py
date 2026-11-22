@@ -30,6 +30,8 @@ def resolve_opencode_exe(configured: str) -> str:
     if from_env:
         return from_env
     candidates = [
+        Path(os.environ.get("APPDATA", "")) / "npm" / "node_modules" /
+        "@opencode" / "cli" / "bin" / "opencode.exe",
         shutil.which("opencode.exe"),
         Path(os.environ.get("APPDATA", "")) / "npm" / "node_modules" /
         "opencode-ai" / "bin" / "opencode.exe",

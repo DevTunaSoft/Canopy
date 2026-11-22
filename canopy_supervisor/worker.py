@@ -108,9 +108,9 @@ class WorkerLauncher:
         protected = tuple(self.config.get("protected_paths", ()))
         prompt = build_prompt(task, worktree, worker_evidence_path(worktree), protected)
         arguments = [
-            self.exe, "--pure", "run",
+            self.exe, "run", "--auto", "--archived",
             "--model", str(self.config.get("model", "opencode-go/hy4-flash-free")),
-            "--dir", str(worktree), prompt,
+            prompt,
         ]
         flags = getattr(subprocess, "CREATE_NO_WINDOW", 0) if os.name == "nt" else 0
         with log_path.open("a", encoding="utf-8", newline="\n") as log:

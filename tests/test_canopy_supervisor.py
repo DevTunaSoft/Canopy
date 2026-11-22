@@ -446,10 +446,10 @@ class WorkerTests(unittest.TestCase):
             pid = launcher.launch(task, "worker-1", worktree, root / "log.txt")
         self.assertEqual(pid, 4242)
         args = calls[0][0][0]
-        self.assertIn("--pure", args)
         self.assertIn("run", args)
+        self.assertIn("--auto", args)
+        self.assertIn("--model", args)
         self.assertIn("opencode-go/hy4-flash-free", args)
-        self.assertIn(str(worktree), args)
 
     def test_progress_signature_tracks_file_changes(self):
         with tempfile.TemporaryDirectory() as directory:

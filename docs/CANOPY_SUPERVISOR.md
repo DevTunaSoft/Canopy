@@ -282,6 +282,58 @@ py -3 .\tools\canopy_supervisor.py --state-root $state status
 any further retry. The unrelated `screenshot-provenance-gate` process-loss
 task is **not eligible** for this repair.
 
+## One-paste bounded Qt development wave (November 21, 2026)
+
+This is the next autonomous work batch, not a perpetual task generator.
+Four previous coding assignments already have draft PRs #152-#155.
+Do not requeue them. The genuine Qt Classic app resides in draft PR #151:
+main does not contain that prototype. All three new tasks have nonoverlapping
+owned paths and target the Qt draft branch as their stacked PR base, not main.
+
+The tasks cover Linux Mint guest runtime acceptance, safe user-level preview
+packaging, and compiled-Qt interaction smoke testing. These are support toward
+completion, not evidence that a Mint VM, approved landscape wallpaper or the
+entire shell has been accepted.
+
+One-time operator step: press Ctrl+C in the old continually running supervisor
+window and ensure it has exited. Do not interrupt active workers. From a new
+Windows PowerShell window, paste the following block exactly once:
+
+~~~powershell
+$ErrorActionPreference = 'Stop'
+$w = 'C:\Users\X1\Projects\Canopy-Supervisor'
+$state = 'C:\CanopySupervisor\state'
+py -3 "$w\tools\canopy_supervisor.py" --state-root $state pause
+if ($LASTEXITCODE -ne 0) { throw 'Pause failed' }
+if ((git -C $w status --porcelain)) { throw 'Supervisor checkout has edits; preserve them before updating' }
+git -C $w fetch origin
+if ($LASTEXITCODE -ne 0) { throw 'Git fetch failed' }
+git -C $w switch --detach origin/feat/windows-multi-agent-supervisor-20261121
+if ($LASTEXITCODE -ne 0) { throw 'Supervisor update failed' }
+Push-Location $w
+try {
+    py -3 -m unittest tests.test_canopy_supervisor tests.test_canopy_next_wave -q
+    if ($LASTEXITCODE -ne 0) { throw 'Local supervisor tests failed' }
+    py -3 .\tools\canopy_next_wave.py --state-root $state --start
+    if ($LASTEXITCODE -ne 0) { throw 'Qt wave stopped with a blocker; review dashboard' }
+} finally {
+    Pop-Location
+}
+~~~
+
+The wave tool atomically appends the new assignments to the existing roadmap,
+under the state lock. It never resets the task ledger or worktrees, regenerates
+approved assets, duplicates old PRs, or merges anything. It verifies the Qt
+branch from GitHub and preserves the configured free OpenCode model.
+Re-running setup does not duplicate tasks. The worker loop stops itself when
+the assigned roadmap is exhausted, prints QT_WAVE_FINISHED, and reports
+failure separately. Keep the PC on during the run; this is a local continuous
+process, not a cloud or background scheduled service. Work on other projects
+in separate terminals or applications.
+
+A new single-runner lock prevents overlapping modern supervisor loops, but
+the older supervisor predates that protection: close it first.
+
 ## Task and evidence contract
 
 Tasks are appended with `add-task`, or edited in `tasks.json` while the

@@ -230,6 +230,58 @@ starts any retry from its registered worktree. Passing Ubuntu CI tests alone
 does not prove actual unattended OpenCode runtime recovery on Windows.
 Verify real exit/evidence logs and a draft PR before marking this resolved.
 
+## Recover completed work rejected only for Python test caches (2026-11-21)
+
+Worker branches may start from `main`, which does not necessarily have the
+supervisor branch's Python cache ignore rules. The supervisor now ignores only
+**untracked** `__pycache__` and `*.py[cod]` data when identifying and
+staging changes. Tracked and staged files, including protected assets, remain
+visible to the scope gate. Tests set `PYTHONDONTWRITEBYTECODE` where feasible,
+but the already-generated local files are not deleted.
+
+If workers exited successfully and `evidence_collected` was recorded, but a
+task is `failed` with a **Python cache path** in `last_error`, do not rerun
+the agents. Their tests and source code may be reusable. The
+`retry-verification` command is deliberately limited to this exact failure,
+requires a paused state, matching worktree branch and existing evidence,
+rejects live workers and existing PRs, and preserves source files and attempt
+counts.
+
+Safely stop the previous supervisor and update the **separate supervisor
+checkout** first:
+
+```powershell
+$root = 'C:\Users\X1\Projects\Canopy-Supervisor'
+$state = 'C:\CanopySupervisor\state'
+py -3 "$root\tools\canopy_supervisor.py" --state-root $state pause
+py -3 "$root\tools\canopy_supervisor.py" --state-root $state stop
+# Wait for the old supervisor terminal to exit before updating.
+Set-Location $root
+git status --short
+git fetch origin
+git switch --detach origin/feat/windows-multi-agent-supervisor-20261121
+py -3 -m unittest tests.test_canopy_supervisor -v
+py -3 .\tools\canopy_supervisor.py --state-root $state check
+```
+
+Abort checkout if `git status --short` shows unexpected edits; do not force
+reset. Reverify the **three known completed tasks** without a new model call,
+while paused:
+
+```powershell
+py -3 .\tools\canopy_supervisor.py --state-root $state retry-verification `
+    --id shared-event-queue `
+    --id shell-host-fault-matrix `
+    --id registry-negative-controls
+py -3 .\tools\canopy_supervisor.py --state-root $state run --once
+py -3 .\tools\canopy_supervisor.py --state-root $state status
+```
+
+`REVERIFY_READY 3` is not a success signal. Confirm each task reached
+`awaiting_review` with a draft PR and passing CI. Inspect failures before
+any further retry. The unrelated `screenshot-provenance-gate` process-loss
+task is **not eligible** for this repair.
+
 ## Task and evidence contract
 
 Tasks are appended with `add-task`, or edited in `tasks.json` while the

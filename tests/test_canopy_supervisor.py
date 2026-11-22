@@ -990,6 +990,13 @@ class SupervisorTests(unittest.TestCase):
         self.assertTrue(self.store.dashboard_path.is_file())
         self.assertIn("alpha", self.store.dashboard_path.read_text(encoding="utf-8"))
 
+    def test_runner_process_lock_prevents_second_concurrent_loop(self):
+        lock = self.root / "locks" / "runner.lock"
+        with state.exclusive_lock(lock):
+            with self.assertRaises(state.LockBusy):
+                self.supervisor.run(once=True)
+        self.assertEqual(self.supervisor.run(once=True)["tasks"], [])
+
     def test_run_releases_lock_between_steps(self):
         observed = []
 

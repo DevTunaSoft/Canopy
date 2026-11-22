@@ -43,10 +43,12 @@ class ClassicDesktopIntegrationTests(unittest.TestCase):
 
     def test_cmake_builds_and_links_gio(self):
         text = (SOURCE / "CMakeLists.txt").read_text(encoding="utf-8")
-        self.assertIn("find_package(PkgConfig REQUIRED)", text)
+        self.assertIn("find_package(PkgConfig QUIET)", text)
         self.assertIn("gio-unix-2.0", text)
         self.assertIn("SystemAppLauncher.cpp SystemAppLauncher.h", text)
         self.assertIn("PkgConfig::GIO_UNIX", text)
+        self.assertIn("CANOPY_HAVE_GIO", text)
+        self.assertIn("disabled fallback", text)
 
     def test_main_exposes_flag_selftests_and_bridge(self):
         cpp = (SOURCE / "main.cpp").read_text(encoding="utf-8")

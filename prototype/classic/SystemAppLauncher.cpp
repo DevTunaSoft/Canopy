@@ -1,7 +1,11 @@
 // GIO headers must be parsed BEFORE Qt defines its "signals" macro.
 // GLib's GDBus structs legitimately contain a member called "signals".
+// Without the gio-unix-2.0 dev package the launcher compiles as a disabled
+// fallback: every request is refused, so no native app code can run.
+#ifdef CANOPY_HAVE_GIO
 #include <gio/gdesktopappinfo.h>
 #include <gio/gio.h>
+#endif
 
 #include "SystemAppLauncher.h"
 
@@ -54,6 +58,7 @@ QStringList SystemAppLauncher::candidatesFor(const QString &dockName) {
 }
 
 bool SystemAppLauncher::canLaunch(const QString &dockName) const {
+#ifdef CANOPY_HAVE_GIO
     if (!m_enabled)
         return false;
     const QStringList choices = candidatesFor(dockName);
@@ -68,9 +73,14 @@ bool SystemAppLauncher::canLaunch(const QString &dockName) const {
             return true;
     }
     return false;
+#else
+    Q_UNUSED(dockName);
+    return false;
+#endif
 }
 
 bool SystemAppLauncher::launch(const QString &dockName) const {
+#ifdef CANOPY_HAVE_GIO
     if (!m_enabled)
         return false;
     const QStringList choices = candidatesFor(dockName);
@@ -103,4 +113,8 @@ bool SystemAppLauncher::launch(const QString &dockName) const {
     }
     qWarning() << "CANOPY_APP_LAUNCH_UNAVAILABLE:" << dockName;
     return false;
+#else
+    Q_UNUSED(dockName);
+    return false;
+#endif
 }

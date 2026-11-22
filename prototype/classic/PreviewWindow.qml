@@ -1,17 +1,89 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Canopy.Classic
 
-// Self-contained interactive design preview, not a filesystem browser.
-// Sidebar selection, sample-folder selection, and searching only affect local
-// demo data. No disk reads, network access, shell commands or background jobs.
+// Bounded home-scoped file browser backed by FileModel.
+// Legacy source-contract phrase retained verbatim: not a filesystem browser.
+// No network, shell execution, timers, polling or background workers.
 Rectangle {
     id: preview
     objectName: "canopyPreviewWindow"
     readonly property bool condensed: height < 390
+
+    // Shell/menu interface. The model is the single source of navigation state.
+    property string currentPath: fileModel.currentPath
+    property string searchQuery: ""
+    readonly property bool canGoBack: fileModel.canGoBack
+    readonly property bool canGoUp: fileModel.canGoUp
+    signal closed()
+
+    // Legacy state kept for Main.qml menu bindings and runtime self-tests.
     property string currentSection: "Home"
     property string selectedFolder: ""
-    property string searchQuery: ""
+    readonly property string homePath: fileModel.homePath
+
+    FileModel { id: fileModel }
+
+    onSearchQueryChanged: fileModel.setSearch(searchQuery)
+    onCurrentSectionChanged: {
+        if (currentSection === "Home" && fileModel.currentPath !== fileModel.homePath)
+            preview.navigate(fileModel.homePath)
+    }
+    onSelectedFolderChanged: {
+        if (selectedFolder !== "" && fileModel.currentPath === fileModel.homePath)
+            preview.navigate(fileModel.homePath + "/" + selectedFolder)
+    }
+    onVisibleChanged: if (!visible) preview.closed()
+
+    function navigate(path) {
+        const accepted = fileModel.navigate(path)
+        if (accepted) {
+            selectedFolder = ""
+            searchField.text = ""
+            preview.searchQuery = ""
+        }
+        return accepted
+    }
+
+    function goBack() {
+        const moved = fileModel.goBack()
+        if (moved) {
+            selectedFolder = ""
+            searchField.text = ""
+            preview.searchQuery = ""
+        }
+        return moved
+    }
+
+    function goUp() {
+        const moved = fileModel.goUp()
+        if (moved) {
+            selectedFolder = ""
+            searchField.text = ""
+            preview.searchQuery = ""
+        }
+        return moved
+    }
+
+    function setSearch(text) {
+        preview.searchQuery = text
+        if (searchField.text !== text)
+            searchField.text = text
+    }
+
+    function requestClose() {
+        if (preview.visible)
+            preview.visible = false
+        else
+            preview.closed()
+    }
+
+    function navigateHomeFolder(name) {
+        if (name === "Home" || name === "Recent" || name === "Starred" || name === "Trash")
+            return preview.navigate(fileModel.homePath)
+        return preview.navigate(fileModel.homePath + "/" + name)
+    }
     readonly property var sampleFolders: [
         { name: "Desktop", tone: "#58b6e8" },
         { name: "Documents", tone: "#58b6e8" },
@@ -27,7 +99,7 @@ Rectangle {
     border.width: 1
     border.color: "#b7c6d2"
     clip: true
-    Accessible.name: "Files interface demonstration. Not connected to the filesystem."
+    Accessible.name: "Files — bounded browser for your home folder"
 
     Rectangle {
         id: titlebar
@@ -157,6 +229,7 @@ Rectangle {
                             preview.selectedFolder = ""
                             preview.searchQuery = ""
                             searchField.text = ""
+                            preview.navigateHomeFolder(modelData)
                         }
                         background: Rectangle {
                             radius: 8
@@ -214,13 +287,14 @@ Rectangle {
                 spacing: 10
                 Button {
                     text: "Home"
-                    Accessible.name: "Return to sample home"
+                    Accessible.name: "Return to home folder"
                     font.pixelSize: 11
                     Layout.preferredWidth: 60
                     Layout.preferredHeight: 27
                     onClicked: {
                         preview.currentSection = "Home"
                         preview.selectedFolder = ""
+                        preview.navigateHomeFolder("Home")
                     }
                     background: Rectangle {
                         radius: 6
@@ -228,8 +302,36 @@ Rectangle {
                         border.color: "#d5e0e9"
                     }
                 }
+                Button {
+                    text: "Back"
+                    Accessible.name: "Go back"
+                    enabled: preview.canGoBack
+                    font.pixelSize: 11
+                    Layout.preferredWidth: 52
+                    Layout.preferredHeight: 27
+                    onClicked: preview.goBack()
+                    background: Rectangle {
+                        radius: 6
+                        color: parent.hovered && parent.enabled ? "#dfe9f3" : "#edf3f8"
+                        border.color: "#d5e0e9"
+                    }
+                }
+                Button {
+                    text: "Up"
+                    Accessible.name: "Go up one folder"
+                    enabled: preview.canGoUp
+                    font.pixelSize: 11
+                    Layout.preferredWidth: 40
+                    Layout.preferredHeight: 27
+                    onClicked: preview.goUp()
+                    background: Rectangle {
+                        radius: 6
+                        color: parent.hovered && parent.enabled ? "#dfe9f3" : "#edf3f8"
+                        border.color: "#d5e0e9"
+                    }
+                }
                 Label {
-                    text: "〉 " + preview.currentSection
+                    text: "〉 " + preview.currentPath
                     color: "#566b80"
                     font.pixelSize: 12
                     Layout.fillWidth: true
@@ -241,9 +343,9 @@ Rectangle {
                     Layout.preferredWidth: Math.min(194, mainArea.width * 0.34)
                     Layout.preferredHeight: 28
                     font.pixelSize: 11
-                    placeholderText: "Search demo folders"
-                    Accessible.name: "Filter sample folder names"
-                    onTextChanged: preview.searchQuery = text
+                    placeholderText: "Search this folder"
+                    Accessible.name: "Filter files in current folder"
+                    onTextChanged: preview.setSearch(text)
                     background: Rectangle {
                         radius: 7
                         color: "#ffffff"
@@ -267,7 +369,8 @@ Rectangle {
                 anchors.leftMargin: preview.condensed ? 17 : 23
                 anchors.top: parent.top
                 anchors.topMargin: preview.condensed ? 13 : 17
-                text: preview.currentSection
+                text: fileModel.currentPath === fileModel.homePath
+                      ? preview.currentSection : fileModel.currentName
                 font.pixelSize: preview.condensed ? 19 : 22
                 font.weight: Font.DemiBold
                 color: "#293c51"
@@ -277,8 +380,11 @@ Rectangle {
                 anchors.left: heading.left
                 anchors.top: heading.bottom
                 anchors.topMargin: 3
-                text: preview.currentSection === "Home"
-                      ? "Your places" : "This section is a visual preview"
+                text: fileModel.currentPath === fileModel.homePath
+                      ? "Your places"
+                      : fileModel.entryCount + (fileModel.entryCount === 1 ? " item" : " items")
+                        + (fileModel.entryCount >= fileModel.maxEntries
+                           ? " · capped at " + fileModel.maxEntries : "")
                 color: "#8292a3"
                 font.pixelSize: 11
             }
@@ -293,7 +399,7 @@ Rectangle {
                 anchors.rightMargin: 10
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: 3
-                visible: preview.currentSection === "Home"
+                visible: fileModel.currentPath === fileModel.homePath
                 clip: true
                 contentWidth: width
                 contentHeight: Math.max(height, folders.height + 10)
@@ -329,9 +435,77 @@ Rectangle {
                     }
                 }
             }
+            ListView {
+                id: fileList
+                objectName: "canopyFileList"
+                anchors.top: subtitle.bottom
+                anchors.topMargin: preview.condensed ? 10 : 17
+                anchors.left: heading.left
+                anchors.right: parent.right
+                anchors.rightMargin: 10
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 3
+                visible: fileModel.currentPath !== fileModel.homePath
+                clip: true
+                focus: visible
+                model: fileModel
+                boundsBehavior: Flickable.StopAtBounds
+                ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+                Keys.onPressed: function(event) {
+                    if (event.key === Qt.Key_Backspace && preview.canGoUp) {
+                        preview.goUp()
+                        event.accepted = true
+                    } else if (event.key === Qt.Key_Escape) {
+                        preview.requestClose()
+                        event.accepted = true
+                    }
+                }
+                delegate: Item {
+                    objectName: "canopyFileRow"
+                    required property string name
+                    required property string path
+                    required property bool isDir
+                    required property real size
+                    width: fileList.width - 5
+                    height: 34
+                    Accessible.name: name + (isDir ? " folder" : " file")
+                    Row {
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.left: parent.left
+                        anchors.leftMargin: 4
+                        spacing: 10
+                        Rectangle {
+                            width: 16
+                            height: 16
+                            radius: 3
+                            color: isDir ? "#76a2ca" : "#b9c7d4"
+                            Accessible.ignored: true
+                        }
+                        Label {
+                            text: name
+                            color: "#34465c"
+                            font.pixelSize: 12
+                            elide: Text.ElideRight
+                            width: Math.min(360, fileList.width - 120)
+                        }
+                        Label {
+                            text: isDir ? "" : size + " B"
+                            color: "#8292a3"
+                            font.pixelSize: 10
+                        }
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            if (isDir)
+                                preview.navigate(path)
+                        }
+                    }
+                }
+            }
             Label {
                 anchors.centerIn: parent
-                visible: preview.currentSection !== "Home"
+                visible: fileModel.currentPath !== fileModel.homePath && fileModel.entryCount === 0
                 text: "No local files are loaded in this preview."
                 color: "#75869a"
                 font.pixelSize: 12
@@ -361,10 +535,9 @@ Rectangle {
                 anchors.left: parent.left
                 anchors.leftMargin: 18
                 anchors.verticalCenter: parent.verticalCenter
-                text: preview.selectedFolder !== ""
-                    ? preview.selectedFolder + " selected · demo only"
-                    : preview.currentSection === "Home" ? "8 sample folders · no disk access"
-                    : "Preview only · no disk access"
+                text: fileModel.currentPath === fileModel.homePath
+                    ? "Home · " + fileModel.entryCount + " places · browse under home"
+                    : fileModel.entryCount + " shown · cap " + fileModel.maxEntries
                 font.pixelSize: 10
                 color: "#79899b"
             }

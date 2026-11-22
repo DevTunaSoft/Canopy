@@ -807,6 +807,9 @@ class SupervisorTests(unittest.TestCase):
         self.assertEqual(blocked["status"], "blocked")
         self.assertEqual(blocked["checkpoint"]["stage"], "prerequisites-blocked")
         self.assertFalse(any(call[0] == "draft_pr" for call in self.git.calls))
+        self.assertFalse(any(call[0] in ("commit_all", "push")
+                             for call in self.git.calls),
+                         "unverified BLOCKED edits must remain local")
 
     def test_not_run_evidence_blocks_campaign(self):
         self.assertEqual(self.supervisor._evidence_outcome(

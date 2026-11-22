@@ -1054,6 +1054,18 @@ class SupervisorTests(unittest.TestCase):
                 self.supervisor.run(once=True)
         self.assertEqual(self.supervisor.run(once=True)["tasks"], [])
 
+    def test_until_idle_rejects_undispatched_roadmap_tasks(self):
+        self.supervisor.config["auto_queue"] = False
+        path = self.root / "roadmap.json"
+        path.write_text(json.dumps([task_definition("unstarted")]),
+                        encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "1 planned tasks not dispatched"):
+            self.supervisor.run(until_idle=True)
+        self.assertEqual(self.store.load()["tasks"], [],
+                         "failure must not forge progress or erase queue history")
+        self.assertIn("roadmap_incomplete",
+                      [event["event"] for event in self.store.recent_events()])
+
     def test_long_running_wave_emits_factual_progress_without_gui(self):
         from contextlib import redirect_stdout
         import io

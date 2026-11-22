@@ -92,6 +92,9 @@ class WorkerLauncher:
     def build_env(self, worker_id: str) -> dict:
         environment = dict(os.environ)
         environment["OPENCODE_API_KEY"] = self.credential()
+        # Test workers should not emit incidental .pyc files in branches
+        # created from main, which may not yet ignore Python bytecode.
+        environment["PYTHONDONTWRITEBYTECODE"] = "1"
         data_home = self.root / "worker-data" / worker_id
         data_home.mkdir(parents=True, exist_ok=True)
         environment["XDG_DATA_HOME"] = str(data_home)

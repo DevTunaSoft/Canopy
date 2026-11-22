@@ -1054,6 +1054,16 @@ class SupervisorTests(unittest.TestCase):
                 self.supervisor.run(once=True)
         self.assertEqual(self.supervisor.run(once=True)["tasks"], [])
 
+    def test_long_running_wave_emits_factual_progress_without_gui(self):
+        from contextlib import redirect_stdout
+        import io
+        self.supervisor.config["auto_queue"] = False
+        output = io.StringIO()
+        with redirect_stdout(output):
+            self.supervisor.run(once=True, progress_every=1)
+        self.assertIn("CANOPY_PROGRESS", output.getvalue())
+        self.assertIn("{}", output.getvalue())
+
     def test_run_releases_lock_between_steps(self):
         observed = []
 

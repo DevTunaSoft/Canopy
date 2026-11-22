@@ -94,8 +94,11 @@ def make_parser() -> argparse.ArgumentParser:
     add.add_argument("--base", default="main")
     add.add_argument("--branch", default=None)
 
-    commands.add_parser("run", help="dispatch and monitor workers").add_argument(
-        "--once", action="store_true", help="run a single coordination step")
+    run = commands.add_parser("run", help="dispatch and monitor workers")
+    run.add_argument("--once", action="store_true",
+                     help="run a single coordination step")
+    run.add_argument("--until-idle", action="store_true",
+                     help="exit when all approved roadmap tasks are terminal")
     commands.add_parser("status", help="print the Markdown dashboard").add_argument(
         "--json", action="store_true", help="print raw task state instead")
     commands.add_parser("check", help="validate queue invariants without launching workers")
@@ -371,7 +374,7 @@ def main(argv=None) -> int:
 
         if args.command == "run":
             supervisor = build_supervisor(config, store)
-            data = supervisor.run(once=args.once)
+            data = supervisor.run(once=args.once, until_idle=args.until_idle)
             active = sum(task.get("status") in state.ACTIVE_STATUSES for task in data["tasks"])
             print(f"RUN_DONE active={active} dashboard={store.dashboard_path}")
             return 0

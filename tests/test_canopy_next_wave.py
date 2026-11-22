@@ -89,10 +89,20 @@ class WaveTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "differs"):
             self._prepare()
 
-    def test_missing_roadmap_is_not_silently_replaced(self):
+    def test_missing_explicit_roadmap_creates_only_new_wave(self):
         self.roadmap.unlink()
-        with self.assertRaisesRegex(ValueError, "existing roadmap.json required"):
-            self._prepare()
+        # A fresh state might use the built-in catalog, so roadmap.json
+        # never existed. Existing task history remains untouched.
+        data = self.store.load()
+        data["tasks"].append({"id": "old-completed-work",
+                              "status": "awaiting_review", "pr": {"number": "152"}})
+        self.store.save(data)
+        self.assertEqual(self._prepare(), 3)
+        catalog = json.loads(self.roadmap.read_text(encoding="utf-8"))
+        self.assertEqual({row["id"] for row in catalog},
+                         {row["id"] for row in canopy_next_wave.TASKS})
+        self.assertEqual(self.store.load()["tasks"], data["tasks"])
+
 
     def test_does_not_duplicate_task_already_in_ledger(self):
         data = self.store.load()

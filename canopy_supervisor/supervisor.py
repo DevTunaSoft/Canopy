@@ -14,7 +14,8 @@ from . import policy
 from . import roadmap
 from . import state as state_module
 from .policy import PolicyError
-from .worker import WorkerError, evidence_path, progress_signature, read_evidence
+from .worker import (WorkerError, evidence_path, worker_evidence_path,
+                     progress_signature, read_evidence)
 
 DEFAULT_CONFIG = {
     "repo": "",
@@ -133,12 +134,49 @@ class Supervisor:
             return path
         return self.git.worktree_add(repo, path, task["branch"], task["base_sha"])
 
+    def _collect_worker_evidence(self, task: dict) -> bool:
+        """Ingest a bounded, local-only report after the worker has exited.
+
+        Worker tools may write only inside their worktree. Only this trusted
+        supervisor writes the durable state/evidence directory. Never stage
+        symlinks, out-of-scope paths, or mismatched task identities.
+        """
+        worktree = task.get("worktree")
+        if not worktree:
+            return False
+        source = worker_evidence_path(Path(worktree))
+        if not source.is_file() and not source.is_symlink():
+            return False
+        try:
+            if source.is_symlink():
+                raise WorkerError("worktree evidence cannot be a symlink")
+            with source.open("rb") as handle:
+                raw = handle.read(131073)
+            if len(raw) > 131072:
+                raise WorkerError("worktree evidence exceeds 128 KiB limit")
+            report = json.loads(raw.decode("utf-8"))
+            if not isinstance(report, dict):
+                raise WorkerError("worktree evidence must be a JSON object")
+            if report.get("task_id") != task["id"] or report.get("branch") != task["branch"]:
+                raise WorkerError("worktree evidence task or branch mismatch")
+            target = evidence_path(self.store.root, task["id"])
+            state_module.atomic_write(target, json.dumps(report, sort_keys=True) + "\n")
+            source.unlink()
+        except (WorkerError, OSError, ValueError, UnicodeError) as exc:
+            self.store.event(task["id"], "evidence_collection_failed",
+                             type(exc).__name__, level="ERROR")
+            return False
+        self.store.event(task["id"], "evidence_collected",
+                         "worktree report moved to supervisor state")
+        return True
+
     def recover(self, data: dict) -> int:
         """Requeue tasks whose supervisor lease has expired."""
         recovered = 0
         now = self.now()
         for task in data["tasks"]:
             if task.get("status") == "interrupted":
+                self._collect_worker_evidence(task)
                 has_evidence = evidence_path(self.store.root, task["id"]).is_file()
                 attempts = task.get("attempts", 0)
                 limit = task.get("max_attempts", self.config["max_attempts"])
@@ -174,6 +212,8 @@ class Supervisor:
             alive = bool(pid) and self.git.is_pid_alive(pid)
             if not expired and (not pid or alive):
                 continue
+            if not alive:
+                self._collect_worker_evidence(task)
             if not alive and evidence_path(self.store.root, task["id"]).is_file():
                 # Worker finished between supervisor restarts. Let verification
                 # inspect the evidence and the real diff before any decision.
@@ -222,9 +262,10 @@ class Supervisor:
             try:
                 worktree = self.prepare_worktree(task)
                 task["worktree"] = str(worktree)
-                evidence_file = Path(self.config["state_root"]) / "evidence" / \
-                    task["id"] / "evidence.json"
-                evidence_file.unlink(missing_ok=True)
+                # A retry cannot accidentally reuse a partial report from a
+                # previous worker attempt. Source files remain untouched.
+                worker_evidence_path(worktree).unlink(missing_ok=True)
+                evidence_path(self.store.root, task["id"]).unlink(missing_ok=True)
                 log = Path(self.config["state_root"]) / "logs" / (task["id"] + ".log")
                 pid = self.launcher.launch(task, worker, worktree, log)
                 state_module.advance(
@@ -281,6 +322,7 @@ class Supervisor:
                                  level="WARN")
                 code = 0
             if code is not None:
+                self._collect_worker_evidence(task)
                 state_module.advance(task, "verifying", "worker-exit", "",
                                      exit_code=code, lease_expires_at=now + self.config["lease_minutes"] * 60)
                 self.store.event(task["id"], "worker_exit", f"exit={code}")
@@ -457,6 +499,7 @@ class Supervisor:
         for task in data["tasks"]:
             if task.get("status") != "verifying":
                 continue
+            self._collect_worker_evidence(task)
             self.publish(task)
             self.store.save(data)
             count += 1

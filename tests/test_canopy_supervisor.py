@@ -1077,6 +1077,83 @@ class CliTests(unittest.TestCase):
             store.save(data)
             self.assertEqual(cli_main(retry), 2, "published PR cannot be requeued")
 
+    def test_cli_reverify_cache_failure_reuses_evidence_and_source(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            repo = base / "repo"
+            repo.mkdir()
+            (repo / ".git").mkdir()
+            state_root = base / "state"
+            common = ["--state-root", str(state_root)]
+            self.assertEqual(cli_main(common + ["init", "--repo", str(repo)]), 0)
+            store = state.TaskStore(state_root)
+            worktree = base / "worker"
+            worktree.mkdir()
+            gitops.run(["git", "init"], cwd=worktree)
+            gitops.run(["git", "checkout", "-b", "feat/canopy-supervisor-alpha"],
+                       cwd=worktree)
+            gitops.run(["git", "-c", "user.name=Test", "-c", "user.email=t@t",
+                        "commit", "--allow-empty", "-m", "init"], cwd=worktree)
+            file = worktree / "docs" / "alpha.md"
+            file.parent.mkdir()
+            file.write_text("verified work\n", encoding="utf-8")
+            generated = worktree / "canopy_core" / "__pycache__" / "__init__.cpython-314.pyc"
+            generated.parent.mkdir(parents=True)
+            generated.write_bytes(b"bytecode residue")
+            task = state.new_task(task_definition("alpha"), 2)
+            task.update({
+                "status": "failed", "attempts": 1, "pid": None,
+                "worktree": str(worktree),
+                "last_error": "verification failed: PolicyError: changed file outside task scope: "
+                              "canopy_core/__pycache__/__init__.cpython-314.pyc",
+                "checkpoint": {"stage": "verification-error"},
+            })
+            data = store.load()
+            data["tasks"].append(task)
+            store.save(data)
+            evidence = worker.evidence_path(state_root, "alpha")
+            evidence.parent.mkdir(parents=True)
+            evidence.write_text(json.dumps({
+                "task_id": "alpha", "branch": "feat/canopy-supervisor-alpha",
+                "commit_sha": "PENDING", "draft": True,
+                "tests": [{"command": "python -m unittest",
+                           "result": "PASS", "output_excerpt": "OK"}],
+                "changed_files": ["docs/alpha.md"],
+            }), encoding="utf-8")
+            cmd = common + ["retry-verification", "--id", "alpha"]
+            self.assertEqual(cli_main(cmd), 2, "must pause before re-verification")
+            self.assertEqual(cli_main(common + ["pause"]), 0)
+            self.assertEqual(cli_main(cmd), 0)
+            replay = store.load()["tasks"][0]
+            self.assertEqual(replay["status"], "verifying")
+            self.assertEqual(replay["attempts"], 1, "must not charge another model attempt")
+            self.assertTrue(evidence.is_file())
+            self.assertEqual(file.read_text(encoding="utf-8"), "verified work\n")
+            self.assertTrue(generated.is_file())
+            self.assertEqual(cli_main(cmd), 2, "cannot requeue active verification twice")
+
+    def test_cli_reverify_rejects_unrelated_failure(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            repo = base / "repo"
+            (repo / ".git").mkdir(parents=True)
+            state_root = base / "state"
+            common = ["--state-root", str(state_root)]
+            self.assertEqual(cli_main(common + ["init", "--repo", str(repo)]), 0)
+            store = state.TaskStore(state_root)
+            task = state.new_task(task_definition("alpha"), 2)
+            task.update({"status": "failed", "attempts": 1, "pid": None,
+                         "checkpoint": {"stage": "verification-error"},
+                         "last_error": "verification failed: PolicyError: changed file "
+                                       "outside task scope: canopy/assets/art.png"})
+            data = store.load()
+            data["tasks"].append(task)
+            store.save(data)
+            self.assertEqual(cli_main(common + ["pause"]), 0)
+            self.assertEqual(cli_main(
+                common + ["retry-verification", "--id", "alpha"]), 2)
+            self.assertEqual(store.load()["tasks"][0]["attempts"], 1)
+
     def test_cli_feed_enqueues_from_roadmap(self):
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)

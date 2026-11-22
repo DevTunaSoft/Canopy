@@ -266,7 +266,9 @@ def main(argv=None) -> int:
                 store.set_paused(False)
                 store.event("-", "backlog_100_started", "three workers; bounded recovery")
             sup = build_supervisor(config, store)
-            results = sup.run(until_idle=True)
+            # Emit a factual snapshot every six five-second coordination
+            # steps so the single terminal never looks stuck during long runs.
+            results = sup.run(until_idle=True, progress_every=6)
             ids = {item["id"] for item in tasks()}
             statuses = {}
             for item in results["tasks"]:

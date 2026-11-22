@@ -976,7 +976,7 @@ class CliTests(unittest.TestCase):
             data = store.load()
             data["tasks"].append(task)
             store.save(data)
-            (root / "logs").mkdir()
+            (root / "logs").mkdir(exist_ok=True)
             (root / "logs" / "alpha.log").write_text(
                 "permission requested: external_directory ... auto-rejecting\n",
                 encoding="utf-8")
@@ -1007,7 +1007,7 @@ class CliTests(unittest.TestCase):
             self.assertEqual(cli_main(common + ["pause"]), 0)
             retry = common + ["retry-evidence-permission", "--id", "alpha"]
             self.assertEqual(cli_main(retry), 2, "missing log cannot justify retry")
-            (root / "logs").mkdir()
+            (root / "logs").mkdir(exist_ok=True)
             log = root / "logs" / "alpha.log"
             log.write_text("some other error", encoding="utf-8")
             self.assertEqual(cli_main(retry), 2, "unrelated failure cannot justify retry")

@@ -516,8 +516,8 @@ class Supervisor:
     def stop(self) -> None:
         self._stop.set()
 
-    def run(self, *, once: bool = False, max_steps: int | None = None,
-            interval: float | None = None) -> dict:
+    def run(self, *, once: bool = False, until_idle: bool = False,
+            max_steps: int | None = None, interval: float | None = None) -> dict:
         """Loop with a per-step lock so operators can feed tasks between steps."""
         interval = float(interval if interval is not None else self.config["poll_seconds"])
         steps = 0
@@ -526,9 +526,18 @@ class Supervisor:
         try:
             while not self._stop.is_set() and not self.store.stop_path.exists():
                 with state_module.exclusive_lock(self.store.lock_path):
-                    self.step()
+                    data = self.step()
                 steps += 1
                 if once or (max_steps is not None and steps >= max_steps):
+                    break
+                # Explicit bounded-wave mode ends only after the approved
+                # roadmap has no more assignments and all workers are done.
+                # Normal run remains continuous for other workflows.
+                if until_idle and not any(
+                    task.get("status") in ("queued", "assigned", "running",
+                                           "verifying", "publishing", "interrupted")
+                    for task in data["tasks"]
+                ):
                     break
                 self._stop.wait(interval)
         except KeyboardInterrupt:

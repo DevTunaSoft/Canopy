@@ -141,8 +141,8 @@ def load(state_root: Path) -> list[dict]:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeError, ValueError) as exc:
         raise RoadmapError("corrupt roadmap.json") from exc
-    if not isinstance(data, list) or len(data) > 64:
-        raise RoadmapError("roadmap.json must be a list of at most 64 tasks")
+    if not isinstance(data, list) or len(data) > 128:
+        raise RoadmapError("roadmap.json must be a list of at most 128 tasks")
     return [dict(policy.validate_task(item)) for item in data]
 
 

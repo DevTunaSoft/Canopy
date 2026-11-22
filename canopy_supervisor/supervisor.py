@@ -238,11 +238,6 @@ class Supervisor:
         if self.store.paused:
             return 0
         started = 0
-        try:
-            base_sha = self.git.rev_parse(Path(self.config["repo"]), self.config["base_branch"])
-        except gitops.GitError as exc:
-            self.store.event("-", "dispatch_blocked", f"base ref unavailable: {exc}", level="ERROR")
-            return 0
         for task in data["tasks"]:
             if self.active_count(data["tasks"]) >= self.config["max_workers"]:
                 break
@@ -251,6 +246,18 @@ class Supervisor:
             worker = self.free_worker(data["tasks"])
             if not worker:
                 break
+            # A stacked Qt QA task must branch from the actual compiled Qt
+            # prototype PR, not old main (which contains no Qt prototype).
+            # Resolve feature bases from a fetched remote-tracking ref.
+            base = task.get("base") or self.config["base_branch"]
+            base_ref = (base if base == self.config["base_branch"]
+                        else f"{self.config['remote']}/{base}")
+            try:
+                base_sha = self.git.rev_parse(Path(self.config["repo"]), base_ref)
+            except gitops.GitError as exc:
+                self.store.event(task["id"], "dispatch_blocked",
+                                 f"base ref unavailable: {base_ref}: {exc}", level="ERROR")
+                continue
             state_module.advance(
                 task, "assigned", "assigned", "", owner=worker,
                 lease_expires_at=self.now() + self.config["lease_minutes"] * 60,
@@ -356,6 +363,7 @@ class Supervisor:
             f"Task: {task['id']} — {task['title']}",
             f"Commit: `{sha}`",
             f"Scope: {', '.join(task['scope'])}",
+            f"Review base: {task.get('base') or self.config['base_branch']} (stacked PRs must not merge before their base)",
             "",
             "## Reported test evidence",
             tests or "- NOT RUN",
@@ -439,7 +447,7 @@ class Supervisor:
             if not url:
                 url = self.git.create_draft_pr(
                     worktree, repo_slug=self.config["repo_slug"],
-                    base=self.config["base_branch"], head=task["branch"],
+                    base=task.get("base") or self.config["base_branch"], head=task["branch"],
                     title="DRAFT: " + task["title"],
                     body=self._pr_body(task, evidence, sha),
                     body_dir=Path(self.config["state_root"]) / "evidence" / task["id"],

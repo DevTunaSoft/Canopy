@@ -12,7 +12,8 @@ import time
 
 from . import credentials, gitops, policy, state
 from .supervisor import DEFAULT_CONFIG, Supervisor
-from .worker import WorkerLauncher, evidence_path, worker_evidence_path, read_evidence
+from .worker import (WorkerError, WorkerLauncher, evidence_path,
+                     worker_evidence_path, read_evidence)
 
 
 def default_state_root() -> Path:
@@ -375,7 +376,7 @@ def main(argv=None) -> int:
             print(f"RUN_DONE active={active} dashboard={store.dashboard_path}")
             return 0
     except (ValueError, policy.PolicyError, state.LockBusy, credentials.CredentialError,
-            gitops.GitError) as exc:
+            gitops.GitError, WorkerError) as exc:
         print(f"SUPERVISOR_FAIL: {exc}", file=sys.stderr)
         return 2
     return 2

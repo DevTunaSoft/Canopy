@@ -110,7 +110,7 @@ def generate(existing: list[dict], max_workers: int, *, protected=None,
                 continue
         definition = dict(item)
         if number > 1:
-            definition["id"] = f"{definition['id']}-attempt-{number}"
+            definition["id"] = f"{definition['id']}-r{number}"
             definition["branch"] = f"feat/canopy-supervisor-{definition['id']}"
             definition["scope"] = [
                 scope.replace("{n}", str(number)) for scope in definition["scope"]

@@ -241,7 +241,7 @@ class RoadmapTests(unittest.TestCase):
             exhausted = []
             for number in (1, 2):
                 item = dict(first[0])
-                item.update({"id": f"{chosen_campaign}-attempt-{number}",
+                item.update({"id": f"{chosen_campaign}-r{number}",
                              "campaign": chosen_campaign, "status": "failed",
                              "attempts": 1, "next_attempt_at": 0})
                 exhausted.append(item)

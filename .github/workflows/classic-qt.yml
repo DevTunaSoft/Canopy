@@ -50,15 +50,15 @@ jobs:
         timeout-minutes: 2
         run: |
           set -e
-          sha=$(sha256sum build/classic/canopy-classic-spike | cut -d' ' -f1)
+          binary="$PWD/build/classic/canopy-classic-spike"
+          art="$PWD/prototype/classic/assets/approved"
+          sha=$(sha256sum "$binary" | cut -d' ' -f1)
           export XDG_DATA_HOME="$PWD/test-artifacts/preview-xdg"
           mkdir -p "$XDG_DATA_HOME"
           python3 -m tools.qa.classic_preview_package plan \
-            --binary build/classic/canopy-classic-spike --binary-sha256 "$sha" \
-            --approved-art-dir prototype/classic/assets/approved
+            --binary "$binary" --binary-sha256 "$sha" --approved-art-dir "$art"
           python3 -m tools.qa.classic_preview_package install \
-            --binary build/classic/canopy-classic-spike --binary-sha256 "$sha" \
-            --approved-art-dir prototype/classic/assets/approved
+            --binary "$binary" --binary-sha256 "$sha" --approved-art-dir "$art"
           python3 -m tools.qa.classic_preview_package status
           desktop=$(find "$XDG_DATA_HOME" -name '*.desktop' -print -quit)
           test -n "$desktop"

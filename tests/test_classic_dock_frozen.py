@@ -7,6 +7,7 @@ These checks supplement, not replace, real same-binary Qt pixel diff.
 """
 import hashlib
 from pathlib import Path
+import subprocess
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,8 +31,14 @@ def fnv1a64(content):
 
 class FrozenClassicDockTests(unittest.TestCase):
     def test_existing_dock_source_bytes_locked(self):
-        tile = (CLASSIC / "DockTile.qml").read_bytes()
-        manifest = (CLASSIC / "assets/approved/manifest.json").read_bytes()
+        # Read the committed blob, not the working-tree bytes: core.autocrlf
+        # may convert line endings on Windows without changing the asset.
+        def committed(relative):
+            return subprocess.check_output(
+                ["git", "-C", str(ROOT), "show", "HEAD:" + relative])
+
+        tile = committed("prototype/classic/DockTile.qml")
+        manifest = committed("prototype/classic/assets/approved/manifest.json")
         self.assertEqual(git_blob_sha1(tile), DOCK_TILE_GIT_BLOB_SHA1)
         self.assertEqual(git_blob_sha1(manifest),
                          APPROVED_MANIFEST_GIT_BLOB_SHA1)

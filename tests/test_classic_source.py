@@ -185,18 +185,24 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn('objectName: "canopyFolderTile"', (ROOT / "FolderTile.qml").read_text())
         self.assertNotIn("dock->findChildren<QQuickItem *>", runtime)
 
-    def test_contextual_menu_controls_are_real_demo_actions(self):
-        source = (ROOT / "Main.qml").read_text()
-        self.assertIn('model: ["File", "Edit", "View", "Go", "Window", "Help"]', source)
-        self.assertIn("onClicked: actionMenu.open()", source)
-        self.assertIn("onTriggered:", source)
-        self.assertIn("filesPreview.visible = !filesPreview.visible", source)
-        self.assertIn("filesPreview.selectedFolder = \"\"", source)
-        self.assertIn('title: "Canopy Classic Preview"', source)
-        self.assertIn("width: 360", source)
-        self.assertIn("implicitWidth: 290", source)
-        self.assertIn("anchors.fill: parent", source)
-        self.assertNotIn("Timer {", source)
+    def test_menu_bar_actions_are_real_files_interface_calls(self):
+        menus = (ROOT / "ShellMenuBar.qml").read_text()
+        main = (ROOT / "Main.qml").read_text()
+        for title in ("File", "Edit", "View", "Go", "Window", "Help"):
+            self.assertIn('title: "' + title + '"', menus)
+        for action in ("requestClose()", "setSearch(", "goBack()", "goUp()",
+                       "showLauncherRequested()", "aboutRequested()"):
+            self.assertIn(action, menus)
+        self.assertIn("property var filesWindow: null", menus)
+        self.assertIn("ShellMenuBar {", main)
+        self.assertIn("filesWindow: filesPreview", main)
+        self.assertIn("onClosed: filesPreview.visible = false", main)
+        self.assertIn("sequence: \"Ctrl+W\"", main)
+        self.assertIn('title: "Canopy Classic Preview"', main)
+        self.assertIn("width: 360", main)
+        self.assertIn("implicitWidth: 290", main)
+        self.assertNotIn("Timer {", main)
+        self.assertNotIn("selectedFolder = \"\"", main)
 
     def test_screenshot_rejects_uniform_frames(self):
         source = (ROOT / "main.cpp").read_text()

@@ -183,8 +183,9 @@ class RoadmapTests(unittest.TestCase):
     def test_blocked_campaign_is_paused_not_replaced(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
+            campaign = roadmap._backlog()[0]["id"]
             task = state.new_task(task_definition("blocked-task"), 2)
-            task.update({"campaign": "qt-toolchain-enablement", "status": "awaiting_review"})
+            task.update({"campaign": campaign, "status": "awaiting_review"})
             evidence = root / "evidence" / "blocked-task"
             evidence.mkdir(parents=True)
             (evidence / "evidence.json").write_text(json.dumps({
@@ -192,13 +193,14 @@ class RoadmapTests(unittest.TestCase):
             }), encoding="utf-8")
             self.assertEqual(roadmap.campaign_status(task, root), "blocked")
             chosen = roadmap.generate([task], 3, state_root=root)
-            self.assertNotIn("qt-toolchain-enablement", [t["campaign"] for t in chosen])
+            self.assertNotIn(campaign, [t["campaign"] for t in chosen])
 
     def test_blocked_prerequisites_roll_over_to_unblocked_code_tasks(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             prior = []
-            for index, campaign in enumerate(roadmap.CAMPAIGNS[:6]):
+            backlog = roadmap._backlog()
+            for index, campaign in enumerate(backlog[:6]):
                 task_id = f"blocked-prereq-{index}"
                 item = state.new_task(task_definition(task_id), 2)
                 item.update({"campaign": campaign["id"], "status": "blocked"})
@@ -209,10 +211,8 @@ class RoadmapTests(unittest.TestCase):
                     encoding="utf-8")
                 prior.append(item)
             chosen = roadmap.generate(prior, 3, state_root=root)
-            self.assertEqual([item["campaign"] for item in chosen], [
-                "shared-event-queue", "shell-host-fault-matrix",
-                "registry-negative-controls",
-            ])
+            self.assertEqual([item["campaign"] for item in chosen],
+                             [item["id"] for item in backlog[6:9]])
             self.assertTrue(all(item["kind"] == "implementation" for item in chosen))
             self.assertTrue(all(item["artifacts"] for item in chosen))
             scopes = [path for item in chosen for path in item["scope"]]
@@ -223,22 +223,30 @@ class RoadmapTests(unittest.TestCase):
                 item["status"] = "running"
             follow_up = roadmap.generate(prior + active, 4, state_root=root)
             self.assertEqual([item["campaign"] for item in follow_up],
-                             ["screenshot-provenance-gate"])
+                             [backlog[9]["id"]])
 
-    def test_generate_prioritizes_real_work_and_caps_campaigns(self):
-        first = roadmap.generate([], 3)
-        self.assertEqual([task["campaign"] for task in first], [
-            "qt-toolchain-enablement", "qt-source-build", "qt-runtime-screenshot",
-        ])
-        self.assertTrue(all(task["kind"] in ("build", "verify") for task in first))
-        exhausted = []
-        for number in (1, 2):
-            item = task_definition(f"mint-guest-acceptance-attempt-{number}")
-            item.update({"campaign": "mint-guest-acceptance", "status": "failed",
-                         "attempts": 1, "next_attempt_at": 0})
-            exhausted.append(item)
-        selected = roadmap.generate(exhausted, 3)
-        self.assertNotIn("mint-guest-acceptance", [task["campaign"] for task in selected])
+    def test_generate_uses_100_task_backlog_and_caps_campaigns(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            first = roadmap.generate([], 3, state_root=root)
+            self.assertEqual(len(first), 3)
+            self.assertEqual(len({task["campaign"] for task in first}), 3)
+            self.assertTrue(all(task["campaign"].startswith("c100-") for task in first))
+            self.assertTrue(all(task["kind"] == "implementation" for task in first))
+            from tools import canopy_backlog_100
+
+            self.assertEqual(len(canopy_backlog_100.tasks()), 100)
+            self.assertEqual(len({task["id"] for task in canopy_backlog_100.tasks()}), 100)
+            chosen_campaign = first[0]["campaign"]
+            exhausted = []
+            for number in (1, 2):
+                item = dict(first[0])
+                item.update({"id": f"{chosen_campaign}-attempt-{number}",
+                             "campaign": chosen_campaign, "status": "failed",
+                             "attempts": 1, "next_attempt_at": 0})
+                exhausted.append(item)
+            selected = roadmap.generate(exhausted, 3, state_root=root)
+            self.assertNotIn(chosen_campaign, [task["campaign"] for task in selected])
 
     def test_custom_roadmap_file_is_loaded(self):
         with tempfile.TemporaryDirectory() as directory:

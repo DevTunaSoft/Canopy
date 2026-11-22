@@ -5,6 +5,8 @@ import json
 import os
 from pathlib import Path
 import sqlite3
+import subprocess
+import sys
 import tempfile
 import time
 import unittest
@@ -284,6 +286,20 @@ class GitOpsTests(unittest.TestCase):
 
     def test_invalid_pid_is_not_alive(self):
         self.assertFalse(gitops.is_pid_alive(-1))
+
+    @unittest.skipUnless(os.name == "nt", "requires Windows process handles")
+    def test_native_windows_pid_liveness_before_and_after_exit(self):
+        proc = subprocess.Popen(
+            [sys.executable, "-c", "import time; time.sleep(6)"],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        )
+        try:
+            self.assertTrue(gitops.is_pid_alive(proc.pid),
+                            "a live Windows child must not be misclassified as lost")
+        finally:
+            proc.terminate()
+            proc.wait(timeout=5)
+        self.assertFalse(gitops.is_pid_alive(proc.pid))
 
 
 class WorkerTests(unittest.TestCase):

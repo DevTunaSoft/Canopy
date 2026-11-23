@@ -265,20 +265,39 @@ def png_size(path):
     return width, height
 
 
+def _match_marker_line(line, marker_bytes, seen_lines):
+    """Return (matched marker or None, duplicate-line flag) for a pass line.
+
+    Real Qt builds append detail after SELF_TEST_PASS markers, so matching is
+    prefix-based; duplicate exact lines are still rejected.
+    """
+    line = line.rstrip(b"\r")
+    duplicate = line in seen_lines
+    seen_lines.add(line)
+    for prefix, marker in marker_bytes.items():
+        if line.startswith(prefix):
+            return marker, duplicate
+    return None, duplicate
+
+
 def _run_qt(command, timeout_seconds, expected_markers):
     """Drain Qt output without retaining unbounded logs and count exact markers."""
     counts = {marker: 0 for marker in expected_markers}
     marker_lines = 0
+    duplicate_marker = False
+    seen_lines = set()
     pending = bytearray()
     discarding_line = False
     marker_bytes = {marker.encode("utf-8"): marker for marker in expected_markers}
 
     def record(line):
-        nonlocal marker_lines
+        nonlocal marker_lines, duplicate_marker
         line = line.rstrip(b"\r")
         if line.startswith(b"SELF_TEST_PASS:"):
             marker_lines += 1
-            marker = marker_bytes.get(line)
+            marker, duplicate = _match_marker_line(line, marker_bytes, seen_lines)
+            if duplicate:
+                duplicate_marker = True
             if marker is not None:
                 counts[marker] += 1
 
@@ -347,7 +366,8 @@ def _run_qt(command, timeout_seconds, expected_markers):
     finally:
         selector.close()
         process.stdout.close()
-    return (None if timed_out else return_code), counts, marker_lines
+    return ((None if timed_out else return_code), counts, marker_lines,
+            duplicate_marker)
 
 
 def _write_report(path, report):
@@ -423,13 +443,14 @@ def run_mint_smoke(*, binary, approved_art, wallpaper, output_dir, source_sha,
         }
         try:
             expected_markers = REQUIRED_MARKERS + ((FRAME_MARKER,) if framing_review else ())
-            exit_code, marker_counts, marker_lines = _run_qt(
+            exit_code, marker_counts, marker_lines, duplicate_marker = _run_qt(
                 command, timeout_seconds, expected_markers,
             )
             result["exit_code"] = exit_code
             result["markers_observed"] = marker_lines
             marker_ok = (
-                marker_lines == len(expected_markers)
+                marker_lines >= len(expected_markers)
+                and not duplicate_marker
                 and all(marker_counts[marker] == 1 for marker in expected_markers)
             )
             if exit_code == 0 and marker_ok:

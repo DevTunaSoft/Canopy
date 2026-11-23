@@ -59,13 +59,17 @@ def parse_version(text) -> Optional[Tuple[int, ...]]:
     """Parse a dotted numeric prefix into a comparable tuple, else None.
 
     Packaging suffixes such as '6.4.2-0ubuntu1' are ignored after the numeric
-    prefix. Malformed or empty values fail closed as None.
+    prefix. Malformed or empty values fail closed as None. Only ASCII digits
+    are accepted: str.isdigit() also matches Unicode numerals that int() may
+    reject (superscript digits raise ValueError) or silently coerce (other
+    scripts), both of which would escape the documented fail-closed path.
     """
     if not isinstance(text, str) or not text:
         return None
     head = text.split("-", 1)[0].split("+", 1)[0]
     parts = head.split(".")
-    if not parts or any(not part.isdigit() for part in parts):
+    if not parts or any(not part.isascii() or not part.isdigit()
+                        for part in parts):
         return None
     return tuple(int(part) for part in parts)
 

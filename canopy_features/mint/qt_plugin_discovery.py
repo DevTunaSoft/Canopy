@@ -53,7 +53,12 @@ def normalize_plugin_name(filename):
 
 
 def parse_version(value):
-    """Parse a bounded dotted numeric Qt version, or return None."""
+    """Parse a bounded dotted numeric Qt version, or return None.
+
+    Only ASCII digits are accepted: str.isdigit() also matches Unicode
+    numerals that int() may reject (superscript digits raise ValueError) or
+    silently coerce (other scripts), escaping this fail-closed contract.
+    """
     if not isinstance(value, str):
         return None
     text = value.strip()
@@ -62,7 +67,8 @@ def parse_version(value):
     parts = text.split(".")
     if not 1 <= len(parts) <= 4:
         return None
-    if not all(part.isdigit() and len(part) <= 6 for part in parts):
+    if not all(part.isascii() and part.isdigit() and len(part) <= 6
+               for part in parts):
         return None
     return tuple(int(part) for part in parts)
 

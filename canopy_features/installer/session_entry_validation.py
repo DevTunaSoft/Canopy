@@ -10,7 +10,8 @@ Safety properties (fail closed):
 - bounded file size and bounded directory scan (no unbounded memory);
 - ``Exec`` must be one absolute path with no shell syntax, arguments or field
   codes, and its binary must exist as a regular non-symlink executable file;
-- symlinked entry files, unknown keys and unknown groups are rejected.
+- symlinked entry files, symlinked binary path components, unknown keys and
+  unknown groups are rejected.
 
 Scope note: ``tools/register_classic_preview.py`` already writes a reversible
 per-user *application menu* entry and permits quoted paths plus flags. That
@@ -101,8 +102,28 @@ def _safe_exec_path(value):
     return path
 
 
+def _symlinked_ancestor(path):
+    """Return True if any parent component of ``path`` is a symlink.
+
+    A validation that only stats the final component can be bypassed by a
+    symlinked directory: the binary itself is a regular non-symlink file, yet
+    it resolves outside the user's tree. Walk existing parents from the anchor
+    so the check stays lexical and bounded by the path component count.
+    """
+    current = Path(path.anchor)
+    for part in path.parts[1:-1]:  # final component is checked separately below
+        current = current / part
+        if current.is_symlink():
+            return True
+        if not current.exists():
+            break  # Deeper components cannot exist, so cannot be links.
+    return False
+
+
 def _check_binary(path):
     """Stat the binary only; never launch it or inspect its contents."""
+    if _symlinked_ancestor(path):
+        raise SessionEntryError("session binary path contains a symlink")
     if not path.is_file():
         raise SessionEntryError("session binary is missing")
     if path.is_symlink():

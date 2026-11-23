@@ -12,7 +12,10 @@ from pathlib import Path
 import struct
 import sys
 
-from tools.audit_approved_icon_optics import decode_rgba_png, AuditError
+try:
+    from .audit_approved_icon_optics import decode_rgba_png, AuditError
+except ImportError:
+    from audit_approved_icon_optics import decode_rgba_png, AuditError
 
 TARGET = ("browser", "mail", "files", "terminal", "settings")
 FROZEN = ("calendar", "photos", "music")

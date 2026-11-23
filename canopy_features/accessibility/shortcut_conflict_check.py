@@ -127,8 +127,14 @@ def _normalized_reserved(reserved):
 def _validate_registrations(items, source):
     if isinstance(items, (str, bytes)):
         raise ShortcutConflictError("registrations must be iterable of pairs")
+    try:
+        iterable = iter(items)
+    except TypeError as exc:
+        # Non-iterable callers (None, ints, floats, ...) must fail closed with
+        # the documented domain error, not leak a bare TypeError from `for`.
+        raise ShortcutConflictError("registrations must be iterable of pairs") from exc
     result = []
-    for item in items:
+    for item in iterable:
         if not isinstance(item, (tuple, list)) or len(item) != 2:
             raise ShortcutConflictError("registration must be an (action, sequence) pair")
         action, sequence = item

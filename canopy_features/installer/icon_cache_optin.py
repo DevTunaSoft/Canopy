@@ -83,7 +83,11 @@ def _home_path(home):
         home = str(home)
     text = _clean_text(home, "home directory", MAX_PATH_CHARS)
     path = PurePosixPath(text)
-    if not path.is_absolute() or path == PurePosixPath("/") or ".." in path.parts:
+    # A single-part absolute path is a root, not a user home: '/' is caught
+    # below, while the POSIX double-slash root ('//') has parts ('//',) and
+    # must not reach the parts[1] lookup (it raised IndexError). Fail closed.
+    if (not path.is_absolute() or path == PurePosixPath("/")
+            or len(path.parts) < 2 or ".." in path.parts):
         raise IconCacheDescriptionError("home must be an absolute user directory")
     if path.parts[1] in SYSTEM_HOME_ROOTS:
         raise IconCacheDescriptionError("home must not be a system directory")

@@ -86,7 +86,10 @@ class ThemeTransitionRollback:
         """Record one offscreen candidate; return a status string.
 
         A busy ledger, a duplicate resource name or a full abandoned set
-        rejects the request without changing state.
+        rejects the request without changing state. A batch that is not an
+        iterable of non-empty strings is also rejected with
+        ``INVALID_RESOURCES`` rather than leaking a built-in ``TypeError``
+        from the normalizer.
         """
         if self._state != IDLE:
             return "BUSY"
@@ -94,7 +97,7 @@ class ThemeTransitionRollback:
             return "INVALID_THEME"
         try:
             batch = self._normalize(resources)
-        except ValueError:
+        except (TypeError, ValueError):
             return "INVALID_RESOURCES"
         if batch & self._active_resources or batch & self._abandoned:
             return "DUPLICATE_RESOURCE"

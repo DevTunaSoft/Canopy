@@ -10,16 +10,16 @@ Measured from the real 1920×1080 Qt screenshot, relative bright-art centers ran
 
 ## Experiment: gentle non-cropping optical compensation
 
-`--dock-optical-balance-review` is **off by default** and uses *only the eight SHA-locked originals*. Each original PNG is scaled with its entire source visible into a 160px maximum art rectangle inside the **same** fixed 168px rounded alpha mask, with a small per-icon translation (at most 5px in the 192px cached provider). This creates consistent breathing room and compensates for asymmetric content weight without changing the 58×70 QML buttons or 54px art slots.
+**The optically balanced renderer is selected by default when the eight exact approved PNGs are loaded.** The opt-in `--dock-optical-balance-review` remains as reproducible reference, while `--dock-original-fit` restores the old renderer on demand. Both use *only the immutable SHA-locked originals*. Each original PNG is scaled with its entire source visible into a 160px maximum art rectangle inside the **same** fixed 168px rounded alpha mask, with a small per-icon translation (at most 5px in the 192px cached provider). This creates consistent breathing room and compensates for asymmetric content weight without changing the 58×70 QML buttons or 54px art slots.
 
 The new provider renders **one image per icon at startup**, caching eight 192×192 results; no persistent timers, extra threads, effects, shader passes, or repeated image allocations. Terminal's optional separately refined transparent-square candidate stays on its original path.
 
-All preview flags are mutually exclusive: no combination of old and new framing modes can silently change what the owner sees. The default renderer is unchanged, and no original image bytes are touched or uploaded as new masters.
+Dock preview modes remain mutually exclusive, and the `--dock-original-fit` rollback cannot be combined with another dock preview flag. The launcher-only review mode is independent. The approved-art **in-memory rendered appearance** is the only selected default change; no original image bytes, manifests, QML geometry, wallpaper or other source artwork were changed.
 
 ## Review and acceptance
 
 CI captures, using the **same compiled Qt binary**, the untouched baseline plus the 324px, 333px and gentle optical-centering candidates at 1920×1080, 1200×750 and 760×500. Pixel-isolation checks reject all non-dock changes (except the right-hand clock minute rollover); source contract checks fail on altered default rendering or unlocked icon geometries.
 
-The pass condition for this branch is strict: real Qt compile and test evidence, zero unexpected changed pixels, and genuinely more consistent icon appearance on full-size screenshots. If remaining visible issues originate in baked-in original artwork, document them rather than claim pixel isolation is an optical-quality guarantee. No merge to the default branch or final visual signoff is implied by automated tests.
+The successful real Qt captures show horizontal bright-art center spread reduced **1.09px → 0.73px (33%)** and vertical spread **1.87px → 1.17px (37%)** at 1920×1080. A new pure-stdlib CI quality gate requires improvement on both axes at all three sizes and verifies that a normal approved-art Qt launch renders the chosen default exactly like the explicit optical-mode preview (other than the minute-changing clock). This mechanical improvement is **not** proof of perfection: different baked-in highlight bands and icon illustrations cannot be entirely normalized without redesigning the source artwork. Default-mode CI must pass before any integration; no unverified visual merge is authorized.
 
 Historical blue-wave wallpaper remains a test fixture. The separate alpine landscape candidate is **not included** in this icon-specific PR.

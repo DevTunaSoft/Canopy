@@ -135,9 +135,14 @@ class SwitcherState:
         return self._selected
 
     def select(self, window_id):
-        """Jump selection directly to a tracked window id."""
+        """Jump selection directly to a tracked window id.
+
+        ``_valid_id`` is checked before membership: ``True == 1`` and
+        ``False == 0`` would otherwise let a bool alias a tracked int id and
+        be stored as a window id, which every other boundary rejects.
+        """
         self._require_active()
-        if window_id not in self._order:
+        if not _valid_id(window_id) or window_id not in self._order:
             raise SwitcherError("unknown window id")
         self._selected = window_id
         return window_id
@@ -160,10 +165,15 @@ class SwitcherState:
         return self._current
 
     def focus(self, window_id):
-        """Record an external focus change while no cycle is active."""
+        """Record an external focus change while no cycle is active.
+
+        ``None`` clears focus; any other value must be a valid, tracked id so
+        a bool cannot alias an int id and be persisted as ``current``.
+        """
         if self._active:
             raise SwitcherError("cannot change focus during selection")
-        if window_id is not None and window_id not in self._order:
+        if window_id is not None and (
+                not _valid_id(window_id) or window_id not in self._order):
             raise SwitcherError("unknown window id")
         self._current = window_id
         return window_id

@@ -5,6 +5,10 @@ Read README.md and docs/ARCHITECTURE.md and docs/QUALITY.md completely before ma
 ## Mission
 Build a polished, familiar Linux desktop shell. Classic is macOS-inspired without copying proprietary artwork, assets, or trademarks. Modern is a later Windows-inspired presentation using shared services. Tagline: “The Familiar Feel. The Freedom of Linux.”
 
+## Approved Canopy Classic wallpaper (source-of-truth)
+
+Read [`docs/CLASSIC_MASTER_WALLPAPER.md`](docs/CLASSIC_MASTER_WALLPAPER.md) before any visual, packaging, CI screenshot or default-wallpaper changes. The owner selected the **1920×1080 alpine lake / autumn foliage PNG** as the master wallpaper (exact SHA-256 `8c6cab50a0977fc129c0d2a20523d9361646f36da66f2f3f2b2436a0d9001381`). It is stored in the owner's private ChatGPT Library, **not yet in GitHub**. Do not invent a substitute, regenerate the image, mistake the historical blue-wave test fixture for the master, or claim final wallpaper integration without loading these exact verified bytes in a real compiled Qt run. Additional wallpaper choices can follow later; this image remains the default. Preserve the already approved eight original dock icon masters and dock geometry.
+
 ## Non-negotiables
 - Premium visual quality and accessibility with low idle CPU, RAM, GPU, and wakeups.
 - Original iconography and legally distributable assets only.

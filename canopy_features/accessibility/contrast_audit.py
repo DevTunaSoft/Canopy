@@ -138,10 +138,29 @@ def parse_color(value: str) -> Color:
     raise ValueError(f"unrecognized color reference: {value!r}")
 
 
+def _validate_color(value: Color) -> Color:
+    """Fail closed when a Color channel or alpha leaves the documented [0, 1].
+
+    ``Color`` is a public NamedTuple, so callers can construct out-of-range
+    instances directly.  Without this guard they reach ``linear()`` and yield
+    luminance > 1 and contrast > 21, breaking the documented output ranges.
+    NaN and infinities fail the range check and are rejected too.
+    """
+    for name in ("red", "green", "blue", "alpha"):
+        channel = getattr(value, name)
+        if not isinstance(channel, (int, float)) or isinstance(channel, bool):
+            raise ValueError(f"color channel {name} must be a real number")
+        if not 0.0 <= channel <= 1.0:
+            raise ValueError(
+                f"color channel {name}={channel!r} outside documented [0, 1]"
+            )
+    return value
+
+
 def _as_color(value: str | Color) -> Color:
     if isinstance(value, Color):
-        return value
-    return parse_color(value)
+        return _validate_color(value)
+    return _validate_color(parse_color(value))
 
 
 def is_transparent(color: str | Color) -> bool:
@@ -169,7 +188,11 @@ def composite(foreground: str | Color, background: str | Color) -> Color:
 
 
 def relative_luminance(color: str | Color) -> float:
-    """Return WCAG relative luminance in [0, 1] for an opaque color."""
+    """Return WCAG relative luminance in [0, 1] for an opaque color.
+
+    Raises ``ValueError`` if any channel is outside [0, 1] or the color is
+    translucent.
+    """
     value = _as_color(color)
     if value.alpha != 1.0:
         raise ValueError("translucent color has no defined luminance; composite it first")
@@ -188,7 +211,8 @@ def contrast_ratio(foreground: str | Color, background: str | Color) -> float:
     """Return the WCAG contrast ratio in [1, 21] between two screen colors.
 
     A translucent foreground is composited over the background first. The
-    background must be opaque.
+    background must be opaque. Any channel outside [0, 1] is rejected with
+    ``ValueError`` so the returned ratio stays in [1, 21].
     """
     bg = _as_color(background)
     fg = composite(foreground, bg) if _as_color(foreground).alpha != 1.0 else _as_color(foreground)

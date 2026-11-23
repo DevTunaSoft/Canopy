@@ -65,3 +65,17 @@ P0 gaps require explicit resolution or a clearly documented blocked state.
 it is not a whole-product success or proof of Mint, compositor, usability,
 security or visual correctness. Keep tests honest (all-skipped is not green),
 use negative controls and fail-closed cleanup in every shell lifecycle.
+
+## Owner-approved visual design lock — mandatory for every coding agent
+
+The current owner-approved Canopy Classic GUI appearance is **frozen** unless the owner explicitly authorizes a specific visual change. This applies to Hermes, OpenCode, Copilot, supervisors, subagents, CI-driven changes, and future contributors.
+
+- Do **not** create, regenerate, replace, recolor, restyle, resize, reposition, rename, or delete approved icons, wallpaper, artwork, branding, dock assets, or their manifests.
+- Do **not** alter approved dock geometry, icon centering, spacing, scale, alignment, top menu bar, window chrome, typography, palette, backgrounds, or overall GUI look. Do not substitute placeholder artwork or generic controls for approved visuals.
+- Functional, accessibility, compatibility, security, and performance work may proceed **without changing the approved appearance**. If a necessary fix would affect appearance, stop that change and request explicit owner approval; do not infer permission from a task description or green tests.
+- Treat the current approved assets and their manifests as immutable reference inputs. Do not assume screenshots or an agent's interpretation supersede owner-approved designs. Where an exact approved visual baseline is not available, do not invent one or claim visual equivalence.
+- Before every PR, review changed paths and rendered-output impact for visual regressions. If any approved visual asset or layout is affected, keep the PR in draft and flag it for owner review; do not merge or silently accept it.
+- Only the owner/ChatGPT design workflow supplies new approved artwork. Coding agents integrate supplied assets after explicit approval; they must not generate replacements.
+- Existing approved visual assets must not be modified as part of unrelated fixes. Preserve them byte-for-byte whenever possible. No automated formatting, optimization, or asset regeneration on protected assets.
+
+This lock is additive to existing visual-acceptance, quality, and legal requirements. It does not authorize redesign of previously rejected mockups, nor does it establish that an unreviewed current screenshot is owner-approved.

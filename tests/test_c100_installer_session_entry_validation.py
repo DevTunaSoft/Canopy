@@ -128,6 +128,24 @@ class SessionEntryValidationTests(unittest.TestCase):
         with self.assertRaisesRegex(SessionEntryError, "cannot be a symlink"):
             validate_session_entry(self.entry)
 
+    def test_symlinked_exec_parent_directory_rejected(self):
+        # A non-symlink binary reached through a symlinked parent directory can
+        # resolve outside the user's tree; it must fail closed like a linked
+        # binary, otherwise an entry can name an arbitrary system executable.
+        real_dir = self.dir / "real-bin"
+        real_dir.mkdir()
+        binary = real_dir / "canopy-session"
+        binary.write_bytes(b"#!/bin/sh\nexit 0\n")
+        binary.chmod(0o700)
+        link = self.dir / "linked-bin"
+        try:
+            link.symlink_to(real_dir, target_is_directory=True)
+        except (OSError, NotImplementedError):
+            self.skipTest("symlink creation unavailable on this host")
+        self.write_entry(self.replace_exec(link / "canopy-session"))
+        with self.assertRaisesRegex(SessionEntryError, "symlink"):
+            validate_session_entry(self.entry)
+
     def test_unknown_key_rejected(self):
         self.reject(
             self.valid_text() + "X-GNOME-Autostart=true\n",

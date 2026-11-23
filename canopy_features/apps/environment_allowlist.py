@@ -43,8 +43,11 @@ _STRONG_WORDS = frozenset({
     "apikey", "privatekey", "accesstoken", "refreshtoken", "passphrase",
 })
 # Exact word matches after splitting on non-alphanumeric separators.
+# Short aliases matter as much as their long forms: a wide or mistaken
+# allowlist must not copy DB_PASS, DB_PW or AWS_CRED into a child process.
 _WORDS = _STRONG_WORDS | frozenset({
     "key", "api", "auth", "authorization", "cookie", "bearer", "pwd",
+    "pass", "pw", "cred",
     "private", "signature", "cert", "certificate", "accesskey",
 })
 

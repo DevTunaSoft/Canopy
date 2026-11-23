@@ -367,6 +367,26 @@ class JsonFileBoundaryTests(unittest.TestCase):
             with self.assertRaises(gate.BundleError):
                 gate.validate_bundle_file(Path(td))
 
+    def test_fdopen_os_error_translated_to_bundle_error(self):
+        """POSIX os.open() accepts a directory; fdopen() then raises OSError.
+
+        The reader must translate that OSError too, or a raw
+        IsADirectoryError escapes the documented fail-closed boundary. This
+        mock reproduces the POSIX path on every host.
+        """
+        from unittest import mock
+        payload = json.dumps(_bundle()).encode("utf-8")
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "bundle.json"
+            path.write_bytes(payload)
+            def _fail_fdopen(fd, *args, **kwargs):
+                gate.os.close(fd)
+                raise IsADirectoryError("is a directory")
+
+            with mock.patch.object(gate.os, "fdopen", side_effect=_fail_fdopen):
+                with self.assertRaises(gate.BundleError):
+                    gate.validate_bundle_file(path)
+
     def test_symlink_path_rejected(self):
         payload = json.dumps(_bundle()).encode("utf-8")
         with tempfile.TemporaryDirectory() as td:

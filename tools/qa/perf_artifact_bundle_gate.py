@@ -194,12 +194,15 @@ def validate_bundle_file(path):
             raise BundleError("symlinked bundle path rejected")
     try:
         fd = os.open(p, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+        # POSIX allows os.open() on a directory and only fails at fdopen();
+        # Windows fails at os.open() instead. Keep the whole read path inside
+        # one OSError boundary so either host fails closed with BundleError.
+        with os.fdopen(fd, "rb") as handle:
+            if not stat.S_ISREG(os.fstat(handle.fileno()).st_mode):
+                raise BundleError("bundle path is not a regular file")
+            data = handle.read(MAX_BUNDLE_BYTES + 1)
     except OSError as exc:
         raise BundleError("bundle file missing or unsafe") from exc
-    with os.fdopen(fd, "rb") as handle:
-        if not stat.S_ISREG(os.fstat(handle.fileno()).st_mode):
-            raise BundleError("bundle path is not a regular file")
-        data = handle.read(MAX_BUNDLE_BYTES + 1)
     if not data or len(data) > MAX_BUNDLE_BYTES:
         raise BundleError("bundle JSON is missing or oversized")
     return validate_bundle_json(data)

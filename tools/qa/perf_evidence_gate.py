@@ -76,9 +76,13 @@ def _real_file(path):
         data = f.read(MAX_REPORT_BYTES + 1)
     if not data or len(data) > MAX_REPORT_BYTES:
         raise EvidenceError("report missing or oversized")
+    # A report within MAX_REPORT_BYTES can still exhaust the decoder's
+    # recursion budget when deeply nested. That is malformed evidence, not a
+    # host failure: translate it here so the CLI always fails closed with a
+    # QT_PERF_GATE_FAIL marker rather than a raw traceback.
     try:
         parsed = json.loads(data.decode("utf-8"), parse_constant=_nonfinite)
-    except (UnicodeError, ValueError) as exc:
+    except (UnicodeError, ValueError, RecursionError) as exc:
         raise EvidenceError("invalid report JSON") from exc
     if type(parsed) is not dict:
         raise EvidenceError("performance report must be an object")

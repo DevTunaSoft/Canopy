@@ -7,8 +7,10 @@ A VALID manifest does NOT imply that a pack is trusted or safe to run.
 
 import argparse
 import json
+import os
 from pathlib import Path
 import re
+import stat
 import sys
 
 
@@ -33,6 +35,39 @@ ENTRY_FILE = re.compile(r"[A-Za-z][A-Za-z0-9_-]*\.qml", re.ASCII)
 
 class PackValidationError(ValueError):
     """Untrusted pack descriptor is invalid or unsupported."""
+
+
+def require_real_path_components(path, message):
+    """Raise PackValidationError if any component of *path* is a symlink.
+
+    A leaf-only ``is_symlink()`` check is defeated by an aliased parent: the
+    whole catalog then resolves outside the declared tree while the caller
+    still records the declared path. Walk every component from the anchor
+    with ``lstat`` (never ``resolve``), so relative inputs and ordinary
+    multi-component Windows temp paths behave exactly as before.
+    """
+    try:
+        raw = os.fspath(path)
+    except TypeError as exc:
+        raise PackValidationError(message) from exc
+    if not isinstance(raw, str) or not raw or "\x00" in raw:
+        raise PackValidationError(message)
+    if os.pardir in Path(raw).parts:
+        # abspath collapses '..' lexically, which could conceal an alias.
+        raise PackValidationError(message)
+    try:
+        parts = Path(os.path.abspath(raw)).parts
+    except (OSError, ValueError) as exc:
+        raise PackValidationError(message) from exc
+    current = Path(parts[0])
+    for part in parts[1:]:
+        current = current / part
+        try:
+            mode = os.lstat(current).st_mode
+        except OSError as exc:
+            raise PackValidationError(message) from exc
+        if stat.S_ISLNK(mode):
+            raise PackValidationError(message)
 
 
 def _unique_object(pairs):
@@ -81,6 +116,9 @@ def validate_pack(pack_root: Path) -> dict:
     pack_root = Path(pack_root)
     if pack_root.is_symlink() or not pack_root.is_dir():
         raise PackValidationError("pack must be a real local directory")
+    # The leaf check above is defeated by an aliased ancestor; fail closed on
+    # every component so the descriptor cannot escape the declared pack path.
+    require_real_path_components(pack_root, "pack must be a real local directory")
     manifest_path = pack_root / "manifest.json"
     if manifest_path.is_symlink() or not manifest_path.is_file():
         raise PackValidationError("manifest.json must be a regular local file")

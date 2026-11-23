@@ -247,16 +247,10 @@ jobs:
               --size "$size" \
               --output "test-artifacts/dock-clean-edges-diff-$size.json"
           done
-          # A normal Qt approved-art launch MUST exactly match the cleaned
-          # renderer, apart from the bounded minute-changing top-bar clock.
-          python3 - <<'PY'
-          from pathlib import Path
-          from tools.check_dock_optical_balance_quality import equivalent_selected_default
-          clock_delta = equivalent_selected_default(
-              Path("test-artifacts/classic-selected-default-1200x750.png"),
-              Path("test-artifacts/dock-clean-edges-1200x750.png"), "1200x750")
-          print("CLEAN_DEFAULT_MATCH_PASS: identical selected renderer", clock_delta)
-          PY
+          # Historical unshifted clean-art mode is now a *rollback*, not the
+          # normal default. Its screenshot remains checked for integrity and
+          # five-only source isolation. Default identity is checked against
+          # dock-five-center AFTER the target images have been captured.
           sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
 
       - name: Prove FIVE-only centering in real Qt at three resolutions

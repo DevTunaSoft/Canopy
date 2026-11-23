@@ -19,11 +19,15 @@ class CleanIconEdgesContractTests(unittest.TestCase):
         cls.provider = (P / "RoundedDockIconProvider.cpp").read_text(encoding="utf-8")
         cls.header = (P / "RoundedDockIconProvider.h").read_text(encoding="utf-8")
 
-    def test_preview_only_and_verified_master_required(self):
+    def test_selected_default_and_verified_master_required(self):
         self.assertIn('args.contains(QStringLiteral("--dock-clean-edges-review"))', self.main)
         self.assertIn("if (dockCleanEdgesReviewMode && !approvedMode)", self.main)
         self.assertIn("DOCK_CLEAN_EDGES_FAIL", self.main)
-        self.assertIn("!dockCleanEdgesReviewMode;", self.main)
+        self.assertIn("dockCleanEdgesReviewModeSelected =", self.main)
+        self.assertIn("approvedMode && !dockOriginalFitMode &&", self.main)
+        self.assertIn("!explicitOpticalBalanceReview;", self.main)
+        self.assertIn("approvedMode && explicitOpticalBalanceReview;", self.main)
+        self.assertIn("if (dockOriginalFitMode && !approvedMode)", self.main)
         self.assertIn("bool cleanSourceEdgesReviewMode = false", self.header)
         self.assertIn("if (cleanSourceEdgesReviewMode && !terminalDerivative)", self.provider)
         self.assertNotIn("dockCleanEdgesReviewMode = true", self.main)

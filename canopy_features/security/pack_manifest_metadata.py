@@ -42,7 +42,9 @@ _CONTROL = re.compile(r"[\x00-\x1f\x7f]")
 
 # Executable-looking field names are rejected as keys, before any value is
 # read. An exact token between separators avoids false positives on valid
-# manifest keys such as "shell_api" or "entrypoint".
+# manifest keys such as "shell_api" or "entrypoint". The key is first folded
+# to a canonical underscore form (see _normalize_key) so a hostile manifest
+# cannot hide the same token behind a hyphen, a dot or camelCase.
 _EXECUTABLE_KEY = re.compile(
     r"(?:^|_)(?:"
     r"exec|executable|command|cmd|script|run|hook|callback|spawn|launch|"
@@ -51,6 +53,22 @@ _EXECUTABLE_KEY = re.compile(
     r")(?:$|_)",
     re.IGNORECASE,
 )
+
+_KEY_SEPARATOR = re.compile(r"[^A-Za-z0-9]+")
+_CAMEL_LOWER_UPPER = re.compile(r"([a-z0-9])([A-Z])")
+_CAMEL_ACRONYM = re.compile(r"([A-Z])([A-Z][a-z])")
+
+
+def _normalize_key(key: str) -> str:
+    """Fold alternate key separators to the underscore form the rule expects.
+
+    ``exec-path``, ``exec.path``, ``execPath`` and ``EXEC-PATH`` all become
+    ``exec_path``. Non-separator spellings such as ``filepath`` are left as
+    one token, keeping the rule's original no-false-positive behaviour.
+    """
+    folded = _CAMEL_LOWER_UPPER.sub(r"\1_\2", key)
+    folded = _CAMEL_ACRONYM.sub(r"\1_\2", folded)
+    return _KEY_SEPARATOR.sub("_", folded).strip("_").lower()
 
 _URI = re.compile(
     r"^(?:[A-Za-z][A-Za-z0-9+.-]*://|(?:file|data|javascript|mailto):)",
@@ -114,7 +132,7 @@ def _scan(value: Any, depth: int, used: list) -> None:
         for key, child in value.items():
             if not isinstance(key, str):
                 raise PackValidationError("metadata keys must be strings")
-            if _EXECUTABLE_KEY.search(key):
+            if _EXECUTABLE_KEY.search(_normalize_key(key)):
                 raise PackValidationError(f"executable-looking metadata field: {key}")
             _scan(child, depth + 1, used)
         return

@@ -64,9 +64,16 @@ class SessionEvent:
             raise LockSessionEventError("event timestamp exceeds bound")
         if not math.isfinite(self.timestamp):
             raise LockSessionEventError("event timestamp must be finite")
-        if (type(self.source) is not str
-                or len(self.source.encode("utf-8")) > MAX_SOURCE_BYTES
-                or not _SOURCE.fullmatch(self.source)):
+        if type(self.source) is not str:
+            raise LockSessionEventError("invalid event source")
+        try:
+            source_bytes = len(self.source.encode("utf-8"))
+        except UnicodeEncodeError:
+            # An unpaired surrogate cannot be UTF-8 encoded, so its byte length
+            # (and the MAX_SOURCE_BYTES bound) is undefined. That is a
+            # structural event-contract violation, not a leaked Unicode error.
+            raise LockSessionEventError("invalid event source") from None
+        if source_bytes > MAX_SOURCE_BYTES or not _SOURCE.fullmatch(self.source):
             raise LockSessionEventError("invalid event source")
 
 

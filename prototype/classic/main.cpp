@@ -310,10 +310,15 @@ int main(int argc, char *argv[]) {
         args.contains(QStringLiteral("--dock-optical-balance-review"));
     const bool dockCleanEdgesReviewMode =
         args.contains(QStringLiteral("--dock-clean-edges-review"));
+    // Real-Qt, approved-art-only optional five-icon positioning study.
+    // Calendar, Photos and Music use the identical clean-matte code path.
+    const bool dockFiveCenterReviewMode =
+        args.contains(QStringLiteral("--dock-five-center-review"));
     const int iconReviewFlags = (dockInnerReviewMode ? 1 : 0)
         + (dockBalancedFitReviewMode ? 1 : 0)
         + (explicitOpticalBalanceReview ? 1 : 0)
-        + (dockCleanEdgesReviewMode ? 1 : 0);
+        + (dockCleanEdgesReviewMode ? 1 : 0)
+        + (dockFiveCenterReviewMode ? 1 : 0);
     if (iconReviewFlags > 1) {
         qCritical() << "DOCK_OPTICAL_BALANCE_FAIL: conflicting dock visual modes";
         return 2;
@@ -352,6 +357,10 @@ int main(int argc, char *argv[]) {
     }
     if (dockCleanEdgesReviewMode && !approvedMode) {
         qCritical() << "DOCK_CLEAN_EDGES_FAIL: SHA-locked approved art required";
+        return 2;
+    }
+    if (dockFiveCenterReviewMode && !approvedMode) {
+        qCritical() << "DOCK_FIVE_CENTER_FAIL: exact approved icon masters required";
         return 2;
     }
     const bool requireApproved = args.contains(QStringLiteral("--self-test-approved"));
@@ -442,7 +451,7 @@ int main(int argc, char *argv[]) {
         auto *roundedIcons = new RoundedDockIconProvider(
             approvedRoot, terminalCandidatePath, dockInnerReviewMode,
             &roundedError, dockBalancedFitReviewMode, dockOpticalBalanceReviewMode,
-            dockCleanEdgesReviewModeSelected);
+            dockCleanEdgesReviewModeSelected, dockFiveCenterReviewMode);
         if (!roundedIcons->isValid() || !roundedIcons->allCornersClipped()) {
             qCritical().noquote() << "APPROVED_ART_FAIL: rounded dock rendering:"
                                    << roundedError;
@@ -467,6 +476,10 @@ int main(int argc, char *argv[]) {
             qInfo() << "DOCK_CLEAN_EDGES_ACTIVE: exact approved source cleanup "
                        "selected for normal startup, frozen PNGs and QML geometry; "
                        "original and optical rollback modes retained";
+        if (dockFiveCenterReviewMode)
+            qInfo() << "DOCK_FIVE_CENTER_ACTIVE: Browser, Mail, Files, Terminal, Settings "
+                       "artwork re-centered inside unchanged mask; "
+                       "Calendar/Photos/Music exact pixel lock retained";
         if (framingReviewMode) {
             QString reviewError;
             auto *launcherReviewIcons = new RoundedDockIconProvider(
@@ -603,6 +616,7 @@ int main(int argc, char *argv[]) {
             [window, screenshotPath, launcherScreenshotPath, approvedMode, landscapeMode,
              framingReviewMode, dockInnerReviewMode, dockBalancedFitReviewMode,
              dockOpticalBalanceReviewMode, dockCleanEdgesReviewModeSelected,
+             dockFiveCenterReviewMode,
              terminalCandidateMode = !terminalCandidatePath.isEmpty()]() {
             auto *bar = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBar"));
             auto *clock = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBarClock"));
@@ -715,6 +729,9 @@ int main(int argc, char *argv[]) {
                 qInfo() << "SELF_TEST_PASS: dock optical balance inside unchanged geometry";
             if (dockCleanEdgesReviewModeSelected)
                 qInfo() << "SELF_TEST_PASS: approved icon matte cleaned only inside dock";
+            if (dockFiveCenterReviewMode)
+                qInfo() << "SELF_TEST_PASS: five icons optically centered; "
+                           "Calendar Photos Music untouched";
 
             const QPointF barOrigin = bar->mapToItem(window->contentItem(), QPointF(0, 0));
             const QPointF dockOrigin = dock->mapToItem(window->contentItem(), QPointF(0, 0));

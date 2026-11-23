@@ -206,12 +206,23 @@ jobs:
             --self-test-approved --self-test-size 1200x750 \
             --self-test-screenshot test-artifacts/classic-selected-default-1200x750.png
           python3 tools/check_screenshot.py test-artifacts/classic-selected-default-1200x750.png 1200 750
+          # Keep independent optical-balance regression evidence, but do not
+          # conflate it with the now-selected cleaner source renderer.
           python3 tools/check_dock_optical_balance_quality.py \
             --before test-artifacts/classic-1200x750.png \
             --after test-artifacts/dock-optical-balance-1200x750.png \
-            --selected-default test-artifacts/classic-selected-default-1200x750.png \
             --size 1200x750 \
             --output test-artifacts/dock-optical-balance-quality-1200x750.json
+          # A normal Qt approved-art launch MUST exactly match the cleaned
+          # renderer, apart from the bounded minute-changing top-bar clock.
+          python3 - <<'PY'
+          from pathlib import Path
+          from tools.check_dock_optical_balance_quality import equivalent_selected_default
+          clock_delta = equivalent_selected_default(
+              Path("test-artifacts/classic-selected-default-1200x750.png"),
+              Path("test-artifacts/dock-clean-edges-1200x750.png"), "1200x750")
+          print("CLEAN_DEFAULT_MATCH_PASS: identical selected renderer", clock_delta)
+          PY
           sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
 
       - name: Capture exact-original clean-matte dock preview from compiled Qt

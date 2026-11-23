@@ -300,16 +300,28 @@ int main(int argc, char *argv[]) {
     const bool dockInnerReviewMode = args.contains(QStringLiteral("--dock-inner-framing-review"));
     const bool dockBalancedFitReviewMode =
         args.contains(QStringLiteral("--dock-balanced-fit-review"));
-    const bool dockOpticalBalanceReviewMode =
+    // The visually evaluated optical-balance treatment is the approved-art
+    // default. --dock-original-fit gives an exact rollback without changing
+    // any artwork bytes. Other dock preview flags remain independent. The
+    // launcher-only frame-review flag does not change the dock appearance.
+    const bool dockOriginalFitMode =
+        args.contains(QStringLiteral("--dock-original-fit"));
+    const bool explicitOpticalBalanceReview =
         args.contains(QStringLiteral("--dock-optical-balance-review"));
-    const int iconReviewFlags = (framingReviewMode ? 1 : 0)
-        + (dockInnerReviewMode ? 1 : 0)
+    const int iconReviewFlags = (dockInnerReviewMode ? 1 : 0)
         + (dockBalancedFitReviewMode ? 1 : 0)
-        + (dockOpticalBalanceReviewMode ? 1 : 0);
+        + (explicitOpticalBalanceReview ? 1 : 0);
     if (iconReviewFlags > 1) {
-        qCritical() << "DOCK_OPTICAL_BALANCE_FAIL: conflicting visual preview flags";
+        qCritical() << "DOCK_OPTICAL_BALANCE_FAIL: conflicting dock visual modes";
         return 2;
     }
+    if (dockOriginalFitMode && iconReviewFlags > 0) {
+        qCritical() << "DOCK_OPTICAL_BALANCE_FAIL: original fit cannot combine with previews";
+        return 2;
+    }
+    const bool dockOpticalBalanceReviewMode =
+        approvedMode && !dockOriginalFitMode &&
+        !dockInnerReviewMode && !dockBalancedFitReviewMode;
     if (framingReviewMode && !approvedMode) {
         qCritical() << "ICON_FRAMING_REVIEW_FAIL: exact SHA-locked approved art required";
         return 2;
@@ -322,8 +334,12 @@ int main(int argc, char *argv[]) {
         qCritical() << "DOCK_BALANCED_FIT_REVIEW_FAIL: approved SHA-locked art required";
         return 2;
     }
-    if (dockOpticalBalanceReviewMode && !approvedMode) {
+    if (explicitOpticalBalanceReview && !approvedMode) {
         qCritical() << "DOCK_OPTICAL_BALANCE_FAIL: approved SHA-locked originals required";
+        return 2;
+    }
+    if (dockOriginalFitMode && !approvedMode) {
+        qCritical() << "DOCK_OPTICAL_BALANCE_FAIL: original fit requires approved art";
         return 2;
     }
     const bool requireApproved = args.contains(QStringLiteral("--self-test-approved"));
@@ -430,9 +446,10 @@ int main(int argc, char *argv[]) {
                        "square sample; no changes to approved originals, dock QML or "
                        "launcher; NOT visually approved";
         if (dockOpticalBalanceReviewMode)
-            qInfo() << "DOCK_OPTICAL_BALANCE_ACTIVE: approved originals rendered in "
-                       "uniform 160px inset with measured optical compensation; "
-                       "dock geometry and wallpaper UNCHANGED; review only";
+            qInfo() << "DOCK_OPTICAL_BALANCE_ACTIVE: original SHA-locked PNGs "
+                       "rendered in selected uniform 160px inset with "
+                       "measured optical compensation; dock geometry and "
+                       "wallpaper UNCHANGED; legacy renderer remains available";
         if (framingReviewMode) {
             QString reviewError;
             auto *launcherReviewIcons = new RoundedDockIconProvider(

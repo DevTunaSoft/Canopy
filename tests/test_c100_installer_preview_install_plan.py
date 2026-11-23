@@ -31,7 +31,19 @@ def ready_preflight():
 def make_binary(directory):
     exe = Path(directory) / "canopy-classic"
     exe.write_bytes(b"fake compiled qt binary")
+    # Windows os.access(X_OK) treats any existing file as executable; POSIX
+    # CI runners require the real permission bit. Set it in the fixture.
+    if os.name == "posix":
+        exe.chmod(0o755)
     return exe
+
+
+def _posix_access(path, mode):
+    """Emulate the POSIX executable-bit check on every host for regression tests."""
+    try:
+        return bool(os.stat(path).st_mode & 0o111)
+    except OSError:
+        return False
 
 
 class PreviewInstallPlanTests(unittest.TestCase):
@@ -92,6 +104,15 @@ class PreviewInstallPlanTests(unittest.TestCase):
             plan = self.plan()
         self.assertEqual(plan["status"], "BLOCKED")
         self.assertTrue(any("not executable" in b for b in plan["blockers"]))
+
+    def test_executable_bit_produces_ready_plan_with_posix_access_semantics(self):
+        """Regression for POSIX CI: the fixture binary must carry +x."""
+        art = self.root / "approved"
+        art.mkdir()
+        with mock.patch.object(planner.os, "access", side_effect=_posix_access):
+            plan = self.plan(art=art)
+        self.assertEqual(plan["status"], "READY", plan["blockers"])
+        self.assertIsNotNone(plan["exec_command"])
 
     # -- payload reuses the real installer's quoting and template ----------
     def test_desktop_payload_reuses_installer_quoting_and_manifest_digest(self):

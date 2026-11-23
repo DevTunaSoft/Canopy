@@ -2,12 +2,14 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import json
+from contextlib import redirect_stdout
 from pathlib import Path
 import tempfile
 import unittest
 
-from tools.check_visual_lock import AWAITING, check
+from tools.check_visual_lock import AWAITING, check, main
 
 ICON = b"approved-icon-bytes"
 WALL = b"approved-wallpaper-bytes"
@@ -106,6 +108,32 @@ class VisualLockTests(unittest.TestCase):
         check(self.root, self._baseline())
         self.assertEqual(icon.read_bytes(), before)
         self.assertEqual((self.root / MANIFEST_PATH).read_bytes(), manifest_before)
+
+    def test_cli_exit_zero_when_awaiting_owner(self):
+        """CI gate must not fail merely because no owner baseline exists."""
+        out = io.StringIO()
+        with redirect_stdout(out):
+            code = main(["--root", str(self.root), "--json"])
+        self.assertEqual(code, 0)
+        self.assertEqual(json.loads(out.getvalue())["status"], AWAITING)
+
+    def test_cli_exit_nonzero_on_tampered_asset(self):
+        """CI gate must fail closed when an approved asset is modified."""
+        (self.root / MANIFEST_PATH.parent / "icons" / "Browser_Option_3.png").write_bytes(
+            b"tampered")
+        out = io.StringIO()
+        with redirect_stdout(out):
+            code = main(["--root", str(self.root), "--json"])
+        self.assertEqual(code, 1)
+        self.assertEqual(json.loads(out.getvalue())["status"], "FAIL")
+
+    def test_foundation_ci_runs_visual_lock_gate(self):
+        """The Foundation workflow must actually execute the visual-lock gate."""
+        repo_root = Path(__file__).resolve().parent.parent
+        workflow = (repo_root / ".github" / "workflows" / "foundation.yml").read_text(
+            encoding="utf-8")
+        self.assertIn("tools/check_visual_lock.py", workflow)
+        self.assertIn("--json", workflow)
 
 
 if __name__ == "__main__":

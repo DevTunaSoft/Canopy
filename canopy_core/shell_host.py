@@ -12,6 +12,10 @@ from dataclasses import dataclass
 from threading import Lock
 from typing import Callable, FrozenSet, Mapping, Optional, Protocol
 
+from .capabilities import (
+    CapabilityError, describe as _describe_capability,
+    load as _load_capability, names as _capability_names,
+)
 from .registry import PackScan
 
 
@@ -78,6 +82,29 @@ class ShellHost:
     @property
     def needs_recovery(self) -> bool:
         return self._needs_recovery
+
+    def available_capabilities(self) -> tuple:
+        """Static catalog names explicitly allowed by this host.
+
+        The host capability allowlist supplied at construction gates every
+        return value. Discovery imports no feature module and changes no
+        presentation state.
+        """
+        return tuple(name for name in _capability_names()
+                     if name in self._capabilities)
+
+    def describe_capability(self, name: str):
+        """Return the immutable descriptor for one host-allowed capability."""
+        if not isinstance(name, str) or name not in self._capabilities:
+            raise CapabilityError("capability not allowed by this host")
+        return _describe_capability(name)
+
+    def load_capability(self, name: str):
+        """Lazily load one host-allowed pure capability callable."""
+        descriptor = self.describe_capability(name)
+        if descriptor.visual:
+            raise CapabilityError("visual capabilities are not loadable here")
+        return _load_capability(name)
 
     @staticmethod
     def _attempt(view: Presentation, method: str) -> Optional[str]:

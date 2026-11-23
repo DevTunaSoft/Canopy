@@ -54,7 +54,10 @@ def base_dir(kind, *, home=None, env=None):
 
     Resolution is lexical: no directory is created and no symlink is followed.
     """
-    if kind not in _BASES:
+    # Guard the type before the dict lookup: an unhashable kind (list/dict)
+    # would otherwise raise TypeError from the membership test instead of the
+    # documented UnsafeXdgPath. The isinstance check short-circuits it.
+    if not isinstance(kind, str) or kind not in _BASES:
         raise UnsafeXdgPath("unknown XDG base kind: " + str(kind))
     variable, default = _BASES[kind]
     if kind == "data" and home is None and env is None:
@@ -76,12 +79,21 @@ def base_dir(kind, *, home=None, env=None):
 
 
 def _absolute(target):
-    if target is None or isinstance(target, bytes):
+    # Only str / os.PathLike are path-shaped. Reject everything else (int,
+    # bool, list, dict, float, None, bytes, ...) with the documented domain
+    # error before pathlib raises a bare TypeError. Also fail closed for a
+    # PathLike whose __fspath__ is broken or returns non-str.
+    if not isinstance(target, (str, os.PathLike)):
         raise UnsafeXdgPath("target must be a path")
-    text = str(target)
+    try:
+        text = os.fspath(target)
+    except (TypeError, ValueError):
+        raise UnsafeXdgPath("target must be a path") from None
+    if not isinstance(text, str):
+        raise UnsafeXdgPath("target must be a path")
     if "\x00" in text:
         raise UnsafeXdgPath("target contains a null byte")
-    p = Path(target)
+    p = Path(text)
     if not p.is_absolute():
         raise UnsafeXdgPath("target must be absolute")
     return p

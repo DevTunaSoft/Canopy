@@ -29,6 +29,7 @@ EVIDENCE_KINDS = ("frame_pacing", "memory_growth", "launch_latency", "pss")
 MAX_PROVENANCE_VALUES = 128
 MAX_EXCLUDED = 256
 MAX_PSS_KIB = 2 ** 31 - 1
+MAX_DELTA_KIB = 2 ** 31 - 1
 
 NOT_ESTABLISHED = "NOT_ESTABLISHED"
 MEMORY_STATUSES = frozenset({"ok"})
@@ -70,6 +71,26 @@ def _float_or_none(value, label):
     return value
 
 
+def _number_or_none(value, label):
+    """Accept a finite number or None, rejecting bool and unbounded ints.
+
+    ``memory_delta`` emits a float for most derived fields but an int for the
+    mean when the interaction span is zero; both are valid outputs of the
+    already-tested parser and must survive projection unchanged.
+    """
+    if value is None:
+        return None
+    if type(value) is float:
+        if not math.isfinite(value):
+            raise SnapshotError(label + " must be a finite number or None")
+        return value
+    if type(value) is int:
+        if not -MAX_DELTA_KIB <= value <= MAX_DELTA_KIB:
+            raise SnapshotError(label + " exceeds its bound")
+        return value
+    raise SnapshotError(label + " must be a finite number or None")
+
+
 def _text_tuple(values, label, cap):
     if type(values) not in (list, tuple):
         raise SnapshotError(label + " must be a list or tuple")
@@ -94,9 +115,15 @@ def _project_memory(value):
             raise SnapshotError("incomplete memory growth evidence: " + key)
     projected = {}
     for key in MEMORY_INT_KEYS:
-        projected[key] = _int(source[key], "memory " + key, minimum=0)
+        if key == "delta_kib":
+            # Signed by design: memory_delta reports released memory as-is.
+            projected[key] = _int(
+                source[key], "memory " + key,
+                minimum=-MAX_DELTA_KIB, maximum=MAX_DELTA_KIB)
+        else:
+            projected[key] = _int(source[key], "memory " + key, minimum=0)
     for key in MEMORY_FLOAT_KEYS:
-        projected[key] = _float_or_none(source[key], "memory " + key)
+        projected[key] = _number_or_none(source[key], "memory " + key)
     status = source["status"]
     if type(status) is not str or status not in MEMORY_STATUSES:
         raise SnapshotError("unsupported memory growth status")

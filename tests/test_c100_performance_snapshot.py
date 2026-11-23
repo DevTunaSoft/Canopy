@@ -220,6 +220,37 @@ class PerformanceSnapshotTests(unittest.TestCase):
             with self.subTest(field=field), self.assertRaises(TypeError):
                 compose_snapshot(**{field: "forged"})
 
+    def test_valid_negative_growth_is_preserved(self):
+        # memory_delta documents that released memory is reported as-is.
+        released = report_growth([
+            MemorySample(0, 200_000), MemorySample(1, 150_000),
+        ])
+        self.assertEqual(released["delta_kib"], -50_000)
+        snap = compose_snapshot(memory_growth=released)
+        self.assertEqual(snap.memory_growth["delta_kib"], -50_000)
+        self.assertEqual(snap.memory_growth["delta_percent"], -25.0)
+
+    def test_valid_zero_span_integer_mean_is_preserved(self):
+        # report_growth returns an int mean when interactions span zero.
+        same_span = report_growth([
+            MemorySample(5, 120_000), MemorySample(5, 130_000),
+        ])
+        self.assertEqual(type(same_span["mean_growth_per_interaction_kib"]),
+                         int)
+        snap = compose_snapshot(memory_growth=same_span)
+        self.assertEqual(snap.memory_growth["interactions"], 0)
+        self.assertEqual(snap.memory_growth["mean_growth_per_interaction_kib"],
+                         10_000)
+
+    def test_delta_kib_remains_bounded_after_signed_support(self):
+        source = memory()
+        source["delta_kib"] = -(2 ** 31)
+        with self.assertRaises(SnapshotError):
+            compose_snapshot(memory_growth=source)
+        source["delta_kib"] = True
+        with self.assertRaises(SnapshotError):
+            compose_snapshot(memory_growth=source)
+
     def test_no_measurement_or_visual_imports(self):
         source = Path(__file__).resolve().parents[1] / (
             "canopy_features/performance/performance_snapshot.py")

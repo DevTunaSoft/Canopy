@@ -204,7 +204,6 @@ RoundedDockIconProvider::RoundedDockIconProvider(
             // approved originals, 168px face, 54px QML slot, dock chrome,
             // launchers and the three frozen icons remain identical.
             // No new image provider, timer or background processing.
-            QRectF artwork = inner;
             if (fiveOnlyCenterReviewMode) {
                 const auto center = kFiveDockCenterOffsets.constFind(id);
                 if (center != kFiveDockCenterOffsets.cend()) {
@@ -214,10 +213,18 @@ RoundedDockIconProvider::RoundedDockIconProvider(
                         m_images.clear();
                         return;
                     }
+                    QRectF artwork = inner;
                     artwork.translate(delta);
+                    painter.drawImage(artwork, source);
+                } else {
+                    // Calendar, Photos and Music follow the EXACT existing
+                    // painter call, not a translated zero-offset derivative.
+                    painter.drawImage(inner, source);
                 }
+            } else {
+                // Original default behavior is deliberately unchanged.
+                painter.drawImage(inner, source);
             }
-            painter.drawImage(artwork, source);
         } else if (opticalBalanceReviewMode && !terminalDerivative) {
             // Candidate D: gently normalize optical centers without cropping
             // or changing the user's original art. The 160px image is a

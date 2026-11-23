@@ -12,6 +12,8 @@ from pathlib import Path
 import struct
 import sys
 
+from tools.audit_approved_icon_optics import decode_rgba_png, AuditError
+
 TARGET = ("browser", "mail", "files", "terminal", "settings")
 FROZEN = ("calendar", "photos", "music")
 DENSITIES = (1, 2, 3)
@@ -85,6 +87,17 @@ def verify_pack(master_dir: Path, output_dir: Path):
                 raise ProductionIconError("production icon lacks transparent corner capacity: " + rel)
             if row.get("pixels") != 192*density:
                 raise ProductionIconError("production manifest dimensions mismatch: " + rel)
+            try:
+                decoded_width, decoded_height, rgba = decode_rgba_png(blob)
+            except AuditError as exc:
+                raise ProductionIconError("PNG pixel/CRC integrity failure: " + rel) from exc
+            if (decoded_width, decoded_height) != (width, height):
+                raise ProductionIconError("decoded dimensions mismatch: " + rel)
+            for x, y in ((0, 0), (width-1, 0), (0, height-1), (width-1, height-1)):
+                if rgba[4 * (y*width+x) + 3] != 0:
+                    raise ProductionIconError("source-derived icon corner must be transparent: " + rel)
+            if rgba[4*((height//2)*width+width//2)+3] < 250:
+                raise ProductionIconError("source-derived icon center unexpectedly transparent: " + rel)
             hashes[rel] = row["sha256"]
     return {
         "verified_source_master_count": 8,
@@ -115,7 +128,7 @@ def main(argv=None):
             print(payload,end="")
         print("CANOPY_FIVE_PRODUCTION_ASSET_PACK_PASS: 15 SHA-checked PNGs; 3 frozen excluded")
         return 0
-    except (OSError,ValueError,KeyError,TypeError,json.JSONDecodeError) as exc:
+    except (OSError,ValueError,KeyError,TypeError,json.JSONDecodeError,AuditError) as exc:
         print("CANOPY_FIVE_PRODUCTION_ASSET_PACK_FAIL:",exc,file=sys.stderr)
         return 1
 

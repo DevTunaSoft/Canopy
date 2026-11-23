@@ -92,13 +92,32 @@ def _unsafe_components(root: Path, path: Path) -> bool:
     return False
 
 
+def _entry_sort_key(name):
+    """Total, non-raising order over arbitrary mapping keys.
+
+    Valid string keys sort exactly as before. Non-string keys are grouped
+    after them and ordered by their text and type name, so a malformed mapping
+    can never abort the audit in ``sorted()`` before its INVALID problem is
+    recorded. Both ``str()`` fallbacks are guarded for hostile objects.
+    """
+    if isinstance(name, str):
+        # Bypass custom __lt__/__str__ on a str subclass.
+        return (0, str.__str__(name), "")
+    try:
+        text = str(name)
+    except Exception:
+        text = ""
+    return (1, text, type(name).__name__)
+
+
 def verify(entries=None, root=None) -> ManifestReport:
     """Audit catalog targets as source text only; never import feature code.
 
     ``entries`` maps a capability name to ``(module, attribute, area)`` and
     defaults to the live static catalog. ``root`` defaults to the repository
     root. Both are injectable for offline tests; every injected value is held
-    to the same regex validation as the owner-reviewed catalog.
+    to the same regex validation as the owner-reviewed catalog. Malformed
+    mapping keys are reported as bounded INVALID problems, never raised.
     """
     if entries is None:
         entries = _entries_from_catalog()
@@ -108,13 +127,17 @@ def verify(entries=None, root=None) -> ManifestReport:
         root = Path(root)
 
     problems = []
-    for name in sorted(entries):
+    for name in sorted(entries, key=_entry_sort_key):
         target = entries[name]
         if (not isinstance(name, str)
                 or not capabilities.CAPABILITY_NAME.fullmatch(name)
                 or not isinstance(target, tuple) or len(target) != 3
                 or not all(isinstance(part, str) for part in target)):
-            problems.append(ManifestProblem(str(name), INVALID))
+            try:
+                display = str(name)
+            except Exception:
+                display = ""
+            problems.append(ManifestProblem(display, INVALID))
             continue
         module, attribute, area = target
         if (not capabilities.MODULE_NAME.fullmatch(module)

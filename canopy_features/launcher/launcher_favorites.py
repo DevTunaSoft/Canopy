@@ -45,6 +45,29 @@ def _reject_constant(value):
     raise FavoritesError("invalid JSON constant in favorites state")
 
 
+def _installed_set(installed_ids):
+    """Fail-closed conversion of a caller catalog into an installed-id set.
+
+    A bare string is one id, not an iterable of ids: coercing it into a set
+    turns every character into a fake catalog entry, so ``visible`` hides
+    every favorite. Worse, ``prune`` would then persist that empty visible
+    set and permanently erase the user's saved favorites. Mappings are
+    refused for the same reason (iterating one silently uses only its keys),
+    and unhashable entries collapse to this module's domain error instead of
+    leaking a raw ``TypeError``.
+    """
+    if isinstance(installed_ids, (str, bytes, bytearray, dict)):
+        raise FavoritesError("installed ids must be a collection of ids")
+    try:
+        iterator = iter(installed_ids)
+    except TypeError as exc:
+        raise FavoritesError("installed ids must be a collection of ids") from exc
+    try:
+        return frozenset(iterator)
+    except TypeError as exc:
+        raise FavoritesError("installed ids must be hashable") from exc
+
+
 def valid_app_id(value):
     """True for a bounded, plain-ASCII stable application ID."""
     return (type(value) is str and 1 <= len(value) <= MAX_ID_BYTES
@@ -103,7 +126,7 @@ class FavoritesStore:
         Non-destructive: a temporarily empty catalog hides favorites without
         erasing them.
         """
-        installed = frozenset(installed_ids)
+        installed = _installed_set(installed_ids)
         return tuple(item for item in self._ids if item in installed)
 
     def prune(self, installed_ids):

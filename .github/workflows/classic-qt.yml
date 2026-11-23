@@ -320,6 +320,7 @@ jobs:
             --golden docs/CLASSIC_FIVE_DOCK_GOLDEN.json \
             --screens-dir test-artifacts \
             --image-prefix dock-five-center- \
+            --require-complete \
             --output test-artifacts/five-icon-golden-report.json
 
       - name: Verify ordinary Qt launch selects exactly the five-icon correction

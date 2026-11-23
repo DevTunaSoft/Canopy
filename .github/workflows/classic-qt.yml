@@ -8,7 +8,7 @@ on:
   pull_request:
   push:
     # Isolated visual CI can run even when draft PR targets a non-main Qt branch.
-    branches: [main, visual/dock-inner-framing-review-20261122, visual/dock-balanced-fit-20261122]
+    branches: [main, visual/dock-inner-framing-review-20261122, visual/dock-balanced-fit-20261122, visual/dock-optical-balance-20261122]
   workflow_dispatch:
 
 permissions:
@@ -67,7 +67,7 @@ jobs:
         run: python3 -m unittest tests.test_approved_art tests.test_approved_manifest_contract tests.test_approved_art_zip -v
 
       - name: Visual-only regression and negative-control tests
-        run: python3 -m unittest tests.test_classic_dock_frozen tests.test_classic_shared_icon_framing tests.test_dock_inner_framing_review tests.test_dock_balanced_fit_review -v
+        run: python3 -m unittest tests.test_classic_dock_frozen tests.test_classic_shared_icon_framing tests.test_dock_inner_framing_review tests.test_dock_balanced_fit_review tests.test_dock_optical_balance_review -v
 
       - name: Headless startup smoke test
         timeout-minutes: 2
@@ -158,6 +158,41 @@ jobs:
               --after "test-artifacts/dock-balanced-fit-$size.png" \
               --size "$size" \
               --output "test-artifacts/dock-balanced-fit-diff-$size.json"
+          done
+          sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
+
+      - name: Capture original-art optical-balanced dock from real Qt
+        # Third candidate, preserving all eight original source files,
+        # fixed mask, QML geometry, and existing default.
+        timeout-minutes: 4
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          set -eu
+          set +e
+          xvfb-run -a ./build/classic/canopy-classic-spike --dock-optical-balance-review >test-artifacts/dock-optical-without-approved.log 2>&1
+          rejected=$?
+          set -e
+          test "$rejected" -eq 2
+          grep -q 'DOCK_OPTICAL_BALANCE_FAIL' test-artifacts/dock-optical-without-approved.log
+          for size in 1920x1080 1200x750 760x500; do
+            width="${size%x*}"
+            height="${size#*x}"
+            timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike \
+              --approved-art-dir prototype/classic/assets/approved \
+              --dock-optical-balance-review --self-test-approved \
+              --self-test-size "$size" \
+              --self-test-screenshot "test-artifacts/dock-optical-balance-$size.png" \
+              >"test-artifacts/dock-optical-balance-$size.log" 2>&1
+            grep -q 'DOCK_OPTICAL_BALANCE_ACTIVE' "test-artifacts/dock-optical-balance-$size.log"
+            grep -q 'SELF_TEST_PASS: dock optical balance inside unchanged geometry' "test-artifacts/dock-optical-balance-$size.log"
+            python3 tools/check_screenshot.py "test-artifacts/dock-optical-balance-$size.png" "$width" "$height"
+            python3 tools/check_dock_inner_framing.py \
+              --before "test-artifacts/classic-$size.png" \
+              --after "test-artifacts/dock-optical-balance-$size.png" \
+              --size "$size" \
+              --output "test-artifacts/dock-optical-balance-diff-$size.json"
           done
           sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
 

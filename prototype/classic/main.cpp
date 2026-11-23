@@ -915,7 +915,30 @@ int main(int argc, char *argv[]) {
             // hover highlights before both baseline and candidate screenshots;
             // this changes ONLY the CI/test capture, never runtime appearance.
             QCursor::setPos(window->mapToGlobal(QPoint(8, window->height() - 8)));
+            // Moving the Xvfb pointer alone does not reliably clear every
+            // QQuickControls hover state. For reproducible screenshot-mode
+            // capture, disable transient hover on all controls AFTER the
+            // behavioral tests and BEFORE grabbing the frame. These changes
+            // never execute in normal interactive Canopy runtime.
+            int neutralizedHoverControls = 0;
+            for (QObject *object : window->findChildren<QObject *>()) {
+                const auto state = object->property("hoverEnabled");
+                if (state.isValid() && state.toBool()) {
+                    if (!object->setProperty("hoverEnabled", false)) {
+                        qCritical() << "SELF_TEST_FAIL: cannot neutralize screenshot hover";
+                        QCoreApplication::exit(1);
+                        return;
+                    }
+                    ++neutralizedHoverControls;
+                }
+            }
+            if (neutralizedHoverControls < 8) {
+                qCritical() << "SELF_TEST_FAIL: too few screenshot hover controls";
+                QCoreApplication::exit(1);
+                return;
+            }
             QCoreApplication::processEvents();
+            qInfo() << "SELF_TEST_PASS: screenshot hover neutralized" << neutralizedHoverControls;
             const QImage frame = window->grabWindow();
             if (frame.isNull() || frame.width() < 720 || frame.height() < 480) {
                 qCritical() << "SELF_TEST_FAIL: invalid screenshot dimensions";

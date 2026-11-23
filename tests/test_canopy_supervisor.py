@@ -653,6 +653,33 @@ class SupervisorTests(unittest.TestCase):
         self.assertIn("invalid artifact SHA-256", task["last_error"])
         self.assertFalse(any(call[0] == "draft_pr" for call in self.git.calls))
 
+    def test_publish_rejects_artifact_without_sha256(self):
+        task_id = self._implementation_fixture()
+        evidence_path = self.root / "evidence" / task_id / "evidence.json"
+        evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+        del evidence["artifacts"][0]["sha256"]
+        evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+        data = self.store.load()
+        self.supervisor.verify(data)
+        self.store.save(data)
+        task = self._get(task_id)
+        self.assertEqual(task["status"], "failed")
+        self.assertIn("invalid artifact SHA-256", task["last_error"])
+        self.assertFalse(any(call[0] == "draft_pr" for call in self.git.calls))
+
+    def test_publish_rejects_non_string_sha256(self):
+        task_id = self._implementation_fixture()
+        evidence_path = self.root / "evidence" / task_id / "evidence.json"
+        evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+        evidence["artifacts"][0]["sha256"] = 123456
+        evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+        data = self.store.load()
+        self.supervisor.verify(data)
+        self.store.save(data)
+        task = self._get(task_id)
+        self.assertEqual(task["status"], "failed")
+        self.assertIn("invalid artifact SHA-256", task["last_error"])
+
     def test_dispatch_reserves_workers_and_respects_limit(self):
         for name in ("alpha", "beta", "gamma"):
             self._add(task_definition(name))

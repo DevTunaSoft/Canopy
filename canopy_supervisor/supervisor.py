@@ -422,20 +422,23 @@ class Supervisor:
             if not path.is_file():
                 raise PolicyError("artifact missing: " + item["path"])
             expected = item.get("sha256")
-            if isinstance(expected, str):
-                normalized = expected.strip()
-                try:
-                    expected_bytes = bytes.fromhex(normalized)
-                except ValueError as exc:
-                    raise PolicyError("invalid artifact SHA-256: " + item["path"]) from exc
-                if len(expected_bytes) != 32:
-                    raise PolicyError("invalid artifact SHA-256: " + item["path"])
-                # Workers may report hexadecimal in either case (or with
-                # surrounding whitespace); hashlib.hexdigest() is lowercase.
-                # Compare decoded bytes so formatting cannot cause a false
-                # verification failure for a genuinely identical artifact.
-                if hashlib.sha256(path.read_bytes()).digest() != expected_bytes:
-                    raise PolicyError("artifact SHA-256 mismatch: " + item["path"])
+            # A missing/non-string hash must never silently skip the integrity
+            # check: every declared artifact needs a verifiable digest.
+            if not isinstance(expected, str):
+                raise PolicyError("invalid artifact SHA-256: " + item["path"])
+            normalized = expected.strip()
+            try:
+                expected_bytes = bytes.fromhex(normalized)
+            except ValueError as exc:
+                raise PolicyError("invalid artifact SHA-256: " + item["path"]) from exc
+            if len(expected_bytes) != 32:
+                raise PolicyError("invalid artifact SHA-256: " + item["path"])
+            # Workers may report hexadecimal in either case (or with
+            # surrounding whitespace); hashlib.hexdigest() is lowercase.
+            # Compare decoded bytes so formatting cannot cause a false
+            # verification failure for a genuinely identical artifact.
+            if hashlib.sha256(path.read_bytes()).digest() != expected_bytes:
+                raise PolicyError("artifact SHA-256 mismatch: " + item["path"])
 
     def publish(self, task: dict) -> None:
         """Verify claims, commit, push and open a draft PR. Never merge."""

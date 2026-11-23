@@ -10,6 +10,9 @@ Rectangle {
     id: preview
     objectName: "canopyPreviewWindow"
     readonly property bool condensed: height < 390
+    // CI screenshot-only: force a repeatable resting state for Files tiles.
+    // Normal interactive use always leaves this false.
+    property bool screenshotCaptureMode: false
 
     // Shell/menu interface. The model is the single source of navigation state.
     property string currentPath: fileModel.currentPath
@@ -428,6 +431,7 @@ Rectangle {
                             folderTone: modelData.tone
                             compact: preview.condensed
                             selected: preview.selectedFolder === folderName
+                            screenshotCaptureMode: preview.screenshotCaptureMode
                             visible: folderName.toLowerCase().indexOf(
                                 preview.searchQuery.toLowerCase()) >= 0
                             onClicked: preview.selectedFolder = folderName

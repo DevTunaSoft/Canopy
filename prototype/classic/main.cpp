@@ -911,6 +911,11 @@ int main(int argc, char *argv[]) {
                 return;
             }
             qInfo() << "SELF_TEST_PASS: Files keyboard close and reopen bindings";
+            // Self-tests can leave Xvfb over a Files tile. Remove transient
+            // hover highlights before both baseline and candidate screenshots;
+            // this changes ONLY the CI/test capture, never runtime appearance.
+            QCursor::setPos(window->mapToGlobal(QPoint(8, window->height() - 8)));
+            QCoreApplication::processEvents();
             const QImage frame = window->grabWindow();
             if (frame.isNull() || frame.width() < 720 || frame.height() < 480) {
                 qCritical() << "SELF_TEST_FAIL: invalid screenshot dimensions";

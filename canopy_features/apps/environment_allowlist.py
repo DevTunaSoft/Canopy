@@ -53,6 +53,11 @@ _NEVER_ALLOW = frozenset({
     "XAUTHORITY", "SSH_AUTH_SOCK", "SSH_AGENT_PID", "GPG_AGENT_INFO",
     "KRB5CCNAME",
 })
+# Match these handles case-insensitively. On Windows the process environment
+# is case-insensitive, so a caller-supplied lowercase/title spelling resolves
+# the very same value; a canonical-only check would copy the handle into the
+# child and defeat this denylist. Fold once at import, then compare folded.
+_NEVER_ALLOW_FOLDED = frozenset(name.casefold() for name in _NEVER_ALLOW)
 
 # Trusted, conservative baselines. They contain no credential-shaped names.
 CORE_ENV = frozenset({"PATH", "LANG", "LC_ALL", "TERM"})
@@ -88,7 +93,7 @@ def _check_name(name):
         raise EnvironmentAllowlistError("invalid environment variable name")
     if len(name) > MAX_NAME_BYTES:
         raise EnvironmentAllowlistError("environment variable name exceeds bound")
-    if name in _NEVER_ALLOW or _looks_sensitive(name):
+    if name.casefold() in _NEVER_ALLOW_FOLDED or _looks_sensitive(name):
         raise EnvironmentAllowlistError(
             "credential-shaped environment variable name refused")
 

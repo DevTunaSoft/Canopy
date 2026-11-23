@@ -51,18 +51,32 @@ class RankedMatch:
 
 
 def _subsequence_span(query: str, folded: str):
-    """Smallest span containing query as an ordered subsequence, else None."""
-    positions = []
-    query_index = 0
+    """Smallest span containing query as an ordered subsequence, else None.
+
+    Greedy leftmost matching is not span-minimal when query characters repeat
+    (e.g. ``ab`` in ``aab`` has span 2, not 3). For each query prefix track the
+    *latest* start index that can realize it; the rightmost start leaves the
+    shortest possible window. Iterate prefix indices in reverse so an update
+    at this character cannot reuse the same character for two prefix steps.
+    """
+    if not query:
+        return 0
+    # Rightmost start index that can realize each matched query prefix.
+    latest_start: list[int | None] = [None] * len(query)
+    best = None
     for char_index, char in enumerate(folded):
-        if query_index < len(query) and char == query[query_index]:
-            positions.append(char_index)
-            query_index += 1
-            if query_index == len(query):
-                break
-    if query_index != len(query):
-        return None
-    return positions[-1] - positions[0] + 1
+        for prefix in range(len(query) - 1, -1, -1):
+            if char != query[prefix]:
+                continue
+            if prefix == 0:
+                latest_start[0] = char_index
+            elif latest_start[prefix - 1] is not None:
+                latest_start[prefix] = latest_start[prefix - 1]
+        if latest_start[-1] is not None:
+            span = char_index - latest_start[-1] + 1
+            if best is None or span < best:
+                best = span
+    return best
 
 
 def _classify(query: str, folded: str):

@@ -12,7 +12,9 @@ class RoundedDockIconProvider final : public QQuickImageProvider {
 public:
     explicit RoundedDockIconProvider(const QString &approvedRoot,
                                      const QString &terminalCandidatePath,
-                                     bool framingReviewMode, QString *error);
+                                     bool framingReviewMode, QString *error,
+                                     bool balancedDockFitMode = false,
+                                     bool opticalBalanceReviewMode = false);
 
     bool isValid() const { return m_images.size() == 8; }
     bool allCornersClipped() const;

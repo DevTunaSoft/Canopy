@@ -7,7 +7,8 @@ name: Classic Qt build and runtime evidence
 on:
   pull_request:
   push:
-    branches: [main]
+    # Isolated visual CI can run even when draft PR targets a non-main Qt branch.
+    branches: [main, visual/dock-inner-framing-review-20261122, visual/dock-balanced-fit-20261122, visual/dock-optical-balance-20261122]
   workflow_dispatch:
 
 permissions:
@@ -65,6 +66,9 @@ jobs:
       - name: Verify approved eight-icon artwork
         run: python3 -m unittest tests.test_approved_art tests.test_approved_manifest_contract tests.test_approved_art_zip -v
 
+      - name: Visual-only regression and negative-control tests
+        run: python3 -m unittest tests.test_classic_dock_frozen tests.test_classic_shared_icon_framing tests.test_dock_inner_framing_review tests.test_dock_balanced_fit_review tests.test_dock_optical_balance_review tests.test_dock_optical_balance_quality -v
+
       - name: Headless startup smoke test
         timeout-minutes: 2
         env:
@@ -79,12 +83,135 @@ jobs:
           LIBGL_ALWAYS_SOFTWARE: "1"
         run: |
           mkdir -p test-artifacts
-          timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike --approved-art-dir prototype/classic/assets/approved --self-test-approved --self-test-size 1920x1080 --self-test-screenshot test-artifacts/classic-1920x1080.png
+          timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike --dock-original-fit --approved-art-dir prototype/classic/assets/approved --self-test-approved --self-test-size 1920x1080 --self-test-screenshot test-artifacts/classic-1920x1080.png
           python3 tools/check_screenshot.py test-artifacts/classic-1920x1080.png 1920 1080
-          timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike --approved-art-dir prototype/classic/assets/approved --self-test-approved --self-test-size 1200x750 --self-test-screenshot test-artifacts/classic-1200x750.png
+          timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike --dock-original-fit --approved-art-dir prototype/classic/assets/approved --self-test-approved --self-test-size 1200x750 --self-test-screenshot test-artifacts/classic-1200x750.png
           python3 tools/check_screenshot.py test-artifacts/classic-1200x750.png 1200 750
-          timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike --approved-art-dir prototype/classic/assets/approved --self-test-approved --self-test-size 760x500 --self-test-screenshot test-artifacts/classic-760x500.png
+          timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike --dock-original-fit --approved-art-dir prototype/classic/assets/approved --self-test-approved --self-test-size 760x500 --self-test-screenshot test-artifacts/classic-760x500.png
           python3 tools/check_screenshot.py test-artifacts/classic-760x500.png 760 500
+          sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
+
+      - name: Capture optional dock-content review from SAME compiled Qt binary
+        # These screenshots are evidence, NOT owner approval. Default artwork
+        # remains untouched, and the preview flag is never auto-enabled.
+        timeout-minutes: 4
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          set -eu
+          set +e
+          xvfb-run -a ./build/classic/canopy-classic-spike --dock-inner-framing-review >test-artifacts/dock-review-no-art.log 2>&1
+          rejected=$?
+          set -e
+          test "$rejected" -eq 2
+          grep -q 'DOCK_INNER_FRAMING_REVIEW_FAIL' test-artifacts/dock-review-no-art.log
+          for size in 1920x1080 1200x750 760x500; do
+            width="${size%x*}"
+            height="${size#*x}"
+            timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike \
+              --approved-art-dir prototype/classic/assets/approved \
+              --dock-inner-framing-review --self-test-approved \
+              --self-test-size "$size" \
+              --self-test-screenshot "test-artifacts/dock-inner-review-$size.png" \
+              >"test-artifacts/dock-inner-review-$size.log" 2>&1
+            grep -q 'DOCK_INNER_FRAMING_REVIEW_ACTIVE' "test-artifacts/dock-inner-review-$size.log"
+            grep -q 'SELF_TEST_PASS: dock-only inner framing' "test-artifacts/dock-inner-review-$size.log"
+            python3 tools/check_screenshot.py "test-artifacts/dock-inner-review-$size.png" "$width" "$height"
+            python3 tools/check_dock_inner_framing.py \
+              --before "test-artifacts/classic-$size.png" \
+              --after "test-artifacts/dock-inner-review-$size.png" \
+              --size "$size" \
+              --output "test-artifacts/dock-inner-frame-diff-$size.json"
+          done
+          sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
+
+      - name: Capture conservative full-height dock-fit candidate from real Qt
+        # Independent and opt-in, never modifies the eight SHA-locked PNGs,
+        # QML geometry, launcher visuals or the approved renderer.
+        timeout-minutes: 4
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          set -eu
+          set +e
+          xvfb-run -a ./build/classic/canopy-classic-spike --dock-balanced-fit-review >test-artifacts/dock-balanced-without-approved.log 2>&1
+          rejected=$?
+          set -e
+          test "$rejected" -eq 2
+          grep -q 'DOCK_BALANCED_FIT_REVIEW_FAIL' test-artifacts/dock-balanced-without-approved.log
+          for size in 1920x1080 1200x750 760x500; do
+            width="${size%x*}"
+            height="${size#*x}"
+            timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike \
+              --approved-art-dir prototype/classic/assets/approved \
+              --dock-balanced-fit-review --self-test-approved \
+              --self-test-size "$size" \
+              --self-test-screenshot "test-artifacts/dock-balanced-fit-$size.png" \
+              >"test-artifacts/dock-balanced-fit-$size.log" 2>&1
+            grep -q 'DOCK_BALANCED_FIT_REVIEW_ACTIVE' "test-artifacts/dock-balanced-fit-$size.log"
+            grep -q 'SELF_TEST_PASS: dock balanced full-height original content fit' "test-artifacts/dock-balanced-fit-$size.log"
+            python3 tools/check_screenshot.py "test-artifacts/dock-balanced-fit-$size.png" "$width" "$height"
+            python3 tools/check_dock_inner_framing.py \
+              --before "test-artifacts/classic-$size.png" \
+              --after "test-artifacts/dock-balanced-fit-$size.png" \
+              --size "$size" \
+              --output "test-artifacts/dock-balanced-fit-diff-$size.json"
+          done
+          sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
+
+      - name: Capture original-art optical-balanced dock from real Qt
+        # Third candidate, preserving all eight original source files,
+        # fixed mask, QML geometry, and existing default.
+        timeout-minutes: 4
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          set -eu
+          set +e
+          xvfb-run -a ./build/classic/canopy-classic-spike --dock-optical-balance-review >test-artifacts/dock-optical-without-approved.log 2>&1
+          rejected=$?
+          set -e
+          test "$rejected" -eq 2
+          grep -q 'DOCK_OPTICAL_BALANCE_FAIL' test-artifacts/dock-optical-without-approved.log
+          for size in 1920x1080 1200x750 760x500; do
+            width="${size%x*}"
+            height="${size#*x}"
+            timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike \
+              --approved-art-dir prototype/classic/assets/approved \
+              --dock-optical-balance-review --self-test-approved \
+              --self-test-size "$size" \
+              --self-test-screenshot "test-artifacts/dock-optical-balance-$size.png" \
+              >"test-artifacts/dock-optical-balance-$size.log" 2>&1
+            grep -q 'DOCK_OPTICAL_BALANCE_ACTIVE' "test-artifacts/dock-optical-balance-$size.log"
+            grep -q 'SELF_TEST_PASS: dock optical balance inside unchanged geometry' "test-artifacts/dock-optical-balance-$size.log"
+            python3 tools/check_screenshot.py "test-artifacts/dock-optical-balance-$size.png" "$width" "$height"
+            python3 tools/check_dock_inner_framing.py \
+              --before "test-artifacts/classic-$size.png" \
+              --after "test-artifacts/dock-optical-balance-$size.png" \
+              --size "$size" \
+              --output "test-artifacts/dock-optical-balance-diff-$size.json"
+            python3 tools/check_dock_optical_balance_quality.py \
+              --before "test-artifacts/classic-$size.png" \
+              --after "test-artifacts/dock-optical-balance-$size.png" \
+              --size "$size" \
+              --output "test-artifacts/dock-optical-balance-quality-$size.json"
+          done
+          # Verify that ordinary approved-art startup now displays the chosen
+          # optical-balanced renderer, not merely a preview flag.
+          timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike \
+            --approved-art-dir prototype/classic/assets/approved \
+            --self-test-approved --self-test-size 1200x750 \
+            --self-test-screenshot test-artifacts/classic-selected-default-1200x750.png
+          python3 tools/check_screenshot.py test-artifacts/classic-selected-default-1200x750.png 1200 750
+          python3 tools/check_dock_optical_balance_quality.py \
+            --before test-artifacts/classic-1200x750.png \
+            --after test-artifacts/dock-optical-balance-1200x750.png \
+            --selected-default test-artifacts/classic-selected-default-1200x750.png \
+            --size 1200x750 \
+            --output test-artifacts/dock-optical-balance-quality-1200x750.json
           sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
 
       - name: Measure five-minute idle CPU and PSS

@@ -296,8 +296,50 @@ int main(int argc, char *argv[]) {
     const int approvedIndex = args.indexOf(QStringLiteral("--approved-art-dir"));
     const bool approvedMode = approvedIndex >= 0;
     const bool framingReviewMode = args.contains(QStringLiteral("--icon-framing-review"));
+    // Dock CONTENT-only framing review: never change QML tile/card geometry.
+    const bool dockInnerReviewMode = args.contains(QStringLiteral("--dock-inner-framing-review"));
+    const bool dockBalancedFitReviewMode =
+        args.contains(QStringLiteral("--dock-balanced-fit-review"));
+    // The visually evaluated optical-balance treatment is the approved-art
+    // default. --dock-original-fit gives an exact rollback without changing
+    // any artwork bytes. Other dock preview flags remain independent. The
+    // launcher-only frame-review flag does not change the dock appearance.
+    const bool dockOriginalFitMode =
+        args.contains(QStringLiteral("--dock-original-fit"));
+    const bool explicitOpticalBalanceReview =
+        args.contains(QStringLiteral("--dock-optical-balance-review"));
+    const int iconReviewFlags = (dockInnerReviewMode ? 1 : 0)
+        + (dockBalancedFitReviewMode ? 1 : 0)
+        + (explicitOpticalBalanceReview ? 1 : 0);
+    if (iconReviewFlags > 1) {
+        qCritical() << "DOCK_OPTICAL_BALANCE_FAIL: conflicting dock visual modes";
+        return 2;
+    }
+    if (dockOriginalFitMode && iconReviewFlags > 0) {
+        qCritical() << "DOCK_OPTICAL_BALANCE_FAIL: original fit cannot combine with previews";
+        return 2;
+    }
+    const bool dockOpticalBalanceReviewMode =
+        approvedMode && !dockOriginalFitMode &&
+        !dockInnerReviewMode && !dockBalancedFitReviewMode;
     if (framingReviewMode && !approvedMode) {
         qCritical() << "ICON_FRAMING_REVIEW_FAIL: exact SHA-locked approved art required";
+        return 2;
+    }
+    if (dockInnerReviewMode && !approvedMode) {
+        qCritical() << "DOCK_INNER_FRAMING_REVIEW_FAIL: exact SHA-locked approved art required";
+        return 2;
+    }
+    if (dockBalancedFitReviewMode && !approvedMode) {
+        qCritical() << "DOCK_BALANCED_FIT_REVIEW_FAIL: approved SHA-locked art required";
+        return 2;
+    }
+    if (explicitOpticalBalanceReview && !approvedMode) {
+        qCritical() << "DOCK_OPTICAL_BALANCE_FAIL: approved SHA-locked originals required";
+        return 2;
+    }
+    if (dockOriginalFitMode && !approvedMode) {
+        qCritical() << "DOCK_OPTICAL_BALANCE_FAIL: original fit requires approved art";
         return 2;
     }
     const bool requireApproved = args.contains(QStringLiteral("--self-test-approved"));
@@ -382,11 +424,12 @@ int main(int argc, char *argv[]) {
         // Source PNGs were SHA-verified above; transform copies IN MEMORY
         // only. The files and their immutable manifest remain unchanged.
         QString roundedError;
-        // The dock is locked to the existing original full-fit rendering.
-        // Experimental optical adjustments are isolated to a DIFFERENT
-        // QQuickImageProvider, instantiated only for an explicit review.
+        // Default dock full-fit rendering is unchanged. Only the explicit
+        // review flag enables in-memory source-content framing within
+        // the SAME centered rounded mask. The original PNGs are unchanged.
         auto *roundedIcons = new RoundedDockIconProvider(
-            approvedRoot, terminalCandidatePath, false, &roundedError);
+            approvedRoot, terminalCandidatePath, dockInnerReviewMode,
+            &roundedError, dockBalancedFitReviewMode, dockOpticalBalanceReviewMode);
         if (!roundedIcons->isValid() || !roundedIcons->allCornersClipped()) {
             qCritical().noquote() << "APPROVED_ART_FAIL: rounded dock rendering:"
                                    << roundedError;
@@ -395,6 +438,18 @@ int main(int argc, char *argv[]) {
         }
         engine.addImageProvider(QStringLiteral("canopy-dock"), roundedIcons);
         qInfo() << "CANOPY_ROUNDED_DOCK_VERIFIED: eight original icons, padded, alpha-clipped";
+        if (dockInnerReviewMode)
+            qInfo() << "DOCK_INNER_FRAMING_REVIEW_ACTIVE: opt-in source-content sample; "
+                       "dock QML and source PNGs unchanged; NOT visually approved";
+        if (dockBalancedFitReviewMode)
+            qInfo() << "DOCK_BALANCED_FIT_REVIEW_ACTIVE: opt-in full-height in-memory "
+                       "square sample; no changes to approved originals, dock QML or "
+                       "launcher; NOT visually approved";
+        if (dockOpticalBalanceReviewMode)
+            qInfo() << "DOCK_OPTICAL_BALANCE_ACTIVE: original SHA-locked PNGs "
+                       "rendered in selected uniform 160px inset with "
+                       "measured optical compensation; dock geometry and "
+                       "wallpaper UNCHANGED; legacy renderer remains available";
         if (framingReviewMode) {
             QString reviewError;
             auto *launcherReviewIcons = new RoundedDockIconProvider(
@@ -529,7 +584,9 @@ int main(int argc, char *argv[]) {
             ? args.at(launcherShotIndex + 1) : QString();
         QTimer::singleShot(1000, window,
             [window, screenshotPath, launcherScreenshotPath, approvedMode, landscapeMode,
-             framingReviewMode, terminalCandidateMode = !terminalCandidatePath.isEmpty()]() {
+             framingReviewMode, dockInnerReviewMode, dockBalancedFitReviewMode,
+             dockOpticalBalanceReviewMode,
+             terminalCandidateMode = !terminalCandidatePath.isEmpty()]() {
             auto *bar = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBar"));
             auto *clock = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBarClock"));
             auto *dock = window->findChild<QQuickItem *>(QStringLiteral("canopyDock"));
@@ -632,7 +689,13 @@ int main(int argc, char *argv[]) {
             }
             qInfo() << "SELF_TEST_PASS: actual Qt launcher opens, searches and closes";
             if (framingReviewMode)
-                qInfo() << "SELF_TEST_PASS: launcher-only Qt frame review enabled; dock frozen";
+                qInfo() << "SELF_TEST_PASS: launcher-only Qt frame review enabled; dock frozen unless separately reviewed";
+            if (dockInnerReviewMode)
+                qInfo() << "SELF_TEST_PASS: dock-only inner framing, fixed card geometry";
+            if (dockBalancedFitReviewMode)
+                qInfo() << "SELF_TEST_PASS: dock balanced full-height original content fit";
+            if (dockOpticalBalanceReviewMode)
+                qInfo() << "SELF_TEST_PASS: dock optical balance inside unchanged geometry";
 
             const QPointF barOrigin = bar->mapToItem(window->contentItem(), QPointF(0, 0));
             const QPointF dockOrigin = dock->mapToItem(window->contentItem(), QPointF(0, 0));
@@ -900,6 +963,34 @@ int main(int argc, char *argv[]) {
                 return;
             }
             qInfo() << "SELF_TEST_PASS: Files keyboard close and reopen bindings";
+            // Self-tests can leave Xvfb over a Files tile. Remove transient
+            // hover highlights before both baseline and candidate screenshots;
+            // this changes ONLY the CI/test capture, never runtime appearance.
+            QCursor::setPos(window->mapToGlobal(QPoint(8, window->height() - 8)));
+            // Moving the Xvfb pointer alone does not reliably clear every
+            // QQuickControls hover state. For reproducible screenshot-mode
+            // capture, disable transient hover on all controls AFTER the
+            // behavioral tests and BEFORE grabbing the frame. These changes
+            // never execute in normal interactive Canopy runtime.
+            int neutralizedHoverControls = 0;
+            for (QObject *object : window->findChildren<QObject *>()) {
+                const auto state = object->property("hoverEnabled");
+                if (state.isValid() && state.toBool()) {
+                    if (!object->setProperty("hoverEnabled", false)) {
+                        qCritical() << "SELF_TEST_FAIL: cannot neutralize screenshot hover";
+                        QCoreApplication::exit(1);
+                        return;
+                    }
+                    ++neutralizedHoverControls;
+                }
+            }
+            if (neutralizedHoverControls < 8) {
+                qCritical() << "SELF_TEST_FAIL: too few screenshot hover controls";
+                QCoreApplication::exit(1);
+                return;
+            }
+            QCoreApplication::processEvents();
+            qInfo() << "SELF_TEST_PASS: screenshot hover neutralized" << neutralizedHoverControls;
             const QImage frame = window->grabWindow();
             if (frame.isNull() || frame.width() < 720 || frame.height() < 480) {
                 qCritical() << "SELF_TEST_FAIL: invalid screenshot dimensions";

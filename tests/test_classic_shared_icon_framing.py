@@ -24,7 +24,7 @@ class SharedIconFramingTests(unittest.TestCase):
         self.assertIn("if (framingReviewMode && !approvedMode)", self.cpp)
         self.assertIn("ICON_FRAMING_REVIEW_FAIL", self.cpp)
         self.assertIn("verifyExactArtwork(requested, !landscapeMode, &error)", self.cpp)
-        self.assertIn("false, &roundedError", self.cpp)
+        self.assertIn("dockInnerReviewMode,\n            &roundedError, dockBalancedFitReviewMode", self.cpp)
         self.assertIn("true, &reviewError", self.cpp)
         self.assertNotIn("framingReviewMode = true", self.cpp)
 
@@ -75,7 +75,7 @@ class SharedIconFramingTests(unittest.TestCase):
         self.assertIn('"image://canopy-dock/"', self.launcher)
         self.assertIn('engine.addImageProvider(QStringLiteral("canopy-launcher-review")', self.cpp)
         self.assertIn('framingReviewMode: canopyIconFramingReview', (ROOT / "Main.qml").read_text())
-        self.assertIn('false, &roundedError', self.cpp)
+        self.assertIn('dockInnerReviewMode,', self.cpp)
         self.assertIn('objectName: "canopyLauncherAppButton"', self.launcher)
         self.assertIn("launcherButtonImagesAreCentered(applicationLauncher", self.cpp)
         self.assertIn("qAbs(imageMidX - item->width() / 2) > 0.75", self.cpp)

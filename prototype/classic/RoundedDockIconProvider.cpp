@@ -15,7 +15,7 @@ constexpr int kInsetPixels = 12;
 constexpr int kRoundedRadius = 36;
 constexpr int kMaxRequestPixels = 256;
 
-// Experimental launcher-only sampling of SHA-locked 345x333/334 sources.
+// Optional in-memory sampling of SHA-locked 345x333/334 sources.
 // Centers are rounded from 2%-98% bounds of bright illustration pixels,
 // measured independently for each private original PNG. This centers the
 // major visible artwork rather than only chopping a source-sheet TOP gutter.
@@ -32,12 +32,36 @@ const QHash<QString, QPointF> kLauncherOpticalCenters = {
     {QStringLiteral("terminal"), QPointF(171, 170)},
     {QStringLiteral("settings"), QPointF(175, 165)},
 };
+
+// Candidate D: source-neutral *content-only* optical compensation for the
+// unbalanced luminous artwork in the eight owner's original approved PNGs.
+// These small offsets were measured from the actual 1920x1080 Qt captures,
+// not by moving any QML button/card. 160px illustration area retains complete
+// source (no cropping), centered inside the fixed 168px clipped rounded face.
+// Per-icon translations are bounded and apply ONLY in explicit review mode.
+constexpr int kOpticalFitPixels = 160;
+const QHash<QString, QPointF> kOpticalBalanceOffset = {
+    {QStringLiteral("browser"), QPointF(3, -2)},
+    {QStringLiteral("mail"), QPointF(2, 5)},
+    {QStringLiteral("files"), QPointF(3, 3)},
+    {QStringLiteral("calendar"), QPointF(3, -4)},
+    {QStringLiteral("photos"), QPointF(2, 1)},
+    {QStringLiteral("music"), QPointF(1, -5)},
+    {QStringLiteral("terminal"), QPointF(-4, 1)},
+    {QStringLiteral("settings"), QPointF(1, 4)},
+};
 }
 
 RoundedDockIconProvider::RoundedDockIconProvider(
     const QString &approvedRoot, const QString &terminalCandidatePath,
-    bool framingReviewMode, QString *error)
+    bool framingReviewMode, QString *error, bool balancedDockFitMode,
+    bool opticalBalanceReviewMode)
     : QQuickImageProvider(QQuickImageProvider::Image) {
+    if ((framingReviewMode && balancedDockFitMode) ||
+        (opticalBalanceReviewMode && (framingReviewMode || balancedDockFitMode))) {
+        *error = QStringLiteral("conflicting icon framing experiments");
+        return;
+    }
     QFile manifest(QStringLiteral(":/Canopy/Classic/assets/approved/manifest.json"));
     if (!manifest.open(QIODevice::ReadOnly)) {
         *error = QStringLiteral("embedded icon manifest missing");
@@ -97,7 +121,66 @@ RoundedDockIconProvider::RoundedDockIconProvider(
 
         const bool terminalDerivative =
             !terminalCandidatePath.isEmpty() && sourcePath == terminalCandidatePath;
-        if (framingReviewMode && !terminalDerivative) {
+        if (opticalBalanceReviewMode && !terminalDerivative) {
+            // Candidate D: gently normalize optical centers without cropping
+            // or changing the user's original art. The 160px image is a
+            // single cached render; one-time startup work, zero extra timers
+            // or graphics effects. All eight original masters are verified
+            // before this in-memory derivative.
+            const auto location = kOpticalBalanceOffset.constFind(id);
+            if (location == kOpticalBalanceOffset.cend() ||
+                original.width() != 345 ||
+                (original.height() != 333 && original.height() != 334)) {
+                *error = QStringLiteral("optical balance source input mismatch");
+                m_images.clear();
+                return;
+            }
+            const QPointF delta = location.value();
+            if (qAbs(delta.x()) > 5 || qAbs(delta.y()) > 5) {
+                *error = QStringLiteral("optical balance offset out of bounds");
+                m_images.clear();
+                return;
+            }
+            const QSize fit = original.size().scaled(
+                kOpticalFitPixels, kOpticalFitPixels, Qt::KeepAspectRatio);
+            const QRectF placement(
+                face.center().x() - fit.width() / 2.0 + delta.x(),
+                face.center().y() - fit.height() / 2.0 + delta.y(),
+                fit.width(), fit.height());
+            if (!face.contains(placement)) {
+                *error = QStringLiteral("optical balance does not fit clipped face");
+                m_images.clear();
+                return;
+            }
+            painter.drawImage(placement, original);
+        } else if (balancedDockFitMode && !terminalDerivative) {
+            // Candidate C: preserve the ENTIRE original 333/334px height
+            // and sample only the horizontal source gutter. Compared with
+            // the 324px zoom experiment, this is a gentler optical fit.
+            // Fixed 168px rounded face and QML dock geometry NEVER move.
+            // Originals remain immutable, and the separate Terminal-v3
+            // transparent derivative keeps its independent default fit.
+            if (!kLauncherOpticalCenters.contains(id) ||
+                original.width() != 345 ||
+                (original.height() != 333 && original.height() != 334)) {
+                *error = QStringLiteral("balanced dock source dimensions mismatch");
+                m_images.clear();
+                return;
+            }
+            constexpr qreal kFullSourceHeight = 333.0;
+            const qreal x = kLauncherOpticalCenters.value(id).x();
+            const QRectF source(x - kFullSourceHeight / 2.0,
+                                (original.height() - kFullSourceHeight) / 2.0,
+                                kFullSourceHeight, kFullSourceHeight);
+            if (source.left() < 0 || source.top() < 0 ||
+                source.right() > original.width() ||
+                source.bottom() > original.height()) {
+                *error = QStringLiteral("balanced dock source sample out of bounds");
+                m_images.clear();
+                return;
+            }
+            painter.drawImage(face, original, source);
+        } else if (framingReviewMode && !terminalDerivative) {
             // Candidate B: source-specific bright-illustration bounds, not
             // uniform top trimming. The unchanged fixed 168px mask remains
             // centered. Only the launcher may instantiate this mode; dock

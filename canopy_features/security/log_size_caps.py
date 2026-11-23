@@ -98,12 +98,14 @@ def bounded_json_report(payload, max_bytes=MAX_REPORT_BYTES):
     _check_bound("max_bytes", max_bytes, MAX_REPORT_BYTES)
     encoder = json.JSONEncoder(sort_keys=True, ensure_ascii=True,
                                allow_nan=False, separators=(",", ":"))
+    # ensure_ascii=True above guarantees every emitted chunk is ASCII, so the
+    # chunk's str length is already its encoded byte count. Counting with
+    # len(piece) avoids allocating one short-lived bytes object per chunk.
     pieces = []
     total = 0
     try:
         for piece in encoder.iterencode(payload):
-            encoded = piece.encode("ascii")
-            total += len(encoded)
+            total += len(piece)
             if total > max_bytes:
                 raise ReportTooLarge(f"JSON report exceeds {max_bytes} bytes")
             pieces.append(piece)

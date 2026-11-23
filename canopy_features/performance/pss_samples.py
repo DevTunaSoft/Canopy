@@ -23,6 +23,7 @@ __all__ = [
 
 # Strict ASCII decimal integer, so Unicode digits and signs cannot slip in.
 _INT = re.compile(r"[0-9]+\Z")
+_PID = re.compile(r"[0-9]+\Z")
 
 
 class PssError(ValueError):
@@ -78,10 +79,20 @@ def read_pss_kib(pid, *, proc_root="/proc"):
     """Read the Pss total for *pid* from ``<proc_root>/<pid>/smaps_rollup``.
 
     A vanished process maps to ProcessDisappearedError. Parse failures surface
-    as MissingPssError or MalformedPssError unchanged. No retry or polling.
+    as MissingPssError or MalformedPssError unchanged. A non-positive,
+    non-decimal or non-int/str pid fails closed with MalformedPssError before
+    any path is built. No retry or polling.
     Pass *proc_root* to read an offline capture or to test on non-Linux hosts.
     """
-    path = Path(proc_root) / str(int(pid)) / "smaps_rollup"
+    if type(pid) is int:
+        if pid <= 0:
+            raise MalformedPssError("invalid process id")
+        pid_text = str(pid)
+    elif type(pid) is str and _PID.fullmatch(pid) and int(pid) > 0:
+        pid_text = str(int(pid))
+    else:
+        raise MalformedPssError("invalid process id")
+    path = Path(proc_root) / pid_text / "smaps_rollup"
     try:
         text = path.read_text(encoding="utf-8")
     except (FileNotFoundError, NotADirectoryError, ProcessLookupError) as exc:

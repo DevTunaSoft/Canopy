@@ -16,6 +16,12 @@ from pathlib import PurePosixPath, PureWindowsPath
 MAX_PATH_CHARS = 4096
 MAX_ROOTS = 32
 
+# An injected filesystem view can report an unusable path (symlink loop,
+# undecodable encoding, malformed argument) with any of these faults. They all
+# mean "containment cannot be established" and must collapse to a REJECTED
+# decision rather than escape this pure evaluator.
+_VIEW_FAULTS = (OSError, RuntimeError, TypeError, ValueError)
+
 _ALLOWED = "ALLOWED"
 _REJECTED = "REJECTED"
 
@@ -93,10 +99,14 @@ class WorkingDirectoryPolicy:
                 and "\x00" not in value)
 
     def _canonical(self, path):
-        """Resolve symlinks; return None if the result is unusable."""
+        """Resolve symlinks; return None if the result is unusable.
+
+        Any filesystem-view fault means containment cannot be established, so
+        it is treated as an unusable result and the caller rejects fail-closed.
+        """
         try:
             resolved = self._filesystem.resolve(path)
-        except OSError:
+        except _VIEW_FAULTS:
             return None
         if not self._valid_string(resolved):
             return None
@@ -135,7 +145,7 @@ class WorkingDirectoryPolicy:
         unsafe = "UNSAFE_INHERITANCE" if inherit else None
         try:
             is_directory = self._filesystem.is_directory(candidate)
-        except OSError:
+        except _VIEW_FAULTS:
             is_directory = False
         if not is_directory:
             return _reject(unsafe or "MISSING_DIRECTORY")

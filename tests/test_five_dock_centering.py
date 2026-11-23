@@ -40,7 +40,10 @@ class FiveIconCenterTests(unittest.TestCase):
         self.assertIn("DOCK_FIVE_CENTER_FAIL",self.main)
         self.assertIn("bool fiveOnlyCenterReviewMode = false",self.h)
         self.assertIn("if (fiveOnlyCenterReviewMode && !cleanSourceEdgesReviewMode)",self.p)
-        self.assertIn("dockCleanEdgesReviewModeSelected, dockFiveCenterReviewMode",self.main)
+        self.assertIn("dockCleanEdgesReviewModeSelected, dockFiveCenterModeSelected",self.main)
+        self.assertIn("const bool dockFiveCenterModeSelected =", self.main)
+        self.assertIn("(dockFiveCenterReviewMode || !dockCleanEdgesReviewMode)", self.main)
+        self.assertIn("if (dockFiveCenterModeSelected)", self.main)
         self.assertNotIn("dockFiveCenterReviewMode = true",self.main)
         self.assertIn("SELF_TEST_PASS: five icons optically centered",self.main)
 

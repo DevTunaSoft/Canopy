@@ -13,12 +13,16 @@ The manifest is trusted input::
 
 Paths use forward slashes and stay relative to the install root. This module
 never deletes, never mounts, and never escalates privilege; it only computes
-a plan for a separate executor to review and carry out.
+a plan for a separate executor to review and carry out. The install root and
+manifest path must be real paths: a symlink in any existing path component is
+unsafe and fails closed, not just a symlink at the final component.
 """
 from __future__ import annotations
 
 import hashlib
 import json
+import os
+import stat
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -95,11 +99,51 @@ def normalize_manifest(data):
     return {"schema": SCHEMA, "files": normalized}
 
 
+def _require_real_path_components(path, message):
+    """Raise ``UninstallIntegrityError`` if any existing component is a link.
+
+    A leaf-only ``is_symlink()`` check is defeated by an aliased parent: the
+    install root (or manifest) resolves outside the declared tree while the
+    plan still records the declared path. Walk every component with ``lstat``
+    (never ``resolve``) so ordinary multi-component Windows temp paths behave
+    as before. ``..`` is refused rather than collapsed lexically, which could
+    conceal the alias. The walk stops at the first missing component; no link
+    can exist beneath a component that does not exist.
+    """
+    try:
+        raw = os.fspath(path)
+    except TypeError as exc:
+        raise UninstallIntegrityError(message) from exc
+    if not isinstance(raw, str) or not raw or "\x00" in raw:
+        raise UninstallIntegrityError(message)
+    if os.pardir in Path(raw).parts:
+        raise UninstallIntegrityError(message)
+    try:
+        parts = Path(os.path.abspath(raw)).parts
+    except (OSError, ValueError) as exc:
+        raise UninstallIntegrityError(message) from exc
+    if not parts:
+        raise UninstallIntegrityError(message)
+    current = Path(parts[0])
+    for part in parts[1:]:
+        current = current / part
+        try:
+            mode = os.lstat(current).st_mode
+        except FileNotFoundError:
+            break
+        except OSError as exc:
+            raise UninstallIntegrityError(message) from exc
+        if stat.S_ISLNK(mode):
+            raise UninstallIntegrityError(message)
+
+
 def read_manifest(path):
     """Read and validate an ownership manifest from disk."""
     source = Path(path)
     if source.is_symlink() or not source.is_file():
         raise UninstallIntegrityError("manifest must be a regular file")
+    _require_real_path_components(
+        source, "manifest path contains a symlinked or unsafe ancestor")
     if source.stat().st_size > MAX_MANIFEST_BYTES:
         raise UninstallIntegrityError("manifest too large")
     try:
@@ -142,6 +186,13 @@ def plan_uninstall(root, manifest):
 
     if root.is_symlink():
         blockers.append("install root is a symlink")
+        return UninstallPlan(False, (), (), (), tuple(blockers))
+    try:
+        _require_real_path_components(
+            root, "install root contains a symlinked or unsafe ancestor")
+    except UninstallIntegrityError as exc:
+        blockers.append(str(exc))
+        return UninstallPlan(False, (), (), (), tuple(blockers))
 
     for rel in sorted(owned):
         parts = _safe_parts(rel)

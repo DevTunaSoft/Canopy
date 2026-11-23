@@ -79,9 +79,13 @@ class CompareReport:
         approval through the public serialization path. The directions map is
         rebuilt from the fixed METRICS allowlist, never from caller keys.
         """
+        # Validate the token type BEFORE the frozenset membership test: an
+        # unhashable wrong type (list, dict, bytearray) would otherwise leak a
+        # raw TypeError from ``in`` instead of this fail-closed CompareError.
         if (type(self.directions) is not tuple
                 or len(self.directions) != len(METRICS)
-                or any(tok not in DIRECTIONS for tok in self.directions)):
+                or any(type(tok) is not str or tok not in DIRECTIONS
+                       for tok in self.directions)):
             raise CompareError("comparison report directions are invalid")
         if (type(self.baseline_evidence_count) is not int
                 or not 0 <= self.baseline_evidence_count <= len(METRICS)

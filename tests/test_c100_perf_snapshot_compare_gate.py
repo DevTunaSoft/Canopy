@@ -136,6 +136,16 @@ class RealArtifactCompositionTests(unittest.TestCase):
         with self.assertRaises(gate.CompareError):
             short.as_dict()
 
+    def test_unhashable_direction_token_fails_closed(self):
+        # A membership check against the DIRECTIONS frozenset must not run
+        # before the token type is validated: unhashable wrong types leak a
+        # raw TypeError instead of the documented CompareError boundary.
+        for bad in ([], {}, bytearray(), 7, None):
+            forged = gate.CompareReport(4, 4, (bad,) * len(gate.METRICS))
+            with self.subTest(bad=type(bad).__name__), \
+                    self.assertRaises(gate.CompareError):
+                forged.as_dict()
+
 
 class InputValidationTests(unittest.TestCase):
     def test_bad_wrapper_key_set(self):

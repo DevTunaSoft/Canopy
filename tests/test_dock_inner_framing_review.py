@@ -27,7 +27,11 @@ class DockInnerFramingReviewTests(unittest.TestCase):
         source = (root / "prototype/classic/main.cpp").read_text()
         neutralize = "QCursor::setPos(window->mapToGlobal(QPoint(8, window->height() - 8)));"
         self.assertIn(neutralize, source)
+        self.assertIn('setProperty("hoverEnabled", false)', source)
+        self.assertIn("neutralizedHoverControls < 8", source)
         self.assertLess(source.index(neutralize),
+                        source.index('setProperty("hoverEnabled", false)'))
+        self.assertLess(source.index('setProperty("hoverEnabled", false)'),
                         source.index("const QImage frame = window->grabWindow()"))
 
     def test_all_eight_inner_art_changes_pass(self):

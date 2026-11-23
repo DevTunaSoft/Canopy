@@ -22,6 +22,14 @@ class DockInnerFramingReviewTests(unittest.TestCase):
         self.b.write_bytes(make_rgba_png(760, 500, changes))
         return compare_dock_pair(self.a, self.b, self.size)
 
+    def test_desktop_capture_neutralizes_qt_hover_before_grab(self):
+        root = Path(__file__).resolve().parents[1]
+        source = (root / "prototype/classic/main.cpp").read_text()
+        neutralize = "QCursor::setPos(window->mapToGlobal(QPoint(8, window->height() - 8)));"
+        self.assertIn(neutralize, source)
+        self.assertLess(source.index(neutralize),
+                        source.index("const QImage frame = window->grabWindow()"))
+
     def test_all_eight_inner_art_changes_pass(self):
         result = self.simulate(self.centers)
         self.assertEqual(result["changed_icon_pixels"], 8)

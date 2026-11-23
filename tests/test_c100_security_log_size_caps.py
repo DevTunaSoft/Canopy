@@ -133,6 +133,29 @@ class JsonReportTests(unittest.TestCase):
         with self.assertRaises(caps.ReportTooLarge):
             caps.bounded_json_report(payload, len(exact) - 1)
 
+    def test_iterencode_chunks_are_ascii_by_contract(self):
+        # bounded_json_report counts chunk bytes with len(chunk); that is only
+        # correct because ensure_ascii=True makes every chunk ASCII.
+        payload = {"unicode": "✓ café", "surrogate": "\ud800\udcff",
+                   "escape": "line\nquote\"slash\\", "nested": [1, True, None]}
+        encoder = json.JSONEncoder(sort_keys=True, ensure_ascii=True,
+                                   allow_nan=False, separators=(",", ":"))
+        chunks = tuple(encoder.iterencode(payload))
+        self.assertTrue(chunks)
+        for chunk in chunks:
+            with self.subTest(chunk=chunk[:24]):
+                self.assertTrue(chunk.isascii())
+                self.assertEqual(len(chunk), len(chunk.encode("ascii")))
+
+    def test_cap_boundary_is_byte_exact_with_escaped_unicode(self):
+        payload = {"k": "✓" * 100}
+        serialized = json.dumps(payload, sort_keys=True, ensure_ascii=True,
+                                allow_nan=False, separators=(",", ":"))
+        self.assertTrue(serialized.isascii())
+        self.assertEqual(caps.bounded_json_report(payload, len(serialized)), serialized)
+        with self.assertRaises(caps.ReportTooLarge):
+            caps.bounded_json_report(payload, len(serialized) - 1)
+
     def test_bad_report_cap_rejected(self):
         for bad in (0, -1, caps.MAX_REPORT_BYTES + 1, True, 2.5, "64"):
             with self.subTest(bound=bad):

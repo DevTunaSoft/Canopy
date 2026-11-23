@@ -4,7 +4,7 @@
 
 Canopy is a planned lightweight Linux desktop shell with a macOS-inspired Classic experience and a future Windows-inspired Modern experience. Project specification and engineering foundation will be proposed through a draft pull request.
 
-Status: planning; no working desktop shell yet.
+Status: a compilable Classic Qt prototype exists in the draft PR stack (see #151), but no release candidate has passed owner visual acceptance and Linux Mint guest acceptance; see release blocker #132. Modern is planned.
 
 ## LacOS and expandable Canopy Shell Packs — future goals
 

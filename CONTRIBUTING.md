@@ -30,6 +30,11 @@ screenshots where appropriate, and PASS/FAIL/BLOCKED/NOT RUN results.
 Review packets can be shared with any reviewers the project works with;
 a report artifact is **not** a human reviewer signoff.
 
+## PR lifecycle: DEVELOP → TEST → REVIEW → READY → INTEGRATE → VERIFY
+Use a draft PR while implementation or required evidence is incomplete. When all applicable checks pass, verify the exact head SHA and full diff, confirm dependencies/conflicts/ancestry, perform an independent code review, confirm any required human approval is present, then promote to ready-for-review and integrate through the appropriate branch. Run post-integration regression tests.
+
+Routine, independently verified nonvisual changes may use an autonomous review and integration process. That automation is engineering review, **not human approval**. Human approval remains mandatory for owner visual decisions, high-risk security decisions and final release acceptance. A specific PR hold (for example #278) is never overridden by general development authorization.
+
 ## Branch and merge gates
 
 The historical Canopy PRs are **stacked**, and several ancestors were

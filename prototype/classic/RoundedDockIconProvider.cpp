@@ -32,14 +32,34 @@ const QHash<QString, QPointF> kLauncherOpticalCenters = {
     {QStringLiteral("terminal"), QPointF(171, 170)},
     {QStringLiteral("settings"), QPointF(175, 165)},
 };
+
+// Candidate D: source-neutral *content-only* optical compensation for the
+// unbalanced luminous artwork in the eight owner's original approved PNGs.
+// These small offsets were measured from the actual 1920x1080 Qt captures,
+// not by moving any QML button/card. 160px illustration area retains complete
+// source (no cropping), centered inside the fixed 168px clipped rounded face.
+// Per-icon translations are bounded and apply ONLY in explicit review mode.
+constexpr int kOpticalFitPixels = 160;
+const QHash<QString, QPointF> kOpticalBalanceOffset = {
+    {QStringLiteral("browser"), QPointF(3, -2)},
+    {QStringLiteral("mail"), QPointF(2, 5)},
+    {QStringLiteral("files"), QPointF(3, 3)},
+    {QStringLiteral("calendar"), QPointF(3, -4)},
+    {QStringLiteral("photos"), QPointF(2, 1)},
+    {QStringLiteral("music"), QPointF(1, -5)},
+    {QStringLiteral("terminal"), QPointF(-4, 1)},
+    {QStringLiteral("settings"), QPointF(1, 4)},
+};
 }
 
 RoundedDockIconProvider::RoundedDockIconProvider(
     const QString &approvedRoot, const QString &terminalCandidatePath,
-    bool framingReviewMode, QString *error, bool balancedDockFitMode)
+    bool framingReviewMode, QString *error, bool balancedDockFitMode,
+    bool opticalBalanceReviewMode)
     : QQuickImageProvider(QQuickImageProvider::Image) {
-    if (framingReviewMode && balancedDockFitMode) {
-        *error = QStringLiteral("two conflicting icon framing experiments");
+    if ((framingReviewMode && balancedDockFitMode) ||
+        (opticalBalanceReviewMode && (framingReviewMode || balancedDockFitMode))) {
+        *error = QStringLiteral("conflicting icon framing experiments");
         return;
     }
     QFile manifest(QStringLiteral(":/Canopy/Classic/assets/approved/manifest.json"));
@@ -101,7 +121,39 @@ RoundedDockIconProvider::RoundedDockIconProvider(
 
         const bool terminalDerivative =
             !terminalCandidatePath.isEmpty() && sourcePath == terminalCandidatePath;
-        if (balancedDockFitMode && !terminalDerivative) {
+        if (opticalBalanceReviewMode && !terminalDerivative) {
+            // Candidate D: gently normalize optical centers without cropping
+            // or changing the user's original art. The 160px image is a
+            // single cached render; one-time startup work, zero extra timers
+            // or graphics effects. All eight original masters are verified
+            // before this in-memory derivative.
+            const auto location = kOpticalBalanceOffset.constFind(id);
+            if (location == kOpticalBalanceOffset.cend() ||
+                original.width() != 345 ||
+                (original.height() != 333 && original.height() != 334)) {
+                *error = QStringLiteral("optical balance source input mismatch");
+                m_images.clear();
+                return;
+            }
+            const QPointF delta = location.value();
+            if (qAbs(delta.x()) > 5 || qAbs(delta.y()) > 5) {
+                *error = QStringLiteral("optical balance offset out of bounds");
+                m_images.clear();
+                return;
+            }
+            const QSize fit = original.size().scaled(
+                kOpticalFitPixels, kOpticalFitPixels, Qt::KeepAspectRatio);
+            const QRectF placement(
+                face.center().x() - fit.width() / 2.0 + delta.x(),
+                face.center().y() - fit.height() / 2.0 + delta.y(),
+                fit.width(), fit.height());
+            if (!face.contains(placement)) {
+                *error = QStringLiteral("optical balance does not fit clipped face");
+                m_images.clear();
+                return;
+            }
+            painter.drawImage(placement, original);
+        } else if (balancedDockFitMode && !terminalDerivative) {
             // Candidate C: preserve the ENTIRE original 333/334px height
             // and sample only the horizontal source gutter. Compared with
             // the 324px zoom experiment, this is a gentler optical fit.

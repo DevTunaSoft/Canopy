@@ -308,9 +308,12 @@ int main(int argc, char *argv[]) {
         args.contains(QStringLiteral("--dock-original-fit"));
     const bool explicitOpticalBalanceReview =
         args.contains(QStringLiteral("--dock-optical-balance-review"));
+    const bool dockCleanEdgesReviewMode =
+        args.contains(QStringLiteral("--dock-clean-edges-review"));
     const int iconReviewFlags = (dockInnerReviewMode ? 1 : 0)
         + (dockBalancedFitReviewMode ? 1 : 0)
-        + (explicitOpticalBalanceReview ? 1 : 0);
+        + (explicitOpticalBalanceReview ? 1 : 0)
+        + (dockCleanEdgesReviewMode ? 1 : 0);
     if (iconReviewFlags > 1) {
         qCritical() << "DOCK_OPTICAL_BALANCE_FAIL: conflicting dock visual modes";
         return 2;
@@ -321,7 +324,8 @@ int main(int argc, char *argv[]) {
     }
     const bool dockOpticalBalanceReviewMode =
         approvedMode && !dockOriginalFitMode &&
-        !dockInnerReviewMode && !dockBalancedFitReviewMode;
+        !dockInnerReviewMode && !dockBalancedFitReviewMode &&
+        !dockCleanEdgesReviewMode;
     if (framingReviewMode && !approvedMode) {
         qCritical() << "ICON_FRAMING_REVIEW_FAIL: exact SHA-locked approved art required";
         return 2;
@@ -340,6 +344,10 @@ int main(int argc, char *argv[]) {
     }
     if (dockOriginalFitMode && !approvedMode) {
         qCritical() << "DOCK_OPTICAL_BALANCE_FAIL: original fit requires approved art";
+        return 2;
+    }
+    if (dockCleanEdgesReviewMode && !approvedMode) {
+        qCritical() << "DOCK_CLEAN_EDGES_FAIL: SHA-locked approved art required";
         return 2;
     }
     const bool requireApproved = args.contains(QStringLiteral("--self-test-approved"));
@@ -429,7 +437,8 @@ int main(int argc, char *argv[]) {
         // the SAME centered rounded mask. The original PNGs are unchanged.
         auto *roundedIcons = new RoundedDockIconProvider(
             approvedRoot, terminalCandidatePath, dockInnerReviewMode,
-            &roundedError, dockBalancedFitReviewMode, dockOpticalBalanceReviewMode);
+            &roundedError, dockBalancedFitReviewMode, dockOpticalBalanceReviewMode,
+            dockCleanEdgesReviewMode);
         if (!roundedIcons->isValid() || !roundedIcons->allCornersClipped()) {
             qCritical().noquote() << "APPROVED_ART_FAIL: rounded dock rendering:"
                                    << roundedError;
@@ -450,6 +459,9 @@ int main(int argc, char *argv[]) {
                        "rendered in selected uniform 160px inset with "
                        "measured optical compensation; dock geometry and "
                        "wallpaper UNCHANGED; legacy renderer remains available";
+        if (dockCleanEdgesReviewMode)
+            qInfo() << "DOCK_CLEAN_EDGES_ACTIVE: source-aware matte cleanup, "
+                       "unchanged original PNGs, frozen QML geometry; REVIEW ONLY";
         if (framingReviewMode) {
             QString reviewError;
             auto *launcherReviewIcons = new RoundedDockIconProvider(
@@ -585,7 +597,7 @@ int main(int argc, char *argv[]) {
         QTimer::singleShot(1000, window,
             [window, screenshotPath, launcherScreenshotPath, approvedMode, landscapeMode,
              framingReviewMode, dockInnerReviewMode, dockBalancedFitReviewMode,
-             dockOpticalBalanceReviewMode,
+             dockOpticalBalanceReviewMode, dockCleanEdgesReviewMode,
              terminalCandidateMode = !terminalCandidatePath.isEmpty()]() {
             auto *bar = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBar"));
             auto *clock = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBarClock"));
@@ -696,6 +708,8 @@ int main(int argc, char *argv[]) {
                 qInfo() << "SELF_TEST_PASS: dock balanced full-height original content fit";
             if (dockOpticalBalanceReviewMode)
                 qInfo() << "SELF_TEST_PASS: dock optical balance inside unchanged geometry";
+            if (dockCleanEdgesReviewMode)
+                qInfo() << "SELF_TEST_PASS: approved icon matte cleaned only inside dock";
 
             const QPointF barOrigin = bar->mapToItem(window->contentItem(), QPointF(0, 0));
             const QPointF dockOrigin = dock->mapToItem(window->contentItem(), QPointF(0, 0));

@@ -15,7 +15,7 @@ constexpr int kInsetPixels = 12;
 constexpr int kRoundedRadius = 36;
 constexpr int kMaxRequestPixels = 256;
 
-// Experimental launcher-only sampling of SHA-locked 345x333/334 sources.
+// Optional in-memory sampling of SHA-locked 345x333/334 sources.
 // Centers are rounded from 2%-98% bounds of bright illustration pixels,
 // measured independently for each private original PNG. This centers the
 // major visible artwork rather than only chopping a source-sheet TOP gutter.
@@ -36,8 +36,12 @@ const QHash<QString, QPointF> kLauncherOpticalCenters = {
 
 RoundedDockIconProvider::RoundedDockIconProvider(
     const QString &approvedRoot, const QString &terminalCandidatePath,
-    bool framingReviewMode, QString *error)
+    bool framingReviewMode, QString *error, bool balancedDockFitMode)
     : QQuickImageProvider(QQuickImageProvider::Image) {
+    if (framingReviewMode && balancedDockFitMode) {
+        *error = QStringLiteral("two conflicting icon framing experiments");
+        return;
+    }
     QFile manifest(QStringLiteral(":/Canopy/Classic/assets/approved/manifest.json"));
     if (!manifest.open(QIODevice::ReadOnly)) {
         *error = QStringLiteral("embedded icon manifest missing");
@@ -97,7 +101,34 @@ RoundedDockIconProvider::RoundedDockIconProvider(
 
         const bool terminalDerivative =
             !terminalCandidatePath.isEmpty() && sourcePath == terminalCandidatePath;
-        if (framingReviewMode && !terminalDerivative) {
+        if (balancedDockFitMode && !terminalDerivative) {
+            // Candidate C: preserve the ENTIRE original 333/334px height
+            // and sample only the horizontal source gutter. Compared with
+            // the 324px zoom experiment, this is a gentler optical fit.
+            // Fixed 168px rounded face and QML dock geometry NEVER move.
+            // Originals remain immutable, and the separate Terminal-v3
+            // transparent derivative keeps its independent default fit.
+            if (!kLauncherOpticalCenters.contains(id) ||
+                original.width() != 345 ||
+                (original.height() != 333 && original.height() != 334)) {
+                *error = QStringLiteral("balanced dock source dimensions mismatch");
+                m_images.clear();
+                return;
+            }
+            constexpr qreal kFullSourceHeight = 333.0;
+            const qreal x = kLauncherOpticalCenters.value(id).x();
+            const QRectF source(x - kFullSourceHeight / 2.0,
+                                (original.height() - kFullSourceHeight) / 2.0,
+                                kFullSourceHeight, kFullSourceHeight);
+            if (source.left() < 0 || source.top() < 0 ||
+                source.right() > original.width() ||
+                source.bottom() > original.height()) {
+                *error = QStringLiteral("balanced dock source sample out of bounds");
+                m_images.clear();
+                return;
+            }
+            painter.drawImage(face, original, source);
+        } else if (framingReviewMode && !terminalDerivative) {
             // Candidate B: source-specific bright-illustration bounds, not
             // uniform top trimming. The unchanged fixed 168px mask remains
             // centered. Only the launcher may instantiate this mode; dock

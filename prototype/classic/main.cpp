@@ -989,8 +989,19 @@ int main(int argc, char *argv[]) {
                 QCoreApplication::exit(1);
                 return;
             }
+            // FolderTile backgrounds can retain a stale 'hovered' state
+            // under Xvfb even after hoverEnabled=false and pointer moves.
+            // Clear ONLY this presentation effect for the self-test frame.
+            // Never execute this path during real interactive runtime.
+            if (!preview->setProperty("screenshotCaptureMode", true) ||
+                !preview->property("screenshotCaptureMode").toBool()) {
+                qCritical() << "SELF_TEST_FAIL: cannot neutralize Files tile hover";
+                QCoreApplication::exit(1);
+                return;
+            }
             QCoreApplication::processEvents();
             qInfo() << "SELF_TEST_PASS: screenshot hover neutralized" << neutralizedHoverControls;
+            qInfo() << "SELF_TEST_PASS: Files screenshot tile hover cleared";
             const QImage frame = window->grabWindow();
             if (frame.isNull() || frame.width() < 720 || frame.height() < 480) {
                 qCritical() << "SELF_TEST_FAIL: invalid screenshot dimensions";

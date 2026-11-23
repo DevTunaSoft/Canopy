@@ -21,6 +21,19 @@ FORBIDDEN_FIELDS = frozenset({
     "__proto__", "prototype", "constructor", "password", "secret", "token",
     "credential", "cookie", "authorization", "private_key",
 })
+# FIELD names are lowercase ASCII with underscores. An exact deny-list alone
+# lets credential-bearing compounds (user_password, access_token, api_key)
+# through and publishes their values in dispatch records/reports. Strong words
+# are refused inside any name; short aliases are refused as whole components,
+# so ordinary names such as monkey_count or keyboard_layout stay accepted.
+_CREDENTIAL_WORDS = frozenset({
+    "token", "secret", "password", "passwd", "credential", "apikey",
+    "privatekey", "accesstoken", "refreshtoken", "passphrase",
+})
+_CREDENTIAL_ALIASES = frozenset({
+    "pw", "pwd", "pass", "key", "api", "auth", "cookie", "bearer",
+    "private", "signature", "cert", "certificate", "accesskey",
+})
 FIELD = re.compile(r"[a-z][a-z0-9_]{0,47}\Z")
 
 
@@ -61,13 +74,23 @@ def _valid_topic(topic):
         raise HostEventError("unsupported host event topic")
 
 
+def _is_credential_field(folded_name):
+    """True for credential-bearing field names, including compounds."""
+    if any(word in folded_name for word in _CREDENTIAL_WORDS):
+        return True
+    return any(part in _CREDENTIAL_ALIASES
+               for part in folded_name.split("_") if part)
+
+
 def _encode_fields(payload):
     if type(payload) is not dict or len(payload) > MAX_PAYLOAD_FIELDS:
         raise HostEventError("invalid or oversized host event payload")
     result = []
     for key, value in payload.items():
-        if (type(key) is not str or not FIELD.fullmatch(key)
-                or key.casefold() in FORBIDDEN_FIELDS):
+        if type(key) is not str or not FIELD.fullmatch(key):
+            raise HostEventError("unsupported host event field name")
+        folded = key.casefold()
+        if folded in FORBIDDEN_FIELDS or _is_credential_field(folded):
             raise HostEventError("unsupported host event field name")
         if type(value) is str:
             try:

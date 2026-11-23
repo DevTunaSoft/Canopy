@@ -72,6 +72,26 @@ class FiveProductionPackContractTests(unittest.TestCase):
         self.assertNotIn("QThread",self.provider)
         self.assertNotIn("ShaderEffect",self.provider)
 
+    def test_immutable_full_real_qt_golden_baseline(self):
+        import json
+        manifest=json.loads((ROOT/"docs/CLASSIC_FIVE_DOCK_GOLDEN.json").read_text())
+        self.assertEqual(manifest["schema_version"],1)
+        self.assertEqual(set(manifest["frozen_names"]),{"calendar","photos","music"})
+        self.assertEqual(set(manifest["fixed_resolution_hashes"]),
+                         {"760x500","1200x750","1920x1080"})
+        self.assertEqual(set(manifest["five_production_goldens"]),
+                         {"760x500","1200x750","1920x1080"})
+        for size in ("760x500","1200x750","1920x1080"):
+            frozen=manifest["fixed_resolution_hashes"][size]
+            five=manifest["five_production_goldens"][size]
+            self.assertEqual(set(frozen),{"calendar","photos","music"})
+            self.assertEqual(set(five),
+                             {"browser","mail","files","terminal","settings"})
+            for h in list(frozen.values())+list(five.values()):
+                self.assertRegex(h,r"^[0-9a-f]{64}$")
+        self.assertIn("actions/runs/45287610604",
+                      manifest["five_production_source_run_url"])
+
     def test_approved_manifest_and_all_eight_pngs_unchanged(self):
         import hashlib,json
         root=QT/"assets/approved"

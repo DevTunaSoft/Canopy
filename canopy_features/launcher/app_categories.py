@@ -55,7 +55,17 @@ class Application:
         if type(self.title) is not str or not self.title:
             raise CategoryError("invalid application title")
         if not isinstance(self.categories, tuple):
-            object.__setattr__(self, "categories", tuple(self.categories))
+            # A bare string is one category id, not a sequence of ids. tuple()
+            # would silently explode it into single-character tokens and turn
+            # a valid category into bogus unknown ones.
+            if isinstance(self.categories, (str, bytes, bytearray)):
+                raise CategoryError(
+                    "application categories must be a tuple of category ids")
+            try:
+                object.__setattr__(self, "categories", tuple(self.categories))
+            except TypeError:
+                raise CategoryError(
+                    "application categories must be iterable") from None
         if any(type(token) is not str or not _CATEGORY_ID.fullmatch(token)
                for token in self.categories):
             raise CategoryError("invalid application category token")

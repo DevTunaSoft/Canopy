@@ -223,6 +223,18 @@ class MintQtSmokeTests(unittest.TestCase):
         self.assertEqual(smoke._match_marker_line(line, prefixes, seen), ("dock", False))
         self.assertEqual(smoke._match_marker_line(line, prefixes, seen), ("dock", True))
 
+    def test_marker_counted_once_across_base_and_detailed_lines(self):
+        prefixes = {b"SELF_TEST_PASS: dock icons horizontally/vertically centred": "dock"}
+        counts = {"dock": 0}
+        seen, counted = set(), set()
+        self.assertFalse(smoke._register_marker(
+            b"SELF_TEST_PASS: dock icons horizontally/vertically centred",
+            prefixes, seen, counted, counts))
+        self.assertFalse(smoke._register_marker(
+            b"SELF_TEST_PASS: dock icons horizontally/vertically centred count 8",
+            prefixes, seen, counted, counts))
+        self.assertEqual(counts["dock"], 1)
+
     def test_symlinked_screenshot_is_not_hashed_or_reported_as_pass(self):
         target = self.root / "private.png"
         target.write_bytes(b"private screenshot")

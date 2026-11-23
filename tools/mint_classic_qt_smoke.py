@@ -280,12 +280,22 @@ def _match_marker_line(line, marker_bytes, seen_lines):
     return None, duplicate
 
 
+def _register_marker(line, marker_bytes, seen_lines, counted_markers, counts):
+    """Count each expected marker once, even when Qt prints detail variants."""
+    marker, duplicate = _match_marker_line(line, marker_bytes, seen_lines)
+    if marker is not None and marker not in counted_markers:
+        counts[marker] += 1
+        counted_markers.add(marker)
+    return duplicate
+
+
 def _run_qt(command, timeout_seconds, expected_markers):
     """Drain Qt output without retaining unbounded logs and count exact markers."""
     counts = {marker: 0 for marker in expected_markers}
     marker_lines = 0
     duplicate_marker = False
     seen_lines = set()
+    counted_markers = set()
     pending = bytearray()
     discarding_line = False
     marker_bytes = {marker.encode("utf-8"): marker for marker in expected_markers}
@@ -295,11 +305,10 @@ def _run_qt(command, timeout_seconds, expected_markers):
         line = line.rstrip(b"\r")
         if line.startswith(b"SELF_TEST_PASS:"):
             marker_lines += 1
-            marker, duplicate = _match_marker_line(line, marker_bytes, seen_lines)
+            duplicate = _register_marker(
+                line, marker_bytes, seen_lines, counted_markers, counts)
             if duplicate:
                 duplicate_marker = True
-            if marker is not None:
-                counts[marker] += 1
 
     process = subprocess.Popen(
         command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,

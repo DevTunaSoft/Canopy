@@ -65,6 +65,9 @@ jobs:
       - name: Verify approved eight-icon artwork
         run: python3 -m unittest tests.test_approved_art tests.test_approved_manifest_contract tests.test_approved_art_zip -v
 
+      - name: Visual-only regression and negative-control tests
+        run: python3 -m unittest tests.test_classic_dock_frozen tests.test_classic_shared_icon_framing tests.test_dock_inner_framing_review -v
+
       - name: Headless startup smoke test
         timeout-minutes: 2
         env:
@@ -85,6 +88,41 @@ jobs:
           python3 tools/check_screenshot.py test-artifacts/classic-1200x750.png 1200 750
           timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike --approved-art-dir prototype/classic/assets/approved --self-test-approved --self-test-size 760x500 --self-test-screenshot test-artifacts/classic-760x500.png
           python3 tools/check_screenshot.py test-artifacts/classic-760x500.png 760 500
+          sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
+
+      - name: Capture optional dock-content review from SAME compiled Qt binary
+        # These screenshots are evidence, NOT owner approval. Default artwork
+        # remains untouched, and the preview flag is never auto-enabled.
+        timeout-minutes: 4
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          set -eu
+          set +e
+          xvfb-run -a ./build/classic/canopy-classic-spike --dock-inner-framing-review >test-artifacts/dock-review-no-art.log 2>&1
+          rejected=$?
+          set -e
+          test "$rejected" -eq 2
+          grep -q 'DOCK_INNER_FRAMING_REVIEW_FAIL' test-artifacts/dock-review-no-art.log
+          for size in 1920x1080 1200x750 760x500; do
+            width="${size%x*}"
+            height="${size#*x}"
+            timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike \
+              --approved-art-dir prototype/classic/assets/approved \
+              --dock-inner-framing-review --self-test-approved \
+              --self-test-size "$size" \
+              --self-test-screenshot "test-artifacts/dock-inner-review-$size.png" \
+              >"test-artifacts/dock-inner-review-$size.log" 2>&1
+            grep -q 'DOCK_INNER_FRAMING_REVIEW_ACTIVE' "test-artifacts/dock-inner-review-$size.log"
+            grep -q 'SELF_TEST_PASS: dock-only inner framing' "test-artifacts/dock-inner-review-$size.log"
+            python3 tools/check_screenshot.py "test-artifacts/dock-inner-review-$size.png" "$width" "$height"
+            python3 tools/check_dock_inner_framing.py \
+              --before "test-artifacts/classic-$size.png" \
+              --after "test-artifacts/dock-inner-review-$size.png" \
+              --size "$size" \
+              --output "test-artifacts/dock-inner-frame-diff-$size.json"
+          done
           sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
 
       - name: Measure five-minute idle CPU and PSS

@@ -24,7 +24,7 @@ class SharedIconFramingTests(unittest.TestCase):
         self.assertIn("if (framingReviewMode && !approvedMode)", self.cpp)
         self.assertIn("ICON_FRAMING_REVIEW_FAIL", self.cpp)
         self.assertIn("verifyExactArtwork(requested, !landscapeMode, &error)", self.cpp)
-        self.assertIn("dockInnerReviewMode, &roundedError", self.cpp)
+        self.assertIn("dockInnerReviewMode,\n            &roundedError, dockBalancedFitReviewMode", self.cpp)
         self.assertIn("true, &reviewError", self.cpp)
         self.assertNotIn("framingReviewMode = true", self.cpp)
 

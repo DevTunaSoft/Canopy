@@ -40,13 +40,27 @@ _ELEVATION = frozenset({
 })
 
 # System-level commands a preview/desktop helper must never invoke.
+# Names are matched whole after basename normalization, so a harmless word
+# such as "--title=mkfs.ext4 guide" is still allowed.
 _SYSTEM = frozenset({
     "apt", "apt-get", "dpkg", "snap", "systemctl", "service",
     "mount", "umount", "fdisk", "mkfs", "iptables", "ufw",
     "useradd", "usermod", "userdel", "passwd", "visudo",
     "reboot", "shutdown", "halt", "poweroff", "setcap",
     "insmod", "modprobe",
+    # Debian/Ubuntu/Mint account tools. The original list had only the
+    # lower-level useradd/userdel forms, so the friendly wrappers and group
+    # tools failed open on the distributions Canopy targets.
+    "adduser", "addgroup", "deluser", "delgroup",
+    "groupadd", "groupmod", "groupdel", "newusers", "chpasswd",
 })
+
+# Dispatch utilities are named ``mkfs.<fstype>`` on Linux, not ``mkfs``:
+# mkfs.ext4, mkfs.vfat, mkfs.xfs, mkfs.btrfs, ...  A prefix rule covers new
+# filesystem types without another denylist update. It is applied to the
+# normalized whole word (see _basename), so it cannot match a bare word that
+# merely contains "mkfs." mid-token.
+_SYSTEM_PREFIXES = frozenset({"mkfs."})
 
 # Split injected shell words so "sh -c 'sudo mount /'" is still caught.
 _WORD_SPLIT = re.compile(r"[\s;&|`$()<>\n\r]+")
@@ -98,6 +112,11 @@ def _words(argument: str):
             yield name
 
 
+def _is_system_command(word: str) -> bool:
+    """True for a denied system command, exact name or dispatch prefix."""
+    return word in _SYSTEM or any(word.startswith(p) for p in _SYSTEM_PREFIXES)
+
+
 def evaluate(argv: Sequence[str], *, euid: Union[int, None, object] = _AUTO) -> Decision:
     """Decide whether a helper action may proceed. Pure; runs nothing.
 
@@ -127,7 +146,7 @@ def evaluate(argv: Sequence[str], *, euid: Union[int, None, object] = _AUTO) -> 
         for word in _words(argument):
             if word in _ELEVATION:
                 return Decision(False, DENIED_ELEVATION)
-            if word in _SYSTEM:
+            if _is_system_command(word):
                 return Decision(False, DENIED_SYSTEM_COMMAND)
     return Decision(True, ALLOWED)
 

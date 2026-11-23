@@ -47,6 +47,29 @@ jobs:
         timeout-minutes: 6
         run: cmake --build build/classic --parallel 2
 
+      - name: Verify and install five-icon Qt production pack
+        # Generated from the EXACT eight SHA-locked original sources by Qt
+        # at 192/384/576px. Only five target names may be present.
+        timeout-minutes: 4
+        run: |
+          set -eu
+          mkdir -p test-artifacts
+          python3 tools/validate_five_production_icons.py \
+            --approved-art-dir prototype/classic/assets/approved \
+            --production-dir build/classic/production-icons \
+            --report test-artifacts/five-production-pack-integrity.json
+          QT_QPA_PLATFORM=offscreen ./build/classic/canopy-classic-spike \
+            --approved-art-dir prototype/classic/assets/approved \
+            --export-five-production-icons test-artifacts/reproducible-five-icons
+          cmp build/classic/production-icons/manifest.json \
+              test-artifacts/reproducible-five-icons/manifest.json
+          cmake --install build/classic --prefix "$PWD/test-artifacts/installed-classic"
+          test -s test-artifacts/installed-classic/share/canopy/classic/icons/manifest.json
+          cmp build/classic/production-icons/manifest.json \
+              test-artifacts/installed-classic/share/canopy/classic/icons/manifest.json
+          cp -a build/classic/production-icons test-artifacts/production-icons
+          echo "CANOPY_FIVE_PRODUCTION_PACK_INSTALL_PASS: five exact assets x three densities"
+
       - name: Verify real GIO launcher path and opt-in safety
         timeout-minutes: 3
         run: |
@@ -67,7 +90,7 @@ jobs:
         run: python3 -m unittest tests.test_approved_art tests.test_approved_manifest_contract tests.test_approved_art_zip -v
 
       - name: Visual-only regression and negative-control tests
-        run: python3 -m unittest tests.test_classic_dock_frozen tests.test_classic_shared_icon_framing tests.test_dock_inner_framing_review tests.test_dock_balanced_fit_review tests.test_dock_optical_balance_review tests.test_dock_optical_balance_quality tests.test_classic_clean_icon_edges tests.test_five_dock_centering -v
+        run: python3 -m unittest tests.test_classic_dock_frozen tests.test_classic_shared_icon_framing tests.test_dock_inner_framing_review tests.test_dock_balanced_fit_review tests.test_dock_optical_balance_review tests.test_dock_optical_balance_quality tests.test_classic_clean_icon_edges tests.test_five_dock_centering tests.test_five_production_pack_contract -v
 
       - name: Headless startup smoke test
         timeout-minutes: 2
@@ -203,6 +226,7 @@ jobs:
           # optical-balanced renderer, not merely a preview flag.
           timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike \
             --approved-art-dir prototype/classic/assets/approved \
+            --require-five-production-icons \
             --self-test-approved --self-test-size 1200x750 \
             --self-test-screenshot test-artifacts/classic-selected-default-1200x750.png
           python3 tools/check_screenshot.py test-artifacts/classic-selected-default-1200x750.png 1200 750
@@ -273,8 +297,8 @@ jobs:
             height="${size#*x}"
             timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike \
               --approved-art-dir prototype/classic/assets/approved \
-              --dock-five-center-review --self-test-approved \
-              --self-test-size "$size" \
+              --dock-five-center-review --require-five-production-icons \
+              --self-test-approved --self-test-size "$size" \
               --self-test-screenshot "test-artifacts/dock-five-center-$size.png" \
               >"test-artifacts/dock-five-center-$size.log" 2>&1
             grep -q 'DOCK_FIVE_CENTER_ACTIVE' "test-artifacts/dock-five-center-$size.log"

@@ -135,6 +135,8 @@ def _validate_registrations(items, source):
         raise ShortcutConflictError("registrations must be iterable of pairs") from exc
     result = []
     for item in iterable:
+        if len(result) >= MAX_REGISTRATIONS:
+            raise ShortcutConflictError("too many registrations")
         if not isinstance(item, (tuple, list)) or len(item) != 2:
             raise ShortcutConflictError("registration must be an (action, sequence) pair")
         action, sequence = item

@@ -82,10 +82,15 @@ class PropagationResult:
     changed: tuple
 
     def decision_for(self, consumer_id):
-        """Return the decision delivered to ``consumer_id`` on this update."""
+        """Return the decision delivered to ``consumer_id`` on this update.
+
+        Any id that is not a delivered consumer fails closed with
+        :class:`MotionContractError`, including unhashable ids whose mapping
+        lookup raises ``TypeError`` rather than ``KeyError``.
+        """
         try:
             return self.decisions[consumer_id]
-        except KeyError as exc:
+        except (KeyError, TypeError) as exc:
             raise MotionContractError("unknown reduced-motion consumer") from exc
 
 

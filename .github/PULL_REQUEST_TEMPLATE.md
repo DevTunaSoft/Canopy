@@ -33,5 +33,11 @@ Code review: **NOT YET REVIEWED / REVIEW IN PROGRESS / REVIEWED**
 
 Green CI **alone never authorizes merging**. Do not merge visually rejected
 work, unverified Mint integration or a stacked PR that would transitively
-merge an unapproved ancestor. Document source changes and obtain appropriate
-human review before changing status to ready.
+merge an unapproved ancestor. Document source changes before changing status
+to ready.
+
+Routine nonvisual work may be reviewed and integrated by the autonomous
+engineering process after exact-SHA verification and regression tests; mark
+that as **AGENT REVIEWED**, never as human approval. Obtain explicit owner
+approval for visual changes, high-risk security decisions and release
+acceptance. A named PR hold is never overridden by general authorization.

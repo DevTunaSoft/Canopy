@@ -14,7 +14,8 @@ public:
                                      const QString &terminalCandidatePath,
                                      bool framingReviewMode, QString *error,
                                      bool balancedDockFitMode = false,
-                                     bool opticalBalanceReviewMode = false);
+                                     bool opticalBalanceReviewMode = false,
+                                     bool cleanSourceEdgesReviewMode = false);
 
     bool isValid() const { return m_images.size() == 8; }
     bool allCornersClipped() const;

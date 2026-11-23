@@ -40,6 +40,22 @@ const QHash<QString, QPointF> kLauncherOpticalCenters = {
 // source (no cropping), centered inside the fixed 168px clipped rounded face.
 // Per-icon translations are bounded and apply ONLY in explicit review mode.
 constexpr int kOpticalFitPixels = 160;
+// These first rows are *opaque selection-sheet matte*, not part of the
+// chosen illustration; the source PNGs remain byte-for-byte untouched.
+// This separate source-aware renderer is only enabled for --dock-clean-edges-review.
+// Native source pixel inspection (2026-11-23): the Terminal and Settings
+// titlebar begins around scanline 15, while the other six begin earlier.
+const QHash<QString, QPair<int, int>> kSourceMatteRowTrim = {
+    {QStringLiteral("browser"), {7, 0}},
+    {QStringLiteral("mail"), {6, 1}},
+    {QStringLiteral("files"), {5, 1}},
+    {QStringLiteral("calendar"), {0, 0}},
+    {QStringLiteral("photos"), {4, 0}},
+    {QStringLiteral("music"), {3, 0}},
+    {QStringLiteral("terminal"), {15, 7}},
+    {QStringLiteral("settings"), {15, 4}},
+};
+
 const QHash<QString, QPointF> kOpticalBalanceOffset = {
     {QStringLiteral("browser"), QPointF(3, -2)},
     {QStringLiteral("mail"), QPointF(2, 5)},
@@ -55,10 +71,12 @@ const QHash<QString, QPointF> kOpticalBalanceOffset = {
 RoundedDockIconProvider::RoundedDockIconProvider(
     const QString &approvedRoot, const QString &terminalCandidatePath,
     bool framingReviewMode, QString *error, bool balancedDockFitMode,
-    bool opticalBalanceReviewMode)
+    bool opticalBalanceReviewMode, bool cleanSourceEdgesReviewMode)
     : QQuickImageProvider(QQuickImageProvider::Image) {
     if ((framingReviewMode && balancedDockFitMode) ||
-        (opticalBalanceReviewMode && (framingReviewMode || balancedDockFitMode))) {
+        (opticalBalanceReviewMode && (framingReviewMode || balancedDockFitMode)) ||
+        (cleanSourceEdgesReviewMode &&
+         (framingReviewMode || balancedDockFitMode || opticalBalanceReviewMode))) {
         *error = QStringLiteral("conflicting icon framing experiments");
         return;
     }
@@ -121,7 +139,49 @@ RoundedDockIconProvider::RoundedDockIconProvider(
 
         const bool terminalDerivative =
             !terminalCandidatePath.isEmpty() && sourcePath == terminalCandidatePath;
-        if (opticalBalanceReviewMode && !terminalDerivative) {
+        if (cleanSourceEdgesReviewMode && !terminalDerivative) {
+            // Reuse the *identical verified original PNG*. Remove only its
+            // extra selection-sheet matte at the upper/lower source edges.
+            // Draw the entire chosen composition within the SAME fixed 168px
+            // rounded card. An unobtrusive, image-derived soft edge fill
+            // avoids the old extra #10203d frame / square-into-rounded effect.
+            // This executes once on startup; there are zero runtime effects.
+            const auto trimIt = kSourceMatteRowTrim.constFind(id);
+            if (trimIt == kSourceMatteRowTrim.cend() ||
+                original.width() != 345 ||
+                (original.height() != 333 && original.height() != 334)) {
+                *error = QStringLiteral("clean dock source dimensions mismatch");
+                m_images.clear();
+                return;
+            }
+            const int cropTop = trimIt.value().first;
+            const int cropBottom = trimIt.value().second;
+            if (cropTop < 0 || cropBottom < 0 ||
+                cropTop + cropBottom >= original.height() - 32) {
+                *error = QStringLiteral("unsafe source matte trim");
+                m_images.clear();
+                return;
+            }
+            const QImage source = original.copy(
+                0, cropTop, original.width(),
+                original.height() - cropTop - cropBottom);
+            if (source.isNull()) {
+                *error = QStringLiteral("source matte crop missing");
+                m_images.clear();
+                return;
+            }
+            // A 14px reduction and smooth expansion creates a low-frequency
+            // continuation of the image's own colors in the 1px outer rim,
+            // not a second dark border or a new illustration.
+            const QImage edgeFill = source.scaled(
+                14, 14, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)
+                .scaled(face.size().toSize(), Qt::IgnoreAspectRatio,
+                        Qt::SmoothTransformation);
+            const QRectF inner(face.left() + 1, face.top() + 1,
+                               face.width() - 2, face.height() - 2);
+            painter.drawImage(face, edgeFill);
+            painter.drawImage(inner, source);
+        } else if (opticalBalanceReviewMode && !terminalDerivative) {
             // Candidate D: gently normalize optical centers without cropping
             // or changing the user's original art. The 160px image is a
             // single cached render; one-time startup work, zero extra timers

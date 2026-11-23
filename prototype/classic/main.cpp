@@ -446,6 +446,30 @@ int main(int argc, char *argv[]) {
         terminalCandidatePath = filePath;
         qInfo() << "CANOPY_TERMINAL_CANDIDATE_VERIFIED: optional, Terminal only";
     }
+    // Explicit offline pack export, never normal user startup. The exact
+    // SHA-locked master PNGs were verified before this point.
+    const int packExportIndex =
+        args.indexOf(QStringLiteral("--export-five-production-icons"));
+    if (packExportIndex >= 0) {
+        if (!approvedMode || !terminalCandidatePath.isEmpty() ||
+            packExportIndex + 1 >= args.size() ||
+            args.at(packExportIndex + 1).startsWith(QLatin1Char('-'))) {
+            qCritical() << "FIVE_PRODUCTION_EXPORT_FAIL: original masters and output directory required";
+            return 2;
+        }
+        QString error;
+        RoundedDockIconProvider productionSource(
+            approvedRoot, QString(), false, &error, false, false, true, true);
+        if (!productionSource.isValid() || !productionSource.allCornersClipped() ||
+            !productionSource.exportFiveProductionPack(
+                args.at(packExportIndex + 1), approvedRoot, &error)) {
+            qCritical().noquote() << "FIVE_PRODUCTION_EXPORT_FAIL:" << error;
+            return 3;
+        }
+        qInfo() << "FIVE_PRODUCTION_EXPORT_PASS: five verified original-master icons "
+                   "at 192/384/576 pixels; Calendar/Photos/Music excluded";
+        return 0;
+    }
     QQmlApplicationEngine engine;
     if (approvedMode) {
         // Source PNGs were SHA-verified above; transform copies IN MEMORY
@@ -454,15 +478,34 @@ int main(int argc, char *argv[]) {
         // Default dock full-fit rendering is unchanged. Only the explicit
         // review flag enables in-memory source-content framing within
         // the SAME centered rounded mask. The original PNGs are unchanged.
+        // Qt build-generated pack lives beside the executable; install
+        // packages use the standard share/canopy/classic/icons directory.
+        QString productionPackRoot =
+            QCoreApplication::applicationDirPath() + QStringLiteral("/production-icons");
+        if (!QFileInfo::exists(productionPackRoot + QStringLiteral("/manifest.json")))
+            productionPackRoot = QDir(QCoreApplication::applicationDirPath())
+                .absoluteFilePath(QStringLiteral("../share/canopy/classic/icons"));
         auto *roundedIcons = new RoundedDockIconProvider(
             approvedRoot, terminalCandidatePath, dockInnerReviewMode,
             &roundedError, dockBalancedFitReviewMode, dockOpticalBalanceReviewMode,
-            dockCleanEdgesReviewModeSelected, dockFiveCenterModeSelected);
+            dockCleanEdgesReviewModeSelected, dockFiveCenterModeSelected,
+            productionPackRoot);
         if (!roundedIcons->isValid() || !roundedIcons->allCornersClipped()) {
             qCritical().noquote() << "APPROVED_ART_FAIL: rounded dock rendering:"
                                    << roundedError;
             delete roundedIcons;
             return 3;
+        }
+        if (args.contains(QStringLiteral("--require-five-production-icons")) &&
+            (!dockFiveCenterModeSelected || !roundedIcons->productionPackVerified())) {
+            qCritical() << "FIVE_PRODUCTION_PACK_FAIL: pack absent or SHA-invalid";
+            delete roundedIcons;
+            return 3;
+        }
+        if (dockFiveCenterModeSelected) {
+            qInfo() << (roundedIcons->productionPackVerified()
+                ? "FIVE_PRODUCTION_PACK_VERIFIED: exactly five SHA-verified original-derived icons"
+                : "FIVE_PRODUCTION_PACK_FALLBACK: exact original-derived Qt renderer");
         }
         engine.addImageProvider(QStringLiteral("canopy-dock"), roundedIcons);
         qInfo() << "CANOPY_ROUNDED_DOCK_VERIFIED: eight original icons, padded, alpha-clipped";

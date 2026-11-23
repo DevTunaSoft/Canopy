@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "kind": "real_compiled_qt_screenshot_inner_icon_rgba_sha256",
+  "source_run_url": "https://github.com/DevTunaSoft/Canopy/actions/runs/45256190360",
+  "source_commit": "f9fa62de03435ab49d3543e437c6f0d48dae6e49",
+  "extraction": "54x54 rgba8 centered on eight fixed QML dock image centers; no image generation",
+  "frozen_names": [
+    "calendar",
+    "photos",
+    "music"
+  ],
+  "fixed_resolution_hashes": {
+    "760x500": {
+      "calendar": "63820215a75c21c677a07e5f46a4b9552818f6566ee463939e0a79bed169a7cb",
+      "photos": "4ce3230f1e2240cefe232a2469492ec216b9a0d6f7caadc733adfd9ad7749c4a",
+      "music": "1be0d11f8599bd73ed0019306939970b28cfa48e22e48ef68b5aab87ea42ad17"
+    },
+    "1200x750": {
+      "calendar": "60f8d2d6a5e8cf7da278ce1307c0f7f11c07ae1e14213c329fd4e8a00e212351",
+      "photos": "cae4510bc9506aadcc1c138d351ee57409feec68552ed3f2a60adc26f7723fe8",
+      "music": "c64d36f37fc11a3f6d9ddb358aa0f69f4ab8294c90a1d6aefcd00c8783ee5d0a"
+    },
+    "1920x1080": {
+      "calendar": "c6c55c85b87c63103b683207b7694f7f5bb3feeabc46ce66da25e4f8c35a89fe",
+      "photos": "eac6e7336b6edb426d4ecfd12f6a4f779e9b923ff74e8f21e0cd71a092551369",
+      "music": "c0b8bf44f943abddba91e3af04dcc97d7772f72b372165fb0b7c317c999779b9"
+    }
+  },
+  "five_production_goldens": {
+    "760x500": {
+      "browser": "b5ffae6c5770163a60201664b92772dba5347261517f6a71dcc1a78a21c835a9",
+      "mail": "aebb42c4c8051220f8a3ce0636c272cab34b61f36898fd46e7539458f8e100c1",
+      "files": "a1f008b74cf1071402894fb71f67645ff70ea6e162a78ac286fb350a7d482aaf",
+      "terminal": "e22dcae391cc25096d85d205b01250265cb18a9be95ccf73a8867f1287d23c8e",
+      "settings": "f5133e8f95c6737cb1f60645e24d6936313324c30cbb6a1defc019bfd0e4ef36"
+    },
+    "1200x750": {
+      "browser": "5e5784e8bc0373cbaa4e14b0437a4ab9581547b960c81e9681ee0326a690b0df",
+      "mail": "12f5a655d9daafab7b795a4b4be20b457df2816215675ee82bdb9f6cc6010d27",
+      "files": "3a9e6c661bc6b511f39f829f6c1c9fa41b0f426c2ffbacaa70a68e5473dbcddc",
+      "terminal": "ce14d417f5459f36b9e426109c988828c7257dd62a74e193b895412e72d3adc5",
+      "settings": "6e26d8760e9a569807bd7efcd2d03ea34db831214287234a923a3466d91ecc97"
+    },
+    "1920x1080": {
+      "browser": "95ef31d3401c721cbee634a327bbe0cc4fc3afbdd38dc7f21690fc264b5bc019",
+      "mail": "4e4fe85195a437b3ec1d951e19c0d28a7e43c4c301fb9905ceeb3915dde460be",
+      "files": "768ac9cc67c115a79f540d5d854ccdd1319de23d67163d0df47d5d4edfd9a803",
+      "terminal": "859bc68c369406861ba0b3fd39b4b8b0201f0c40ef523a698ad385ca9fe99d46",
+      "settings": "558af96ec6e4acf262d8cbe62d683f0fbc5abc9b1484c40a66706d235a42b2d7"
+    }
+  },
+  "note": "All 24 icon SHA-256 values (9 frozen + 15 production) were extracted from genuine compiled Qt screenshot pixels, never model-generated. User locked Calendar, Photos, Music. Five results are a reproducible technical rendering baseline; do not infer final aesthetic approval.",
+  "five_production_source_run_url": "https://github.com/DevTunaSoft/Canopy/actions/runs/45287610604",
+  "five_production_source_commit": "5f57738cae5bf4e070b8f0ec96ef815fae306afd"
+}

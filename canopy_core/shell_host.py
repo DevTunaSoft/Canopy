@@ -17,6 +17,7 @@ from .capabilities import (
     load as _load_capability, names as _capability_names,
 )
 from .registry import PackScan
+from .window_focus_adapter import WindowFocusAdapter, issue_host_authority
 
 
 class Presentation(Protocol):
@@ -74,6 +75,9 @@ class ShellHost:
         self._active_id: Optional[str] = None
         self._active_view: Optional[Presentation] = None
         self._needs_recovery = False
+        # Opaque authority minted in trusted host code; pack metadata can
+        # never construct a focus adapter.
+        self._focus_authority = issue_host_authority()
 
     @property
     def active_id(self) -> Optional[str]:
@@ -105,6 +109,15 @@ class ShellHost:
         if descriptor.visual:
             raise CapabilityError("visual capabilities are not loadable here")
         return _load_capability(name)
+
+    def make_focus_adapter(self, authorize):
+        """Create a decision-only focus advisory owned by this host.
+
+        ``authorize`` is the host's explicit approve callback. The adapter
+        never receives an activation backend, so it can report a decision but
+        cannot change a window, launch an app or query the compositor.
+        """
+        return WindowFocusAdapter(self._focus_authority, authorize)
 
     @staticmethod
     def _attempt(view: Presentation, method: str) -> Optional[str]:

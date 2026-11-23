@@ -15,6 +15,10 @@ from types import MappingProxyType
 MAX_CATEGORY_ID_BYTES = 64
 MAX_CATEGORY_TOKENS = 256
 MAX_CATALOG_CATEGORIES = 128
+# A launcher catalog must stay bounded no matter what iterable the host hands
+# us.  Cap the number of consumed applications, not just the categories, so a
+# hostile or runaway source cannot be fully materialized into ``decorated``.
+MAX_APPLICATIONS = 4096
 
 # Freedesktop category names: alphanumeric and '-' (vendor X- prefixes fit).
 _CATEGORY_ID = re.compile(r"[A-Za-z][A-Za-z0-9-]{0,%d}\Z" % (MAX_CATEGORY_ID_BYTES - 1))
@@ -207,12 +211,20 @@ def order_applications(applications, catalog):
     Apps with no known category (only unknown/reserved tokens, or none) sort
     last but remain deterministic. Duplicate app ids are collapsed to the
     first occurrence so one desktop entry cannot occupy multiple slots.
+    At most ``MAX_APPLICATIONS`` items are consumed; an oversized source fails
+    closed with ``CategoryError`` instead of being fully materialized.
     """
     if not isinstance(catalog, CategoryCatalog):
         raise CategoryError("a CategoryCatalog is required")
     seen_ids = set()
     decorated = []
+    processed = 0
     for app in applications:
+        # Count every consumed item, including duplicates, so a generator that
+        # keeps yielding cannot be drained without bound.
+        processed += 1
+        if processed > MAX_APPLICATIONS:
+            raise CategoryError("too many applications")
         if not isinstance(app, Application):
             raise CategoryError("applications must be Application objects")
         if app.id in seen_ids:

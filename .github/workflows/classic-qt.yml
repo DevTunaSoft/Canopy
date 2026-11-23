@@ -312,6 +312,16 @@ jobs:
           done
           sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
 
+      - name: Verify real Qt golden pixels of frozen Calendar, Photos and Music
+        # These SHA-256 references came from actual compiled Qt screenshots
+        # in green run 45256190360; do not regenerate them from synthetic UI.
+        run: |
+          python3 tools/check_five_dock_goldens.py \
+            --golden docs/CLASSIC_FIVE_DOCK_GOLDEN.json \
+            --screens-dir test-artifacts \
+            --image-prefix dock-five-center- \
+            --output test-artifacts/five-icon-golden-report.json
+
       - name: Verify ordinary Qt launch selects exactly the five-icon correction
         # Compare actual default Qt rendering with explicit five-icon rendering.
         # Allow only bounded top-bar clock rollover; no icon pixel exceptions.

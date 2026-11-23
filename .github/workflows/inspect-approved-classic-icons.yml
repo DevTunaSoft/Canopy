@@ -1,0 +1,56 @@
+name: Inspect exact approved Classic icon source crops
+on:
+  push:
+    branches:
+      - visual/approved-master-native-pixel-inspection-20261123
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-artifact:
+    name: Verify and export eight untouched selection-sheet PNGs
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify original approved-art PNG bytes and dimensions
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import pathlib
+          import shutil
+          import struct
+
+          base = pathlib.Path("prototype/classic/assets/approved")
+          manifest = json.loads((base / "manifest.json").read_text())
+          assert len(manifest["icons"]) == 8
+          out = pathlib.Path("test-artifacts/original-icon-native-pixels")
+          out.mkdir(parents=True, exist_ok=True)
+          lines = []
+          for item in manifest["icons"]:
+              p = base / item["path"]
+              raw = p.read_bytes()
+              digest = hashlib.sha256(raw).hexdigest()
+              assert digest == item["sha256"], (p, digest, item["sha256"])
+              assert raw[:8] == b"\x89PNG\r\n\x1a\n", p
+              assert raw[12:16] == b"IHDR", p
+              w, h = struct.unpack(">II", raw[16:24])
+              assert (w, h) in {(345, 333), (345, 334)}, (p, w, h)
+              shutil.copyfile(p, out / p.name)
+              lines.append(f"{item['name']}\t{p.name}\t{w}x{h}\t{len(raw)} bytes\t{digest}")
+          (out / "SOURCE_SHA256_DIMENSIONS.tsv").write_text("\n".join(lines) + "\n")
+          shutil.copyfile(base / "manifest.json", out / "manifest.json")
+          print("PASS: eight exact approved original icon PNG files exported without byte changes")
+          for item in lines:
+              print(item)
+          PY
+      - name: Upload exact source bytes for visual diagnosis
+        uses: actions/upload-artifact@v4
+        with:
+          name: canopy-approved-original-icon-crops-sha-locked
+          path: test-artifacts/original-icon-native-pixels/
+          if-no-files-found: error
+          retention-days: 14

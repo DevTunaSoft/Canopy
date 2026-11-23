@@ -14,6 +14,24 @@ from typing import Mapping
 
 DEFAULT_MAX_BYTES = 64 * 1024
 
+
+def _check_max_bytes(max_bytes: int) -> None:
+    """Reject a non-positive or non-int byte limit before any read occurs."""
+    if type(max_bytes) is not int or max_bytes < 1:
+        raise MalformedEntryError("invalid size limit")
+
+
+def _byte_length(data) -> int:
+    """Real byte length, including memoryviews with a non-byte element type.
+
+    ``len(memoryview)`` counts elements, not bytes: a 200000-byte buffer viewed
+    as 8-byte integers reports 25000. Enforcing ``max_bytes`` against that
+    number lets an oversized entry through, so use ``nbytes`` for memoryviews.
+    """
+    if isinstance(data, memoryview):
+        return data.nbytes
+    return len(data)
+
 _KEY = re.compile(r"[A-Za-z0-9-]+(?:\[[A-Za-z0-9_@.+:-]+\])?")
 _GROUP = re.compile(r"[A-Za-z0-9][A-Za-z0-9 -]*")
 _BOOLEANS = frozenset({"Terminal", "NoDisplay", "Hidden", "StartupNotify"})
@@ -136,7 +154,8 @@ def parse(
     """Parse one desktop entry, failing closed on malformed or ambiguous input."""
     if not isinstance(data, (bytes, bytearray, memoryview)):
         raise TypeError("desktop entry data must be bytes")
-    if len(data) > max_bytes:
+    _check_max_bytes(max_bytes)
+    if _byte_length(data) > max_bytes:
         raise MalformedEntryError("desktop entry exceeds size limit")
     try:
         text = bytes(data).decode("utf-8-sig")
@@ -209,6 +228,7 @@ def parse_file(
     require_application: bool = True,
 ) -> DesktopEntry:
     """Parse a desktop entry file with a bounded read; never follow a walk."""
+    _check_max_bytes(max_bytes)
     with Path(path).open("rb") as handle:
         data = handle.read(max_bytes + 1)
     return parse(data, max_bytes=max_bytes, require_application=require_application)

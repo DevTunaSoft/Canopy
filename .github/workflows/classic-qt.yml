@@ -294,6 +294,23 @@ jobs:
           done
           sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
 
+      - name: Verify ordinary Qt launch selects exactly the five-icon correction
+        # Compare actual default Qt rendering with explicit five-icon rendering.
+        # Allow only bounded top-bar clock rollover; no icon pixel exceptions.
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from tools.check_dock_optical_balance_quality import equivalent_selected_default
+          count=equivalent_selected_default(
+              Path("test-artifacts/classic-selected-default-1200x750.png"),
+              Path("test-artifacts/dock-five-center-1200x750.png"),
+              "1200x750",
+          )
+          print("CANOPY_FIVE_DOCK_DEFAULT_IDENTITY_PASS:",
+                "selected default identical to explicit five-center preview;",
+                count, "clock-only exceptions")
+          PY
+
       - name: Measure five-minute idle CPU and PSS
         timeout-minutes: 9
         env:

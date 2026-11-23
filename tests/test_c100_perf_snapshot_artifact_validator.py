@@ -412,6 +412,32 @@ class CliTests(unittest.TestCase):
             self.assertEqual(validator.main([str(Path(tmp) / "none.json")]), 1)
 
 
+class ProducerContractTests(unittest.TestCase):
+    """The validator must accept every projection the producer can emit."""
+
+    def test_null_delta_percent_accepted(self):
+        # memory_delta emits None when the start memory reading is zero.
+        artifact = _artifact()
+        artifact["memory_growth"]["start_kib"] = 0
+        artifact["memory_growth"]["min_kib"] = 0
+        artifact["memory_growth"]["delta_percent"] = None
+        self.assertEqual(validator.validate(artifact)["status"], "VALID")
+
+    def test_null_mean_growth_accepted(self):
+        artifact = _artifact()
+        artifact["memory_growth"]["mean_growth_per_interaction_kib"] = None
+        self.assertEqual(validator.validate(artifact)["status"], "VALID")
+
+    def test_bad_number_or_none_still_rejected(self):
+        for field in ("delta_percent", "mean_growth_per_interaction_kib"):
+            for bad in (True, float("nan"), float("inf"), 2 ** 31, "1", []):
+                with self.subTest(field=field, bad=bad):
+                    artifact = _artifact()
+                    artifact["memory_growth"][field] = bad
+                    with self.assertRaises(validator.ArtifactError):
+                        validator.validate(artifact)
+
+
 class PurityTests(unittest.TestCase):
     def test_no_runtime_or_visual_imports(self):
         source = Path(validator.__file__).read_text(encoding="utf-8")

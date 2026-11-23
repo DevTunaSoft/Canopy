@@ -96,6 +96,18 @@ def _number(value):
     raise ArtifactError("artifact numeric field has wrong type")
 
 
+def _number_or_none(value):
+    """Accept the producer's null projection as well as a finite number.
+
+    ``memory_delta`` emits a null percent when the start reading is zero, and
+    the producer's ``_number_or_none`` projection preserves it verbatim. A
+    validator that rejected null would reject a real, valid artifact.
+    """
+    if value is None:
+        return None
+    return _number(value)
+
+
 def _float_or_none(value):
     if value is None:
         return None
@@ -167,8 +179,8 @@ def _validate_memory(value):
                 "peak_kib", "min_kib"):
         _int(s[key], 0)
     _int(s["delta_kib"], -MAX_DELTA_KIB, MAX_DELTA_KIB)
-    _number(s["delta_percent"])
-    _number(s["mean_growth_per_interaction_kib"])
+    _number_or_none(s["delta_percent"])
+    _number_or_none(s["mean_growth_per_interaction_kib"])
     if type(s["status"]) is not str or s["status"] not in MEMORY_STATUSES:
         raise ArtifactError("artifact memory status is unsupported")
 

@@ -7,7 +7,8 @@ name: Classic Qt build and runtime evidence
 on:
   pull_request:
   push:
-    branches: [main]
+    # Isolated visual CI can run even when draft PR targets a non-main Qt branch.
+    branches: [main, visual/dock-inner-framing-review-20261122]
   workflow_dispatch:
 
 permissions:

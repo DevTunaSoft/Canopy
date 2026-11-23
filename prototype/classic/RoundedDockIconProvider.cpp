@@ -60,12 +60,12 @@ const QHash<QString, QPair<int, int>> kSourceMatteRowTrim = {
 // Measured from high-contrast feature centers in genuine 1920x1080 Qt captures
 // of the unchanged source-aware clean-matte renderer, NOT from the button
 // rectangle or a generated dock mockup. After Qt's 54/192 reduction these
-// are roughly: Browser (+0.6,-1.1), Mail (-0.6,+0.3),
+// are roughly: Browser (0,-2.3), Mail (+0.6,0),
 // Files (-2.5,+0.3), Terminal (-2.3,-0.8), Settings (-2.0,-0.6)px.
 // Calendar, Photos and Music MUST NEVER appear in this map or be altered.
 const QHash<QString, QPointF> kFiveDockCenterOffsets = {
-    {QStringLiteral("browser"), QPointF(2, -4)},
-    {QStringLiteral("mail"), QPointF(-2, 1)},
+    {QStringLiteral("browser"), QPointF(0, -8)},
+    {QStringLiteral("mail"), QPointF(2, 0)},
     {QStringLiteral("files"), QPointF(-9, 1)},
     {QStringLiteral("terminal"), QPointF(-8, -3)},
     {QStringLiteral("settings"), QPointF(-7, -2)},

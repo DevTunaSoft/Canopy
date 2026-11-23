@@ -8,7 +8,7 @@ Ordering rules (arrival order is authoritative, timestamps guard against late
 and backwards events):
   * a duplicate fingerprint is ignored;
   * an event older than the newest observed event is stale and cannot regress
-    the committed state;
+    the committed state; a rejected event leaves the dedup window unchanged;
   * SUSPEND forces the locked flag on (fail-closed);
   * UNLOCK while suspended cannot expose an unlocked session;
   * redundant events report a status but do not emit a transition.
@@ -147,10 +147,14 @@ class Reconciler:
         fingerprint = (event.kind, event.timestamp, event.source)
         if fingerprint in self._seen_set:
             return Outcome(DUPLICATE, event, self._state, self._state)
-        self._remember(fingerprint)
         if (self._last_timestamp is not None
                 and event.timestamp < self._last_timestamp):
+            # A rejected event must not consume a duplicate-window slot:
+            # remembering it could evict an accepted fingerprint and let its
+            # replay flip committed state. Fail-closed rejection leaves the
+            # whole reconciler state (including the dedup window) unchanged.
             return Outcome(STALE, event, self._state, self._state)
+        self._remember(fingerprint)
         self._last_timestamp = event.timestamp
         previous = self._state
         if event.kind == UNLOCK and previous.suspended:

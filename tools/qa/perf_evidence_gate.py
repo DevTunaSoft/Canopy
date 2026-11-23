@@ -28,9 +28,21 @@ class EvidenceError(ValueError):
 
 
 def _real(value):
-    if type(value) not in (float, int) or not math.isfinite(value):
+    """Return a finite float for a bounded JSON number, or fail closed.
+
+    A finite JSON integer can still be too large for the float range. Convert
+    first and translate that overflow, so an oversized observation never
+    escapes as a raw built-in exception past the EvidenceError boundary.
+    """
+    if type(value) not in (float, int):
         raise EvidenceError("numeric evidence must be finite")
-    return float(value)
+    try:
+        result = float(value)
+    except (OverflowError, ValueError) as exc:
+        raise EvidenceError("numeric evidence must be finite") from exc
+    if not math.isfinite(result):
+        raise EvidenceError("numeric evidence must be finite")
+    return result
 
 
 def _int(value, minimum=0):

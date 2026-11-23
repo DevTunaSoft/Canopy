@@ -61,7 +61,7 @@ class FrozenClassicDockTests(unittest.TestCase):
         tile = (CLASSIC / "DockTile.qml").read_text(encoding="utf-8")
         self.assertIn("approvedRoot, terminalCandidatePath, dockInnerReviewMode,",
                       cpp)
-        self.assertIn("&roundedError, dockBalancedFitReviewMode", cpp)
+        self.assertIn("&roundedError, dockBalancedFitReviewMode, dockOpticalBalanceReviewMode", cpp)
         self.assertIn('args.contains(QStringLiteral("--dock-inner-framing-review"))', cpp)
         self.assertIn("if (dockInnerReviewMode && !approvedMode)", cpp)
         self.assertIn("approvedRoot, terminalCandidatePath, true, &reviewError",

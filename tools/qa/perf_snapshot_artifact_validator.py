@@ -161,7 +161,12 @@ def _validate_frame(value):
     times = {}
     for key in ("min_ms", "max_ms", "mean_ms", "p50_ms", "p95_ms", "p99_ms"):
         val = _float_or_none(s[key])
-        if val is None or not 0 < val <= MAX_FRAME_MS:
+        # The offline parser rounds frame times to 4 decimals, so a valid
+        # tiny positive sample can project to exactly 0.0. A validator that
+        # required a strictly positive value would reject a real artifact;
+        # the closed lower bound matches the producer's output domain while
+        # still refusing negatives, non-finite and oversized frame times.
+        if val is None or not 0 <= val <= MAX_FRAME_MS:
             raise ArtifactError("artifact frame time is out of range")
         times[key] = val
     if not (times["min_ms"] <= times["p50_ms"] <= times["p95_ms"]

@@ -83,6 +83,11 @@ def _corroborates(gate, result, excerpt):
     if result == "PASS":
         if pass_marker is not None and not _matches(pass_marker, excerpt):
             raise SummaryError("PASS result lacks command output marker")
+        # A PASS label must not survive an explicit FAIL/BLOCKED marker in the
+        # same excerpt; that record is self-contradictory, not a pass.
+        fail_markers = _FAIL_MARKERS[gate]
+        if fail_markers and any(_matches(marker, excerpt) for marker in fail_markers):
+            raise SummaryError("PASS result contradicted by failure output marker")
         return
     if result in SKIP_STATUSES:
         if pass_marker is not None and _matches(pass_marker, excerpt):

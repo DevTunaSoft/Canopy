@@ -133,15 +133,40 @@ def check_text(base_px, scale, layout, device_pixel_ratio=1.0):
                        logical, physical, tuple(reasons))
 
 
+def _is_usable_font_size(value):
+    """True only for finite, non-bool real numbers that can be ordered."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return False
+    try:
+        return math.isfinite(value)
+    except OverflowError:
+        # Arbitrarily large ints cannot be converted to float for ordering.
+        return False
+
+
 def resolve_fallback(base_px, scale, layout, available_sizes=FONT_SIZES_PX,
                      device_pixel_ratio=1.0):
-    """Pick the closest available font size that satisfies the text policy."""
+    """Pick the closest available font size that satisfies the text policy.
+
+    ``available_sizes`` is caller-supplied: an unhashable/non-iterable value or
+    entries that are not finite, non-bool numbers cannot define a usable size
+    and are skipped rather than raising a raw ``TypeError`` while sorting. With
+    no usable size that fits, the documented no-fallback ``Fallback`` is
+    returned, matching the empty-set and unsuitable-set behaviour.
+    """
     error = _finite_positive(base_px, "base_px")
     if error:
         return Fallback(False, None, error)
     if check_text(base_px, scale, layout, device_pixel_ratio).ok:
         return Fallback(True, float(base_px), "")
-    for size in sorted(available_sizes, key=lambda s: abs(s - base_px)):
+    # Only real, finite, non-bool numbers can be ordered by distance to
+    # base_px; ignore unusable caller entries instead of leaking TypeError.
+    try:
+        iterator = iter(available_sizes)
+    except TypeError:
+        iterator = iter(())
+    usable = [s for s in iterator if _is_usable_font_size(s)]
+    for size in sorted(usable, key=lambda s: abs(s - base_px)):
         if check_text(size, scale, layout, device_pixel_ratio).ok:
             return Fallback(True, float(size),
                             "fell back from %g to %g px" % (base_px, size))

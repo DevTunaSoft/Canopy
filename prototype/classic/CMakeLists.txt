@@ -33,4 +33,29 @@ else()
     message(STATUS "gio-unix-2.0 dev package absent: native app launching compiles as a disabled fallback")
     target_link_libraries(canopy-classic-spike PRIVATE Qt6::Quick Qt6::QuickControls2)
 endif()
+# Build-time production art is rendered by the SAME Qt implementation
+# as the dock, directly from SHA-verified user-approved originals. The
+# five-source master raster assets are never copied/edited/replaced.
+# At 1x/2x/3x, only Browser/Mail/Files/Terminal/Settings are generated.
+set(CANOPY_FIVE_ICON_PACK "${CMAKE_CURRENT_BINARY_DIR}/production-icons")
+file(GLOB CANOPY_MASTER_ICON_INPUTS CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/assets/approved/icons/*.png")
+add_custom_command(
+    OUTPUT "${CANOPY_FIVE_ICON_PACK}/manifest.json"
+    COMMAND "${CMAKE_COMMAND}" -E env
+        "QT_QPA_PLATFORM=offscreen"
+        "$<TARGET_FILE:canopy-classic-spike>"
+        --approved-art-dir "${CMAKE_CURRENT_SOURCE_DIR}/assets/approved"
+        --export-five-production-icons "${CANOPY_FIVE_ICON_PACK}"
+    DEPENDS canopy-classic-spike
+        "${CMAKE_CURRENT_SOURCE_DIR}/assets/approved/manifest.json"
+        ${CANOPY_MASTER_ICON_INPUTS}
+    COMMENT "Render exact five approved Canopy dock masters into deterministic 1x/2x/3x production PNGs"
+    VERBATIM
+)
+add_custom_target(canopy-classic-production-icons ALL
+    DEPENDS "${CANOPY_FIVE_ICON_PACK}/manifest.json")
+
 install(TARGETS canopy-classic-spike RUNTIME DESTINATION bin)
+install(DIRECTORY "${CANOPY_FIVE_ICON_PACK}/"
+    DESTINATION share/canopy/classic/icons)

@@ -9,6 +9,14 @@ import tempfile
 import unittest
 
 from tools.qa import perf_snapshot_artifact_validator as validator
+from canopy_features.performance.frame_pacing import parse_frame_times
+from canopy_features.performance.performance_snapshot import compose_snapshot
+
+
+def _real_frame_artifact(sample):
+    """Build a real artifact from the producer for a tiny frame-time sample."""
+    report = parse_frame_times([sample])
+    return compose_snapshot(frame_pacing=report).as_dict()
 
 
 def _frame():
@@ -436,6 +444,50 @@ class ProducerContractTests(unittest.TestCase):
                     artifact["memory_growth"][field] = bad
                     with self.assertRaises(validator.ArtifactError):
                         validator.validate(artifact)
+
+    def test_tiny_positive_frame_time_projects_to_zero(self):
+        # A valid sub-0.00005 ms sample is accepted by the parser but rounds
+        # to exactly 0.0 in the report; the validator must accept that artifact.
+        artifact = _real_frame_artifact(1e-6)
+        self.assertEqual(artifact["frame_pacing"]["min_ms"], 0.0)
+        self.assertEqual(validator.validate(artifact)["status"], "VALID")
+
+    def test_tiny_frame_time_all_projected_fields_accepted(self):
+        for sample in (1e-6, 4e-5):
+            with self.subTest(sample=sample):
+                artifact = _real_frame_artifact(sample)
+                self.assertEqual(validator.validate(artifact)["status"], "VALID")
+
+    def test_negative_frame_time_still_rejected(self):
+        for key in ("min_ms", "p99_ms", "max_ms"):
+            with self.subTest(key=key):
+                artifact = _artifact()
+                artifact["frame_pacing"][key] = -1.0
+                with self.assertRaises(validator.ArtifactError):
+                    validator.validate(artifact)
+
+    def test_oversized_frame_time_still_rejected(self):
+        for key in ("min_ms", "p99_ms", "max_ms"):
+            with self.subTest(key=key):
+                artifact = _artifact()
+                artifact["frame_pacing"][key] = validator.MAX_FRAME_MS + 1.0
+                with self.assertRaises(validator.ArtifactError):
+                    validator.validate(artifact)
+
+    def test_nonfinite_frame_time_still_rejected(self):
+        for key in ("min_ms", "p99_ms", "max_ms"):
+            for bad in (float("nan"), float("inf"), float("-inf")):
+                with self.subTest(key=key, bad=bad):
+                    artifact = _artifact()
+                    artifact["frame_pacing"][key] = bad
+                    with self.assertRaises(validator.ArtifactError):
+                        validator.validate(artifact)
+
+    def test_zero_frame_budget_still_rejected(self):
+        artifact = _artifact()
+        artifact["frame_pacing"]["frame_budget_ms"] = 0.0
+        with self.assertRaises(validator.ArtifactError):
+            validator.validate(artifact)
 
 
 class PurityTests(unittest.TestCase):

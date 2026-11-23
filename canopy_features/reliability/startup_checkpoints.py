@@ -178,8 +178,11 @@ class StartupCheckpoints:
             return "invalid checkpoint status"
         if status == COMPLETE and len(done) != len(plan):
             return "completed checkpoint misses steps"
-        if status == ROLLBACK and len(done) == len(plan):
-            return "rollback checkpoint has no partial state"
+        # A ROLLBACK journal may legitimately hold a full completed plan: a
+        # crash after the last complete() but before finish() must unwind every
+        # durable step. Rejecting that state would make recover()'s own
+        # persisted decision unreadable, flipping a second recover() to
+        # FAIL_CLOSED instead of returning the identical rollback decision.
         return None
 
     def begin(self) -> None:

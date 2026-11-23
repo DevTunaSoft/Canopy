@@ -78,7 +78,18 @@ def _text(value, field):
 
 
 def _byte_length(value):
-    return len(value.encode("utf-8", "strict"))
+    """UTF-8 byte length, refusing text that cannot be encoded.
+
+    An unpaired UTF-16 surrogate survives NFKC and whitespace collapse but
+    cannot be encoded as UTF-8. Translate that raw ``UnicodeEncodeError`` into
+    the module's ``WorkspaceInventoryError`` so record validation stays
+    fail-closed: ``build_inventory`` reports such a record as a problem and
+    skips it rather than letting the raw exception abort the whole snapshot.
+    """
+    try:
+        return len(value.encode("utf-8", "strict"))
+    except UnicodeEncodeError as exc:
+        raise WorkspaceInventoryError("text is not valid Unicode") from exc
 
 
 def _check_permitted(permitted_sources):

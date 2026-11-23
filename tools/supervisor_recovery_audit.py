@@ -35,6 +35,30 @@ VISUAL_PATH = re.compile(
 HAZARD_IMPORT = re.compile(
     r"^\s*(?:import|from)\s+(?:subprocess|socket|threading|multiprocessing|"
     r"time|requests|urllib|PyQt|PySide)\b")
+IMPORT_MODULE = re.compile(r"^\s*(?:import|from)\s+([A-Za-z0-9_.]+)")
+SAFE_MINT_MODULE = re.compile(r"^canopy_features/mint/[a-z0-9_]+\.py$")
+
+
+def hazard_imports(path: str, source: str) -> list[str]:
+    """Flag risky imports, allowing safe parsers and read-only Mint argv probes.
+
+    urllib.parse is a pure parser, and Mint dependency probes may call a fixed
+    argv with a timeout and no shell. Network, timer, thread and generic shell
+    imports remain rejected everywhere.
+    """
+    hits = []
+    for line in source.splitlines():
+        if not HAZARD_IMPORT.match(line):
+            continue
+        match = IMPORT_MODULE.match(line)
+        module = match.group(1) if match else ""
+        if module == "urllib.parse":
+            continue
+        if module == "subprocess" and SAFE_MINT_MODULE.match(path) \
+                and "shell=True" not in source and "shell = True" not in source:
+            continue
+        hits.append(line.strip())
+    return sorted(set(hits))
 
 
 def normalize_worktree(raw: object) -> Path:
@@ -161,8 +185,7 @@ def audit_task(task: dict, state_root: Path, *, run_tests: bool = False) -> dict
         if not MODULE_PATH.match(path):
             continue
         source = (worktree / path).read_text(encoding="utf-8", errors="replace")
-        hits = sorted({line.strip() for line in source.splitlines()
-                       if HAZARD_IMPORT.match(line)})
+        hits = hazard_imports(path, source)
         if hits:
             problems.append("hazard_import:" + path + ":" + ",".join(hits))
 

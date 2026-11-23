@@ -8,7 +8,8 @@ import subprocess
 import tempfile
 import unittest
 
-from tools.supervisor_recovery_audit import audit_all, audit_task, normalize_worktree
+from tools.supervisor_recovery_audit import (
+    audit_all, audit_task, hazard_imports, normalize_worktree)
 
 SAFE_MODULE = '''"""Safe sample state module."""
 from dataclasses import dataclass
@@ -35,6 +36,34 @@ class FailingTests(unittest.TestCase):
     def test_failure(self):
         self.fail("intentional failure")
 '''
+
+
+class ImportPolicyTests(unittest.TestCase):
+    def test_urllib_parse_is_a_safe_pure_parser(self):
+        source = "from urllib.parse import unquote, urlsplit\n"
+        self.assertEqual(hazard_imports(
+            "canopy_features/apps/safe_uri_open.py", source), [])
+
+    def test_network_urllib_is_still_rejected(self):
+        source = "from urllib.request import urlopen\n"
+        self.assertTrue(hazard_imports(
+            "canopy_features/apps/safe_uri_open.py", source))
+
+    def test_readonly_mint_argv_probe_is_allowed(self):
+        source = ("import subprocess\n"
+                  "subprocess.run(['dpkg-query', '-W', name], timeout=2)\n")
+        self.assertEqual(hazard_imports(
+            "canopy_features/mint/dependency_probe.py", source), [])
+
+    def test_mint_probe_with_shell_is_rejected(self):
+        source = "import subprocess\nsubprocess.run(cmd, shell=True)\n"
+        self.assertTrue(hazard_imports(
+            "canopy_features/mint/dependency_probe.py", source))
+
+    def test_subprocess_outside_mint_is_rejected(self):
+        source = "import subprocess\nsubprocess.run(cmd, timeout=2)\n"
+        self.assertTrue(hazard_imports(
+            "canopy_features/apps/launch_argv.py", source))
 
 
 class RecoveryAuditTests(unittest.TestCase):

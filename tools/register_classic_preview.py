@@ -9,6 +9,7 @@ import json
 import os
 from pathlib import Path
 import re
+import stat
 import sys
 
 DESKTOP = "org.canopy.ClassicPreview.desktop"
@@ -41,11 +42,51 @@ def data_home():
     return Path.home() / ".local" / "share"
 
 
+def _require_real_path_components(path, message):
+    """Raise RegistrationError if any existing component of *path* is a link.
+
+    A leaf-only ``is_symlink()`` check is defeated by an aliased parent: the
+    resource or registration directory resolves outside the declared tree
+    while the caller still records the declared path. Walk every component
+    with ``lstat`` (never ``resolve``) so ordinary multi-component Windows
+    temp paths behave as before. ``..`` is refused rather than collapsed
+    lexically, which could conceal the alias. Installation creates missing
+    directories, so the walk stops at the first component that does not exist
+    yet; no link can exist beneath a missing component.
+    """
+    try:
+        raw = os.fspath(path)
+    except TypeError as exc:
+        raise RegistrationError(message) from exc
+    if not isinstance(raw, str) or not raw or "\x00" in raw:
+        raise RegistrationError(message)
+    if os.pardir in Path(raw).parts:
+        raise RegistrationError(message)
+    try:
+        parts = Path(os.path.abspath(raw)).parts
+    except (OSError, ValueError) as exc:
+        raise RegistrationError(message) from exc
+    if not parts:
+        raise RegistrationError(message)
+    current = Path(parts[0])
+    for part in parts[1:]:
+        current = current / part
+        try:
+            mode = os.lstat(current).st_mode
+        except FileNotFoundError:
+            break
+        except OSError as exc:
+            raise RegistrationError(message) from exc
+        if stat.S_ISLNK(mode):
+            raise RegistrationError(message)
+
+
 def _safe_folders(p):
     for key in ("data", "parent", "folder", "apps"):
         path = p[key]
-        if path.is_symlink() or (path.exists() and not path.is_dir()):
+        if path.exists() and not path.is_dir():
             raise RegistrationError("unsafe registration directory")
+        _require_real_path_components(path, "unsafe registration directory")
 
 
 def _sha(data):
@@ -93,6 +134,8 @@ def _resource(obj, name, directory=False):
     if (not p.is_absolute() or p.is_symlink()
             or (not p.is_dir() if directory else not p.is_file())):
         raise RegistrationError(name + " must be an existing absolute non-symlink path")
+    _require_real_path_components(
+        p, name + " must be an existing absolute non-symlink path")
     return str(p)
 
 
@@ -147,6 +190,7 @@ def install(home, binary, *, art=None, wallpaper=None, terminal=None, native_app
                         sort_keys=True).encode("utf-8")
     for key in ("data", "parent", "folder", "apps"):
         path = p[key]
+        _require_real_path_components(path, "unsafe linked directory")
         if path.is_symlink():
             raise RegistrationError("unsafe linked directory")
         path.mkdir(parents=True, mode=0o700, exist_ok=True)

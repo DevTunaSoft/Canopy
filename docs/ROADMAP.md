@@ -12,6 +12,9 @@ Status legend: PLANNED / IN PROGRESS / VERIFIED / BLOCKED.
 
 No milestone is VERIFIED until implementation and evidence are recorded.
 
+## Integration discipline (issue #132)
+Draft PRs are temporary working states. Promote verified PRs to ready-for-review only after their exact SHA passes all required checks and dependencies/conflicts are cleared. Green CI alone never authorizes a merge. Integrate eligible nonvisual work incrementally through the integration branch with regression tests; keep Classic Qt final integration draft until real Mint acceptance and owner visual approval are complete. Maintain two isolated, non-overlapping workstreams (integration/QA and feature development) whenever independent work exists.
+
 ## Expandable desktop experiences — FOUNDATION
 
 - **FOUNDATION:** versioned Shell Pack manifest, strict read-only checker,

@@ -23,12 +23,21 @@ class ManifestError(ValueError):
 
 
 def serialize(manifest):
-    """Return canonical bytes: stable order, no locale or platform endings."""
+    """Return canonical bytes: stable order, no locale or platform endings.
+
+    A manifest that cannot be represented as canonical JSON (non-finite
+    floats, unsupported value or key types, cyclic data) is refused with
+    ``ManifestError``. Raw ``json`` conversion errors must not escape this
+    boundary: ``write_manifest`` and the CLI only handle ``ManifestError``.
+    """
     if type(manifest) is not dict:
         raise ManifestError("manifest must be an object")
-    text = json.dumps(
-        manifest, indent=2, sort_keys=True, ensure_ascii=True, allow_nan=False,
-    )
+    try:
+        text = json.dumps(
+            manifest, indent=2, sort_keys=True, ensure_ascii=True, allow_nan=False,
+        )
+    except (TypeError, ValueError, OverflowError, RecursionError) as exc:
+        raise ManifestError("manifest is not serializable") from exc
     return (text + "\n").encode("ascii")
 
 

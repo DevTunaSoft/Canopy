@@ -47,6 +47,30 @@ class SwitchResult:
         return self.status in ("SWITCHED", "ALREADY_ACTIVE", "STOPPED")
 
 
+@dataclass(frozen=True)
+class HostAuditSnapshot:
+    """Frozen, read-only point-in-time view of host coordination state.
+
+    Reports only bookkeeping the host already keeps in process: the active
+    presentation id, the recovery flag, the host-allowed catalog capability
+    names and decision counts from the host's most recently issued focus
+    adapter. Taking a snapshot imports no feature module, starts no lifecycle
+    action, performs no I/O and mutates no host or adapter state.
+
+    The adapter reference is a single bounded slot (replaced on each
+    :meth:`ShellHost.make_focus_adapter` call), mirroring the single-active
+    presentation model; counts therefore describe the latest adapter only.
+    This is in-process diagnostics, not proof of a running shell or a window
+    action.
+    """
+    active_pack_id: Optional[str]
+    needs_recovery: bool
+    capability_names: tuple
+    focus_decision_count: int
+    focus_rejection_count: int
+    focus_replay_count: int
+
+
 class ShellHost:
     """Single-active-presentation state coordinator (not a Qt runtime loader).
 
@@ -78,6 +102,9 @@ class ShellHost:
         # Opaque authority minted in trusted host code; pack metadata can
         # never construct a focus adapter.
         self._focus_authority = issue_host_authority()
+        # Single bounded slot for the most recently issued decision-only
+        # focus adapter; replaced on each make_focus_adapter call.
+        self._focus_adapter: Optional[WindowFocusAdapter] = None
 
     @property
     def active_id(self) -> Optional[str]:
@@ -117,7 +144,29 @@ class ShellHost:
         never receives an activation backend, so it can report a decision but
         cannot change a window, launch an app or query the compositor.
         """
-        return WindowFocusAdapter(self._focus_authority, authorize)
+        adapter = WindowFocusAdapter(self._focus_authority, authorize)
+        # Replace the single bounded slot; older adapters are no longer
+        # referenced by the host and become collectable by the caller.
+        self._focus_adapter = adapter
+        return adapter
+
+    def audit_snapshot(self) -> HostAuditSnapshot:
+        """Return one frozen, side-effect-free view of host coordination state.
+
+        This is a non-locking best-effort point-in-time read, consistent with
+        the ``active_id`` and ``needs_recovery`` properties. It imports no
+        feature module (``available_capabilities`` is a static catalog lookup)
+        and neither advances nor clears any adapter decision bookkeeping.
+        """
+        adapter = self._focus_adapter
+        return HostAuditSnapshot(
+            active_pack_id=self._active_id,
+            needs_recovery=self._needs_recovery,
+            capability_names=self.available_capabilities(),
+            focus_decision_count=adapter.decision_count if adapter is not None else 0,
+            focus_rejection_count=adapter.rejection_count if adapter is not None else 0,
+            focus_replay_count=adapter.replay_count if adapter is not None else 0,
+        )
 
     @staticmethod
     def _attempt(view: Presentation, method: str) -> Optional[str]:

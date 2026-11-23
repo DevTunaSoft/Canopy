@@ -65,9 +65,16 @@ def _argument_tokens(arguments):
 
 
 def _check_allowlist(value, allowed, label):
+    """Fail closed with LaunchArgvError on any malformed host allowlist."""
     if isinstance(allowed, (str, bytes, bytearray, dict)) or not isinstance(allowed, Iterable):
         raise LaunchArgvError(f"{label} must be a collection of strings")
-    if value not in set(allowed):
+    try:
+        approved = set(allowed)
+    except TypeError as exc:
+        # Unhashable entries otherwise escape as a built-in TypeError from
+        # set(), bypassing the documented LaunchArgvError boundary.
+        raise LaunchArgvError(f"{label} must be a collection of strings") from exc
+    if value not in approved:
         raise LaunchArgvError(f"{label} is not approved by the host")
 
 

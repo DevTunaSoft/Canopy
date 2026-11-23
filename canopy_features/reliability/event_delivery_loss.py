@@ -93,7 +93,10 @@ class BoundedDeliveryChannel:
     def __init__(self, capacity=16, *, policy="drop_oldest", start_sequence=1):
         if (type(capacity) is not int or not 1 <= capacity <= MAX_CAPACITY):
             raise DeliveryError("capacity must be an int within 1..64")
-        if policy not in POLICIES:
+        # Gate on type before the frozenset membership test: an unhashable
+        # caller value (list/dict) must fail closed with the documented
+        # DeliveryError, not leak a bare TypeError from set lookup.
+        if not isinstance(policy, str) or policy not in POLICIES:
             raise DeliveryError("unsupported overflow policy")
         if type(start_sequence) is not int or start_sequence < 0:
             raise DeliveryError("invalid start sequence")

@@ -174,5 +174,65 @@ class SyntheticCatalogTests(unittest.TestCase):
         self.assertEqual(names, sorted(names))
 
 
+class MalformedKeyTests(unittest.TestCase):
+    """Malformed mapping keys must become bounded problems, never a raise.
+
+    ``verify`` validates each key with ``isinstance(name, str)`` but used to
+    sort the raw keys first, so a mapping mixing strings with other key types
+    escaped a built-in ``TypeError`` instead of reporting INVALID problems.
+    """
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self._tmp.name)
+        self.addCleanup(self._tmp.cleanup)
+
+    def target(self):
+        return ("canopy_features.dummy.ok_mod", "target", "dummy")
+
+    def _pairs(self, entries):
+        report = verify(entries=entries, root=self.root)
+        return report, [(p.name, p.reason) for p in report.problems]
+
+    def test_mixed_string_and_int_keys_are_reported(self):
+        report, pairs = self._pairs({"dummy.ok": self.target(), 7: self.target()})
+        self.assertFalse(report.ok)
+        self.assertEqual(report.checked, 2)
+        self.assertIn(("dummy.ok", MISSING), pairs)
+        self.assertIn(("7", INVALID), pairs)
+
+    def test_mixed_string_and_none_keys_are_reported(self):
+        report, pairs = self._pairs({"dummy.ok": self.target(), None: self.target()})
+        self.assertEqual(report.checked, 2)
+        self.assertIn(("None", INVALID), pairs)
+
+    def test_mixed_string_and_tuple_keys_are_reported(self):
+        key = (1, 2)
+        report, pairs = self._pairs({"dummy.ok": self.target(), key: self.target()})
+        self.assertEqual(report.checked, 2)
+        self.assertIn((str(key), INVALID), pairs)
+
+    def test_every_mixed_key_pair_fails_closed(self):
+        bad_keys = (7, None, (1, 2), 3.5, b"bytes", object())
+        for key in bad_keys:
+            with self.subTest(key_type=type(key).__name__):
+                report, pairs = self._pairs(
+                    {"dummy.ok": self.target(), key: self.target()})
+                self.assertEqual(report.checked, 2)
+                self.assertEqual(len(pairs), 2)
+                self.assertIn(INVALID, [reason for _, reason in pairs])
+
+    def test_valid_string_keys_keep_sorted_problem_order(self):
+        _write(self.root, "canopy_features/dummy/aaa.py", "x = 1\n")
+        entries = {"dummy.zzz": ("canopy_features.dummy.aaa", "target", "dummy"),
+                   "dummy.aaa": ("canopy_features.dummy.nope", "target", "dummy")}
+        report, pairs = self._pairs(entries)
+        names = [name for name, _ in pairs]
+        self.assertEqual(names, sorted(names))
+        first, _ = self._pairs(entries)
+        second, _ = self._pairs(entries)
+        self.assertEqual(first, second)
+
+
 if __name__ == "__main__":
     unittest.main()

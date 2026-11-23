@@ -1,6 +1,7 @@
 """Safety and correctness tests for the Canopy multi-agent supervisor."""
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -596,6 +597,61 @@ class SupervisorTests(unittest.TestCase):
             "changed_files": [f"docs/{task_id}.md"], "draft": True,
             "notes": "bounded task", **(extra or {}),
         }), encoding="utf-8")
+
+    def _implementation_fixture(self, task_id="artifacts", digest_case=str.upper):
+        """Stage a real worktree artifact whose reported digest uses digest_case."""
+        self._add(task_definition(
+            task_id, scope=["docs/artifact.py"], kind="implementation",
+            artifacts=["docs/artifact.py"]))
+        self.assertEqual(self.supervisor.dispatch(self.store.load()), 1)
+        task = self._get(task_id)
+        artifact = Path(task["worktree"]) / "docs" / "artifact.py"
+        artifact.parent.mkdir(parents=True, exist_ok=True)
+        artifact.write_text("value = 1\n", encoding="utf-8")
+        reported = digest_case(hashlib.sha256(artifact.read_bytes()).hexdigest())
+        self.git.pending = ["docs/artifact.py"]
+        self.git.changed = ["docs/artifact.py"]
+        self._write_evidence(task_id, extra={"artifacts": [
+            {"path": "docs/artifact.py", "sha256": reported}]})
+        self._mutate(task_id, status="verifying")
+        return task_id
+
+    def test_publish_accepts_uppercase_artifact_sha256(self):
+        """Real worker evidence uses uppercase hex; it must not be a false failure."""
+        task_id = self._implementation_fixture()
+        data = self.store.load()
+        self.supervisor.verify(data)
+        self.store.save(data)
+        self.assertEqual(self._get(task_id)["status"], "awaiting_review")
+        self.assertTrue(any(call[0] == "draft_pr" for call in self.git.calls))
+
+    def test_publish_accepts_padded_lowercase_artifact_sha256(self):
+        task_id = self._implementation_fixture(
+            digest_case=lambda digest: "  " + digest + "  ")
+        data = self.store.load()
+        self.supervisor.verify(data)
+        self.store.save(data)
+        self.assertEqual(self._get(task_id)["status"], "awaiting_review")
+
+    def test_publish_rejects_mismatched_artifact_sha256(self):
+        task_id = self._implementation_fixture(digest_case=lambda digest: "0" * 64)
+        data = self.store.load()
+        self.supervisor.verify(data)
+        self.store.save(data)
+        task = self._get(task_id)
+        self.assertEqual(task["status"], "failed")
+        self.assertIn("artifact SHA-256 mismatch", task["last_error"])
+        self.assertFalse(any(call[0] == "draft_pr" for call in self.git.calls))
+
+    def test_publish_rejects_malformed_artifact_sha256(self):
+        task_id = self._implementation_fixture(digest_case=lambda digest: "not-hex")
+        data = self.store.load()
+        self.supervisor.verify(data)
+        self.store.save(data)
+        task = self._get(task_id)
+        self.assertEqual(task["status"], "failed")
+        self.assertIn("invalid artifact SHA-256", task["last_error"])
+        self.assertFalse(any(call[0] == "draft_pr" for call in self.git.calls))
 
     def test_dispatch_reserves_workers_and_respects_limit(self):
         for name in ("alpha", "beta", "gamma"):

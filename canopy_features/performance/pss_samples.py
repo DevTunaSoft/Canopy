@@ -7,6 +7,10 @@ or substitutes a value when a Pss total is absent or invalid:
 - MalformedPssError -> a Pss total exists but is not a usable value.
 - ProcessDisappearedError -> the process or its /proc entry was gone.
 
+Oversized decimal values and rollup text that is not valid UTF-8 are also
+malformed evidence: they fail closed with MalformedPssError rather than
+escaping as a raw built-in exception or being estimated.
+
 No polling, background services, privileged calls, or network access.
 """
 import re
@@ -66,7 +70,13 @@ def parse_pss_kib(text):
         token = tokens[0]
         if not _INT.fullmatch(token):
             raise MalformedPssError("Pss total is not a non-negative integer")
-        value = int(token)
+        try:
+            value = int(token)
+        except ValueError as exc:
+            # The regex permits any number of ASCII digits, but the runtime
+            # caps decimal-to-int conversion. Never leak that built-in error.
+            raise MalformedPssError(
+                "Pss total is not a non-negative integer") from exc
         if found is not None and found != value:
             raise MalformedPssError("conflicting Pss totals")
         found = value
@@ -88,8 +98,15 @@ def read_pss_kib(pid, *, proc_root="/proc"):
         if pid <= 0:
             raise MalformedPssError("invalid process id")
         pid_text = str(pid)
-    elif type(pid) is str and _PID.fullmatch(pid) and int(pid) > 0:
-        pid_text = str(int(pid))
+    elif type(pid) is str and _PID.fullmatch(pid):
+        try:
+            pid_value = int(pid)
+        except ValueError as exc:
+            # A decimal string can still exceed the runtime's conversion cap.
+            raise MalformedPssError("invalid process id") from exc
+        if pid_value <= 0:
+            raise MalformedPssError("invalid process id")
+        pid_text = str(pid_value)
     else:
         raise MalformedPssError("invalid process id")
     path = Path(proc_root) / pid_text / "smaps_rollup"
@@ -97,4 +114,6 @@ def read_pss_kib(pid, *, proc_root="/proc"):
         text = path.read_text(encoding="utf-8")
     except (FileNotFoundError, NotADirectoryError, ProcessLookupError) as exc:
         raise ProcessDisappearedError("process or /proc entry disappeared") from exc
+    except UnicodeDecodeError as exc:
+        raise MalformedPssError("Pss evidence is not valid UTF-8 text") from exc
     return parse_pss_kib(text)

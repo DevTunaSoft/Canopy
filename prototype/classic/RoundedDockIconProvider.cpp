@@ -172,7 +172,8 @@ RoundedDockIconProvider::RoundedDockIconProvider(
         *error = QStringLiteral("embedded icon manifest missing");
         return;
     }
-    const QJsonDocument json = QJsonDocument::fromJson(manifest.readAll());
+    const QByteArray originalManifestBytes = manifest.readAll();
+    const QJsonDocument json = QJsonDocument::fromJson(originalManifestBytes);
     if (!json.isObject()) {
         *error = QStringLiteral("embedded icon manifest invalid");
         return;
@@ -198,7 +199,7 @@ RoundedDockIconProvider::RoundedDockIconProvider(
                     QLatin1String(kPackRenderer) &&
                 spec.value(QStringLiteral("schema_version")).toInt() == 1 &&
                 spec.value(QStringLiteral("source_manifest_sha256")).toString() ==
-                    sha256(QJsonDocument(json.object()).toJson(QJsonDocument::Compact)) &&
+                    sha256(originalManifestBytes) &&
                 spec.value(QStringLiteral("files")).toArray().size() == 15;
             // Manifest identity is compared to canonicalized JSON on both
             // generation and consumption; no generated source PNG is trusted
@@ -515,12 +516,12 @@ bool RoundedDockIconProvider::exportFiveProductionPack(
         *error = QStringLiteral("cannot hash canonical original manifest");
         return false;
     }
-    const QJsonDocument parsed = QJsonDocument::fromJson(sourceManifest.readAll());
+    const QByteArray originalBytes = sourceManifest.readAll();
     QJsonObject manifest;
     manifest.insert(QStringLiteral("schema_version"), 1);
     manifest.insert(QStringLiteral("renderer"), QLatin1String(kPackRenderer));
     manifest.insert(QStringLiteral("source_manifest_sha256"),
-                    sha256(QJsonDocument(parsed.object()).toJson(QJsonDocument::Compact)));
+                    sha256(originalBytes));
     manifest.insert(QStringLiteral("files"), results);
     QSaveFile output(out.filePath(QStringLiteral("manifest.json")));
     if (!output.open(QIODevice::WriteOnly) ||

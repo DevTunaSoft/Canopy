@@ -28,6 +28,9 @@ def ready_preflight():
     )
 
 
+_EXECUTABLE_PATHS = set()
+
+
 def make_binary(directory):
     exe = Path(directory) / "canopy-classic"
     exe.write_bytes(b"fake compiled qt binary")
@@ -35,13 +38,16 @@ def make_binary(directory):
     # CI runners require the real permission bit. Set it in the fixture.
     if os.name == "posix":
         exe.chmod(0o755)
+    _EXECUTABLE_PATHS.add(exe.resolve())
     return exe
 
 
 def _posix_access(path, mode):
     """Emulate the POSIX executable-bit check on every host for regression tests."""
     try:
-        return bool(os.stat(path).st_mode & 0o111)
+        if os.name == "posix":
+            return bool(os.stat(path).st_mode & 0o111)
+        return Path(path).resolve() in _EXECUTABLE_PATHS
     except OSError:
         return False
 

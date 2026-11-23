@@ -68,11 +68,18 @@ else:
 print("SELF_TEST_PASS: all eight exact approved dock PNGs loaded")
 if mode == "repeated_marker":
     print("SELF_TEST_PASS: all eight exact approved dock PNGs loaded")
+if mode == "detailed_marker":
+    print("SELF_TEST_PASS: all eight exact approved dock PNGs loaded count 8 with equal 54px art slots")
 if mode == "secret_output":
     print("PRIVATE_TOKEN=sensitive-example")
 print("SELF_TEST_PASS: dock icons horizontally/vertically centred")
+if mode == "detailed_marker":
+    print("SELF_TEST_PASS: dock icons horizontally/vertically centred count 8 with 7px insets")
 if mode != "missing_marker":
     print("SELF_TEST_PASS: nonuniform window screenshot captured")
+if mode == "detailed_marker":
+    print("SELF_TEST_PASS: nonuniform window screenshot captured QSize(1920, 1080) sampled colors 91")
+    print("SELF_TEST_PASS: extra unrelated but genuine check passed")
 if "--icon-framing-review" in args and mode != "missing_frame":
     print("SELF_TEST_PASS: opt-in icon source framing verified")
 if mode == "bad_exit":
@@ -196,6 +203,38 @@ class MintQtSmokeTests(unittest.TestCase):
         self.assertEqual(report["qt_smoke"], "FAIL")
         self.assertEqual([row["markers_observed"] for row in report["tests"]],
                          [4] * 3)
+
+    @unittest.skipIf(os.name == "nt", "POSIX pipe selector required for Qt smoke")
+    def test_detailed_marker_lines_are_accepted(self):
+        """Real Qt builds append detail after markers; 19 lines must still pass."""
+        with patch.dict(os.environ, {"CANOPY_FAKE_QT_MODE": "detailed_marker"}):
+            report = self.run_smoke()
+        self.assertEqual(report["qt_smoke"], "PASS")
+        self.assertTrue(all(row["markers_observed"] >= 3 for row in report["tests"]))
+
+    def test_marker_helper_matches_real_detailed_lines(self):
+        prefixes = {b"SELF_TEST_PASS: dock icons horizontally/vertically centred": "dock"}
+        line = b"SELF_TEST_PASS: dock icons horizontally/vertically centred count 8 with 7px insets"
+        self.assertEqual(smoke._match_marker_line(line, prefixes, set()), ("dock", False))
+
+    def test_marker_helper_rejects_duplicate_exact_line(self):
+        prefixes = {b"SELF_TEST_PASS: dock icons horizontally/vertically centred": "dock"}
+        line = b"SELF_TEST_PASS: dock icons horizontally/vertically centred"
+        seen = set()
+        self.assertEqual(smoke._match_marker_line(line, prefixes, seen), ("dock", False))
+        self.assertEqual(smoke._match_marker_line(line, prefixes, seen), ("dock", True))
+
+    def test_marker_counted_once_across_base_and_detailed_lines(self):
+        prefixes = {b"SELF_TEST_PASS: dock icons horizontally/vertically centred": "dock"}
+        counts = {"dock": 0}
+        seen, counted = set(), set()
+        self.assertFalse(smoke._register_marker(
+            b"SELF_TEST_PASS: dock icons horizontally/vertically centred",
+            prefixes, seen, counted, counts))
+        self.assertFalse(smoke._register_marker(
+            b"SELF_TEST_PASS: dock icons horizontally/vertically centred count 8",
+            prefixes, seen, counted, counts))
+        self.assertEqual(counts["dock"], 1)
 
     def test_symlinked_screenshot_is_not_hashed_or_reported_as_pass(self):
         target = self.root / "private.png"

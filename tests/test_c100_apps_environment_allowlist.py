@@ -84,6 +84,20 @@ class EnvironmentAllowlistTests(unittest.TestCase):
                 with self.assertRaises(EnvironmentAllowlistError):
                     build_environment([name], self.source)
 
+    def test_short_credential_aliases_refused_even_when_allowlisted(self):
+        # Regression: DB_PASS / DB_PW / AWS_CRED are credential-shaped names,
+        # but the word matcher only knew long forms (PASSWORD, PASSWORD_HASH,
+        # CREDENTIAL) and copied their values into the child environment.
+        names = ("PASS", "PW", "CRED", "DB_PASS", "MYSQL_PASS", "SSH_PASS",
+                 "DB_PW", "AWS_CRED", "my_pass", "SVC_CRED")
+        secret = "SYNTHETIC_SECRET_VALUE"
+        for name in names:
+            with self.subTest(name=name):
+                with self.assertRaises(EnvironmentAllowlistError):
+                    build_environment([name], {name: secret})
+        env = build_environment(["PATH"], {**self.source, "DB_PASS": secret})
+        self.assertNotIn(secret, repr(env))
+
     def test_error_messages_never_include_secret_values(self):
         with self.assertRaises(EnvironmentAllowlistError) as ctx:
             build_environment(["GITHUB_TOKEN"], self.source)

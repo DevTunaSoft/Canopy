@@ -69,8 +69,16 @@ def _check_contract(samples):
                 or not 1 <= len(sample.clock) <= MAX_CLOCK_BYTES
                 or sample.clock not in KNOWN_CLOCKS):
             raise LatencyError("unsupported or oversized clock")
-        if (type(sample.source) is not str
-                or not 1 <= len(sample.source.encode("utf-8")) <= MAX_SOURCE_BYTES):
+        if type(sample.source) is not str:
+            raise LatencyError("invalid or oversized marker source")
+        try:
+            source_bytes = len(sample.source.encode("utf-8"))
+        except UnicodeEncodeError:
+            # An unpaired surrogate cannot be UTF-8 encoded, so its byte
+            # length (and the MAX_SOURCE_BYTES bound) is undefined. That is a
+            # structural contract violation, not a leaked Unicode error.
+            raise LatencyError("invalid or oversized marker source") from None
+        if not 1 <= source_bytes <= MAX_SOURCE_BYTES:
             raise LatencyError("invalid or oversized marker source")
         if sample.source_sha256 is not None:
             sha = sample.source_sha256

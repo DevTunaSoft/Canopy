@@ -26,6 +26,24 @@ def _default_case_sensitive():
     return os.name != "nt"
 
 
+def _fold_component(component):
+    """Case-insensitive key for one path component, without expansion.
+
+    NTFS and Qt compare names with *simple* (one-code-point-to-one-code-point)
+    case folding. Python's ``str.casefold()`` is full Unicode folding and can
+    expand a single character into several (``ß`` -> ``ss``, ``ﬀ`` -> ``ff``,
+    ``ſ`` -> ``s``). Using it here would make two distinct NTFS directory
+    names compare equal, so a path outside the jail root could be reported as
+    contained -- a fail-open. Fold each code point independently and keep any
+    character whose lowercase form is not itself a single code point.
+    """
+    folded = []
+    for char in component:
+        lowered = char.lower()
+        folded.append(lowered if len(lowered) == 1 else char)
+    return "".join(folded)
+
+
 def canonicalize(path, *, must_exist=False):
     """Return an absolute canonical :class:`~pathlib.Path`.
 
@@ -61,8 +79,8 @@ def is_contained(candidate, root, *, case_sensitive=None):
     cand_parts = tuple(Path(candidate).parts)
     root_parts = tuple(Path(root).parts)
     if not case_sensitive:
-        cand_parts = tuple(part.casefold() for part in cand_parts)
-        root_parts = tuple(part.casefold() for part in root_parts)
+        cand_parts = tuple(_fold_component(part) for part in cand_parts)
+        root_parts = tuple(_fold_component(part) for part in root_parts)
     return len(cand_parts) >= len(root_parts) and cand_parts[:len(root_parts)] == root_parts
 
 

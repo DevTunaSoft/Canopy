@@ -21,6 +21,17 @@ MAX_PROBLEMS = 32
 _IDENTIFIER = re.compile(r"[a-z0-9][a-z0-9-]{0,63}\Z")
 _NON_SLUG = re.compile(r"[^a-z0-9]+")
 
+# Tab, LF and CR are the whitespace separators the "collapse whitespace"
+# contract intentionally accepts. Other Unicode Cc controls are rejected even
+# where str.split() would silently consume them as whitespace (VT, FF and
+# U+001C-U+001F are Python whitespace but are still control characters).
+_WHITESPACE_CONTROLS = frozenset("\t\n\r")
+
+
+def _has_disallowed_control(text):
+    return any(unicodedata.category(char) == "Cc"
+               and char not in _WHITESPACE_CONTROLS for char in text)
+
 
 class WorkspaceInventoryError(ValueError):
     """Invalid caller configuration or malformed required argument."""
@@ -78,7 +89,18 @@ def _text(value, field):
 
 
 def _byte_length(value):
-    return len(value.encode("utf-8", "strict"))
+    """UTF-8 byte length, refusing text that cannot be encoded.
+
+    An unpaired UTF-16 surrogate survives NFKC and whitespace collapse but
+    cannot be encoded as UTF-8. Translate that raw ``UnicodeEncodeError`` into
+    the module's ``WorkspaceInventoryError`` so record validation stays
+    fail-closed: ``build_inventory`` reports such a record as a problem and
+    skips it rather than letting the raw exception abort the whole snapshot.
+    """
+    try:
+        return len(value.encode("utf-8", "strict"))
+    except UnicodeEncodeError as exc:
+        raise WorkspaceInventoryError("text is not valid Unicode") from exc
 
 
 def _check_permitted(permitted_sources):
@@ -91,13 +113,18 @@ def _check_permitted(permitted_sources):
 
 
 def normalize_name(value):
-    """NFKC, trim and collapse whitespace; reject empty or control-laden names."""
+    """NFKC, trim and collapse whitespace; reject empty or control-laden names.
+
+    Tab, LF and CR collapse as whitespace; every other Unicode control is
+    rejected before str.split() can hide it (VT, FF and U+001C-U+001F are
+    Python whitespace but remain control characters).
+    """
     text = unicodedata.normalize("NFKC", _text(value, "name"))
+    if _has_disallowed_control(text):
+        raise WorkspaceInventoryError("workspace name contains a control character")
     text = " ".join(text.split())
     if not text:
         raise WorkspaceInventoryError("workspace name is empty after normalization")
-    if any(ord(char) < 0x20 or ord(char) == 0x7F for char in text):
-        raise WorkspaceInventoryError("workspace name contains a control character")
     if _byte_length(text) > MAX_NAME_BYTES:
         raise WorkspaceInventoryError("workspace name exceeds byte bound")
     return text

@@ -81,6 +81,17 @@ def safe_resource(path, kind, *, directory=False, executable=False):
     return path
 
 
+def _as_path(value, kind):
+    """Convert a caller-supplied path, rejecting wrong types with a domain error."""
+    if isinstance(value, str):
+        return Path(value)
+    if isinstance(value, os.PathLike):
+        candidate = os.fspath(value)
+        if isinstance(candidate, str):
+            return Path(candidate)
+    raise MintSmokeError(kind + " must be a str or str-returning PathLike")
+
+
 def _paeth(left, above, upper_left):
     estimate = left + above - upper_left
     left_distance = abs(estimate - left)
@@ -390,6 +401,14 @@ def run_mint_smoke(*, binary, approved_art, wallpaper, output_dir, source_sha,
                    terminal=None, framing_review=False, preflight=None,
                    timeout_seconds=25):
     """Return a report after 3 Qt screenshot runs; never change system session."""
+    if type(framing_review) is not bool:
+        raise MintSmokeError("framing_review must be a bool")
+    binary = _as_path(binary, "Classic Qt binary")
+    approved_art = _as_path(approved_art, "approved art")
+    wallpaper = _as_path(wallpaper, "alpine wallpaper")
+    if terminal is not None:
+        terminal = _as_path(terminal, "Terminal candidate")
+    output_dir = _as_path(output_dir, "output directory")
     conditions = mint_preflight() if preflight is None else preflight
     if (not isinstance(conditions, dict)
             or conditions.get("status") != "READY_FOR_TESTS"

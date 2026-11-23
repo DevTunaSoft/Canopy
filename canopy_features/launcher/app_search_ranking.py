@@ -94,6 +94,28 @@ def _classify(query: str, folded: str):
     return None
 
 
+def _iter_titles(applications):
+    """Yield ``(index, title)`` after enforcing the catalog's type contract.
+
+    A bare ``str``/``bytes``/``bytearray`` would be enumerated into
+    single-character "titles", so it is refused. Non-iterable catalogs and
+    non-string titles raise ``TypeError`` rather than leaking a raw
+    ``AttributeError`` from ``casefold``. Both the empty-query and the filter
+    path use this helper so they agree on the contract.
+    """
+    if isinstance(applications, (str, bytes, bytearray)):
+        raise TypeError("applications must be an iterable of title strings")
+    try:
+        iterator = iter(applications)
+    except TypeError:
+        raise TypeError("applications must be an iterable of title strings") from None
+    for index, title in enumerate(iterator):
+        if not isinstance(title, str):
+            raise TypeError(
+                "application title at index %d must be a string" % index)
+        yield index, title
+
+
 def rank_applications(query: str, applications: Iterable[str]) -> Tuple[RankedMatch, ...]:
     """Rank ``applications`` against ``query``, best match first.
 
@@ -109,11 +131,11 @@ def rank_applications(query: str, applications: Iterable[str]) -> Tuple[RankedMa
     if not folded_query:
         return tuple(
             RankedMatch(name=name, tier=ALL, score=_TIER_RANK[ALL], index=index)
-            for index, name in enumerate(applications)
+            for index, name in _iter_titles(applications)
         )
 
     ranked = []
-    for index, name in enumerate(applications):
+    for index, name in _iter_titles(applications):
         folded_name = name.casefold()
         classified = _classify(folded_query, folded_name)
         if classified is None:

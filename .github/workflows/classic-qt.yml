@@ -67,7 +67,7 @@ jobs:
         run: python3 -m unittest tests.test_approved_art tests.test_approved_manifest_contract tests.test_approved_art_zip -v
 
       - name: Visual-only regression and negative-control tests
-        run: python3 -m unittest tests.test_classic_dock_frozen tests.test_classic_shared_icon_framing tests.test_dock_inner_framing_review tests.test_dock_balanced_fit_review tests.test_dock_optical_balance_review tests.test_dock_optical_balance_quality tests.test_classic_clean_icon_edges -v
+        run: python3 -m unittest tests.test_classic_dock_frozen tests.test_classic_shared_icon_framing tests.test_dock_inner_framing_review tests.test_dock_balanced_fit_review tests.test_dock_optical_balance_review tests.test_dock_optical_balance_quality tests.test_classic_clean_icon_edges tests.test_five_dock_centering -v
 
       - name: Headless startup smoke test
         timeout-minutes: 2
@@ -257,6 +257,41 @@ jobs:
               Path("test-artifacts/dock-clean-edges-1200x750.png"), "1200x750")
           print("CLEAN_DEFAULT_MATCH_PASS: identical selected renderer", clock_delta)
           PY
+          sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
+
+      - name: Prove FIVE-only centering in real Qt at three resolutions
+        # Must affect exactly Browser, Mail, Files, Terminal and Settings.
+        # Calendar, Photos, Music and every non-dock pixel remain identical.
+        timeout-minutes: 4
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          set -eu
+          set +e
+          xvfb-run -a ./build/classic/canopy-classic-spike --dock-five-center-review >test-artifacts/five-center-no-approved.log 2>&1
+          denied=$?
+          set -e
+          test "$denied" -eq 2
+          grep -q 'DOCK_FIVE_CENTER_FAIL' test-artifacts/five-center-no-approved.log
+          for size in 1920x1080 1200x750 760x500; do
+            width="${size%x*}"
+            height="${size#*x}"
+            timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike \
+              --approved-art-dir prototype/classic/assets/approved \
+              --dock-five-center-review --self-test-approved \
+              --self-test-size "$size" \
+              --self-test-screenshot "test-artifacts/dock-five-center-$size.png" \
+              >"test-artifacts/dock-five-center-$size.log" 2>&1
+            grep -q 'DOCK_FIVE_CENTER_ACTIVE' "test-artifacts/dock-five-center-$size.log"
+            grep -q 'SELF_TEST_PASS: five icons optically centered' "test-artifacts/dock-five-center-$size.log"
+            python3 tools/check_screenshot.py "test-artifacts/dock-five-center-$size.png" "$width" "$height"
+            python3 tools/check_five_dock_centering.py \
+              --before "test-artifacts/dock-clean-edges-$size.png" \
+              --after "test-artifacts/dock-five-center-$size.png" \
+              --size "$size" \
+              --output "test-artifacts/dock-five-center-diff-$size.json"
+          done
           sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
 
       - name: Measure five-minute idle CPU and PSS

@@ -33,6 +33,24 @@ class DockInnerFramingReviewTests(unittest.TestCase):
                         source.index('setProperty("hoverEnabled", false)'))
         self.assertLess(source.index('setProperty("hoverEnabled", false)'),
                         source.index("const QImage frame = window->grabWindow()"))
+        self.assertIn('preview->setProperty("screenshotCaptureMode", true)', source)
+        self.assertLess(source.index('preview->setProperty("screenshotCaptureMode", true)'),
+                        source.index("const QImage frame = window->grabWindow()"))
+
+    def test_stale_folder_hover_neutralized_only_for_screenshot(self):
+        root = Path(__file__).resolve().parents[1] / "prototype/classic"
+        preview = (root / "PreviewWindow.qml").read_text()
+        folder = (root / "FolderTile.qml").read_text()
+        main = (root / "main.cpp").read_text()
+        self.assertIn("property bool screenshotCaptureMode: false", preview)
+        self.assertIn("screenshotCaptureMode: preview.screenshotCaptureMode", preview)
+        self.assertIn("property bool screenshotCaptureMode: false", folder)
+        self.assertIn("(folder.hovered && !folder.screenshotCaptureMode)", folder)
+        self.assertIn('preview->setProperty("screenshotCaptureMode", true)', main)
+        self.assertIn("SELF_TEST_PASS: Files screenshot tile hover cleared", main)
+        self.assertLess(main.index('preview->setProperty("screenshotCaptureMode", true)'),
+                        main.index("const QImage frame = window->grabWindow()"))
+        self.assertNotIn("screenshotCaptureMode: true", preview)
 
     def test_all_eight_inner_art_changes_pass(self):
         result = self.simulate(self.centers)

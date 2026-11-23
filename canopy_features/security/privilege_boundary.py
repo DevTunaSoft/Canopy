@@ -97,9 +97,16 @@ def current_euid() -> Optional[int]:
 
 
 def _basename(word: str) -> str:
-    """Normalize one shell word to a lowercase executable basename."""
+    """Normalize one shell word to a lowercase executable basename.
+
+    Every trailing ``.exe`` is removed, not just the last one: normalization
+    must be a fixed point, otherwise a decorated spelling such as
+    ``sudo.exe.exe`` normalizes to ``sudo.exe`` (not denylisted) while a
+    second pass normalizes it to ``sudo`` (denied). The deny decision cannot
+    depend on how many times the word has been normalized.
+    """
     name = word.strip("\"'").replace("\\", "/").rsplit("/", 1)[-1]
-    if name.lower().endswith(".exe"):
+    while name.lower().endswith(".exe"):
         name = name[:-4]
     return name.lower()
 

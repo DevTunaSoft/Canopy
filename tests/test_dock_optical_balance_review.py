@@ -20,7 +20,11 @@ class DockOpticalBalanceReviewTests(unittest.TestCase):
 
     def test_default_off_and_exact_originals_mandatory(self):
         self.assertIn('args.contains(QStringLiteral("--dock-optical-balance-review"))', self.main)
-        self.assertIn("if (dockOpticalBalanceReviewMode && !approvedMode)", self.main)
+        self.assertIn("if (explicitOpticalBalanceReview && !approvedMode)", self.main)
+        self.assertIn("approvedMode && !dockOriginalFitMode &&", self.main)
+        self.assertIn("if (dockOriginalFitMode && !approvedMode)", self.main)
+        self.assertIn("if (dockOriginalFitMode && iconReviewFlags > 0)", self.main)
+        self.assertIn('args.contains(QStringLiteral("--dock-original-fit"))', self.main)
         self.assertIn("DOCK_OPTICAL_BALANCE_FAIL", self.main)
         self.assertIn("verifyExactArtwork(requested, !landscapeMode, &error)", self.main)
         self.assertNotIn("dockOpticalBalanceReviewMode = true", self.main)

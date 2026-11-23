@@ -24,9 +24,9 @@ class BalancedFitContractTests(unittest.TestCase):
                       self.cpp)
         self.assertIn("if (dockBalancedFitReviewMode && !approvedMode)", self.cpp)
         self.assertIn("DOCK_BALANCED_FIT_REVIEW_FAIL", self.cpp)
-        self.assertIn("if (dockBalancedFitReviewMode && (dockInnerReviewMode || framingReviewMode))", self.cpp)
+        self.assertIn("if (iconReviewFlags > 1)", self.cpp)
         self.assertIn('approvedRoot, terminalCandidatePath, dockInnerReviewMode,', self.cpp)
-        self.assertIn("&roundedError, dockBalancedFitReviewMode", self.cpp)
+        self.assertIn("&roundedError, dockBalancedFitReviewMode, dockOpticalBalanceReviewMode", self.cpp)
         self.assertIn("bool balancedDockFitMode = false", self.header)
         self.assertNotIn("dockBalancedFitReviewMode = true", self.cpp)
 

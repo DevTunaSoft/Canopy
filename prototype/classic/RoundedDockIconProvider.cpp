@@ -56,6 +56,21 @@ const QHash<QString, QPair<int, int>> kSourceMatteRowTrim = {
     {QStringLiteral("settings"), {15, 4}},
 };
 
+// Five targeted optical centering corrections, in 192px provider pixels.
+// Measured from high-contrast feature centers in genuine 1920x1080 Qt captures
+// of the unchanged source-aware clean-matte renderer, NOT from the button
+// rectangle or a generated dock mockup. After Qt's 54/192 reduction these
+// are roughly: Browser (+0.6,-1.1), Mail (-0.6,+0.3),
+// Files (-2.5,+0.3), Terminal (-2.3,-0.8), Settings (-2.0,-0.6)px.
+// Calendar, Photos and Music MUST NEVER appear in this map or be altered.
+const QHash<QString, QPointF> kFiveDockCenterOffsets = {
+    {QStringLiteral("browser"), QPointF(2, -4)},
+    {QStringLiteral("mail"), QPointF(-2, 1)},
+    {QStringLiteral("files"), QPointF(-9, 1)},
+    {QStringLiteral("terminal"), QPointF(-8, -3)},
+    {QStringLiteral("settings"), QPointF(-7, -2)},
+};
+
 const QHash<QString, QPointF> kOpticalBalanceOffset = {
     {QStringLiteral("browser"), QPointF(3, -2)},
     {QStringLiteral("mail"), QPointF(2, 5)},
@@ -71,8 +86,13 @@ const QHash<QString, QPointF> kOpticalBalanceOffset = {
 RoundedDockIconProvider::RoundedDockIconProvider(
     const QString &approvedRoot, const QString &terminalCandidatePath,
     bool framingReviewMode, QString *error, bool balancedDockFitMode,
-    bool opticalBalanceReviewMode, bool cleanSourceEdgesReviewMode)
+    bool opticalBalanceReviewMode, bool cleanSourceEdgesReviewMode,
+    bool fiveOnlyCenterReviewMode)
     : QQuickImageProvider(QQuickImageProvider::Image) {
+    if (fiveOnlyCenterReviewMode && !cleanSourceEdgesReviewMode) {
+        *error = QStringLiteral("five-icon centering requires the existing clean-matte renderer");
+        return;
+    }
     if ((framingReviewMode && balancedDockFitMode) ||
         (opticalBalanceReviewMode && (framingReviewMode || balancedDockFitMode)) ||
         (cleanSourceEdgesReviewMode &&
@@ -180,7 +200,24 @@ RoundedDockIconProvider::RoundedDockIconProvider(
             const QRectF inner(face.left() + 1, face.top() + 1,
                                face.width() - 2, face.height() - 2);
             painter.drawImage(face, edgeFill);
-            painter.drawImage(inner, source);
+            // Translate artwork CONTENT inside the unchanged mask. The
+            // approved originals, 168px face, 54px QML slot, dock chrome,
+            // launchers and the three frozen icons remain identical.
+            // No new image provider, timer or background processing.
+            QRectF artwork = inner;
+            if (fiveOnlyCenterReviewMode) {
+                const auto center = kFiveDockCenterOffsets.constFind(id);
+                if (center != kFiveDockCenterOffsets.cend()) {
+                    const QPointF delta = center.value();
+                    if (qAbs(delta.x()) > 9 || qAbs(delta.y()) > 9) {
+                        *error = QStringLiteral("five-icon centering exceeded bounded offsets");
+                        m_images.clear();
+                        return;
+                    }
+                    artwork.translate(delta);
+                }
+            }
+            painter.drawImage(artwork, source);
         } else if (opticalBalanceReviewMode && !terminalDerivative) {
             // Candidate D: gently normalize optical centers without cropping
             // or changing the user's original art. The 160px image is a

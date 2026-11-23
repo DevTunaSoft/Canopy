@@ -67,7 +67,7 @@ jobs:
         run: python3 -m unittest tests.test_approved_art tests.test_approved_manifest_contract tests.test_approved_art_zip -v
 
       - name: Visual-only regression and negative-control tests
-        run: python3 -m unittest tests.test_classic_dock_frozen tests.test_classic_shared_icon_framing tests.test_dock_inner_framing_review tests.test_dock_balanced_fit_review tests.test_dock_optical_balance_review tests.test_dock_optical_balance_quality -v
+        run: python3 -m unittest tests.test_classic_dock_frozen tests.test_classic_shared_icon_framing tests.test_dock_inner_framing_review tests.test_dock_balanced_fit_review tests.test_dock_optical_balance_review tests.test_dock_optical_balance_quality tests.test_classic_clean_icon_edges -v
 
       - name: Headless startup smoke test
         timeout-minutes: 2
@@ -212,6 +212,40 @@ jobs:
             --selected-default test-artifacts/classic-selected-default-1200x750.png \
             --size 1200x750 \
             --output test-artifacts/dock-optical-balance-quality-1200x750.json
+          sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
+
+      - name: Capture exact-original clean-matte dock preview from compiled Qt
+        # Visual-only experiment. No master PNG, manifest or QML card change.
+        timeout-minutes: 4
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          set -eu
+          set +e
+          xvfb-run -a ./build/classic/canopy-classic-spike --dock-clean-edges-review >test-artifacts/dock-clean-edges-without-approved.log 2>&1
+          rejected=$?
+          set -e
+          test "$rejected" -eq 2
+          grep -q 'DOCK_CLEAN_EDGES_FAIL' test-artifacts/dock-clean-edges-without-approved.log
+          for size in 1920x1080 1200x750 760x500; do
+            width="${size%x*}"
+            height="${size#*x}"
+            timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike \
+              --approved-art-dir prototype/classic/assets/approved \
+              --dock-clean-edges-review --self-test-approved \
+              --self-test-size "$size" \
+              --self-test-screenshot "test-artifacts/dock-clean-edges-$size.png" \
+              >"test-artifacts/dock-clean-edges-$size.log" 2>&1
+            grep -q 'DOCK_CLEAN_EDGES_ACTIVE' "test-artifacts/dock-clean-edges-$size.log"
+            grep -q 'SELF_TEST_PASS: approved icon matte cleaned only inside dock' "test-artifacts/dock-clean-edges-$size.log"
+            python3 tools/check_screenshot.py "test-artifacts/dock-clean-edges-$size.png" "$width" "$height"
+            python3 tools/check_dock_inner_framing.py \
+              --before "test-artifacts/classic-$size.png" \
+              --after "test-artifacts/dock-clean-edges-$size.png" \
+              --size "$size" \
+              --output "test-artifacts/dock-clean-edges-diff-$size.json"
+          done
           sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
 
       - name: Measure five-minute idle CPU and PSS

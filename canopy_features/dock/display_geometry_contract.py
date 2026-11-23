@@ -110,28 +110,38 @@ def validate_dock_bounds(screen_width, screen_height, scale=1.0,
         violations.append("invalid_scale")
     effective_scale = scale if scale_is_valid else 1.0
 
-    if screen_width <= 0 or screen_height <= 0:
+    # Non-finite screen dimensions must never reach round_half_up: NaN/inf
+    # cannot be converted to an int and would raise instead of returning a
+    # GeometryReport. Substitute a finite sentinel for arithmetic only; the
+    # invalid_screen violation records the rejection. This preserves the
+    # documented "no exception is raised for invalid inputs" contract.
+    width_is_finite = math.isfinite(screen_width)
+    height_is_finite = math.isfinite(screen_height)
+    if (not (width_is_finite and height_is_finite)
+            or screen_width <= 0 or screen_height <= 0):
         violations.append("invalid_screen")
+    safe_width = screen_width if width_is_finite else 0
+    safe_height = screen_height if height_is_finite else 0
 
     logical = dock_rect if dock_rect is not None else dock_logical_rect(
-        screen_width, screen_height, tile_count)
+        safe_width, safe_height, tile_count)
 
     if logical.width <= 0 or logical.height <= 0:
         violations.append("dock_nonpositive")
     if logical.x < -FIT_TOLERANCE:
         violations.append("dock_left_out_of_bounds")
-    if logical.x + logical.width > screen_width + FIT_TOLERANCE:
+    if logical.x + logical.width > safe_width + FIT_TOLERANCE:
         violations.append("dock_right_out_of_bounds")
     if logical.y < 0:
         violations.append("dock_above_screen")
     elif logical.y < BAR_HEIGHT:
         violations.append("dock_overlaps_top_bar")
-    if logical.y + logical.height > screen_height + FIT_TOLERANCE:
+    if logical.y + logical.height > safe_height + FIT_TOLERANCE:
         violations.append("dock_bottom_out_of_bounds")
-    if abs(logical.x + logical.width / 2 - screen_width / 2) > CENTER_TOLERANCE:
+    if abs(logical.x + logical.width / 2 - safe_width / 2) > CENTER_TOLERANCE:
         violations.append("dock_not_centered")
 
-    screen_logical = Rect(0, 0, screen_width, screen_height)
+    screen_logical = Rect(0, 0, safe_width, safe_height)
     return GeometryReport(
         logical=logical,
         physical=to_physical(logical, effective_scale),

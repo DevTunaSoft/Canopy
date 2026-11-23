@@ -296,8 +296,14 @@ int main(int argc, char *argv[]) {
     const int approvedIndex = args.indexOf(QStringLiteral("--approved-art-dir"));
     const bool approvedMode = approvedIndex >= 0;
     const bool framingReviewMode = args.contains(QStringLiteral("--icon-framing-review"));
+    // Dock CONTENT-only framing review: never change QML tile/card geometry.
+    const bool dockInnerReviewMode = args.contains(QStringLiteral("--dock-inner-framing-review"));
     if (framingReviewMode && !approvedMode) {
         qCritical() << "ICON_FRAMING_REVIEW_FAIL: exact SHA-locked approved art required";
+        return 2;
+    }
+    if (dockInnerReviewMode && !approvedMode) {
+        qCritical() << "DOCK_INNER_FRAMING_REVIEW_FAIL: exact SHA-locked approved art required";
         return 2;
     }
     const bool requireApproved = args.contains(QStringLiteral("--self-test-approved"));
@@ -382,11 +388,11 @@ int main(int argc, char *argv[]) {
         // Source PNGs were SHA-verified above; transform copies IN MEMORY
         // only. The files and their immutable manifest remain unchanged.
         QString roundedError;
-        // The dock is locked to the existing original full-fit rendering.
-        // Experimental optical adjustments are isolated to a DIFFERENT
-        // QQuickImageProvider, instantiated only for an explicit review.
+        // Default dock full-fit rendering is unchanged. Only the explicit
+        // review flag enables in-memory source-content framing within
+        // the SAME centered rounded mask. The original PNGs are unchanged.
         auto *roundedIcons = new RoundedDockIconProvider(
-            approvedRoot, terminalCandidatePath, false, &roundedError);
+            approvedRoot, terminalCandidatePath, dockInnerReviewMode, &roundedError);
         if (!roundedIcons->isValid() || !roundedIcons->allCornersClipped()) {
             qCritical().noquote() << "APPROVED_ART_FAIL: rounded dock rendering:"
                                    << roundedError;
@@ -395,6 +401,9 @@ int main(int argc, char *argv[]) {
         }
         engine.addImageProvider(QStringLiteral("canopy-dock"), roundedIcons);
         qInfo() << "CANOPY_ROUNDED_DOCK_VERIFIED: eight original icons, padded, alpha-clipped";
+        if (dockInnerReviewMode)
+            qInfo() << "DOCK_INNER_FRAMING_REVIEW_ACTIVE: opt-in source-content sample; "
+                       "dock QML and source PNGs unchanged; NOT visually approved";
         if (framingReviewMode) {
             QString reviewError;
             auto *launcherReviewIcons = new RoundedDockIconProvider(
@@ -529,7 +538,7 @@ int main(int argc, char *argv[]) {
             ? args.at(launcherShotIndex + 1) : QString();
         QTimer::singleShot(1000, window,
             [window, screenshotPath, launcherScreenshotPath, approvedMode, landscapeMode,
-             framingReviewMode, terminalCandidateMode = !terminalCandidatePath.isEmpty()]() {
+             framingReviewMode, dockInnerReviewMode, terminalCandidateMode = !terminalCandidatePath.isEmpty()]() {
             auto *bar = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBar"));
             auto *clock = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBarClock"));
             auto *dock = window->findChild<QQuickItem *>(QStringLiteral("canopyDock"));
@@ -632,7 +641,9 @@ int main(int argc, char *argv[]) {
             }
             qInfo() << "SELF_TEST_PASS: actual Qt launcher opens, searches and closes";
             if (framingReviewMode)
-                qInfo() << "SELF_TEST_PASS: launcher-only Qt frame review enabled; dock frozen";
+                qInfo() << "SELF_TEST_PASS: launcher-only Qt frame review enabled; dock frozen unless separately reviewed";
+            if (dockInnerReviewMode)
+                qInfo() << "SELF_TEST_PASS: dock-only inner framing, fixed card geometry";
 
             const QPointF barOrigin = bar->mapToItem(window->contentItem(), QPointF(0, 0));
             const QPointF dockOrigin = dock->mapToItem(window->contentItem(), QPointF(0, 0));

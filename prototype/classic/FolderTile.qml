@@ -10,6 +10,9 @@ Button {
     required property string folderName
     required property color folderTone // Legacy demo model input; not an icon tint.
     property bool selected: false
+    // Only set by the compiled application's self-test screenshot path.
+    // Do not rely on asynchronous Xvfb mouse-exit or QQuickButton.hovered.
+    property bool screenshotCaptureMode: false
     // Compact only the Files sample grid; approved dock artwork is untouched.
     property bool compact: false
     readonly property bool imageReady: folderIcon.status === Image.Ready
@@ -24,7 +27,8 @@ Button {
     background: Rectangle {
         radius: 9
         color: folder.selected ? "#dcecfb"
-              : folder.hovered ? "#f0f6fa" : "transparent"
+              : (folder.hovered && !folder.screenshotCaptureMode)
+                ? "#f0f6fa" : "transparent"
         border.color: folder.selected ? "#a7c7e4" : "transparent"
         border.width: folder.selected ? 1 : 0
     }

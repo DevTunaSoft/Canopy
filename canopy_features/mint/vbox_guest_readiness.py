@@ -68,12 +68,23 @@ def locate_vboxmanage(which=None):
 
 
 def parse_vminfo(text):
-    """Parse a bounded showvminfo snapshot into an allowlisted dict."""
+    """Parse a bounded showvminfo snapshot into an allowlisted dict.
+
+    Caller-supplied text that cannot be UTF-8 encoded (for example an unpaired
+    surrogate) is refused with ``EvidenceError``; the byte bound is measured on
+    the encoded form so oversized non-ASCII input is still rejected.
+    """
     if text is None or text == "":
         return {}
     if not isinstance(text, str):
         raise EvidenceError("vminfo must be text")
-    if len(text.encode("utf-8")) > MAX_INPUT_BYTES:
+    try:
+        encoded_len = len(text.encode("utf-8"))
+    except UnicodeEncodeError:
+        # Unpaired surrogates are not encodable. Keep the documented domain
+        # error instead of leaking a raw UnicodeEncodeError to the caller.
+        raise EvidenceError("vminfo snapshot is not encodable text") from None
+    if encoded_len > MAX_INPUT_BYTES:
         raise EvidenceError("vminfo snapshot too large")
     result = {}
     for line in text.splitlines():

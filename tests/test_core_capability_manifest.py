@@ -35,8 +35,17 @@ def _write(root: Path, rel: str, text: str) -> Path:
 
 
 class RealCatalogTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # verify() reads and parses every catalog module source (~30 ms,
+        # ~1 MiB traced peak here). These two independent results are reused
+        # by the content and determinism tests; the no-import test below still
+        # calls verify() itself after clearing sys.modules.
+        cls.clean_report = verify()
+        cls.second_report = verify()
+
     def test_real_catalog_audits_clean(self):
-        report = verify()
+        report = self.clean_report
         self.assertTrue(report.ok, report.problems)
         self.assertEqual(report.checked, len(capabilities.names()))
         self.assertEqual(report.problems, ())
@@ -65,11 +74,11 @@ class RealCatalogTests(unittest.TestCase):
                 self.assertNotIn(forbidden, source)
 
     def test_reports_are_immutable_and_ordered(self):
-        report = verify()
+        report = self.clean_report
         self.assertIsInstance(report, ManifestReport)
         with self.assertRaises(dataclasses.FrozenInstanceError):
             report.checked = 0
-        again = verify()
+        again = self.second_report
         self.assertEqual(report, again)
 
 

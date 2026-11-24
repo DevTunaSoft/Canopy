@@ -166,6 +166,30 @@ class FailClosedTests(unittest.TestCase):
         with self.assertRaises(OutcomeInputError):
             events(*batch)
 
+    def test_contradictory_duplicate_event_id_rejected(self):
+        # One event id cannot both fail and succeed. Without a guard the
+        # reconciler returns SUCCEEDED for a contradictory replay, which is a
+        # false launch-success/process-start claim.
+        failed = LaunchFailed(sequence=7, app_id=APP_ID,
+                              reason="spawn-refused")
+        denied = LaunchFailed(sequence=7, app_id=APP_ID,
+                              reason="launch-denied")
+        succeeded = LaunchSucceeded(sequence=7, app_id=APP_ID, pid=4242)
+        clean_exit = LaunchExited(sequence=7, app_id=APP_ID, code=0)
+        for batch in ((failed, succeeded), (succeeded, failed),
+                      (clean_exit, denied)):
+            with self.subTest(batch=batch):
+                with self.assertRaises(OutcomeInputError):
+                    events(*batch)
+
+    def test_repeated_same_outcome_event_id_still_reconciles(self):
+        # Identical replayed ids must not trip the contradiction guard.
+        result = events(
+            LaunchFailed(sequence=7, app_id=APP_ID, reason="spawn-refused"),
+            LaunchFailed(sequence=7, app_id=APP_ID, reason="spawn-refused"))
+        self.assertEqual(result.status, STATUS_RETRY)
+        self.assertEqual(result.failure_count, 2)
+
     def test_bare_string_batch_rejected(self):
         with self.assertRaises(OutcomeInputError):
             compose_launch_outcome(APP_ID, preview(), "events")

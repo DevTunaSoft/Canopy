@@ -93,3 +93,6 @@ P0 gaps require explicit resolution or a clearly documented blocked state.
 it is not a whole-product success or proof of Mint, compositor, usability,
 security or visual correctness. Keep tests honest (all-skipped is not green),
 use negative controls and fail-closed cleanup in every shell lifecycle.
+
+## Autonomous integration and durable checkpoints
+Commit and push each coherent verified change to its owned branch; verify the remote SHA. Preserve unfinished work on its isolated branch with explicit test status, never present it as verified. Routine independently reviewed nonvisual changes may integrate into the designated integration branch after applicable exact-SHA checks, dependency review and post-integration regression tests. Final release requirements apply to final release integration, not independent development. Named PR holds, branch protections, owner visual approval and high-risk security approval remain binding. Do not merge #151 or #278 into main or override their specific holds. Keep at least four active isolated engineering subagents plus Hermes when eligible work exists; prioritize wiring existing modules into real runtime behavior over new offline-only helpers. A blocked task is not complete; continue unrelated tasks. Do not create duplicate supervisors or redundant PRs.

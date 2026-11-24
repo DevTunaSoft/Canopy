@@ -1,6 +1,6 @@
 # Canopy architecture — initial proposal
 
-**Status: design proposal, not an implemented shell.**
+**Status: implemented Qt/QML prototype and growing shared module foundation; Classic product integration in progress. This is not a completed desktop session.** See `docs/PRODUCT_COMPLETION_MATRIX.md` for verified runtime maturity.
 
 ## Deployment model
 Start as a desktop shell/session on an existing Linux distribution, not as a forked operating system or custom installer. First target: Linux Mint-compatible installation, with packaging decisions validated against real Mint releases. A bootable installer is a later milestone.

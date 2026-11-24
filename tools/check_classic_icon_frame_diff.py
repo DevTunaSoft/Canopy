@@ -25,17 +25,17 @@ SIZES = ("760x500", "1200x750", "1920x1080")
 # silent tolerance expansion or arbitrary ignored screenshot rectangle.
 CENTERS = {
     "760x500": {
-        "desktop": [(111 + 77 * i, 427) for i in range(8)],
+        "desktop": [(112 + 77 * i, 427) for i in range(8)],
         "launcher": [(127 + 169 * i, 196) for i in range(4)] +
                     [(127 + 169 * i, 293) for i in range(4)],
     },
     "1200x750": {
-        "desktop": [(331 + 77 * i, 677) for i in range(8)],
+        "desktop": [(332 + 77 * i, 677) for i in range(8)],
         "launcher": [(310 + 193 * i, 284) for i in range(4)] +
                     [(310 + 193 * i, 401) for i in range(4)],
     },
     "1920x1080": {
-        "desktop": [(691 + 77 * i, 1007) for i in range(8)],
+        "desktop": [(692 + 77 * i, 1007) for i in range(8)],
         "launcher": [(670 + 193 * i, 449) for i in range(4)] +
                     [(670 + 193 * i, 566) for i in range(4)],
     },

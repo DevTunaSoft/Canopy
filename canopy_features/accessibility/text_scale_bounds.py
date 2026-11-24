@@ -157,6 +157,12 @@ def resolve_fallback(base_px, scale, layout, available_sizes=FONT_SIZES_PX,
     error = _finite_positive(base_px, "base_px")
     if error:
         return Fallback(False, None, error)
+    # A hostile, wrong-type scale cannot define a usable text scale. Fail
+    # closed with the module's domain result before the value reaches %g
+    # formatting in the no-fallback reason (which raised a raw TypeError).
+    error = _finite_positive(scale, "scale")
+    if error:
+        return Fallback(False, None, error)
     if check_text(base_px, scale, layout, device_pixel_ratio).ok:
         return Fallback(True, float(base_px), "")
     # Only real, finite, non-bool numbers can be ordered by distance to

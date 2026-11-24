@@ -221,6 +221,53 @@ class FailClosedTests(unittest.TestCase):
             bad, launcher_empty(), files_denied())
         self.assertEqual(decision.reason, REASON_SOURCE_DISAGREEMENT)
 
+    def test_hostile_bounded_dock_target_denied(self):
+        # Bounded length is not enough: format, separator, private-use,
+        # noncharacter, C1 control and surrogate scalars are not printable
+        # text and must never become an action-ready target.
+        for unsafe in ("\u0085", "\u200b", "\u202e", "\u2028", "\ue000",
+                       "\ufdd0", "\ud800"):
+            with self.subTest(unsafe=repr(unsafe)):
+                bad = DockActionPreview(
+                    dock_mod.APPROVED, dock_mod.REASON_OK, action="launch",
+                    target="Files" + unsafe, pinned_index=0, running_pids=0)
+                decision = compose_shell_action_decision(
+                    bad, launcher_empty(), files_denied())
+                self.assertEqual(decision.reason, REASON_SOURCE_DISAGREEMENT)
+                self.assertEqual(decision.status, STATUS_DENIED)
+                self.assertFalse(decision.ready)
+                self.assertIsNone(decision.surface)
+                self.assertIsNone(decision.action)
+                self.assertIsNone(decision.target)
+
+    def test_hostile_bounded_files_uri_denied(self):
+        bad = FilesIntentPreview(
+            files_mod.APPROVED, files_mod.REASON_OK, action=LAUNCH_ACTION,
+            uri="file:///home/u/Docs\u202e.exe", directory="/home/u/Docs")
+        decision = compose_shell_action_decision(
+            dock_denied(), launcher_empty(), bad)
+        self.assertEqual(decision.reason, REASON_SOURCE_DISAGREEMENT)
+        self.assertFalse(decision.ready)
+        self.assertIsNone(decision.target)
+
+    def test_hostile_bounded_launcher_name_denied(self):
+        name = "Firefox\u200b"
+        bad = SearchView("fire", (Match(name, EXACT, 0),), 0, name, SEARCH_READY)
+        decision = compose_shell_action_decision(
+            dock_denied(), bad, files_denied())
+        self.assertEqual(decision.reason, REASON_SOURCE_DISAGREEMENT)
+        self.assertFalse(decision.ready)
+        self.assertIsNone(decision.target)
+
+    def test_printable_unicode_target_still_ready(self):
+        bad = DockActionPreview(
+            dock_mod.APPROVED, dock_mod.REASON_OK, action="launch",
+            target="Caf\u00e9", pinned_index=0, running_pids=0)
+        decision = compose_shell_action_decision(
+            bad, launcher_empty(), files_denied())
+        self.assertEqual(decision.status, STATUS_READY)
+        self.assertEqual(decision.target, "Caf\u00e9")
+
     def test_inputs_are_not_mutated(self):
         dock, search, files = dock_ready(), launcher_ready(), files_ready()
         before = (dock, search, files)

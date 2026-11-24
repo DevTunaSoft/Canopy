@@ -182,6 +182,25 @@ def _statuses(values, allowed, field, record_type):
     return tuple(result)
 
 
+def _focus_statuses(values):
+    """Validate focus history statuses and their reason fields together.
+
+    The broker records a reason only on DENIED/ACTIVATION_FAILED decisions.
+    A GRANTED decision carrying one is a contradictory record: it would let
+    ``_derive_status`` claim a ready/safe session from a failed focus
+    decision. Validate the durable reason field even though the snapshot does
+    not project it, so hostile-but-bounded text cannot manufacture that claim
+    and a non-string reason cannot escape as a raw exception.
+    """
+    statuses = _statuses(values, FOCUS_STATUSES, "focus history", FocusDecision)
+    for decision, status in zip(values[-MAX_RECENT:], statuses):
+        reason = _bounded_text(getattr(decision, "reason", ""),
+                               "focus decision reason")
+        if status == GRANTED and reason:
+            raise SnapshotError("granted focus decision carries a reason")
+    return statuses
+
+
 def _session_view(reconciler):
     if not isinstance(reconciler, Reconciler):
         raise SnapshotError("session must be a Reconciler")
@@ -248,8 +267,7 @@ def _focus_view(broker, policy):
         live_windows=_count(broker.live_window_count, "focus live window count"),
         grant_count=(None if policy is None
                      else _count(policy.grant_count, "focus grant count")),
-        recent_statuses=_statuses(broker.history, FOCUS_STATUSES,
-                                  "focus history", FocusDecision),
+        recent_statuses=_focus_statuses(broker.history),
     )
 
 

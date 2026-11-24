@@ -10,13 +10,16 @@ A desktop ID absent from the allowlist is never guessed: that window is
 reported in ``unmapped`` so the host may render a neutral fallback. Repeated
 sightings of the same window ID are folded into one group and reported in
 ``duplicates`` (first occurrence wins). Outputs are immutable tuples in stable,
-first-seen order.
+first-seen order. The host-supplied allowlist is hard-bounded to
+``MAX_TRUSTED_APPLICATIONS`` entries so work and memory stay bounded regardless
+of the snapshot size; an over-bound allowlist fails closed.
 """
 from collections.abc import Mapping
 from dataclasses import dataclass
 
 MAX_WINDOWS = 256
 MAX_GROUPS = 64
+MAX_TRUSTED_APPLICATIONS = 64
 MAX_ID_BYTES = 256
 
 
@@ -73,8 +76,9 @@ def group_windows_by_desktop_id(windows, trusted_map, *,
 
     ``trusted_map`` maps each allowed desktop ID to its dock label. The host
     derives it from its own launcher catalog so no desktop-ID list is duplicated
-    here. Returns ``GroupingResult``; unknown desktop IDs become ``unmapped``
-    and repeated window IDs become ``duplicates``.
+    here. It is bounded to ``MAX_TRUSTED_APPLICATIONS`` entries, like every other
+    caller-supplied collection. Returns ``GroupingResult``; unknown desktop IDs
+    become ``unmapped`` and repeated window IDs become ``duplicates``.
     """
     if not isinstance(trusted_map, Mapping):
         raise WindowGroupingError("trusted_map must be a mapping")
@@ -83,6 +87,10 @@ def group_windows_by_desktop_id(windows, trusted_map, *,
 
     allowlist = {}
     for desktop_id, dock_label in trusted_map.items():
+        # Bound the host-supplied allowlist before it is materialized: a
+        # larger snapshot is out of contract and fails closed.
+        if len(allowlist) >= MAX_TRUSTED_APPLICATIONS:
+            raise WindowGroupingError("trusted map exceeds bound")
         if not _valid_text(desktop_id) or not _valid_text(dock_label):
             raise WindowGroupingError("invalid trusted map entry")
         allowlist[desktop_id] = dock_label

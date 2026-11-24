@@ -227,6 +227,22 @@ class BoundaryTests(unittest.TestCase):
         self.assertEqual(out["held_count"], 2)
         self.assertEqual(out["hold_reasons"], ("DEPENDENCY_HOLD",))
 
+    def test_dependency_cycle_never_yields_false_pass(self):
+        # A two-member cycle where one member is already MERGED used to emit
+        # merge_order=(377,) with zero holds: a clean PASS for a graph that
+        # could never have been built in dependency order.
+        pulls = [pull(375, state="MERGED"), pull(377, head=SHA_B)]
+        cyclic = snapshot(pulls=pulls, dependencies={"375": 377, "377": 375})
+        with self.assertRaises(gate.DependencyGateError):
+            gate.evaluate(cyclic)
+
+    def test_dependency_cycle_all_open_is_refused(self):
+        pulls = [pull(375), pull(377, head=SHA_B), pull(378, head=SHA_C)]
+        cyclic = snapshot(pulls=pulls,
+                          dependencies={"375": 377, "377": 378, "378": 375})
+        with self.assertRaises(gate.DependencyGateError):
+            gate.evaluate(cyclic)
+
 
 class JsonFileTests(unittest.TestCase):
     def test_json_bytes_and_text(self):

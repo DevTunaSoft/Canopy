@@ -20,6 +20,20 @@ from canopy_supervisor.cli import build_supervisor, load_config  # noqa: E402
 BASE = "feat/classic-qt-port-buildable-20261121"
 MAX_BACKLOG = 128
 
+
+def _reject_duplicate_json_keys(pairs):
+    """Reject duplicate object keys in untrusted roadmap JSON.
+
+    json.loads otherwise keeps the last value, so an appended duplicate
+    ``depends_on``/``scope``/``id`` field can silently erase a real guard.
+    """
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("duplicate JSON key in roadmap: " + key)
+        result[key] = value
+    return result
+
 # Every row is a specific, bounded, independently testable engineering problem,
 # not a generic "write another document" instruction. No task owns the Classic
 # approved art, frozen dock geometry, source QML/C++, or GitHub workflows.
@@ -206,7 +220,8 @@ def prepare(root: Path) -> tuple[int, int]:
         gitops.run(["git", "fetch", config["remote"]], cwd=repo, timeout=180)
         gitops.rev_parse(repo, config["remote"] + "/" + BASE)
         path = store.root / "roadmap.json"
-        catalog = json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
+        catalog = json.loads(path.read_text(encoding="utf-8"),
+                             object_pairs_hook=_reject_duplicate_json_keys) if path.exists() else []
         if not isinstance(catalog, list):
             raise ValueError("roadmap must be an array; no task state changed")
         validated = [policy.validate_task(item, config["protected_paths"])

@@ -302,6 +302,10 @@ class ShellHost:
                 return SwitchResult(previous_id, None, "RECOVERY_REQUIRED",
                                     previous_id, False)
             if self._active_view is None:
+                # Shutdown is terminal: release the last focus adapter (and
+                # the host-supplied authorize callback it holds) even though
+                # the host object itself may stay alive for diagnostics.
+                self._focus_adapter = None
                 return SwitchResult(None, None, "STOPPED", None, True)
             off_error = self._attempt(self._active_view, "deactivate")
             if off_error:
@@ -312,6 +316,9 @@ class ShellHost:
             self._active_view = None
             self._active_id = None
             dispose_error = self._attempt(old_view, "dispose")
+            # Release the decision-only adapter on every completed stop path,
+            # including failed dispose; recovery diagnostics keep the flag.
+            self._focus_adapter = None
             if dispose_error:
                 self._needs_recovery = True
                 return SwitchResult(previous_id, None, "CLEANUP_FAILED", None,

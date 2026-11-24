@@ -125,6 +125,19 @@ class IconCacheOptinTests(unittest.TestCase):
         for forbidden in ("subprocess", "os.system", "Popen", "os.exec"):
             self.assertNotIn(forbidden, source)
 
+    def test_non_callable_tool_lookup_fails_closed(self):
+        """A hostile wrong-type lookup must raise the domain error, not TypeError.
+
+        ``tool_lookup`` is a public, injectable argument of ``describe_refresh``.
+        Calling a non-callable value leaked a raw ``TypeError`` from the public
+        entry point instead of the module's documented fail-closed domain error.
+        """
+        for bad in (None, 42, 3.5, True, "which", b"which", [1], {"a": 1}, object()):
+            with self.subTest(bad=bad):
+                with self.assertRaises(ic.IconCacheDescriptionError) as caught:
+                    ic.describe_refresh(HOME, (THEME,), tool_lookup=bad)
+                self.assertIn("lookup", str(caught.exception).lower())
+
     def test_default_lookup_is_offline_on_this_windows_host(self):
         # Real PATH probing only; no tool execution and no Linux Mint claim.
         result = ic.describe_refresh(HOME, (THEME,))

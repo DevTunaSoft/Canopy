@@ -123,6 +123,8 @@ def _theme_dirs(home, icon_dirs):
 
 
 def _cache_tool(tool_lookup):
+    if not callable(tool_lookup):
+        raise IconCacheDescriptionError("tool lookup must be callable")
     candidate = tool_lookup(CACHE_TOOL)
     if candidate is None:
         return None

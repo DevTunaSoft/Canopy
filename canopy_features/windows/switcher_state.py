@@ -4,6 +4,8 @@ Pure in-memory state machine, not a Qt or OS bridge. It never observes real
 windows, binds keys, polls, creates threads/timers, opens sockets or performs
 I/O. Callers supply a stable ordered list of opaque window ids and feed it
 explicit transition events (begin/next/previous/select/confirm/cancel/remove).
+String ids must be printable, UTF-8 round-trippable text: a bounded label full
+of controls, surrogates or other non-printing scalars is never a valid id.
 
 Given the same starting state and the same operation sequence, results are
 always identical: there is no clock, randomness or hidden state. This is
@@ -11,9 +13,16 @@ selection bookkeeping only. It proves nothing about a working desktop until a
 trusted host wires it into real window and keyboard events.
 """
 from dataclasses import dataclass
+import unicodedata
 
 MAX_WINDOWS = 64
 MAX_ID_LENGTH = 128
+
+# A bounded string is not automatically a displayable, round-trippable id.
+# Refuse control and format characters, unpaired surrogates, private-use
+# scalars, noncharacters and line/paragraph separators before they can be
+# reported as a tracked, selectable window.
+_UNSAFE_TEXT_CATEGORIES = frozenset({"Cc", "Cf", "Cs", "Co", "Cn", "Zl", "Zp"})
 
 
 class SwitcherError(ValueError):
@@ -31,13 +40,22 @@ class SwitchState:
 
 
 def _valid_id(value):
-    """Accept only bounded, opaque ids: positive ints or short nonempty strs."""
+    """Accept only bounded, opaque ids: safe ints or printable UTF-8 strs."""
     if type(value) is bool:
         return False
     if type(value) is int:
         return 0 < value <= 1_000_000_000_000
     if type(value) is str:
-        return 0 < len(value) <= MAX_ID_LENGTH
+        if not 0 < len(value) <= MAX_ID_LENGTH:
+            return False
+        if any(unicodedata.category(char) in _UNSAFE_TEXT_CATEGORIES
+               for char in value):
+            return False
+        try:
+            value.encode("utf-8", "strict")
+        except UnicodeEncodeError:
+            return False
+        return True
     return False
 
 

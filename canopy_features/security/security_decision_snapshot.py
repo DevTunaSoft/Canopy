@@ -122,6 +122,16 @@ class SecurityDecisionSnapshot:
         if (type(self.privilege_reason) is not str
                 or self.privilege_reason not in PRIVILEGE_REASONS):
             raise SnapshotError("unsupported privilege reason token")
+        # Cross-field contract: the reason code is the ground truth emitted by
+        # the privilege validator -- ALLOWED pairs only with its single success
+        # code, DENIED only with a denial code. Each field above is a valid
+        # token on its own, so a forged record pairing ALLOWED with a denial
+        # reason (or DENIED with the success reason) would otherwise emit a
+        # self-contradictory allow/deny claim. Fail closed on that mismatch.
+        status_allows = self.privilege_status == "ALLOWED"
+        reason_allows = self.privilege_reason == priv_mod.ALLOWED
+        if status_allows != reason_allows:
+            raise SnapshotError("contradictory privilege decision flags")
         if (type(self.metadata_status) is not str
                 or self.metadata_status not in METADATA_STATUSES):
             raise SnapshotError("unsupported metadata status token")

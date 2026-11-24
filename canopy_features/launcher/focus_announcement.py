@@ -141,6 +141,8 @@ def _check_transition(transition):
     for value in (transition.from_id, transition.to_id):
         if value is not None and type(value) is not str:
             raise AnnouncementInputError("invalid transition id")
+    if transition.moved and transition.from_id == transition.to_id:
+        raise AnnouncementInputError("moved transition has identical endpoints")
 
 
 def _check_view(view):

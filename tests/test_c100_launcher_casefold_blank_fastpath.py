@@ -1,4 +1,4 @@
-"""Regression tests for allocation-free validation on blank search queries.
+"""Regression tests for bounded-allocation validation on blank search queries.
 
 Run: python -m unittest tests.test_c100_launcher_casefold_blank_fastpath -v
 """

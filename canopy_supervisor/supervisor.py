@@ -121,8 +121,16 @@ class Supervisor:
 
     @staticmethod
     def backoff(attempts: int) -> float:
-        """Exponential delay, capped at five minutes."""
-        return min(300.0, 30.0 * (2 ** max(0, attempts - 1)))
+        """Exponential delay, capped at five minutes.
+
+        Wrong-typed or non-positive attempt counts fail closed at the maximum
+        delay, and the exponent itself is capped so a corrupted counter cannot
+        request an unbounded integer allocation.
+        """
+        if isinstance(attempts, bool) or not isinstance(attempts, int) \
+                or attempts < 1:
+            return 300.0
+        return min(300.0, 30.0 * (2 ** min(attempts - 1, 4)))
 
     # ---------- worktree and recovery ----------
 

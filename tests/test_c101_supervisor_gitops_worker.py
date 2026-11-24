@@ -54,6 +54,20 @@ class WorkerPidTypeTests(unittest.TestCase):
             self.assertEqual(worker.poll(1), 0)
 
 
+class SupervisorBackoffTests(unittest.TestCase):
+    def test_wrong_type_backoff_fails_closed_at_max_delay(self):
+        for bad in (None, "3", True, 3.5, [], {}, -1, 0):
+            with self.subTest(value=repr(bad)):
+                self.assertEqual(Supervisor.backoff(bad), 300.0)
+
+    def test_exponent_is_bounded(self):
+        for attempts, expected in ((1, 30.0), (2, 60.0), (3, 120.0),
+                                   (4, 240.0), (5, 300.0),
+                                   (10 ** 6, 300.0)):
+            with self.subTest(attempts=attempts):
+                self.assertEqual(Supervisor.backoff(attempts), expected)
+
+
 class GitOpsOutputBoundTests(unittest.TestCase):
     def test_oversized_command_output_fails_closed(self):
         result = MagicMock()

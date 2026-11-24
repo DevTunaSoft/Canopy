@@ -21,6 +21,8 @@ always ``NOT_PERFORMED``.
 The status describes only the supplied state, never a running desktop.
 Hard close refusals anywhere in the supplied decision history block the
 record even when those entries fall outside the embedded decision cap.
+Close decisions are likewise checked for status/visibility consistency, so a
+record can never jointly claim a parked window that is still visible.
 """
 from dataclasses import dataclass
 from types import MappingProxyType
@@ -30,7 +32,8 @@ from canopy_features.windows.focus_intents import (
     FocusBroker, FocusDecision, PermissionPolicy)
 from canopy_features.windows.switcher_state import SwitchState
 from canopy_features.windows.window_close_intents import (
-    ALREADY_CLOSED, ALREADY_OPEN, GUARDED, OWNERSHIP_DENIED, UNKNOWN_WINDOW,
+    ALREADY_CLOSED, ALREADY_OPEN, CLOSED, GUARDED, OWNERSHIP_DENIED,
+    REOPENED, UNKNOWN_WINDOW,
     STATUSES as CLOSE_STATUSES, CloseIntentModel, IntentResult)
 
 SCHEMA = 1
@@ -42,6 +45,20 @@ MAX_WINDOW_ID = 1_000_000_000_000
 
 BLOCKING_CLOSE = frozenset({UNKNOWN_WINDOW, OWNERSHIP_DENIED, GUARDED})
 SOFT_CLOSE = frozenset({ALREADY_CLOSED, ALREADY_OPEN})
+
+# Visibility is authoritative for a lifecycle claim. The producing model never
+# emits a status paired with a contradicting visibility flag: a parked window
+# is hidden, a restored window is shown, and a guarded window was left open.
+# ``None`` means no visibility observation was supplied (the canonical refusal
+# form) and is accepted. Rejecting an explicit contradiction here stops the
+# record from jointly claiming, for example, CLOSED with visible=True.
+VISIBLE_FOR_STATUS = {
+    CLOSED: False,
+    ALREADY_CLOSED: False,
+    REOPENED: True,
+    ALREADY_OPEN: True,
+    GUARDED: True,
+}
 FOCUS_FAILURE = frozenset({
     DENIED, STALE_TARGET, UNKNOWN_TARGET, ACTIVATION_FAILED})
 FOCUS_STATUSES = frozenset({
@@ -172,6 +189,14 @@ def _close_view(model, decisions):
         status = _text(decision.status, "close decision status")
         if status not in CLOSE_STATUSES:
             raise SnapshotError("unknown close decision status")
+        expected_visible = VISIBLE_FOR_STATUS.get(status)
+        if expected_visible is not None:
+            observed = decision.visible
+            if observed is not None and type(observed) is not bool:
+                raise SnapshotError("close visible flag must be bool or None")
+            if observed is not None and observed is not expected_visible:
+                raise SnapshotError(
+                    "close status contradicts visible flag")
         if status in BLOCKING_CLOSE:
             blocking = True
     window_ids, statuses, visible_flags, notes = [], [], [], []
@@ -273,7 +298,9 @@ def compose(close_model, switcher, focus, decisions=(), policy=None):
     ``decisions`` is the bounded tuple/list of ``IntentResult`` values emitted
     by the close model; only the most recent ``MAX_DECISIONS`` entries are
     embedded, but a hard refusal anywhere in the supplied history still makes
-    the status ``BLOCKED``. ``policy`` is optional. Every component is validated
+    the status ``BLOCKED``. Every decision's status is also cross-checked
+    against its visibility flag, and a contradiction fails closed with
+    ``SnapshotError``. ``policy`` is optional. Every component is validated
     before any record is built, so a rejected input raises ``SnapshotError``
     without a partial result. The source objects are never mutated.
     """

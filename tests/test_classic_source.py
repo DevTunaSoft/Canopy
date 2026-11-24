@@ -171,7 +171,7 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertIn("SELF_TEST_FAIL: sample Files preview content incomplete", runtime)
         self.assertIn("SELF_TEST_PASS: wallpaper regions visually distinct", runtime)
         self.assertIn("SELF_TEST_FAIL: Blue Current wallpaper image did not load", runtime)
-        self.assertIn("SELF_TEST_PASS: original SVG wallpaper image loaded", runtime)
+        self.assertIn("SELF_TEST_PASS: exact approved alpine lake master wallpaper loaded", runtime)
         self.assertIn("SELF_TEST_PASS: all six SVG dock candidates loaded", runtime)
         self.assertIn("SELF_TEST_PASS: all eight original sample folder images loaded", runtime)
         self.assertIn("SELF_TEST_PASS: compact folder grid fits and four-column cap verified", runtime)

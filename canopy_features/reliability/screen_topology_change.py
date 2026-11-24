@@ -8,7 +8,7 @@ shell should do to recover; it does not prove any desktop behavior. Future
 integration must wire it into the compiled Qt application's screen signals.
 """
 from collections import deque
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import re
 
 MAX_MONITORS = 16
@@ -102,6 +102,7 @@ class Topology:
     """A bounded, deduplicated, connector-sorted set of monitors."""
 
     monitors: tuple
+    _connectors_cache: object = field(default=None, repr=False, compare=False)
 
     def __init__(self, monitors=()):
         if type(monitors) not in (tuple, list):
@@ -119,6 +120,7 @@ class Topology:
         if sum(1 for monitor in items if monitor.primary) > 1:
             raise TopologyError("at most one primary monitor")
         object.__setattr__(self, "monitors", items)
+        object.__setattr__(self, "_connectors_cache", None)
 
     @property
     def is_empty(self):
@@ -126,7 +128,10 @@ class Topology:
 
     @property
     def connectors(self):
-        return frozenset(m.connector for m in self.monitors)
+        if self._connectors_cache is None:
+            object.__setattr__(self, "_connectors_cache",
+                               frozenset(m.connector for m in self.monitors))
+        return self._connectors_cache
 
     @property
     def primary(self):

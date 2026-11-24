@@ -154,6 +154,15 @@ def _effective_grants(negotiation):
     # SUPPORTED/PARTIAL promise at least one grant; UNSUPPORTED promises none.
     if (negotiation.status == "UNSUPPORTED") != (not granted):
         return frozenset()
+    # A known backend name binds the record to that profile's advertisement.
+    # Grants outside it (for example minimize on Wayland or any grant on
+    # headless) would be a false capability claim at every decision point.
+    try:
+        profile = KNOWN_BACKENDS.get(negotiation.backend)
+    except (TypeError, ValueError):
+        return frozenset()
+    if profile is not None and not granted <= profile.supported:
+        return frozenset()
     return granted
 
 

@@ -5,7 +5,9 @@ launch or Mint VM is involved. These tests do not prove a working desktop.
 """
 import tempfile
 import unittest
+from collections import UserDict
 from pathlib import Path
+from types import MappingProxyType
 
 from canopy_features.launcher import launcher_favorites as favorites
 
@@ -112,6 +114,68 @@ class InstalledCatalogTypeTests(unittest.TestCase):
             with self.subTest(container=type(container).__name__):
                 self.assertEqual(self.store.visible(container), ())
                 self._assert_intact()
+
+
+class NonDictMappingCatalogTests(unittest.TestCase):
+    """Every Mapping fails closed, not just a plain ``dict``.
+
+    ``_installed_set`` documents that mappings are refused: iterating one
+    exposes only its keys, so a caller-supplied mapping of app labels cannot
+    be trusted as an installed-id collection. A non-dict Mapping used to slip
+    past the ``dict``-only guard and make ``visible`` falsely claim that a
+    favorite is installed; the matching ``prune`` then persisted that false
+    claim and erased unrelated favorites from disk.
+    """
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.path = Path(self._tmp.name) / "favorites.json"
+        self.store = favorites.FavoritesStore(self.path)
+        for app_id in ("org.example.One", "org.example.Two"):
+            self.assertTrue(self.store.add(app_id))
+        self._persisted = self.path.read_bytes()
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def _assert_intact(self):
+        self.assertEqual(self.store.ids(),
+                         ("org.example.One", "org.example.Two"))
+        self.assertEqual(self.path.read_bytes(), self._persisted)
+        self.assertEqual(favorites.FavoritesStore(self.path).ids(),
+                         ("org.example.One", "org.example.Two"))
+
+    @staticmethod
+    def _non_dict_mappings():
+        class CustomMapping(UserDict):
+            pass
+
+        return (
+            MappingProxyType({"org.example.One": False}),
+            UserDict({"org.example.One": False}),
+            CustomMapping({"org.example.One": False}),
+        )
+
+    def test_visible_refuses_every_mapping_type(self):
+        # A mapping with a false-valued label must NOT be read as a collection
+        # of installed ids: only its keys were ever exposed by iteration.
+        for value in self._non_dict_mappings():
+            with self.subTest(mapping=type(value).__name__):
+                with self.assertRaises(favorites.FavoritesError):
+                    self.store.visible(value)
+                self._assert_intact()
+
+    def test_prune_refuses_every_mapping_without_erasing(self):
+        for value in self._non_dict_mappings():
+            with self.subTest(mapping=type(value).__name__):
+                with self.assertRaises(favorites.FavoritesError):
+                    self.store.prune(value)
+                self._assert_intact()
+
+    def test_plain_dict_still_refused_alongside_other_mappings(self):
+        with self.assertRaises(favorites.FavoritesError):
+            self.store.visible({"org.example.One": True})
+        self._assert_intact()
 
 
 if __name__ == "__main__":

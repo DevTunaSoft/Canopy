@@ -170,7 +170,8 @@ class ComponentBoundaryTests(unittest.TestCase):
                 imports.add(node.module.split(".")[0])
             elif isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
                 called.add(node.func.attr)
-        self.assertTrue(imports.issubset({"json", "os", "pathlib", "re", "tempfile"}))
+        self.assertTrue(imports.issubset(
+            {"collections", "json", "os", "pathlib", "re", "tempfile"}))
         blocked = ("sleep", "start", "wait", "poll", "connect", "Popen", "launch")
         for token in blocked:
             with self.subTest(blocked=token):

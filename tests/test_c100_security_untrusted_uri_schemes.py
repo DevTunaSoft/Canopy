@@ -190,5 +190,42 @@ class OtherCategoryBoundaryTests(unittest.TestCase):
                          "https")
 
 
+class WrongTypeAllowlistTests(unittest.TestCase):
+    """Wrong-type ``allowed`` values must fail closed, never claim "safe".
+
+    ``allowed`` is host-owned configuration required to be a collection of
+    scheme strings. A mapping is the wrong type here: ``tuple(mapping)``
+    yields only the KEYS, so a scheme whose value is explicitly ``False``
+    (disabled) is silently promoted into the allowlist and produces a false
+    "permitted" decision. Likewise, a container that fails while being
+    materialised must not leak a raw exception past the boolean wrapper.
+    """
+
+    def test_mapping_allowlist_cannot_permit_a_disabled_scheme(self):
+        # "javascript" is present as a KEY but explicitly disabled by value.
+        allowed = {"javascript": False}
+        with self.assertRaises(UntrustedUriError):
+            validate_uri_intent("javascript:alert(1)", allowed=allowed)
+        self.assertFalse(is_permitted_uri("javascript:alert(1)", allowed=allowed))
+
+    def test_mapping_allowlist_is_rejected_for_ordinary_schemes(self):
+        # Even a benign mapping must be rejected: its type breaks the contract.
+        with self.assertRaises(UntrustedUriError):
+            validate_uri_intent("https://example.com", allowed={"https": True})
+        self.assertFalse(is_permitted_uri("https://example.com",
+                                          allowed={"https": True}))
+
+    def test_iteration_failure_is_translated_to_domain_error(self):
+        class BrokenIterable:
+            def __iter__(self):
+                raise RuntimeError("iteration failed")
+
+        with self.assertRaises(UntrustedUriError):
+            validate_uri_intent("https://example.com", allowed=BrokenIterable())
+        # The boolean convenience wrapper must never leak a raw exception.
+        self.assertFalse(is_permitted_uri("https://example.com",
+                                          allowed=BrokenIterable()))
+
+
 if __name__ == "__main__":
     unittest.main()

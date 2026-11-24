@@ -134,5 +134,43 @@ class WaveTests(unittest.TestCase):
                          ["awaiting_review"])
 
 
+    def _assert_domain_error(self, pattern):
+        # A hostile-but-plausible record must produce the module's domain
+        # ValueError (handled as QT_WAVE_BLOCKED), never a raw built-in.
+        try:
+            self._prepare()
+        except ValueError as exc:
+            self.assertRegex(str(exc), pattern)
+        except (KeyError, TypeError) as exc:
+            self.fail("raw %s leaked from hostile input: %s"
+                      % (type(exc).__name__, exc))
+        else:
+            self.fail("hostile input was accepted")
+
+    def test_active_ledger_task_missing_id_fails_closed(self):
+        data = self.store.load()
+        data["tasks"].append({"status": "running",
+                              "pr": {"number": "152"}})
+        self.store.save(data)
+        self._assert_domain_error("task id")
+        self.assertEqual(len(json.loads(self.roadmap.read_text())), 1)
+
+    def test_unhashable_ledger_id_fails_closed(self):
+        data = self.store.load()
+        data["tasks"].append({"id": ["152", "153"],
+                              "status": "awaiting_review"})
+        self.store.save(data)
+        self._assert_domain_error("task id")
+        self.assertEqual(len(json.loads(self.roadmap.read_text())), 1)
+
+    def test_unhashable_roadmap_id_fails_closed(self):
+        state.atomic_write(self.roadmap, json.dumps([
+            {"id": ["duplicate", "id"], "title": "Hostile",
+             "objective": "A sufficiently long objective text",
+             "scope": ["docs/hostile.md"]}]))
+        self._assert_domain_error("IDs")
+        self.assertEqual(len(json.loads(self.roadmap.read_text())), 1)
+
+
 if __name__ == "__main__":
     unittest.main()

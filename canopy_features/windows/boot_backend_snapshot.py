@@ -141,10 +141,18 @@ def _startup_view(decision):
         raise SnapshotError("unsupported recovery action")
     if type(decision.completed) is not tuple or type(decision.unwind) is not tuple:
         raise SnapshotError("completed and unwind steps must be tuples")
+    safe = _flag(decision.safe_to_start, "safe_to_start")
+    rollback = _flag(decision.needs_rollback, "needs_rollback")
+    # A RecoveryDecision subclass may override these properties. Derive the
+    # expected values from the durable action/unwind fields so a forged flag
+    # cannot turn ROLLBACK into a boot-ready STATUS_OK.
+    if (safe != (action in (START_FRESH, READY))
+            or rollback != bool(decision.unwind)):
+        raise SnapshotError("startup flags contradict recovery decision")
     return StartupView(
         action=action,
-        safe_to_start=_flag(decision.safe_to_start, "safe_to_start"),
-        needs_rollback=_flag(decision.needs_rollback, "needs_rollback"),
+        safe_to_start=safe,
+        needs_rollback=rollback,
         completed_count=len(decision.completed),
         unwind_count=len(decision.unwind),
         reason=_bounded_text(decision.reason, "recovery reason"),

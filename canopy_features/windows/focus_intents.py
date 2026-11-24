@@ -151,6 +151,7 @@ class FocusBroker:
         self._live = {}  # window_id -> (owner app_id, serial)
         self._next_serial = 1
         self._history = deque(maxlen=MAX_HISTORY)
+        self._history_cache = None
 
     def register_window(self, app_id, window_id):
         _valid_app_id(app_id, "window owner app id")
@@ -174,10 +175,14 @@ class FocusBroker:
 
     @property
     def history(self):
-        return tuple(self._history)
+        """Immutable tuple snapshot, rebuilt lazily after a new decision."""
+        if self._history_cache is None:
+            self._history_cache = tuple(self._history)
+        return self._history_cache
 
     def _record(self, decision):
         self._history.append(decision)
+        self._history_cache = None
         return decision
 
     def request_focus(self, intent):

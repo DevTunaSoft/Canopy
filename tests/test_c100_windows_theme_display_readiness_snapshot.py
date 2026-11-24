@@ -172,6 +172,19 @@ class ThemeDisplayReadinessSnapshotTests(unittest.TestCase):
         with self.assertRaises(_m().SnapshotError):
             _m().compose(ledger, _portal(), _display())
 
+    def test_fail_closed_idle_theme_with_pending_candidate(self):
+        # The ledger invariant is: state == IDLE iff candidate is None.
+        # prepare() sets the candidate and PREPARED together, and
+        # _clear_candidate() clears both together. A hostile but bounded
+        # snapshot that reports IDLE while still carrying a candidate label
+        # must not be projected as a ready (STATUS_OK) theme.
+        fake = Snapshot(theme.IDLE, "active-theme", "pending-theme",
+                        frozenset({"live"}), frozenset())
+        ledger = theme.ThemeTransitionRollback()
+        object.__setattr__(ledger, "snapshot", lambda: fake)
+        with self.assertRaises(_m().SnapshotError):
+            _m().compose(ledger, _portal(), _display())
+
     def test_cross_call_independence_no_mutable_alias(self):
         ledger = theme.ThemeTransitionRollback()
         record = _m().compose(ledger, _portal(), _display())

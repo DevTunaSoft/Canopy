@@ -12,7 +12,6 @@ from dataclasses import dataclass
 from threading import Lock
 from typing import Callable, FrozenSet, Mapping, Optional, Protocol
 
-from .host_events import CAPABILITIES_TOPIC
 from .capabilities import (
     CapabilityError, describe as _describe_capability,
     load as _load_capability, names as _capability_names,
@@ -168,18 +167,6 @@ class ShellHost:
             focus_rejection_count=adapter.rejection_count if adapter is not None else 0,
             focus_replay_count=adapter.replay_count if adapter is not None else 0,
         )
-
-    def publish_capability_report(self, records, bus):
-        """Emit one bounded capability report on explicit host request only.
-
-        No subscription is created and no reference is retained: the caller
-        owns the bus lifecycle. There is no timer, polling or periodic call.
-        The payload is built solely from the validated frozen report.
-        """
-        if not callable(getattr(bus, "emit", None)):
-            raise CapabilityReportError("event bus does not support emit")
-        report = self.capability_report(records)
-        return bus.emit(CAPABILITIES_TOPIC, capability_event_payload(report))
 
     def capability_report(self, records):
         """Compose four already-produced read-only records into one report.
@@ -427,32 +414,6 @@ DELIVERY_KEYS = frozenset({
 SWITCHER_KEYS = frozenset({
     "active", "current", "selected", "window_count", "order",
 })
-
-
-CAPABILITY_NEGATIVE_CLAIMS = (
-    "release=not_approved;mint=not_approved;visual=not_approved;"
-    "process=not_launched;io=none;capability=not_activated;"
-    "desktop=not_claimed;geometry=not_read"
-)
-
-
-def capability_event_payload(report):
-    """Return a flat, bounded, fixed-token payload for one report."""
-    if not isinstance(report, HostCapabilityReport):
-        raise CapabilityReportError("event payload requires a frozen report")
-    data = report.as_dict()
-    codes = "|".join(data["component_tokens"])
-    if len(codes.encode("utf-8", "strict")) > 512:
-        raise CapabilityReportError("event component codes exceed bound")
-    return {
-        "status": data["status"],
-        "schema": data["schema"],
-        "component_count": data["component_count"],
-        "component_codes": codes,
-        "has_active_pack": data["has_active_pack"],
-        "needs_recovery": data["needs_recovery"],
-        "negative_claims": CAPABILITY_NEGATIVE_CLAIMS,
-    }
 
 
 class CapabilityReportError(ValueError):

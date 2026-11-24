@@ -7,6 +7,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
+from canopy_supervisor.supervisor import Supervisor
 from canopy_supervisor.worker import WorkerLauncher
 
 
@@ -49,6 +50,28 @@ class WorkerPidTypeTests(unittest.TestCase):
             self.assertFalse(worker.knows(True))
             self.assertIsNone(worker.poll(True))
             self.assertEqual(worker.poll(1), 0)
+
+
+class SupervisorAssignableTypeTests(unittest.TestCase):
+    def supervisor(self):
+        sup = Supervisor.__new__(Supervisor)
+        sup.config = {"max_attempts": 3}
+        sup.now = lambda: 100.0
+        return sup
+
+    def test_wrong_type_next_attempt_fails_closed(self):
+        for bad in (None, [], {}, "soon", float("nan"),
+                    float("inf"), -float("inf"), True):
+            with self.subTest(value=repr(bad)):
+                task = {"status": "queued", "next_attempt_at": bad}
+                self.assertIs(self.supervisor().assignable(task, []), False)
+
+    def test_valid_next_attempt_still_gates_scheduling(self):
+        sup = self.supervisor()
+        self.assertIs(sup.assignable(
+            {"status": "queued", "next_attempt_at": 200}, []), False)
+        self.assertIs(sup.assignable(
+            {"status": "queued", "next_attempt_at": 50}, []), True)
 
 
 if __name__ == "__main__":

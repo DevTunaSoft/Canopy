@@ -4,6 +4,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import threading
@@ -80,7 +81,18 @@ class Supervisor:
     def assignable(self, task: dict, tasks: list[dict]) -> bool:
         if task.get("status") != "queued":
             return False
-        if self.now() < float(task.get("next_attempt_at", 0)):
+        scheduled = task.get("next_attempt_at", 0)
+        # Persisted state may be wrong-typed or non-finite; fail closed rather
+        # than letting a crash stop the loop or a NaN look immediately due.
+        if isinstance(scheduled, bool):
+            return False
+        try:
+            next_attempt = float(scheduled)
+        except (TypeError, ValueError, OverflowError):
+            return False
+        if not math.isfinite(next_attempt):
+            return False
+        if self.now() < next_attempt:
             return False
         if task.get("attempts", 0) >= task.get("max_attempts", self.config["max_attempts"]):
             return False

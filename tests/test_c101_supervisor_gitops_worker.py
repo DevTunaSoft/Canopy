@@ -10,6 +10,7 @@ import unittest
 
 from canopy_supervisor import gitops
 from canopy_supervisor.supervisor import Supervisor
+from canopy_supervisor import worker
 from canopy_supervisor.worker import WorkerLauncher
 
 
@@ -87,6 +88,19 @@ class GitOpsOutputBoundTests(unittest.TestCase):
         with patch("canopy_supervisor.gitops.subprocess.run",
                    return_value=result):
             self.assertEqual(gitops.run(["git", "status"]), "ok")
+
+
+class WorkerRedactTests(unittest.TestCase):
+    def test_wrong_type_input_is_redacted_not_raised(self):
+        for bad in (None, 7, True, [], {}, b"raw-token"):
+            with self.subTest(value=repr(bad)):
+                out = worker.redact(bad)
+                self.assertEqual(out, "[REDACTED]")
+                self.assertNotIn("raw", out)
+
+    def test_valid_text_still_redacted(self):
+        self.assertEqual(worker.redact("plain text"), "plain text")
+        self.assertEqual(worker.redact("\x1b[31msecret\x1b[0m"), "secret")
 
 
 class GitOpsRunTypeTests(unittest.TestCase):

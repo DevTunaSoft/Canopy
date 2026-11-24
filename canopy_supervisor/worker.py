@@ -27,6 +27,10 @@ def _valid_pid(pid) -> bool:
 
 def redact(text: str) -> str:
     """Remove ANSI escapes and known credential shapes from worker output."""
+    # Fail closed: a wrong-typed log fragment is never passed through or
+    # allowed to crash the launcher's bounded log write.
+    if not isinstance(text, str):
+        return "[REDACTED]"
     clean = ANSI.sub("", text)
     for pattern in SECRETS:
         clean = pattern.sub("[REDACTED]", clean)

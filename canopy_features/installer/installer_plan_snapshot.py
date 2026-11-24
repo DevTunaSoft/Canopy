@@ -21,7 +21,7 @@ Malformed bounded wrapper shape fails closed with :class:`SnapshotError`;
 rejections by a composing validator become fixed status tokens.
 """
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from canopy_features.installer import icon_cache_optin as icon_mod
 from canopy_features.installer import session_entry_validation as session_mod
@@ -196,6 +196,19 @@ def snapshot(record):
     if (type(dirs) not in (list, tuple)
             or len(dirs) > icon_mod.MAX_THEME_DIRS):
         raise SnapshotError("installer snapshot icon directories are invalid")
+    # The composing icon helper accepts path-like labels and stringifies them.
+    # Gate that conversion here: a bounded hostile label whose __str__ raises
+    # must fail closed with this module's error, never a raw built-in one.
+    safe_dirs = []
+    for item in dirs:
+        if type(item) is not str and not isinstance(item, PurePosixPath):
+            raise SnapshotError("installer snapshot icon directory label is invalid")
+        try:
+            safe_dirs.append(str(item))
+        except (TypeError, ValueError, OSError):
+            raise SnapshotError(
+                "installer snapshot icon directory label is invalid") from None
+    dirs = tuple(safe_dirs)
     tool_available = record["tool_available"]
     if type(tool_available) is not bool:
         raise SnapshotError("installer snapshot tool_available must be boolean")
@@ -212,7 +225,18 @@ def snapshot(record):
     if type(entry_text) is not str or len(entry_text) > session_mod.MAX_ENTRY_BYTES:
         raise SnapshotError("installer snapshot session entry text is invalid")
 
-    ownership_status, count = _ownership(record["ownership_manifest"])
+    # The ownership helper reports a bad label through repr(); gate the label
+    # type before delegation so a hostile __repr__ cannot leak a raw error.
+    manifest = record["ownership_manifest"]
+    if type(manifest) is dict:
+        files = manifest.get("files")
+        if isinstance(files, dict):
+            for rel in files:
+                if type(rel) is not str:
+                    raise SnapshotError(
+                        "installer snapshot owned file label is invalid")
+
+    ownership_status, count = _ownership(manifest)
     return InstallerPlanSnapshot(
         schema=SCHEMA,
         icon_status=_icon_status(home, dirs, tool_available),

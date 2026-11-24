@@ -22,15 +22,20 @@ _IDENTIFIER = re.compile(r"[a-z0-9][a-z0-9-]{0,63}\Z")
 _NON_SLUG = re.compile(r"[^a-z0-9]+")
 
 # Tab, LF and CR are the whitespace separators the "collapse whitespace"
-# contract intentionally accepts. Other Unicode Cc controls are rejected even
-# where str.split() would silently consume them as whitespace (VT, FF and
-# U+001C-U+001F are Python whitespace but are still control characters).
+# contract intentionally accepts. Every other non-printing scalar is refused
+# before str.split() can fold it away or smuggle it into a "valid" name:
+# Cc (VT, FF and U+001C-U+001F are Python whitespace but remain controls),
+# Cf (zero-width/format characters), Cs (unpaired surrogates), Co (private
+# use), Cn (noncharacters) and Zl/Zp (line/paragraph separators). Printable
+# text, including Zs spaces that NFKC folds to ASCII space, stays valid.
 _WHITESPACE_CONTROLS = frozenset("\t\n\r")
+_UNSAFE_CATEGORIES = frozenset({"Cc", "Cf", "Cs", "Co", "Cn", "Zl", "Zp"})
 
 
 def _has_disallowed_control(text):
-    return any(unicodedata.category(char) == "Cc"
-               and char not in _WHITESPACE_CONTROLS for char in text)
+    return any(char not in _WHITESPACE_CONTROLS
+               and unicodedata.category(char) in _UNSAFE_CATEGORIES
+               for char in text)
 
 
 class WorkspaceInventoryError(ValueError):

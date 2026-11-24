@@ -11,11 +11,17 @@ from pathlib import Path
 import sqlite3
 
 
+MAX_CREDENTIAL_BLOB_BYTES = 65536
+MAX_AUTH_FILE_BYTES = 262144
+
+
 class CredentialError(RuntimeError):
     """No usable OpenCode credential found."""
 
 
 def _token_from_blob(value: str) -> str:
+    if not isinstance(value, str) or len(value) > MAX_CREDENTIAL_BLOB_BYTES:
+        raise ValueError("credential blob is not a bounded string")
     data = json.loads(value)
     if not isinstance(data, dict):
         raise ValueError("credential is not an object")
@@ -32,18 +38,27 @@ def get_opencode_api_key(explicit: str | None = None, data_home: Path | None = N
     Precedence: explicit argument, OPENCODE_API_KEY, auth.json, SQLite DB.
     """
     token = explicit or os.environ.get("OPENCODE_API_KEY", "")
+    if explicit is not None and not isinstance(explicit, str):
+        raise CredentialError("credential argument must be a string")
+    if not isinstance(token, str):
+        raise CredentialError("credential value must be a string")
     if token.strip():
         return token.strip()
 
+    if data_home is not None and not isinstance(data_home, (str, os.PathLike)):
+        raise CredentialError("credential data_home must be a path")
     base = Path(data_home or os.environ.get("OPENCODE_DATA_HOME") or
                 (Path.home() / ".local" / "share" / "opencode"))
     auth_file = base / "auth.json"
     if auth_file.is_file():
         try:
+            if auth_file.stat().st_size > MAX_AUTH_FILE_BYTES:
+                raise ValueError("auth file too large")
             raw = json.loads(auth_file.read_text(encoding="utf-8"))
-            for value in raw.values():
-                if isinstance(value, dict) and isinstance(value.get("access"), str):
-                    return _token_from_blob(json.dumps(value))
+            if isinstance(raw, dict) and "opencode" in raw:
+                provider = raw["opencode"]
+                if isinstance(provider, dict) and isinstance(provider.get("access"), str):
+                    return _token_from_blob(json.dumps(provider))
         except (OSError, ValueError):
             pass
 
@@ -62,6 +77,8 @@ def get_opencode_api_key(explicit: str | None = None, data_home: Path | None = N
     except sqlite3.Error as exc:
         raise CredentialError(f"cannot read OpenCode credential store: {type(exc).__name__}") from exc
     for (value,) in rows:
+        if not isinstance(value, str):
+            continue
         try:
             return _token_from_blob(value)
         except (ValueError, TypeError):

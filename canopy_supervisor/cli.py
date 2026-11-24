@@ -15,6 +15,8 @@ from .supervisor import DEFAULT_CONFIG, Supervisor
 from .worker import (WorkerError, WorkerLauncher, evidence_path,
                      worker_evidence_path, read_evidence)
 
+MAX_CONFIG_FILE_BYTES = 262144
+
 
 def default_state_root() -> Path:
     override = os.environ.get("CANOPY_SUPERVISOR_STATE_ROOT")
@@ -24,6 +26,8 @@ def default_state_root() -> Path:
 
 
 def resolve_opencode_exe(configured: str) -> str:
+    if configured is not None and not isinstance(configured, str):
+        raise ValueError("configured OpenCode executable must be a string")
     if configured:
         return configured
     from_env = os.environ.get("OPENCODE_EXE", "")
@@ -48,6 +52,8 @@ def load_config(state_root: Path) -> dict:
     if not config.is_file():
         raise ValueError("supervisor not initialized; run: init --repo <path>")
     try:
+        if config.stat().st_size > MAX_CONFIG_FILE_BYTES:
+            raise ValueError("supervisor config file too large")
         data = json.loads(config.read_text(encoding="utf-8"))
     except (OSError, UnicodeError, ValueError) as exc:
         raise ValueError("corrupt supervisor config") from exc
@@ -129,7 +135,10 @@ def make_parser() -> argparse.ArgumentParser:
 
 
 def _state_root(args) -> Path:
-    return Path(args.state_root) if args.state_root else default_state_root()
+    value = getattr(args, "state_root", None)
+    if value is not None and not isinstance(value, (str, os.PathLike)):
+        raise ValueError("state root must be a path")
+    return Path(value) if value else default_state_root()
 
 
 def _locked_action(store, action):

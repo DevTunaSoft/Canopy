@@ -127,7 +127,12 @@ def compose_window_group_preview(
     resulting dock label must also be present in the host's pinned snapshot.
     No window id, desktop id or label is copied into the returned record.
     """
-    if not isinstance(pinned, PinnedItems) or type(pinned.items) is not tuple:
+    if (not isinstance(pinned, PinnedItems)
+            or type(pinned.items) is not tuple
+            or any(type(item) is not str for item in pinned.items)):
+        # A pinned snapshot with a non-string entry is out of contract: its
+        # comparison can raise or masquerade as a trusted dock label, so deny
+        # before any membership test reaches it.
         return _deny(REASON_INVALID_INPUT)
     options = {}
     if max_windows is not None:

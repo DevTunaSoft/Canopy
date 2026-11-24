@@ -24,6 +24,7 @@ from typing import Optional, Union
 ALLOWED = "allowed"
 DENIED_EMPTY_ACTION = "empty-action"
 DENIED_INVALID_ACTION = "invalid-action"
+DENIED_INVALID_EUID = "invalid-privilege-label"
 DENIED_OVERSIZED = "oversized-action"
 DENIED_INHERITED_ROOT = "inherited-root"
 DENIED_ELEVATION = "elevation-command"
@@ -135,10 +136,15 @@ def evaluate(argv: Sequence[str], *, euid: Union[int, None, object] = _AUTO) -> 
 
     ``argv`` must be a list or tuple of short strings. Pass ``euid`` to make a
     check deterministic or to simulate inherited root on any host; omit it to
-    detect the current process.
+    detect the current process. ``euid`` must be an ``int`` (or ``None`` when
+    elevation detection is unavailable); other labels are refused so a
+    wrong-type config value cannot fail open into ALLOWED and a hostile
+    ``__eq__`` cannot raise out of the boundary.
     """
     if euid is _AUTO:
         euid = current_euid()
+    if euid is not None and type(euid) is not int:
+        return Decision(False, DENIED_INVALID_EUID)
 
     if not isinstance(argv, (list, tuple)):
         return Decision(False, DENIED_INVALID_ACTION)

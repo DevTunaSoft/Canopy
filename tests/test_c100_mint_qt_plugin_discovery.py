@@ -119,6 +119,25 @@ class QtPluginDiscoveryTests(unittest.TestCase):
             with self.subTest(filename=filename):
                 self.assertIsNone(discovery.normalize_plugin_name(filename))
 
+    def test_hostile_names_cannot_manufacture_a_plugin_present_claim(self):
+        # A suffix match anywhere in the name used to be split away, so a
+        # bounded hostile file name became "qsvg" and yielded status OK even
+        # though no real qsvg plugin was observed.
+        hostile = ("qsvg.so\0.evil", "qsvg.so\n.evil", "qsvg.so\x1c.evil",
+                   "qsvg.so\t.lib", "qsvg.so;.evil", "qsvg.so.evil")
+        for filename in hostile:
+            with self.subTest(filename=filename):
+                self.assertIsNone(discovery.normalize_plugin_name(filename))
+                report = self.probe(images=[filename])
+                self.assertFalse(report["svg_plugin_present"])
+                self.assertEqual(report["image_plugins"], [])
+                self.assertEqual(report["status"], "BLOCKED")
+                self.assertEqual(report["missing_image_plugins"], ["qsvg"])
+
+        # A real versioned shared object must still normalize to the plugin key.
+        self.assertEqual(discovery.normalize_plugin_name("qsvg.so.6"), "qsvg")
+        self.assertEqual(discovery.normalize_plugin_name("qsvg.so.6.2"), "qsvg")
+
     def test_assess_normalizes_raw_plugin_filenames(self):
         report = self.probe(
             images=["qsvg.dll", "qpng.dll"],

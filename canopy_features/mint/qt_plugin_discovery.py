@@ -38,18 +38,35 @@ def normalize_plugin_name(filename):
     name = os.path.basename(filename)
     if not name or len(name) > MAX_NAME_BYTES or not name.isascii():
         return None
-    lowered = name.lower()
-    for suffix in (".so", ".dll", ".dylib"):
-        marker = suffix in lowered
-        if marker:
-            lowered = lowered.split(suffix, 1)[0]
-            break
-    if lowered.startswith("lib"):
-        lowered = lowered[3:]
-    if len(lowered) < 2 or not lowered.startswith("q") or any(
-            char in lowered for char in (" ", "/", "\\", "\0")):
+    # Gate the raw name before any suffix handling. isprintable() rejects
+    # control characters (NUL, tab, newline and 0x1c-0x1f, which Python also
+    # treats as whitespace) and isspace() rejects plain whitespace. Without
+    # this gate, "qsvg.so\0.evil" was split at ".so" and reported as qsvg.
+    if not name.isprintable() or any(char.isspace() for char in name):
         return None
-    return lowered
+    lowered = name.lower()
+    stem = lowered
+    for suffix in (".dll", ".dylib", ".so"):
+        if lowered.endswith(suffix):
+            stem = lowered[:-len(suffix)]
+            break
+    else:
+        # Versioned shared objects such as qsvg.so.6 are legitimate. Accept
+        # only an ASCII-digit dotted version after ".so"; any other tail is
+        # junk and must never be silently discarded into a plugin key.
+        marker = lowered.find(".so.")
+        if marker != -1:
+            tail = lowered[marker + len(".so."):]
+            if tail and all(part.isascii() and part.isdigit()
+                            for part in tail.split(".")):
+                stem = lowered[:marker]
+    if stem.startswith("lib"):
+        stem = stem[3:]
+    if (len(stem) < 2 or not stem.startswith("q")
+            or not stem.isalnum() or any(
+                char in stem for char in (" ", "/", "\\", "\0"))):
+        return None
+    return stem
 
 
 def parse_version(value):

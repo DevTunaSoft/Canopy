@@ -90,8 +90,8 @@ class CleanIconEdgesContractTests(unittest.TestCase):
     def test_no_dock_tile_qml_modifications_or_app_runtime_overrides(self):
         tile = (P / "DockTile.qml").read_text()
         self.assertIn("anchors.centerIn: parent", tile)
-        self.assertIn("width: 54", tile)
-        self.assertIn("height: 54", tile)
+        self.assertIn("width: 62", tile)
+        self.assertIn("height: 62", tile)
         self.assertIn("SELF_TEST_PASS: approved icon matte cleaned only inside dock", self.main)
 
 

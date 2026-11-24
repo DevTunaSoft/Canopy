@@ -171,7 +171,12 @@ def compose_launch_outcome(
     """
     if type(app_id) is not str or DESKTOP_ID.fullmatch(app_id) is None:
         raise OutcomeInputError("invalid desktop application id")
-    if not isinstance(preview, AppLaunchPreview) or preview.status != PREVIEW_READY:
+    # Gate on the exact status label type before comparing it. A hostile str
+    # subclass could otherwise fake READY (claiming a false launch success on
+    # a denied preview) or leak a raw exception from an overridden __ne__.
+    if (not isinstance(preview, AppLaunchPreview)
+            or type(preview.status) is not str
+            or preview.status != PREVIEW_READY):
         raise OutcomeInputError("expected a ready AppLaunchPreview")
     if type(max_events) is not int or not 1 <= max_events <= MAX_EVENTS:
         raise OutcomeInputError("invalid event bound")

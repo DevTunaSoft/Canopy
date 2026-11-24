@@ -11,6 +11,7 @@ before luminance is meaningful.
 
 from __future__ import annotations
 
+import math
 import re
 from typing import NamedTuple
 
@@ -220,10 +221,35 @@ def contrast_ratio(foreground: str | Color, background: str | Color) -> float:
     return (light + 0.05) / (dark + 0.05)
 
 
+def _validate_ratio(value: float) -> float:
+    """Return a finite built-in ``float`` ratio or fail closed with ValueError.
+
+    ``wcag_level``/``meets_wcag`` are public and take a caller-supplied float.
+    Wrong-type values (strings, containers, complex numbers, bool, Decimal),
+    non-finite floats and oversized ints used to leak raw ``TypeError``,
+    ``InvalidOperation`` or ``OverflowError``; infinity even produced ``AAA``
+    and a false ``meets_wcag`` pass.  Validate before any level decision and
+    coerce to a plain float so a hostile numeric subclass cannot influence the
+    comparisons.  Thresholds and colour handling are unchanged.
+    """
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError("contrast ratio must be a finite real number")
+    try:
+        ratio = float(value)
+    except (OverflowError, TypeError, ValueError) as exc:
+        raise ValueError("contrast ratio must be a finite real number") from exc
+    if not math.isfinite(ratio) or ratio < 0:
+        raise ValueError("contrast ratio must be finite and non-negative")
+    return ratio
+
+
 def wcag_level(ratio: float, *, large_text: bool = False) -> str:
-    """Return the strongest WCAG text level met: ``AAA``, ``AA`` or ``FAIL``."""
-    if ratio < 0:
-        raise ValueError("contrast ratio cannot be negative")
+    """Return the strongest WCAG text level met: ``AAA``, ``AA`` or ``FAIL``.
+
+    A non-finite, negative or wrong-type ratio raises ``ValueError``; no pass
+    level is ever returned for such input.
+    """
+    ratio = _validate_ratio(ratio)
     if large_text:
         if ratio >= AAA_LARGE:
             return "AAA"

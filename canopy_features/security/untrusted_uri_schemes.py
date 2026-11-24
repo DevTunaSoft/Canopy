@@ -18,9 +18,13 @@ _SCHEME = re.compile(r"[A-Za-z][A-Za-z0-9+.-]*\Z")
 DEFAULT_ALLOWED_SCHEMES = frozenset({"http", "https", "mailto"})
 MAX_URI_CHARS = 2048
 
-# Control, line/paragraph separator and space-separator categories carry
-# CRLF injection and newline payloads (e.g. "https://x\njavascript:...").
-_UNSAFE_CATEGORIES = frozenset({"Cc", "Cf", "Zl", "Zp", "Zs"})
+# Every Unicode "Other" category (Cc/Cf/Cs/Co/Cn) plus line/paragraph and
+# space separators carries injection payloads or cannot be encoded safely.
+# Omitting Cs/Co/Cn let lone surrogates, noncharacters and private-use code
+# points pass the gate and raise a raw UnicodeEncodeError downstream.
+_UNSAFE_CATEGORIES = frozenset({
+    "Cc", "Cf", "Cs", "Co", "Cn", "Zl", "Zp", "Zs",
+})
 
 
 class UntrustedUriError(ValueError):

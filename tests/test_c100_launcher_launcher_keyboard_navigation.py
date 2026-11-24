@@ -131,6 +131,24 @@ class SearchSelectionTests(unittest.TestCase):
         self.assertEqual(
             nav.selected_item(nav.move_selection(no_focus, "next")), "alpha")
 
+    def test_duplicate_result_identifiers_are_rejected(self):
+        # make_grid() rejects duplicate identifiers for the same reason a
+        # selection must: with a repeated ID the focus index changes while
+        # selected_item() reports the same identifier, a false navigation-
+        # valid claim. Fail closed at the validating factory.
+        for results in (
+            ["alpha", "alpha", "beta"],
+            ["alpha", "beta", "alpha"],
+            ["alpha", "alpha"],
+        ):
+            with self.subTest(results=results), self.assertRaises(ValueError):
+                nav.make_selection(results)
+        # Distinct identifiers still select and navigate normally.
+        selection = nav.make_selection(["alpha", "beta", "alpha2"])
+        self.assertEqual(nav.selected_item(selection), "alpha")
+        self.assertEqual(
+            nav.selected_item(nav.move_selection(selection, "next")), "beta")
+
     def test_selection_validation_is_bounded(self):
         for results, query in (
             ([f"x{i}" for i in range(nav.MAX_ITEMS + 1)], ""),

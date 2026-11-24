@@ -130,6 +130,8 @@ def make_selection(results, query: str = "") -> SearchSelection:
         if not isinstance(result, str) or not result or len(result) > MAX_ID_LENGTH:
             raise ValueError("invalid result identifier")
         normalized.append(result)
+    if len(set(normalized)) != len(normalized):
+        raise ValueError("duplicate result identifier")
     return SearchSelection(
         results=tuple(normalized),
         index=0 if normalized else NO_FOCUS,

@@ -48,6 +48,8 @@ class MintSmokeError(ValueError):
 
 
 def _open_regular_file(path):
+    if Path(path).is_symlink():
+        raise MintSmokeError("file is missing or unsafe")
     flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
     try:
         descriptor = os.open(path, flags)

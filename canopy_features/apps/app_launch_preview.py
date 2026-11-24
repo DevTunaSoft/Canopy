@@ -116,7 +116,7 @@ def _deny(status, reason):
 
 
 def _argv_agrees(intent, policy):
-    """Check both sources describe the same shell-free argv without echoing."""
+    """Check both sources describe the same shell-free GIO argv without echoing."""
     argv = intent.argv
     if type(argv) is not tuple or len(argv) < 4:
         return False
@@ -124,6 +124,11 @@ def _argv_agrees(intent, policy):
         return False
     app_id = intent.selected_app_id
     if type(app_id) is not str or DESKTOP_ID.fullmatch(app_id) is None:
+        return False
+    # Matching lengths alone are not agreement: a wrong-shaped but same-length
+    # argv would let a false no_source_disagreement claim reach a READY record.
+    # Require the exact GIO prefix for the same selected app id the policy used.
+    if argv[:4] != ("gio", "launch", "--", app_id):
         return False
     return all(
         type(token) is str
@@ -142,11 +147,16 @@ def compose_app_launch_preview(
     intent summary; ``env_allow``/``env_source`` and the selected app id feed
     the launch policy snapshot. Neither source value is copied into the result.
     """
+    # A caller may hand in a bounded but hostile lazy iterable whose read
+    # raises an arbitrary built-in mid-consumption. This is the composition
+    # boundary: translate any source failure to the module's own denial rather
+    # than leak a raw exception to the host. BaseException (interrupt/exit) is
+    # deliberately not swallowed.
     try:
         intent = summarize_launcher_intent(
             query, catalog, favorites=favorites,
             allowed_app_ids=allowed_app_ids)
-    except (TypeError, ValueError):
+    except Exception:
         return _deny(STATUS_DENIED, REASON_INVALID_INPUT)
 
     if intent.status == INTENT_NO_MATCH:
@@ -163,7 +173,7 @@ def compose_app_launch_preview(
             intent.selected_app_id,
             allowed_app_ids=allowed_app_ids,
         )
-    except (TypeError, ValueError):
+    except Exception:
         return _deny(STATUS_DENIED, REASON_INVALID_INPUT)
     if policy.status != POLICY_APPROVED:
         return _deny(STATUS_DENIED, REASON_POLICY_DENIED)

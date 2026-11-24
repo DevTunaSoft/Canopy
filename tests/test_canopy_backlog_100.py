@@ -154,6 +154,24 @@ class PreparationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "contract has changed"):
             self._prepare()
 
+    def test_duplicate_json_object_keys_rejected_in_roadmap(self):
+        # A hostile-but-plausible generator may append a second ``depends_on``
+        # field without removing the default. json.loads keeps only the last
+        # duplicate key, silently erasing a real prerequisite and publishing an
+        # immediately-eligible task instead of a blocked one.
+        raw = (
+            '[{"id":"hostile-dep","title":"Valid title",'
+            '"objective":"A sufficiently long and valid objective text.",'
+            '"scope":["docs/hostile_dep.py"],'
+            '"depends_on":["previous-completed"],"depends_on":[]}]'
+        )
+        path = self.root / "roadmap.json"
+        state.atomic_write(path, raw)
+        before = path.read_bytes()
+        with self.assertRaisesRegex(ValueError, "duplicate JSON key"):
+            self._prepare()
+        self.assertEqual(path.read_bytes(), before)
+
     def test_128_task_ceiling_protects_existing_catalog(self):
         existing = [{
             "id": f"test-prior-{i:03d}", "title": "Existing task",

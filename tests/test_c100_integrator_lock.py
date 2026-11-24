@@ -100,6 +100,29 @@ class IntegratorLockTests(unittest.TestCase):
         with acquire(self.path, attempts=1) as handle:
             self.assertEqual(handle.token, read_lock(self.path)["token"])
 
+    def test_fresh_empty_lock_is_writer_starting_not_stale(self) -> None:
+        self.path.write_text("", encoding="utf-8")
+        state = lock_state(self.path)
+        self.assertEqual(state.status, "live")
+        self.assertEqual(state.reason, "lock_being_written")
+        cleared, reason = clear_stale_lock(self.path)
+        self.assertFalse(cleared)
+        self.assertEqual(reason, "live")
+        with self.assertRaises(LockHeld):
+            acquire(self.path, attempts=1)
+
+    def test_old_empty_lock_is_recoverable(self) -> None:
+        self.path.write_text("", encoding="utf-8")
+        old = time.time() - 10_000
+        os.utime(self.path, (old, old))
+        state = lock_state(self.path)
+        self.assertEqual(state.status, "stale")
+        self.assertEqual(state.reason, "pending_writer_dead")
+        cleared, _ = clear_stale_lock(self.path)
+        self.assertTrue(cleared)
+        with acquire(self.path) as handle:
+            self.assertEqual(handle.info["owner"], "integrator")
+
     def test_pid_reuse_guard(self) -> None:
         self.path.write_text(json.dumps({
             "pid": os.getpid(), "start": 1.0, "token": "reuse",

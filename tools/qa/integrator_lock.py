@@ -135,7 +135,9 @@ def read_lock(path: str | pathlib.Path) -> dict[str, Any] | None:
     except OSError:
         return {"malformed": True, "reason": "unreadable"}
     if not text:
-        return {"malformed": True, "reason": "empty"}
+        # O_CREAT|O_EXCL creates the file before its JSON is written. A fresh
+        # empty file means "writer still starting", not a corrupt stale lock.
+        return {"pending": True}
     if text.isdigit():
         return {"pid": int(text), "legacy": True}
     try:
@@ -151,6 +153,15 @@ def lock_state(path: str | pathlib.Path,
     info = read_lock(path)
     if info is None:
         return LockState("absent", None, "missing")
+    if info.get("pending"):
+        try:
+            mtime = datetime.datetime.fromtimestamp(
+                pathlib.Path(path).stat().st_mtime, datetime.timezone.utc)
+        except OSError:
+            return LockState("stale", info, "pending_unreadable")
+        if (_now() - mtime).total_seconds() <= stale_seconds:
+            return LockState("live", info, "lock_being_written")
+        return LockState("stale", info, "pending_writer_dead")
     if info.get("legacy"):
         if process_alive(info.get("pid")):
             return LockState("live", info, "legacy_live_owner")

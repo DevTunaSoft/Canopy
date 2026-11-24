@@ -167,8 +167,12 @@ def _check_decision(decision):
         raise AnnouncementInputError("expected a ShellActionDecision")
     if decision.status not in (DECISION_READY, STATUS_IDLE, STATUS_DENIED):
         raise AnnouncementInputError("unsupported decision status")
-    if decision.surface is not None and decision.surface not in _SURFACE_TOKENS:
-        raise AnnouncementInputError("unsupported decision surface")
+    if decision.surface is not None:
+        surface = decision.surface
+        # Reject unhashable/non-string surfaces before dict membership; the
+        # token-table lookup below would otherwise raise a raw TypeError.
+        if not isinstance(surface, str) or surface not in _SURFACE_TOKENS:
+            raise AnnouncementInputError("unsupported decision surface")
 
 
 def compose_focus_announcement(transition, view, decision, *, max_results=MAX_RESULTS):

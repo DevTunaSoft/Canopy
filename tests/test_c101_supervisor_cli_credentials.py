@@ -60,6 +60,14 @@ class CredentialArgumentTests(unittest.TestCase):
             PLACEHOLDER,
         )
 
+    def test_auth_json_never_falls_back_to_other_provider(self):
+        (self.base / "auth.json").write_text(json.dumps({
+            "opencode": {"access": 12345},
+            "other": {"access": PLACEHOLDER},
+        }), encoding="utf-8")
+        with self.assertRaises(credentials.CredentialError):
+            credentials.get_opencode_api_key(data_home=self.base)
+
 
 if __name__ == "__main__":
     unittest.main()

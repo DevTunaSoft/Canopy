@@ -143,9 +143,20 @@ def _validate_registrations(items, source):
     for item in iterable:
         if len(result) >= MAX_REGISTRATIONS:
             raise ShortcutConflictError("too many registrations")
-        if not isinstance(item, (tuple, list)) or len(item) != 2:
+        if not isinstance(item, (tuple, list)):
             raise ShortcutConflictError("registration must be an (action, sequence) pair")
-        action, sequence = item
+        # A hostile-but-bounded pair can lie about len() while yielding a
+        # different number of elements. Materialize the actual elements and
+        # check their count before unpacking: otherwise the gate leaks a raw
+        # ValueError instead of its documented domain error.
+        try:
+            pair = tuple(item)
+        except (TypeError, ValueError) as exc:
+            raise ShortcutConflictError(
+                "registration must be an (action, sequence) pair") from exc
+        if len(pair) != 2:
+            raise ShortcutConflictError("registration must be an (action, sequence) pair")
+        action, sequence = pair
         if type(action) is not str or not action.strip() or len(action) > MAX_ACTION_LENGTH:
             raise ShortcutConflictError("invalid or oversized action")
         result.append((source, action.strip(), normalize_sequence(sequence)))

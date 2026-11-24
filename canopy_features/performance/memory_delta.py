@@ -31,13 +31,15 @@ class MemorySample:
 def _validate_sample(sample):
     if not isinstance(sample, MemorySample):
         raise SampleError("sample must be a MemorySample")
-    if (type(sample.interaction) is not int
-            or not 0 <= sample.interaction <= MAX_INTERACTION):
+    interaction = sample.interaction
+    memory_kib = sample.memory_kib
+    if (type(interaction) is not int
+            or not 0 <= interaction <= MAX_INTERACTION):
         raise SampleError("interaction index out of bounded range")
-    if (type(sample.memory_kib) is not int
-            or not 0 <= sample.memory_kib <= MAX_MEMORY_KIB):
+    if (type(memory_kib) is not int
+            or not 0 <= memory_kib <= MAX_MEMORY_KIB):
         raise SampleError("memory_kib out of bounded range")
-    return sample
+    return MemorySample(interaction=interaction, memory_kib=memory_kib)
 
 
 def _percent(delta_kib, start_kib):
@@ -55,8 +57,8 @@ def delta(start, end):
         raise SampleError("missing start sample")
     if end is None:
         raise SampleError("missing end sample")
-    _validate_sample(start)
-    _validate_sample(end)
+    start = _validate_sample(start)
+    end = _validate_sample(end)
     if end.interaction < start.interaction:
         raise SampleError("end interaction precedes start interaction")
     change = end.memory_kib - start.memory_kib
@@ -83,8 +85,7 @@ def report_growth(samples, *, max_samples=MAX_SAMPLES):
         raise SampleError("missing start and end samples: no samples")
     if len(buffered) > max_samples:
         raise SampleError("sample count exceeds bound")
-    for sample in buffered:
-        _validate_sample(sample)
+    buffered = [_validate_sample(sample) for sample in buffered]
     if len(buffered) < 2:
         raise SampleError("missing end sample: need a start and an end reading")
     result = delta(buffered[0], buffered[-1])

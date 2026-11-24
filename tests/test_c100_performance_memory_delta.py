@@ -77,6 +77,21 @@ class MemoryDeltaTests(unittest.TestCase):
         with self.assertRaisesRegex(SampleError, "exceeds bound"):
             report_growth(many)
 
+    def test_hostile_rss_attribute_is_projected_once(self):
+        class VolatileSample(MemorySample):
+            def __getattribute__(self, name):
+                if name == "memory_kib":
+                    reads = getattr(self, "_reads", 0)
+                    object.__setattr__(self, "_reads", reads + 1)
+                    return (100, "bad-rss", 120)[min(reads, 2)]
+                return super().__getattribute__(name)
+
+        series = report_growth([VolatileSample(0, 100), sample(1, 120)])
+        self.assertEqual(series["start_kib"], 100)
+        self.assertEqual(series["delta_kib"], 20)
+        endpoints = delta(VolatileSample(0, 100), sample(1, 120))
+        self.assertEqual(endpoints["start_kib"], 100)
+
     def test_generator_of_samples_is_supported(self):
         result = report_growth(sample(i, 100 + i) for i in range(4))
         self.assertEqual(result["sample_count"], 4)

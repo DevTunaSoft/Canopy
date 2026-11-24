@@ -19,7 +19,7 @@ else:
         APPS, CENTERS, ComparisonError, _read_png
     )
 
-HALF = 27
+HALF = 31
 TARGET_RATIO = 0.83
 
 

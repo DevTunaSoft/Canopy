@@ -20,8 +20,18 @@ class RegistrationError(ValueError):
     pass
 
 
+def _home_path(home):
+    """Normalize a caller-supplied home, failing closed with a domain error."""
+    if isinstance(home, bool) or not isinstance(home, (str, os.PathLike)):
+        raise RegistrationError("home must be a string or path-like value")
+    try:
+        return Path(home)
+    except (TypeError, ValueError, OSError) as exc:
+        raise RegistrationError("home must be a string or path-like value") from exc
+
+
 def paths(home):
-    home = Path(home)
+    home = _home_path(home)
     folder = home / "canopy" / "classic-preview"
     return {
         "data": home,
@@ -111,8 +121,8 @@ def _marker(p):
 
 
 def status(home):
-    p = paths(home)
     try:
+        p = paths(home)
         _safe_folders(p)
     except RegistrationError:
         return "UNSAFE"

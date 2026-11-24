@@ -17,6 +17,7 @@ No background work, polling, file discovery or privileged action is performed.
 
 from dataclasses import dataclass
 import re
+import unicodedata
 from typing import Any, FrozenSet, Mapping
 
 from tools.check_shell_pack import (
@@ -39,6 +40,21 @@ MAX_NAME_CHARS = 80
 MAX_DESCRIPTION_CHARS = 240
 
 _CONTROL = re.compile(r"[\x00-\x1f\x7f]")
+
+# The ASCII-only control check misses bounded, hostile Unicode strings whose
+# code points cannot be encoded (Cs surrogates), are undefined (Cn
+# noncharacters), are private use (Co) or inject a line/paragraph break
+# (Zl/Zp). Such a string passes the gate, survives into the projected display
+# value and later raises a raw UnicodeEncodeError when written to a log or
+# shown in settings. Fail closed at the boundary instead.
+# Format characters (Cf) and ordinary spaces (Zs) are deliberately allowed:
+# ZWJ/ZWNJ are legitimate in many scripts and spaces are valid display text.
+_UNSAFE_UNICODE_CATEGORIES = frozenset({"Cs", "Co", "Cn", "Zl", "Zp"})
+
+
+def _has_unsafe_unicode(value: str) -> bool:
+    return any(unicodedata.category(char) in _UNSAFE_UNICODE_CATEGORIES
+               for char in value)
 
 # Executable-looking field names are rejected as keys, before any value is
 # read. An exact token between separators avoids false positives on valid
@@ -113,6 +129,8 @@ class SafePackMetadata:
 def _check_string(value: str) -> None:
     if _CONTROL.search(value):
         raise PackValidationError("control character in metadata value")
+    if _has_unsafe_unicode(value):
+        raise PackValidationError("unsafe unicode character in metadata value")
     if _URI.match(value):
         raise PackValidationError("URI in metadata value")
     if _TRAVERSAL.search(value):

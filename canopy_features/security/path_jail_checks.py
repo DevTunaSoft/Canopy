@@ -21,20 +21,31 @@ class PathJailError(ValueError):
     """Candidate path escapes its root or cannot be canonicalized."""
 
 
+def _safe_repr(value):
+    """repr() that cannot leak an exception from a hostile object."""
+    try:
+        return repr(value)
+    except Exception:
+        return f"<{type(value).__name__} with hostile repr>"
+
+
 def _as_path(value, label):
     """Return a str path argument, or fail closed with PathJailError.
 
     ``os.fspath`` already rejects non-path scalars and containers, but accepts
     ``bytes``; ``pathlib.Path`` then raises a raw ``TypeError`` that callers
     catching the module's domain error cannot contain. Reject bytes here so
-    every wrong-typed argument reaches callers as PathJailError.
+    every wrong-typed argument reaches callers as PathJailError. A hostile
+    ``PathLike`` may raise *any* exception from ``__fspath__`` (not just
+    TypeError), and an object may raise from ``repr()`` while we format the
+    domain error; neither may escape this boundary as a raw built-in error.
     """
     try:
         raw = os.fspath(value)
-    except TypeError as exc:
-        raise PathJailError(f"invalid {label}: {value!r}") from exc
+    except Exception as exc:
+        raise PathJailError(f"invalid {label}: {_safe_repr(value)}") from exc
     if isinstance(raw, bytes):
-        raise PathJailError(f"invalid {label} type: {value!r}")
+        raise PathJailError(f"invalid {label} type: {_safe_repr(value)}")
     return raw
 
 
@@ -95,11 +106,13 @@ def canonicalize(path, *, must_exist=False):
     raw = _as_path(path, "path")
     # Windows pathlib silently truncates at NUL; reject it at the boundary.
     if "\x00" in raw:
-        raise PathJailError(f"embedded NUL byte in path: {path!r}")
+        raise PathJailError(f"embedded NUL byte in path: {_safe_repr(path)}")
     try:
         return Path(raw).resolve(strict=must_exist)
     except (OSError, RuntimeError, ValueError) as exc:
-        raise PathJailError(f"cannot canonicalize path: {path!r}") from exc
+        raise PathJailError(
+            f"cannot canonicalize path: {_safe_repr(path)}"
+        ) from exc
 
 
 def is_contained(candidate, root, *, case_sensitive=None):
@@ -131,7 +144,7 @@ def resolve_within(root, candidate, *, must_exist=False, case_sensitive=None):
     """
     root_path = canonicalize(root, must_exist=True)
     if not root_path.is_dir():
-        raise PathJailError(f"root is not a directory: {root!r}")
+        raise PathJailError(f"root is not a directory: {_safe_repr(root)}")
 
     if candidate is None:
         candidate_path = root_path
@@ -146,5 +159,7 @@ def resolve_within(root, candidate, *, must_exist=False, case_sensitive=None):
 
     candidate_real = canonicalize(candidate_path, must_exist=must_exist)
     if not is_contained(candidate_real, root_path, case_sensitive=case_sensitive):
-        raise PathJailError(f"path escapes allowed root: {candidate!r}")
+        raise PathJailError(
+            f"path escapes allowed root: {_safe_repr(candidate)}"
+        )
     return candidate_real

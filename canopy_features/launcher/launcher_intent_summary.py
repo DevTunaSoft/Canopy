@@ -30,6 +30,11 @@ from canopy_features.launcher.app_search_ranking import RankedMatch, rank_applic
 MAX_QUERY_CHARS = 256
 MAX_CATALOG_ENTRIES = 1024
 MAX_FAVORITES = 16
+# Raw snapshots may contain extra duplicate or uninstalled ids, which are
+# hidden non-destructively (see test_favorites_are_deduplicated). Cap the raw
+# snapshot separately so a runaway iterable cannot be drained in full while
+# the kept-only bound below still governs visible favorites.
+MAX_FAVORITES_RAW = MAX_FAVORITES * 4
 
 STATUS_READY = "READY"
 STATUS_NO_MATCH = "NO_MATCH"
@@ -39,6 +44,7 @@ __all__ = [
     "MAX_QUERY_CHARS",
     "MAX_CATALOG_ENTRIES",
     "MAX_FAVORITES",
+    "MAX_FAVORITES_RAW",
     "STATUS_READY",
     "STATUS_NO_MATCH",
     "STATUS_NOT_APPROVED",
@@ -140,7 +146,14 @@ def _normalize_favorites(favorites, catalog_ids) -> Tuple[str, ...]:
     """Keep installed favorites in order; hide unknown ids non-destructively."""
     kept = []
     seen = set()
+    raw_count = 0
     for app_id in _iterable(favorites, "favorites"):
+        # Count EVERY supplied id, including unknown and duplicate ones. The
+        # old kept-only check let an unbounded stream of skipped ids drain in
+        # full before any bound was applied.
+        raw_count += 1
+        if raw_count > MAX_FAVORITES_RAW:
+            raise LauncherIntentError("favorites exceed entry bound")
         if type(app_id) is not str:
             raise LauncherIntentError("favorite must be a string")
         if app_id not in catalog_ids or app_id in seen:

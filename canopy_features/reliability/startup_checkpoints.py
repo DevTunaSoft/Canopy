@@ -176,6 +176,11 @@ class StartupCheckpoints:
                 or any(type(name) is not str or not NAME.fullmatch(name) for name in plan)
                 or len(set(plan)) != len(plan)):
             return "invalid startup plan in checkpoint"
+        # The caller's steps are the trusted plan. A structurally valid but
+        # foreign durable plan would otherwise let recover() report READY for
+        # steps this host never intended to run, skipping the real startup.
+        if plan != list(self._steps):
+            return "checkpoint plan differs from the trusted startup plan"
         if type(done) is not list or any(type(name) is not str for name in done):
             return "invalid completed list in checkpoint"
         if done != plan[:len(done)] or len(done) > len(plan):

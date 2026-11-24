@@ -211,6 +211,17 @@ class ClassicPreviewMenuTests(unittest.TestCase):
                     menu.paths(bad)
                 self.assertEqual(menu.status(bad), "UNSAFE")
 
+    def test_wrong_type_resources_use_domain_error(self):
+        for bad in (7, None, True, [], {}, b"bin"):
+            with self.subTest(value=repr(bad)):
+                with patch("tools.register_classic_preview._effective_uid",
+                           return_value=1000):
+                    with self.assertRaises(menu.RegistrationError):
+                        menu.install(self.home, bad)
+                    if bad is not None:
+                        with self.assertRaises(menu.RegistrationError):
+                            menu.install(self.home, self.binary, art=bad)
+
     def test_unknown_privilege_probe_fails_closed(self):
         with patch("tools.register_classic_preview._effective_uid", return_value=None):
             with self.assertRaisesRegex(menu.RegistrationError,

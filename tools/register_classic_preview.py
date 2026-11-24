@@ -140,12 +140,17 @@ def status(home):
 def _resource(obj, name, directory=False):
     if obj is None:
         return None
-    p = Path(obj)
+    message = name + " must be an existing absolute non-symlink path"
+    if isinstance(obj, bool) or not isinstance(obj, (str, os.PathLike)):
+        raise RegistrationError(message)
+    try:
+        p = Path(obj)
+    except (TypeError, ValueError, OSError) as exc:
+        raise RegistrationError(message) from exc
     if (not p.is_absolute() or p.is_symlink()
             or (not p.is_dir() if directory else not p.is_file())):
-        raise RegistrationError(name + " must be an existing absolute non-symlink path")
-    _require_real_path_components(
-        p, name + " must be an existing absolute non-symlink path")
+        raise RegistrationError(message)
+    _require_real_path_components(p, message)
     return str(p)
 
 
@@ -194,6 +199,9 @@ def install(home, binary, *, art=None, wallpaper=None, terminal=None, native_app
     if status(home) != "NOT_INSTALLED":
         raise RegistrationError("existing registration: refusing overwrite")
     exe = _resource(binary, "Canopy binary")
+    if exe is None:
+        raise RegistrationError(
+            "Canopy binary must be an existing absolute non-symlink path")
     if not os.access(exe, os.X_OK):
         raise RegistrationError("Canopy binary is not executable")
     art = _resource(art, "approved artwork", directory=True)

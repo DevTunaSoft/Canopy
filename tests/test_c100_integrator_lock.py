@@ -80,14 +80,17 @@ class IntegratorLockTests(unittest.TestCase):
         self.assertEqual(reason, "live")
 
     def test_naive_iso_heartbeat_does_not_crash_state_or_acquire(self) -> None:
+        # A live PID is required: a dead PID short-circuits before timestamp
+        # subtraction, which would hide the naive/aware datetime TypeError.
         self.path.write_text(json.dumps({
-            "pid": 999_999_999, "start": 1.0, "token": "naive",
-            "ts": "2026-11-24T18:00:00",
+            "pid": os.getpid(), "start": process_start_time(os.getpid()),
+            "token": "naive", "ts": "2026-11-24T18:00:00",
         }))
         state = lock_state(self.path)
         self.assertEqual(state.status, "stale")
-        with acquire(self.path, attempts=1) as handle:
-            self.assertEqual(handle.info["owner"], "integrator")
+        self.assertEqual(state.reason, "heartbeat_stale_but_process_alive")
+        with self.assertRaises(LockHeld):
+            acquire(self.path, attempts=1)
 
     def test_single_attempt_retries_after_clearing_stale_lock(self) -> None:
         self.path.write_text(json.dumps({

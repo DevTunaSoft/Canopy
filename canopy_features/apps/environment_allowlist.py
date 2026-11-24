@@ -16,6 +16,7 @@ parent environment today.
 
 Limits are fixed and small: no polling, no background work, bounded memory.
 """
+from collections.abc import Mapping
 import os
 import re
 
@@ -136,7 +137,7 @@ def build_environment(allow, source=None):
 
     if source is None:
         source = os.environ
-    if not hasattr(source, "__getitem__") or not hasattr(source, "__contains__"):
+    if not isinstance(source, Mapping):
         raise EnvironmentAllowlistError("source must be a mapping of variables")
 
     result = {}

@@ -863,7 +863,7 @@ int main(int argc, char *argv[]) {
             if (landscapeMode)
                 qInfo() << "SELF_TEST_PASS: validated custom landscape wallpaper loaded";
             else
-                qInfo() << "SELF_TEST_PASS: original SVG wallpaper image loaded";
+                qInfo() << "SELF_TEST_PASS: exact approved alpine lake master wallpaper loaded";
             const QPointF wallpaperOrigin = wallpaper->mapToItem(window->contentItem(), QPointF(0, 0));
             const bool wallpaperFits = qAbs(wallpaperOrigin.x()) <= 1
                 && qAbs(wallpaperOrigin.y()) <= 1
@@ -888,7 +888,7 @@ int main(int argc, char *argv[]) {
                 // unavailable on the runner. Full eight-icon QA runs locally.
                 // A successful icon decoder doesn't prove the dock looks aligned.
                 // Test all eight ACTUAL QML image rectangles in the running scene.
-                // Each 54px art slot must be centred on its 58x70px button,
+                // Each 62px art slot must be centred on its 66x76px button,
                 // and its button must be centered vertically inside the dock.
                 const QStringList names = approvedMode ? QStringList{
                     QStringLiteral("Browser"), QStringLiteral("Mail"),
@@ -922,7 +922,7 @@ int main(int argc, char *argv[]) {
                         iconStart.y() < 7 || iconStart.y() + art->height()
                              > dock->height() - 7 ||
                         tileStart.x() < previousRight ||
-                        art->width() < 50 || art->width() > 56 ||
+                        art->width() < 60 || art->width() > 64 ||
                         art->height() != art->width()) {
                         qCritical() << "SELF_TEST_FAIL: dock icon optical alignment"
                                     << name << "image" << iconStart << art->size()
@@ -935,7 +935,7 @@ int main(int argc, char *argv[]) {
                 }
                 qInfo() << "SELF_TEST_PASS: dock icons horizontally/vertically centred"
                         << "count" << names.size()
-                        << "with equal 54px art slots and 7px minimum dock insets";
+                        << "with equal 62px art slots and 7px minimum dock insets";
             }
             if (!wallpaperFits || dockTileCount != (approvedMode ? 8 : 6)) {
                 qCritical() << "SELF_TEST_FAIL: wallpaper bounds or dock icon count invalid"

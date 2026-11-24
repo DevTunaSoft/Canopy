@@ -4,7 +4,9 @@
 application is present. This module checks the filesystem alone. It never
 starts a process, opens a shell, polls, keeps state, or walks without a bound.
 Bare names are resolved against an explicit PATH (or the process PATH) with
-``shutil.which``; absolute paths are checked directly.
+``shutil.which``; absolute paths are checked directly. An explicit PATH never
+picks up the current directory, and a relative path-looking TryExec value
+cannot bypass that PATH.
 """
 from __future__ import annotations
 
@@ -14,6 +16,44 @@ import stat
 from typing import Any, Mapping
 
 __all__ = ["is_tryexec_available", "tryexec_available_for_entry"]
+
+
+def _is_absolute_path(value: str) -> bool:
+    """Reject drive-relative and root-only paths as well as plain relative ones."""
+    if not os.path.isabs(value):
+        return False
+    if os.name == "nt":
+        drive, _ = os.path.splitdrive(value)
+        # "\\tool" is absolute on Windows only because it inherits the
+        # current drive, which an explicit search path must not supply.
+        return bool(drive)
+    return True
+
+
+def _resolve_in_explicit_path(candidate: str, search_path: str) -> str | None:
+    """Resolve a bare name using only the caller's PATH entries.
+
+    ``shutil.which`` prepends the current directory to an explicit PATH on
+    Windows, and PATH may contain an empty (cwd) entry on either platform.
+    Search each entry separately and accept a hit only when it really lives
+    under that entry, so cwd files cannot answer an isolated probe.
+    """
+    for entry in search_path.split(os.pathsep):
+        if not entry:
+            continue
+        # Joining first gives which() a directory component, so it cannot
+        # inject "." ahead of the explicit entry on Windows.
+        resolved = shutil.which(os.path.join(entry, candidate))
+        if resolved is None:
+            continue
+        base = os.path.abspath(entry)
+        try:
+            if os.path.commonpath((base, os.path.abspath(resolved))) == base:
+                return resolved
+        except ValueError:
+            # Different Windows drives have no common path.
+            continue
+    return None
 
 
 def is_tryexec_available(
@@ -54,7 +94,17 @@ def is_tryexec_available(
     # still short-circuit above and ignore search_path.
     if search_path is not None and not isinstance(search_path, str):
         raise TypeError("search_path must be a string or None")
-    resolved = shutil.which(candidate, path=search_path)
+    # A value with a directory component is a path, not a command name. Only
+    # a truly absolute path may bypass search_path; drive-relative and
+    # "./tool" values would otherwise consult the current directory.
+    drive, _ = os.path.splitdrive(candidate)
+    if (os.path.dirname(candidate) or drive) and not _is_absolute_path(candidate):
+        return False
+    resolved = (
+        _resolve_in_explicit_path(candidate, search_path)
+        if search_path is not None and not os.path.dirname(candidate)
+        else shutil.which(candidate, path=search_path)
+    )
     if resolved is None:
         return False
     try:

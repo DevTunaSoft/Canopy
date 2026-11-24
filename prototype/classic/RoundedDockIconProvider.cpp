@@ -69,7 +69,7 @@ const QHash<QString, QPair<int, int>> kSourceMatteRowTrim = {
 const QHash<QString, QPointF> kFiveDockCenterOffsets = {
     {QStringLiteral("browser"), QPointF(0, -8)},
     {QStringLiteral("mail"), QPointF(2, 0)},
-    {QStringLiteral("files"), QPointF(-11, -1)},
+    {QStringLiteral("files"), QPointF(-9, -1)},
     {QStringLiteral("terminal"), QPointF(-8, -3)},
     {QStringLiteral("settings"), QPointF(-8, -5)},
 };

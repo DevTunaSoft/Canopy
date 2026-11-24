@@ -175,18 +175,60 @@ def _portal_view(report):
         raise SnapshotError("portal report must not claim window enumeration")
     if type(report.capabilities) is not tuple:
         raise SnapshotError("portal capabilities must be a tuple")
+    # The summary sets drive status derivation, but the per-capability entries
+    # are the only evidence for them. A bounded report whose summary claims a
+    # granted portal while its details record a denial/missing portal would
+    # otherwise compose as boot-ready; cross-check before any record is built.
+    detail = {"usable": set(), "denied": set(), "missing": set(),
+              "unknown_permission": set()}
+    seen = set()
     for capability in report.capabilities:
         if not isinstance(capability, PortalCapability):
             raise SnapshotError("capabilities must hold PortalCapability entries")
+        capability_id = capability.capability
+        if type(capability_id) is not str or capability_id not in PORTAL_IDS:
+            raise SnapshotError("unknown portal capability id in capabilities")
+        if capability_id in seen:
+            raise SnapshotError("duplicate portal capability entry")
+        seen.add(capability_id)
+        if capability.interface != PORTAL_INTERFACES[capability_id]:
+            raise SnapshotError("portal capability interface disagrees with id")
+        status = capability.status
+        if type(status) is not str:
+            raise SnapshotError("portal capability status must be a string")
+        usable = _flag(capability.usable, "portal capability usable flag")
+        if status == "available":
+            if not usable:
+                raise SnapshotError("usable flag disagrees with available status")
+            detail["usable"].add(capability_id)
+        elif status in ("permission-denied", "portal-missing",
+                        "permission-unknown", "not-wayland"):
+            if usable:
+                raise SnapshotError("usable flag disagrees with capability status")
+            if status != "not-wayland":
+                detail[{"permission-denied": "denied",
+                        "portal-missing": "missing",
+                        "permission-unknown": "unknown_permission"}[status]
+                       ].add(capability_id)
+        else:
+            raise SnapshotError("unsupported portal capability status")
+    usable = _portal_ids(report.usable, "usable")
+    denied = _portal_ids(report.denied, "denied")
+    missing = _portal_ids(report.missing, "missing")
+    unknown = _portal_ids(report.unknown_permission, "unknown_permission")
+    if (usable != tuple(sorted(detail["usable"]))
+            or denied != tuple(sorted(detail["denied"]))
+            or missing != tuple(sorted(detail["missing"]))
+            or unknown != tuple(sorted(detail["unknown_permission"]))):
+        raise SnapshotError("portal summary sets disagree with capability details")
     return PortalView(
         session_type=session,
         wayland=wayland,
         window_enumeration=WINDOW_ENUMERATION,
-        usable=_portal_ids(report.usable, "usable"),
-        denied=_portal_ids(report.denied, "denied"),
-        missing=_portal_ids(report.missing, "missing"),
-        unknown_permission=_portal_ids(report.unknown_permission,
-                                        "unknown_permission"),
+        usable=usable,
+        denied=denied,
+        missing=missing,
+        unknown_permission=unknown,
     )
 
 

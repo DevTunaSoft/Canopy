@@ -105,6 +105,16 @@ class SearchSelectionTests(unittest.TestCase):
         stale = nav.SearchSelection(results=("only",), index=-99)
         self.assertEqual(nav.selected_item(stale), "only")
 
+    def test_no_focus_selection_never_claims_an_item(self):
+        # NO_FOCUS is the module's explicit "nothing active" sentinel. A
+        # selection carrying it alongside results must not report a selected
+        # identifier: that is a false navigation-valid claim. An actual
+        # navigation may still select the first result afterwards.
+        no_focus = nav.SearchSelection(results=("alpha", "beta"), index=nav.NO_FOCUS)
+        self.assertIsNone(nav.selected_item(no_focus))
+        self.assertEqual(
+            nav.selected_item(nav.move_selection(no_focus, "next")), "alpha")
+
     def test_selection_validation_is_bounded(self):
         for results, query in (
             ([f"x{i}" for i in range(nav.MAX_ITEMS + 1)], ""),

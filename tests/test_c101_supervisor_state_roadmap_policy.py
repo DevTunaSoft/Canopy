@@ -75,5 +75,22 @@ class CampaignEvidenceTypeGuardTests(unittest.TestCase):
         self.assertEqual(self._campaign({"tests": [{"result": "NOT RUN"}]}), "blocked")
 
 
+class BoundedEventHistoryTests(unittest.TestCase):
+    def test_event_history_is_bounded(self):
+        from canopy_supervisor import state
+        from canopy_supervisor.state import TaskStore
+
+        cap = state.MAX_HISTORY_EVENTS
+        store = TaskStore(Path(tempfile.mkdtemp()))
+        for i in range(cap + 4):
+            store.event("task-001", "tick", "n=%d" % i)
+        lines = store.history_path.read_text(encoding="utf-8").splitlines()
+        self.assertLessEqual(len(lines), cap)
+        recent = store.recent_events(3)
+        self.assertEqual(len(recent), 3)
+        self.assertEqual([row["message"] for row in recent],
+                         ["n=%d" % (cap + 3), "n=%d" % (cap + 2), "n=%d" % (cap + 1)])
+
+
 if __name__ == "__main__":
     unittest.main()

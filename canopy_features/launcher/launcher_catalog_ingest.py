@@ -12,6 +12,7 @@ No id, title or category value is copied into ``to_dict``, so untrusted text
 cannot reach a log or a host bridge through the diagnostic view.
 """
 from dataclasses import dataclass
+import unicodedata
 from typing import Tuple
 
 from canopy_features.apps.launch_argv import DESKTOP_ID
@@ -20,6 +21,12 @@ from canopy_features.launcher.desktop_entry_parser import DesktopEntry
 MAX_ENTRIES = 1024
 MAX_TITLE_CHARS = 256
 MAX_CATEGORY_TOKENS = 64
+
+# Display text can hide or re-order a title when the launcher renders it, and
+# C0 separators (0x1c-0x1f) are silently eaten by str.strip(). Reject every
+# control/format/noncharacter scalar before a title reaches the host bridge;
+# Zs (ordinary spacing) is deliberately allowed.
+_UNSAFE_UNICODE_CATEGORIES = frozenset({"Cc", "Cf", "Cs", "Co", "Cn", "Zl", "Zp"})
 
 CLAIM_NO_FILESYSTEM_IO = "no_filesystem_io"
 CLAIM_NO_PROCESS_LAUNCH = "no_process_launch"
@@ -102,7 +109,8 @@ def _check_title(title):
         title.encode("utf-8", "strict")
     except UnicodeError:
         raise CatalogIngestError("application title is not valid Unicode") from None
-    if any(ord(char) < 0x20 or ord(char) == 0x7f for char in title):
+    if any(unicodedata.category(char) in _UNSAFE_UNICODE_CATEGORIES
+           for char in title):
         raise CatalogIngestError("application title contains a control character")
 
 

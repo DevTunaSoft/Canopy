@@ -20,8 +20,17 @@ class WorkerError(RuntimeError):
     """Worker could not be started or configured."""
 
 
+def _valid_pid(pid) -> bool:
+    """Only a positive plain int can name a worker launched by this instance."""
+    return type(pid) is int and pid > 0
+
+
 def redact(text: str) -> str:
     """Remove ANSI escapes and known credential shapes from worker output."""
+    # Fail closed: a wrong-typed log fragment is never passed through or
+    # allowed to crash the launcher's bounded log write.
+    if not isinstance(text, str):
+        return "[REDACTED]"
     clean = ANSI.sub("", text)
     for pattern in SECRETS:
         clean = pattern.sub("[REDACTED]", clean)
@@ -101,6 +110,9 @@ class WorkerLauncher:
         return environment
 
     def launch(self, task: dict, worker_id: str, worktree: Path, log_path: Path) -> int:
+        # Bounded lifecycle: drop handles from workers that already exited
+        # before retaining another one. No process is signalled here.
+        self.prune_finished()
         worktree, log_path = Path(worktree), Path(log_path)
         if not worktree.is_dir():
             raise WorkerError("worktree missing: " + str(worktree))
@@ -127,8 +139,17 @@ class WorkerLauncher:
         self._processes[process.pid] = process
         return process.pid
 
+    def prune_finished(self) -> None:
+        """Poll known handles and release the ones that already exited."""
+        for pid in tuple(self._processes):
+            self.poll(pid)
+
+    def close(self) -> None:
+        """Deterministically drop every launcher handle (no process signal)."""
+        self._processes.clear()
+
     def knows(self, pid: int) -> bool:
-        return pid in self._processes
+        return _valid_pid(pid) and pid in self._processes
 
     def poll(self, pid: int) -> int | None:
         """Return the real exit code for a process launched by this instance.
@@ -136,6 +157,9 @@ class WorkerLauncher:
         After a restart the OS handle is gone. Returning None is deliberate:
         the supervisor requeues such tasks instead of guessing their result.
         """
+        if not _valid_pid(pid):
+            # Wrong-type or non-positive PIDs are unknown, never a crash.
+            return None
         process = self._processes.get(pid)
         if process is None:
             return None

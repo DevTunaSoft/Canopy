@@ -4,6 +4,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import threading
@@ -80,7 +81,18 @@ class Supervisor:
     def assignable(self, task: dict, tasks: list[dict]) -> bool:
         if task.get("status") != "queued":
             return False
-        if self.now() < float(task.get("next_attempt_at", 0)):
+        scheduled = task.get("next_attempt_at", 0)
+        # Persisted state may be wrong-typed or non-finite; fail closed rather
+        # than letting a crash stop the loop or a NaN look immediately due.
+        if isinstance(scheduled, bool):
+            return False
+        try:
+            next_attempt = float(scheduled)
+        except (TypeError, ValueError, OverflowError):
+            return False
+        if not math.isfinite(next_attempt):
+            return False
+        if self.now() < next_attempt:
             return False
         if task.get("attempts", 0) >= task.get("max_attempts", self.config["max_attempts"]):
             return False
@@ -109,8 +121,16 @@ class Supervisor:
 
     @staticmethod
     def backoff(attempts: int) -> float:
-        """Exponential delay, capped at five minutes."""
-        return min(300.0, 30.0 * (2 ** max(0, attempts - 1)))
+        """Exponential delay, capped at five minutes.
+
+        Wrong-typed or non-positive attempt counts fail closed at the maximum
+        delay, and the exponent itself is capped so a corrupted counter cannot
+        request an unbounded integer allocation.
+        """
+        if isinstance(attempts, bool) or not isinstance(attempts, int) \
+                or attempts < 1:
+            return 300.0
+        return min(300.0, 30.0 * (2 ** min(attempts - 1, 4)))
 
     # ---------- worktree and recovery ----------
 
@@ -643,6 +663,12 @@ class Supervisor:
                 with state_module.exclusive_lock(self.store.lock_path):
                     self.shutdown()
                 self.store.stop_path.unlink(missing_ok=True)
+            else:
+                # A one-shot or bounded run must not signal workers, but it
+                # still has to drop in-process launcher handles on return.
+                close = getattr(self.launcher, "close", None)
+                if callable(close):
+                    close()
         return self.store.load()
 
     def shutdown(self) -> None:
@@ -656,6 +682,10 @@ class Supervisor:
                                      "supervisor stopped before task finished",
                                      owner=None, pid=None, lease_expires_at=0.0)
                 self.store.event(task["id"], "shutdown", "checkpoint saved", level="WARN")
+        # Release in-process worker handles after OS PIDs were terminated.
+        close = getattr(self.launcher, "close", None)
+        if callable(close):
+            close()
         self.store.save(data)
         self.store.write_dashboard(data, self.config)
         self.store.event("-", "supervisor_stop")

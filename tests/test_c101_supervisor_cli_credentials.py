@@ -1,4 +1,5 @@
 """Regression tests for fail-closed credential argument handling (SYNTHETIC)."""
+import json
 import os
 import tempfile
 import unittest
@@ -48,6 +49,16 @@ class CredentialArgumentTests(unittest.TestCase):
                 with self.assertRaises(credentials.CredentialError) as caught:
                     credentials.get_opencode_api_key(data_home=value)
                 self.assertNotIn(PLACEHOLDER, str(caught.exception))
+
+    def test_auth_json_prefers_opencode_provider(self):
+        (self.base / "auth.json").write_text(json.dumps({
+            "other": {"access": "INERT_OTHER"},
+            "opencode": {"access": PLACEHOLDER},
+        }), encoding="utf-8")
+        self.assertEqual(
+            credentials.get_opencode_api_key(data_home=self.base),
+            PLACEHOLDER,
+        )
 
 
 if __name__ == "__main__":

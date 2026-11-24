@@ -180,10 +180,19 @@ def _startup_view(decision):
         raise SnapshotError("unsupported recovery action")
     if type(decision.completed) is not tuple or type(decision.unwind) is not tuple:
         raise SnapshotError("completed and unwind steps must be tuples")
+    safe_to_start = _flag(decision.safe_to_start, "safe_to_start")
+    needs_rollback = _flag(decision.needs_rollback, "needs_rollback")
+    # These flags are derived, not independent: a safe action never carries
+    # unwind steps, and a rollback action is never safe to start. Trusting a
+    # hostile-but-bounded override here could publish a false ready claim.
+    if safe_to_start != (action in (START_FRESH, READY)):
+        raise SnapshotError("safe_to_start disagrees with recovery action")
+    if needs_rollback != bool(decision.unwind):
+        raise SnapshotError("needs_rollback disagrees with unwind steps")
     return StartupView(
         action=action,
-        safe_to_start=_flag(decision.safe_to_start, "safe_to_start"),
-        needs_rollback=_flag(decision.needs_rollback, "needs_rollback"),
+        safe_to_start=safe_to_start,
+        needs_rollback=needs_rollback,
         completed_count=len(decision.completed),
         unwind_count=len(decision.unwind),
         reason=_bounded_text(decision.reason, "recovery reason"),

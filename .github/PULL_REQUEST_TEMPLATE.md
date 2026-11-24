@@ -5,7 +5,7 @@ What does this PR change? What does it deliberately **not** change?
 ## Why and integration
 
 Related issue(s): #
-Base branch: `main` or explicitly documented stacked branch:
+Base branch: `main`, `integration/canopy-classic-20261123`, or explicitly documented stacked branch:
 Dependencies on other PRs:
 
 ## Verification (actual evidence, not estimates)

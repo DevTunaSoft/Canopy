@@ -19,6 +19,8 @@ observation claim: acceptance is always ``NOT_ESTABLISHED`` and observation
 always ``NOT_PERFORMED``.
 
 The status describes only the supplied state, never a running desktop.
+Hard close refusals anywhere in the supplied decision history block the
+record even when those entries fall outside the embedded decision cap.
 """
 from dataclasses import dataclass
 from types import MappingProxyType
@@ -161,24 +163,30 @@ def _close_view(model, decisions):
         raise SnapshotError("close must be a CloseIntentModel")
     if type(decisions) not in (tuple, list):
         raise SnapshotError("close decisions must be a sequence")
-    window_ids, statuses, visible_flags, notes = [], [], [], []
-    for decision in decisions[-MAX_DECISIONS:]:
+    # Validate the whole supplied history and remember any hard refusal: the
+    # embedded view is capped, but a refusal outside that cap still blocks.
+    blocking = False
+    for decision in decisions:
         if not isinstance(decision, IntentResult):
             raise SnapshotError("close decisions must hold IntentResult values")
-        window_id = _bounded_text(decision.window_id, "close window id")
-        if not window_id or len(window_id) > MAX_ID_LENGTH:
-            raise SnapshotError("close window id is empty or too long")
         status = _text(decision.status, "close decision status")
         if status not in CLOSE_STATUSES:
             raise SnapshotError("unknown close decision status")
+        if status in BLOCKING_CLOSE:
+            blocking = True
+    window_ids, statuses, visible_flags, notes = [], [], [], []
+    for decision in decisions[-MAX_DECISIONS:]:
+        window_id = _bounded_text(decision.window_id, "close window id")
+        if not window_id or len(window_id) > MAX_ID_LENGTH:
+            raise SnapshotError("close window id is empty or too long")
         visible = decision.visible
         if visible is not None and type(visible) is not bool:
             raise SnapshotError("close visible flag must be bool or None")
         window_ids.append(window_id)
-        statuses.append(status)
+        statuses.append(decision.status)
         visible_flags.append(visible)
         notes.append(_bounded_text(decision.note, "close decision note"))
-    return CloseView(
+    view = CloseView(
         registered_count=_count(model.window_count, "registered window count"),
         decision_count=len(decisions),
         window_ids=tuple(window_ids),
@@ -186,6 +194,7 @@ def _close_view(model, decisions):
         visible_flags=tuple(visible_flags),
         notes=tuple(notes),
     )
+    return view, blocking
 
 
 def _switcher_view(state):
@@ -241,13 +250,15 @@ def _focus_view(broker, policy):
     )
 
 
-def _derive_status(close, switcher, focus):
+def _derive_status(close, switcher, focus, close_blocking):
     # A hard close refusal (unknown window, ownership denial or owner guard)
-    # or a failed focus decision blocks the record. A parked/reopened window,
-    # soft no-ops, cross-app grants, any decision history or no tracked window
-    # is attention-worthy but still a usable snapshot. This status describes
-    # only the supplied state; there is no acceptance field to flip.
-    if (any(status in BLOCKING_CLOSE for status in close.statuses)
+    # anywhere in the supplied decision history, or a failed focus decision,
+    # blocks the record even when older entries fall outside the embedded cap.
+    # A parked/reopened window, soft no-ops, cross-app grants, any embedded
+    # decision history or no tracked window is attention-worthy but still a
+    # usable snapshot. This status describes only the supplied state; there is
+    # no acceptance field to flip.
+    if (close_blocking
             or any(status in FOCUS_FAILURE for status in focus.recent_statuses)):
         return STATUS_BLOCKED
     if (close.statuses or focus.recent_statuses
@@ -261,16 +272,18 @@ def compose(close_model, switcher, focus, decisions=(), policy=None):
 
     ``decisions`` is the bounded tuple/list of ``IntentResult`` values emitted
     by the close model; only the most recent ``MAX_DECISIONS`` entries are
-    embedded. ``policy`` is optional. Every component is validated before any
-    record is built, so a rejected input raises ``SnapshotError`` without a
-    partial result. The source objects are never mutated.
+    embedded, but a hard refusal anywhere in the supplied history still makes
+    the status ``BLOCKED``. ``policy`` is optional. Every component is validated
+    before any record is built, so a rejected input raises ``SnapshotError``
+    without a partial result. The source objects are never mutated.
     """
-    close_view = _close_view(close_model, decisions)
+    close_view, close_blocking = _close_view(close_model, decisions)
     switcher_view = _switcher_view(switcher)
     focus_view = _focus_view(focus, policy)
     return CloseLifecycleSnapshot(
         schema=SCHEMA,
-        status=_derive_status(close_view, switcher_view, focus_view),
+        status=_derive_status(close_view, switcher_view, focus_view,
+                              close_blocking),
         acceptance=ACCEPTANCE_NOT_ESTABLISHED,
         observation=OBSERVATION_NOT_PERFORMED,
         close=close_view,

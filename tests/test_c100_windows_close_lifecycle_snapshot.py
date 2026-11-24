@@ -169,6 +169,29 @@ class CloseLifecycleSnapshotTests(unittest.TestCase):
                 self.assertEqual(record.status, _m().STATUS_BLOCKED)
                 self.assertTrue(record.is_blocked)
 
+    def test_blocking_decision_beyond_embedding_cap_still_blocks(self):
+        # The record embeds only the newest MAX_DECISIONS entries, but a hard
+        # refusal in the supplied history must still decide the status.
+        for status in (close.UNKNOWN_WINDOW, close.OWNERSHIP_DENIED,
+                       close.GUARDED):
+            with self.subTest(status=status):
+                blocking = close.IntentResult("files.win", status, None,
+                                              close.NO_STATE, "")
+                soft = tuple(
+                    close.IntentResult("w%d.win" % i, close.CLOSED, False,
+                                       close.NO_STATE, "")
+                    for i in range(_m().MAX_DECISIONS))
+                decisions = (blocking,) + soft
+                record = _m().compose(_close_model(), _switcher(),
+                                      _quiet_focus(), decisions)
+                self.assertEqual(record.close.decision_count,
+                                 _m().MAX_DECISIONS + 1)
+                self.assertEqual(len(record.close.statuses),
+                                 _m().MAX_DECISIONS)
+                self.assertNotIn(status, record.close.statuses)
+                self.assertEqual(record.status, _m().STATUS_BLOCKED)
+                self.assertTrue(record.is_blocked)
+
     def test_status_blocked_for_focus_failure(self):
         broker = focus.FocusBroker(lambda *_: False)
         ref = broker.register_window("files", 10)

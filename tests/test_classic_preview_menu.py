@@ -204,6 +204,13 @@ class ClassicPreviewMenuTests(unittest.TestCase):
                 with self.assertRaises(menu.RegistrationError):
                     menu._quote(bad)
 
+    def test_wrong_type_home_uses_domain_error(self):
+        for bad in (None, 7, True, [], {}, b"/tmp"):
+            with self.subTest(value=repr(bad)):
+                with self.assertRaises(menu.RegistrationError):
+                    menu.paths(bad)
+                self.assertEqual(menu.status(bad), "UNSAFE")
+
     def test_unknown_privilege_probe_fails_closed(self):
         with patch("tools.register_classic_preview._effective_uid", return_value=None):
             with self.assertRaisesRegex(menu.RegistrationError,

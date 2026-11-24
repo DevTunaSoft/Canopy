@@ -126,9 +126,17 @@ def prepare_wave(root: Path) -> int:
         if not store.paused:
             raise ValueError("supervisor must be paused before preparing a wave")
         data = store.load()
-        active = [t["id"] for t in data["tasks"]
-                  if t.get("status") in ("assigned", "running",
-                                         "verifying", "publishing", "interrupted")]
+        ledger = []
+        for row in data["tasks"]:
+            if not isinstance(row, dict):
+                raise ValueError("invalid task record in ledger")
+            task_id = row.get("id")
+            if not isinstance(task_id, str) or not task_id:
+                raise ValueError("invalid or missing task id in ledger")
+            ledger.append((task_id, row.get("status")))
+        active = [task_id for task_id, status in ledger
+                  if status in ("assigned", "running",
+                                "verifying", "publishing", "interrupted")]
         if active:
             raise ValueError("active work must finish first: " + ", ".join(active))
         repo = Path(config["repo"])
@@ -146,10 +154,15 @@ def prepare_wave(root: Path) -> int:
             # catalog containing *only* these next-wave jobs. Old task state,
             # evidence and draft PRs are preserved in tasks.json.
             catalog = []
-        by_id = {row.get("id"): row for row in catalog if isinstance(row, dict)}
-        if len(by_id) != len(catalog):
-            raise ValueError("invalid or duplicate IDs in existing roadmap")
-        known_ids = {t["id"] for t in data["tasks"]}
+        by_id = {}
+        for row in catalog:
+            if not isinstance(row, dict):
+                raise ValueError("invalid or duplicate IDs in existing roadmap")
+            task_id = row.get("id")
+            if not isinstance(task_id, str) or not task_id or task_id in by_id:
+                raise ValueError("invalid or duplicate IDs in existing roadmap")
+            by_id[task_id] = row
+        known_ids = {task_id for task_id, _ in ledger}
         additions = []
         for task in TASKS:
             safe = policy.validate_task(task, config["protected_paths"])

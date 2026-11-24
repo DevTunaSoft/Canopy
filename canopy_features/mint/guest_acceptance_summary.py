@@ -68,7 +68,11 @@ class SummaryError(ValueError):
 
 
 def _text(value, field, limit):
-    if not isinstance(value, str) or not value or len(value) > limit:
+    # Require an exact str: isinstance() admits a str subclass whose __eq__ or
+    # __hash__ can impersonate an allowlisted gate (or whose __len__ can hide
+    # an oversized value), turning a hostile label into a trusted evidence
+    # record. Bounded labels are plain text only.
+    if type(value) is not str or not value or len(value) > limit:
         raise SummaryError("invalid " + field)
     return value
 
@@ -124,7 +128,10 @@ def compose(command_results):
             raise SummaryError("gate does not match command")
         excerpt = _text(record["output_excerpt"], "output_excerpt", MAX_EXCERPT_CHARS)
         result = record["result"]
-        if not isinstance(result, str) or result not in RESULT_STATUSES:
+        # Exact str only: a str subclass can compare equal to PASS while
+        # still matching SKIP_STATUSES, which used to put one gate in both
+        # passed_gates and skipped_gates (a false acceptance claim).
+        if type(result) is not str or result not in RESULT_STATUSES:
             raise SummaryError("unknown command result status")
         _corroborates(gate, result, excerpt)
         if gate in by_gate:

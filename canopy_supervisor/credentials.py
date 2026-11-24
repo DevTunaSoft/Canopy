@@ -12,6 +12,7 @@ import sqlite3
 
 
 MAX_CREDENTIAL_BLOB_BYTES = 65536
+MAX_AUTH_FILE_BYTES = 262144
 
 
 class CredentialError(RuntimeError):
@@ -51,6 +52,8 @@ def get_opencode_api_key(explicit: str | None = None, data_home: Path | None = N
     auth_file = base / "auth.json"
     if auth_file.is_file():
         try:
+            if auth_file.stat().st_size > MAX_AUTH_FILE_BYTES:
+                raise ValueError("auth file too large")
             raw = json.loads(auth_file.read_text(encoding="utf-8"))
             if isinstance(raw, dict) and "opencode" in raw:
                 provider = raw["opencode"]

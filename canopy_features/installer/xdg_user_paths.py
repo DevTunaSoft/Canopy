@@ -8,6 +8,7 @@ The XDG data-home resolver and the root-refusal policy are reused from the
 existing ``tools.register_classic_preview`` installer rather than duplicated.
 """
 import os
+from collections.abc import Mapping
 from pathlib import Path
 
 from tools import register_classic_preview as _menu
@@ -34,8 +35,32 @@ def _refuse_root():
         raise UnsafeXdgPath(str(exc)) from None
 
 
+def _path_text(value, message):
+    """Return the string form of a path-shaped caller value, or fail closed.
+
+    ``pathlib.Path`` raises a bare ``TypeError`` for ints, containers, bytes
+    and for a ``__fspath__`` that returns a non-str.  Every path-shaped input
+    of this module is documented to raise :class:`UnsafeXdgPath` instead, so
+    gate the conversion once here and reuse it at every entry point.
+    """
+    if not isinstance(value, (str, os.PathLike)):
+        raise UnsafeXdgPath(message)
+    try:
+        text = os.fspath(value)
+    except (TypeError, ValueError):
+        raise UnsafeXdgPath(message) from None
+    if not isinstance(text, str):
+        raise UnsafeXdgPath(message)
+    if "\x00" in text:
+        raise UnsafeXdgPath("path contains a null byte")
+    return text
+
+
 def _home(home):
-    h = Path(home) if home is not None else Path.home()
+    if home is None:
+        h = Path.home()
+    else:
+        h = Path(_path_text(home, "home must be a path"))
     if not h.is_absolute():
         raise UnsafeXdgPath("home must be absolute")
     return Path(os.path.normpath(str(h)))
@@ -68,9 +93,21 @@ def base_dir(kind, *, home=None, env=None):
             raise UnsafeXdgPath(str(exc)) from None
     h = _home(home)
     environ = os.environ if env is None else env
-    chosen = environ.get(variable)
-    if chosen:
-        candidate = Path(chosen)
+    if not isinstance(environ, Mapping):
+        raise UnsafeXdgPath("env must be a mapping")
+    try:
+        chosen = environ.get(variable)
+    except (TypeError, ValueError, KeyError):
+        raise UnsafeXdgPath("env must be a mapping") from None
+    if chosen is not None:
+        # Gate the *type* before the truth test: a hostile falsy value (False,
+        # 0, []) must not be silently treated as "unset" and fall back to the
+        # default base. Path(chosen) otherwise leaks built-in TypeError.
+        text = _path_text(chosen, variable + " must be a path")
+    else:
+        text = ""
+    if text:
+        candidate = Path(text)
         if not candidate.is_absolute():
             raise UnsafeXdgPath(variable + " must be absolute")
     else:
@@ -83,16 +120,7 @@ def _absolute(target):
     # bool, list, dict, float, None, bytes, ...) with the documented domain
     # error before pathlib raises a bare TypeError. Also fail closed for a
     # PathLike whose __fspath__ is broken or returns non-str.
-    if not isinstance(target, (str, os.PathLike)):
-        raise UnsafeXdgPath("target must be a path")
-    try:
-        text = os.fspath(target)
-    except (TypeError, ValueError):
-        raise UnsafeXdgPath("target must be a path") from None
-    if not isinstance(text, str):
-        raise UnsafeXdgPath("target must be a path")
-    if "\x00" in text:
-        raise UnsafeXdgPath("target contains a null byte")
+    text = _path_text(target, "target must be a path")
     p = Path(text)
     if not p.is_absolute():
         raise UnsafeXdgPath("target must be absolute")
@@ -133,7 +161,7 @@ def validate(target, *, home=None, env=None):
 
 def target(kind, relative, *, home=None, env=None):
     """Build and validate a user-level XDG target from a *relative* subpath."""
-    p = Path(relative)
+    p = Path(_path_text(relative, "relative subpath must be a path"))
     if p.is_absolute():
         raise UnsafeXdgPath("relative subpath must not be absolute")
     if ".." in p.parts:

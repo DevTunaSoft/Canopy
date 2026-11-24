@@ -186,6 +186,56 @@ class DataOnlyMetadataTests(unittest.TestCase):
         self.reject("string too long")
 
 
+class UnicodeDisplaySafetyTests(unittest.TestCase):
+    """Bounded hostile Unicode strings must fail closed at the projection gate.
+
+    A lone surrogate passed the ASCII-only control check at 531a0cf, survived
+    into the projected display string and raised a raw UnicodeEncodeError when
+    that string was later written to a log or shown in settings. Unassigned,
+    private-use and line/paragraph-separating code points have the same shape.
+    """
+
+    def setUp(self):
+        self.manifest = valid_manifest()
+
+    def project(self, **changes):
+        manifest = dict(self.manifest)
+        manifest.update(changes)
+        return to_safe_metadata(manifest)
+
+    @staticmethod
+    def label(text):
+        return text.encode("unicode_escape").decode("ascii")
+
+    def test_lone_surrogate_in_display_values_fails_closed(self):
+        for field in ("name", "description"):
+            for bad in ("Calm\ud800Desktop", "Calm\udfffDesktop"):
+                with self.subTest(field=field, bad=self.label(bad)):
+                    with self.assertRaises(PackValidationError):
+                        self.project(**{field: bad})
+
+    def test_noncharacter_private_use_and_line_separator_fail_closed(self):
+        for bad in ("Calm\ufffeDesktop",   # Cn noncharacter
+                    "Calm\ue000Desktop",   # Co private use
+                    "Calm\u2028Desktop",   # Zl line separator
+                    "Calm\u2029Desktop"):  # Zp paragraph separator
+            with self.subTest(bad=self.label(bad)):
+                with self.assertRaises(PackValidationError):
+                    self.project(name=bad)
+
+    def test_projected_strings_are_utf8_encodable(self):
+        result = self.project()
+        for value in vars(result).values():
+            if isinstance(value, str):
+                value.encode("utf-8")
+
+    def test_legitimate_unicode_display_names_still_project(self):
+        for good in ("Café — Démo", "Cafe\u0301 Desk", "नमस्ते डेस्कटॉप",
+                     "Calm 😊 Desktop", "Calm Desktop"):
+            with self.subTest(good=self.label(good)):
+                self.assertEqual(self.project(name=good).name, good)
+
+
 class SafeMetadataFromPackTests(unittest.TestCase):
     """Confirm the helper reuses the existing v1 pack validator."""
 

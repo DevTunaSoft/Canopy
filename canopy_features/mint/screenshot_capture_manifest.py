@@ -7,6 +7,7 @@ A green unit test is not proof of a real Mint capture or a working desktop.
 import hashlib
 import json
 import os
+from collections.abc import Iterable, Mapping
 from pathlib import Path
 import re
 
@@ -20,6 +21,33 @@ SHA256 = re.compile(r"[0-9a-f]{64}\Z")
 
 class ManifestError(ValueError):
     """Capture set cannot be proven from files that actually exist."""
+
+
+def _path_arg(value, label):
+    """Return a string path or fail closed with the manifest domain error.
+
+    Caller-supplied path values reach ``Path``/``os.fspath`` directly; a wrong
+    type must not leak a raw ``TypeError`` (or be coerced into a capture-safe
+    claim) at any public entry point.
+    """
+    message = label + " path must be a string or path-like object"
+    if not isinstance(value, (str, os.PathLike)):
+        raise ManifestError(message)
+    try:
+        path = os.fspath(value)
+    except (TypeError, ValueError, OSError) as exc:
+        raise ManifestError(message) from exc
+    if not isinstance(path, str):
+        raise ManifestError(message)
+    return path
+
+
+def _capture_iterable(captures):
+    """Require a finite, non-string iterable of caller-supplied path values."""
+    if isinstance(captures, (str, bytes, bytearray, Mapping)) or not isinstance(
+            captures, Iterable):
+        raise ManifestError("captures must be an iterable of path values")
+    return captures
 
 
 def serialize(manifest):
@@ -63,9 +91,10 @@ def build_manifest(captures, *, binary=None, expected_sha256=None):
     """
     expected = _expected_map(expected_sha256)
     paths = []
-    for item in captures:
+    for item in _capture_iterable(captures):
+        capture_arg = _path_arg(item, "screenshot capture")
         try:
-            paths.append(qt.safe_resource(item, "screenshot capture"))
+            paths.append(qt.safe_resource(capture_arg, "screenshot capture"))
         except (OSError, qt.MintSmokeError) as exc:
             raise ManifestError("screenshot capture missing or unsafe") from exc
     if not paths or len(paths) > MAX_CAPTURES:
@@ -103,8 +132,9 @@ def build_manifest(captures, *, binary=None, expected_sha256=None):
 
     binary_sha256 = None
     if binary is not None:
+        binary_arg = _path_arg(binary, "binary")
         try:
-            source = qt.safe_resource(binary, "capture binary")
+            source = qt.safe_resource(binary_arg, "capture binary")
             binary_sha256 = qt.file_sha256(source)
         except (OSError, qt.MintSmokeError) as exc:
             raise ManifestError("capture binary missing or unsafe") from exc
@@ -123,7 +153,7 @@ def build_manifest(captures, *, binary=None, expected_sha256=None):
 def write_manifest(path, manifest):
     """Write canonical manifest bytes to a new file; never overwrite."""
     data = serialize(manifest)
-    target = Path(path)
+    target = Path(_path_arg(path, "manifest target"))
     flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
     descriptor = os.open(target, flags, 0o600)
     with os.fdopen(descriptor, "wb") as stream:

@@ -65,6 +65,16 @@ class HostileShellPackTextFieldTests(unittest.TestCase):
         name = "Café \u2014 Présentation"
         self.assertEqual(self.validate_with("name", name)["name"], name)
 
+    def test_oversized_integer_literal_fails_closed(self):
+        # CPython limits int-str conversion to 4300 digits. A hostile manifest
+        # must not leak the resulting raw ValueError from json.loads.
+        raw = (STARTER / "manifest.json").read_text(encoding="utf-8")
+        raw = raw.replace('"manifest_version": 1',
+                          '"manifest_version": ' + "9" * 4400, 1)
+        (self.root / "manifest.json").write_text(raw, encoding="utf-8")
+        with self.assertRaises(PackValidationError):
+            validate_pack(self.root)
+
 
 if __name__ == "__main__":
     unittest.main()

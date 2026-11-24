@@ -135,7 +135,9 @@ def validate_pack(pack_root: Path) -> dict:
             object_pairs_hook=_unique_object,
             parse_constant=_invalid_constant,
         )
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+    except (OSError, UnicodeError, ValueError) as exc:
+        # ValueError also covers CPython's int-string digit limit, which a
+        # hostile manifest can trigger with a huge numeric literal.
         raise PackValidationError(f"invalid manifest JSON: {exc}") from exc
     if not isinstance(manifest, dict):
         raise PackValidationError("manifest must be one JSON object")

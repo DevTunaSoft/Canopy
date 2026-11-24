@@ -17,6 +17,7 @@ this record. An approved source whose own fields disagree fails closed with
 ``ShellActionCompositionError`` because that is a host programming error.
 """
 from dataclasses import dataclass
+import unicodedata
 from typing import Optional
 
 from canopy_features.apps.file_manager_intent import LAUNCH_ACTION
@@ -52,6 +53,13 @@ SURFACE_FILES = "files"
 SURFACES = (SURFACE_DOCK, SURFACE_LAUNCHER, SURFACE_FILES)
 
 MAX_TARGET_CHARS = 512
+
+# Length alone does not make text safe to hand to a host bridge. Reject every
+# non-printing Unicode category: C1/C0 controls (Cc), bidi/zero-width format
+# characters (Cf), surrogates (Cs), private-use scalars (Co), unassigned or
+# noncharacters (Cn), and line/paragraph separators (Zl, Zp). Zs (including the
+# ordinary space) stays printable and is intentionally allowed.
+_UNSAFE_TEXT_CATEGORIES = frozenset(("Cc", "Cf", "Cs", "Co", "Cn", "Zl", "Zp"))
 
 _DOCK_ACTIONS = frozenset(("launch", "focus"))
 
@@ -117,9 +125,11 @@ def _deny(reason):
 
 
 def _text_ok(value, limit=MAX_TARGET_CHARS):
-    """Bounded printable text, free of control characters and null bytes."""
+    """Bounded printable Unicode, free of controls and non-printing scalars."""
     return (type(value) is str and 0 < len(value) <= limit
-            and all(char >= " " and char != "\x7f" for char in value))
+            and all(char >= " " and char != "\x7f"
+                    and unicodedata.category(char) not in _UNSAFE_TEXT_CATEGORIES
+                    for char in value))
 
 
 def _dock_candidate(preview):

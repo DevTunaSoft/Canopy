@@ -230,6 +230,31 @@ class ForgedRecordTests(unittest.TestCase):
                     self.assertRaises(SnapshotError):
                 self.make(uri_status=bad).as_dict()
 
+    def test_contradictory_privilege_flags_fail_closed(self):
+        # A forged record must not emit a "ALLOWED" status while its reason
+        # code is a denial (or vice versa). Each field is a valid token on
+        # its own, but the pair is contradictory: the reason is the ground
+        # truth from the privilege validator, so status must agree with it.
+        denied_reasons = PRIVILEGE_REASONS - {priv.ALLOWED}
+        for reason in sorted(denied_reasons):
+            with self.subTest(reason=reason), self.assertRaises(SnapshotError):
+                self.make(privilege_status="ALLOWED",
+                          privilege_reason=reason).as_dict()
+        with self.assertRaises(SnapshotError):
+            self.make(privilege_status="DENIED",
+                      privilege_reason=priv.ALLOWED).as_dict()
+
+    def test_consistent_privilege_flags_still_serialize(self):
+        # Guard against over-rejection: the two real, self-consistent pairs
+        # must remain serializable.
+        allowed = self.make(privilege_status="ALLOWED",
+                            privilege_reason=priv.ALLOWED).as_dict()
+        self.assertEqual(allowed["privilege_status"], "ALLOWED")
+        denied = self.make(privilege_status="DENIED",
+                           privilege_reason=priv.DENIED_ELEVATION).as_dict()
+        self.assertEqual(denied["privilege_status"], "DENIED")
+        self.assertEqual(denied["privilege_reason"], priv.DENIED_ELEVATION)
+
     def test_bad_counts_fail_closed(self):
         for bad in (-1, len(CAPABILITIES) + 1, True, "2", None):
             with self.subTest(bad=bad), self.assertRaises(SnapshotError):

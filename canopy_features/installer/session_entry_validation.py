@@ -7,6 +7,7 @@ registers a session, starts a session, replaces a login manager, or executes
 the entry's ``Exec`` command. It only stats the referenced binary.
 
 Safety properties (fail closed):
+- wrong-type entry location labels are rejected with ``SessionEntryError``;
 - bounded file size and bounded directory scan (no unbounded memory);
 - ``Exec`` must be one absolute path with no shell syntax, arguments or field
   codes, and its binary must exist as a regular non-symlink executable file;
@@ -54,6 +55,28 @@ _SAFE_EXEC_CHARS = frozenset(
 
 class SessionEntryError(ValueError):
     """Untrusted or unsupported session entry metadata."""
+
+
+def _as_path(value, label):
+    """Coerce a caller-supplied path label to a string-backed ``Path``.
+
+    ``Path()`` raises a raw ``TypeError`` for numbers, containers, bytes and
+    PathLike objects whose ``__fspath__`` returns a non-string. Entry
+    locations are untrusted metadata, so translate every such case to the
+    module's domain error before a path is built or any claim is made.
+    """
+    if isinstance(value, str):
+        candidate = value
+    elif isinstance(value, os.PathLike):
+        try:
+            candidate = os.fspath(value)
+        except (TypeError, ValueError, OSError) as exc:
+            raise SessionEntryError(f"{label} must be a string path") from exc
+    else:
+        raise SessionEntryError(f"{label} must be a string path")
+    if not isinstance(candidate, str):
+        raise SessionEntryError(f"{label} must be a string path")
+    return Path(candidate)
 
 
 @dataclass(frozen=True)
@@ -167,7 +190,7 @@ def _parse(text):
 
 def validate_session_entry(entry_path):
     """Validate one untrusted session entry file. Never executes its Exec."""
-    entry_path = Path(entry_path)
+    entry_path = _as_path(entry_path, "session entry")
     if entry_path.is_symlink() or not entry_path.is_file():
         raise SessionEntryError("session entry must be a regular local file")
     with entry_path.open("rb") as handle:
@@ -197,7 +220,7 @@ def scan_session_entries(directory):
     Invalid entries are reported and excluded without stopping healthy ones.
     This is metadata inspection only; no entry is installed or executed.
     """
-    root = Path(directory)
+    root = _as_path(directory, "session entry directory")
     if root.is_symlink() or not root.is_dir():
         raise SessionEntryError("session entry directory must be a real directory")
     candidates = sorted(
@@ -223,9 +246,17 @@ def scan_session_entries(directory):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("entry", type=Path, help="user-level session entry file")
-    args = parser.parse_args(argv)
+    parser.add_argument("entry", type=str, help="user-level session entry file")
     try:
+        if argv is not None:
+            if not isinstance(argv, (list, tuple)):
+                raise SessionEntryError("argv must be a sequence of strings")
+            # argparse indexes each token before applying ``type``; normalize
+            # caller-supplied labels first so a wrong type fails closed here
+            # instead of leaking TypeError from argparse internals.
+            argv = [token if isinstance(token, str) else str(token)
+                    for token in argv]
+        args = parser.parse_args(argv)
         result = validate_session_entry(args.entry)
     except (SessionEntryError, OSError) as exc:
         print(f"SESSION_ENTRY_FAIL: {exc}", file=sys.stderr)

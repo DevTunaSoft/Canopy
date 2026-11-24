@@ -3,6 +3,8 @@
 No login manager, display manager, compositor, Qt application or real Linux
 Mint session is started here. Only local temporary files are inspected.
 """
+import contextlib
+import io
 import os
 from pathlib import Path
 import subprocess
@@ -13,6 +15,7 @@ import unittest
 from canopy_features.installer.session_entry_validation import (
     MAX_ENTRY_BYTES,
     SessionEntryError,
+    main,
     scan_session_entries,
     validate_session_entry,
 )
@@ -227,6 +230,62 @@ class SessionEntryValidationTests(unittest.TestCase):
         )
         self.assertEqual(bad.returncode, 1)
         self.assertIn("SESSION_ENTRY_FAIL", bad.stderr)
+
+
+class HostileEntryLabelTests(unittest.TestCase):
+    """Wrong-type entry-location labels must fail closed, never raise raw TypeError.
+
+    Entry locations are caller-supplied metadata: a hostile caller can pass a
+    non-string container, number, bool, bytes or a PathLike whose ``__fspath__``
+    returns a non-string. All of them must produce ``SessionEntryError`` rather
+    than leaking a built-in exception from ``Path()``.
+    """
+
+    WRONG_TYPES = (
+        (None,),
+        (7,),
+        (True,),
+        (["session.desktop"],),
+        ({"entry": "session.desktop"},),
+        (b"session.desktop",),
+    )
+
+    def test_wrong_type_entry_path_fails_closed(self):
+        for (value,) in self.WRONG_TYPES:
+            with self.subTest(value=repr(value)):
+                with self.assertRaises(SessionEntryError):
+                    validate_session_entry(value)
+
+    def test_wrong_type_scan_directory_fails_closed(self):
+        for (value,) in self.WRONG_TYPES:
+            with self.subTest(value=repr(value)):
+                with self.assertRaises(SessionEntryError):
+                    scan_session_entries(value)
+
+    def test_pathlike_with_non_string_fspath_fails_closed(self):
+        class BadPathLike:
+            def __fspath__(self):
+                return 7
+
+        class BytesPathLike:
+            def __fspath__(self):
+                return b"session.desktop"
+
+        for value in (BadPathLike(), BytesPathLike()):
+            with self.subTest(value=type(value).__name__):
+                with self.assertRaises(SessionEntryError):
+                    validate_session_entry(value)
+                with self.assertRaises(SessionEntryError):
+                    scan_session_entries(value)
+
+    def test_cli_wrong_type_entry_label_fails_closed(self):
+        out, err = io.StringIO(), io.StringIO()
+        for value in (None, 7, ["session.desktop"]):
+            with self.subTest(value=repr(value)):
+                with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+                    result = main([value])
+                self.assertEqual(result, 1)
+                self.assertIn("SESSION_ENTRY_FAIL", err.getvalue())
 
 
 if __name__ == "__main__":

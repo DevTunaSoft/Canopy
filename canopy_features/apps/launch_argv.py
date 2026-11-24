@@ -10,7 +10,7 @@ desktop-ID allowlist and uses GIO. This module only guarantees that every
 emitted token is a plain, bounded, shell-free string, so a shell command
 string or an injected token cannot pass as a validated launch.
 """
-from collections.abc import Iterable
+from collections.abc import Iterable, Set
 import re
 
 MAX_ARGUMENTS = 64
@@ -54,8 +54,11 @@ def _plain_token(value, label):
 
 
 def _argument_tokens(arguments):
-    if isinstance(arguments, (str, bytes, bytearray, dict)) or not isinstance(arguments, Iterable):
-        raise LaunchArgvError("arguments must be an iterable of strings")
+    # A set/frozenset (or any set-like view) is iterable but unordered: every
+    # token can be plain and bounded while iteration order changes between
+    # processes, silently changing the meaning of an "ordered" argv.
+    if isinstance(arguments, (str, bytes, bytearray, dict, Set)) or not isinstance(arguments, Iterable):
+        raise LaunchArgvError("arguments must be an ordered iterable of strings")
     tokens = []
     for index, value in enumerate(arguments):
         if index >= MAX_ARGUMENTS:

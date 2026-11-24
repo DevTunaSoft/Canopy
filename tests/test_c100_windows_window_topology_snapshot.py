@@ -258,6 +258,19 @@ class WindowTopologySnapshotTests(unittest.TestCase):
         with self.assertRaises(m.SnapshotError):
             m.compose(_normal_recovery(), negotiation, transition)
 
+    def test_duplicate_window_ids_with_conflicting_visibility_fail_closed(self):
+        m = _m()
+        model = CloseIntentModel()
+        model.register("files.win", "shell.owner")
+        parked = model.request_close("files.win", "shell.owner")
+        shown = model.reopen("files.win", "shell.owner")
+        self.assertEqual((parked.status, parked.visible), ("CLOSED", False))
+        self.assertEqual((shown.status, shown.visible), ("REOPENED", True))
+        negotiation, transition = _supported()
+        with self.assertRaises(m.SnapshotError):
+            m.compose(_normal_recovery(), negotiation, transition,
+                      (parked, shown))
+
     def test_contradiction_supported_empty_granted(self):
         m = _m()
         negotiation = Negotiation("x11", "SUPPORTED", frozenset())

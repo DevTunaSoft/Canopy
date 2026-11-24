@@ -27,13 +27,32 @@ class PlanError(ValueError):
     """Input or output failed a safety gate before any plan was produced."""
 
 
+def _path_arg(value, name):
+    """Coerce a caller-supplied path to text, failing closed on wrong types.
+
+    ``Path(value)`` and ``os.fspath(value)`` leak a raw ``TypeError`` for
+    non-path values and for PathLike objects with a hostile ``__fspath__``.
+    Every path boundary in this module translates those into ``PlanError`` so
+    an offline plan never exits on a built-in exception.
+    """
+    if not isinstance(value, (str, os.PathLike)):
+        raise PlanError(name + " must be a path string or PathLike")
+    try:
+        text = os.fspath(value)
+    except Exception as exc:
+        raise PlanError(name + " must be a readable path string") from exc
+    if not isinstance(text, str):
+        raise PlanError(name + " must be a path string or PathLike")
+    return text
+
+
 def validate_qt_binary(binary):
     """Return the absolute path of a safe, executable Qt binary.
 
     Uses os.access for the execute bit because Windows has no POSIX mode bits;
     the existing smoke helper uses st_mode and rejects ordinary Windows files.
     """
-    path = Path(binary)
+    path = Path(_path_arg(binary, "Qt executable"))
     if not path.is_absolute():
         raise PlanError("Qt executable must be an absolute path")
     if smoke._has_symlink_component(path):
@@ -85,7 +104,8 @@ def build_plan(qt_binary, *, data_home=None, art=None, wallpaper=None,
     session = _token(session_type, "session_type")
     digest = _source_sha(source_sha)
 
-    home = Path(data_home) if data_home is not None else menu.data_home()
+    home = (Path(_path_arg(data_home, "data_home"))
+            if data_home is not None else menu.data_home())
     if not home.is_absolute():
         raise PlanError("data_home must be an absolute path")
     destinations = menu.paths(home)
@@ -211,12 +231,13 @@ def build_plan(qt_binary, *, data_home=None, art=None, wallpaper=None,
 
 def authorize_output(output_path, *, allowed_root=None):
     """Return a new, writable .json path inside an authorized root."""
-    path = Path(output_path)
+    path = Path(_path_arg(output_path, "plan output"))
     if not path.is_absolute() or path.suffix != ".json":
         raise PlanError("plan output must be an absolute .json path")
     if smoke._has_symlink_component(path):
         raise PlanError("plan output must not contain symlink components")
-    root = Path(allowed_root) if allowed_root is not None else Path.cwd()
+    root = (Path(_path_arg(allowed_root, "allowed root"))
+            if allowed_root is not None else Path.cwd())
     if not root.is_absolute():
         raise PlanError("allowed root must be an absolute path")
     root = root.resolve()

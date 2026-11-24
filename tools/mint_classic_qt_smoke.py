@@ -19,6 +19,11 @@ import time
 import zlib
 import sys
 
+if __package__ in (None, ""):
+    # Direct execution (python tools/mint_classic_qt_smoke.py) puts tools/,
+    # not the repository root, on sys.path. Module-style invocation already
+    # has the repository root and is intentionally left unchanged.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from tools.mint_guest_preflight import collect as mint_preflight
 
 SIZES = ((1920, 1080), (1200, 750), (760, 500))

@@ -59,6 +59,40 @@ def _validate(event: Event) -> None:
         raise ValueError("invalid pid")
 
 
+def _fold(owners, sequence, event):
+    """Apply one already-validated event to a mutable owners dict.
+
+    Returns ``(owners, sequence)``; ``owners`` may be the same object when the
+    event only advances the sequence. A rejected event never mutates the caller
+    state, matching the previous immutable per-event path exactly.
+    """
+    if event.sequence <= sequence:
+        return owners, sequence
+    if isinstance(event, AppStarted):
+        previous = owners.get(event.pid)
+        if previous == event.app_id:
+            return owners, event.sequence
+        reuse = previous is not None and previous != event.app_id
+        # Only the PID-reuse case needs a trial copy: capacity must be judged
+        # after the old owner is removed, but a rejected reuse must leave the
+        # original owners untouched.
+        check = dict(owners) if reuse else owners
+        if reuse:
+            del check[event.pid]
+        pid_count = sum(1 for owner in check.values() if owner == event.app_id)
+        app_count = len(set(check.values()) | {event.app_id})
+        if pid_count >= MAX_PIDS_PER_APP or app_count > MAX_APPS:
+            return owners, event.sequence
+        if reuse:
+            del owners[event.pid]
+        owners[event.pid] = event.app_id
+        return owners, event.sequence
+    if owners.get(event.pid) != event.app_id:
+        return owners, event.sequence
+    del owners[event.pid]
+    return owners, event.sequence
+
+
 def apply_event(state: IndicatorState, event: Event) -> IndicatorState:
     """Apply one trusted event; stale, duplicate and overflow events are ignored.
 
@@ -72,28 +106,8 @@ def apply_event(state: IndicatorState, event: Event) -> IndicatorState:
     _validate(event)
     if event.sequence <= state.sequence:
         return state
-
-    owners = dict(state.owners)
-    if isinstance(event, AppStarted):
-        previous = owners.get(event.pid)
-        if previous is not None and previous != event.app_id:
-            # PID reuse: the old owner no longer controls this process.
-            del owners[event.pid]
-        elif previous == event.app_id:
-            owners = dict(state.owners)
-            return IndicatorState(sequence=event.sequence,
-                                  owners=tuple(sorted(owners.items())))
-        pid_count = sum(1 for owner in owners.values() if owner == event.app_id)
-        app_count = len(set(owners.values()) | {event.app_id})
-        if pid_count >= MAX_PIDS_PER_APP or app_count > MAX_APPS:
-            return IndicatorState(sequence=event.sequence, owners=state.owners)
-        owners[event.pid] = event.app_id
-    else:
-        if owners.get(event.pid) != event.app_id:
-            return IndicatorState(sequence=event.sequence, owners=state.owners)
-        del owners[event.pid]
-
-    return IndicatorState(sequence=event.sequence, owners=tuple(sorted(owners.items())))
+    owners, sequence = _fold(dict(state.owners), state.sequence, event)
+    return IndicatorState(sequence=sequence, owners=tuple(sorted(owners.items())))
 
 
 def apply_events(state: IndicatorState, events) -> IndicatorState:
@@ -102,10 +116,16 @@ def apply_events(state: IndicatorState, events) -> IndicatorState:
         raise ValueError("events must be a sequence")
     if len(events) > 1024:
         raise ValueError("too many events")
-    current = state
+    if not events:
+        return state
+    owners = dict(state.owners)
+    sequence = state.sequence
     for event in events:
-        current = apply_event(current, event)
-    return current
+        _validate(event)
+        owners, sequence = _fold(owners, sequence, event)
+    if sequence == state.sequence:
+        return state
+    return IndicatorState(sequence=sequence, owners=tuple(sorted(owners.items())))
 
 
 def indicator_ids(state: IndicatorState) -> tuple[str, ...]:

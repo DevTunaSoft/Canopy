@@ -63,7 +63,13 @@ _SYSTEM = frozenset({
 _SYSTEM_PREFIXES = frozenset({"mkfs."})
 
 # Split injected shell words so "sh -c 'sudo mount /'" is still caught.
-_WORD_SPLIT = re.compile(r"[\s;&|`$()<>\n\r]+")
+# Control bytes (NUL, the rest of C0, DEL and C1) must split too: a helper
+# converting a Python argument to a native C string can truncate at NUL, and
+# without this an injected "sudo\x00 ..." word was never matched against the
+# denylist -- the elevation decision depended on an invisible control byte.
+# \s still covers Unicode whitespace; the control ranges keep a control byte
+# from ever becoming part of a command word.
+_WORD_SPLIT = re.compile(r"[\s\x00-\x1f\x7f-\x9f;&|`$()<>]+")
 
 _AUTO = object()
 

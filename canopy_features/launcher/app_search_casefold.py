@@ -52,6 +52,28 @@ def _normalize(text, max_chars, max_normalized, label):
     return key
 
 
+def _validate_any_name(name):
+    """Validate a name for score ANY without allocating a normalized key.
+
+    An empty search key gives every candidate the same score, so its caseless
+    form is never compared. All type, UTF-8 and size checks still apply. For
+    ASCII input, casefold cannot expand a code point, NFKC is the identity and
+    strip only removes characters, so the original length bound already proves
+    the normalized bound. Non-ASCII input keeps the full normalization path.
+    """
+    if type(name) is not str:
+        raise AppSearchError("name must be a string")
+    if len(name) > MAX_NAME_CHARS:
+        raise AppSearchError("name exceeds " + str(MAX_NAME_CHARS) + " characters")
+    try:
+        name.encode("utf-8", "strict")
+    except UnicodeError as exc:
+        raise AppSearchError("name is not valid Unicode") from exc
+    if name.isascii():
+        return
+    _normalize(name, MAX_NAME_CHARS, MAX_NORMALIZED_NAME_CHARS, "name")
+
+
 def normalize_for_search(query):
     """Return the bounded caseless key for a launcher search query."""
     return _normalize(query, MAX_QUERY_CHARS, MAX_NORMALIZED_QUERY_CHARS, "query")
@@ -82,10 +104,16 @@ def rank_matches(query, names, *, limit=MAX_RESULTS):
     key = normalize_for_search(query)
     ranked = []
     for index, name in enumerate(names):
-        name_key = normalize_name(name)
         if not key:
-            score = ANY
-        elif name_key == key:
+            _validate_any_name(name)
+            # Every remaining name is still validated, but only the bounded
+            # result is materialized. Input order already equals final order
+            # because all scores are ANY and indices ascend.
+            if len(ranked) < limit:
+                ranked.append(Match(name=name, score=ANY, index=index))
+            continue
+        name_key = normalize_name(name)
+        if name_key == key:
             score = EXACT
         elif name_key.startswith(key):
             score = PREFIX
@@ -94,5 +122,7 @@ def rank_matches(query, names, *, limit=MAX_RESULTS):
         else:
             continue
         ranked.append(Match(name=name, score=score, index=index))
-    ranked.sort(key=lambda match: (-match.score, match.index))
-    return tuple(ranked[:limit])
+    if key:
+        ranked.sort(key=lambda match: (-match.score, match.index))
+        return tuple(ranked[:limit])
+    return tuple(ranked)

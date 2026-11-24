@@ -10,7 +10,11 @@ from itertools import islice
 from pathlib import Path
 from typing import FrozenSet, Mapping, Optional, Tuple
 
-from tools.check_shell_pack import PackValidationError, validate_pack
+from tools.check_shell_pack import (
+    PackValidationError,
+    require_real_path_components,
+    validate_pack,
+)
 
 
 MAX_PACK_DIRECTORIES = 64
@@ -64,6 +68,9 @@ def scan_shell_packs(directory: Path) -> PackScan:
     root = Path(directory)
     if root.is_symlink() or not root.is_dir():
         raise PackValidationError("shell pack catalog root must be a real directory")
+    require_real_path_components(
+        root, "shell pack catalog root must be a real directory"
+    )
 
     discovered = {}
     bad_ids = set()

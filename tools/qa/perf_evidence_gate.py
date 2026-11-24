@@ -28,9 +28,21 @@ class EvidenceError(ValueError):
 
 
 def _real(value):
-    if type(value) not in (float, int) or not math.isfinite(value):
+    """Return a finite float for a bounded JSON number, or fail closed.
+
+    A finite JSON integer can still be too large for the float range. Convert
+    first and translate that overflow, so an oversized observation never
+    escapes as a raw built-in exception past the EvidenceError boundary.
+    """
+    if type(value) not in (float, int):
         raise EvidenceError("numeric evidence must be finite")
-    return float(value)
+    try:
+        result = float(value)
+    except (OverflowError, ValueError) as exc:
+        raise EvidenceError("numeric evidence must be finite") from exc
+    if not math.isfinite(result):
+        raise EvidenceError("numeric evidence must be finite")
+    return result
 
 
 def _int(value, minimum=0):
@@ -64,9 +76,13 @@ def _real_file(path):
         data = f.read(MAX_REPORT_BYTES + 1)
     if not data or len(data) > MAX_REPORT_BYTES:
         raise EvidenceError("report missing or oversized")
+    # A report within MAX_REPORT_BYTES can still exhaust the decoder's
+    # recursion budget when deeply nested. That is malformed evidence, not a
+    # host failure: translate it here so the CLI always fails closed with a
+    # QT_PERF_GATE_FAIL marker rather than a raw traceback.
     try:
         parsed = json.loads(data.decode("utf-8"), parse_constant=_nonfinite)
-    except (UnicodeError, ValueError) as exc:
+    except (UnicodeError, ValueError, RecursionError) as exc:
         raise EvidenceError("invalid report JSON") from exc
     if type(parsed) is not dict:
         raise EvidenceError("performance report must be an object")

@@ -40,3 +40,53 @@ The ten negative/positive test scenarios build PNGs with actual valid
 CRC and visible scanline variation; they do not claim execution in a
 Linux Mint guest. Keep the owner-supplied icon and landscape wallpaper
 assets private; neither is required by this verification tool.
+
+## Verified evidence scope (2026-11-24)
+
+These are scoped verdicts from pinned reports in the durable scratch evidence
+directory (`C:/Users/X1/AppData/Local/hermes/cache/scratch/mint-evidence/`),
+not release approval. Exact source revision
+`abb21ae92d500cbba6667c474d8a590add607a9e`; compiled binary SHA-256
+`48f5d98a7796a875dbe4cdb2f7a26dd812bd84dd8778974a1d8b793c3e92fd3f`.
+The versioned manifest `reports/agent_c_run_manifest_20261124T003600Z.json`
+(SHA-256 `e744a464102ec5ce9cb3fdc070f4bf3ed086890ebfb7d2098423e5082cc0bc84`)
+pins 24 reports and passes the fail-closed SHA chain.
+
+| Gate | Verdict | Pinned report (SHA-256) |
+|---|---|---|
+| R073 | PASS | `reports/mint_guest_boot_and_preflight_run2.json` (`5f34ee4ebaf5101b9e5384734bd338d7d9451e4c444a68565e2c1035e5a2e631`) |
+| R074 | PASS_SCOPED | `reports/agent_c_r074_cinnamon_session_20261123T2206Z.json` (`fdac389ff489c6bde577e4b632bfdbf2348ca64d411f943447b5b276f130f644`) |
+| R066 | PASS_NUMERIC_SCOPED | `reports/agent_c_r066_five_minute_idle_20261123T2012Z.json` (`9a3469662b779bb2c2437e3f449256f04b94fa6a0efad1340942ccaad6bc99e1`), `reports/agent_c_r066_wakeups_20261123T2056Z.json` (`e8a7df5b4b5d650f9c07c671fb52f2ce9fb2c1e116c784de17d617ee05af30fa`) |
+| R078 | PARTIAL_SCOPED | `reports/agent_c_r078_composed_20261124T001919Z.json` (`1672bd5f728e158ec5778844c6012d5cea687b0d0833c70748354eae0767e55d`) |
+| R086 | NOT_RUN | `reports/agent_c_r086_feasibility_20261123T232528Z.json` (`a9c055fd9e8b520fdb253c4bf7b29707157f37f827e78ab274a1edefd2229b36`) |
+| R047 / R050 | BLOCKED | owner visual approval pending; approved at least 1920x1080 alpine wallpaper asset absent |
+
+R073 comes from an in-guest preflight that distinguishes Linux Mint 22.3 from
+Ubuntu. R074 is a real Cinnamon X11 session launch of the exact binary above;
+it is not owner visual acceptance. R066 is numeric-only: three genuine
+approximately-five-minute guest samples (early idle 305.919 s / 62 samples,
+0.2615% of one core, PSS peak 150854 KiB; wakeup sample 305.912 s / 62 samples
+with context-switch proxies only because the kernel does not expose
+`se.nr_wakeups`; real-session sample 305.825 s / 62 samples, 0.2322% of one
+core, PSS peak 127825 KiB). R078 proves a fresh boot identity, a discovered
+Cinnamon X11 login, the exact binary window, clean exit and intact desktop
+rollback, but **not** a clean guest-initiated reboot.
+
+Current blockers, recorded rather than resolved:
+
+- R078 clean reboot is BLOCKED: guest `sudo -n` requires a password and logind
+  denied interactive authentication; the observed restart used a forced host
+  poweroff plus fresh boot.
+- R086 automatic CI-on-guest is NOT_RUN: no self-hosted runner with nested
+  virtualization is registered and no workflow provisions a Mint guest.
+  Host-orchestrated on-guest runs must not be called R086 PASS.
+- R047 and R050 remain BLOCKED pending owner visual approval. The frozen
+  1280x720 wave master SHA-256
+  `1efa6e83deee160ce9cf225db010025f4f162975f4dfc23e6da3f3ca0973528a` is
+  preserved; no substitute wallpaper was used or approved.
+- Scheduler wakeups are unmeasured; release readiness stays false.
+
+`python tools/check_foundation.py` passed on this branch both before and after
+the edit.
+This documentation change alters no tool behaviour, visual asset, CI workflow
+or owner instruction file.

@@ -494,10 +494,11 @@ not disable OpenCode permission checks. The JSON format is:
 }
 ```
 
-`commit_sha` is `PENDING` because the supervisor commits after verification.
-The supervisor replaces it with the real SHA before creating the draft PR.
-`NOT RUN` is accepted only when `tests_required` is false and a reason is given;
-a task with no `PASS` test is never published.
+Verification evidence must contain a lowercase hex `commit_sha` of 7-40
+characters, as required by `policy.COMMIT_SHA`; `PENDING` is rejected
+fail-closed before publication. No runtime SHA substitution occurs.
+`NOT RUN` is permitted by current validation; only the `PASS` + draft
+requirement is enforced. A task with no `PASS` test is never published.
 
 ## CI and Canopy protections
 

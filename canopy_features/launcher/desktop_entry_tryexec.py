@@ -35,10 +35,18 @@ def is_tryexec_available(
         return True
     if not isinstance(tryexec, str):
         raise TypeError("TryExec must be a string or None")
+    # Fail closed on the *raw* value before any whitespace folding. str.strip()
+    # treats C0 separators (0x1c-0x1f) as whitespace, so checking only the
+    # stripped candidate would launder a control-wrapped path into a clean name
+    # and return a false launchable verdict. Non-printable characters (C0/C1
+    # controls, bidi overrides, zero-width text) must never name an executable,
+    # even when a matching file exists.
+    if any(not char.isprintable() for char in tryexec):
+        return False
     candidate = tryexec.strip()
     if not candidate:
         return True
-    if "\x00" in candidate or "%" in candidate:
+    if "%" in candidate:
         return False
     # shutil.which() raises a raw TypeError from os.fspath for a non-string
     # path. Enforce this module's search_path: str | None contract here so a

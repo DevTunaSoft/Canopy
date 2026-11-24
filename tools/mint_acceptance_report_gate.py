@@ -10,6 +10,7 @@ remains a separate manual acceptance gate.
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import sys
@@ -63,6 +64,8 @@ def validate(directory, *, expected_source_sha, expected_binary_sha256):
         raise EvidenceError("explicit expected source commit SHA required")
     if not isinstance(expected_binary_sha256, str) or not BINARY_SHA.fullmatch(expected_binary_sha256):
         raise EvidenceError("explicit expected compiled binary SHA required")
+    if not isinstance(directory, (str, os.PathLike)) or isinstance(directory, (bytes, bytearray)):
+        raise EvidenceError("evidence directory must be a path")
     root, report = _report(directory)
     if (type(report["schema_version"]) is not int or report["schema_version"] != 1
             or report["environment"] != "linuxmint"

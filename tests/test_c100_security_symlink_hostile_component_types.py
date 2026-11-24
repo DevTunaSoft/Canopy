@@ -20,6 +20,16 @@ class HostilePathLike:
         raise ValueError("hostile fspath implementation")
 
 
+class FspathFailure:
+    """PathLike whose fspath fails with an arbitrary hostile exception."""
+
+    def __init__(self, error):
+        self.error = error
+
+    def __fspath__(self):
+        raise self.error
+
+
 class WrongPathTypeContractTests(unittest.TestCase):
     BAD_PATHS = (None, 123, 1.5, [], {}, bytearray(b"/tmp"), HostilePathLike())
 
@@ -38,6 +48,19 @@ class WrongPathTypeContractTests(unittest.TestCase):
     def test_verified_directory_wrong_types_use_domain_error(self):
         for bad in self.BAD_PATHS:
             with self.subTest(path_type=type(bad).__name__):
+                with self.assertRaises(defense.UnsafePathError):
+                    with defense.verified_directory(bad):
+                        pass
+
+    def test_hostile_fspath_failures_use_domain_error_everywhere(self):
+        for error in (OSError("hostile fspath I/O failure"),
+                      RuntimeError("hostile fspath runtime failure")):
+            bad = FspathFailure(error)
+            with self.subTest(error=type(error).__name__):
+                with self.assertRaises(defense.UnsafePathError):
+                    defense.find_symlink_component(bad)
+                with self.assertRaises(defense.UnsafePathError):
+                    defense.reject_symlink_components(bad)
                 with self.assertRaises(defense.UnsafePathError):
                     with defense.verified_directory(bad):
                         pass

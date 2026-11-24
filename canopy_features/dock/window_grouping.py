@@ -12,15 +12,21 @@ sightings of the same window ID are folded into one group and reported in
 ``duplicates`` (first occurrence wins). Outputs are immutable tuples in stable,
 first-seen order. The host-supplied allowlist is hard-bounded to
 ``MAX_TRUSTED_APPLICATIONS`` entries so work and memory stay bounded regardless
-of the snapshot size; an over-bound allowlist fails closed.
+of the snapshot size; an over-bound allowlist fails closed. Desktop IDs and
+dock labels must also be display-safe: control, format, surrogate, private-use,
+noncharacter and line/paragraph separator code points are rejected so a bounded
+but hostile label cannot become a false trusted group claim.
 """
 from collections.abc import Mapping
 from dataclasses import dataclass
+import unicodedata
 
 MAX_WINDOWS = 256
 MAX_GROUPS = 64
 MAX_TRUSTED_APPLICATIONS = 64
 MAX_ID_BYTES = 256
+
+_UNSAFE_TEXT_CATEGORIES = frozenset(("Cc", "Cf", "Cs", "Co", "Cn", "Zl", "Zp"))
 
 
 class WindowGroupingError(ValueError):
@@ -57,6 +63,11 @@ class GroupingResult:
 
 def _valid_text(value):
     if type(value) is not str or not value:
+        return False
+    # Gate display safety before the length projection; the strict UTF-8
+    # encoding below remains a second fail-closed check for malformed text.
+    if any(unicodedata.category(char) in _UNSAFE_TEXT_CATEGORIES
+           for char in value):
         return False
     try:
         return len(value.encode("utf-8", "strict")) <= MAX_ID_BYTES

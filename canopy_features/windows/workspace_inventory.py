@@ -9,7 +9,7 @@ Future Shell Host / compiled Qt integration must pass trusted snapshots here
 explicitly. Using this module alone does not prove a working desktop.
 """
 from collections.abc import Iterable, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import re
 import unicodedata
 
@@ -58,17 +58,23 @@ class WorkspaceInventory:
 
     workspaces: tuple
     problems: tuple
+    _lookup_cache: object = field(default=None, repr=False, compare=False)
 
     def identifiers(self):
         return tuple(workspace.identifier for workspace in self.workspaces)
 
     def get(self, identifier):
-        """Exact-case lookup; no path resolution or code execution."""
-        return next(
-            (workspace for workspace in self.workspaces
-             if workspace.identifier == identifier),
-            None,
-        )
+        """Exact-case lookup; no path resolution or code execution.
+
+        The id->workspace map is built lazily once. First occurrence wins for
+        duplicate identifiers, matching the previous linear scan exactly.
+        """
+        if self._lookup_cache is None:
+            lookup = {}
+            for workspace in self.workspaces:
+                lookup.setdefault(workspace.identifier, workspace)
+            object.__setattr__(self, "_lookup_cache", lookup)
+        return self._lookup_cache.get(identifier)
 
 
 @dataclass(frozen=True)

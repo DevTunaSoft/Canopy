@@ -3,10 +3,12 @@
 Run: python -m unittest tests.test_c101_supervisor_gitops_worker -v
 """
 from contextlib import contextmanager
+from unittest.mock import MagicMock, patch
 from pathlib import Path
 import tempfile
 import unittest
 
+from canopy_supervisor import gitops
 from canopy_supervisor.supervisor import Supervisor
 from canopy_supervisor.worker import WorkerLauncher
 
@@ -50,6 +52,26 @@ class WorkerPidTypeTests(unittest.TestCase):
             self.assertFalse(worker.knows(True))
             self.assertIsNone(worker.poll(True))
             self.assertEqual(worker.poll(1), 0)
+
+
+class GitOpsRunTypeTests(unittest.TestCase):
+    def test_wrong_type_args_rejected_before_spawn(self):
+        for bad in ("git status", None, 7, {}, b"git", ["git", 7]):
+            with self.subTest(value=repr(bad)):
+                with patch("canopy_supervisor.gitops.subprocess.run") as spawn:
+                    with self.assertRaises(gitops.GitError):
+                        gitops.run(bad)
+                    spawn.assert_not_called()
+
+    def test_valid_list_still_runs(self):
+        result = MagicMock()
+        result.returncode = 0
+        result.stdout = "ok\n"
+        result.stderr = ""
+        with patch("canopy_supervisor.gitops.subprocess.run",
+                   return_value=result) as spawn:
+            self.assertEqual(gitops.run(["git", "status"]), "ok")
+        self.assertEqual(spawn.call_args.args[0], ["git", "status"])
 
 
 class SupervisorAssignableTypeTests(unittest.TestCase):

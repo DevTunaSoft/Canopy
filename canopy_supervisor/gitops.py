@@ -21,7 +21,14 @@ class GitError(RuntimeError):
 
 def run(args: Iterable[str], *, cwd: Path | str | None = None, timeout: int = 120) -> str:
     """Run a git/gh command without a shell and return bounded output."""
-    command = [str(arg) for arg in args]
+    # A bare string is iterable and used to become a character-wise command,
+    # and wrong types leaked raw TypeError. Refuse anything that is not an
+    # explicit non-empty sequence of strings before spawning a process.
+    if (isinstance(args, (str, bytes, bytearray))
+            or not isinstance(args, (list, tuple)) or not args
+            or any(not isinstance(arg, str) for arg in args)):
+        raise GitError("command args must be a non-empty sequence of strings")
+    command = list(args)
     try:
         result = subprocess.run(
             command, cwd=str(cwd) if cwd else None, capture_output=True,

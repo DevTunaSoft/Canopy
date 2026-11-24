@@ -2,6 +2,10 @@
 
 Read README.md and docs/ARCHITECTURE.md and docs/QUALITY.md completely before making changes. Preserve existing project instructions; this file supplements rather than replaces them.
 
+## Governing product-completion priority
+
+The governing objective is a single coherent, functional, secure, stable and resource-efficient Canopy Classic desktop product. Workstreams are: A real desktop functionality; B Linux Mint and system integration; C performance and resource efficiency; D integration and quality assurance. Prioritize security/stability/data integrity, explicit owner decisions and protected visuals, actual product functionality, clean architecture, continuous autonomous execution, and evidence-backed acceptance. Do not optimize for commit, PR, module or test counts. Use `docs/PRODUCT_COMPLETION_MATRIX.md` to select dependency-aware work and record verified maturity. Do not continue generating increasingly granular standalone validators while core desktop integration remains incomplete. This product-completion directive supersedes earlier lower-priority queues but does not weaken any protection or release gate.
+
 ## Authority and continuous execution
 
 The owner authorizes Hermes to perform routine nonvisual engineering, testing,

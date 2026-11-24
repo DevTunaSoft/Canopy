@@ -12,6 +12,17 @@ Status legend: PLANNED / IN PROGRESS / VERIFIED / BLOCKED.
 
 No milestone is VERIFIED until implementation and evidence are recorded.
 
+## Governing workstreams
+
+Work is selected from `docs/PRODUCT_COMPLETION_MATRIX.md` by dependency and product impact, not by module count:
+
+- **A — Real desktop functionality:** connect existing launchers, dock, window, workspace, files, settings, notification, session and accessibility contracts to the compiled Qt runtime.
+- **B — Linux Mint and system integration:** reversible session registration, compositor interoperability, install/uninstall, lifecycle, suspend/resume, display changes and recovery in isolated VMs.
+- **C — Performance and resource efficiency:** profile the actual desktop first; reduce shell-owned PSS, CPU, GPU proxy, wakeups, disk I/O, startup latency and leaks with measured evidence.
+- **D — Integration and quality assurance:** reproducible Classic builds, compiled-runtime tests, real Mint evidence, security/accessibility validation, independent review and regression prevention.
+
+Standalone security and reliability defects remain eligible, but increasingly granular synthetic validators do not displace core integration work.
+
 ## Integration discipline (issue #132)
 Draft PRs are temporary working states. Promote verified PRs to ready-for-review only after their exact SHA passes all required checks and dependencies/conflicts are cleared. Green CI alone never authorizes a merge. Integrate eligible nonvisual work incrementally through the integration branch with regression tests; keep Classic Qt final integration draft until real Mint acceptance and owner visual approval are complete. Maintain at least four concurrently active, isolated engineering subagents plus Hermes; assign another eligible independent task whenever one completes or is blocked. Verify the five-minute watchdog is operational.
 

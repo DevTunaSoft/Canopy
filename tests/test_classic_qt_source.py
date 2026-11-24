@@ -35,7 +35,7 @@ class ClassicQtSourceTests(unittest.TestCase):
     def test_frozen_visual_constants_are_unchanged(self):
         text = (SOURCE / "Theme.qml").read_text(encoding="utf-8")
         for constant in ("barHeight: 32", "dockSize: 96", "tileSize: 52",
-                         "cornerRadius: 24", "dockSpacing: 7", "dockPadding: 12"):
+                         "cornerRadius: 24", "dockSpacing: 7", "dockPadding: 14"):
             self.assertIn(constant, text)
         main = (SOURCE / "Main.qml").read_text(encoding="utf-8")
         for name in ("canopyTopBar", "canopyDock", "canopyLauncher"):

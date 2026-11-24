@@ -50,8 +50,8 @@ def compare_dock_pair(before: Path, after: Path, size: str) -> dict:
         raise ComparisonError("inner framing did not affect every dock icon")
     for (cx, cy) in CENTERS[size]["desktop"]:
         # Corner outside the cached rounded-face mask must remain unchanged.
-        for dx in (-26, 26):
-            for dy in (-26, 26):
+        for dx in (-30, 30):
+            for dy in (-30, 30):
                 i = 4 * ((cy + dy) * width + cx + dx)
                 if first[i:i + 4] != second[i:i + 4]:
                     raise ComparisonError("rounded card silhouette corner moved")

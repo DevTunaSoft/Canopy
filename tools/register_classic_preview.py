@@ -142,19 +142,43 @@ def _resource(obj, name, directory=False):
 def _quote(value):
     # Desktop Entry Exec field codes are not shell quoting.
     # Permit spaces, but reject tricky chars rather than use a shell.
-    banned = ('"', "\\", "$", chr(96), "%", "\n", "\r", "\x00")
+    banned = ('"', "$", chr(96), "%", chr(10), chr(13), chr(0))
+    sep = chr(92)
+    if sep in value:
+        if os.name != "nt":
+            raise RegistrationError("unsupported character in desktop Exec path")
+        # Native absolute paths use backslash separators. Accept only a
+        # drive-qualified prefix; UNC, doubled and trailing separators stay refused.
+        if (len(value) < 3 or not value[0].isalpha() or value[1:3] != ":" + sep
+                or sep + sep in value or value.endswith(sep)):
+            raise RegistrationError("unsupported character in desktop Exec path")
     if any(ch in value for ch in banned):
         raise RegistrationError("unsupported character in desktop Exec path")
-    return '"' + value + '"'
+    return '"' + value + '"' 
+
+
+def _effective_uid():
+    """Return the POSIX effective UID, or None when the probe is unavailable."""
+    getter = getattr(os, "geteuid", None)
+    return None if getter is None else getter()
 
 
 def _unprivileged():
-    if hasattr(os, "geteuid") and os.geteuid() == 0:
+    # Shared by pure validators: without a POSIX probe there is no root to
+    # refuse, so path validation may continue; writes use the stricter guard.
+    if _effective_uid() == 0:
         raise RegistrationError("root/system-wide operation refused")
 
 
-def install(home, binary, *, art=None, wallpaper=None, terminal=None, native_apps=False):
+def _require_unprivileged():
+    if _effective_uid() is None:
+        # Fail closed: an operation that writes cannot prove it is unprivileged.
+        raise RegistrationError("privilege check unavailable: operation refused")
     _unprivileged()
+
+
+def install(home, binary, *, art=None, wallpaper=None, terminal=None, native_apps=False):
+    _require_unprivileged()
     p = paths(home)
     _safe_folders(p)
     if status(home) != "NOT_INSTALLED":
@@ -214,7 +238,7 @@ def install(home, binary, *, art=None, wallpaper=None, terminal=None, native_app
 
 
 def uninstall(home):
-    _unprivileged()
+    _require_unprivileged()
     p = paths(home)
     if status(home) != "INSTALLED":
         raise RegistrationError("not exact-byte owned; removed nothing")

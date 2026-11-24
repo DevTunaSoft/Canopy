@@ -33,7 +33,7 @@ from canopy_features.windows.window_state_capabilities import (
 from canopy_features.windows.window_close_intents import (
     IntentResult, STATUSES as CLOSE_STATUSES,
     UNKNOWN_WINDOW, OWNERSHIP_DENIED, GUARDED,
-    ALREADY_CLOSED, ALREADY_OPEN,
+    ALREADY_CLOSED, ALREADY_OPEN, CLOSED, REOPENED,
 )
 
 SCHEMA = 1
@@ -53,6 +53,20 @@ FEATURE_VALUES = frozenset(feature.value for feature in WindowStateFeature)
 BLOCKING_CLOSE = frozenset({UNKNOWN_WINDOW, OWNERSHIP_DENIED, GUARDED})
 SOFT_CLOSE = frozenset({ALREADY_CLOSED, ALREADY_OPEN})
 BLOCKING_REJECTION = frozenset({"FEATURE_NOT_GRANTED", "INVALID_TRANSITION"})
+
+# Durable visibility implied by each close decision status. The producer
+# (window_close_intents.py) derives status from the stored visibility flag, so
+# a decision whose visible flag disagrees with its status jointly asserts a
+# false close/topology state. Denials carry no visibility verdict (None).
+CLOSE_VISIBILITY = MappingProxyType({
+    CLOSED: False,
+    ALREADY_CLOSED: False,
+    GUARDED: True,
+    REOPENED: True,
+    ALREADY_OPEN: True,
+    UNKNOWN_WINDOW: None,
+    OWNERSHIP_DENIED: None,
+})
 
 STATUS_OK = "OK"
 STATUS_ATTENTION = "ATTENTION"
@@ -258,6 +272,8 @@ def _close_view(decisions):
         statuses.append(status)
         if decision.visible is not None and type(decision.visible) is not bool:
             raise SnapshotError("close visible flag must be bool or None")
+        if decision.visible != CLOSE_VISIBILITY[status]:
+            raise SnapshotError("close status contradicts visible flag")
         visible_flags.append(decision.visible)
         notes.append(_bounded_text(decision.note, "close decision note"))
     return CloseView(

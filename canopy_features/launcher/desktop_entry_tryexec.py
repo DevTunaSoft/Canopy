@@ -40,6 +40,12 @@ def is_tryexec_available(
         return True
     if "\x00" in candidate or "%" in candidate:
         return False
+    # shutil.which() raises a raw TypeError from os.fspath for a non-string
+    # path. Enforce this module's search_path: str | None contract here so a
+    # caller always gets a controlled, named error. Values that need no probe
+    # still short-circuit above and ignore search_path.
+    if search_path is not None and not isinstance(search_path, str):
+        raise TypeError("search_path must be a string or None")
     resolved = shutil.which(candidate, path=search_path)
     if resolved is None:
         return False

@@ -275,5 +275,26 @@ class AgreementGateTests(unittest.TestCase):
                          list(range(len(view.rows))))
 
 
+class OrderedSourceContractTests(unittest.TestCase):
+    """An ordered snapshot cannot be manufactured from an unordered source."""
+
+    def test_unordered_favorites_snapshot_rejected(self):
+        # The projection promises a deterministic favorites display order.
+        # A set has no display order, so accepting one silently invents an
+        # arbitrary favorites-first order and a plausible favorite_count --
+        # a false favorites-valid claim. Fail closed instead.
+        for bad in ({"org.mozilla.firefox", "org.gnome.Terminal"},
+                    frozenset({"org.mozilla.firefox", "org.gnome.Terminal"})):
+            with self.subTest(bad=type(bad).__name__):
+                with self.assertRaises(proj.ProjectionError):
+                    proj.project_results("", CATALOG, favorites=bad)
+
+    def test_unordered_catalog_rejected(self):
+        # Catalog order decides every non-favorite row and all tie breaks.
+        bad = {("org.example.A", "Alpha"), ("org.example.B", "Beta")}
+        with self.assertRaises(proj.ProjectionError):
+            proj.project_results("", bad)
+
+
 if __name__ == "__main__":
     unittest.main()

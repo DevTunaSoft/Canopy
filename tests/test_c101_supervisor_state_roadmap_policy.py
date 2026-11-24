@@ -92,5 +92,24 @@ class BoundedEventHistoryTests(unittest.TestCase):
                          ["n=%d" % (cap + 3), "n=%d" % (cap + 2), "n=%d" % (cap + 1)])
 
 
+class TaskStoreSaveTypeGuardTests(unittest.TestCase):
+    def test_non_dict_state_raises_domain_value_error(self):
+        from canopy_supervisor.state import TaskStore
+
+        store = TaskStore(Path(tempfile.mkdtemp()))
+        for value in (None, [], 7, "text", True):
+            with self.subTest(value=repr(value)):
+                with self.assertRaises(ValueError) as caught:
+                    store.save(value)
+                self.assertNotIsInstance(caught.exception, AttributeError)
+
+    def test_valid_state_still_saves(self):
+        from canopy_supervisor.state import TaskStore
+
+        store = TaskStore(Path(tempfile.mkdtemp()))
+        store.save({"version": 1, "tasks": []})
+        self.assertEqual(store.load()["tasks"], [])
+
+
 if __name__ == "__main__":
     unittest.main()

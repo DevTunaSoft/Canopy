@@ -114,6 +114,8 @@ class TaskStore:
         return data
 
     def save(self, data: dict) -> None:
+        if not isinstance(data, dict):
+            raise ValueError("invalid task state")
         if data.get("version") != STATE_VERSION or not isinstance(data.get("tasks"), list):
             raise ValueError("invalid task state")
         data["updated_at"] = utcnow()

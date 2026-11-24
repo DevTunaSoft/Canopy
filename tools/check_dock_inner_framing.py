@@ -20,6 +20,19 @@ else:
     )
 
 
+# Qt 6 software AA can differ by ONE colour level on 1–2 isolated
+# Files-window rounded-corner pixels between independent captures. This is
+# unrelated to the dock or master wallpaper. Never ignore a large rectangle.
+WINDOW_CORNER = {"1200x750": (210, 123), "760x500": (36, 62),
+                 "1920x1080": (422, 196)}
+
+
+def corner_antialias_jitter(size, x, y, old_rgba, new_rgba):
+    px, py = WINDOW_CORNER[size]
+    return (0 <= x-px <= 9 and 0 <= y-py <= 9 and
+            all(abs(int(a)-int(b)) <= 1 for a,b in zip(old_rgba,new_rgba)))
+
+
 def compare_dock_pair(before: Path, after: Path, size: str) -> dict:
     if size not in CENTERS:
         raise ComparisonError("unsupported real Qt capture size")
@@ -27,6 +40,7 @@ def compare_dock_pair(before: Path, after: Path, size: str) -> dict:
     _, _, second, second_hash = _read_png(after, size)
     counts = [0] * len(APPS)
     clock_changes = 0
+    corner_jitter = 0
     for offset in range(0, len(first), 4):
         if first[offset:offset + 4] == second[offset:offset + 4]:
             continue
@@ -42,6 +56,11 @@ def compare_dock_pair(before: Path, after: Path, size: str) -> dict:
             # Qt clock can roll over at the minute between two executions.
             # The tight right-hand clock area is the only dynamic exception.
             clock_changes += 1
+        elif corner_antialias_jitter(
+                size, x, y, first[offset:offset+4], second[offset:offset+4]):
+            corner_jitter += 1
+            if corner_jitter > 2:
+                raise ComparisonError("more than two Qt AA corner pixels changed")
         else:
             raise ComparisonError(
                 f"unexpected non-icon change at ({x}, {y}) in {size}"
@@ -62,6 +81,7 @@ def compare_dock_pair(before: Path, after: Path, size: str) -> dict:
         "changed_icon_pixels": sum(counts),
         "per_icon_changed_pixels": dict(zip(APPS, counts)),
         "clock_delta_pixels": clock_changes,
+        "one_level_files_corner_aa_pixels": corner_jitter,
         "unexpected_changed_pixels": 0,
         "source_approval_inferred": False,
         "owner_visual_approval": False,

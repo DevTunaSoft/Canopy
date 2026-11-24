@@ -152,5 +152,43 @@ class MalformedIntentTests(unittest.TestCase):
         self.assertNotIn(marker, str(ctx.exception))
 
 
+class OtherCategoryBoundaryTests(unittest.TestCase):
+    """Unicode 'Other' categories must fail closed, not yield a safe scheme.
+
+    Surrogates (Cs), unassigned/noncharacters (Cn) and private-use code
+    points (Co) are not valid URI content. The gate previously scanned only
+    Cc/Cf/Zl/Zp/Zs, so a lone surrogate in the authority or path was
+    classified as a permitted https URI; encoding that string downstream
+    then raised a raw UnicodeEncodeError instead of a controlled denial.
+    """
+
+    @staticmethod
+    def _label(uri):
+        return uri.encode("unicode_escape").decode("ascii")
+
+    def test_lone_surrogate_in_authority_or_path_is_rejected(self):
+        for uri in ("https://exa\ud800mple.com",
+                    "https://example.com/\ud800",
+                    "https://example.com/?x=\udfff"):
+            with self.subTest(uri=self._label(uri)):
+                with self.assertRaises(UntrustedUriError):
+                    validate_uri_intent(uri)
+                self.assertFalse(is_permitted_uri(uri))
+
+    def test_unassigned_private_use_and_noncharacter_are_rejected(self):
+        for uri in ("https://example.com/\u0378",      # Cn
+                    "https://example.com/\ue000",      # Co
+                    "https://example.com/\ufffe"):     # Cn (noncharacter)
+            with self.subTest(uri=self._label(uri)):
+                with self.assertRaises(UntrustedUriError):
+                    validate_uri_intent(uri)
+                self.assertFalse(is_permitted_uri(uri))
+
+    def test_combining_mark_is_not_over_rejected(self):
+        # Mn is not an 'Other' category; keep ordinary content permitted.
+        self.assertEqual(validate_uri_intent("https://example.com/\u0301"),
+                         "https")
+
+
 if __name__ == "__main__":
     unittest.main()

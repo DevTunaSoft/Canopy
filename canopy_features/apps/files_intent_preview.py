@@ -75,8 +75,14 @@ class FilesIntentPreview:
 
 
 def _text_ok(value):
-    """Bounded printable text, free of control characters and null bytes."""
-    return (isinstance(value, str) and 0 < len(value) <= _MAX_FIELD_CHARS
+    """Bounded printable text, free of control characters and null bytes.
+
+    Require an exact ``str``: a str subclass can override iteration,
+    containment, ``startswith`` or case/separator folding, so an ``isinstance``
+    check would let a hostile record forge a clean safety scan (or raise a raw
+    exception mid-scan) while carrying unsafe text into an APPROVED preview.
+    """
+    return (type(value) is str and 0 < len(value) <= _MAX_FIELD_CHARS
             and all(char >= " " and char != "\x7f" for char in value))
 
 

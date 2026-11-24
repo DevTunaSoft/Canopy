@@ -13,7 +13,7 @@ zero counts, with no source material. A host still owns the allowlists and the
 actual process launch; this module only proves the policy decision is bounded
 and shell-free.
 """
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from typing import Optional, Tuple
 
@@ -106,6 +106,19 @@ class LaunchPolicySnapshot:
         }
 
 
+def _read_labels(values):
+    """Materialize a caller-supplied label iterable, or return ``None``.
+
+    Reading a lazy or hostile iterable can fail with any built-in exception,
+    not just ``TypeError``/``ValueError``. The caller has no way to prove the
+    labels it did read were the complete set, so a failed read is unusable.
+    """
+    try:
+        return tuple(values)
+    except Exception:
+        return None
+
+
 def _deny(reason):
     return LaunchPolicySnapshot(STATUS_DENIED, reason)
 
@@ -148,26 +161,48 @@ def compose_launch_policy_snapshot(
     if type(app_id) is not str:
         raise SnapshotInputError("app_id must be a string")
 
-    # Normalize once: build_environment() consumes the allowlist iterable.
-    if isinstance(allow, (str, bytes)) or not hasattr(allow, "__iter__"):
-        return _deny(REASON_ENV_REJECTED)
-    try:
-        allow_names = tuple(allow)
-    except (TypeError, ValueError):
+    # Hostile-but-bounded label iterables must fail closed, never leak the
+    # built-in exception raised partway through a read to a host bridge. The
+    # sibling tested builders normalize once for the same reason.
+    allow_names = _read_labels(allow)
+    if allow_names is None:
         return _deny(REASON_ENV_REJECTED)
 
     try:
         env = build_environment(allow_names, source)
     except (EnvironmentAllowlistError, TypeError, ValueError):
         return _deny(REASON_ENV_REJECTED)
+    except Exception:
+        # A custom Mapping or value may fail with any built-in exception while
+        # being read. Nothing can be proven safe, so deny without echoing it.
+        return _deny(REASON_ENV_REJECTED)
+
+    # A host allowlist carrying a non-string label cannot ground an
+    # "argv_host_approved" claim, even when the app id itself would match.
+    if allowed_app_ids is not None:
+        if (isinstance(allowed_app_ids, (str, bytes, bytearray, dict))
+                or not isinstance(allowed_app_ids, Iterable)):
+            return _deny(REASON_ARGV_REJECTED)
+        approved = _read_labels(allowed_app_ids)
+        if approved is None or not all(type(item) is str for item in approved):
+            return _deny(REASON_ARGV_REJECTED)
+        allowed_app_ids = frozenset(approved)
 
     try:
         argv = gio_launch_argv(
             app_id, arguments, allowed_app_ids=allowed_app_ids)
     except (LaunchArgvError, TypeError, ValueError):
         return _deny(REASON_ARGV_REJECTED)
+    except Exception:
+        # A bounded token iterable may fail with any built-in exception. Deny
+        # instead of letting a raw exception pass as a policy decision.
+        return _deny(REASON_ARGV_REJECTED)
 
-    if not _env_agrees(env, allow_names) or not _argv_agrees(argv, app_id):
+    try:
+        agreed = _env_agrees(env, allow_names) and _argv_agrees(argv, app_id)
+    except Exception:
+        agreed = False
+    if not agreed:
         return _deny(REASON_SOURCE_DISAGREEMENT)
 
     return LaunchPolicySnapshot(

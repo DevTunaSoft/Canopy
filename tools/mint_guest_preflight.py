@@ -5,6 +5,7 @@ Reports only non-personal environment readiness facts. Never changes the
 default session, installs packages, runs Qt, or modifies system settings.
 """
 import argparse
+from collections.abc import Mapping
 import json
 import os
 from pathlib import Path
@@ -17,8 +18,14 @@ NEEDED = ("cmake", "pkg-config", "ninja", "xvfb-run")
 MAX_RELEASE_BYTES = 4096
 
 
+class PreflightError(ValueError):
+    """Caller supplied a wrong-type preflight input; fail closed."""
+
+
 def parse_release(data):
     """Parse the small ID, VERSION_ID and NAME subset of os-release safely."""
+    if not isinstance(data, str):
+        raise PreflightError("release data must be a string")
     result = {}
     for line in data.splitlines():
         if line.startswith("#") or "=" not in line:
@@ -40,7 +47,16 @@ def parse_release(data):
 
 def assess(release, env, available, qt_version=None):
     """Pure, deterministic readiness evaluation with explicit blockers."""
-    distro = release.get("ID", "").lower()
+    if not isinstance(release, Mapping) or not isinstance(env, Mapping) \
+            or not isinstance(available, Mapping):
+        raise PreflightError("release, env and available must be mappings")
+    version_id = release.get("VERSION_ID", "unknown")
+    if not isinstance(version_id, str):
+        raise PreflightError("VERSION_ID must be a string")
+    distro_value = release.get("ID", "")
+    if not isinstance(distro_value, str):
+        raise PreflightError("release ID must be a string")
+    distro = distro_value.lower()
     is_mint = distro == "linuxmint"
     desktop = env.get("XDG_CURRENT_DESKTOP", "")
     session = env.get("XDG_SESSION_TYPE", "")
@@ -83,7 +99,7 @@ def assess(release, env, available, qt_version=None):
         "visual_acceptance": "NOT_RUN",
         "status": "READY_FOR_TESTS" if not reasons else "BLOCKED",
         "mint_identified": is_mint,
-        "version_id": release.get("VERSION_ID", "unknown")[:30],
+        "version_id": version_id[:30],
         "desktop_session_present": bool(desktop),
         "cinnamon_identified": cinnamon,
         "graphical_display_present": has_display,

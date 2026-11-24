@@ -100,7 +100,11 @@ class PermissionPolicy:
 
     def __init__(self, grants: Iterable[Tuple[str, str]] = ()):
         self._grants = set()
-        for pair in grants:
+        try:
+            pairs = iter(grants)
+        except TypeError:
+            raise FocusIntentError("grants must be iterable") from None
+        for pair in pairs:
             self._add(pair)
 
     def _add(self, pair):

@@ -249,11 +249,18 @@ def _negotiation_view(negotiation):
         if not isinstance(feature, WindowStateFeature):
             raise SnapshotError("granted must hold WindowStateFeature values")
         features.append(feature.value)
+    supported = bool(granted)
+    # The status and the granted set must tell the same story: a bounded
+    # negotiation that claims SUPPORTED/PARTIAL with no granted features (or
+    # claims UNSUPPORTED while granting features) would compose as a false
+    # boot-ready/blocked claim. Cross-check before any record is built.
+    if supported != (status in ("SUPPORTED", "PARTIAL")):
+        raise SnapshotError("negotiation status disagrees with granted feature set")
     return NegotiationView(
         backend=backend,
         status=status,
         granted=tuple(sorted(features))[:MAX_GRANTS],
-        supported=bool(granted),
+        supported=supported,
     )
 
 

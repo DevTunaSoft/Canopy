@@ -13,6 +13,7 @@ escaping as a raw built-in exception or being estimated.
 
 No polling, background services, privileged calls, or network access.
 """
+import os
 import re
 from pathlib import Path
 
@@ -52,8 +53,11 @@ def parse_pss_kib(text):
     Only an exact ``Pss:`` field counts; ``Pss_Dirty:``, ``Pss_Anon:`` and
     similar totals are ignored. Raises MissingPssError when no total exists
     and MalformedPssError when one exists but is unusable. Never estimates.
+    Evidence that is not an exact ``str`` is rejected before line handling:
+    a hostile subclass overriding text methods cannot yield wrong-type lines
+    or manufacture a valid-looking total.
     """
-    if not isinstance(text, str):
+    if type(text) is not str:
         raise MalformedPssError("Pss evidence must be text")
     found = None
     for line in text.splitlines():
@@ -93,6 +97,8 @@ def read_pss_kib(pid, *, proc_root="/proc"):
     non-decimal or non-int/str pid fails closed with MalformedPssError before
     any path is built. No retry or polling.
     Pass *proc_root* to read an offline capture or to test on non-Linux hosts.
+    A non-str/non-PathLike *proc_root*, or one whose ``__fspath__`` does not
+    yield text, fails closed with MalformedPssError before any path is built.
     """
     if type(pid) is int:
         if pid <= 0:
@@ -109,7 +115,13 @@ def read_pss_kib(pid, *, proc_root="/proc"):
         pid_text = str(pid_value)
     else:
         raise MalformedPssError("invalid process id")
-    path = Path(proc_root) / pid_text / "smaps_rollup"
+    try:
+        root_text = os.fspath(proc_root)
+    except (TypeError, ValueError) as exc:
+        raise MalformedPssError("invalid proc root") from exc
+    if type(root_text) is not str:
+        raise MalformedPssError("invalid proc root")
+    path = Path(root_text) / pid_text / "smaps_rollup"
     try:
         text = path.read_text(encoding="utf-8")
     except (FileNotFoundError, NotADirectoryError, ProcessLookupError) as exc:

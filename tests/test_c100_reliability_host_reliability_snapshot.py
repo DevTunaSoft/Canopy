@@ -159,6 +159,57 @@ class HostReliabilitySnapshotTests(unittest.TestCase):
         self.assertEqual(record.status, snapshot.STATUS_OK)
         self.assertFalse(record.is_blocked)
 
+    def test_contradictory_startup_flags_fail_closed(self):
+        # ``READY`` derives safe_to_start=True, while a non-empty unwind
+        # tuple derives needs_rollback=True. Both cannot describe one durable
+        # decision: publishing STATUS_OK from these contradictory flags would
+        # be a false reliability claim.
+        decision = checkpoints.RecoveryDecision(
+            checkpoints.READY, ("shell",), ("shell",), "shell",
+            "ready but still unwinding")
+        channel = _clean_delivery()
+        with self.assertRaises(snapshot.SnapshotError):
+            snapshot.compose(
+                decision, channel.stats, channel.overflow_notices(),
+                _clean_switcher())
+
+    def test_overridden_startup_flags_fail_closed(self):
+        # A subclass still passes isinstance(), so the snapshot must re-derive
+        # the flags from the durable action/unwind tuple rather than trusting
+        # overridden properties that hide a real rollback.
+        class Forged(checkpoints.RecoveryDecision):
+            @property
+            def safe_to_start(self):
+                return True
+
+            @property
+            def needs_rollback(self):
+                return False
+
+        decision = Forged(
+            checkpoints.ROLLBACK, ("shell",), ("shell",), "shell",
+            "partial startup; unwind durable steps")
+        channel = _clean_delivery()
+        with self.assertRaises(snapshot.SnapshotError):
+            snapshot.compose(
+                decision, channel.stats, channel.overflow_notices(),
+                _clean_switcher())
+
+    def test_rollback_without_unwind_steps_is_still_blocked(self):
+        # recover() legitimately emits ROLLBACK with an empty unwind tuple
+        # when a crash precedes the first completed step. The consistency
+        # guard must not reject this legal degraded decision.
+        decision = checkpoints.RecoveryDecision(
+            checkpoints.ROLLBACK, (), (), None,
+            "partial startup; unwind durable steps")
+        channel = _clean_delivery()
+        record = snapshot.compose(
+            decision, channel.stats, channel.overflow_notices(),
+            _clean_switcher())
+        self.assertEqual(record.status, snapshot.STATUS_BLOCKED)
+        self.assertTrue(record.is_blocked)
+        self.assertEqual(record.startup.unwind_count, 0)
+
     def test_wrong_component_types_fail_closed(self):
         channel = _clean_delivery()
         good = (_clean_startup(), channel.stats, channel.overflow_notices(),

@@ -181,12 +181,27 @@ def _startup_view(decision):
         raise SnapshotError("unsupported recovery action")
     if type(decision.reason) is not str:
         raise SnapshotError("recovery reason must be a string")
+    completed = _tuple_of(decision.completed, "completed")
+    unwind = _tuple_of(decision.unwind, "unwind")
+    # safe_to_start and needs_rollback are derived fields, not independent
+    # inputs: the first follows the durable action, the second follows the
+    # durable unwind tuple. A caller can construct a decision whose action is
+    # safe while unwind steps remain, or subclass one whose overridden flags
+    # hide a real rollback. Either case lets _derive_status publish a false
+    # OK, so re-derive both and fail closed when they disagree.
+    expected_safe = decision.action in (START_FRESH, READY)
+    expected_rollback = bool(unwind)
+    if expected_safe and expected_rollback:
+        raise SnapshotError("startup action contradicts unwind steps")
+    if (_flag(decision.safe_to_start, "safe_to_start") != expected_safe
+            or _flag(decision.needs_rollback, "needs_rollback") != expected_rollback):
+        raise SnapshotError("startup flags contradict the durable decision")
     return StartupSnapshot(
         action=decision.action,
-        safe_to_start=_flag(decision.safe_to_start, "safe_to_start"),
-        needs_rollback=_flag(decision.needs_rollback, "needs_rollback"),
-        completed_count=len(_tuple_of(decision.completed, "completed")),
-        unwind_count=len(_tuple_of(decision.unwind, "unwind")),
+        safe_to_start=expected_safe,
+        needs_rollback=expected_rollback,
+        completed_count=len(completed),
+        unwind_count=len(unwind),
         reason=decision.reason[:MAX_REASON_CHARS],
     )
 

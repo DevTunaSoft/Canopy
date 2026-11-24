@@ -85,7 +85,12 @@ def _invalid_constant(value):
 
 def _nonempty_string(value, name, maximum):
     if (not isinstance(value, str) or not value or len(value) > maximum
-            or value != value.strip() or NAME_CONTROL.search(value)):
+            or value != value.strip() or NAME_CONTROL.search(value)
+            # NAME_CONTROL covers ASCII C0/DEL only. Host UI consumes display
+            # text, so non-printable Unicode (C1 controls, bidi overrides,
+            # zero-width/format characters, lone surrogates) must also fail
+            # closed instead of yielding a false VALID manifest verdict.
+            or any(not ch.isprintable() for ch in value)):
         raise PackValidationError(f"{name} must be a clean string, max {maximum} characters")
 
 

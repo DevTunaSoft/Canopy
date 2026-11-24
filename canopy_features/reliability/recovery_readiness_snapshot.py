@@ -180,6 +180,17 @@ def _startup_view(decision):
         raise SnapshotError("unsupported recovery action")
     if type(decision.completed) is not tuple or type(decision.unwind) is not tuple:
         raise SnapshotError("completed and unwind steps must be tuples")
+    # recover() only emits READY with a complete, unique, string-valued plan
+    # prefix. A caller-owned dataclass can still carry empty, duplicated or
+    # non-string steps; counting those as completed would publish a false
+    # ready claim with an inflated completed_count.
+    completed = decision.completed
+    if any(type(step) is not str or not step for step in completed):
+        raise SnapshotError("completed steps must be non-empty strings")
+    if len(set(completed)) != len(completed):
+        raise SnapshotError("completed steps must be unique")
+    if action == READY and not completed:
+        raise SnapshotError("ready recovery decision has no completed steps")
     safe_to_start = _flag(decision.safe_to_start, "safe_to_start")
     needs_rollback = _flag(decision.needs_rollback, "needs_rollback")
     # These flags are derived, not independent: a safe action never carries

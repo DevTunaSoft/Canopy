@@ -37,8 +37,8 @@ class FiveProductionPackContractTests(unittest.TestCase):
         self.assertNotIn("Photos_Option_2.png",self.cmake)
         self.assertNotIn("Music_Option_3.png",self.cmake)
         self.assertIn("anchors.centerIn: parent",self.tile)
-        self.assertIn("width: 54",self.tile)
-        self.assertIn("height: 54",self.tile)
+        self.assertIn("width: 62",self.tile)
+        self.assertIn("height: 62",self.tile)
 
     def test_production_pack_provenance_and_rollback(self):
         self.assertIn("source_manifest_sha256",self.provider)

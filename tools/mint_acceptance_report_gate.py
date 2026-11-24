@@ -41,6 +41,16 @@ def _reject_nonstandard(value):
     raise EvidenceError("non-finite JSON number rejected")
 
 
+def _reject_duplicate_keys(pairs):
+    """Reject ambiguous objects before json.loads keeps only the last key."""
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise EvidenceError("duplicate JSON key in report")
+        result[key] = value
+    return result
+
+
 def _report(directory):
     root = qt.safe_resource(directory, "evidence directory", directory=True)
     report_path = root / "report.json"
@@ -50,7 +60,11 @@ def _report(directory):
     if not raw or len(raw) > MAX_REPORT_BYTES:
         raise EvidenceError("report missing or oversized")
     try:
-        report = json.loads(raw.decode("utf-8"), parse_constant=_reject_nonstandard)
+        report = json.loads(raw.decode("utf-8"),
+                            parse_constant=_reject_nonstandard,
+                            object_pairs_hook=_reject_duplicate_keys)
+    except EvidenceError:
+        raise
     except (UnicodeError, ValueError) as exc:
         raise EvidenceError("invalid report JSON") from exc
     if type(report) is not dict or set(report) != FIXED_KEYS:

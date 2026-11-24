@@ -179,6 +179,23 @@ class MintEvidenceGateTests(unittest.TestCase):
         with self.assertRaises(gate.EvidenceError):
             self.check()
 
+    def test_duplicate_json_keys_cannot_launder_owner_approval_claim(self):
+        # A hostile report repeats a key so a raw reader sees an owner-approval
+        # PASS while json.loads keeps the later NOT_RUN. The parsed dict still
+        # matches the fixed schema, so a duplicate-blind gate would return PASS
+        # for a report that textually claims owner approval.
+        path = self.directory / "report.json"
+        text = json.dumps(self.report)
+        hidden = text.replace(
+            '"visual_owner_approval": "NOT_RUN"',
+            '"visual_owner_approval": "PASS", "visual_owner_approval": "NOT_RUN"',
+            1,
+        )
+        self.assertNotEqual(hidden, text)
+        path.write_text(hidden, encoding="utf-8")
+        with self.assertRaises(gate.EvidenceError):
+            self.check()
+
 
 if __name__ == "__main__":
     unittest.main()

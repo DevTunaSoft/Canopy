@@ -145,9 +145,17 @@ def move_selection(selection: SearchSelection, direction: str) -> SearchSelectio
 
 
 def selected_item(selection: SearchSelection) -> str | None:
-    """Return the active identifier without inventing a result for no matches."""
+    """Return the active identifier without inventing a result for no matches.
+
+    NO_FOCUS is an explicit "nothing active" claim. A selection that carries
+    it alongside results is contradictory input: clamping the sentinel to the
+    first result would report a valid selection that the caller never made.
+    Fail closed and let a real navigation set an index before claiming an item.
+    """
     if not isinstance(selection, SearchSelection):
         raise ValueError("selection must be a SearchSelection")
+    if selection.index == NO_FOCUS:
+        return None
     if not selection.results:
         return None
     index = max(0, min(selection.index, len(selection.results) - 1))

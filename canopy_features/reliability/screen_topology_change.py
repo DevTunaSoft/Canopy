@@ -7,6 +7,7 @@ real screen event arrives. This module only decides what changed and what a
 shell should do to recover; it does not prove any desktop behavior. Future
 integration must wire it into the compiled Qt application's screen signals.
 """
+from collections import deque
 from dataclasses import dataclass
 import re
 
@@ -179,7 +180,7 @@ class ScreenTopologyModel:
         self._history_limit = history_limit
         self._sequence = 0
         self._current = None
-        self._history = ()
+        self._history = deque(maxlen=history_limit)
 
     @property
     def current(self):
@@ -187,7 +188,8 @@ class ScreenTopologyModel:
 
     @property
     def history(self):
-        return self._history
+        """Immutable tuple snapshot of the bounded recent results."""
+        return tuple(self._history)
 
     def apply(self, topology):
         """Apply one observed snapshot and return its RecoveryResult."""
@@ -200,13 +202,13 @@ class ScreenTopologyModel:
         self._sequence += 1
         result = RecoveryResult(self._sequence, changes, actions, safe)
         self._current = topology
-        self._history = (self._history + (result,))[-self._history_limit:]
+        self._history.append(result)
         return result
 
     def reset(self):
         """Drop all observed state; the caller owns any real re-initialization."""
         self._current = None
-        self._history = ()
+        self._history.clear()
         self._sequence = 0
 
     @staticmethod

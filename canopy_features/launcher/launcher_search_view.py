@@ -150,7 +150,14 @@ def move_focus(view, direction):
         raise SearchViewError("direction must be a string")
 
     results = tuple(match.name for match in view.results)
-    selection = SearchSelection(results=results, index=view.selected_index)
+    try:
+        # A host or replayed record can hand us a view that compose never
+        # produced. Re-run the validating factory so duplicate result IDs do
+        # not survive into a new READY view with a false navigation claim.
+        checked = make_selection(results, query=view.key)
+    except ValueError as exc:
+        raise SearchViewError(str(exc)) from exc
+    selection = SearchSelection(results=checked.results, index=view.selected_index)
     try:
         moved = move_selection(selection, direction)
     except ValueError as exc:

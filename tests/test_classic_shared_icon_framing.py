@@ -56,8 +56,8 @@ class SharedIconFramingTests(unittest.TestCase):
         self.assertNotIn("painter.translate(", self.provider)
         self.assertNotIn("QFile::remove(", self.provider)
         self.assertIn("anchors.centerIn: parent", self.tile)
-        self.assertIn("width: 54", self.tile)
-        self.assertIn("height: 54", self.tile)
+        self.assertIn("width: 62", self.tile)
+        self.assertIn("height: 62", self.tile)
         self.assertNotIn("anchors.verticalCenterOffset", self.tile)
 
     def test_default_renderer_unchanged_terminal_derivative_not_reframed(self):

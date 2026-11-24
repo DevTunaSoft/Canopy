@@ -2,10 +2,11 @@
 
 Run: python -m unittest tests.test_c101_supervisor_gitops_worker -v
 """
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from unittest.mock import MagicMock, patch
 from pathlib import Path
 import tempfile
+import threading
 import unittest
 
 from canopy_supervisor import gitops
@@ -128,6 +129,37 @@ class WorkerHandleCleanupTests(unittest.TestCase):
         self.assertEqual(len(worker._processes), 1)
         worker.close()
         self.assertEqual(worker._processes, {})
+
+
+class LoopCleanupTests(unittest.TestCase):
+    def test_once_loop_releases_launcher_handles(self):
+        class CloseSpy:
+            def __init__(self):
+                self.closed = 0
+
+            def close(self):
+                self.closed += 1
+
+        with tempfile.TemporaryDirectory() as d:
+            store = MagicMock()
+            store.stop_path = Path(d) / "stop"
+            store.lock_path = Path(d) / "lock"
+            sup = Supervisor.__new__(Supervisor)
+            sup.config = {"poll_seconds": 0.001,
+                          "model": "opencode-go/x"}
+            sup.store = store
+            launcher = CloseSpy()
+            sup.launcher = launcher
+            sup.git = MagicMock()
+            sup.now = lambda: 0.0
+            sup._stop = threading.Event()
+            sup.step = lambda: {"tasks": []}
+            sup.shutdown = MagicMock()
+            with patch("canopy_supervisor.supervisor.state_module.exclusive_lock",
+                       return_value=nullcontext()):
+                sup._run_loop(once=True)
+            self.assertEqual(launcher.closed, 1)
+            self.assertFalse(sup.shutdown.called)
 
 
 class WorkerRedactTests(unittest.TestCase):

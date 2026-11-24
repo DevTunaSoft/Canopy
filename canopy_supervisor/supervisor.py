@@ -663,6 +663,12 @@ class Supervisor:
                 with state_module.exclusive_lock(self.store.lock_path):
                     self.shutdown()
                 self.store.stop_path.unlink(missing_ok=True)
+            else:
+                # A one-shot or bounded run must not signal workers, but it
+                # still has to drop in-process launcher handles on return.
+                close = getattr(self.launcher, "close", None)
+                if callable(close):
+                    close()
         return self.store.load()
 
     def shutdown(self) -> None:

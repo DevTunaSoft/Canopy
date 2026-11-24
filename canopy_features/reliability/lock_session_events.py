@@ -125,6 +125,7 @@ class Reconciler:
         self._seen = deque()
         self._seen_set = set()
         self._history = deque(maxlen=history_limit)
+        self._history_cache = None
         self._last_timestamp = None
         self._accepted = 0
 
@@ -138,8 +139,14 @@ class Reconciler:
 
     @property
     def history(self):
-        """Immutable tuple of the most recent transitions (bounded)."""
-        return tuple(self._history)
+        """Immutable tuple of the most recent transitions (bounded).
+
+        Built lazily on first read; only a committed transition appends to
+        the bounded deque and invalidates the cached view.
+        """
+        if self._history_cache is None:
+            self._history_cache = tuple(self._history)
+        return self._history_cache
 
     def observe(self, event):
         if type(event) is not SessionEvent:
@@ -167,6 +174,7 @@ class Reconciler:
         outcome = Outcome(TRANSITION, event, previous, current)
         if self._history.maxlen:
             self._history.append(outcome)
+            self._history_cache = None
         return outcome
 
     def _remember(self, fingerprint):

@@ -114,15 +114,14 @@ class DuplicateWindowTests(unittest.TestCase):
         self.assertEqual(result.duplicates, (42,))
         self.assertEqual(result.unmapped, ())
 
-    def test_duplicate_first_occurrence_wins_even_across_desktop_ids(self):
-        result = group_windows_by_desktop_id(
-            [rec(8, "firefox.desktop"),
-             rec(8, "org.gnome.Terminal.desktop")],
-            TRUSTED)
-        self.assertEqual(result.groups, (
-            WindowGroup("firefox.desktop", "Browser", (8,)),
-        ))
-        self.assertEqual(result.duplicates, (8,))
+    def test_duplicate_across_desktop_ids_fails_closed(self):
+        # A window ID cannot belong to two dock tiles; the former
+        # first-occurrence-wins behavior manufactured a false group claim.
+        with self.assertRaises(WindowGroupingError):
+            group_windows_by_desktop_id(
+                [rec(8, "firefox.desktop"),
+                 rec(8, "org.gnome.Terminal.desktop")],
+                TRUSTED)
 
     def test_duplicate_of_unmapped_window_still_reported(self):
         unknown = rec(4, "org.missing.App.desktop")

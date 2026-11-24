@@ -15,7 +15,9 @@ first-seen order. The host-supplied allowlist is hard-bounded to
 of the snapshot size; an over-bound allowlist fails closed. Desktop IDs and
 dock labels must also be display-safe: control, format, surrogate, private-use,
 noncharacter and line/paragraph separator code points are rejected so a bounded
-but hostile label cannot become a false trusted group claim.
+but hostile label cannot become a false trusted group claim. A window ID
+sighted under two different desktop IDs contradicts itself, so it fails closed
+instead of being silently attributed to the first-seen dock tile.
 """
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -89,7 +91,9 @@ def group_windows_by_desktop_id(windows, trusted_map, *,
     derives it from its own launcher catalog so no desktop-ID list is duplicated
     here. It is bounded to ``MAX_TRUSTED_APPLICATIONS`` entries, like every other
     caller-supplied collection. Returns ``GroupingResult``; unknown desktop IDs
-    become ``unmapped`` and repeated window IDs become ``duplicates``.
+    become ``unmapped`` and repeated sightings of the same window ID with the
+    same desktop ID become ``duplicates``. One window ID claimed by two desktop
+    IDs is contradictory and fails closed.
     """
     if not isinstance(trusted_map, Mapping):
         raise WindowGroupingError("trusted_map must be a mapping")
@@ -110,7 +114,7 @@ def group_windows_by_desktop_id(windows, trusted_map, *,
             or not hasattr(windows, "__iter__")):
         raise WindowGroupingError("windows must be an iterable of WindowRecord")
 
-    seen = set()
+    seen = {}  # window_id -> first desktop_id; contradiction fails closed
     duplicates = []
     unmapped = []
     groups = {}  # desktop_id -> window_ids, insertion order is deterministic
@@ -130,9 +134,12 @@ def group_windows_by_desktop_id(windows, trusted_map, *,
             raise WindowGroupingError("invalid window desktop_id")
 
         if record.window_id in seen:
+            if seen[record.window_id] != record.desktop_id:
+                raise WindowGroupingError(
+                    "duplicate window id with conflicting desktop id")
             duplicates.append(record.window_id)
             continue
-        seen.add(record.window_id)
+        seen[record.window_id] = record.desktop_id
 
         label = allowlist.get(record.desktop_id)
         if label is None:

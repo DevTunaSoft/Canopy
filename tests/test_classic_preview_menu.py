@@ -211,6 +211,23 @@ class ClassicPreviewMenuTests(unittest.TestCase):
                     menu.paths(bad)
                 self.assertEqual(menu.status(bad), "UNSAFE")
 
+    def test_uninstall_rolls_back_desktop_if_manifest_unlink_fails(self):
+        desktop = self.install()
+        original = desktop.read_bytes()
+        marker = menu.paths(self.home)["manifest"]
+        real_unlink = Path.unlink
+
+        def fail_on_manifest(path, *args, **kwargs):
+            if path == marker:
+                raise OSError("simulated locked manifest")
+            return real_unlink(path, *args, **kwargs)
+
+        with patch.object(Path, "unlink", fail_on_manifest):
+            with self.assertRaisesRegex(menu.RegistrationError, "restored"):
+                self.uninstall()
+        self.assertEqual(desktop.read_bytes(), original)
+        self.assertEqual(menu.status(self.home), "INSTALLED")
+
     def test_wrong_type_resources_use_domain_error(self):
         for bad in (7, None, True, [], {}, b"bin"):
             with self.subTest(value=repr(bad)):

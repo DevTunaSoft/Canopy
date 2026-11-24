@@ -261,11 +261,29 @@ def uninstall(home):
     if status(home) != "INSTALLED":
         raise RegistrationError("not exact-byte owned; removed nothing")
     marker = _marker(p)
-    if (marker is None or p["desktop"].is_symlink()
-            or _sha(p["desktop"].read_bytes()) != marker["sha256"]):
+    desktop, manifest = p["desktop"], p["manifest"]
+    try:
+        original = desktop.read_bytes()
+        mode = stat.S_IMODE(desktop.stat().st_mode)
+    except OSError as exc:
+        raise RegistrationError("registration changed during uninstall") from exc
+    if (marker is None or desktop.is_symlink()
+            or _sha(original) != marker["sha256"]):
         raise RegistrationError("registration changed during uninstall")
-    p["desktop"].unlink()
-    p["manifest"].unlink()
+    desktop.unlink()
+    try:
+        manifest.unlink()
+    except (OSError, ValueError) as exc:
+        # Deterministic bounded rollback: the desktop entry is at most 8 KiB
+        # (checked by status), so restoring its exact bytes is bounded too.
+        try:
+            with desktop.open("xb") as handle:
+                handle.write(original)
+            desktop.chmod(mode)
+            detail = "uninstall failed; desktop entry restored"
+        except (OSError, ValueError):
+            detail = "uninstall failed; desktop entry could not be restored"
+        raise RegistrationError(detail) from exc
     # Retain directories, which may contain unrelated files.
     return "UNINSTALLED"
 

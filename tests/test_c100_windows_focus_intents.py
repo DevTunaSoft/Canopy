@@ -155,6 +155,19 @@ class FocusIntentTests(unittest.TestCase):
         with self.assertRaisesRegex(FocusIntentError, "limit"):
             policy.grant("one.too.many", "dst.app")
 
+    def test_non_iterable_grants_fail_closed_with_domain_error(self):
+        # A non-iterable grants source must leave a raw TypeError nowhere:
+        # callers of the policy constructor get the module's domain error.
+        for bad in (None, 7, object(), 3.5, True):
+            with self.subTest(grants=bad):
+                with self.assertRaisesRegex(FocusIntentError, "grants"):
+                    PermissionPolicy(bad)
+
+    def test_iterable_grants_are_still_accepted(self):
+        policy = PermissionPolicy([("app.a", "app.b")])
+        self.assertEqual(policy.grant_count, 1)
+        self.assertTrue(policy.authorize("app.a", "app.b"))
+
     def test_invalid_inputs_are_rejected(self):
         with self.assertRaises(FocusIntentError):
             FocusBroker(None)

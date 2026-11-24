@@ -259,6 +259,24 @@ class FailClosedTests(unittest.TestCase):
         self.assertFalse(decision.ready)
         self.assertIsNone(decision.target)
 
+    def test_unhashable_dock_action_denied(self):
+        # An approved record whose action is an unhashable container is a
+        # source disagreement: it must deny with the module's domain reason
+        # and carry no payload, never leak a raw TypeError from set membership.
+        for action in (["launch"], {"launch": 1}):
+            with self.subTest(action=repr(action)):
+                bad = DockActionPreview(
+                    dock_mod.APPROVED, dock_mod.REASON_OK, action=action,
+                    target="Files", pinned_index=0, running_pids=0)
+                decision = compose_shell_action_decision(
+                    bad, launcher_empty(), files_denied())
+                self.assertEqual(decision.status, STATUS_DENIED)
+                self.assertEqual(decision.reason, REASON_SOURCE_DISAGREEMENT)
+                self.assertFalse(decision.ready)
+                self.assertIsNone(decision.surface)
+                self.assertIsNone(decision.action)
+                self.assertIsNone(decision.target)
+
     def test_printable_unicode_target_still_ready(self):
         bad = DockActionPreview(
             dock_mod.APPROVED, dock_mod.REASON_OK, action="launch",

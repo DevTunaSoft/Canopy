@@ -138,6 +138,7 @@ def _dock_candidate(preview):
         return None
     if (preview.status != DOCK_APPROVED
             or preview.reason != DOCK_REASON_OK
+            or type(preview.action) is not str
             or preview.action not in _DOCK_ACTIONS
             or not _text_ok(preview.target)
             or type(preview.pinned_index) is not int

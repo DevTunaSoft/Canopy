@@ -166,21 +166,31 @@ def _normalize_favorites(favorites, catalog_ids):
     return tuple(kept)
 
 
-def _build_rows(pairs, matches, favorites, *, blank):
-    """Turn an ordered sequence of (index, score) into projected rows."""
+def _build_rows(pairs, matches, favorites, *, blank, limit):
+    """Build at most ``limit`` projected rows from validated sources.
+
+    A blank query used to materialize a row for every catalog entry and let
+    the caller slice the result down to ``limit``. Favorites are now emitted
+    first in display order, then catalog rows, stopping as soon as the bounded
+    result is full. Ordering, flags and the later agreement checks are unchanged.
+    """
     rows = []
     if blank:
-        # Favorites first in their own display order, then the rest of the
-        # catalog in catalog order. ``matches`` still carries the validated
-        # full catalog in order (blank rank_matches returns every title).
+        favset = frozenset(favorites)
         by_id = {app_id: (index, title) for index, (app_id, title)
-                 in enumerate(pairs)}
-        ordered = [(by_id[app_id][0], ANY) for app_id in favorites]
-        ordered.extend((index, ANY) for index in range(len(pairs))
-                       if pairs[index][0] not in favorites)
-        for index, score in ordered:
-            app_id, title = pairs[index]
-            rows.append((app_id, title, score, app_id in favorites, index))
+                 in enumerate(pairs) if app_id in favset}
+        for app_id in favorites:
+            if len(rows) >= limit:
+                break
+            index, title = by_id[app_id]
+            rows.append((app_id, title, ANY, True, index))
+        if len(rows) < limit:
+            for index, (app_id, title) in enumerate(pairs):
+                if app_id in favset:
+                    continue
+                rows.append((app_id, title, ANY, False, index))
+                if len(rows) >= limit:
+                    break
     else:
         for match in matches:
             index = match.index
@@ -246,5 +256,5 @@ def project_results(query, catalog, *, favorites=(), limit=MAX_RESULTS):
         raise ProjectionError(str(exc)) from exc
 
     blank = not key
-    raw = _build_rows(pairs, matches, favs, blank=blank)
-    return _finalize(key, raw[:limit], favs)
+    raw = _build_rows(pairs, matches, favs, blank=blank, limit=limit)
+    return _finalize(key, raw, favs)

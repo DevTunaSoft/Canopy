@@ -27,6 +27,21 @@ def _has_nonprintable(text: str) -> bool:
     return any(unicodedata.category(char) in _UNSAFE_CATEGORIES for char in text)
 
 
+def _entry_lines(text: str):
+    """Yield entry lines split on LF only, the Desktop Entry line ending.
+
+    ``str.splitlines()`` also breaks on C0 separators (\x0b, \x0c,
+    \x1c-\x1e), NEL (\x85) and Zl/Zp (\u2028/\u2029). Those scalars are in
+    ``_UNSAFE_CATEGORIES`` but splitlines() consumes them before the per-line
+    guard can see them, so a hostile line is silently rewritten into two
+    clean-looking fields and a valid entry is claimed. Splitting on LF alone
+    leaves them inside the raw line for the guard to reject. One trailing CR
+    (CRLF) is dropped so files written on Windows keep parsing.
+    """
+    for raw in text.split("\n"):
+        yield raw[:-1] if raw.endswith("\r") else raw
+
+
 def _check_max_bytes(max_bytes: int) -> None:
     """Reject a non-positive or non-int byte limit before any read occurs."""
     if type(max_bytes) is not int or max_bytes < 1:
@@ -180,7 +195,7 @@ def parse(
     group: str | None = None
     continued = ""
 
-    for raw in text.splitlines():
+    for raw in _entry_lines(text):
         line = continued + raw.strip()
         continued = ""
         if not line or line.startswith("#"):

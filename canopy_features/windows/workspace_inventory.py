@@ -58,10 +58,20 @@ class WorkspaceInventory:
 
     workspaces: tuple
     problems: tuple
+    _identifiers_cache: object = field(default=None, repr=False, compare=False)
     _lookup_cache: object = field(default=None, repr=False, compare=False)
 
     def identifiers(self):
-        return tuple(workspace.identifier for workspace in self.workspaces)
+        """Immutable canonical identifier tuple, built lazily once.
+
+        Both this tuple and the lookup map in ``get()`` are derived from the
+        immutable ``workspaces`` tuple, so neither needs invalidation.
+        """
+        if self._identifiers_cache is None:
+            object.__setattr__(
+                self, "_identifiers_cache",
+                tuple(workspace.identifier for workspace in self.workspaces))
+        return self._identifiers_cache
 
     def get(self, identifier):
         """Exact-case lookup; no path resolution or code execution.

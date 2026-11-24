@@ -93,7 +93,8 @@ def _atomic_write(path: Path, payload: bytes) -> None:
 class StartupCheckpoints:
     """Single-owner journal of ordered startup steps in one state directory."""
 
-    def __init__(self, state_dir: Path, steps: Sequence[str]):
+    def __init__(self, state_dir: str | os.PathLike, steps: Sequence[str]):
+        """Accept a str or os.PathLike state directory; other types fail closed."""
         if not isinstance(state_dir, (str, os.PathLike)):
             raise CheckpointError("state directory must be a path")
         try:

@@ -26,13 +26,26 @@ FILES = "Files"
 BROWSER = "Browser"
 
 
+def raw_pinned(items):
+    """Build a malformed snapshot to exercise the preview's defensive guard.
+
+    PinnedItems now rejects duplicate IDs at construction (PR #484). Bypassing
+    __post_init__ here is deliberate: a downstream consumer must still fail
+    closed if a malformed snapshot reaches it through deserialization or a
+    future caller that does not use the constructor.
+    """
+    snapshot = object.__new__(PinnedItems)
+    object.__setattr__(snapshot, "items", items)
+    return snapshot
+
+
 def compose(pinned_items, *, kind=IntentKind.LAUNCH, reason="installed",
-            running=()):
+            running=(), raw=False):
     focus = DockFocusOrder(items=[FILES, BROWSER])
     focus.focus(FILES)
     return compose_dock_action_preview(
         ClickIntent(kind, FILES, reason),
-        PinnedItems(items=pinned_items),
+        raw_pinned(pinned_items) if raw else PinnedItems(items=pinned_items),
         IndicatorState(sequence=7, owners=tuple(running)),
         focus,
         FILES,
@@ -52,23 +65,27 @@ class DuplicatePinnedIdTests(unittest.TestCase):
         self.assertIsNone(preview.indicator_sequence)
         self.assertFalse(preview.focus_was_on_target)
 
+    def test_duplicate_pin_rejected_at_construction(self):
+        with self.assertRaisesRegex(ValueError, "duplicate app_id"):
+            PinnedItems(items=(FILES, FILES))
+
     def test_duplicate_target_pin_denied(self):
-        self.assert_invalid_pinned(compose((FILES, FILES)))
+        self.assert_invalid_pinned(compose((FILES, FILES), raw=True))
 
     def test_triple_target_pin_denied(self):
-        self.assert_invalid_pinned(compose((FILES, FILES, FILES)))
+        self.assert_invalid_pinned(compose((FILES, FILES, FILES), raw=True))
 
     def test_duplicate_other_pin_denied(self):
-        self.assert_invalid_pinned(compose((BROWSER, FILES, FILES)))
+        self.assert_invalid_pinned(compose((BROWSER, FILES, FILES), raw=True))
 
     def test_duplicate_pin_denied_for_focus_intent(self):
         self.assert_invalid_pinned(
             compose((FILES, FILES), kind=IntentKind.FOCUS, reason="running",
-                    running=((101, FILES),))
+                    running=((101, FILES),), raw=True)
         )
 
     def test_duplicate_and_malformed_pin_denied(self):
-        self.assert_invalid_pinned(compose((FILES, FILES, 42)))
+        self.assert_invalid_pinned(compose((FILES, FILES, 42), raw=True))
 
     def test_unique_reordered_pins_still_approved(self):
         preview = compose((BROWSER, FILES))

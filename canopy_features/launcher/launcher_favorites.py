@@ -15,6 +15,7 @@ This is a modular component only. It does not prove a working desktop until a
 host wires it into the compiled Qt application.
 """
 
+import collections.abc
 import json
 import os
 from pathlib import Path
@@ -56,7 +57,8 @@ def _installed_set(installed_ids):
     and unhashable entries collapse to this module's domain error instead of
     leaking a raw ``TypeError``.
     """
-    if isinstance(installed_ids, (str, bytes, bytearray, dict)):
+    if isinstance(installed_ids, (str, bytes, bytearray,
+                                  collections.abc.Mapping)):
         raise FavoritesError("installed ids must be a collection of ids")
     try:
         iterator = iter(installed_ids)

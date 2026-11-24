@@ -15,12 +15,12 @@ Build a polished, familiar Linux desktop shell. Classic is macOS-inspired withou
 - No unsupported performance, compatibility, or test claims.
 
 ## Workflow
-1. Synchronize with origin/main; inspect existing work, open PRs, tests, and docs before choosing a task.
-2. Select one bounded milestone, avoid duplicated concurrent work, and use a feature branch and draft PR.
+1. Fetch origin/main and the designated integration branch; use the current integration tip for independent Classic engineering, or main for explicitly main-targeted work; inspect existing work, open PRs, tests, and docs before choosing a task.
+2. Select one bounded milestone, avoid duplicated concurrent work, and use an isolated feature branch; reuse an existing scoped PR where appropriate. Draft status never prevents commits or pushes.
 3. Implement tests alongside code. Run available formatting, linting, unit, integration, and packaging checks; distinguish PASS, FAIL, BLOCKED, NOT RUN.
 4. On failure diagnose root cause, fix it, add regression coverage, and rerun affected tests.
 5. Update README, architecture, quality budgets, and status docs when behavior changes.
-6. Commit and push verified changes to GitHub; never merge failing or unverified work. Continue to the next independent task only when safe.
+6. Commit and push verified changes to GitHub; never merge failing or unverified work. Continue to the next eligible independent task without waiting for unrelated release gates.
 7. Record measured performance with machine details, methodology, and baseline; do not invent numbers.
 
 ## Visual acceptance
@@ -65,3 +65,6 @@ P0 gaps require explicit resolution or a clearly documented blocked state.
 it is not a whole-product success or proof of Mint, compositor, usability,
 security or visual correctness. Keep tests honest (all-skipped is not green),
 use negative controls and fail-closed cleanup in every shell lifecycle.
+
+## Autonomous integration and durable checkpoints
+Commit and push each coherent verified change to its owned branch; verify the remote SHA. Preserve unfinished work on its isolated branch with explicit test status, never present it as verified. Routine independently reviewed nonvisual changes may integrate into the designated integration branch after applicable exact-SHA checks, dependency review and post-integration regression tests. Final release requirements apply to final release integration, not independent development. Named PR holds, branch protections, owner visual approval and high-risk security approval remain binding. Do not merge #151 or #278 into main or override their specific holds. Keep at least two nonoverlapping workstreams active when eligible work exists; prioritize wiring existing modules into real runtime behavior over new offline-only helpers. A blocked task is not complete; continue unrelated tasks. Do not create duplicate supervisors or redundant PRs.

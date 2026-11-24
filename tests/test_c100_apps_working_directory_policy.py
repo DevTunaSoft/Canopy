@@ -159,6 +159,46 @@ class WorkingDirectoryPolicyTests(unittest.TestCase):
             decision.path = "/other"
 
 
+class WindowsUnicodeContainmentTests(unittest.TestCase):
+    """Root containment must not use Unicode/casefold equivalence.
+
+    ``PureWindowsPath`` compares names with ``str.lower()``; U+212A KELVIN
+    SIGN lowercases to ASCII ``k`` even though it is a distinct Windows
+    filename. Treating it as the root name would claim a sibling directory
+    is inside the allowed root.
+    """
+
+    ROOT = "C:\\apps\\work"
+
+    def policy(self, *roots, directories=()):
+        fs = FakeFilesystem(directories)
+        return WorkingDirectoryPolicy(roots or (self.ROOT,), filesystem=fs,
+                                      flavor="windows")
+
+    def test_unicode_casefold_sibling_is_outside_root(self):
+        sibling = "C:\\apps\\wor\u212a"  # wor + KELVIN SIGN
+        policy = self.policy(directories=(self.ROOT, sibling))
+        decision = policy.evaluate(sibling, self.ROOT)
+        self.assertEqual(decision.status, "REJECTED")
+        self.assertEqual(decision.reason, "OUTSIDE_ALLOWED_ROOT")
+        self.assertIsNone(decision.path)
+        self.assertFalse(decision.allowed)
+
+    def test_ascii_case_insensitive_descendant_still_allowed(self):
+        # Negative control: real Windows case variants remain in scope.
+        policy = self.policy(directories=("C:\\APPS\\WORK\\sub",))
+        decision = policy.evaluate("C:\\APPS\\WORK\\sub", self.ROOT)
+        self.assertEqual(decision.status, "ALLOWED")
+        self.assertEqual(decision.path, "C:\\APPS\\WORK\\sub")
+
+    def test_posix_case_distinct_sibling_is_outside_root(self):
+        fs = FakeFilesystem(("/apps/work", "/apps/Work"))
+        policy = WorkingDirectoryPolicy(("/apps/work",), filesystem=fs,
+                                        flavor="posix")
+        decision = policy.evaluate("/apps/Work", "/apps/work")
+        self.assertEqual(decision.reason, "OUTSIDE_ALLOWED_ROOT")
+
+
 class HostFilesystemTests(unittest.TestCase):
     """Real filesystem check on the host running this suite (no Mint claim)."""
 

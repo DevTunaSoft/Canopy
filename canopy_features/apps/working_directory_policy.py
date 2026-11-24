@@ -25,6 +25,13 @@ _VIEW_FAULTS = (OSError, RuntimeError, TypeError, ValueError)
 _ALLOWED = "ALLOWED"
 _REJECTED = "REJECTED"
 
+# Windows filenames are case-insensitive for ASCII letters, but Unicode
+# ``str.lower()`` folds characters such as U+212A KELVIN SIGN to ASCII ``k``
+# even though Windows treats them as distinct names. Compare only ASCII case
+# variants and keep every non-ASCII code point exact.
+_ASCII_LOWER = str.maketrans(
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz")
+
 
 class WorkingDirectoryPolicyError(ValueError):
     """Invalid policy configuration, not a rejected launch request."""
@@ -72,6 +79,7 @@ class WorkingDirectoryPolicy:
             self._path_type = PureWindowsPath
         else:
             raise WorkingDirectoryPolicyError("unsupported path flavor")
+        self._windows = flavor == "windows"
 
         if isinstance(allowed_roots, (str, bytes)) or not isinstance(
                 allowed_roots, (tuple, list)):
@@ -115,14 +123,26 @@ class WorkingDirectoryPolicy:
             return None
         return resolved
 
+    def _containment_parts(self, value):
+        """Exact comparison key: ASCII case-folded on Windows, exact on POSIX.
+
+        ``PurePath.__eq__`` and membership in ``parents`` use ``str.lower()``
+        for Windows paths, which equates distinct Unicode filenames. Building
+        the key from normalized parts avoids that implicit casefold.
+        """
+        parts = self._path_type(value).parts
+        if self._windows:
+            return tuple(part.translate(_ASCII_LOWER) for part in parts)
+        return tuple(parts)
+
     def _within_roots(self, resolved):
-        candidate = self._path_type(resolved)
+        candidate = self._containment_parts(resolved)
         for root in self._roots:
             base_value = self._canonical(root)
             if base_value is None:
                 continue
-            base = self._path_type(base_value)
-            if candidate == base or base in candidate.parents:
+            base = self._containment_parts(base_value)
+            if len(candidate) >= len(base) and candidate[:len(base)] == base:
                 return True
         return False
 

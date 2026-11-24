@@ -38,7 +38,14 @@ def _fold_component(component):
     character whose lowercase form is not itself a single code point, or whose
     lowercase does not round-trip under ``str.upper()`` (compatibility letters
     such as ``ẞ``/``ß``, ``K``/``k`` and ``Å``/``å`` are distinct NTFS names).
+
+    On Windows the OS invariant case table (used by ``ntpath.normcase``) is
+    authoritative for NTFS identity; use it so no compatibility letter can be
+    folded into a distinct name. Elsewhere there is no host table for the
+    Windows convention, so keep the conservative Unicode fold below.
     """
+    if os.name == "nt":
+        return os.path.normcase(component)
     folded = []
     for char in component:
         lowered = char.lower()

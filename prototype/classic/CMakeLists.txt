@@ -19,6 +19,7 @@ qt_add_qml_module(canopy-classic-spike
 qt_add_resources(canopy-classic-spike "canopy-original-art"
     PREFIX "/Canopy/Classic"
     FILES assets/approved/manifest.json
+          assets/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png
           assets/wallpapers/blue-current.svg
           assets/ui/folder-blue.svg
           assets/brand/penguin-launcher.svg
@@ -57,5 +58,10 @@ add_custom_target(canopy-classic-production-icons ALL
     DEPENDS "${CANOPY_FIVE_ICON_PACK}/manifest.json")
 
 install(TARGETS canopy-classic-spike RUNTIME DESTINATION bin)
+# The complete verified eight-icon source set and exact approved lake master
+# are installed next to the Qt binary for automatic normal startup.
+# The original wave remains a historical fixture only.
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/assets/approved/"
+    DESTINATION share/canopy/classic/approved)
 install(DIRECTORY "${CANOPY_FIVE_ICON_PACK}/"
     DESTINATION share/canopy/classic/icons)

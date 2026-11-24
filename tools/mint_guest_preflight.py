@@ -9,6 +9,7 @@ from collections.abc import Mapping
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -58,6 +59,16 @@ def assess(release, env, available, qt_version=None):
         raise PreflightError("release ID must be a string")
     distro = distro_value.lower()
     is_mint = distro == "linuxmint"
+    # A copied or stale os-release can carry a Linux Mint ID but name a
+    # different distribution in PRETTY_NAME. That contradiction is not a
+    # verified Mint identity, so it must not produce a readiness PASS.
+    pretty_name = release.get("PRETTY_NAME")
+    name_consistent = (pretty_name is None or (
+        isinstance(pretty_name, str)
+        and re.match(r"linux mint(?:\s|$)",
+                     pretty_name.strip().casefold()) is not None
+    ))
+    mint_identified = is_mint and name_consistent
     desktop = env.get("XDG_CURRENT_DESKTOP", "")
     session = env.get("XDG_SESSION_TYPE", "")
     # The desktop field may be colon-separated, but individual entries
@@ -76,6 +87,8 @@ def assess(release, env, available, qt_version=None):
     reasons = []
     if not is_mint:
         reasons.append("guest is not verified as Linux Mint")
+    elif not name_consistent:
+        reasons.append("release metadata contradicts Linux Mint identity")
     if not has_display:
         reasons.append("no graphical display for declared session")
     if not desktop:
@@ -98,7 +111,7 @@ def assess(release, env, available, qt_version=None):
         "runtime_functional_test": "NOT_RUN",
         "visual_acceptance": "NOT_RUN",
         "status": "READY_FOR_TESTS" if not reasons else "BLOCKED",
-        "mint_identified": is_mint,
+        "mint_identified": mint_identified,
         "version_id": version_id[:30],
         "desktop_session_present": bool(desktop),
         "cinnamon_identified": cinnamon,

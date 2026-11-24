@@ -130,6 +130,33 @@ def profile_for(name: str) -> BackendProfile:
     return BackendProfile(name, frozenset())
 
 
+_NEGOTIATION_STATUSES = frozenset({"SUPPORTED", "PARTIAL", "UNSUPPORTED"})
+
+
+def _valid_grants(granted):
+    """Return the grant set only if its container and values are trusted."""
+    if not isinstance(granted, frozenset):
+        return frozenset()
+    for feature in granted:
+        if not isinstance(feature, WindowStateFeature):
+            return frozenset()
+    return granted
+
+
+def _effective_grants(negotiation):
+    """Grants usable for a decision: well-typed and consistent with the record."""
+    if (not isinstance(negotiation.backend, str)
+            or not negotiation.backend
+            or not isinstance(negotiation.status, str)
+            or negotiation.status not in _NEGOTIATION_STATUSES):
+        return frozenset()
+    granted = _valid_grants(negotiation.granted)
+    # SUPPORTED/PARTIAL promise at least one grant; UNSUPPORTED promises none.
+    if (negotiation.status == "UNSUPPORTED") != (not granted):
+        return frozenset()
+    return granted
+
+
 @dataclass(frozen=True)
 class Negotiation:
     """The agreed feature set for one backend and one requested set."""
@@ -140,14 +167,14 @@ class Negotiation:
 
     @property
     def supported(self) -> bool:
-        return bool(self.granted)
+        return bool(_valid_grants(self.granted))
 
     def allows(self, action: WindowStateAction) -> bool:
         try:
             feature = ACTION_FEATURE.get(action)
         except TypeError:
             return False
-        return feature is not None and feature in self.granted
+        return feature is not None and feature in _effective_grants(self)
 
 
 def negotiate(backend, requested: Collection[WindowStateFeature]) -> Negotiation:
@@ -227,7 +254,7 @@ class WindowStateController:
         if feature is None:
             return TransitionResult("REJECTED", self._state, "UNKNOWN_ACTION")
 
-        if feature not in self._negotiation.granted:
+        if feature not in _effective_grants(self._negotiation):
             return TransitionResult("REJECTED", self._state, "FEATURE_NOT_GRANTED")
 
         next_state = VALID_TRANSITIONS.get((self._state, action))

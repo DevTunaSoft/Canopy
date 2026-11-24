@@ -281,5 +281,71 @@ class ContractConsistencyTests(unittest.TestCase):
         self.assertNotIn(pair, VALID_TRANSITIONS)
 
 
+class NegotiationContractGuardTests(unittest.TestCase):
+    """A malformed record must not manufacture a capability at a decision point."""
+
+    def bad_records(self):
+        return (
+            Negotiation("x11", "SUPPORTED", frozenset()),
+            Negotiation("x11", "PARTIAL", frozenset()),
+            Negotiation("headless", "UNSUPPORTED", ALL),
+            Negotiation("x11", "APPROVED", ALL),
+            Negotiation("", "SUPPORTED", ALL),
+            Negotiation(None, "SUPPORTED", ALL),
+            Negotiation("x11", "SUPPORTED", {WindowStateFeature.MINIMIZE}),
+            Negotiation(
+                "x11",
+                "SUPPORTED",
+                [WindowStateFeature.MINIMIZE, WindowStateFeature.MINIMIZE],
+            ),
+            Negotiation("x11", "SUPPORTED", "minimize"),
+            Negotiation("x11", "SUPPORTED", frozenset({"minimize"})),
+        )
+
+    def test_malformed_records_never_allow_an_action(self):
+        for record in self.bad_records():
+            with self.subTest(status=record.status, granted=repr(record.granted)):
+                self.assertFalse(record.allows(MIN))
+                self.assertFalse(record.allows(MAX))
+                self.assertFalse(record.allows(RES))
+
+    def test_contradictory_record_cannot_drive_a_transition(self):
+        record = Negotiation("headless", "UNSUPPORTED", ALL)
+        controller = WindowStateController(record)
+        result = controller.apply(MIN)
+        self.assertFalse(result.ok)
+        self.assertEqual(result.reason, "FEATURE_NOT_GRANTED")
+        self.assertIs(controller.state, WindowState.NORMAL)
+        self.assertFalse(controller.allows(MIN))
+
+    def test_hostile_grant_container_does_not_leak_raw_error(self):
+        record = Negotiation("x11", "SUPPORTED", "minimize")
+        self.assertFalse(record.allows(MIN))
+        result = WindowStateController(record).apply(MIN)
+        self.assertFalse(result.ok)
+        self.assertEqual(result.reason, "FEATURE_NOT_GRANTED")
+
+    def test_hostile_grants_do_not_claim_supported(self):
+        self.assertFalse(Negotiation("x11", "SUPPORTED", "minimize").supported)
+        self.assertFalse(
+            Negotiation("x11", "SUPPORTED", ["minimize"]).supported)
+
+    def test_negotiated_records_remain_valid(self):
+        supported = negotiate("x11", ALL)
+        self.assertTrue(supported.supported)
+        self.assertTrue(supported.allows(MIN))
+        self.assertEqual(
+            WindowStateController(supported).apply(MIN).state,
+            WindowState.MINIMIZED,
+        )
+        partial = negotiate("wayland", ALL)
+        self.assertEqual(partial.status, "PARTIAL")
+        self.assertTrue(partial.allows(MAX))
+        self.assertFalse(partial.allows(MIN))
+        unsupported = negotiate("headless", ALL)
+        self.assertFalse(unsupported.supported)
+        self.assertFalse(unsupported.allows(MIN))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -243,10 +243,15 @@ def _close_view(decisions):
     if type(decisions) not in (tuple, list):
         raise SnapshotError("close decisions must be a sequence")
     window_ids, statuses, visible_flags, notes = [], [], [], []
+    seen_ids = set()
     for decision in decisions[:MAX_CLOSE_DECISIONS]:
         if not isinstance(decision, IntentResult):
             raise SnapshotError("close decisions must hold IntentResult values")
-        window_ids.append(_bounded_text(decision.window_id, "window id"))
+        window_id = _bounded_text(decision.window_id, "window id")
+        if window_id in seen_ids:
+            raise SnapshotError("duplicate window id in close decisions")
+        seen_ids.add(window_id)
+        window_ids.append(window_id)
         status = _text(decision.status, "close decision status")
         if status not in CLOSE_STATUSES:
             raise SnapshotError("unknown close decision status")

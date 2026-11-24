@@ -224,8 +224,15 @@ def reconcile(previous, current):
 
     shared_previous = [identifier for identifier in previous_ids if identifier in current_by_id]
     shared_current = [identifier for identifier in current_ids if identifier in previous_by_id]
+    # One id->index map per side keeps this step O(n). Repeated list.index()
+    # scans here were O(n^2). Positions are computed on the FILTERED shared
+    # lists, exactly as the old index() calls did, so results are unchanged.
+    previous_positions = {identifier: index
+                          for index, identifier in enumerate(shared_previous)}
+    current_positions = {identifier: index
+                         for index, identifier in enumerate(shared_current)}
     reordered = tuple(identifier for identifier in shared_current
-                      if shared_previous.index(identifier) != shared_current.index(identifier))
+                      if previous_positions[identifier] != current_positions[identifier])
 
     return Reconciliation(
         inventory=current,

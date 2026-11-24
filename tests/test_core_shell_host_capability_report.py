@@ -355,7 +355,6 @@ class SecondBatchTests(unittest.TestCase):
 
 class PurityTests(unittest.TestCase):
     def test_no_new_imports_or_process_launch(self):
-        source = Path(ShellHost.__module__.replace(".", "/")).with_suffix("")
         module_file = Path(__file__).resolve().parents[1] / "canopy_core/shell_host.py"
         tree = ast.parse(module_file.read_text(encoding="utf-8"))
         forbidden = {"subprocess", "socket", "time", "random", "importlib"}
@@ -367,6 +366,29 @@ class PurityTests(unittest.TestCase):
                 self.assertNotIn((node.module or "").split(".")[0], forbidden)
             elif isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
                 self.assertNotIn(node.func.attr, {"system", "popen", "Popen", "exec"})
+
+
+class TestHygieneTests(unittest.TestCase):
+    def test_no_unused_locals_in_capability_test_modules(self):
+        """Dead locals in test scaffolding obscure the contract under test."""
+        roots = Path(__file__).resolve().parents[1]
+        modules = (
+            "tests/test_core_shell_host_capability_report.py",
+            "tests/test_core_shell_host_capabilities_event.py",
+            "tests/test_core_capability_cli.py",
+        )
+        findings = []
+        for rel in modules:
+            tree = ast.parse((roots / rel).read_text(encoding="utf-8"))
+            for fn in (n for n in ast.walk(tree)
+                       if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))):
+                loads = {n.id for n in ast.walk(fn)
+                         if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Load)}
+                for node in ast.walk(fn):
+                    if (isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store)
+                            and node.id != "_" and node.id not in loads):
+                        findings.append(f"{rel}:{node.lineno} {fn.name}:{node.id}")
+        self.assertEqual(findings, [], "unused locals: " + ", ".join(findings))
 
 
 if __name__ == "__main__":

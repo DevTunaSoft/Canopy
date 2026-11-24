@@ -66,7 +66,7 @@ class CapabilityEventTests(unittest.TestCase):
         self.assertEqual(len(events), 2)
 
     def test_no_subscription_or_host_state_retained(self):
-        bus, events = observed()
+        bus, _ = observed()
         bus.subscribe(CAPABILITIES_TOPIC, bus._trusted[CAPABILITIES_TOPIC][0])
         before = bus.subscription_count
         h = host()
@@ -116,7 +116,7 @@ class CapabilityEventTests(unittest.TestCase):
             self.assertNotIn(marker, rendered)
 
     def test_cleanup_on_close_is_deterministic(self):
-        bus, events = observed()
+        bus, _ = observed()
         token = bus.subscribe(CAPABILITIES_TOPIC, bus._trusted[CAPABILITIES_TOPIC][0])
         host().publish_capability_report(records(), bus)
         bus.close()

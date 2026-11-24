@@ -85,6 +85,11 @@ class DockClickMapper:
 
         if name in self._running:
             self._pending = self._pending - {name}
+            if not self._launcher_enabled:
+                # A running label must not resurrect a valid click claim once
+                # the host has disabled the launcher: FOCUS is actionable, so
+                # emitting it would contradict the enabled flag. Fail closed.
+                return ClickIntent(IntentKind.IGNORE, name, "launcher-disabled")
             return ClickIntent(IntentKind.FOCUS, name, "running")
 
         if name in self._pending:

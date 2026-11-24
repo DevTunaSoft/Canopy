@@ -16,11 +16,13 @@ caller-supplied keys cannot become output fields, and no live alias to a caller
 container is retained. Invalid or oversized evidence fails closed with
 :class:`SnapshotError`.
 """
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 import math
 from types import MappingProxyType
 
-from canopy_features.performance.frame_pacing import FramePacingReport
+from canopy_features.performance.frame_pacing import (
+    FramePacingReport, MEASUREMENT_SOURCE,
+)
 from canopy_features.performance.launch_latency import SCHEMA as LAUNCH_SCHEMA
 
 SCHEMA = 1
@@ -191,6 +193,33 @@ def _project_launch(value):
     return MappingProxyType(projected)
 
 
+def _project_frame(value):
+    """Validate the embedded report's measurement claims and flags.
+
+    ``FramePacingReport`` is a frozen dataclass whose constructor does not
+    validate, so a caller can bypass ``parse_frame_times`` and supply a report
+    claiming a real GPU capture. The snapshot's negative claims are absolute;
+    embedded evidence that asserts the opposite is a contradictory
+    passing/failing flag pair and a false performance-safe claim. Re-derive
+    the two claim fields from the caller's real report rather than trusting
+    an overridable ``as_dict()`` method, and fail closed on disagreement.
+    """
+    if not isinstance(value, FramePacingReport):
+        raise SnapshotError("frame pacing evidence must be a FramePacingReport")
+    try:
+        claim = value.real_gpu_measurement
+        source = value.measurement_source
+    except (AttributeError, TypeError) as exc:
+        raise SnapshotError("frame pacing evidence is structurally unsafe") from exc
+    if claim is not False:
+        raise SnapshotError("frame pacing real-measurement flag contradicts snapshot")
+    if type(source) is not str or source != MEASUREMENT_SOURCE:
+        raise SnapshotError("frame pacing source label contradicts offline snapshot")
+    # Freeze the validated projection now: as_dict() must never call back into
+    # a caller-overridable method or re-read a field that could change.
+    return MappingProxyType(asdict(value))
+
+
 def _thaw(value):
     """Return a fresh JSON-friendly copy with no live alias to the record."""
     if isinstance(value, MappingProxyType):
@@ -208,6 +237,7 @@ class PerformanceSnapshot:
     evidence_kinds: tuple
     evidence_count: int
     frame_pacing: object
+    frame_pacing_view: object
     memory_growth: object
     launch_latency: object
     pss_kib: object
@@ -222,10 +252,7 @@ class PerformanceSnapshot:
             "schema": self.schema,
             "evidence_kinds": list(self.evidence_kinds),
             "evidence_count": self.evidence_count,
-            "frame_pacing": (
-                None if self.frame_pacing is None
-                else self.frame_pacing.as_dict()
-            ),
+            "frame_pacing": _thaw(self.frame_pacing_view),
             "memory_growth": _thaw(self.memory_growth),
             "launch_latency": _thaw(self.launch_latency),
             "pss_kib": self.pss_kib,
@@ -243,9 +270,7 @@ def compose_snapshot(*, frame_pacing=None, memory_growth=None,
     Each keyword is optional; omitted evidence is recorded as ``None``. The
     negative-claim fields are hardcoded and cannot be supplied by the caller.
     """
-    if frame_pacing is not None and not isinstance(frame_pacing,
-                                                    FramePacingReport):
-        raise SnapshotError("frame pacing evidence must be a FramePacingReport")
+    frame = None if frame_pacing is None else _project_frame(frame_pacing)
     if pss_kib is not None:
         _int(pss_kib, "pss_kib", minimum=0, maximum=MAX_PSS_KIB)
     memory = None if memory_growth is None else _project_memory(memory_growth)
@@ -256,6 +281,7 @@ def compose_snapshot(*, frame_pacing=None, memory_growth=None,
         evidence_kinds=EVIDENCE_KINDS,
         evidence_count=sum(item is not None for item in evidence),
         frame_pacing=frame_pacing,
+        frame_pacing_view=frame,
         memory_growth=memory,
         launch_latency=launch,
         pss_kib=pss_kib,

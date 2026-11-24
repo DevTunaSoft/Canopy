@@ -164,7 +164,10 @@ def compose_launch_outcome(
 
     Events naming another application are counted but never applied. A success
     is terminal; otherwise failures within the retry budget yield RETRY and a
-    larger count yields GIVE_UP. All inputs are validated before any decision.
+    larger count yields GIVE_UP. One event sequence may only carry one outcome
+    class: a success and a failure sharing an id are contradictory caller
+    input and fail closed rather than producing a false launch-success claim.
+    All inputs are validated before any decision.
     """
     if type(app_id) is not str or DESKTOP_ID.fullmatch(app_id) is None:
         raise OutcomeInputError("invalid desktop application id")
@@ -181,6 +184,8 @@ def compose_launch_outcome(
     relevant = 0
     succeeded = 0
     failures = 0
+    success_ids = set()
+    failure_ids = set()
     for event in events:
         event_count += 1
         if event_count > max_events:
@@ -193,12 +198,24 @@ def compose_launch_outcome(
         relevant += 1
         if isinstance(event, LaunchSucceeded):
             succeeded += 1
+            is_success = True
         elif isinstance(event, LaunchFailed):
             failures += 1
+            is_success = False
         elif event.code == 0:
             succeeded += 1
+            is_success = True
         else:
             failures += 1
+            is_success = False
+        if is_success:
+            if event.sequence in failure_ids:
+                raise OutcomeInputError("contradictory launch outcome event id")
+            success_ids.add(event.sequence)
+        else:
+            if event.sequence in success_ids:
+                raise OutcomeInputError("contradictory launch outcome event id")
+            failure_ids.add(event.sequence)
 
     if relevant == 0:
         return LaunchOutcomeSnapshot(STATUS_IDLE, REASON_NO_EVENTS,

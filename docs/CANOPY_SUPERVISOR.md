@@ -7,6 +7,13 @@ results. This document supplements, and does not replace, `AGENTS.md`,
 `README.md`, `docs/ARCHITECTURE.md`, `docs/QUALITY.md` and the coordination
 ledger proposed in PR #133.
 
+**Scope:** this describes the bounded Windows OpenCode supervisor pilot only.
+It is not the global Canopy agent contract. Hermes separately maintains at
+least four active engineering subagents plus itself, promotes eligible
+verified nonvisual PRs through the normal integration lifecycle, and continues
+work while visual approval is pending. The pilot's three-worker cap and draft
+PR output remain specific to this supervisor implementation.
+
 ## Recommended: one-click Windows Autopilot (no recurring PowerShell)
 
 The repository now includes `tools/Enable-Canopy-Autopilot.cmd`.
@@ -72,8 +79,10 @@ That workflow keeps reporting PR/CI status with read-only permissions. This
 supervisor does not add, edit or duplicate a GitHub Actions workflow.
 
 It is **not** a merge bot. There is no merge, approval, force-push or label
-operation anywhere in the implementation. A draft PR is the terminal publish
-action and always requires human review.
+operation anywhere in the implementation. Within this pilot, a draft PR is the
+terminal publish action and must receive independent exact-SHA review; human
+approval remains mandatory for owner visual decisions, high-risk security
+decisions and final release acceptance.
 
 ## Safety invariants
 

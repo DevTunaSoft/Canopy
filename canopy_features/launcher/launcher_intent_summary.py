@@ -113,11 +113,34 @@ def _iterable(value, label):
         raise LauncherIntentError(f"{label} must be an iterable") from None
 
 
+def _safe_items(value, label):
+    """Yield caller-supplied items, translating read failures to the domain error.
+
+    A lazy, config-backed or otherwise hostile iterable may raise while it is
+    being consumed, not merely when ``iter()`` is called. Such a source is not
+    valid caller input, so expose the module's domain error instead of leaking
+    a raw built-in exception past the composition boundary. The iterator is
+    consumed at most one item at a time, preserving the caller's existing
+    bounds.
+    """
+    iterator = _iterable(value, label)
+    while True:
+        try:
+            item = next(iterator)
+        except StopIteration:
+            return
+        except LauncherIntentError:
+            raise
+        except Exception:
+            raise LauncherIntentError(f"{label} could not be read") from None
+        yield item
+
+
 def _normalize_catalog(catalog) -> Tuple[Tuple[str, str], ...]:
     """Validate (desktop_id, title) pairs; reject any malformed entry."""
     pairs = []
     seen = set()
-    for item in _iterable(catalog, "catalog"):
+    for item in _safe_items(catalog, "catalog"):
         if len(pairs) >= MAX_CATALOG_ENTRIES:
             raise LauncherIntentError("catalog exceeds entry bound")
         if isinstance(item, (str, bytes, bytearray)):
@@ -147,7 +170,7 @@ def _normalize_favorites(favorites, catalog_ids) -> Tuple[str, ...]:
     kept = []
     seen = set()
     raw_count = 0
-    for app_id in _iterable(favorites, "favorites"):
+    for app_id in _safe_items(favorites, "favorites"):
         # Count EVERY supplied id, including unknown and duplicate ones. The
         # old kept-only check let an unbounded stream of skipped ids drain in
         # full before any bound was applied.

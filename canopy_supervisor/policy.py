@@ -117,10 +117,12 @@ def validate_task(task: object, protected: object = None) -> dict:
                                          for d in deps):
         raise PolicyError("depends_on must be a list of valid task ids")
     base = task.get("base", "main")
+    if not isinstance(base, str):
+        raise PolicyError("invalid base ref")
     if base != "main" and not BRANCH.fullmatch(base):
         raise PolicyError("invalid base ref")
     branch = task.get("branch", f"feat/canopy-supervisor-{task_id}")
-    if not BRANCH.fullmatch(branch):
+    if not isinstance(branch, str) or not BRANCH.fullmatch(branch):
         raise PolicyError("invalid branch name")
     extra = {}
     for key in ("campaign", "kind", "publish", "artifacts", "max_attempts"):

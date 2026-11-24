@@ -140,6 +140,13 @@ def normalize_preflight(report):
     if type(blockers) is not list or len(blockers) > MAX_BLOCKERS:
         raise EvidenceError("preflight blockers outside bounds")
     clean_blockers = [_bounded_text(item, "blocker") for item in blockers]
+    # Cross-field consistency: the preflight producer emits READY_FOR_TESTS
+    # only when its blocker list is empty. A captured report that claims both
+    # is internally contradictory; normalizing it would surface a false
+    # guest-ready claim. Fail closed with the documented domain error before
+    # any readiness/success value can be derived from it.
+    if status == "READY_FOR_TESTS" and clean_blockers:
+        raise EvidenceError("READY_FOR_TESTS contradicts non-empty blockers")
     commands = report.get("commands_present")
     if type(commands) is not dict:
         raise EvidenceError("commands_present must be an object")

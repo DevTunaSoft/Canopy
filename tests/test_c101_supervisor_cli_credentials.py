@@ -42,6 +42,13 @@ class CredentialArgumentTests(unittest.TestCase):
                     cli._state_root(SimpleNamespace(state_root=value))
                 self.assertNotIn(PLACEHOLDER, str(caught.exception))
 
+    def test_wrong_type_data_home_fails_closed(self):
+        for value in ([], {}, False, 123):
+            with self.subTest(value_type=type(value).__name__):
+                with self.assertRaises(credentials.CredentialError) as caught:
+                    credentials.get_opencode_api_key(data_home=value)
+                self.assertNotIn(PLACEHOLDER, str(caught.exception))
+
 
 if __name__ == "__main__":
     unittest.main()

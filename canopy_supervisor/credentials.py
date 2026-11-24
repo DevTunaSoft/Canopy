@@ -39,6 +39,8 @@ def get_opencode_api_key(explicit: str | None = None, data_home: Path | None = N
     if token.strip():
         return token.strip()
 
+    if data_home is not None and not isinstance(data_home, (str, os.PathLike)):
+        raise CredentialError("credential data_home must be a path")
     base = Path(data_home or os.environ.get("OPENCODE_DATA_HOME") or
                 (Path.home() / ".local" / "share" / "opencode"))
     auth_file = base / "auth.json"

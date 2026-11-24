@@ -95,6 +95,10 @@ NEGOTIATION_KEYS = frozenset({
     "backend", "status", "granted", "supported",
 })
 
+# Durable startup actions that cannot be published as a ready component.
+# Kept as a local literal: this pure module imports only structural helpers.
+BLOCKED_ACTIONS = frozenset({"ROLLBACK", "FAIL_CLOSED"})
+
 
 class ReadinessError(ValueError):
     """Malformed, unbounded or unrecognized host readiness input."""
@@ -152,6 +156,34 @@ def _check_view(value, keys, label):
     return view
 
 
+def _startup_ready(view, label):
+    """Fail closed on a startup detail that cannot back a ready status.
+
+    The aggregate ``status`` token and the startup booleans are each bounded
+    and individually legal, but a caller may pair ``OK`` with an unsafe or
+    rolling-back startup. Re-derive the rollback flag from the durable unwind
+    count instead of trusting the caller's boolean, require strict bools, and
+    type-check the action before any membership test so an unhashable label
+    cannot leak a raw ``TypeError``.
+    """
+    action = view["action"]
+    safe = view["safe_to_start"]
+    rollback = view["needs_rollback"]
+    unwind = view["unwind_count"]
+    if type(action) is not str:
+        raise ReadinessError(label + " action token is unsupported")
+    if type(unwind) is not int:
+        raise ReadinessError(label + " unwind count is invalid")
+    if type(safe) is not bool or type(rollback) is not bool:
+        raise ReadinessError(label + " ready flags are not bool")
+    expected_rollback = unwind > 0
+    if rollback is not expected_rollback:
+        raise ReadinessError(label + " rollback flag contradicts unwind count")
+    if safe and rollback:
+        raise ReadinessError(label + " ready and rollback flags contradict")
+    return safe and not rollback and action not in BLOCKED_ACTIONS
+
+
 def _security(record):
     r = _mapping(record, SECURITY_KEYS, "security snapshot")
     _token(r["status"], frozenset({"SNAPSHOT"}), "security status")
@@ -178,6 +210,8 @@ def _reliability(record):
     _check_view(r["startup"], STARTUP_KEYS, "reliability startup")
     _check_view(r["delivery"], DELIVERY_KEYS, "reliability delivery")
     _check_view(r["switcher"], SWITCHER_KEYS, "reliability switcher")
+    if status == "OK" and not _startup_ready(r["startup"], "reliability startup"):
+        raise ReadinessError("reliability status contradicts blocked startup")
     return status
 
 

@@ -75,7 +75,7 @@ class DockInnerFramingReviewTests(unittest.TestCase):
     def test_card_corner_movement_is_rejected(self):
         cx, cy = self.centers[0]
         with self.assertRaisesRegex(ComparisonError, "silhouette corner"):
-            self.simulate(self.centers + [(cx - 26, cy - 26)])
+            self.simulate(self.centers + [(cx - 30, cy - 30)])
 
     def test_missing_and_mismatched_screenshots_fail_closed(self):
         with self.assertRaises(ComparisonError):

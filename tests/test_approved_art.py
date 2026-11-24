@@ -44,7 +44,8 @@ class ApprovedArtworkTests(unittest.TestCase):
         wallpaper = (REPO / "prototype/classic/Wallpaper.qml").read_text()
         self.assertIn("canopyApprovedMode", qml)
         self.assertIn("image://canopy-dock/", qml)
-        self.assertIn("canopyApprovedWallpaperUrl", wallpaper)
+        self.assertIn("Canopy_Classic_Master_Wallpaper_1920x1080.png", wallpaper)
+        self.assertIn("canopyLandscapeWallpaperUrl", wallpaper)
         self.assertNotIn("ShaderEffect", wallpaper)
 
     def test_tampered_png_rejected(self):

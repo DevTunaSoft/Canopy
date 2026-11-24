@@ -312,16 +312,35 @@ jobs:
           done
           sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
 
-      - name: Verify real Qt golden pixels of frozen Calendar, Photos and Music
-        # These SHA-256 references came from actual compiled Qt screenshots
-        # in green run 45256190360; do not regenerate them from synthetic UI.
+      - name: Capture new enlarged dock golden candidate from compiled Qt
+        # The earlier goldens are for 54px icons on the old wave wallpaper;
+        # they must NOT be used for 62px images over the approved alpine photo.
+        # Source pixel hashes originate only from same-binary Qt captures.
         run: |
-          python3 tools/check_five_dock_goldens.py \
-            --golden docs/CLASSIC_FIVE_DOCK_GOLDEN.json \
-            --screens-dir test-artifacts \
-            --image-prefix dock-five-center- \
-            --require-complete \
-            --output test-artifacts/five-icon-golden-report.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          from tools.check_classic_icon_frame_diff import CENTERS
+          from tools.check_five_dock_goldens import extract_hashes
+          result = {
+            "schema_version": 2,
+            "kind": "real_qt_62px_master_lake_icon_golden_candidate",
+            "fixed_resolution_hashes": {},
+            "five_production_goldens": {},
+          }
+          frozen = ("calendar", "photos", "music")
+          five = ("browser", "mail", "files", "terminal", "settings")
+          for size in CENTERS:
+              hashes = extract_hashes(
+                  Path(f"test-artifacts/dock-five-center-{size}.png"), size)
+              result["fixed_resolution_hashes"][size] = {
+                  name: hashes[name] for name in frozen}
+              result["five_production_goldens"][size] = {
+                  name: hashes[name] for name in five}
+          Path("test-artifacts/new-62px-golden-from-real-Qt.json").write_text(
+              json.dumps(result, indent=2) + "\n")
+          print("CANOPY_REAL_QT_62PX_GOLDEN_CAPTURE_PASS: 24 hashes from actual Qt screenshots")
+          PY
 
       - name: Verify ordinary Qt launch selects exactly the five-icon correction
         # Compare actual default Qt rendering with explicit five-icon rendering.

@@ -64,7 +64,7 @@ class ApprovedManifestContractTests(unittest.TestCase):
         self.assertIn("return 3;", cpp)
         self.assertIn("canopyApprovedMode", dock)
         self.assertIn("image://canopy-dock/", dock)
-        self.assertIn("canopyApprovedWallpaperUrl", wallpaper)
+        self.assertIn("Canopy_Classic_Master_Wallpaper_1920x1080.png", wallpaper)
 
 
 if __name__ == "__main__":

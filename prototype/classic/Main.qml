@@ -208,8 +208,10 @@ ApplicationWindow {
         width: Math.min(root.width - 32, dockRow.implicitWidth + 2 * canopyTheme.dockPadding)
         height: canopyTheme.dockSize
         radius: canopyTheme.cornerRadius
-        color: canopyApprovedMode ? "#b0d6e8f6" : canopyTheme.dockSurface
-        border.color: canopyApprovedMode ? "#e1faffff" : canopyTheme.dockBorder
+        // Lightweight translucent glass; no blur/shader/background polling.
+        // Alpine master scenery remains visible behind the dock.
+        color: canopyApprovedMode ? "#72d6e8f6" : canopyTheme.dockSurface
+        border.color: canopyApprovedMode ? "#9afaffff" : canopyTheme.dockBorder
         border.width: 1
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom

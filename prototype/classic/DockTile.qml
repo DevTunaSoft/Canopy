@@ -19,10 +19,12 @@ Button {
           + iconName.toLowerCase() + ".svg"
     readonly property bool roundedArtActive: canopyApprovedMode
     readonly property bool iconReady: iconArt.status === Image.Ready
-    width: 58
-    height: 70
-    implicitWidth: 58
-    implicitHeight: 70
+    // Larger artwork in the real Qt dock, using the same approved source.
+    // The button remains centered in its own layout slot.
+    width: 66
+    height: 76
+    implicitWidth: 66
+    implicitHeight: 76
     padding: 0
     hoverEnabled: true
     onClicked: tile.activated(tile.iconName)
@@ -36,9 +38,9 @@ Button {
             // the tall (70px) button. Keep an equal visual gap on both
             // sides of the 88px dock, at every tested resolution.
             anchors.centerIn: parent
-            width: 56
-            height: 56
-            radius: 16
+            width: 64
+            height: 64
+            radius: 18
             visible: tile.hovered || tile.activeFocus
             color: tile.hovered ? "#30ffffff" : "#18ffffff"
             border.color: tile.activeFocus ? "#aac9f2ff" : "transparent"
@@ -60,11 +62,10 @@ Button {
             id: iconArt
             objectName: "canopyDockIcon"
             anchors.centerIn: parent
-            // A centered 54px image inside a 70px dock tile leaves 8px
-            // on top and bottom. The old topMargin: 2 pushed every icon
-            // visually high, despite having correct rounded corners.
-            width: 54
-            height: 54
+            // A centered 62px image inside a 76px tile is genuinely
+            // 15% larger on screen, without changing source PNG pixels.
+            width: 62
+            height: 62
             source: tile.iconUrl
             sourceSize: Qt.size(192, 192)
             fillMode: Image.PreserveAspectFit

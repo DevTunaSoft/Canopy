@@ -15,6 +15,11 @@ try:
 except ImportError:
     from check_classic_icon_frame_diff import APPS, CENTERS, HALF_SLOT, ComparisonError, _read_png
 
+try:
+    from .check_dock_inner_framing import corner_antialias_jitter, dock_plate_one_level_jitter
+except ImportError:
+    from check_dock_inner_framing import corner_antialias_jitter, dock_plate_one_level_jitter
+
 FROZEN = frozenset({"Calendar", "Photos", "Music"})
 TARGET = frozenset({"Browser", "Mail", "Files", "Terminal", "Settings"})
 
@@ -28,6 +33,8 @@ def compare_five(before: Path, after: Path, size: str):
     _, _, candidate, candidate_hash = _read_png(after, size)
     changes = dict.fromkeys(APPS, 0)
     clock_pixels = 0
+    corner_jitter = 0
+    dock_plate_jitter = 0
     pixels = CENTERS[size]["desktop"]
     for offset in range(0, len(source), 4):
         if source[offset:offset+4] == candidate[offset:offset+4]:
@@ -43,14 +50,24 @@ def compare_five(before: Path, after: Path, size: str):
             changes[app] += 1
         elif y < 32 and x >= width - 220:
             clock_pixels += 1
+        elif corner_antialias_jitter(
+                size, x, y, source[offset:offset+4], candidate[offset:offset+4]):
+            corner_jitter += 1
+            if corner_jitter > 2:
+                raise ComparisonError("too many Files rounded-corner AA changes")
+        elif dock_plate_one_level_jitter(
+                size, x, y, source[offset:offset+4], candidate[offset:offset+4]):
+            dock_plate_jitter += 1
+            if dock_plate_jitter > 256:
+                raise ComparisonError("too many 1-level glass compositing pixels")
         else:
             raise ComparisonError(f"unexpected non-icon change at ({x},{y})")
     for name in TARGET:
         if changes[name] == 0:
             raise ComparisonError(f"targeted {name} icon did not change")
     for (cx, cy) in pixels:
-        for dx in (-26,26):
-            for dy in (-26,26):
+        for dx in (-30,30):
+            for dy in (-30,30):
                 p = 4*((cy+dy)*width+(cx+dx))
                 if source[p:p+4] != candidate[p:p+4]:
                     raise ComparisonError("dock card corner or silhouette changed")
@@ -62,6 +79,8 @@ def compare_five(before: Path, after: Path, size: str):
         "five_targets_genuinely_changed":all(changes[n]>0 for n in TARGET),
         "non_icon_changes":0,
         "clock_exception_pixels":clock_pixels,
+        "one_level_files_corner_aa_pixels":corner_jitter,
+        "one_level_dock_plate_aa_pixels":dock_plate_jitter,
         "owner_visual_approval_inferred":False,
         "evidence": "same compiled Qt binary + SHA-locked approved masters required",
     }

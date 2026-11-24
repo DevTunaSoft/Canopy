@@ -294,7 +294,22 @@ int main(int argc, char *argv[]) {
         return 0;
     }
     const int approvedIndex = args.indexOf(QStringLiteral("--approved-art-dir"));
-    const bool approvedMode = approvedIndex >= 0;
+    // Normal desktop launch automatically selects the 8 verified masters.
+    // CLI test/experimental flags remain explicitly opt-in and deterministic.
+    const QStringList noPromptFlags = {QStringLiteral("--enable-system-apps")};
+    const bool normalLaunch = args.size() == 1 ||
+        (args.size() == 2 && noPromptFlags.contains(args.at(1)));
+    const QDir appDir(QCoreApplication::applicationDirPath());
+    const QString installedMasterRoot =
+        appDir.absoluteFilePath(QStringLiteral("../share/canopy/classic/approved"));
+    const QString developmentMasterRoot =
+        appDir.absoluteFilePath(QStringLiteral("../../prototype/classic/assets/approved"));
+    const QString autoApprovedRoot =
+        QFileInfo::exists(installedMasterRoot + QStringLiteral("/manifest.json"))
+            ? installedMasterRoot : developmentMasterRoot;
+    const bool autoApprovedMode = approvedIndex < 0 && normalLaunch &&
+        QFileInfo::exists(autoApprovedRoot + QStringLiteral("/manifest.json"));
+    const bool approvedMode = approvedIndex >= 0 || autoApprovedMode;
     const bool framingReviewMode = args.contains(QStringLiteral("--icon-framing-review"));
     // Dock CONTENT-only framing review: never change QML tile/card geometry.
     const bool dockInnerReviewMode = args.contains(QStringLiteral("--dock-inner-framing-review"));
@@ -394,11 +409,14 @@ int main(int argc, char *argv[]) {
     }
     QString approvedRoot;
     if (approvedMode) {
-        if (approvedIndex + 1 >= args.size() || args.at(approvedIndex + 1).startsWith(QLatin1Char('-'))) {
+        if (!autoApprovedMode &&
+            (approvedIndex + 1 >= args.size() ||
+             args.at(approvedIndex + 1).startsWith(QLatin1Char('-')))) {
             qCritical() << "APPROVED_ART_FAIL: missing --approved-art-dir PATH";
             return 2;
         }
-        const QString requested = args.at(approvedIndex + 1);
+        const QString requested =
+            autoApprovedMode ? autoApprovedRoot : args.at(approvedIndex + 1);
         QString error;
         if (!verifyExactArtwork(requested, !landscapeMode, &error)) {
             qCritical().noquote() << "APPROVED_ART_FAIL:" << error;
@@ -407,7 +425,7 @@ int main(int argc, char *argv[]) {
         approvedRoot = QDir(requested).canonicalPath();
         qInfo() << (landscapeMode ?
             "CANOPY_APPROVED_ART_VERIFIED: eight exact PNG icons; landscape wallpaper separately checked" :
-            "CANOPY_APPROVED_ART_VERIFIED: eight exact PNG icons and legacy blue wave");
+            "CANOPY_APPROVED_ART_VERIFIED: eight exact PNG icons; alpine lake master is bundled");
     }
     // The new art is a proposal only; verify it separately and never
     // overwrite or bypass the eight SHA-locked, user-approved master PNGs.
@@ -470,6 +488,18 @@ int main(int argc, char *argv[]) {
                    "at 192/384/576 pixels; Calendar/Photos/Music excluded";
         return 0;
     }
+    // Verify the *actual bundled approved master bytes*, not a filename or
+    // visual approximation. This runs once at application start, no daemon.
+    QFile alpineMaster(QStringLiteral(
+        ":/Canopy/Classic/assets/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png"));
+    if (!alpineMaster.open(QIODevice::ReadOnly) ||
+        QString::fromLatin1(QCryptographicHash::hash(
+            alpineMaster.readAll(), QCryptographicHash::Sha256).toHex()) !=
+            QStringLiteral("8c6cab50a0977fc129c0d2a20523d9361646f36da66f2f3f2b2436a0d9001381")) {
+        qCritical() << "CANOPY_MASTER_WALLPAPER_FAIL: approved alpine PNG missing or SHA-256 invalid";
+        return 3;
+    }
+    qInfo() << "CANOPY_MASTER_WALLPAPER_VERIFIED: exact owner-approved alpine lake PNG";
     QQmlApplicationEngine engine;
     if (approvedMode) {
         // Source PNGs were SHA-verified above; transform copies IN MEMORY
@@ -564,9 +594,7 @@ int main(int argc, char *argv[]) {
                      : QString());
     engine.rootContext()->setContextProperty(
         QStringLiteral("canopyApprovedWallpaperUrl"),
-        approvedMode ? QUrl::fromLocalFile(
-            approvedRoot + QStringLiteral("/wallpaper/canopy-wave-preview.png")).toString()
-                     : QString());
+        QStringLiteral("qrc:/Canopy/Classic/assets/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png"));
     engine.load(QUrl(QStringLiteral("qrc:/Canopy/Classic/Main.qml")));
     if (engine.rootObjects().isEmpty())
         return 1;
@@ -835,7 +863,7 @@ int main(int argc, char *argv[]) {
             if (landscapeMode)
                 qInfo() << "SELF_TEST_PASS: validated custom landscape wallpaper loaded";
             else
-                qInfo() << "SELF_TEST_PASS: original SVG wallpaper image loaded";
+                qInfo() << "SELF_TEST_PASS: exact approved alpine lake master wallpaper loaded";
             const QPointF wallpaperOrigin = wallpaper->mapToItem(window->contentItem(), QPointF(0, 0));
             const bool wallpaperFits = qAbs(wallpaperOrigin.x()) <= 1
                 && qAbs(wallpaperOrigin.y()) <= 1
@@ -860,7 +888,7 @@ int main(int argc, char *argv[]) {
                 // unavailable on the runner. Full eight-icon QA runs locally.
                 // A successful icon decoder doesn't prove the dock looks aligned.
                 // Test all eight ACTUAL QML image rectangles in the running scene.
-                // Each 54px art slot must be centred on its 58x70px button,
+                // Each 62px art slot must be centred on its 66x76px button,
                 // and its button must be centered vertically inside the dock.
                 const QStringList names = approvedMode ? QStringList{
                     QStringLiteral("Browser"), QStringLiteral("Mail"),
@@ -894,7 +922,7 @@ int main(int argc, char *argv[]) {
                         iconStart.y() < 7 || iconStart.y() + art->height()
                              > dock->height() - 7 ||
                         tileStart.x() < previousRight ||
-                        art->width() < 50 || art->width() > 56 ||
+                        art->width() < 60 || art->width() > 64 ||
                         art->height() != art->width()) {
                         qCritical() << "SELF_TEST_FAIL: dock icon optical alignment"
                                     << name << "image" << iconStart << art->size()
@@ -907,7 +935,7 @@ int main(int argc, char *argv[]) {
                 }
                 qInfo() << "SELF_TEST_PASS: dock icons horizontally/vertically centred"
                         << "count" << names.size()
-                        << "with equal 54px art slots and 7px minimum dock insets";
+                        << "with equal 62px art slots and 7px minimum dock insets";
             }
             if (!wallpaperFits || dockTileCount != (approvedMode ? 8 : 6)) {
                 qCritical() << "SELF_TEST_FAIL: wallpaper bounds or dock icon count invalid"

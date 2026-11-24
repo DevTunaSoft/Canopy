@@ -63,11 +63,11 @@ REASON_INVALID_INDICATORS = "invalid_indicators"
 REASON_ALREADY_RUNNING = "already_running"
 REASON_NOT_RUNNING = "not_running"
 
-# Only the fixed reason tokens emitted by the trusted click mapper are carried
-# into an approved record; anything else is a malformed source record.
-_INTENT_REASONS = frozenset((
-    "untrusted-id", "running", "launch-pending", "installed", "missing-target",
-))
+# Each actionable kind has exactly one reason emitted by the trusted click
+# mapper. A reason belonging to a different decision makes the source record
+# contradictory, even when its token is otherwise well formed.
+_LAUNCH_REASON = "installed"
+_FOCUS_REASON = "running"
 
 
 class PreviewInputError(ValueError):
@@ -171,11 +171,15 @@ def compose_dock_action_preview(intent, pinned, indicators, focus, target):
         return _deny(REASON_INTENT_REJECTED)
     if intent.kind is IntentKind.IGNORE:
         return _deny(REASON_INTENT_IGNORED)
-    if intent.kind not in (IntentKind.LAUNCH, IntentKind.FOCUS):
+    if intent.kind is IntentKind.LAUNCH:
+        expected_reason = _LAUNCH_REASON
+    elif intent.kind is IntentKind.FOCUS:
+        expected_reason = _FOCUS_REASON
+    else:
         return _deny(REASON_INVALID_INPUT)
     if intent.name != target:
         return _deny(REASON_TARGET_MISMATCH)
-    if intent.reason not in _INTENT_REASONS:
+    if intent.reason != expected_reason:
         return _deny(REASON_INVALID_INPUT)
 
     position = _pinned_position(pinned, target)

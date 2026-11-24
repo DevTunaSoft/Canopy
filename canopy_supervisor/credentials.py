@@ -47,15 +47,10 @@ def get_opencode_api_key(explicit: str | None = None, data_home: Path | None = N
     if auth_file.is_file():
         try:
             raw = json.loads(auth_file.read_text(encoding="utf-8"))
-            if isinstance(raw, dict):
-                if "opencode" in raw:
-                    provider = raw["opencode"]
-                    if isinstance(provider, dict) and isinstance(provider.get("access"), str):
-                        return _token_from_blob(json.dumps(provider))
-                else:
-                    for value in raw.values():
-                        if isinstance(value, dict) and isinstance(value.get("access"), str):
-                            return _token_from_blob(json.dumps(value))
+            if isinstance(raw, dict) and "opencode" in raw:
+                provider = raw["opencode"]
+                if isinstance(provider, dict) and isinstance(provider.get("access"), str):
+                    return _token_from_blob(json.dumps(provider))
         except (OSError, ValueError):
             pass
 

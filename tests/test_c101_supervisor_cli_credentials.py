@@ -68,6 +68,13 @@ class CredentialArgumentTests(unittest.TestCase):
         with self.assertRaises(credentials.CredentialError):
             credentials.get_opencode_api_key(data_home=self.base)
 
+    def test_auth_json_without_opencode_provider_fails_closed(self):
+        (self.base / "auth.json").write_text(json.dumps({
+            "other": {"access": PLACEHOLDER},
+        }), encoding="utf-8")
+        with self.assertRaises(credentials.CredentialError):
+            credentials.get_opencode_api_key(data_home=self.base)
+
 
 if __name__ == "__main__":
     unittest.main()

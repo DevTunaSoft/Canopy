@@ -23,6 +23,7 @@ promises. The module launches nothing and proves no running desktop.
 """
 import collections.abc
 from dataclasses import dataclass
+import unicodedata
 from typing import Iterable, Tuple
 
 from canopy_features.launcher.app_search_casefold import (
@@ -42,6 +43,13 @@ from canopy_features.launcher.launcher_favorites import (
 
 STATUS_READY = "READY"
 STATUS_EMPTY = "EMPTY"
+
+# Length and Unicode validity alone do not make a title safe for a trusted
+# host bridge. Reject controls, bidi/zero-width format characters, surrogates,
+# private-use and unassigned scalars, and line/paragraph separators before any
+# READY row can echo them. Zs (ordinary spacing) remains printable and allowed.
+_UNSAFE_TITLE_CATEGORIES = frozenset(
+    ("Cc", "Cf", "Cs", "Co", "Cn", "Zl", "Zp"))
 
 __all__ = [
     "MAX_RESULTS",
@@ -136,6 +144,13 @@ def _normalize_catalog(catalog):
             raise ProjectionError("invalid stable application id")
         if type(title) is not str or not title:
             raise ProjectionError("invalid application title")
+        try:
+            title.encode("utf-8", "strict")
+        except UnicodeError:
+            raise ProjectionError("application title is not valid Unicode") from None
+        if any(unicodedata.category(char) in _UNSAFE_TITLE_CATEGORIES
+               for char in title):
+            raise ProjectionError("application title contains a control character")
         try:
             normalize_name(title)
         except AppSearchError as exc:

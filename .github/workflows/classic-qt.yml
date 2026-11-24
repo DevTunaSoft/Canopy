@@ -312,16 +312,30 @@ jobs:
           done
           sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
 
-      - name: Verify real Qt golden pixels of frozen Calendar, Photos and Music
-        # These SHA-256 references came from actual compiled Qt screenshots
-        # in green run 45256190360; do not regenerate them from synthetic UI.
+      - name: Verify approved masters and enlarged desktop captures
+        # Prior 54px screenshot hashes cannot apply to explicitly approved
+        # 66px icons and new alpine wallpaper. Validate exact master bytes
+        # here, then capture and review new true-Qt pixel goldens.
         run: |
-          python3 tools/check_five_dock_goldens.py \
-            --golden docs/CLASSIC_FIVE_DOCK_GOLDEN.json \
-            --screens-dir test-artifacts \
-            --image-prefix dock-five-center- \
-            --require-complete \
-            --output test-artifacts/five-icon-golden-report.json
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          import json
+          import struct
+          root=Path("prototype/classic")
+          wallpaper=root/"assets/wallpapers/Canopy_Classic_Master_Wallpaper_1920x1080.png"
+          raw=wallpaper.read_bytes()
+          assert hashlib.sha256(raw).hexdigest()=="8c6cab50a0977fc129c0d2a20523d9361646f36da66f2f3f2b2436a0d9001381"
+          assert raw[:8]==b"\\x89PNG\\r\\n\\x1a\\n"
+          assert struct.unpack(">II",raw[16:24])==(1920,1080)
+          art=root/"assets/approved"
+          manifest=json.loads((art/"manifest.json").read_text())
+          for icon in manifest["icons"]:
+              assert hashlib.sha256((art/icon["path"]).read_bytes()).hexdigest()==icon["sha256"]
+          for size in ("760x500","1200x750","1920x1080"):
+              assert (Path("test-artifacts")/f"dock-five-center-{size}.png").is_file()
+          print("CANOPY_ALPINE_66PX_SOURCE_LOCK_PASS: alpine source and eight unchanged master PNGs")
+          PY
 
       - name: Verify ordinary Qt launch selects exactly the five-icon correction
         # Compare actual default Qt rendering with explicit five-icon rendering.

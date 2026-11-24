@@ -7,6 +7,7 @@ mappings to prove they cannot leak into the returned environment.
 import os
 import sys
 import unittest
+from collections.abc import Mapping
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -176,6 +177,28 @@ class EnvironmentAllowlistTests(unittest.TestCase):
         self.assertTrue(set(env).issubset(set(CORE_ENV)))
         for name, value in env.items():
             self.assertEqual(value, before[name])
+
+    def test_inconsistent_mapping_keyerror_fails_closed(self):
+        """A mapping that claims a key but raises on read must not leak KeyError."""
+        class InconsistentMapping(Mapping):
+            def __init__(self, data):
+                self._data = data
+
+            def __getitem__(self, key):
+                raise KeyError(key)
+
+            def __iter__(self):
+                return iter(self._data)
+
+            def __len__(self):
+                return len(self._data)
+
+            def __contains__(self, key):
+                return True
+
+        source = InconsistentMapping({"PATH": "/usr/bin:/bin"})
+        with self.assertRaises(EnvironmentAllowlistError):
+            build_environment(["PATH"], source)
 
 
 if __name__ == "__main__":

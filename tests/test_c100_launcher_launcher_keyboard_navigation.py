@@ -72,6 +72,22 @@ class GridFocusTests(unittest.TestCase):
                     self.assertRaises(ValueError):
                 nav.make_grid(items, columns)
 
+    def test_direct_grid_construction_rejects_zero_columns(self):
+        # Grid is a public frozen dataclass: callers construct it directly and
+        # bypass make_grid(). columns=0 must fail closed with the module's
+        # domain error instead of leaking ZeroDivisionError from rows/move.
+        with self.assertRaises(ValueError):
+            nav.Grid(columns=0, items=("alpha",))
+        with self.assertRaises(ValueError):
+            nav.Grid(columns=0, items=())
+        # The whole columns invariant is enforced at construction, so no
+        # divisibility-hostile instance can escape to rows/move.
+        for columns in (-1, nav.MAX_COLUMNS + 1, True, 1.5, None):
+            with self.subTest(columns=columns), self.assertRaises(ValueError):
+                nav.Grid(columns=columns, items=("alpha",))
+        # A valid direct construction still yields usable geometry.
+        self.assertEqual(nav.Grid(columns=3, items=("alpha",)).rows, 1)
+
     def test_focus_rejects_non_grid_and_non_integer(self):
         for requested in ("0", 1.5, True, None):
             with self.subTest(requested=requested), self.assertRaises(ValueError):

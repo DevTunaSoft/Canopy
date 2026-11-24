@@ -18,12 +18,28 @@ GRID_DIRECTIONS = frozenset({"left", "right", "up", "down", "home", "end"})
 SELECTION_DIRECTIONS = frozenset({"next", "previous", "home", "end"})
 
 
+def _checked_columns(columns: int) -> int:
+    """Return a valid column count or fail closed with the domain error.
+
+    Both the validating factory and direct Grid construction rely on this one
+    guard, so no divisibility-hostile instance can reach rows()/move().
+    """
+    if isinstance(columns, bool) or not isinstance(columns, int):
+        raise ValueError("columns must be an integer")
+    if not 1 <= columns <= MAX_COLUMNS:
+        raise ValueError("columns out of range")
+    return columns
+
+
 @dataclass(frozen=True)
 class Grid:
     """An immutable grid of trusted, unique application identifiers."""
 
     columns: int
     items: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        _checked_columns(self.columns)
 
     @property
     def rows(self) -> int:
@@ -42,10 +58,7 @@ class SearchSelection:
 
 def make_grid(items, columns: int) -> Grid:
     """Validate inputs and return a bounded grid; never mutate the caller."""
-    if isinstance(columns, bool) or not isinstance(columns, int):
-        raise ValueError("columns must be an integer")
-    if not 1 <= columns <= MAX_COLUMNS:
-        raise ValueError("columns out of range")
+    _checked_columns(columns)
     if isinstance(items, (str, bytes)) or not isinstance(items, (list, tuple)):
         raise ValueError("items must be a sequence of identifiers")
     if len(items) > MAX_ITEMS:

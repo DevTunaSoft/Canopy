@@ -162,5 +162,86 @@ class FilesIntentPreviewTests(unittest.TestCase):
                 self.assertNotIn(forbidden, source)
 
 
+class _ForgingURI(str):
+    """Bounded hostile URI: lies about scheme, meta scan and printable scan."""
+
+    def startswith(self, *args, **kwargs):
+        return True
+
+    def __contains__(self, item):
+        return False
+
+    def __iter__(self):
+        return iter("file:///safe")
+
+
+class _ExplodingURI(str):
+    """Bounded hostile URI whose iteration raises instead of scanning."""
+
+    def __iter__(self):
+        raise RuntimeError("hostile iteration")
+
+
+class _ForgingDirectory(str):
+    """Bounded hostile path: lies about separator folding and equality."""
+
+    def replace(self, *args, **kwargs):
+        return self
+
+    def __eq__(self, other):
+        return True
+
+    def __ne__(self, other):
+        return False
+
+
+class _ExplodingDirectory(str):
+    """Bounded hostile path whose comparison raises instead of matching."""
+
+    def replace(self, *args, **kwargs):
+        return self
+
+    def __ne__(self, other):
+        raise RuntimeError("hostile comparison")
+
+
+class HostilePreviewValueTests(unittest.TestCase):
+    """Wrong-type field values must fail closed, never claim preview-safe."""
+
+    def test_forged_uri_subclass_cannot_claim_preview_safe(self):
+        uri = _ForgingURI("file:///tmp/a;rm -rf")
+        preview = compose_files_intent_preview(
+            make_intent(uri=uri), make_decision())
+        self.assertEqual(preview.status, DENIED)
+        self.assertEqual(preview.reason, REASON_UNSAFE_URI)
+        self.assertIsNone(preview.uri)
+        self.assertIsNone(preview.to_dict()["uri"])
+
+    def test_exploding_uri_subclass_is_denied_not_raised(self):
+        preview = compose_files_intent_preview(
+            make_intent(uri=_ExplodingURI("file:///tmp/a")), make_decision())
+        self.assertEqual(preview.status, DENIED)
+        self.assertEqual(preview.reason, REASON_UNSAFE_URI)
+
+    def test_forged_directory_subclass_cannot_claim_path_match(self):
+        preview = compose_files_intent_preview(
+            make_intent(directory=_ForgingDirectory(OTHER_DIRECTORY),
+                        uri=Path(DIRECTORY).as_uri()),
+            make_decision())
+        self.assertEqual(preview.status, DENIED)
+        self.assertIn(preview.reason,
+                      (REASON_INVALID_INPUT, REASON_PATH_MISMATCH))
+        self.assertIsNone(preview.directory)
+
+    def test_exploding_directory_subclass_is_denied_not_raised(self):
+        preview = compose_files_intent_preview(
+            make_intent(directory=_ExplodingDirectory(OTHER_DIRECTORY),
+                        uri=Path(DIRECTORY).as_uri()),
+            make_decision())
+        self.assertEqual(preview.status, DENIED)
+        self.assertIn(preview.reason,
+                      (REASON_INVALID_INPUT, REASON_PATH_MISMATCH))
+
+
 if __name__ == "__main__":
     unittest.main()

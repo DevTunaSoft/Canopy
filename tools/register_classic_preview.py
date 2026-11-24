@@ -20,8 +20,18 @@ class RegistrationError(ValueError):
     pass
 
 
+def _home_path(home):
+    """Normalize a caller-supplied home, failing closed with a domain error."""
+    if isinstance(home, bool) or not isinstance(home, (str, os.PathLike)):
+        raise RegistrationError("home must be a string or path-like value")
+    try:
+        return Path(home)
+    except (TypeError, ValueError, OSError) as exc:
+        raise RegistrationError("home must be a string or path-like value") from exc
+
+
 def paths(home):
-    home = Path(home)
+    home = _home_path(home)
     folder = home / "canopy" / "classic-preview"
     return {
         "data": home,
@@ -111,8 +121,8 @@ def _marker(p):
 
 
 def status(home):
-    p = paths(home)
     try:
+        p = paths(home)
         _safe_folders(p)
     except RegistrationError:
         return "UNSAFE"
@@ -130,36 +140,68 @@ def status(home):
 def _resource(obj, name, directory=False):
     if obj is None:
         return None
-    p = Path(obj)
+    message = name + " must be an existing absolute non-symlink path"
+    if isinstance(obj, bool) or not isinstance(obj, (str, os.PathLike)):
+        raise RegistrationError(message)
+    try:
+        p = Path(obj)
+    except (TypeError, ValueError, OSError) as exc:
+        raise RegistrationError(message) from exc
     if (not p.is_absolute() or p.is_symlink()
             or (not p.is_dir() if directory else not p.is_file())):
-        raise RegistrationError(name + " must be an existing absolute non-symlink path")
-    _require_real_path_components(
-        p, name + " must be an existing absolute non-symlink path")
+        raise RegistrationError(message)
+    _require_real_path_components(p, message)
     return str(p)
 
 
 def _quote(value):
     # Desktop Entry Exec field codes are not shell quoting.
     # Permit spaces, but reject tricky chars rather than use a shell.
-    banned = ('"', "\\", "$", chr(96), "%", "\n", "\r", "\x00")
+    banned = ('"', "$", chr(96), "%", chr(10), chr(13), chr(0))
+    sep = chr(92)
+    if sep in value:
+        if os.name != "nt":
+            raise RegistrationError("unsupported character in desktop Exec path")
+        # Native absolute paths use backslash separators. Accept only a
+        # drive-qualified prefix; UNC, doubled and trailing separators stay refused.
+        if (len(value) < 3 or not value[0].isalpha() or value[1:3] != ":" + sep
+                or sep + sep in value or value.endswith(sep)):
+            raise RegistrationError("unsupported character in desktop Exec path")
     if any(ch in value for ch in banned):
         raise RegistrationError("unsupported character in desktop Exec path")
-    return '"' + value + '"'
+    return '"' + value + '"' 
+
+
+def _effective_uid():
+    """Return the POSIX effective UID, or None when the probe is unavailable."""
+    getter = getattr(os, "geteuid", None)
+    return None if getter is None else getter()
 
 
 def _unprivileged():
-    if hasattr(os, "geteuid") and os.geteuid() == 0:
+    # Shared by pure validators: without a POSIX probe there is no root to
+    # refuse, so path validation may continue; writes use the stricter guard.
+    if _effective_uid() == 0:
         raise RegistrationError("root/system-wide operation refused")
 
 
-def install(home, binary, *, art=None, wallpaper=None, terminal=None, native_apps=False):
+def _require_unprivileged():
+    if _effective_uid() is None:
+        # Fail closed: an operation that writes cannot prove it is unprivileged.
+        raise RegistrationError("privilege check unavailable: operation refused")
     _unprivileged()
+
+
+def install(home, binary, *, art=None, wallpaper=None, terminal=None, native_apps=False):
+    _require_unprivileged()
     p = paths(home)
     _safe_folders(p)
     if status(home) != "NOT_INSTALLED":
         raise RegistrationError("existing registration: refusing overwrite")
     exe = _resource(binary, "Canopy binary")
+    if exe is None:
+        raise RegistrationError(
+            "Canopy binary must be an existing absolute non-symlink path")
     if not os.access(exe, os.X_OK):
         raise RegistrationError("Canopy binary is not executable")
     art = _resource(art, "approved artwork", directory=True)
@@ -214,16 +256,34 @@ def install(home, binary, *, art=None, wallpaper=None, terminal=None, native_app
 
 
 def uninstall(home):
-    _unprivileged()
+    _require_unprivileged()
     p = paths(home)
     if status(home) != "INSTALLED":
         raise RegistrationError("not exact-byte owned; removed nothing")
     marker = _marker(p)
-    if (marker is None or p["desktop"].is_symlink()
-            or _sha(p["desktop"].read_bytes()) != marker["sha256"]):
+    desktop, manifest = p["desktop"], p["manifest"]
+    try:
+        original = desktop.read_bytes()
+        mode = stat.S_IMODE(desktop.stat().st_mode)
+    except OSError as exc:
+        raise RegistrationError("registration changed during uninstall") from exc
+    if (marker is None or desktop.is_symlink()
+            or _sha(original) != marker["sha256"]):
         raise RegistrationError("registration changed during uninstall")
-    p["desktop"].unlink()
-    p["manifest"].unlink()
+    desktop.unlink()
+    try:
+        manifest.unlink()
+    except (OSError, ValueError) as exc:
+        # Deterministic bounded rollback: the desktop entry is at most 8 KiB
+        # (checked by status), so restoring its exact bytes is bounded too.
+        try:
+            with desktop.open("xb") as handle:
+                handle.write(original)
+            desktop.chmod(mode)
+            detail = "uninstall failed; desktop entry restored"
+        except (OSError, ValueError):
+            detail = "uninstall failed; desktop entry could not be restored"
+        raise RegistrationError(detail) from exc
     # Retain directories, which may contain unrelated files.
     return "UNINSTALLED"
 

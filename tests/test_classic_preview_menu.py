@@ -33,11 +33,11 @@ class ClassicPreviewMenuTests(unittest.TestCase):
         self.terminal.write_bytes(b"simulated candidate")
 
     def install(self, **kwargs):
-        with patch("tools.register_classic_preview.os.geteuid", return_value=1000):
+        with patch("tools.register_classic_preview._effective_uid", return_value=1000):
             return menu.install(self.home, self.binary, **kwargs)
 
     def uninstall(self):
-        with patch("tools.register_classic_preview.os.geteuid", return_value=1000):
+        with patch("tools.register_classic_preview._effective_uid", return_value=1000):
             return menu.uninstall(self.home)
 
     def test_no_registration_initially(self):
@@ -161,8 +161,11 @@ class ClassicPreviewMenuTests(unittest.TestCase):
 
     def test_binary_must_be_executable(self):
         self.binary.chmod(0o644)
-        with self.assertRaisesRegex(menu.RegistrationError, "not executable"):
-            self.install()
+        # Windows os.access(X_OK) ignores the POSIX mode bit; inject the POSIX
+        # verdict so the assertion stays strict on this host.
+        with patch("tools.register_classic_preview.os.access", return_value=False):
+            with self.assertRaisesRegex(menu.RegistrationError, "not executable"):
+                self.install()
         self.assertEqual(menu.status(self.home), "NOT_INSTALLED")
 
     def test_missing_and_relative_resources_rejected(self):
@@ -173,7 +176,7 @@ class ClassicPreviewMenuTests(unittest.TestCase):
         self.assertEqual(menu.status(self.home), "NOT_INSTALLED")
 
     def _try_binary(self, binary):
-        with patch("tools.register_classic_preview.os.geteuid", return_value=1000):
+        with patch("tools.register_classic_preview._effective_uid", return_value=1000):
             return menu.install(self.home, binary)
 
     def test_terminal_candidate_requires_original_art(self):
@@ -187,8 +190,63 @@ class ClassicPreviewMenuTests(unittest.TestCase):
                     menu._quote("/tmp/name" + char + "unsafe")
         self.assertEqual(menu.status(self.home), "NOT_INSTALLED")
 
+    def test_windows_drive_path_separators_are_quoted(self):
+        if os.name != "nt":
+            self.skipTest("Windows-only path separator semantics")
+        value = "C:\\Program Files\\Canopy\\canopy.exe"
+        self.assertEqual(menu._quote(value), '"' + value + '"')
+
+    def test_unc_and_embedded_backslashes_still_rejected(self):
+        quote = chr(34)
+        for bad in ("\\\\server\\share", "C:\\tmp\\bad\\" + quote + "name",
+                    "/tmp/name\\unsafe"):
+            with self.subTest(value=bad[:18]):
+                with self.assertRaises(menu.RegistrationError):
+                    menu._quote(bad)
+
+    def test_wrong_type_home_uses_domain_error(self):
+        for bad in (None, 7, True, [], {}, b"/tmp"):
+            with self.subTest(value=repr(bad)):
+                with self.assertRaises(menu.RegistrationError):
+                    menu.paths(bad)
+                self.assertEqual(menu.status(bad), "UNSAFE")
+
+    def test_uninstall_rolls_back_desktop_if_manifest_unlink_fails(self):
+        desktop = self.install()
+        original = desktop.read_bytes()
+        marker = menu.paths(self.home)["manifest"]
+        real_unlink = Path.unlink
+
+        def fail_on_manifest(path, *args, **kwargs):
+            if path == marker:
+                raise OSError("simulated locked manifest")
+            return real_unlink(path, *args, **kwargs)
+
+        with patch.object(Path, "unlink", fail_on_manifest):
+            with self.assertRaisesRegex(menu.RegistrationError, "restored"):
+                self.uninstall()
+        self.assertEqual(desktop.read_bytes(), original)
+        self.assertEqual(menu.status(self.home), "INSTALLED")
+
+    def test_wrong_type_resources_use_domain_error(self):
+        for bad in (7, None, True, [], {}, b"bin"):
+            with self.subTest(value=repr(bad)):
+                with patch("tools.register_classic_preview._effective_uid",
+                           return_value=1000):
+                    with self.assertRaises(menu.RegistrationError):
+                        menu.install(self.home, bad)
+                    if bad is not None:
+                        with self.assertRaises(menu.RegistrationError):
+                            menu.install(self.home, self.binary, art=bad)
+
+    def test_unknown_privilege_probe_fails_closed(self):
+        with patch("tools.register_classic_preview._effective_uid", return_value=None):
+            with self.assertRaisesRegex(menu.RegistrationError,
+                                       "privilege check unavailable"):
+                menu.install(self.home, self.binary)
+
     def test_root_install_and_uninstall_both_refused(self):
-        with patch("tools.register_classic_preview.os.geteuid", return_value=0):
+        with patch("tools.register_classic_preview._effective_uid", return_value=0):
             with self.assertRaisesRegex(menu.RegistrationError, "root"):
                 menu.install(self.home, self.binary)
             with self.assertRaisesRegex(menu.RegistrationError, "root"):

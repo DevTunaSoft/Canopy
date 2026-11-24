@@ -32,12 +32,54 @@ class AppExited:
 Event = AppStarted | AppExited
 
 
+def _has_duplicate_owner_pids(owners) -> bool:
+    """True when one PID appears twice in an owner snapshot.
+
+    Only well-formed ``(pid, app_id)`` pairs are inspected; other malformed
+    shapes stay the consumer's existing denial problem and are not turned
+    into constructor errors by this snapshot-integrity guard.
+    """
+    if type(owners) is not tuple:
+        return False
+    seen = set()
+    for pair in owners:
+        if type(pair) is not tuple or len(pair) != 2:
+            continue
+        pid = pair[0]
+        if type(pid) is not int:
+            continue
+        if pid in seen:
+            return True
+        seen.add(pid)
+    return False
+
+
 @dataclass(frozen=True)
 class IndicatorState:
     """Immutable, sequence-stamped mapping of live process IDs to app IDs."""
 
     sequence: int
     owners: tuple[tuple[int, str], ...]
+
+    def __post_init__(self) -> None:
+        # A PID names exactly one live process. A snapshot with the same PID
+        # twice would let a consumer report two running processes for one PID
+        # (for example an APPROVED preview with running_pids=2), so reject it
+        # before any count or approval can be derived.
+        if _has_duplicate_owner_pids(self.owners):
+            raise ValueError("duplicate owner pid")
+
+
+# Captured before callers can monkeypatch the module attribute (the allocation
+# tests spy on IndicatorState), so validation keeps checking the real type.
+_STATE_TYPE = IndicatorState
+
+
+def _validate_state(state) -> None:
+    if not isinstance(state, _STATE_TYPE):
+        raise ValueError("state must be an IndicatorState")
+    if _has_duplicate_owner_pids(state.owners):
+        raise ValueError("duplicate owner pid")
 
 
 def empty_state() -> IndicatorState:
@@ -101,8 +143,7 @@ def apply_event(state: IndicatorState, event: Event) -> IndicatorState:
     accepted-or-ignored event still advances the sequence, so old events cannot
     be replayed later to mutate the indicator state.
     """
-    if not isinstance(state, IndicatorState):
-        raise ValueError("state must be an IndicatorState")
+    _validate_state(state)
     _validate(event)
     if event.sequence <= state.sequence:
         return state
@@ -114,6 +155,7 @@ def apply_events(state: IndicatorState, events) -> IndicatorState:
     """Fold a bounded batch of trusted events in arrival order."""
     if isinstance(events, (str, bytes)) or not isinstance(events, (list, tuple)):
         raise ValueError("events must be a sequence")
+    _validate_state(state)
     if len(events) > 1024:
         raise ValueError("too many events")
     if not events:
@@ -130,8 +172,7 @@ def apply_events(state: IndicatorState, events) -> IndicatorState:
 
 def indicator_ids(state: IndicatorState) -> tuple[str, ...]:
     """Return sorted identifiers with at least one live process."""
-    if not isinstance(state, IndicatorState):
-        raise ValueError("state must be an IndicatorState")
+    _validate_state(state)
     return tuple(sorted({app_id for _, app_id in state.owners}))
 
 
@@ -142,6 +183,7 @@ def has_indicator(state: IndicatorState, app_id: str) -> bool:
 
 
 def running_pid_count(state: IndicatorState, app_id: str) -> int:
+    _validate_state(state)
     if not isinstance(app_id, str):
         raise ValueError("app_id must be a string")
     return sum(1 for _, owner in state.owners if owner == app_id)

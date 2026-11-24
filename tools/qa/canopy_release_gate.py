@@ -15,8 +15,11 @@ token. Only fixed tokens and bounded integers reach the output; no gate name,
 PR number list detail, source path, SHA or other caller text is echoed.
 
 No network, process launch, git command, file discovery or repository state is
-used. The optional file reader is bounded, absolute-path-only and symlink-safe
-with the whole descriptor path inside one ``OSError`` boundary (POSIX-safe).
+used. Duplicate JSON object keys are rejected before evaluation, so a repeated
+``acceptance_verdict``, gate id, count or ``release_ready`` field cannot let the
+last copy erase a hold or an untrusted release claim. The optional file reader
+is bounded, absolute-path-only and symlink-safe with the whole descriptor
+path inside one ``OSError`` boundary (POSIX-safe).
 """
 import argparse
 import json
@@ -193,6 +196,16 @@ def evaluate(snapshot):
     }
 
 
+def _unique_object(pairs):
+    """Reject duplicate JSON object keys; the last-wins default can erase a hold."""
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ReleaseGateError("snapshot JSON contains a duplicate key")
+        result[key] = value
+    return result
+
+
 def _reject_constant(token):
     raise ReleaseGateError("snapshot JSON contains a non-finite number")
 
@@ -212,7 +225,10 @@ def evaluate_json(text):
         raise ReleaseGateError("snapshot JSON is missing or oversized")
     try:
         parsed = json.loads(
-            data.decode("utf-8"), parse_constant=_reject_constant)
+            data.decode("utf-8"), parse_constant=_reject_constant,
+            object_pairs_hook=_unique_object)
+    except ReleaseGateError:
+        raise
     except (UnicodeError, ValueError, RecursionError) as exc:
         raise ReleaseGateError("snapshot JSON could not be parsed") from exc
     return evaluate(parsed)

@@ -11,6 +11,7 @@ process, polls nothing, and does not claim a real Mint or compiled-Qt run.
 from __future__ import annotations
 
 import ast
+from collections.abc import Mapping
 import json
 import os
 import re
@@ -31,6 +32,42 @@ _CALLS = {"min": min, "max": max}
 _LIMITER_VARIABLE = 10 ** 9  # stand-in for an unbounded implicit width
 
 
+def _require_size(size, label):
+    """Return a bounded numeric (width, height) pair or fail closed.
+
+    Callers may hand in hostile-but-bounded values (a bare string, a mapping,
+    a bool, numeric-looking strings). Every such value must produce this
+    module's domain ``ValueError`` rather than leaking a built-in unpack,
+    comparison or float-conversion exception.
+    """
+    if not isinstance(size, (tuple, list)) or len(size) != 2:
+        raise ValueError(label + " must be a (width, height) pair")
+    width, height = size
+    for value in (width, height):
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError(label + " components must be numbers")
+    return (width, height)
+
+
+def _require_sources(text):
+    """Return the three QML source texts or fail closed with ValueError."""
+    if not isinstance(text, Mapping):
+        raise ValueError("sources must be a mapping of QML texts")
+    for key in ("main", "theme", "preview"):
+        if key not in text:
+            raise ValueError("sources missing " + key)
+        if not isinstance(text[key], str):
+            raise ValueError("sources[" + key + "] must be QML source text")
+    return text
+
+
+def _require_path(value, label):
+    """Gate path-like inputs before they reach pathlib/regex helpers."""
+    if not isinstance(value, (str, os.PathLike)) or isinstance(value, bytes):
+        raise ValueError(label + " must be a path-like value")
+    return value
+
+
 def _dotted_name(node):
     parts = []
     while isinstance(node, ast.Attribute):
@@ -49,6 +86,10 @@ def evaluate(expression: str, variables: dict) -> float:
     canopyTheme.barHeight), Math.min/Math.max, + - * / and parentheses.
     Anything else is rejected, so source text can never execute code.
     """
+    if not isinstance(expression, str):
+        raise ValueError("expression must be a string")
+    if not isinstance(variables, Mapping):
+        raise ValueError("variables must be a mapping")
     text = expression.strip().replace("Math.min", "min").replace("Math.max", "max")
     tree = ast.parse(text, mode="eval").body
 
@@ -56,7 +97,11 @@ def evaluate(expression: str, variables: dict) -> float:
         if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
             return node.value
         if isinstance(node, ast.Attribute):
-            return variables[_dotted_name(node)]
+            name = _dotted_name(node)
+            try:
+                return variables[name]
+            except (KeyError, TypeError):
+                raise ValueError("unknown QML reference: " + name) from None
         if isinstance(node, ast.Name):
             if node.id in variables:
                 return variables[node.id]
@@ -142,6 +187,8 @@ def _has_clip(text: str) -> bool:
 
 def load_sources(source_dir=None):
     """Read the three QML files the contracts depend on."""
+    if source_dir is not None:
+        _require_path(source_dir, "source_dir")
     base = Path(source_dir) if source_dir is not None else SOURCE
     return {
         "main": (base / "Main.qml").read_text(encoding="utf-8"),
@@ -152,6 +199,8 @@ def load_sources(source_dir=None):
 
 def screenshot_evidence(path, size) -> dict:
     """Validate an existing screenshot with the shared PNG checker and hash it."""
+    _require_path(path, "screenshot path")
+    _require_size(size, "screenshot size")
     check_screenshot.verify_png(Path(path), int(size[0]), int(size[1]))
     return {
         "name": Path(path).name,
@@ -167,8 +216,9 @@ def check_layout_contract(source_dir=None, *, size=None, sources=None,
     ``sources`` may supply {"main", "theme", "preview"} text directly, which
     lets callers test candidate edits without touching the real QML files.
     """
-    width, height = tuple(size) if size is not None else REDUCED_SIZE
+    width, height = _require_size(size, "size") if size is not None else REDUCED_SIZE
     text = sources if sources is not None else load_sources(source_dir)
+    _require_sources(text)
     main, theme, preview = text["main"], text["theme"], text["preview"]
 
     min_width = int(binding(main, "minimumWidth"))
@@ -267,7 +317,10 @@ def main(argv=None) -> int:
     args = sys.argv[1:] if argv is None else argv
     size = REDUCED_SIZE
     if args:
-        width, height = args[0].split("x")
+        spec = args[0]
+        if not isinstance(spec, str) or spec.count("x") != 1:
+            raise ValueError("size argument must be WIDTHxHEIGHT")
+        width, height = spec.split("x")
         size = (int(width), int(height))
     report = check_layout_contract(size=size)
     print(json.dumps(report, indent=2, sort_keys=True))

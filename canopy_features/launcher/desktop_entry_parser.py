@@ -10,9 +10,21 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 import re
+import unicodedata
 from typing import Mapping
 
 DEFAULT_MAX_BYTES = 64 * 1024
+
+# Unicode "Other" and non-ASCII "Separator" categories. These characters can
+# hide or re-order text when a launcher renders a Name/Comment/Icon, and C0
+# separators are silently eaten by str.strip(). Zs (space) is deliberately not
+# included so ordinary spacing and no-break spaces remain valid.
+_UNSAFE_CATEGORIES = frozenset({"Cc", "Cf", "Cs", "Co", "Cn", "Zl", "Zp"})
+
+
+def _has_nonprintable(text: str) -> bool:
+    """True when *text* contains any control/format/noncharacter scalar."""
+    return any(unicodedata.category(char) in _UNSAFE_CATEGORIES for char in text)
 
 
 def _check_max_bytes(max_bytes: int) -> None:
@@ -173,6 +185,12 @@ def parse(
         continued = ""
         if not line or line.startswith("#"):
             continue
+        # Fail closed on the *raw* line, before strip() folds C0 separators
+        # (0x1c-0x1f) into clean-looking text. The tryexec module already does
+        # this for TryExec paths; the parser needs the same guard for the
+        # display fields (Name, Icon, localized names, Comment, ...) it stores.
+        if _has_nonprintable(raw):
+            raise MalformedEntryError("non-printable character in entry")
         if line.endswith("\\"):
             continued = line[:-1]
             continue

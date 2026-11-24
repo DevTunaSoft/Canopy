@@ -243,6 +243,16 @@ int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
     QGuiApplication::setApplicationDisplayName(QStringLiteral("Canopy Classic Spike"));
     const QStringList args = QCoreApplication::arguments();
+    // Verify the exact owner-approved embedded master before any Qt scene.
+    QFile approvedAlpineMaster(QStringLiteral(
+        ":/Canopy/Classic/assets/wallpapers/Canopy_Classic_Master_Wallpaper_1920x1080.png"));
+    if (!approvedAlpineMaster.open(QIODevice::ReadOnly) ||
+        QCryptographicHash::hash(approvedAlpineMaster.readAll(), QCryptographicHash::Sha256).toHex()
+            != QByteArrayLiteral("8c6cab50a0977fc129c0d2a20523d9361646f36da66f2f3f2b2436a0d9001381")) {
+        qCritical() << "CANOPY_ALPINE_MASTER_FAIL: embedded owner master SHA mismatch";
+        return 3;
+    }
+    qInfo() << "CANOPY_ALPINE_MASTER_VERIFIED: approved 1920x1080 PNG";
     // Native Linux app launching is opt-in. Default preview visuals, dock
     // geometry and screenshot contracts are unchanged when the flag is absent.
     const bool enableSystemApps = args.contains(QStringLiteral("--enable-system-apps"));
@@ -564,9 +574,7 @@ int main(int argc, char *argv[]) {
                      : QString());
     engine.rootContext()->setContextProperty(
         QStringLiteral("canopyApprovedWallpaperUrl"),
-        approvedMode ? QUrl::fromLocalFile(
-            approvedRoot + QStringLiteral("/wallpaper/canopy-wave-preview.png")).toString()
-                     : QString());
+        QStringLiteral("qrc:/Canopy/Classic/assets/wallpapers/Canopy_Classic_Master_Wallpaper_1920x1080.png"));
     engine.load(QUrl(QStringLiteral("qrc:/Canopy/Classic/Main.qml")));
     if (engine.rootObjects().isEmpty())
         return 1;
@@ -827,15 +835,14 @@ int main(int argc, char *argv[]) {
                 if (landscapeMode)
                     qCritical() << "SELF_TEST_FAIL: validated landscape wallpaper did not decode";
                 else
-                    qCritical() << "SELF_TEST_FAIL: Blue Current wallpaper image did not load"
-                                << "check Qt SVG plugin and embedded artwork";
+                    qCritical() << "SELF_TEST_FAIL: embedded approved alpine master did not load";
                 QCoreApplication::exit(1);
                 return;
             }
             if (landscapeMode)
                 qInfo() << "SELF_TEST_PASS: validated custom landscape wallpaper loaded";
             else
-                qInfo() << "SELF_TEST_PASS: original SVG wallpaper image loaded";
+                qInfo() << "SELF_TEST_PASS: embedded approved alpine master wallpaper loaded";
             const QPointF wallpaperOrigin = wallpaper->mapToItem(window->contentItem(), QPointF(0, 0));
             const bool wallpaperFits = qAbs(wallpaperOrigin.x()) <= 1
                 && qAbs(wallpaperOrigin.y()) <= 1
@@ -894,7 +901,7 @@ int main(int argc, char *argv[]) {
                         iconStart.y() < 7 || iconStart.y() + art->height()
                              > dock->height() - 7 ||
                         tileStart.x() < previousRight ||
-                        art->width() < 50 || art->width() > 56 ||
+                        art->width() != 66 ||
                         art->height() != art->width()) {
                         qCritical() << "SELF_TEST_FAIL: dock icon optical alignment"
                                     << name << "image" << iconStart << art->size()
@@ -907,7 +914,7 @@ int main(int argc, char *argv[]) {
                 }
                 qInfo() << "SELF_TEST_PASS: dock icons horizontally/vertically centred"
                         << "count" << names.size()
-                        << "with equal 54px art slots and 7px minimum dock insets";
+                        << "with equal 66px art slots and 7px minimum dock insets";
             }
             if (!wallpaperFits || dockTileCount != (approvedMode ? 8 : 6)) {
                 qCritical() << "SELF_TEST_FAIL: wallpaper bounds or dock icon count invalid"

@@ -109,6 +109,12 @@ class CredentialArgumentTests(unittest.TestCase):
         with self.assertRaises(credentials.CredentialError):
             credentials.get_opencode_api_key(data_home=self.base)
 
+    def test_oversized_config_fails_closed(self):
+        (self.base / "config.json").write_text(
+            json.dumps({"pad": "x" * 300000}), encoding="utf-8")
+        with self.assertRaises(ValueError):
+            cli.load_config(self.base)
+
 
 if __name__ == "__main__":
     unittest.main()

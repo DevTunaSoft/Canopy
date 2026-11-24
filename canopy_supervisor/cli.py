@@ -15,6 +15,8 @@ from .supervisor import DEFAULT_CONFIG, Supervisor
 from .worker import (WorkerError, WorkerLauncher, evidence_path,
                      worker_evidence_path, read_evidence)
 
+MAX_CONFIG_FILE_BYTES = 262144
+
 
 def default_state_root() -> Path:
     override = os.environ.get("CANOPY_SUPERVISOR_STATE_ROOT")
@@ -50,6 +52,8 @@ def load_config(state_root: Path) -> dict:
     if not config.is_file():
         raise ValueError("supervisor not initialized; run: init --repo <path>")
     try:
+        if config.stat().st_size > MAX_CONFIG_FILE_BYTES:
+            raise ValueError("supervisor config file too large")
         data = json.loads(config.read_text(encoding="utf-8"))
     except (OSError, UnicodeError, ValueError) as exc:
         raise ValueError("corrupt supervisor config") from exc

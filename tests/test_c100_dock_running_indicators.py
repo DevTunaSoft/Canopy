@@ -145,5 +145,72 @@ class PurityTests(unittest.TestCase):
         ])
 
 
+class DuplicateOwnerPidTests(unittest.TestCase):
+    """A snapshot must never claim two live processes for one real PID.
+
+    PR #482 denied duplicate pinned ids in the action preview but left a
+    host-supplied ``IndicatorState(owners=((101, app), (101, app)))`` able to
+    compose an APPROVED preview with ``running_pids=2``. One PID is one live
+    process, so such a snapshot is malformed and must fail closed before any
+    count, indicator or approval can be derived from it.
+    """
+
+    def assert_duplicate_pid_rejected(self, owners):
+        with self.subTest(owners=owners), self.assertRaises(ValueError):
+            indicators.IndicatorState(sequence=7, owners=owners)
+
+    def test_duplicate_pid_same_app_is_rejected(self):
+        self.assert_duplicate_pid_rejected(((101, "nemo"), (101, "nemo")))
+
+    def test_duplicate_pid_conflicting_apps_is_rejected(self):
+        self.assert_duplicate_pid_rejected(((101, "nemo"), (101, "mail")))
+
+    def test_triple_duplicate_pid_is_rejected(self):
+        self.assert_duplicate_pid_rejected(
+            ((101, "nemo"), (101, "nemo"), (101, "nemo")))
+
+    def test_duplicate_pid_rejected_through_replace(self):
+        state = indicators.apply_event(
+            indicators.empty_state(), indicators.AppStarted(0, "nemo", 101))
+        with self.assertRaises(ValueError):
+            dataclasses.replace(state, owners=((101, "nemo"), (101, "nemo")))
+
+    def test_public_readers_reject_corrupt_snapshot(self):
+        # Simulate a state that bypassed construction, so the guard is proved
+        # at every reading boundary and not only in the dataclass constructor.
+        state = indicators.empty_state()
+        object.__setattr__(state, "owners", ((101, "nemo"), (101, "nemo")))
+        for reader in (indicators.indicator_ids,
+                       lambda s: indicators.has_indicator(s, "nemo"),
+                       lambda s: indicators.running_pid_count(s, "nemo"),
+                       lambda s: indicators.apply_event(
+                           s, indicators.AppStarted(1, "nemo", 102)),
+                       lambda s: indicators.apply_events(
+                           s, (indicators.AppStarted(1, "nemo", 102),))):
+            with self.subTest(reader=reader), self.assertRaises(ValueError):
+                reader(state)
+
+    def test_absent_pid_is_not_a_duplicate(self):
+        state = indicators.IndicatorState(
+            sequence=7, owners=((101, "nemo"), (102, "mail")))
+        self.assertEqual(indicators.running_pid_count(state, "nemo"), 1)
+
+    def test_distinct_pids_same_app_still_approved_by_count(self):
+        state = indicators.apply_events(indicators.empty_state(), [
+            indicators.AppStarted(0, "nemo", 101),
+            indicators.AppStarted(1, "nemo", 102),
+        ])
+        self.assertEqual(indicators.running_pid_count(state, "nemo"), 2)
+
+    def test_other_malformed_shapes_remain_constructible(self):
+        # The preview already denies these with invalid_indicators; this guard
+        # must not turn them into constructor errors.
+        self.assertEqual(
+            indicators.IndicatorState(sequence=3, owners=((101, "nemo", 9),)).owners,
+            ((101, "nemo", 9),))
+        self.assertTrue(
+            indicators.IndicatorState(sequence=True, owners=()).sequence)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -202,8 +202,15 @@ def to_safe_metadata(manifest: Mapping[str, Any]) -> SafePackMetadata:
         strings[key] = value
 
     capabilities = data.get("capabilities")
+    # Require the exact ``str`` type, not just an ``isinstance`` match: a str
+    # subclass may override __hash__/__eq__ (e.g. set __hash__ to None), so a
+    # bare subclass instance can raise a raw TypeError at the ``in`` lookup or
+    # while building the duplicate-detection set. Exact str is always
+    # hashable, keeping hostile-but-bounded capability values on the domain
+    # fail-closed path. This also covers duplicate IDs carried by such a
+    # subclass: they must be rejected as invalid, not explode.
     if (not isinstance(capabilities, (list, tuple)) or not capabilities
-            or any(not isinstance(cap, str) or cap not in CAPABILITIES
+            or any(type(cap) is not str or cap not in CAPABILITIES
                    for cap in capabilities)
             or len(set(capabilities)) != len(capabilities)):
         raise PackValidationError("invalid capabilities")

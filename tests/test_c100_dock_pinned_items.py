@@ -24,6 +24,21 @@ class PinnedItemsTests(unittest.TestCase):
         self.assertEqual(again, state)
         self.assertEqual(again.items.count("nemo"), 1)
 
+    def test_duplicate_ids_are_rejected_at_construction(self):
+        for items in (("nemo", "nemo"), ("a", "b", "a")):
+            with self.subTest(items=items), self.assertRaises(ValueError):
+                pins.PinnedItems(items=items)
+
+    def test_replace_cannot_reintroduce_duplicate_ids(self):
+        state = pins.add(pins.empty(), "nemo")
+        with self.assertRaises(ValueError):
+            dataclasses.replace(state, items=("nemo", "nemo"))
+
+    def test_valid_pinned_state_still_constructs(self):
+        state = pins.PinnedItems(items=("nemo", "terminal"))
+        self.assertEqual(state.items, ("nemo", "terminal"))
+        self.assertEqual(pins.index_of(state, "terminal"), 1)
+
     def test_remove_missing_id_is_idempotent(self):
         state = pins.add(pins.empty(), "nemo")
         self.assertEqual(pins.remove(state, "not-pinned"), state)

@@ -19,6 +19,21 @@ class PinnedItems:
 
     items: tuple[str, ...]
 
+    def __post_init__(self) -> None:
+        # A frozen dataclass still accepts any caller-supplied tuple. Reject
+        # repeated trusted IDs here: a duplicate would look like a valid pin
+        # order to consumers using contains()/index_of(). Malformed non-string
+        # entries are left untouched for downstream consumers to deny.
+        if not isinstance(self.items, tuple):
+            return
+        seen = set()
+        for app_id in self.items:
+            if not isinstance(app_id, str):
+                continue
+            if app_id in seen:
+                raise ValueError("duplicate app_id")
+            seen.add(app_id)
+
 
 def empty() -> PinnedItems:
     return PinnedItems(items=())

@@ -11,8 +11,10 @@ from threading import get_ident
 from types import MappingProxyType
 
 PROTOCOL_VERSION = 1
+CAPABILITIES_TOPIC = "capabilities.report"
 TOPICS = frozenset({
     "app.catalog.changed", "window.state.changed", "session.state.changed",
+    CAPABILITIES_TOPIC,
 })
 MAX_SUBSCRIBERS = 64
 MAX_PAYLOAD_FIELDS = 8

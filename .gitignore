@@ -1,0 +1,6 @@
+# Local supervisor state, logs and worker worktrees
+.canopy-supervisor/
+
+# Python
+__pycache__/
+*.py[cod]

@@ -68,7 +68,10 @@ def parse_desktop_actions(text: str) -> DesktopActionScan:
     only single-line ``Actions=`` lists and group keys are considered. Upgrade
     if the caller can load real files with folded values.
     """
-    if not isinstance(text, str):
+    # Require an exact str: a subclass can override splitlines() and either
+    # hide declarations (a false action-safe scan) or yield wrong-type lines
+    # that leak a raw AttributeError instead of this domain error.
+    if type(text) is not str:
         raise TypeError("text must be str")
 
     declared = []

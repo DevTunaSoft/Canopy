@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Compare ACTUAL Qt icon pixels with an immutable, run-attributed golden.
 
-Users locked Calendar, Photos and Music. Their exact 54x54 RGBA8 pixels
+Users locked Calendar, Photos and Music. Their exact 62x62 RGBA8 pixels
 from a successful real Qt build must never change. The five production
 goldens are added only after successful native Qt output is inspected.
 No synthesized, rescaled, or model-generated images are accepted here.
@@ -26,9 +26,9 @@ def extract_hashes(path:Path,size:str):
     result={}
     for name,(cx,cy) in zip(APPS,CENTERS[size]["desktop"]):
         region=bytearray()
-        for y in range(cy-27,cy+27):
-            region.extend(rgba[4*(y*width+cx-27):4*(y*width+cx+27)])
-        if len(region)!=54*54*4:
+        for y in range(cy-31,cy+31):
+            region.extend(rgba[4*(y*width+cx-31):4*(y*width+cx+31)])
+        if len(region)!=62*62*4:
             raise ComparisonError("invalid actual Qt pixel crop size")
         result[name.lower()]=hashlib.sha256(region).hexdigest()
     return result
@@ -65,7 +65,7 @@ def validate(golden_path:Path,screens_dir:Path,
         "source_run":gold["source_run_url"],
         "frozen_icon_names":FROZEN,
         "verified_resolutions":tuple(CENTERS),
-        "frozen_icon_54px_pixels_unchanged":True,
+        "frozen_icon_62px_pixels_unchanged":True,
         "five_production_golden_available":set(five)==set(CENTERS),
         "owner_appearance_approval_inferred":False,
     }

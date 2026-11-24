@@ -144,7 +144,13 @@ def build_environment(allow, source=None):
     for name in unique:
         if name not in source:
             continue
-        value = source[name]
+        try:
+            value = source[name]
+        except KeyError as exc:
+            # A custom Mapping may disagree with itself about membership.
+            # Fail closed with the module's domain error instead of leaking
+            # a raw KeyError to a process-launch caller.
+            raise EnvironmentAllowlistError("environment source is inconsistent") from exc
         _check_value(value)
         result[name] = value
     return result

@@ -90,6 +90,46 @@ class GitOpsOutputBoundTests(unittest.TestCase):
             self.assertEqual(gitops.run(["git", "status"]), "ok")
 
 
+class FinishedProcess:
+    next_pid = 100
+
+    def __init__(self, *args, **kwargs):
+        FinishedProcess.next_pid += 1
+        self.pid = FinishedProcess.next_pid
+        self.stopped = False
+
+    def poll(self):
+        return 0
+
+
+class WorkerHandleCleanupTests(unittest.TestCase):
+    def launcher(self):
+        root = tempfile.TemporaryDirectory()
+        self.addCleanup(root.cleanup)
+        base = Path(root.name)
+        worktree = base / "wt"
+        worktree.mkdir()
+        worker = WorkerLauncher(
+            {"model": "opencode-go/x"}, base, lambda: "token",
+            spawner=FinishedProcess)
+        task = {"id": "t", "title": "x", "objective": "y",
+                "scope": (), "branch": "b"}
+        return worker, worktree, base / "log.txt", task
+
+    def test_finished_handles_pruned_on_next_launch(self):
+        worker, worktree, log, task = self.launcher()
+        for _ in range(12):
+            worker.launch(task, "worker-1", worktree, log)
+        self.assertLessEqual(len(worker._processes), 1)
+
+    def test_close_drops_all_launcher_handles(self):
+        worker, worktree, log, task = self.launcher()
+        worker.launch(task, "worker-1", worktree, log)
+        self.assertEqual(len(worker._processes), 1)
+        worker.close()
+        self.assertEqual(worker._processes, {})
+
+
 class WorkerRedactTests(unittest.TestCase):
     def test_wrong_type_input_is_redacted_not_raised(self):
         for bad in (None, 7, True, [], {}, b"raw-token"):

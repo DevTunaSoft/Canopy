@@ -676,6 +676,10 @@ class Supervisor:
                                      "supervisor stopped before task finished",
                                      owner=None, pid=None, lease_expires_at=0.0)
                 self.store.event(task["id"], "shutdown", "checkpoint saved", level="WARN")
+        # Release in-process worker handles after OS PIDs were terminated.
+        close = getattr(self.launcher, "close", None)
+        if callable(close):
+            close()
         self.store.save(data)
         self.store.write_dashboard(data, self.config)
         self.store.event("-", "supervisor_stop")

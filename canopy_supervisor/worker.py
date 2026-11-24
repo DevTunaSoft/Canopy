@@ -110,6 +110,9 @@ class WorkerLauncher:
         return environment
 
     def launch(self, task: dict, worker_id: str, worktree: Path, log_path: Path) -> int:
+        # Bounded lifecycle: drop handles from workers that already exited
+        # before retaining another one. No process is signalled here.
+        self.prune_finished()
         worktree, log_path = Path(worktree), Path(log_path)
         if not worktree.is_dir():
             raise WorkerError("worktree missing: " + str(worktree))
@@ -135,6 +138,15 @@ class WorkerLauncher:
                 raise WorkerError(f"cannot start OpenCode worker: {type(exc).__name__}") from exc
         self._processes[process.pid] = process
         return process.pid
+
+    def prune_finished(self) -> None:
+        """Poll known handles and release the ones that already exited."""
+        for pid in tuple(self._processes):
+            self.poll(pid)
+
+    def close(self) -> None:
+        """Deterministically drop every launcher handle (no process signal)."""
+        self._processes.clear()
 
     def knows(self, pid: int) -> bool:
         return _valid_pid(pid) and pid in self._processes

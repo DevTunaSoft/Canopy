@@ -112,6 +112,15 @@ class EnvironmentAllowlistTests(unittest.TestCase):
                 with self.assertRaises(EnvironmentAllowlistError):
                     build_environment(bad, self.source)
 
+    def test_non_mapping_source_containers_fail_closed(self):
+        # A sequence has both __getitem__ and __contains__, so the old
+        # hasattr-only check let it reach source[name] and leak a raw
+        # built-in TypeError instead of the module's domain error.
+        for bad_source in (["PATH"], ("PATH",), b"PATH", "PATH"):
+            with self.subTest(bad_source=bad_source):
+                with self.assertRaises(EnvironmentAllowlistError):
+                    build_environment(["PATH"], bad_source)
+
     def test_name_format_and_length_validated(self):
         for name in ("", "1BAD", "A=B", "A B", "A\nB", "A" * (MAX_NAME_BYTES + 1)):
             with self.subTest(name=name):

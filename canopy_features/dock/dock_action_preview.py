@@ -116,6 +116,10 @@ def _pinned_position(pinned, target):
     items = pinned.items
     if type(items) is not tuple or any(type(item) is not str for item in items):
         return None
+    # A repeated id names two tiles at once, so no unique pinned_index can be
+    # claimed. The source snapshot is malformed; deny with the existing code.
+    if len(set(items)) != len(items):
+        return None
     return items.index(target) if target in items else -1
 
 

@@ -20,7 +20,11 @@ else:
     )
 
 HALF = 31
-TARGET_RATIO = 0.83
+# Historical optical preview, not the chosen five-icon production default.
+# At 62px with translucency the original 54px surrogate is overly strict:
+# genuine Qt 1920px comparison measured x=0.923, y=0.651. Require both
+# axes to improve by at least 5%, while still rejecting an unchanged axis.
+TARGET_RATIO = 0.95
 
 
 def _stats(rgba: bytes, width: int, size: str):

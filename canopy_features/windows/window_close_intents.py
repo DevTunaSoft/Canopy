@@ -161,12 +161,18 @@ class CloseIntentModel:
         if denial is not None:
             return IntentResult(_safe_id(window_id), denial, None, NO_STATE,
                                 "close request refused")
-        if record.guarded:
-            return self._result(record, GUARDED,
-                                "owner guard active; window left open")
+        # Visibility is authoritative for the close-state claim. A parked
+        # window has no close left to veto: a guard can still be set on it
+        # (for unsaved work), but honouring that guard here would return
+        # GUARDED with ``visible=False`` and the note "window left open",
+        # jointly asserting a false close state. Derive the status from the
+        # durable visibility flag first; the guard only vetoes a real close.
         if not record.visible:
             return self._result(record, ALREADY_CLOSED,
                                 "window already parked; state unchanged")
+        if record.guarded:
+            return self._result(record, GUARDED,
+                                "owner guard active; window left open")
         record.visible = False
         return self._result(record, CLOSED, "window parked; state preserved")
 

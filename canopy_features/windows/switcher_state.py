@@ -71,11 +71,17 @@ class SwitcherState:
         self._current = current
         self._selected = None
         self._active = False
+        self._snapshot = None
 
     # Immutable value view; safe to hand to callers.
     def snapshot(self):
-        return SwitchState(self._active, self._current, self._selected,
-                           self._order)
+        if self._snapshot is None:
+            self._snapshot = SwitchState(self._active, self._current,
+                                         self._selected, self._order)
+        return self._snapshot
+
+    def _invalidate(self):
+        self._snapshot = None
 
     @property
     def active(self):
@@ -106,10 +112,12 @@ class SwitcherState:
         if not self._order:
             self._active = False
             self._selected = None
+            self._invalidate()
             return None
         self._active = True
         self._selected = (self._current if self._current in self._order
                           else self._order[0])
+        self._invalidate()
         return self._selected
 
     def next(self):
@@ -126,12 +134,14 @@ class SwitcherState:
         order = self._order
         if not order:  # defensive: active implies a nonempty order
             self._selected = None
+            self._invalidate()
             return None
         try:
             index = order.index(self._selected)
         except ValueError:
             index = 0
         self._selected = order[(index + delta) % len(order)]
+        self._invalidate()
         return self._selected
 
     def select(self, window_id):
@@ -145,6 +155,7 @@ class SwitcherState:
         if not _valid_id(window_id) or window_id not in self._order:
             raise SwitcherError("unknown window id")
         self._selected = window_id
+        self._invalidate()
         return window_id
 
     def confirm(self):
@@ -155,6 +166,7 @@ class SwitcherState:
             self._current = chosen
         self._active = False
         self._selected = None
+        self._invalidate()
         return chosen
 
     def cancel(self):
@@ -162,6 +174,7 @@ class SwitcherState:
         self._require_active()
         self._active = False
         self._selected = None
+        self._invalidate()
         return self._current
 
     def focus(self, window_id):
@@ -176,6 +189,7 @@ class SwitcherState:
                 not _valid_id(window_id) or window_id not in self._order):
             raise SwitcherError("unknown window id")
         self._current = window_id
+        self._invalidate()
         return window_id
 
     def remove(self, window_id):
@@ -213,4 +227,5 @@ class SwitcherState:
                 self._current = None
         else:
             self._selected = None
+        self._invalidate()
         return True

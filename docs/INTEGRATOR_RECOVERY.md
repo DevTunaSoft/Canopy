@@ -37,7 +37,7 @@ lock:
 
 `tools/qa/integrator_recovery.py` adds bounded supervision:
 
-- Recovers only locks whose owner is dead, PID-reused, legacy, or malformed.
+- Recovers only locks whose owner is dead, PID-reused, dead legacy, or malformed.
 - Launches the replacement detached from the calling shell/session, so gateway
   restarts and terminal teardown do not kill it.
 - Records attempts in `<lock>.recovery.json`; at most two attempts per 15-minute

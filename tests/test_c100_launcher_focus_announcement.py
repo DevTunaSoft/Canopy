@@ -182,6 +182,14 @@ class FailClosedTests(unittest.TestCase):
         with self.assertRaises(AnnouncementInputError):
             compose(d=bad)
 
+    def test_unhashable_decision_surface_rejected(self):
+        # An unhashable surface must fail with the domain error before the
+        # token-table membership check raises a raw TypeError.
+        bad = ShellActionDecision(DECISION_READY, DECISION_REASON_OK,
+                                  ["dock"], "launch", "SECRET-TARGET")
+        with self.assertRaises(AnnouncementInputError):
+            compose(d=bad)
+
     def test_focus_without_target_is_silent(self):
         no_target = FocusTransition("a", None, moved=True,
                                     wrapped=False, duration_ms=120)

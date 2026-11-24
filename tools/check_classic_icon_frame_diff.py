@@ -20,27 +20,28 @@ else:
 APPS = ("Browser", "Mail", "Files", "Calendar", "Photos",
         "Music", "Terminal", "Settings")
 SIZES = ("760x500", "1200x750", "1920x1080")
-# Measured source-branch Qt 54x54 QML Image centers. This audit is intentionally
+# User-approved enlargement: 66x66 dock QML image centers. This audit is intentionally
 # strict: a future layout change requires a reviewed geometry update, not a
 # silent tolerance expansion or arbitrary ignored screenshot rectangle.
 CENTERS = {
     "760x500": {
-        "desktop": [(152 + 65 * i, 434) for i in range(8)],
+        "desktop": [(111 + 77 * i, 427) for i in range(8)],
         "launcher": [(127 + 169 * i, 196) for i in range(4)] +
                     [(127 + 169 * i, 293) for i in range(4)],
     },
     "1200x750": {
-        "desktop": [(372 + 65 * i, 684) for i in range(8)],
+        "desktop": [(331 + 77 * i, 677) for i in range(8)],
         "launcher": [(310 + 193 * i, 284) for i in range(4)] +
                     [(310 + 193 * i, 401) for i in range(4)],
     },
     "1920x1080": {
-        "desktop": [(732 + 65 * i, 1014) for i in range(8)],
+        "desktop": [(691 + 77 * i, 1007) for i in range(8)],
         "launcher": [(670 + 193 * i, 449) for i in range(4)] +
                     [(670 + 193 * i, 566) for i in range(4)],
     },
 }
-HALF_SLOT = 27
+HALF_SLOT = 33
+LAUNCHER_HALF_SLOT = 27
 MAX_FILE = 12_000_000
 
 
@@ -92,8 +93,9 @@ def compare_pair(before, after, size, scene):
             continue
         pixel = i // 4
         x, y = pixel % width, pixel // width
+        slot_half = HALF_SLOT if scene == "desktop" else LAUNCHER_HALF_SLOT
         matches = [n for n, (cx, cy) in enumerate(CENTERS[size][scene])
-                   if abs(x - cx) < HALF_SLOT and abs(y - cy) < HALF_SLOT]
+                   if abs(x - cx) < slot_half and abs(y - cy) < slot_half]
         if len(matches) != 1:
             raise ComparisonError(
                 f"unexpected change outside exactly one {scene} icon slot "

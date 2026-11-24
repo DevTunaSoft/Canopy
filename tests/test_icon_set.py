@@ -1,0 +1,72 @@
+"""Security and completeness controls for the original dock icon asset family."""
+from pathlib import Path
+import tempfile
+import unittest
+
+from tools.check_icon_set import ICON_NAMES, verify_icon, verify_icon_set
+
+ICONS = (Path(__file__).resolve().parents[1] /
+         "prototype/classic/assets/icons")
+BRAND = ICONS.parent / "brand" / "penguin-launcher.svg"
+
+
+class IconSourceTests(unittest.TestCase):
+    def test_six_reference_dock_categories_match(self):
+        verify_icon_set(ICONS)
+        self.assertEqual(len(ICON_NAMES), 6)
+
+    def check_reject(self, changed_svg, message, name="icon.svg"):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / name
+            path.write_text(changed_svg, encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, message):
+                verify_icon(path)
+
+    def test_original_launcher_is_verified(self):
+        verify_icon(BRAND)
+        text = BRAND.read_text(encoding="utf-8")
+        self.assertIn("Canopy full-color Tux-inspired penguin launcher", text)
+        self.assertIn('fill="#182236"', text)
+        self.assertIn('fill-rule="evenodd"', text)
+        self.assertIn('fill="#f4b523"', text)
+        self.assertIn('fill="#f7f9fd"', text)
+        self.assertNotIn('fill="url(', text)
+        self.assertNotIn("<image", text)
+        self.assertNotIn("<script", text)
+
+    def test_missing_tux_gold_accents_rejected(self):
+        source = BRAND.read_text(encoding="utf-8")
+        self.check_reject(source.replace('fill="#f4b523"', 'fill="#444444"'),
+                          "full-color Tux details", name="penguin-launcher.svg")
+
+    def test_corrupt_launcher_is_rejected(self):
+        source = BRAND.read_text(encoding="utf-8")
+        self.check_reject(source.replace("</svg>", "<script>bad()</script></svg>"),
+                          "Unsupported or unsafe")
+
+    def test_no_svg_script_allowed(self):
+        source = (ICONS / "files.svg").read_text(encoding="utf-8")
+        self.check_reject(source.replace("</svg>", "<script>bad()</script></svg>"),
+                          "Unsupported or unsafe")
+
+    def test_external_reference_not_allowed(self):
+        source = (ICONS / "files.svg").read_text(encoding="utf-8")
+        self.check_reject(source.replace("<path ", '<path href="https://invalid.example/icon" ', 1),
+                          "Unsupported icon attribute")
+
+    def test_broken_gradient_not_allowed(self):
+        source = (ICONS / "browser.svg").read_text(encoding="utf-8")
+        self.check_reject(source.replace("url(#n)", "url(#notthere)", 1),
+                          "undefined gradient")
+
+    def test_missing_asset_fails_set(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            destination = Path(tmp)
+            for name in ICON_NAMES[:-1]:
+                (destination / f"{name}.svg").write_bytes((ICONS / f"{name}.svg").read_bytes())
+            with self.assertRaisesRegex(ValueError, "Expected exactly six"):
+                verify_icon_set(destination)
+
+
+if __name__ == "__main__":
+    unittest.main()

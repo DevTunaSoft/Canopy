@@ -1,0 +1,67 @@
+cmake_minimum_required(VERSION 3.21)
+project(canopy_classic_spike VERSION 0.1 LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+find_package(Qt6 6.4 REQUIRED COMPONENTS Quick QuickControls2)
+find_package(PkgConfig QUIET)
+if(PkgConfig_FOUND)
+    pkg_check_modules(GIO_UNIX QUIET IMPORTED_TARGET gio-unix-2.0)
+endif()
+qt_standard_project_setup()
+qt_add_executable(canopy-classic-spike main.cpp RoundedDockIconProvider.cpp RoundedDockIconProvider.h SystemAppLauncher.cpp SystemAppLauncher.h)
+qt_add_qml_module(canopy-classic-spike
+    URI Canopy.Classic
+    VERSION 1.0
+    QML_FILES Main.qml Theme.qml ClockLabel.qml LauncherOverlay.qml DockTile.qml PreviewWindow.qml Wallpaper.qml FolderTile.qml ShellMenuBar.qml
+    SOURCES FileModel.cpp FileModel.h
+)
+qt_add_resources(canopy-classic-spike "canopy-original-art"
+    PREFIX "/Canopy/Classic"
+    FILES assets/approved/manifest.json
+          assets/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png
+          assets/wallpapers/blue-current.svg
+          assets/ui/folder-blue.svg
+          assets/brand/penguin-launcher.svg
+          assets/icons/files.svg assets/icons/browser.svg
+          assets/icons/photos.svg assets/icons/settings.svg
+          assets/icons/terminal.svg assets/icons/trash.svg
+)
+if(TARGET PkgConfig::GIO_UNIX)
+    target_compile_definitions(canopy-classic-spike PRIVATE CANOPY_HAVE_GIO=1)
+    target_link_libraries(canopy-classic-spike PRIVATE Qt6::Quick Qt6::QuickControls2 PkgConfig::GIO_UNIX)
+else()
+    message(STATUS "gio-unix-2.0 dev package absent: native app launching compiles as a disabled fallback")
+    target_link_libraries(canopy-classic-spike PRIVATE Qt6::Quick Qt6::QuickControls2)
+endif()
+# Build-time production art is rendered by the SAME Qt implementation
+# as the dock, directly from SHA-verified user-approved originals. The
+# five-source master raster assets are never copied/edited/replaced.
+# At 1x/2x/3x, only Browser/Mail/Files/Terminal/Settings are generated.
+set(CANOPY_FIVE_ICON_PACK "${CMAKE_CURRENT_BINARY_DIR}/production-icons")
+file(GLOB CANOPY_MASTER_ICON_INPUTS CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/assets/approved/icons/*.png")
+add_custom_command(
+    OUTPUT "${CANOPY_FIVE_ICON_PACK}/manifest.json"
+    COMMAND "${CMAKE_COMMAND}" -E env
+        "QT_QPA_PLATFORM=offscreen"
+        "$<TARGET_FILE:canopy-classic-spike>"
+        --approved-art-dir "${CMAKE_CURRENT_SOURCE_DIR}/assets/approved"
+        --export-five-production-icons "${CANOPY_FIVE_ICON_PACK}"
+    DEPENDS canopy-classic-spike
+        "${CMAKE_CURRENT_SOURCE_DIR}/assets/approved/manifest.json"
+        ${CANOPY_MASTER_ICON_INPUTS}
+    COMMENT "Render exact five approved Canopy dock masters into deterministic 1x/2x/3x production PNGs"
+    VERBATIM
+)
+add_custom_target(canopy-classic-production-icons ALL
+    DEPENDS "${CANOPY_FIVE_ICON_PACK}/manifest.json")
+
+install(TARGETS canopy-classic-spike RUNTIME DESTINATION bin)
+# The complete verified eight-icon source set and exact approved lake master
+# are installed next to the Qt binary for automatic normal startup.
+# The original wave remains a historical fixture only.
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/assets/approved/"
+    DESTINATION share/canopy/classic/approved)
+install(DIRECTORY "${CANOPY_FIVE_ICON_PACK}/"
+    DESTINATION share/canopy/classic/icons)

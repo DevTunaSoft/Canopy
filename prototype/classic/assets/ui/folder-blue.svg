@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="108" viewBox="0 0 128 108">
+<title>Canopy Classic blue document folder</title>
+<desc>Original softly dimensional folder for file manager content; not an application dock icon.</desc>
+<defs>
+<linearGradient id="rear" x1="0" y1="0" x2=".3" y2="1">
+<stop offset="0" stop-color="#37b8fe"/><stop offset="1" stop-color="#147dc5"/></linearGradient>
+<linearGradient id="front" x1=".1" y1="0" x2=".85" y2="1">
+<stop offset="0" stop-color="#8bdeff"/><stop offset=".5" stop-color="#45b9f2"/><stop offset="1" stop-color="#168bd3"/></linearGradient>
+<linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#ffffff" stop-opacity=".65"/>
+<stop offset="1" stop-color="#ffffff" stop-opacity="0"/></linearGradient>
+</defs>
+<path d="M14 29 Q14 19 25 19 H51 Q56 19 60 24 L67 31 H102 Q113 31 113 42 V87 Q113 96 103 96 H23 Q14 96 14 87Z" fill="url(#rear)" stroke="#1085d1" stroke-width="2"/>
+<path d="M17 45 Q17 38 25 38 H105 Q116 38 116 47 V88 Q116 99 105 99 H25 Q17 99 17 89Z" fill="url(#front)" stroke="#148dd1" stroke-width="2"/>
+<path d="M22 49 Q22 44 29 44 H105 Q110 44 110 51 V66 Q76 60 24 76Z" fill="url(#glass)"/>
+<path d="M24 90 Q71 91 108 85" fill="none" stroke="#e7faff" stroke-opacity=".56" stroke-width="2" stroke-linecap="round"/>
+</svg>

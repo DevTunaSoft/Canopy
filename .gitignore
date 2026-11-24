@@ -1,0 +1,7 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Local Qt build output
+build/
+test-artifacts/

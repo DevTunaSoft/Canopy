@@ -1,0 +1,376 @@
+name: Classic Qt build and runtime evidence
+
+# Compiles the real Qt source on a disposable Ubuntu runner and captures
+# screenshots from the compiled executable. A green run is build/runtime
+# evidence only: it is not owner visual approval, a desktop session test or
+# Linux Mint acceptance.
+on:
+  pull_request:
+  push:
+    # Isolated visual CI can run even when draft PR targets a non-main Qt branch.
+    branches: [main, visual/dock-inner-framing-review-20261122, visual/dock-balanced-fit-20261122, visual/dock-optical-balance-20261122]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: canopy-classic-qt-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qt-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install Qt 6.4+ build and headless runtime dependencies
+        timeout-minutes: 18
+        run: |
+          sudo sed -i 's@http://us-east-2.ec2.archive.ubuntu.com/ubuntu@http://archive.ubuntu.com/ubuntu@g' /etc/apt/sources.list.d/ubuntu.sources
+          sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 update
+          sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 install -y --no-install-recommends \
+            build-essential cmake ninja-build xvfb \
+            qt6-base-dev qt6-declarative-dev qt6-declarative-dev-tools libqt6svg6 libglib2.0-dev \
+            qml6-module-qtquick qml6-module-qtquick-controls \
+            qml6-module-qtquick-layouts qml6-module-qtquick-window \
+            qml6-module-qtquick-templates qml6-module-qtqml \
+            qml6-module-qtqml-workerscript
+
+      - name: Configure
+        run: cmake -S prototype/classic -B build/classic -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Compile
+        timeout-minutes: 6
+        run: cmake --build build/classic --parallel 2
+
+      - name: Verify and install five-icon Qt production pack
+        # Generated from the EXACT eight SHA-locked original sources by Qt
+        # at 192/384/576px. Only five target names may be present.
+        timeout-minutes: 4
+        run: |
+          set -eu
+          mkdir -p test-artifacts
+          python3 tools/validate_five_production_icons.py \
+            --approved-art-dir prototype/classic/assets/approved \
+            --production-dir build/classic/production-icons \
+            --report test-artifacts/five-production-pack-integrity.json
+          QT_QPA_PLATFORM=offscreen ./build/classic/canopy-classic-spike \
+            --approved-art-dir prototype/classic/assets/approved \
+            --export-five-production-icons test-artifacts/reproducible-five-icons
+          cmp build/classic/production-icons/manifest.json \
+              test-artifacts/reproducible-five-icons/manifest.json
+          cmake --install build/classic --prefix "$PWD/test-artifacts/installed-classic"
+          test -s test-artifacts/installed-classic/share/canopy/classic/icons/manifest.json
+          cmp build/classic/production-icons/manifest.json \
+              test-artifacts/installed-classic/share/canopy/classic/icons/manifest.json
+          cp -a build/classic/production-icons test-artifacts/production-icons
+          echo "CANOPY_FIVE_PRODUCTION_PACK_INSTALL_PASS: five exact assets x three densities"
+
+      - name: Verify real GIO launcher path and opt-in safety
+        timeout-minutes: 3
+        run: |
+          set -e
+          capability=$(xvfb-run -a ./build/classic/canopy-classic-spike --self-test-system-apps-capability)
+          echo "$capability"
+          echo "$capability" | grep -q 'CANOPY_GIO_ENABLED'
+          xvfb-run -a ./build/classic/canopy-classic-spike --enable-system-apps --self-test-system-apps
+          mkdir -p test-artifacts/gio-xdg/applications
+          marker="$PWD/test-artifacts/gio-launch-marker"
+          rm -f "$marker"
+          printf '[Desktop Entry]\nType=Application\nName=Canopy GIO Fixture\nExec=/bin/sh -c "touch %s"\nNoDisplay=false\nTerminal=false\n' "$marker" > test-artifacts/gio-xdg/applications/nemo.desktop
+          XDG_DATA_HOME="$PWD/test-artifacts/gio-xdg" XDG_DATA_DIRS="$PWD/test-artifacts/gio-xdg:/usr/share/applications" \
+            xvfb-run -a ./build/classic/canopy-classic-spike --enable-system-apps --self-test-system-apps-fixture
+          test -f "$marker"
+
+      - name: Verify approved eight-icon artwork
+        run: python3 -m unittest tests.test_approved_art tests.test_approved_manifest_contract tests.test_approved_art_zip -v
+
+      - name: Visual-only regression and negative-control tests
+        run: python3 -m unittest tests.test_classic_dock_frozen tests.test_classic_shared_icon_framing tests.test_dock_inner_framing_review tests.test_dock_balanced_fit_review tests.test_dock_optical_balance_review tests.test_dock_optical_balance_quality tests.test_classic_clean_icon_edges tests.test_five_dock_centering tests.test_five_production_pack_contract tests.test_five_master_alpha_silhouettes -v
+
+      - name: Headless startup smoke test
+        timeout-minutes: 2
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: xvfb-run -a python3 tools/qt_smoke.py build/classic/canopy-classic-spike
+
+      - name: Capture three real screenshots from the compiled binary
+        timeout-minutes: 4
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          mkdir -p test-artifacts
+          timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike --dock-original-fit --approved-art-dir prototype/classic/assets/approved --self-test-approved --self-test-size 1920x1080 --self-test-screenshot test-artifacts/classic-1920x1080.png
+          python3 tools/check_screenshot.py test-artifacts/classic-1920x1080.png 1920 1080
+          timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike --dock-original-fit --approved-art-dir prototype/classic/assets/approved --self-test-approved --self-test-size 1200x750 --self-test-screenshot test-artifacts/classic-1200x750.png
+          python3 tools/check_screenshot.py test-artifacts/classic-1200x750.png 1200 750
+          timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike --dock-original-fit --approved-art-dir prototype/classic/assets/approved --self-test-approved --self-test-size 760x500 --self-test-screenshot test-artifacts/classic-760x500.png
+          python3 tools/check_screenshot.py test-artifacts/classic-760x500.png 760 500
+          sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
+
+      - name: Capture optional dock-content review from SAME compiled Qt binary
+        # These screenshots are evidence, NOT owner approval. Default artwork
+        # remains untouched, and the preview flag is never auto-enabled.
+        timeout-minutes: 4
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          set -eu
+          set +e
+          xvfb-run -a ./build/classic/canopy-classic-spike --dock-inner-framing-review >test-artifacts/dock-review-no-art.log 2>&1
+          rejected=$?
+          set -e
+          test "$rejected" -eq 2
+          grep -q 'DOCK_INNER_FRAMING_REVIEW_FAIL' test-artifacts/dock-review-no-art.log
+          for size in 1920x1080 1200x750 760x500; do
+            width="${size%x*}"
+            height="${size#*x}"
+            timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike \
+              --approved-art-dir prototype/classic/assets/approved \
+              --dock-inner-framing-review --self-test-approved \
+              --self-test-size "$size" \
+              --self-test-screenshot "test-artifacts/dock-inner-review-$size.png" \
+              >"test-artifacts/dock-inner-review-$size.log" 2>&1
+            grep -q 'DOCK_INNER_FRAMING_REVIEW_ACTIVE' "test-artifacts/dock-inner-review-$size.log"
+            grep -q 'SELF_TEST_PASS: dock-only inner framing' "test-artifacts/dock-inner-review-$size.log"
+            python3 tools/check_screenshot.py "test-artifacts/dock-inner-review-$size.png" "$width" "$height"
+            python3 tools/check_dock_inner_framing.py \
+              --before "test-artifacts/classic-$size.png" \
+              --after "test-artifacts/dock-inner-review-$size.png" \
+              --size "$size" \
+              --output "test-artifacts/dock-inner-frame-diff-$size.json"
+          done
+          sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
+
+      - name: Capture conservative full-height dock-fit candidate from real Qt
+        # Independent and opt-in, never modifies the eight SHA-locked PNGs,
+        # QML geometry, launcher visuals or the approved renderer.
+        timeout-minutes: 4
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          set -eu
+          set +e
+          xvfb-run -a ./build/classic/canopy-classic-spike --dock-balanced-fit-review >test-artifacts/dock-balanced-without-approved.log 2>&1
+          rejected=$?
+          set -e
+          test "$rejected" -eq 2
+          grep -q 'DOCK_BALANCED_FIT_REVIEW_FAIL' test-artifacts/dock-balanced-without-approved.log
+          for size in 1920x1080 1200x750 760x500; do
+            width="${size%x*}"
+            height="${size#*x}"
+            timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike \
+              --approved-art-dir prototype/classic/assets/approved \
+              --dock-balanced-fit-review --self-test-approved \
+              --self-test-size "$size" \
+              --self-test-screenshot "test-artifacts/dock-balanced-fit-$size.png" \
+              >"test-artifacts/dock-balanced-fit-$size.log" 2>&1
+            grep -q 'DOCK_BALANCED_FIT_REVIEW_ACTIVE' "test-artifacts/dock-balanced-fit-$size.log"
+            grep -q 'SELF_TEST_PASS: dock balanced full-height original content fit' "test-artifacts/dock-balanced-fit-$size.log"
+            python3 tools/check_screenshot.py "test-artifacts/dock-balanced-fit-$size.png" "$width" "$height"
+            python3 tools/check_dock_inner_framing.py \
+              --before "test-artifacts/classic-$size.png" \
+              --after "test-artifacts/dock-balanced-fit-$size.png" \
+              --size "$size" \
+              --output "test-artifacts/dock-balanced-fit-diff-$size.json"
+          done
+          sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
+
+      - name: Capture original-art optical-balanced dock from real Qt
+        # Third candidate, preserving all eight original source files,
+        # fixed mask, QML geometry, and existing default.
+        timeout-minutes: 4
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          set -eu
+          set +e
+          xvfb-run -a ./build/classic/canopy-classic-spike --dock-optical-balance-review >test-artifacts/dock-optical-without-approved.log 2>&1
+          rejected=$?
+          set -e
+          test "$rejected" -eq 2
+          grep -q 'DOCK_OPTICAL_BALANCE_FAIL' test-artifacts/dock-optical-without-approved.log
+          for size in 1920x1080 1200x750 760x500; do
+            width="${size%x*}"
+            height="${size#*x}"
+            timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike \
+              --approved-art-dir prototype/classic/assets/approved \
+              --dock-optical-balance-review --self-test-approved \
+              --self-test-size "$size" \
+              --self-test-screenshot "test-artifacts/dock-optical-balance-$size.png" \
+              >"test-artifacts/dock-optical-balance-$size.log" 2>&1
+            grep -q 'DOCK_OPTICAL_BALANCE_ACTIVE' "test-artifacts/dock-optical-balance-$size.log"
+            grep -q 'SELF_TEST_PASS: dock optical balance inside unchanged geometry' "test-artifacts/dock-optical-balance-$size.log"
+            python3 tools/check_screenshot.py "test-artifacts/dock-optical-balance-$size.png" "$width" "$height"
+            python3 tools/check_dock_inner_framing.py \
+              --before "test-artifacts/classic-$size.png" \
+              --after "test-artifacts/dock-optical-balance-$size.png" \
+              --size "$size" \
+              --output "test-artifacts/dock-optical-balance-diff-$size.json"
+            python3 tools/check_dock_optical_balance_quality.py \
+              --before "test-artifacts/classic-$size.png" \
+              --after "test-artifacts/dock-optical-balance-$size.png" \
+              --size "$size" \
+              --output "test-artifacts/dock-optical-balance-quality-$size.json"
+          done
+          # Verify that ordinary approved-art startup now displays the chosen
+          # optical-balanced renderer, not merely a preview flag.
+          timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike \
+            --approved-art-dir prototype/classic/assets/approved \
+            --require-five-production-icons \
+            --self-test-approved --self-test-size 1200x750 \
+            --self-test-screenshot test-artifacts/classic-selected-default-1200x750.png
+          python3 tools/check_screenshot.py test-artifacts/classic-selected-default-1200x750.png 1200 750
+          # Keep independent optical-balance regression evidence, but do not
+          # conflate it with the now-selected cleaner source renderer.
+          python3 tools/check_dock_optical_balance_quality.py \
+            --before test-artifacts/classic-1200x750.png \
+            --after test-artifacts/dock-optical-balance-1200x750.png \
+            --size 1200x750 \
+            --output test-artifacts/dock-optical-balance-quality-1200x750.json
+          sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
+
+      - name: Capture exact-original clean-matte dock preview from compiled Qt
+        # Visual-only experiment. No master PNG, manifest or QML card change.
+        timeout-minutes: 4
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          set -eu
+          set +e
+          xvfb-run -a ./build/classic/canopy-classic-spike --dock-clean-edges-review >test-artifacts/dock-clean-edges-without-approved.log 2>&1
+          rejected=$?
+          set -e
+          test "$rejected" -eq 2
+          grep -q 'DOCK_CLEAN_EDGES_FAIL' test-artifacts/dock-clean-edges-without-approved.log
+          for size in 1920x1080 1200x750 760x500; do
+            width="${size%x*}"
+            height="${size#*x}"
+            timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike \
+              --approved-art-dir prototype/classic/assets/approved \
+              --dock-clean-edges-review --self-test-approved \
+              --self-test-size "$size" \
+              --self-test-screenshot "test-artifacts/dock-clean-edges-$size.png" \
+              >"test-artifacts/dock-clean-edges-$size.log" 2>&1
+            grep -q 'DOCK_CLEAN_EDGES_ACTIVE' "test-artifacts/dock-clean-edges-$size.log"
+            grep -q 'SELF_TEST_PASS: approved icon matte cleaned only inside dock' "test-artifacts/dock-clean-edges-$size.log"
+            python3 tools/check_screenshot.py "test-artifacts/dock-clean-edges-$size.png" "$width" "$height"
+            python3 tools/check_dock_inner_framing.py \
+              --before "test-artifacts/classic-$size.png" \
+              --after "test-artifacts/dock-clean-edges-$size.png" \
+              --size "$size" \
+              --output "test-artifacts/dock-clean-edges-diff-$size.json"
+          done
+          # Historical unshifted clean-art mode is now a *rollback*, not the
+          # normal default. Its screenshot remains checked for integrity and
+          # five-only source isolation. Default identity is checked against
+          # dock-five-center AFTER the target images have been captured.
+          sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
+
+      - name: Prove FIVE-only centering in real Qt at three resolutions
+        # Must affect exactly Browser, Mail, Files, Terminal and Settings.
+        # Calendar, Photos, Music and every non-dock pixel remain identical.
+        timeout-minutes: 4
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          set -eu
+          set +e
+          xvfb-run -a ./build/classic/canopy-classic-spike --dock-five-center-review >test-artifacts/five-center-no-approved.log 2>&1
+          denied=$?
+          set -e
+          test "$denied" -eq 2
+          grep -q 'DOCK_FIVE_CENTER_FAIL' test-artifacts/five-center-no-approved.log
+          for size in 1920x1080 1200x750 760x500; do
+            width="${size%x*}"
+            height="${size#*x}"
+            timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike \
+              --approved-art-dir prototype/classic/assets/approved \
+              --dock-five-center-review --require-five-production-icons \
+              --self-test-approved --self-test-size "$size" \
+              --self-test-screenshot "test-artifacts/dock-five-center-$size.png" \
+              >"test-artifacts/dock-five-center-$size.log" 2>&1
+            grep -q 'DOCK_FIVE_CENTER_ACTIVE' "test-artifacts/dock-five-center-$size.log"
+            grep -q 'SELF_TEST_PASS: five icons optically centered' "test-artifacts/dock-five-center-$size.log"
+            python3 tools/check_screenshot.py "test-artifacts/dock-five-center-$size.png" "$width" "$height"
+            python3 tools/check_five_dock_centering.py \
+              --before "test-artifacts/dock-clean-edges-$size.png" \
+              --after "test-artifacts/dock-five-center-$size.png" \
+              --size "$size" \
+              --output "test-artifacts/dock-five-center-diff-$size.json"
+          done
+          sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
+
+      - name: Capture new enlarged dock golden candidate from compiled Qt
+        # The earlier goldens are for 54px icons on the old wave wallpaper;
+        # they must NOT be used for 62px images over the approved alpine photo.
+        # Source pixel hashes originate only from same-binary Qt captures.
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          from tools.check_classic_icon_frame_diff import CENTERS
+          from tools.check_five_dock_goldens import extract_hashes
+          result = {
+            "schema_version": 2,
+            "kind": "real_qt_62px_master_lake_icon_golden_candidate",
+            "fixed_resolution_hashes": {},
+            "five_production_goldens": {},
+          }
+          frozen = ("calendar", "photos", "music")
+          five = ("browser", "mail", "files", "terminal", "settings")
+          for size in CENTERS:
+              hashes = extract_hashes(
+                  Path(f"test-artifacts/dock-five-center-{size}.png"), size)
+              result["fixed_resolution_hashes"][size] = {
+                  name: hashes[name] for name in frozen}
+              result["five_production_goldens"][size] = {
+                  name: hashes[name] for name in five}
+          Path("test-artifacts/new-62px-golden-from-real-Qt.json").write_text(
+              json.dumps(result, indent=2) + "\n")
+          print("CANOPY_REAL_QT_62PX_GOLDEN_CAPTURE_PASS: 24 hashes from actual Qt screenshots")
+          PY
+
+      - name: Verify ordinary Qt launch selects exactly the five-icon correction
+        # Compare actual default Qt rendering with explicit five-icon rendering.
+        # Allow only bounded top-bar clock rollover; no icon pixel exceptions.
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from tools.check_dock_optical_balance_quality import equivalent_selected_default
+          count=equivalent_selected_default(
+              Path("test-artifacts/classic-selected-default-1200x750.png"),
+              Path("test-artifacts/dock-five-center-1200x750.png"),
+              "1200x750",
+          )
+          print("CANOPY_FIVE_DOCK_DEFAULT_IDENTITY_PASS:",
+                "selected default identical to explicit five-center preview;",
+                count, "clock-only exceptions")
+          PY
+
+      - name: Measure five-minute idle CPU and PSS
+        timeout-minutes: 9
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: xvfb-run -a python3 tools/measure_qt.py build/classic/canopy-classic-spike test-artifacts/qt-idle-300s.json --seconds 300
+
+      - name: Upload compile and runtime evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: canopy-classic-qt-evidence
+          path: test-artifacts/
+          if-no-files-found: warn
+          retention-days: 14

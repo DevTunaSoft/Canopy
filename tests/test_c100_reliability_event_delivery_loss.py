@@ -143,6 +143,30 @@ class BoundedDeliveryChannelTests(unittest.TestCase):
                     channel.send(sequence)
         self.assertEqual(channel.stats.sent, 0)
 
+    def test_hostile_policy_label_cannot_claim_false_rejection(self):
+        # A str subclass is a hostile-but-bounded label: it lies about being a
+        # supported policy, so the channel must fail closed instead of storing
+        # it and later claiming a false reject_new overflow fallback.
+        class LyingPolicy(str):
+            def __hash__(self):
+                return hash("reject_new")
+
+            def __eq__(self, other):
+                return True
+
+        with self.assertRaises(DeliveryError):
+            BoundedDeliveryChannel(capacity=1, policy=LyingPolicy("not_a_policy"))
+
+    def test_hostile_policy_label_hash_cannot_leak_raw_exception(self):
+        # Validation must reject the wrong-type label before any set lookup:
+        # a hostile __hash__ must never escape as a bare RuntimeError.
+        class ExplodingPolicy(str):
+            def __hash__(self):
+                raise RuntimeError("hostile hash")
+
+        with self.assertRaises(DeliveryError):
+            BoundedDeliveryChannel(capacity=1, policy=ExplodingPolicy("drop_oldest"))
+
     def test_composes_with_existing_host_event_sequences(self):
         seen = []
         receive = lambda event: seen.append(event.sequence)

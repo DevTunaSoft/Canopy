@@ -114,6 +114,21 @@ class DenialTests(unittest.TestCase):
     def test_wrong_pinned_type_is_denied(self):
         self.assert_terse_denial(compose(pinned=("Files",)), REASON_INVALID_INPUT)
 
+    def test_hostile_pinned_label_is_denied_without_raw_exception(self):
+        class HostilePinnedLabel:
+            """A bounded pinned-snapshot entry whose comparison always raises."""
+
+            def __eq__(self, other):
+                raise RuntimeError("SYNTHETIC hostile pinned label")
+
+        bounded = PinnedItems(items=(HostilePinnedLabel(), "Files"))  # type: ignore[arg-type]
+        try:
+            result = compose(pinned=bounded)
+        except Exception as exc:
+            self.fail("compose leaked a raw exception: %r" % (exc,))
+        self.assert_terse_denial(result, REASON_INVALID_INPUT)
+        self.assertNotIn("SYNTHETIC", repr(result.to_dict()))
+
     def test_grouping_failure_is_denied_without_echo(self):
         bad = (WindowRecord(window_id=["unhashable"],
                             desktop_id="org.example.Files.desktop"),)

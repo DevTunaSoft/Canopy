@@ -16,9 +16,12 @@ Ranking comes from :mod:`app_search_casefold` and id validation from
 shows visible favorites first (in favorites display order) then the rest of the
 catalog in catalog order. A non-blank query shows the ranked matches and breaks
 equal-score ties in favour of favorites. Every source disagreement, malformed
-input or oversized collection fails closed with ``ProjectionError``. The module
-launches nothing and proves no running desktop.
+input or oversized collection fails closed with ``ProjectionError``. Catalog
+and favorites must be ordered sequences; unordered containers (sets, mappings)
+are refused because they cannot define the display order this projection
+promises. The module launches nothing and proves no running desktop.
 """
+import collections.abc
 from dataclasses import dataclass
 from typing import Iterable, Tuple
 
@@ -101,8 +104,12 @@ class FavoritesProjection:
 
 
 def _iterable(value, label):
-    if isinstance(value, (str, bytes, bytearray, dict)):
-        raise ProjectionError(label + " must be an iterable of pairs")
+    # The projection promises a deterministic favorites display order and a
+    # stable catalog order for tie breaks. A set/frozenset (or any set-like
+    # view) has no order, so accepting one silently invents an ordered,
+    # favorites-valid-looking result from an unordered source. Fail closed.
+    if isinstance(value, (str, bytes, bytearray, dict, collections.abc.Set)):
+        raise ProjectionError(label + " must be an ordered iterable")
     try:
         return iter(value)
     except TypeError:

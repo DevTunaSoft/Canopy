@@ -39,9 +39,7 @@ Routine, independently verified nonvisual changes may use an autonomous review a
 
 The historical Canopy PRs are **stacked**, and several ancestors were
 visually rejected. Do not merge a green descendant if it imports
-unapproved ancestors. First rebase or independently backport bounded,
-verified changes onto current `main`, inspect the entire proposed diff,
-and test that exact code.
+unapproved ancestors. For main-targeted changes, rebase or independently backport bounded verified changes onto current `main`. For routine nonvisual Classic development, use the designated integration branch as the base. In either case inspect the entire proposed diff and test that exact code.
 
 Keep UI/artwork, shared core, VM integration, and QA in separate branches.
 Do not substitute the eight SHA-locked original icon masters or silently

@@ -131,7 +131,10 @@ def make_parser() -> argparse.ArgumentParser:
 
 
 def _state_root(args) -> Path:
-    return Path(args.state_root) if args.state_root else default_state_root()
+    value = getattr(args, "state_root", None)
+    if value is not None and not isinstance(value, (str, os.PathLike)):
+        raise ValueError("state root must be a path")
+    return Path(value) if value else default_state_root()
 
 
 def _locked_action(store, action):

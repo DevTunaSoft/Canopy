@@ -3,6 +3,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 
 from canopy_supervisor import cli, credentials
 
@@ -33,6 +34,13 @@ class CredentialArgumentTests(unittest.TestCase):
         with self.assertRaises(ValueError) as caught:
             cli.resolve_opencode_exe(PLACEHOLDER.encode())
         self.assertNotIn(PLACEHOLDER, str(caught.exception))
+
+    def test_falsy_wrong_type_state_root_fails_closed(self):
+        for value in ([], {}, False):
+            with self.subTest(value_type=type(value).__name__):
+                with self.assertRaises(ValueError) as caught:
+                    cli._state_root(SimpleNamespace(state_root=value))
+                self.assertNotIn(PLACEHOLDER, str(caught.exception))
 
 
 if __name__ == "__main__":

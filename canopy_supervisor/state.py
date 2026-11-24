@@ -10,6 +10,7 @@ import tempfile
 import time
 
 STATE_VERSION = 1
+MAX_HISTORY_EVENTS = 2048
 ACTIVE_STATUSES = ("assigned", "running", "verifying", "publishing")
 TERMINAL_STATUSES = ("awaiting_review", "done", "blocked", "failed", "cancelled")
 ORDER = ("queued", "assigned", "running", "verifying", "publishing",
@@ -113,6 +114,8 @@ class TaskStore:
         return data
 
     def save(self, data: dict) -> None:
+        if not isinstance(data, dict):
+            raise ValueError("invalid task state")
         if data.get("version") != STATE_VERSION or not isinstance(data.get("tasks"), list):
             raise ValueError("invalid task state")
         data["updated_at"] = utcnow()
@@ -140,6 +143,14 @@ class TaskStore:
             handle.write(json.dumps(row, sort_keys=True) + "\n")
             handle.flush()
             os.fsync(handle.fileno())
+        self._trim_history()
+
+    def _trim_history(self) -> None:
+        """Keep the durable event journal bounded to the newest events."""
+        lines = self.history_path.read_text(encoding="utf-8").splitlines()
+        if len(lines) <= MAX_HISTORY_EVENTS:
+            return
+        atomic_write(self.history_path, "\n".join(lines[-MAX_HISTORY_EVENTS:]) + "\n")
 
     def recent_events(self, limit: int = 12) -> list[dict]:
         if not self.history_path.exists():
@@ -245,6 +256,8 @@ class TaskStore:
 
 def new_task(definition: dict, max_attempts: int) -> dict:
     """Create a persisted task with no owner and a fresh checkpoint."""
+    if not isinstance(definition, dict):
+        raise ValueError("invalid task definition")
     now = utcnow()
     return {
         **definition,

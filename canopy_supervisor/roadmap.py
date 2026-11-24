@@ -37,7 +37,12 @@ def campaign_status(task: dict, state_root: Path) -> str:
         evidence = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeError, ValueError):
         return "failed"
-    results = {row.get("result") for row in evidence.get("tests", [])
+    if not isinstance(evidence, dict):
+        return "failed"
+    tests = evidence.get("tests", [])
+    if not isinstance(tests, list):
+        return "failed"
+    results = {row.get("result") for row in tests
                if isinstance(row, dict)}
     if "FAIL" in results:
         return "failed"

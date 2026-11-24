@@ -119,6 +119,13 @@ def _check_categories(value):
         raise CatalogIngestError("invalid application categories")
     if not all(type(token) is str and token for token in value):
         raise CatalogIngestError("invalid application category token")
+    # Category tokens are display text carried in the emitted rows, so they
+    # need the same fail-closed guard as titles: a control/format scalar here
+    # would make no_invalid_entries_accepted a false claim.
+    if any(unicodedata.category(char) in _UNSAFE_UNICODE_CATEGORIES
+           for token in value for char in token):
+        raise CatalogIngestError(
+            "application category contains a control character")
 
 
 def compose_launcher_catalog(entries, *, max_entries=MAX_ENTRIES):

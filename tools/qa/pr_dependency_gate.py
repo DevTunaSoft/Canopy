@@ -20,6 +20,9 @@ A PR is held when any of these fixed conditions applies:
   * ``NOT_OPEN`` -- its state is not OPEN;
   * ``RELEASE_HOLD`` / ``VISUAL_HOLD`` -- host-supplied global holds.
 
+A cyclic dependency map is malformed: it is refused with DependencyGateError
+rather than producing a merge order.
+
 Error and report messages contain only fixed tokens and validated bounded
 integers. No branch name, SHA, check name, PR title or other caller text is
 ever echoed. This gate NEVER approves a release, a Linux Mint acceptance, an
@@ -171,6 +174,25 @@ def _validated_dependencies(snapshot, known_numbers):
         if dependent in result:
             raise DependencyGateError("duplicate dependency is refused")
         result[dependent] = prerequisite
+    # Each dependent has at most one prerequisite, so the map is a functional
+    # graph: follow every chain at most once (bounded by MAX_PRS) and refuse a
+    # cycle. A cyclic map recorded with one member already MERGED used to emit
+    # a zero-hold merge_order for the other member: a false PASS for a graph
+    # that could never have been built in dependency order.
+    settled = set()
+    for start in result:
+        if start in settled:
+            continue
+        path = set()
+        node = start
+        while node in result:
+            if node in path:
+                raise DependencyGateError("dependency cycle is refused")
+            if node in settled:
+                break
+            path.add(node)
+            node = result[node]
+        settled.update(path)
     return result
 
 

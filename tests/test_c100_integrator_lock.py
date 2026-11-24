@@ -139,23 +139,32 @@ class IntegratorLockTests(unittest.TestCase):
             self.assertTrue(self.path.exists())
 
     def test_simultaneous_acquisition_has_single_winner(self) -> None:
+        # The winner must not release the lock until every contender has
+        # observed it; a short sleep made this flaky on faster/slower CI hosts.
         barrier = threading.Barrier(6)
+        attempts_done = threading.Barrier(7)
+        release_ready = threading.Event()
         results: list[str] = []
 
         def worker() -> None:
             barrier.wait()
+            handle = None
             try:
                 handle = acquire(self.path, attempts=1)
             except LockHeld:
                 results.append("lost")
             else:
                 results.append("won")
-                time.sleep(0.05)
+            attempts_done.wait(timeout=10)
+            if handle is not None:
+                release_ready.wait(timeout=10)
                 handle.release()
 
         threads = [threading.Thread(target=worker) for _ in range(6)]
         for thread in threads:
             thread.start()
+        attempts_done.wait(timeout=10)
+        release_ready.set()
         for thread in threads:
             thread.join(timeout=10)
         self.assertEqual(results.count("won"), 1)

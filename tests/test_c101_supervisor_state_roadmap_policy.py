@@ -111,5 +111,23 @@ class TaskStoreSaveTypeGuardTests(unittest.TestCase):
         self.assertEqual(store.load()["tasks"], [])
 
 
+class NewTaskTypeGuardTests(unittest.TestCase):
+    def test_non_mapping_definition_raises_domain_value_error(self):
+        from canopy_supervisor.state import new_task
+
+        for value in (None, [], 7, "text", True):
+            with self.subTest(value=repr(value)):
+                with self.assertRaises(ValueError) as caught:
+                    new_task(value, 3)
+                self.assertNotIsInstance(caught.exception, TypeError)
+
+    def test_valid_definition_still_builds_task(self):
+        from canopy_supervisor.state import new_task
+
+        task = new_task({"id": "task-001"}, 3)
+        self.assertEqual(task["status"], "queued")
+        self.assertEqual(task["max_attempts"], 3)
+
+
 if __name__ == "__main__":
     unittest.main()

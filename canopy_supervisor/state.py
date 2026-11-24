@@ -256,6 +256,8 @@ class TaskStore:
 
 def new_task(definition: dict, max_attempts: int) -> dict:
     """Create a persisted task with no owner and a fresh checkpoint."""
+    if not isinstance(definition, dict):
+        raise ValueError("invalid task definition")
     now = utcnow()
     return {
         **definition,

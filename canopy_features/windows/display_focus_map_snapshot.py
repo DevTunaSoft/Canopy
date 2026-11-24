@@ -183,12 +183,16 @@ def _workspace_view(inventory):
     if type(workspaces) is not tuple or type(problems) is not tuple:
         raise SnapshotError("workspace records and problems must be tuples")
     identifiers = []
+    seen = set()
     for workspace in workspaces[:MAX_WORKSPACES]:
         if not isinstance(workspace, Workspace):
             raise SnapshotError("workspace records must be Workspace values")
         identifier = _bounded_text(workspace.identifier, "workspace identifier")
         if not identifier:
             raise SnapshotError("workspace identifier must not be empty")
+        if identifier in seen:
+            raise SnapshotError("duplicate workspace identifier")
+        seen.add(identifier)
         _bounded_text(workspace.name, "workspace name")
         _bounded_text(workspace.source, "workspace source")
         identifiers.append(identifier)

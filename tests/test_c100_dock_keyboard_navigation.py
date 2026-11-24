@@ -66,6 +66,31 @@ class DockFocusOrderTests(unittest.TestCase):
         self.assertFalse(stopped.moved)
         self.assertFalse(stopped.wrapped)
 
+    def test_single_item_wrap_never_claims_a_wrapped_move(self):
+        # A one-item dock has no other focus target. Wrap-around cannot move
+        # focus, so the transition must not assert a wrapped navigation: that
+        # would be a false navigation-success claim for callers using `wrapped`.
+        model = DockFocusOrder(["Only"], wrap=True)
+        model.focus("Only")
+        for action in (model.next, model.previous):
+            with self.subTest(action=action.__name__):
+                transition = action()
+                self.assertEqual(
+                    (transition.from_id, transition.to_id, transition.moved,
+                     transition.wrapped, transition.duration_ms),
+                    ("Only", "Only", False, False, 0))
+                self.assertEqual(model.focused_id, "Only")
+
+    def test_multi_item_wrap_still_reports_a_wrapped_move(self):
+        # Guard against over-correction: a real end-to-end wrap stays flagged.
+        model = DockFocusOrder(["Browser", "Mail"])
+        model.focus_last()
+        transition = model.next()
+        self.assertEqual(
+            (transition.to_id, transition.moved, transition.wrapped,
+             transition.duration_ms),
+            ("Browser", True, True, DEFAULT_TRANSITION_MS))
+
     def test_focus_by_id_home_end_and_clear(self):
         model = DockFocusOrder(["Browser", "Mail", "Files"])
         self.assertEqual(model.focus("Files").to_id, "Files")

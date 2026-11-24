@@ -1,4 +1,4 @@
-# Canopy Shell Host event contract — in-process protocol v1
+# Canopy Shell Host event contract — in-process protocols v1 and v2
 
 `canopy_core.host_events.HostEvents` is a **small, bounded, host-owned event
 primitive** for future Classic, Modern and third-party presentation adapters
@@ -22,6 +22,28 @@ sensitive or prototype-pollution names (`__proto__`, `constructor`,
 Values are bounded UTF-8 strings (up to 512 bytes), booleans, integers,
 finite small floats, or `None`. Nested objects, lists and executable
 data are rejected before any callback runs.
+
+## Protocol v2 (current, reviewed extension)
+
+Protocol version **2** is the successor to v1. It accepts exactly four
+topics: the three v1 topics listed above plus `capabilities.report`. The
+three v1 topic names and their semantics are unchanged under v2 (backward
+compatibility of topics, not of the old version integer). Exact topic
+spelling is required; there is no fifth topic and no dynamic topic
+registration.
+
+`capabilities.report` carries one frozen host capability report published on
+an explicit host request only — never on a timer, poll or periodic schedule.
+All existing payload rules still apply: at most eight lowercase snake-case
+scalar fields (bounded UTF-8 strings, booleans, integers, finite small floats
+or `None`), no nested objects/lists/executable values, no sensitive or
+prototype-pollution field names. Publishers emit only fixed tokens and fixed
+negative claims; no raw caller value is echoed. The report is the read-only,
+eight-record composition exposed by `ShellHost.capability_report`; this event
+does not approve a release, Mint acceptance, visual approval, process launch,
+I/O or capability activation.
+
+Protocol v1 remains the historical contract for the original three topics.
 
 ## Trust and lifecycle
 

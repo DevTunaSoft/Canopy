@@ -24,7 +24,8 @@ class HostEventTests(unittest.TestCase):
         self.assertEqual(a.callback_failures, 0)
         self.assertEqual([x[:2] for x in received],
                          [("a", 1), ("b", 1), ("a", 2), ("b", 2)])
-        self.assertEqual((a.event.version, b.event.sequence), (1, 2))
+        self.assertEqual((a.event.version, b.event.sequence),
+                         (PROTOCOL_VERSION, 2))
         with self.assertRaises(TypeError):
             a.event.payload["item_count"] = 10
         self.assertEqual(a.event.payload["item_count"], 4)
@@ -41,7 +42,7 @@ class HostEventTests(unittest.TestCase):
         self.assertNotIn("time.sleep", code)
 
     def test_refuse_unsupported_version_and_bool_version(self):
-        for version in (0, True, 2, 100, "1"):
+        for version in (0, True, 1, 100, "2"):
             with self.subTest(version=version):
                 with self.assertRaises(HostEventError):
                     HostEvents({}, version=version)

@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from threading import Lock
 from typing import Callable, FrozenSet, Mapping, Optional, Protocol
 
+from .host_events import CAPABILITIES_TOPIC
 from .capabilities import (
     CapabilityError, describe as _describe_capability,
     load as _load_capability, names as _capability_names,
@@ -167,6 +168,30 @@ class ShellHost:
             focus_rejection_count=adapter.rejection_count if adapter is not None else 0,
             focus_replay_count=adapter.replay_count if adapter is not None else 0,
         )
+
+    def publish_capability_report(self, records, bus):
+        """Emit one bounded capability report on explicit host request only.
+
+        No subscription is created and no reference is retained: the caller
+        owns the bus lifecycle. There is no timer, polling or periodic call.
+        The payload is built solely from the validated frozen report.
+        """
+        if not callable(getattr(bus, "emit", None)):
+            raise CapabilityReportError("event bus does not support emit")
+        report = self.capability_report(records)
+        return bus.emit(CAPABILITIES_TOPIC, capability_event_payload(report))
+
+    def capability_report(self, records):
+        """Compose four already-produced read-only records into one report.
+
+        ``records`` carries the ``to_dict``/``as_dict`` output of the merged
+        reliability, readiness, security and launch-outcome modules. This
+        method performs no I/O, launches nothing, imports no feature module and
+        changes no host or adapter state; it only pins the records structurally
+        and copies fixed tokens into a frozen report.
+        """
+        return _compose_capability_report(
+            records, self._active_id is not None, self._needs_recovery)
 
     @staticmethod
     def _attempt(view: Presentation, method: str) -> Optional[str]:
@@ -326,3 +351,343 @@ class ShellHost:
             return SwitchResult(previous_id, None, "STOPPED", None, True)
         finally:
             self._lock.release()
+
+
+# Bounded, read-only composition of already-merged pure snapshot records.
+CAPABILITY_REPORT_SCHEMA = 1
+# Hard cap: eight bounded records, no growth path for caller-supplied records.
+CAPABILITY_COMPONENTS = ("reliability", "readiness", "security", "launch",
+                         "focus", "session", "recovery", "desktop")
+CAPABILITY_RECORD_KEYS = frozenset(("schema",) + CAPABILITY_COMPONENTS)
+RELIABILITY_RECORD_KEYS = frozenset({
+    "schema", "status", "acceptance", "startup", "delivery", "switcher",
+})
+READINESS_RECORD_KEYS = frozenset({
+    "status", "schema", "component_count", "component_tokens",
+    "release_approved", "linux_mint_acceptance_proven", "owner_visual_approval",
+    "desktop_session_started", "shell_running", "process_launched",
+    "measurement_performed", "real_hardware_measured", "installation_attempted",
+})
+SECURITY_RECORD_KEYS = frozenset({
+    "status", "schema", "uri_status", "privilege_status", "privilege_reason",
+    "metadata_status", "metadata_capability_count", "launch_authorized",
+    "process_launched", "release_approved", "linux_mint_acceptance_proven",
+    "real_hardware_measured", "owner_visual_approval", "measurement_performed",
+})
+LAUNCH_RECORD_KEYS = frozenset({
+    "status", "reason", "event_count", "relevant_count", "success_count",
+    "failure_count", "retry_count", "claims",
+})
+FOCUS_RECORD_KEYS = frozenset({
+    "schema", "status", "acceptance", "observation", "focus", "workspace",
+    "switcher",
+})
+SESSION_RECORD_KEYS = frozenset({
+    "schema", "status", "acceptance", "switcher", "workspace", "portal",
+    "negotiation",
+})
+RECOVERY_RECORD_KEYS = frozenset({
+    "schema", "status", "acceptance", "observation", "startup", "session",
+    "delivery",
+})
+DESKTOP_RECORD_KEYS = frozenset({
+    "status", "reason", "declared_count", "action_count", "argv_length",
+    "claims",
+})
+CORE_STATUS_TOKENS = frozenset({"OK", "ATTENTION", "BLOCKED"})
+LAUNCH_STATUS_TOKENS = frozenset({"SUCCEEDED", "RETRY", "GIVE_UP", "IDLE"})
+DESKTOP_STATUS_TOKENS = frozenset({"READY", "DENIED"})
+DESKTOP_REASON_TOKENS = frozenset({
+    "ok", "invalid_input", "invalid_actions", "unapproved_action",
+    "unsafe_exec", "invalid_argv", "source_disagreement",
+})
+DESKTOP_CLAIM_TOKENS = frozenset({
+    "no_process_launched", "no_value_echo", "no_shell_metacharacters",
+    "no_field_codes", "no_unapproved_action", "no_desktop_claim",
+})
+COMPONENT_TOKENS = (CORE_STATUS_TOKENS | LAUNCH_STATUS_TOKENS
+                    | DESKTOP_STATUS_TOKENS | frozenset({
+                        "READINESS_SNAPSHOT", "SNAPSHOT", "VALID", "PLAN_SNAPSHOT",
+                    }))
+LAUNCH_CLAIM_TOKENS = frozenset({
+    "no_app_id_echo", "no_reason_text_echo", "no_process_launch", "no_io",
+    "no_geometry_read", "no_visual_change",
+})
+MAX_COMPONENT_COUNT = 64
+MAX_NESTED_ITEMS = 128
+MAX_NESTED_TEXT = 256
+STARTUP_KEYS = frozenset({
+    "action", "safe_to_start", "needs_rollback", "completed_count",
+    "unwind_count", "reason",
+})
+DELIVERY_KEYS = frozenset({
+    "sent", "received", "delivered", "duplicates", "reordered", "gaps",
+    "missed", "dropped", "rejected", "notice_count", "last_policy",
+})
+SWITCHER_KEYS = frozenset({
+    "active", "current", "selected", "window_count", "order",
+})
+
+
+CAPABILITY_NEGATIVE_CLAIMS = (
+    "release=not_approved;mint=not_approved;visual=not_approved;"
+    "process=not_launched;io=none;capability=not_activated;"
+    "desktop=not_claimed;geometry=not_read"
+)
+
+
+def capability_event_payload(report):
+    """Return a flat, bounded, fixed-token payload for one report."""
+    if not isinstance(report, HostCapabilityReport):
+        raise CapabilityReportError("event payload requires a frozen report")
+    data = report.as_dict()
+    codes = "|".join(data["component_tokens"])
+    if len(codes.encode("utf-8", "strict")) > 512:
+        raise CapabilityReportError("event component codes exceed bound")
+    return {
+        "status": data["status"],
+        "schema": data["schema"],
+        "component_count": data["component_count"],
+        "component_codes": codes,
+        "has_active_pack": data["has_active_pack"],
+        "needs_recovery": data["needs_recovery"],
+        "negative_claims": CAPABILITY_NEGATIVE_CLAIMS,
+    }
+
+
+class CapabilityReportError(ValueError):
+    """Malformed, unbounded or unrecognized host capability record."""
+
+
+@dataclass(frozen=True)
+class HostCapabilityReport:
+    """Frozen, value-free composition of four already-produced records."""
+
+    schema: int
+    has_active_pack: bool
+    needs_recovery: bool
+    component_count: int
+    component_tokens: tuple
+
+    def as_dict(self):
+        """Return a fresh report with fixed negative claims."""
+        if self.schema != CAPABILITY_REPORT_SCHEMA or type(self.schema) is not int:
+            raise CapabilityReportError("capability report schema is unsupported")
+        if type(self.has_active_pack) is not bool or type(self.needs_recovery) is not bool:
+            raise CapabilityReportError("capability report flags are invalid")
+        if (type(self.component_count) is not int
+                or self.component_count != len(CAPABILITY_COMPONENTS)):
+            raise CapabilityReportError("capability report count is invalid")
+        tokens = self.component_tokens
+        if (type(tokens) is not tuple or len(tokens) != len(CAPABILITY_COMPONENTS)
+                or any(type(token) is not str for token in tokens)
+                or tokens[0] not in CORE_STATUS_TOKENS
+                or tokens[1] != "READINESS_SNAPSHOT" or tokens[2] != "SNAPSHOT"
+                or tokens[3] not in LAUNCH_STATUS_TOKENS
+                or tokens[4] not in CORE_STATUS_TOKENS
+                or tokens[5] not in CORE_STATUS_TOKENS
+                or tokens[6] not in CORE_STATUS_TOKENS
+                or tokens[7] not in DESKTOP_STATUS_TOKENS):
+            raise CapabilityReportError("capability report tokens are invalid")
+        return {
+            "status": "CAPABILITY_REPORT",
+            "schema": CAPABILITY_REPORT_SCHEMA,
+            "has_active_pack": self.has_active_pack,
+            "needs_recovery": self.needs_recovery,
+            "component_count": self.component_count,
+            "component_tokens": list(tokens),
+            "release_approved": False,
+            "linux_mint_acceptance_proven": False,
+            "owner_visual_approval": False,
+            "process_launched": False,
+            "io_performed": False,
+            "capability_activated": False,
+            "desktop_session_started": False,
+            "measurement_performed": False,
+            "real_hardware_measured": False,
+            "desktop_claim": False,
+            "window_geometry_read": False,
+        }
+
+
+def _record(value, keys, label):
+    if not isinstance(value, Mapping) or frozenset(value) != keys:
+        raise CapabilityReportError(label + " record has an unexpected key set")
+    return value
+
+
+def _cap_token(value, allowed, label):
+    # Type-check before membership so unhashable wrong types cannot leak a
+    # raw TypeError past this fail-closed boundary.
+    if type(value) is not str or value not in allowed:
+        raise CapabilityReportError(label + " token is unsupported")
+    return value
+
+
+def _cap_count(value, label, maximum=MAX_COMPONENT_COUNT):
+    if type(value) is not int or not 0 <= value <= maximum:
+        raise CapabilityReportError(label + " count is invalid or unbounded")
+    return value
+
+
+def _cap_false(value, label):
+    if value is not False:
+        raise CapabilityReportError(label + " negative claim is not False")
+
+
+def _bounded_leaf(value, label):
+    if value is None or type(value) is bool:
+        return
+    if type(value) is int:
+        _cap_count(value, label)
+        return
+    if type(value) is str:
+        if len(value) > MAX_NESTED_TEXT:
+            raise CapabilityReportError(label + " nested text is unbounded")
+        return
+    if type(value) in (list, tuple):
+        if len(value) > MAX_NESTED_ITEMS:
+            raise CapabilityReportError(label + " nested collection is unbounded")
+        for item in value:
+            _bounded_leaf(item, label)
+        return
+    raise CapabilityReportError(label + " nested value type is unsupported")
+
+
+def _bounded_view(value, keys, label):
+    view = _record(value, keys, label)
+    for key in keys:
+        _bounded_leaf(view[key], label + " " + key)
+    return view
+
+
+def _compose_capability_report(records, has_active_pack, needs_recovery):
+    if type(records) is not dict or frozenset(records) != CAPABILITY_RECORD_KEYS:
+        raise CapabilityReportError("capability records have an unexpected key set")
+    _cap_count(records["schema"], "record schema", 1)
+    if records["schema"] != 1:
+        raise CapabilityReportError("capability record schema is unsupported")
+
+    reliability = _record(records["reliability"], RELIABILITY_RECORD_KEYS,
+                          "reliability")
+    _cap_count(reliability["schema"], "reliability schema", 1)
+    reliability_token = _cap_token(
+        reliability["status"], CORE_STATUS_TOKENS, "reliability status")
+    _cap_token(reliability["acceptance"], frozenset({"NOT_ESTABLISHED"}),
+               "reliability acceptance")
+    _bounded_view(reliability["startup"], STARTUP_KEYS, "reliability startup")
+    _bounded_view(reliability["delivery"], DELIVERY_KEYS, "reliability delivery")
+    _bounded_view(reliability["switcher"], SWITCHER_KEYS, "reliability switcher")
+
+    readiness = _record(records["readiness"], READINESS_RECORD_KEYS, "readiness")
+    _cap_token(readiness["status"], frozenset({"READINESS_SNAPSHOT"}),
+               "readiness status")
+    _cap_count(readiness["schema"], "readiness schema", 1)
+    tokens = readiness["component_tokens"]
+    if (type(tokens) not in (list, tuple) or len(tokens) > 8
+            or any(_cap_token(token, COMPONENT_TOKENS, "readiness component") is None
+                   for token in tokens)):
+        raise CapabilityReportError("readiness component tokens are invalid")
+    for key in READINESS_RECORD_KEYS - {"status", "schema", "component_count",
+                                        "component_tokens"}:
+        _cap_false(readiness[key], "readiness " + key)
+
+    security = _record(records["security"], SECURITY_RECORD_KEYS, "security")
+    _cap_token(security["status"], frozenset({"SNAPSHOT"}), "security status")
+    _cap_count(security["schema"], "security schema", 1)
+    _cap_token(security["uri_status"], frozenset({"PERMITTED", "REJECTED"}),
+               "security uri status")
+    _cap_token(security["privilege_status"], frozenset({"ALLOWED", "DENIED"}),
+               "security privilege status")
+    _cap_count(security["metadata_capability_count"], "capability count",
+               MAX_COMPONENT_COUNT)
+    for key in ("launch_authorized", "process_launched", "release_approved",
+                "linux_mint_acceptance_proven", "real_hardware_measured",
+                "owner_visual_approval", "measurement_performed"):
+        _cap_false(security[key], "security " + key)
+
+    launch = _record(records["launch"], LAUNCH_RECORD_KEYS, "launch")
+    launch_token = _cap_token(
+        launch["status"], LAUNCH_STATUS_TOKENS, "launch status")
+    _cap_token(launch["reason"], frozenset({
+        "ok", "no_events", "retry_budget", "retry_exhausted"}), "launch reason")
+    for key in ("event_count", "relevant_count", "success_count",
+                "failure_count", "retry_count"):
+        _cap_count(launch[key], "launch " + key)
+    claims = launch["claims"]
+    if (type(claims) not in (list, tuple) or len(claims) > 8
+            or any(_cap_token(claim, LAUNCH_CLAIM_TOKENS, "launch claim") is None
+                   for claim in claims)):
+        raise CapabilityReportError("launch claims are invalid")
+
+    focus = _record(records["focus"], FOCUS_RECORD_KEYS, "focus")
+    _cap_count(focus["schema"], "focus schema", 1)
+    focus_token = _cap_token(focus["status"], CORE_STATUS_TOKENS, "focus status")
+    _cap_token(focus["acceptance"], frozenset({"NOT_ESTABLISHED"}),
+               "focus acceptance")
+    _cap_token(focus["observation"], frozenset({"NOT_PERFORMED"}),
+               "focus observation")
+    _bounded_view(focus["focus"], frozenset({
+        "live_windows", "grant_count", "decision_count", "statuses",
+        "target_apps", "reasons"}), "focus detail")
+    _bounded_view(focus["workspace"], frozenset({
+        "workspace_count", "identifiers", "problem_count", "problem_reasons"}),
+        "focus workspace")
+    _bounded_view(focus["switcher"], SWITCHER_KEYS, "focus switcher")
+
+    session = _record(records["session"], SESSION_RECORD_KEYS, "session")
+    _cap_count(session["schema"], "session schema", 1)
+    session_token = _cap_token(
+        session["status"], CORE_STATUS_TOKENS, "session status")
+    _cap_token(session["acceptance"], frozenset({"NOT_ESTABLISHED"}),
+               "session acceptance")
+    _bounded_view(session["switcher"], SWITCHER_KEYS, "session switcher")
+    _bounded_view(session["workspace"], frozenset({
+        "workspace_count", "identifiers", "problem_count", "problem_reasons"}),
+        "session workspace")
+    _bounded_view(session["portal"], frozenset({
+        "capability_count", "denied", "missing", "session_type",
+        "unknown_permission", "usable", "wayland", "window_enumeration"}),
+        "session portal")
+    _bounded_view(session["negotiation"], frozenset({
+        "backend", "granted", "status", "supported"}), "session negotiation")
+
+    recovery = _record(records["recovery"], RECOVERY_RECORD_KEYS, "recovery")
+    _cap_count(recovery["schema"], "recovery schema", 1)
+    recovery_token = _cap_token(
+        recovery["status"], CORE_STATUS_TOKENS, "recovery status")
+    _cap_token(recovery["acceptance"], frozenset({"NOT_ESTABLISHED"}),
+               "recovery acceptance")
+    _cap_token(recovery["observation"], frozenset({"NOT_PERFORMED"}),
+               "recovery observation")
+    _bounded_view(recovery["startup"], STARTUP_KEYS, "recovery startup")
+    _bounded_view(recovery["session"], frozenset({
+        "accepted", "label", "locked", "recent_statuses", "suspended"}),
+        "recovery session")
+    _bounded_view(recovery["delivery"], DELIVERY_KEYS, "recovery delivery")
+
+    desktop = _record(records["desktop"], DESKTOP_RECORD_KEYS, "desktop")
+    desktop_token = _cap_token(
+        desktop["status"], DESKTOP_STATUS_TOKENS, "desktop status")
+    _cap_token(desktop["reason"], DESKTOP_REASON_TOKENS, "desktop reason")
+    for key in ("declared_count", "action_count", "argv_length"):
+        _cap_count(desktop[key], "desktop " + key)
+    desktop_claims = desktop["claims"]
+    if (type(desktop_claims) not in (list, tuple) or len(desktop_claims) > 6
+            or any(_cap_token(claim, DESKTOP_CLAIM_TOKENS,
+                              "desktop claim") is None
+                   for claim in desktop_claims)):
+        raise CapabilityReportError("desktop claims are invalid")
+
+    if type(has_active_pack) is not bool or type(needs_recovery) is not bool:
+        raise CapabilityReportError("host state flags are invalid")
+    return HostCapabilityReport(
+        schema=CAPABILITY_REPORT_SCHEMA,
+        has_active_pack=has_active_pack,
+        needs_recovery=needs_recovery,
+        component_count=len(CAPABILITY_COMPONENTS),
+        component_tokens=(reliability_token, "READINESS_SNAPSHOT", "SNAPSHOT",
+                          launch_token, focus_token, session_token,
+                          recovery_token, desktop_token),
+    )
+

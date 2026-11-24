@@ -79,10 +79,21 @@ class SessionEvent:
 
 @dataclass(frozen=True)
 class SessionState:
-    """Canonical, fail-closed session state derived from observed events."""
+    """Canonical, fail-closed session state derived from observed events.
+
+    A suspended session is always locked; the two flags are not independent
+    inputs. Reject a caller-built pair that claims otherwise before it can be
+    published downstream as a valid, fail-closed session view.
+    """
 
     suspended: bool
     locked: bool
+
+    def __post_init__(self):
+        if type(self.suspended) is not bool or type(self.locked) is not bool:
+            raise LockSessionEventError("session flags must be bools")
+        if self.suspended and not self.locked:
+            raise LockSessionEventError("suspended session must stay locked")
 
     @property
     def label(self):

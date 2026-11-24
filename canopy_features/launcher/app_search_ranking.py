@@ -100,8 +100,11 @@ def _iter_titles(applications):
     A bare ``str``/``bytes``/``bytearray`` would be enumerated into
     single-character "titles", so it is refused. Non-iterable catalogs and
     non-string titles raise ``TypeError`` rather than leaking a raw
-    ``AttributeError`` from ``casefold``. Both the empty-query and the filter
-    path use this helper so they agree on the contract.
+    ``AttributeError`` from ``casefold``. The title check is exact-type: a
+    ``str`` subclass may override ``casefold`` to return a non-string or raise,
+    which would otherwise leak a raw exception on the filter path and smuggle
+    a malformed label into a valid-looking match on the empty-query path.
+    Both paths use this helper so they agree on the contract.
     """
     if isinstance(applications, (str, bytes, bytearray)):
         raise TypeError("applications must be an iterable of title strings")
@@ -110,7 +113,7 @@ def _iter_titles(applications):
     except TypeError:
         raise TypeError("applications must be an iterable of title strings") from None
     for index, title in enumerate(iterator):
-        if not isinstance(title, str):
+        if type(title) is not str:
             raise TypeError(
                 "application title at index %d must be a string" % index)
         yield index, title
@@ -119,12 +122,13 @@ def _iter_titles(applications):
 def rank_applications(query: str, applications: Iterable[str]) -> Tuple[RankedMatch, ...]:
     """Rank ``applications`` against ``query``, best match first.
 
-    ``applications`` is an iterable of titles (strings); each entry is read
-    once and the input is never mutated. Empty or whitespace-only queries
-    return every title in its original catalog order (tier ``all``), matching
-    the launcher's clear-search behavior.
+    ``applications`` is an iterable of titles (exact ``str``, not a
+    duck-typed subclass); each entry is read once and the input is never
+    mutated. Empty or whitespace-only queries return every title in its
+    original catalog order (tier ``all``), matching the launcher's
+    clear-search behavior.
     """
-    if not isinstance(query, str):
+    if type(query) is not str:
         raise TypeError("query must be a string")
 
     folded_query = query.strip().casefold()

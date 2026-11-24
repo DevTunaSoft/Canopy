@@ -65,12 +65,15 @@ def scan_shell_packs(directory: Path) -> PackScan:
     packs. Duplicate IDs are all excluded, rather than choosing a winner.
     Returns metadata only: QML entrypoints are never executed.
     """
+    message = "shell pack catalog root must be a real directory"
+    # Validate the caller-supplied value before pathlib sees it: Path()
+    # raises a raw TypeError for non-path inputs, which escapes the domain
+    # boundary and bypasses the CLI's PackValidationError gate. The shared
+    # component check also rejects NUL, '..' and symlinked ancestors.
+    require_real_path_components(directory, message)
     root = Path(directory)
     if root.is_symlink() or not root.is_dir():
-        raise PackValidationError("shell pack catalog root must be a real directory")
-    require_real_path_components(
-        root, "shell pack catalog root must be a real directory"
-    )
+        raise PackValidationError(message)
 
     discovered = {}
     bad_ids = set()

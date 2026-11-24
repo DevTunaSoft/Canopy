@@ -268,7 +268,7 @@ class SessionLifecycleSnapshotTests(unittest.TestCase):
         class LongLedger(theme.ThemeTransitionRollback):
             def snapshot(self):
                 return theme.Snapshot(
-                    state=theme.IDLE, active="A" * 400,
+                    state=theme.PREPARED, active="A" * 400,
                     candidate="B" * 400, live_resources=frozenset(),
                     abandoned_resources=frozenset())
 

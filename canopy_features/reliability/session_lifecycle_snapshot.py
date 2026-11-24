@@ -248,10 +248,17 @@ def _theme_view(ledger):
         raise SnapshotError("abandoned resource set exceeds snapshot bound")
     if single_owner != (not (live & abandoned)):
         raise SnapshotError("single-owner flag disagrees with resource sets")
+    # The ledger's invariant is IDLE <=> no in-flight candidate. A hostile
+    # snapshot that claims IDLE while carrying a candidate would let
+    # ``_derive_status`` return STATUS_OK for a switch that never committed.
+    active = _optional_name(projected.active, "theme active")
+    candidate = _optional_name(projected.candidate, "theme candidate")
+    if (state == IDLE) != (candidate is None):
+        raise SnapshotError("theme state disagrees with its candidate")
     return ThemeView(
         state=state,
-        active=_optional_name(projected.active, "theme active"),
-        candidate=_optional_name(projected.candidate, "theme candidate"),
+        active=active,
+        candidate=candidate,
         single_owner=single_owner,
         live_resource_count=len(live),
         abandoned=tuple(sorted(names)),

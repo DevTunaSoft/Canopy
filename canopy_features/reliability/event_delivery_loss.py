@@ -112,6 +112,7 @@ class BoundedDeliveryChannel:
         self._counts = dict(sent=0, received=0, delivered=0, duplicates=0,
                             reordered=0, gaps=0, missed=0, dropped=0,
                             rejected=0)
+        self._stats = None
 
     def _ready(self):
         if self._closed:
@@ -131,6 +132,7 @@ class BoundedDeliveryChannel:
         self._ready()
         self._check_sequence(sequence)
         self._counts["sent"] += 1
+        self._stats = None
         if len(self._pending) < self._capacity:
             self._pending.append((sequence, payload))
             return SendResult(True, QUEUED, sequence)
@@ -149,6 +151,7 @@ class BoundedDeliveryChannel:
         self._ready()
         if not self._pending:
             return None
+        self._stats = None
         sequence, payload = self._pending.popleft()
         counts = self._counts
         counts["received"] += 1
@@ -200,7 +203,10 @@ class BoundedDeliveryChannel:
 
     @property
     def stats(self):
-        return DeliveryStats(**self._counts)
+        """Immutable count snapshot, rebuilt lazily only after a mutation."""
+        if self._stats is None:
+            self._stats = DeliveryStats(**self._counts)
+        return self._stats
 
     def overflow_notices(self):
         """Bounded copy (at most capacity entries) of overflow fallbacks."""

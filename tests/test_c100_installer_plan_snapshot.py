@@ -6,7 +6,7 @@ import ast
 from dataclasses import FrozenInstanceError
 import json
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import unittest
 
 from canopy_features.installer import icon_cache_optin as icon_mod
@@ -289,6 +289,27 @@ class PurityTests(unittest.TestCase):
         for name in ("validate_session_entry",
                      "scan_session_entries", "plan_uninstall", "read_manifest"):
             self.assertNotIn(name, source)
+
+
+class HostileWrongTypeLabelTests(unittest.TestCase):
+    """Bounded wrong-type labels must fail closed, not leak a built-in error."""
+
+    def test_broken_pathlike_icon_label_fails_closed(self):
+        class BrokenPath(PurePosixPath):
+            def __str__(self):
+                raise TypeError("hostile icon label")
+
+        with self.assertRaises(SnapshotError):
+            snapshot(record(dirs=[BrokenPath("/home/alice/.icons")]))
+
+    def test_broken_ownership_key_label_fails_closed(self):
+        class BrokenKey:
+            def __repr__(self):
+                raise TypeError("hostile ownership label")
+
+        manifest = {"schema": 1, "files": {BrokenKey(): "a" * 64}}
+        with self.assertRaises(SnapshotError):
+            snapshot(record(ownership=manifest))
 
 
 if __name__ == "__main__":

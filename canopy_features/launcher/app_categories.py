@@ -66,10 +66,12 @@ class Application:
                 raise CategoryError(
                     "application categories must be a tuple of category ids")
             try:
-                object.__setattr__(self, "categories", tuple(self.categories))
+                object.__setattr__(self, "categories", _bounded_tokens(self.categories))
             except TypeError:
                 raise CategoryError(
                     "application categories must be iterable") from None
+        if len(self.categories) > MAX_CATEGORY_TOKENS:
+            raise CategoryError("too many application category tokens")
         if any(type(token) is not str or not _CATEGORY_ID.fullmatch(token)
                for token in self.categories):
             raise CategoryError("invalid application category token")
@@ -115,6 +117,26 @@ STANDARD_CATEGORIES = (
 
 # Reserved by the specification; must not appear as menu categories.
 RESERVED_CATEGORY_IDS = frozenset({"Screensaver", "TrayIcon", "Applets"})
+
+
+def _bounded_tokens(values):
+    """Coerce a caller-supplied iterable to a bounded tuple of category ids.
+
+    ``tuple(values)`` would drain an arbitrarily large generator before the
+    token bound could be checked. Consume at most one item past
+    ``MAX_CATEGORY_TOKENS`` so an oversized source fails closed without being
+    fully materialized.
+    """
+    try:
+        iterator = iter(values)
+    except TypeError:
+        raise CategoryError("application categories must be iterable") from None
+    tokens = []
+    for token in iterator:
+        if len(tokens) >= MAX_CATEGORY_TOKENS:
+            raise CategoryError("too many application category tokens")
+        tokens.append(token)
+    return tuple(tokens)
 
 
 def parse_categories(value):

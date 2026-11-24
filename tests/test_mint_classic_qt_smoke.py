@@ -106,6 +106,8 @@ class MintQtSmokeTests(unittest.TestCase):
         self.out = self.root / "qt-evidence"
 
     def run_smoke(self, **kwargs):
+        if os.name == "nt" or not os.access(self.binary, os.X_OK):
+            self.skipTest("POSIX fake Qt binary not runnable on this host; NOT_RUN")
         return smoke.run_mint_smoke(
             binary=kwargs.get("binary", self.binary),
             approved_art=kwargs.get("art", self.art),
@@ -374,6 +376,31 @@ class MintQtSmokeTests(unittest.TestCase):
         with self.assertRaisesRegex(smoke.MintSmokeError, "not executable"):
             self.run_smoke()
         self.assertFalse(self.out.exists())
+
+
+class WindowsSkipGuardTests(unittest.TestCase):
+    def test_run_smoke_skips_when_windows_platform(self):
+        case = MintQtSmokeTests("test_three_resolutions_and_hash_evidence")
+        case.setUp()
+        self.addCleanup(case.doCleanups)
+        with patch.object(os, "name", "nt"):
+            with self.assertRaises(unittest.SkipTest) as caught:
+                case.run_smoke()
+        self.assertIn("NOT_RUN", str(caught.exception))
+
+
+class SymlinkOpenGuardTests(unittest.TestCase):
+    def test_open_regular_file_rejects_symlink_without_o_nofollow(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            target = root / "real-report.json"
+            target.write_text("{}", encoding="utf-8")
+            link = root / "report.json"
+            link.symlink_to(target)
+            with patch.object(os, "O_NOFOLLOW", 0, create=True):
+                with self.assertRaises(smoke.MintSmokeError):
+                    with smoke._open_regular_file(link):
+                        pass
 
 
 if __name__ == "__main__":

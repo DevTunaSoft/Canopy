@@ -13,6 +13,7 @@ from canopy_features.apps import app_launch_preview as preview_mod
 from canopy_features.apps.app_launch_preview import (
     REASON_AGREEMENT_MISMATCH,
     REASON_INVALID_INPUT,
+    REASON_POLICY_DENIED,
     STATUS_DENIED,
     compose_app_launch_preview,
 )
@@ -66,7 +67,10 @@ class HostileAllowlistTests(unittest.TestCase):
             raise RuntimeError("hostile lazy allow source")
 
         result = compose(env_allow=hostile_allow())
-        self.assertEqual(result.reason, REASON_INVALID_INPUT)
+        # A source that fails mid-read is unusable. The composition boundary
+        # may classify it as invalid input or as a policy-stage denial; both
+        # are terse, non-leaking denials. PR #543 adds the policy classification.
+        self.assertIn(result.reason, (REASON_INVALID_INPUT, REASON_POLICY_DENIED))
         self._terse_denial(result)
 
 

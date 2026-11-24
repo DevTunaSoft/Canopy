@@ -133,8 +133,10 @@ class CloseIntentModel:
 
     @staticmethod
     def _result(record, status, note=""):
+        if record._state_view is None:
+            record._state_view = MappingProxyType(dict(record.state))
         return IntentResult(record.window_id, status, record.visible,
-                            MappingProxyType(dict(record.state)), note)
+                            record._state_view, note)
 
     def register(self, window_id, owner, state=None, *, visible=True,
                  guarded=False):

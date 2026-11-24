@@ -191,6 +191,12 @@ def _startup_view(decision):
         raise SnapshotError("completed steps must be unique")
     if action == READY and not completed:
         raise SnapshotError("ready recovery decision has no completed steps")
+    # recover() emits a safe action (START_FRESH/READY) with an empty unwind
+    # tuple. A caller-owned dataclass can pair a safe action with unwind steps
+    # while keeping both derived flags self-consistent, which would publish a
+    # contradictory safe_to_start=True / needs_rollback=True record.
+    if action in (START_FRESH, READY) and decision.unwind:
+        raise SnapshotError("safe recovery action carries unwind steps")
     safe_to_start = _flag(decision.safe_to_start, "safe_to_start")
     needs_rollback = _flag(decision.needs_rollback, "needs_rollback")
     # These flags are derived, not independent: a safe action never carries

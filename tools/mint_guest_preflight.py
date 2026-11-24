@@ -53,7 +53,10 @@ def assess(release, env, available, qt_version=None):
     version_id = release.get("VERSION_ID", "unknown")
     if not isinstance(version_id, str):
         raise PreflightError("VERSION_ID must be a string")
-    distro = release.get("ID", "").lower()
+    distro_value = release.get("ID", "")
+    if not isinstance(distro_value, str):
+        raise PreflightError("release ID must be a string")
+    distro = distro_value.lower()
     is_mint = distro == "linuxmint"
     desktop = env.get("XDG_CURRENT_DESKTOP", "")
     session = env.get("XDG_SESSION_TYPE", "")

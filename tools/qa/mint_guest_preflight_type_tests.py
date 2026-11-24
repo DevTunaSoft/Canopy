@@ -37,6 +37,13 @@ class MintPreflightTypeTests(unittest.TestCase):
                 release["VERSION_ID"] = bad
                 self.assert_domain_error(lambda release=release: preflight.assess(release, GOOD_ENV, GOOD_AVAILABLE))
 
+    def test_assess_non_string_release_id_fail_closed(self):
+        for bad in (22, True, [], None):
+            with self.subTest(value=repr(bad)):
+                release = dict(GOOD_RELEASE)
+                release["ID"] = bad
+                self.assert_domain_error(lambda release=release: preflight.assess(release, GOOD_ENV, GOOD_AVAILABLE))
+
     def test_parse_release_wrong_type_fail_closed(self):
         for bad in (123, None, [], b"ID=linuxmint"):
             with self.subTest(value=repr(bad)):

@@ -60,6 +60,13 @@ def normalize_sequence(sequence):
         raise ShortcutConflictError("sequence must be a string")
     if not sequence.strip() or len(sequence) > MAX_SEQUENCE_LENGTH:
         raise ShortcutConflictError("invalid or oversized sequence")
+    # Control/format characters are not key identifiers. Left in place they
+    # change the canonical sequence without changing its visible spelling,
+    # which can bypass reserved-combo checks and hide real collisions. Check
+    # before whitespace folding: some C0 controls count as whitespace and are
+    # otherwise silently removed by str.split().
+    if any(not char.isprintable() for char in sequence):
+        raise ShortcutConflictError("non-printable character in sequence")
     tokens = [part.strip() for part in sequence.split("+")]
     if any(not part for part in tokens):
         raise ShortcutConflictError("empty sequence token")
@@ -68,7 +75,6 @@ def normalize_sequence(sequence):
     tokens = ["".join(part.split()).casefold() for part in tokens]
     if any(not part for part in tokens):
         raise ShortcutConflictError("empty sequence token")
-
     modifiers = [_MODIFIER_ALIASES.get(part) for part in tokens]
     keys = [tokens[i] for i, mod in enumerate(modifiers) if mod is None]
     if not keys:

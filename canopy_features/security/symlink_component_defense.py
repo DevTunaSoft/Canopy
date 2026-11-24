@@ -39,8 +39,10 @@ def _components(path):
     """Return (absolute string, pathlib parts) without following symlinks."""
     try:
         raw = os.fspath(path)
-    except TypeError as exc:
-        raise TypeError("path must be str or os.PathLike") from exc
+    except (TypeError, ValueError) as exc:
+        # Wrong types and hostile __fspath__ implementations are unsafe
+        # paths, never caller-visible built-in exceptions.
+        raise UnsafePathError("path must be a non-empty string") from exc
     if not isinstance(raw, str) or not raw:
         raise UnsafePathError("path must be a non-empty string")
     if "\x00" in raw:

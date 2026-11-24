@@ -90,7 +90,7 @@ jobs:
         run: python3 -m unittest tests.test_approved_art tests.test_approved_manifest_contract tests.test_approved_art_zip -v
 
       - name: Visual-only regression and negative-control tests
-        run: python3 -m unittest tests.test_classic_dock_frozen tests.test_classic_shared_icon_framing tests.test_dock_inner_framing_review tests.test_dock_balanced_fit_review tests.test_dock_optical_balance_review tests.test_dock_optical_balance_quality tests.test_classic_clean_icon_edges tests.test_five_dock_centering tests.test_five_production_pack_contract -v
+        run: python3 -m unittest tests.test_classic_dock_frozen tests.test_classic_shared_icon_framing tests.test_dock_inner_framing_review tests.test_dock_balanced_fit_review tests.test_dock_optical_balance_review tests.test_dock_optical_balance_quality tests.test_classic_clean_icon_edges tests.test_five_dock_centering tests.test_five_production_pack_contract tests.test_five_master_alpha_silhouettes -v
 
       - name: Headless startup smoke test
         timeout-minutes: 2

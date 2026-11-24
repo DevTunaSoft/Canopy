@@ -32,6 +32,10 @@ def get_opencode_api_key(explicit: str | None = None, data_home: Path | None = N
     Precedence: explicit argument, OPENCODE_API_KEY, auth.json, SQLite DB.
     """
     token = explicit or os.environ.get("OPENCODE_API_KEY", "")
+    if explicit is not None and not isinstance(explicit, str):
+        raise CredentialError("credential argument must be a string")
+    if not isinstance(token, str):
+        raise CredentialError("credential value must be a string")
     if token.strip():
         return token.strip()
 

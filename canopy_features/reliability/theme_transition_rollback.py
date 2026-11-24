@@ -67,6 +67,7 @@ class ThemeTransitionRollback:
         self._candidate_resources: FrozenSet[str] = frozenset()
         self._abandoned: FrozenSet[str] = frozenset()
         self._state = IDLE
+        self._snapshot = None
 
     @staticmethod
     def _normalize(resources: Iterable[str]) -> FrozenSet[str]:
@@ -106,6 +107,7 @@ class ThemeTransitionRollback:
         self._candidate = theme
         self._candidate_resources = batch
         self._state = PREPARED
+        self._snapshot = None
         return "PREPARED"
 
     def commit(self) -> str:
@@ -134,18 +136,23 @@ class ThemeTransitionRollback:
         """
         claimed = self._abandoned
         self._abandoned = frozenset()
+        self._snapshot = None
         return claimed
 
     def snapshot(self) -> Snapshot:
-        return Snapshot(
-            state=self._state,
-            active=self._active,
-            candidate=self._candidate,
-            live_resources=self._active_resources | self._candidate_resources,
-            abandoned_resources=self._abandoned,
-        )
+        """Immutable ledger view, rebuilt lazily only after a mutation."""
+        if self._snapshot is None:
+            self._snapshot = Snapshot(
+                state=self._state,
+                active=self._active,
+                candidate=self._candidate,
+                live_resources=self._active_resources | self._candidate_resources,
+                abandoned_resources=self._abandoned,
+            )
+        return self._snapshot
 
     def _clear_candidate(self) -> None:
         self._candidate = None
         self._candidate_resources = frozenset()
         self._state = IDLE
+        self._snapshot = None

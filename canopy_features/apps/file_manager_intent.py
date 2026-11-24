@@ -73,7 +73,10 @@ def _canonical_home(home: Optional[_PathInput]) -> Path:
     try:
         raw = Path.home() if home is None else Path(home).expanduser()
         root = raw.resolve(strict=True)
-    except (OSError, RuntimeError, TypeError, ValueError):
+    except Exception:
+        # The trust root may be caller-supplied, so Path(home) can execute a
+        # hostile __fspath__. Any read failure means there is no usable root;
+        # expose only the domain refusal, never the raw built-in exception.
         raise IntentRejected(REASON_HOME_UNAVAILABLE) from None
     if not root.is_dir():
         raise IntentRejected(REASON_HOME_UNAVAILABLE)
@@ -108,21 +111,25 @@ def form_file_manager_intent(
     """
     root = _canonical_home(home)
 
-    if path is None:
-        raw = ""
-    elif isinstance(path, str):
-        raw = path.strip()
-    else:
-        try:
+    # Path coercion is caller-controlled: a str subclass may override strip,
+    # and an os.PathLike may raise from __fspath__ (or return bytes). Reading
+    # either is bounded work, and any failure is invalid caller input, so the
+    # only exception that may cross this boundary is the domain refusal.
+    try:
+        if path is None:
+            raw = ""
+        elif isinstance(path, str):
+            raw = path.strip()
+        else:
             raw = os.fspath(path)
-        except TypeError:
-            raise IntentRejected(REASON_INVALID_PATH) from None
+    except Exception:
+        raise IntentRejected(REASON_INVALID_PATH) from None
 
     try:
         candidate = root if not raw else Path(raw).expanduser()
         if not candidate.is_absolute():
             candidate = root / candidate
-    except (RuntimeError, TypeError, ValueError):
+    except Exception:
         raise IntentRejected(REASON_INVALID_PATH) from None
 
     try:

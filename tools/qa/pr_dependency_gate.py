@@ -100,6 +100,16 @@ def _reject_constant(token):
     raise DependencyGateError("snapshot JSON contains a non-finite number")
 
 
+def _unique_object(pairs):
+    """Reject duplicate JSON object keys instead of letting the last one win."""
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise DependencyGateError("snapshot JSON contains a duplicate key")
+        result[key] = value
+    return result
+
+
 def _validated_pulls(snapshot):
     raw = snapshot["pulls"]
     if type(raw) is not list or len(raw) > MAX_PRS:
@@ -255,7 +265,10 @@ def evaluate_json(text):
         raise DependencyGateError("snapshot JSON is missing or oversized")
     try:
         parsed = json.loads(
-            data.decode("utf-8"), parse_constant=_reject_constant)
+            data.decode("utf-8"), parse_constant=_reject_constant,
+            object_pairs_hook=_unique_object)
+    except DependencyGateError:
+        raise
     except (UnicodeError, ValueError, RecursionError) as exc:
         raise DependencyGateError("snapshot JSON could not be parsed") from exc
     return evaluate(parsed)

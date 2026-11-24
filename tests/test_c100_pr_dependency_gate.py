@@ -234,6 +234,15 @@ class JsonFileTests(unittest.TestCase):
         self.assertEqual(gate.evaluate_json(text)["pr_count"], 2)
         self.assertEqual(gate.evaluate_json(text.encode("utf-8"))["pr_count"], 2)
 
+    def test_duplicate_json_dependencies_key_refused(self):
+        # Duplicate JSON keys collapse to the last value in json.loads. A
+        # second "dependencies" key could erase a real dependency hold.
+        text = json.dumps(snapshot()).replace(
+            '"dependencies": {"377": 375}',
+            '"dependencies": {"377": 375}, "dependencies": {}', 1)
+        with self.assertRaises(gate.DependencyGateError):
+            gate.evaluate_json(text)
+
     def test_json_wrong_types(self):
         for bad in (None, 7, [], {}):
             with self.subTest(bad=bad), self.assertRaises(gate.DependencyGateError):

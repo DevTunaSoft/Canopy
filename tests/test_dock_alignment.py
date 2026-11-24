@@ -11,10 +11,10 @@ ROOT = Path(__file__).resolve().parents[1] / "prototype" / "classic"
 class DockAlignmentTests(unittest.TestCase):
     def test_icon_geometry_is_centered_not_top_aligned(self):
         tile = (ROOT / "DockTile.qml").read_text(encoding="utf-8")
-        self.assertIn("width: 58", tile)
-        self.assertIn("height: 70", tile)
-        self.assertIn("width: 54", tile)
-        self.assertIn("height: 54", tile)
+        self.assertIn("width: 70", tile)
+        self.assertIn("height: 82", tile)
+        self.assertIn("width: 66", tile)
+        self.assertIn("height: 66", tile)
         self.assertEqual(tile.count("anchors.centerIn: parent"), 2)
         self.assertNotIn("anchors.topMargin: 2", tile)
         self.assertIn("anchors.bottomMargin: 2", tile)

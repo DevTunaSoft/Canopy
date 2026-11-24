@@ -60,8 +60,8 @@ class DockOpticalBalanceReviewTests(unittest.TestCase):
 
     def test_visual_card_qml_and_default_fallback_unchanged(self):
         self.assertIn("anchors.centerIn: parent", self.tile)
-        self.assertIn("width: 54", self.tile)
-        self.assertIn("height: 54", self.tile)
+        self.assertIn("width: 66", self.tile)
+        self.assertIn("height: 66", self.tile)
         self.assertNotIn("anchors.verticalCenterOffset", self.tile)
         self.assertIn("else if (balancedDockFitMode && !terminalDerivative)", self.provider)
         self.assertIn("else if (framingReviewMode && !terminalDerivative)", self.provider)

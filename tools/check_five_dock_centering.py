@@ -49,8 +49,8 @@ def compare_five(before: Path, after: Path, size: str):
         if changes[name] == 0:
             raise ComparisonError(f"targeted {name} icon did not change")
     for (cx, cy) in pixels:
-        for dx in (-26,26):
-            for dy in (-26,26):
+        for dx in (-32,32):
+            for dy in (-32,32):
                 p = 4*((cy+dy)*width+(cx+dx))
                 if source[p:p+4] != candidate[p:p+4]:
                     raise ComparisonError("dock card corner or silhouette changed")

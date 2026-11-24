@@ -62,8 +62,8 @@ class BalancedFitContractTests(unittest.TestCase):
         self.assertNotIn("painter.translate(", self.provider)
         self.assertNotIn("QFile::remove(", self.provider)
         self.assertIn("anchors.centerIn: parent", self.dock)
-        self.assertIn("width: 54", self.dock)
-        self.assertIn("height: 54", self.dock)
+        self.assertIn("width: 66", self.dock)
+        self.assertIn("height: 66", self.dock)
         self.assertNotIn("anchors.verticalCenterOffset", self.dock)
 
     def test_default_and_terminal_optional_derivative_unmodified(self):

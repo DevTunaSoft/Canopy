@@ -208,8 +208,10 @@ ApplicationWindow {
         width: Math.min(root.width - 32, dockRow.implicitWidth + 2 * canopyTheme.dockPadding)
         height: canopyTheme.dockSize
         radius: canopyTheme.cornerRadius
-        color: canopyApprovedMode ? "#b0d6e8f6" : canopyTheme.dockSurface
-        border.color: canopyApprovedMode ? "#e1faffff" : canopyTheme.dockBorder
+        // Approved macOS-familiar glass look without costly live blur.
+        // 0x70 alpha (~44%) reveals the alpine lake through the dock.
+        color: canopyApprovedMode ? "#70dcecf7" : canopyTheme.dockSurface
+        border.color: canopyApprovedMode ? "#aafaffff" : canopyTheme.dockBorder
         border.width: 1
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom

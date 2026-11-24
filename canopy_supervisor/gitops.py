@@ -13,6 +13,9 @@ import subprocess
 from typing import Iterable
 
 SHA = re.compile(r"^[0-9a-f]{40}$")
+# Refuse oversized command output; truncating a file list could hide the very
+# out-of-scope paths the supervisor's scope policy must see.
+MAX_OUTPUT_CHARS = 1_000_000
 
 
 class GitError(RuntimeError):
@@ -36,10 +39,14 @@ def run(args: Iterable[str], *, cwd: Path | str | None = None, timeout: int = 12
         )
     except (OSError, subprocess.SubprocessError) as exc:
         raise GitError(f"command could not run: {type(exc).__name__}") from exc
+    output = result.stdout or ""
+    errors = result.stderr or ""
+    if len(output) > MAX_OUTPUT_CHARS or len(errors) > MAX_OUTPUT_CHARS:
+        raise GitError("command output exceeds bound")
     if result.returncode != 0:
-        detail = (result.stderr or result.stdout or "").strip().splitlines()
+        detail = (errors or output).strip().splitlines()
         raise GitError((detail[-1] if detail else "exit " + str(result.returncode))[:300])
-    return (result.stdout or "").strip()
+    return output.strip()
 
 
 def rev_parse(repo: Path, ref: str) -> str:

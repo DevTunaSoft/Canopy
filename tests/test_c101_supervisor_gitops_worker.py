@@ -54,6 +54,27 @@ class WorkerPidTypeTests(unittest.TestCase):
             self.assertEqual(worker.poll(1), 0)
 
 
+class GitOpsOutputBoundTests(unittest.TestCase):
+    def test_oversized_command_output_fails_closed(self):
+        result = MagicMock()
+        result.returncode = 0
+        result.stdout = "x" * 2_000_000
+        result.stderr = ""
+        with patch("canopy_supervisor.gitops.subprocess.run",
+                   return_value=result):
+            with self.assertRaises(gitops.GitError):
+                gitops.run(["git", "status"])
+
+    def test_bounded_output_still_returned(self):
+        result = MagicMock()
+        result.returncode = 0
+        result.stdout = "ok\n"
+        result.stderr = ""
+        with patch("canopy_supervisor.gitops.subprocess.run",
+                   return_value=result):
+            self.assertEqual(gitops.run(["git", "status"]), "ok")
+
+
 class GitOpsRunTypeTests(unittest.TestCase):
     def test_wrong_type_args_rejected_before_spawn(self):
         for bad in ("git status", None, 7, {}, b"git", ["git", 7]):

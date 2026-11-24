@@ -94,7 +94,12 @@ class StartupCheckpoints:
     """Single-owner journal of ordered startup steps in one state directory."""
 
     def __init__(self, state_dir: Path, steps: Sequence[str]):
-        directory = Path(state_dir)
+        if not isinstance(state_dir, (str, os.PathLike)):
+            raise CheckpointError("state directory must be a path")
+        try:
+            directory = Path(state_dir)
+        except (TypeError, ValueError):
+            raise CheckpointError("state directory must be a path") from None
         if directory.is_symlink():
             raise CheckpointError("state directory must not be a symlink")
         directory.mkdir(parents=True, exist_ok=True)

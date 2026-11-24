@@ -115,6 +115,28 @@ class MintDependencyContractTests(unittest.TestCase):
             with self.subTest(token=forbidden):
                 self.assertNotIn(forbidden, source)
 
+    def test_overlong_numeric_version_labels_fail_closed_without_raw_exception(self):
+        # A bounded 5000-digit label exceeds CPython's int() conversion limit.
+        # The documented fail-closed path must yield a finding, never a raw
+        # ValueError; this applies to installed labels and declared minimums.
+        huge = "9" * 5000
+        self.assertIsNone(contract.parse_version(huge))
+        report = contract.evaluate(installed(self.satisfied, **{
+            "qt6-core": huge,
+        }), "22.3")
+        self.assertEqual(report.status, "UNSATISFIED")
+        self.assertFalse(report.ok)
+        finding = next(f for f in report.findings if f.package == "qt6-core")
+        self.assertEqual(finding.status, "invalid_version")
+        self.assertEqual(finding.installed, huge)
+        min_report = contract.evaluate(
+            self.satisfied, "22.3", constraints=(("cmake", huge),))
+        self.assertEqual(min_report.status, "UNSATISFIED")
+        self.assertFalse(min_report.ok)
+        min_finding = next(f for f in min_report.findings if f.package == "cmake")
+        self.assertEqual(min_finding.status, "invalid_constraint")
+        self.assertEqual(min_finding.required, huge)
+
     def test_contract_minimums_match_compiled_qt_source_contract(self):
         text = (ROOT / "prototype" / "classic" / "CMakeLists.txt").read_text(
             encoding="utf-8")

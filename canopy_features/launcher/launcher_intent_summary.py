@@ -207,8 +207,19 @@ def summarize_launcher_intent(
     try:
         argv = gio_launch_argv(selected, allowed_app_ids=allowed_app_ids)
     except LaunchArgvError:
-        return LauncherIntentSummary(
-            query, matches, visible_favorites, selected, (), STATUS_NOT_APPROVED)
+        # The host explicitly did not approve this app.
+        argv = ()
+        status = STATUS_NOT_APPROVED
+    except Exception:
+        # Fail closed if the allowlist itself cannot be read: a lazy,
+        # config-backed or otherwise hostile iterable may raise midway
+        # through set(allowed) in gio_launch_argv. An unreadable allowlist is
+        # not an approval, and a summary must be a total record for the host
+        # rather than leaking the raw exception with no status at all.
+        argv = ()
+        status = STATUS_NOT_APPROVED
+    else:
+        status = STATUS_READY
 
     return LauncherIntentSummary(
-        query, matches, visible_favorites, selected, argv, STATUS_READY)
+        query, matches, visible_favorites, selected, argv, status)

@@ -1,6 +1,7 @@
 """Regression tests for fail-closed credential argument handling (SYNTHETIC)."""
 import json
 import os
+import sqlite3
 import tempfile
 import unittest
 from pathlib import Path
@@ -72,6 +73,19 @@ class CredentialArgumentTests(unittest.TestCase):
         (self.base / "auth.json").write_text(json.dumps({
             "other": {"access": PLACEHOLDER},
         }), encoding="utf-8")
+        with self.assertRaises(credentials.CredentialError):
+            credentials.get_opencode_api_key(data_home=self.base)
+
+    def test_db_blob_value_fails_closed(self):
+        database = self.base / "opencode.db"
+        connection = sqlite3.connect(database)
+        connection.execute("create table credential (integration_id text, active integer, value)")
+        connection.execute(
+            "insert into credential values ('opencode', 1, ?)",
+            (sqlite3.Binary(('{"access":"' + PLACEHOLDER + '"}').encode()),),
+        )
+        connection.commit()
+        connection.close()
         with self.assertRaises(credentials.CredentialError):
             credentials.get_opencode_api_key(data_home=self.base)
 

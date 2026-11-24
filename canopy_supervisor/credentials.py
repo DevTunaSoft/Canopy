@@ -69,6 +69,8 @@ def get_opencode_api_key(explicit: str | None = None, data_home: Path | None = N
     except sqlite3.Error as exc:
         raise CredentialError(f"cannot read OpenCode credential store: {type(exc).__name__}") from exc
     for (value,) in rows:
+        if not isinstance(value, str):
+            continue
         try:
             return _token_from_blob(value)
         except (ValueError, TypeError):

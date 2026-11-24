@@ -26,7 +26,10 @@ def _check_bound(name, value, upper):
 
 
 def _as_text(value):
-    if isinstance(value, bytes):
+    # Require exact builtin types: a bytes/str subclass can override decode()
+    # and forge a value that escapes the byte cap or raises a raw builtin
+    # exception outside LogSizeCapError.
+    if type(value) is bytes:
         # Qt stderr may contain arbitrary bytes; never let decode abort.
         return value.decode("utf-8", "replace")
     if type(value) is str:

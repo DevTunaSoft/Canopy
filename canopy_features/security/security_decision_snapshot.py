@@ -137,6 +137,17 @@ class SecurityDecisionSnapshot:
             raise SnapshotError("unsupported metadata status token")
         _bounded_int(self.metadata_capability_count, "capability count",
                      0, len(CAPABILITIES))
+        # Cross-field contract: the capability count is the durable ground
+        # truth emitted by to_safe_metadata -- SAFE is returned only with at
+        # least one valid capability, and a rejection always yields zero.
+        # Each field is a valid token on its own, so a forged record pairing
+        # SAFE with zero (or REJECTED with capabilities) would otherwise emit
+        # a false decision-safe claim about the metadata boundary. Fail closed
+        # by re-deriving the status from the count before any claim is returned.
+        expected_metadata_status = (
+            "SAFE" if self.metadata_capability_count > 0 else "REJECTED")
+        if self.metadata_status != expected_metadata_status:
+            raise SnapshotError("contradictory metadata decision flags")
         return {
             "status": "SNAPSHOT",
             "schema": SCHEMA,

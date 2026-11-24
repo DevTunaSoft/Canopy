@@ -132,11 +132,11 @@ def read_lock(path: str | pathlib.Path) -> dict[str, Any] | None:
         return {"malformed": True, "reason": "unreadable"}
     if not text:
         return {"malformed": True, "reason": "empty"}
+    if text.isdigit():
+        return {"pid": int(text), "legacy": True}
     try:
         data = json.loads(text)
     except ValueError:
-        if text.isdigit():
-            return {"pid": int(text), "legacy": True}
         return {"malformed": True, "reason": "not json"}
     return data if isinstance(data, dict) else {"malformed": True, "reason": "not object"}
 
@@ -147,8 +147,12 @@ def lock_state(path: str | pathlib.Path,
     info = read_lock(path)
     if info is None:
         return LockState("absent", None, "missing")
-    if info.get("malformed") or info.get("legacy"):
-        return LockState("stale", info, info.get("reason", "legacy_or_malformed"))
+    if info.get("legacy"):
+        if process_alive(info.get("pid")):
+            return LockState("live", info, "legacy_live_owner")
+        return LockState("stale", info, "legacy_dead_owner")
+    if info.get("malformed"):
+        return LockState("stale", info, info.get("reason", "malformed"))
     if not process_alive(info.get("pid"), info.get("start")):
         return LockState("stale", info, "owner_dead_or_pid_reused")
     stamp = _parse_iso(info.get("ts"))

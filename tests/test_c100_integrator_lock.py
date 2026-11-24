@@ -70,6 +70,15 @@ class IntegratorLockTests(unittest.TestCase):
                 self.assertTrue(cleared)
                 self.assertFalse(self.path.exists())
 
+    def test_legacy_lock_with_live_pid_is_not_cleared(self) -> None:
+        self.path.write_text(str(os.getpid()), encoding="utf-8")
+        state = lock_state(self.path)
+        self.assertEqual(state.status, "live")
+        self.assertEqual(state.reason, "legacy_live_owner")
+        cleared, reason = clear_stale_lock(self.path)
+        self.assertFalse(cleared)
+        self.assertEqual(reason, "live")
+
     def test_pid_reuse_guard(self) -> None:
         self.path.write_text(json.dumps({
             "pid": os.getpid(), "start": 1.0, "token": "reuse",

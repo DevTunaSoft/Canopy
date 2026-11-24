@@ -24,6 +24,8 @@ def default_state_root() -> Path:
 
 
 def resolve_opencode_exe(configured: str) -> str:
+    if configured is not None and not isinstance(configured, str):
+        raise ValueError("configured OpenCode executable must be a string")
     if configured:
         return configured
     from_env = os.environ.get("OPENCODE_EXE", "")

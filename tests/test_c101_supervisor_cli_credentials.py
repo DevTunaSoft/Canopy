@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from canopy_supervisor import credentials
+from canopy_supervisor import cli, credentials
 
 PLACEHOLDER = "INERT_PLACEHOLDER"
 
@@ -28,6 +28,11 @@ class CredentialArgumentTests(unittest.TestCase):
             credentials.get_opencode_api_key(PLACEHOLDER, data_home=self.base),
             PLACEHOLDER,
         )
+
+    def test_non_string_opencode_exe_fails_closed(self):
+        with self.assertRaises(ValueError) as caught:
+            cli.resolve_opencode_exe(PLACEHOLDER.encode())
+        self.assertNotIn(PLACEHOLDER, str(caught.exception))
 
 
 if __name__ == "__main__":

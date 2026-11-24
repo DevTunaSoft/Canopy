@@ -9,6 +9,7 @@ evidence of a wired desktop.
 """
 import re
 import unicodedata
+from collections.abc import Mapping
 
 # RFC 3986 scheme: ALPHA *( ALPHA / DIGIT / "+" / "-" / "." ).
 # The fullmatch plus the leading-alpha rule stops "java script:", "1http:"
@@ -34,11 +35,18 @@ class UntrustedUriError(ValueError):
 def _normalise_allowed(allowed):
     if allowed is None:
         allowed = DEFAULT_ALLOWED_SCHEMES
-    if isinstance(allowed, (str, bytes)):
+    if isinstance(allowed, (str, bytes, Mapping)):
+        # A mapping is a wrong type for an allowlist: tuple(mapping) yields
+        # only its KEYS and silently discards the values. A scheme listed with
+        # a value of False (disabled) would be promoted into the allowlist and
+        # produce a false "permitted"/"safe" claim. Fail closed instead.
         raise UntrustedUriError("allowlist must be a set of scheme strings")
     try:
         entries = tuple(allowed)
-    except TypeError as exc:
+    except Exception as exc:
+        # Any failure to materialise the untrusted config container is a
+        # wrong-type input. Translate it to the domain error so neither the
+        # validator nor the boolean wrapper leaks a raw built-in exception.
         raise UntrustedUriError("allowlist must be iterable") from exc
     if len(entries) > 64:
         raise UntrustedUriError("allowlist exceeds bound")

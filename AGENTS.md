@@ -2,6 +2,30 @@
 
 Read README.md and docs/ARCHITECTURE.md and docs/QUALITY.md completely before making changes. Preserve existing project instructions; this file supplements rather than replaces them.
 
+## Authority and continuous execution
+
+The owner authorizes Hermes to perform routine nonvisual engineering, testing,
+legitimate dependency installation, GitHub operations, independent agent
+review, PR promotion and integration into `integration/canopy-classic-20261123`
+without repeated permission. Preserve `main` branch protection, specific PR
+holds, security requirements and release acceptance gates. Do not merge to
+`main` without explicit owner authorization and all release gates.
+
+Hermes must maintain at least four concurrently active engineering subagents
+in addition to itself (five agents total) with isolated worktrees, explicit
+file ownership, bounded assignments and non-overlapping responsibilities.
+When an agent completes or is blocked, immediately assign another eligible
+independent task. Verify the five-minute watchdog is operational and restore
+the workforce or recover interrupted work when it is not.
+
+Draft PRs are temporary development states, not permanent holding areas.
+After exact-SHA checks, dependency/ancestry verification, independent review,
+green required checks and a post-merge regression run, promote eligible
+nonvisual work to ready and integrate it promptly. Do not leave verified
+nonvisual work indefinitely in draft. Do not stop merely because a PR was
+created, a test completed, a milestone was reached, one agent was blocked,
+visual approval is pending, or a recoverable error occurred.
+
 ## Mission
 Build a polished, familiar Linux desktop shell. Classic is macOS-inspired without copying proprietary artwork, assets, or trademarks. Modern is a later Windows-inspired presentation using shared services. Tagline: “The Familiar Feel. The Freedom of Linux.”
 
@@ -28,10 +52,10 @@ Read [`docs/CLASSIC_MASTER_WALLPAPER.md`](docs/CLASSIC_MASTER_WALLPAPER.md) befo
 7. Record measured performance with machine details, methodology, and baseline; do not invent numbers.
 
 ## Visual acceptance
-Use a coherent design token system: typography, spacing, surfaces, elevation, icon sizes, motion, focus states, and high-DPI scaling. Maintain visual review screenshots for defined resolutions, light/dark modes, and reduced-motion mode. Premium appearance must not depend on constant blur or animated backgrounds.
+ChatGPT and the owner exclusively own visual design, artwork, icons, wallpaper, dock geometry and alignment, typography, colors and visual approval. Hermes and its subagents must not redesign, replace or generate those assets. Maintain visual review screenshots for defined resolutions, light/dark modes, and reduced-motion mode. Premium appearance must not depend on constant blur or animated backgrounds. Pending visual approval never blocks nonvisual engineering.
 
 ## Definition of done
-Functional behavior, accessibility, no known regressions, documented resource measurements, reproducible build/test steps, and a PR with evidence.
+Functional behavior, accessibility, no known regressions, documented resource measurements, reproducible build/test steps, independent review of the exact head SHA, integration into the designated branch with post-merge regression evidence, and a PR with evidence.
 
 ## Owner-approved roadmap expansion: LacOS and future Shell Packs
 

@@ -2,9 +2,27 @@
 
 **The Familiar Feel. The Freedom of Linux.**
 
-Canopy is a planned lightweight Linux desktop shell with a macOS-inspired Classic experience and a future Windows-inspired Modern experience. Project specification and engineering foundation will be proposed through a draft pull request.
+Canopy is a lightweight Linux desktop shell engineering candidate with a
+macOS-inspired Classic experience and a future Windows-inspired Modern
+experience. Shared-core, Qt prototype and nonvisual module work exists;
+this is **not** a production release.
 
-Status: a compilable Classic Qt prototype exists in the draft PR stack (see #151), but no release candidate has passed owner visual acceptance and Linux Mint guest acceptance; see release blocker #132. Modern is planned.
+Status: extensive nonvisual modules are integrated and tested on the
+integration branch, and a compilable Classic Qt prototype exists in the draft
+stack (see #151). No release candidate has passed owner visual acceptance and
+Linux Mint guest acceptance; see release blocker #132. Modern is planned.
+
+## Continuous engineering contract
+
+Hermes maintains at least four active engineering subagents plus itself, each
+in an isolated worktree with explicit file ownership. Routine nonvisual work
+follows DEVELOP → TEST → INDEPENDENT REVIEW → READY → MERGE → VERIFY on the
+designated integration branch. Draft PRs are temporary; eligible verified
+nonvisual work is promoted and integrated promptly. Visual design, artwork,
+wallpaper, dock geometry, colors and typography remain exclusively owned by
+ChatGPT and the owner; their approval never blocks unrelated engineering.
+See [AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUTING.md) and
+[quality gates](docs/QUALITY.md).
 
 ## LacOS and expandable Canopy Shell Packs — future goals
 

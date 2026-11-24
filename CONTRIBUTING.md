@@ -48,9 +48,7 @@ Do not substitute the eight SHA-locked original icon masters or silently
 enable optional visual candidates. Owner-approved screenshot appearance
 remains a distinct gate from Qt compilation or pixel-bound geometry tests.
 
-Run regression and integration checks, verify real Qt and Mint evidence
-as applicable, obtain appropriate code review when needed, and never authorize a merge
-based on a green badge alone.
+Run regression and integration checks, verify real Qt and Mint evidence as applicable, and require independent review for routine nonvisual work. Human approval remains mandatory for owner visual decisions, high-risk security decisions and final release acceptance; never authorize a merge based on a green badge alone.
 
 ## Shell Pack development
 

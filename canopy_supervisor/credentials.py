@@ -11,11 +11,16 @@ from pathlib import Path
 import sqlite3
 
 
+MAX_CREDENTIAL_BLOB_BYTES = 65536
+
+
 class CredentialError(RuntimeError):
     """No usable OpenCode credential found."""
 
 
 def _token_from_blob(value: str) -> str:
+    if not isinstance(value, str) or len(value) > MAX_CREDENTIAL_BLOB_BYTES:
+        raise ValueError("credential blob is not a bounded string")
     data = json.loads(value)
     if not isinstance(data, dict):
         raise ValueError("credential is not an object")

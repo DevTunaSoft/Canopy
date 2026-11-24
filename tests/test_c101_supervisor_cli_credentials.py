@@ -89,6 +89,17 @@ class CredentialArgumentTests(unittest.TestCase):
         with self.assertRaises(credentials.CredentialError):
             credentials.get_opencode_api_key(data_home=self.base)
 
+    def test_oversized_db_value_fails_closed(self):
+        database = self.base / "opencode.db"
+        connection = sqlite3.connect(database)
+        connection.execute("create table credential (integration_id text, active integer, value)")
+        payload = json.dumps({"access": PLACEHOLDER, "pad": "x" * 70000})
+        connection.execute("insert into credential values ('opencode', 1, ?)", (payload,))
+        connection.commit()
+        connection.close()
+        with self.assertRaises(credentials.CredentialError):
+            credentials.get_opencode_api_key(data_home=self.base)
+
 
 if __name__ == "__main__":
     unittest.main()

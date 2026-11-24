@@ -4,7 +4,11 @@ Scope and limits:
 - Pure in-memory logic. No Qt, compositor, X11/Wayland, D-Bus, sockets, threads,
   timers or polling. Trusted host code supplies the ``authorize`` and optional
   ``activate`` callbacks; this module performs no privileged action itself.
-- Every request is denied unless the backend returns the exact boolean ``True``.
+- Every request is denied unless the authorization backend returns the exact
+  boolean ``True``. An activation backend result is three-state: ``None``
+  (void success) or exact ``True`` actuates; ``False`` refuses; anything else
+  is ambiguous and fails closed as ``ACTIVATION_FAILED``, never a false
+  ``GRANTED`` focus-actuated claim.
 - A window identity carries a process-local monotonic serial. Reusing a window
   id after destruction yields a new serial, so an old intent can never match
   the new window (stale-target protection without unbounded id history).
@@ -212,6 +216,15 @@ class FocusBroker:
                 return self._record(FocusDecision(
                     ACTIVATION_FAILED, intent, target_app,
                     "activation error: " + type(exc).__name__))
+            # Three-state activation result: None/True actuated, False
+            # refused. Hostile-but-bounded values (ints, text, containers,
+            # arbitrary objects) are ambiguous, so fail closed rather than
+            # recording a focus-actuated GRANTED claim.
+            if (activated is not None and activated is not True
+                    and activated is not False):
+                return self._record(FocusDecision(
+                    ACTIVATION_FAILED, intent, target_app,
+                    "activation result not boolean"))
             if activated is False:
                 return self._record(FocusDecision(
                     ACTIVATION_FAILED, intent, target_app, "activation refused"))

@@ -129,5 +129,20 @@ class NewTaskTypeGuardTests(unittest.TestCase):
         self.assertEqual(task["max_attempts"], 3)
 
 
+class EvidenceTaskTypeGuardTests(unittest.TestCase):
+    def test_non_dict_task_raises_policy_error(self):
+        from canopy_supervisor.policy import validate_evidence
+
+        evidence = {"task_id": "task-001", "branch": "fix/x",
+                    "commit_sha": "abcdef1234",
+                    "tests": [{"command": "python -m unittest", "result": "PASS"}],
+                    "draft": True}
+        for value in (None, [], 7, "text", True):
+            with self.subTest(value=repr(value)):
+                with self.assertRaises(PolicyError) as caught:
+                    validate_evidence(evidence, value, ["x"])
+                self.assertNotIsInstance(caught.exception, TypeError)
+
+
 if __name__ == "__main__":
     unittest.main()

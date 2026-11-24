@@ -152,6 +152,8 @@ def validate_evidence(evidence: object, task: dict, changed_files: object,
     """
     if not isinstance(evidence, dict):
         raise PolicyError("evidence must be an object")
+    if not isinstance(task, dict):
+        raise PolicyError("task must be an object")
     if evidence.get("task_id") != task["id"]:
         raise PolicyError("evidence task_id mismatch")
     if evidence.get("branch") != task["branch"]:

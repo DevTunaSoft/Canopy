@@ -46,7 +46,16 @@ def _normalize(text, max_chars, max_normalized, label):
         text.encode("utf-8", "strict")
     except UnicodeError as exc:
         raise AppSearchError(label + " is not valid Unicode") from exc
-    key = unicodedata.normalize("NFKC", text.casefold()).strip()
+    if text.isascii():
+        # ASCII casefold and NFKC are identity, so one pass is already
+        # exact and keeps the bounded-allocation path for blank queries.
+        key = unicodedata.normalize("NFKC", text.casefold()).strip()
+    else:
+        # Compatibility decomposition can create a cased character after
+        # casefold has already run (U+1D2C -> 'A'), leaving an uppercase
+        # key that is not idempotent. Fold the NFKC form instead.
+        key = unicodedata.normalize(
+            "NFKC", unicodedata.normalize("NFKC", text).casefold()).strip()
     if len(key) > max_normalized:
         raise AppSearchError("normalized " + label + " exceeds bound")
     return key

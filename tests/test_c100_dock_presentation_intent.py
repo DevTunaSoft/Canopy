@@ -144,5 +144,50 @@ class DenialTests(unittest.TestCase):
         self.assertNotIn("SECRET-INJECTED", repr(result.to_dict()))
 
 
+class HostileLabelTests(unittest.TestCase):
+    """A name that is not an exact str must never produce a presentation claim.
+
+    ``ClickIntent`` is a frozen dataclass but its fields are not type-checked at
+    construction. A bounded hostile label (list, dict, int or a str subclass
+    with no hash) is still a caller-supplied value at this composition seam, so
+    the seam must fail closed with the module's denial record, never with a
+    raw built-in exception and never with a READY claim.
+    """
+
+    def assert_malformed_name_denied(self, result):
+        self.assertEqual(result.status, STATUS_DENIED)
+        self.assertEqual(result.reason, REASON_INVALID_INPUT)
+        self.assertFalse(result.ready)
+        self.assertEqual(result.running_tiles, 0)
+        self.assertEqual(result.badge_tiles, 0)
+        self.assertEqual(result.total_pids, 0)
+        self.assertEqual(result.claims, ())
+        self.assertNotIn("Files", repr(result.to_dict()))
+
+    def test_unhashable_actionable_name_denies_without_exception(self):
+        for kind in (IntentKind.FOCUS, IntentKind.LAUNCH):
+            with self.subTest(kind=kind):
+                result = compose_dock_presentation_intent(
+                    ClickIntent(kind, ["Files"], "running"), IND, BADGES)
+                self.assert_malformed_name_denied(result)
+
+    def test_non_string_inert_name_never_claims_ready(self):
+        for kind in (IntentKind.REJECT, IntentKind.IGNORE):
+            for name in ({"app": "Files"}, 7, ("Files",)):
+                with self.subTest(kind=kind, name=type(name).__name__):
+                    result = compose_dock_presentation_intent(
+                        ClickIntent(kind, name, "untrusted-id"), IND, BADGES)
+                    self.assert_malformed_name_denied(result)
+
+    def test_unhashable_str_subclass_name_denies_without_exception(self):
+        class UnhashableLabel(str):
+            __hash__ = None
+
+        result = compose_dock_presentation_intent(
+            ClickIntent(IntentKind.FOCUS, UnhashableLabel("Files"), "running"),
+            IND, BADGES)
+        self.assert_malformed_name_denied(result)
+
+
 if __name__ == "__main__":
     unittest.main()

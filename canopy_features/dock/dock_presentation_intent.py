@@ -129,6 +129,11 @@ def compose_dock_presentation_intent(intent, indicators, badges):
     if intent.kind not in (IntentKind.LAUNCH, IntentKind.FOCUS,
                            IntentKind.REJECT, IntentKind.IGNORE):
         return _deny(REASON_INVALID_INPUT)
+    # ClickIntent is frozen but its fields are not validated at construction.
+    # A bounded non-str label would either raise a raw TypeError at the set
+    # membership tests below or be silently accepted as an inert READY intent.
+    if type(intent.name) is not str:
+        return _deny(REASON_INVALID_INPUT)
 
     running = _ids(indicator_ids(indicators))
     snapshot = badges.snapshot()

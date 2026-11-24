@@ -167,12 +167,29 @@ def _check_decision(decision):
         raise AnnouncementInputError("expected a ShellActionDecision")
     if decision.status not in (DECISION_READY, STATUS_IDLE, STATUS_DENIED):
         raise AnnouncementInputError("unsupported decision status")
-    if decision.surface is not None:
-        surface = decision.surface
-        # Reject unhashable/non-string surfaces before dict membership; the
-        # token-table lookup below would otherwise raise a raw TypeError.
-        if not isinstance(surface, str) or surface not in _SURFACE_TOKENS:
-            raise AnnouncementInputError("unsupported decision surface")
+
+    # Cross-field consistency with the composing decision record: a READY
+    # decision always carries a recognized surface plus a non-empty action and
+    # target, while every other status carries none of the three. A forged or
+    # replayed record breaking that invariant is individually well-typed but
+    # jointly asserts a false claim to a screen reader (``action_ready`` next
+    # to ``no_surface``, or a surface token for an idle/denied action). Fail
+    # closed before any such claim is returned. Labels are only type-checked;
+    # none is copied or interpreted here.
+    if decision.status != DECISION_READY:
+        if (decision.surface is not None or decision.action is not None
+                or decision.target is not None):
+            raise AnnouncementInputError("non-ready decision carries action fields")
+        return
+
+    surface = decision.surface
+    # Reject unhashable/non-string surfaces before dict membership; the
+    # token-table lookup below would otherwise raise a raw TypeError.
+    if not isinstance(surface, str) or surface not in _SURFACE_TOKENS:
+        raise AnnouncementInputError("unsupported decision surface")
+    if (type(decision.action) is not str or not decision.action
+            or type(decision.target) is not str or not decision.target):
+        raise AnnouncementInputError("ready decision lacks action fields")
 
 
 def compose_focus_announcement(transition, view, decision, *, max_results=MAX_RESULTS):

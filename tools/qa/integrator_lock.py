@@ -53,9 +53,12 @@ def _parse_iso(value: object) -> datetime.datetime | None:
     if not isinstance(value, str):
         return None
     try:
-        return datetime.datetime.fromisoformat(value)
+        parsed = datetime.datetime.fromisoformat(value)
     except ValueError:
         return None
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=datetime.timezone.utc)
+    return parsed
 
 
 class _FILETIME(ctypes.Structure):
@@ -227,7 +230,9 @@ def acquire(path: str | pathlib.Path, *, owner: str = "integrator",
     """Acquire the lock atomically, recovering only definitely stale locks."""
     target = pathlib.Path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
-    for attempt in range(1, max(1, attempts) + 1):
+    # Always allow one retry after clearing a stale lock, even when the caller
+    # asked for a single attempt; the clear itself is not an acquisition try.
+    for attempt in range(1, max(2, attempts) + 1):
         token = uuid.uuid4().hex
         info = {
             "owner": owner,

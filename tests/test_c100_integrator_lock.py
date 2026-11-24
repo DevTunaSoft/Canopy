@@ -79,6 +79,24 @@ class IntegratorLockTests(unittest.TestCase):
         self.assertFalse(cleared)
         self.assertEqual(reason, "live")
 
+    def test_naive_iso_heartbeat_does_not_crash_state_or_acquire(self) -> None:
+        self.path.write_text(json.dumps({
+            "pid": 999_999_999, "start": 1.0, "token": "naive",
+            "ts": "2026-11-24T18:00:00",
+        }))
+        state = lock_state(self.path)
+        self.assertEqual(state.status, "stale")
+        with acquire(self.path, attempts=1) as handle:
+            self.assertEqual(handle.info["owner"], "integrator")
+
+    def test_single_attempt_retries_after_clearing_stale_lock(self) -> None:
+        self.path.write_text(json.dumps({
+            "pid": 999_999_999, "start": 1.0, "token": "dead",
+            "ts": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        }))
+        with acquire(self.path, attempts=1) as handle:
+            self.assertEqual(handle.token, read_lock(self.path)["token"])
+
     def test_pid_reuse_guard(self) -> None:
         self.path.write_text(json.dumps({
             "pid": os.getpid(), "start": 1.0, "token": "reuse",

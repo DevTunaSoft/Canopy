@@ -79,6 +79,22 @@ def _safe_parts(rel):
     return parts
 
 
+def _path_from(value, message):
+    """Coerce a caller path to ``Path`` or fail closed with the domain error.
+
+    ``pathlib.Path`` raises a raw ``TypeError`` for wrong-type inputs (None,
+    numbers, containers, bytes). Path-taking entry points must translate that
+    into this module's integrity refusal, never leak a built-in exception.
+    """
+    try:
+        raw = os.fspath(value)
+    except TypeError as exc:
+        raise UninstallIntegrityError(message) from exc
+    if not isinstance(raw, str) or not raw or "\x00" in raw:
+        raise UninstallIntegrityError(message)
+    return Path(raw)
+
+
 def normalize_manifest(data):
     """Validate a parsed manifest and return a normalized copy."""
     if not isinstance(data, dict):
@@ -139,7 +155,7 @@ def _require_real_path_components(path, message):
 
 def read_manifest(path):
     """Read and validate an ownership manifest from disk."""
-    source = Path(path)
+    source = _path_from(path, "manifest path must be a real path")
     if source.is_symlink() or not source.is_file():
         raise UninstallIntegrityError("manifest must be a regular file")
     _require_real_path_components(
@@ -179,7 +195,10 @@ def plan_uninstall(root, manifest):
     entry is modified. Fails closed on any integrity problem.
     """
     manifest = normalize_manifest(manifest)
-    root = Path(root)
+    try:
+        root = _path_from(root, "install root must be a real path")
+    except UninstallIntegrityError as exc:
+        return UninstallPlan(False, (), (), (), (str(exc),))
     owned = manifest["files"]
     blockers = []
     verified = []

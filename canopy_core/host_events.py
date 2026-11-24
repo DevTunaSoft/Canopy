@@ -10,9 +10,12 @@ import re
 from threading import get_ident
 from types import MappingProxyType
 
-PROTOCOL_VERSION = 1
+PROTOCOL_VERSION = 2
+# v2 keeps the three v1 topics and adds one explicit host-request topic.
+CAPABILITIES_TOPIC = "capabilities.report"
 TOPICS = frozenset({
     "app.catalog.changed", "window.state.changed", "session.state.changed",
+    CAPABILITIES_TOPIC,
 })
 MAX_SUBSCRIBERS = 64
 MAX_PAYLOAD_FIELDS = 8

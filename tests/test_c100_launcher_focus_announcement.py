@@ -41,8 +41,11 @@ from canopy_features.launcher.launcher_search_view import (
 )
 from canopy_features.launcher.shell_action_decision import (
     REASON_OK as DECISION_REASON_OK,
+    STATUS_DENIED,
+    STATUS_IDLE,
     STATUS_READY as DECISION_READY,
     SURFACE_DOCK,
+    SURFACE_LAUNCHER,
     ShellActionDecision,
 )
 
@@ -229,6 +232,53 @@ class ContradictoryFlagTests(unittest.TestCase):
         self.assertEqual(result.status, STATUS_SILENT)
         self.assertEqual(result.reason, REASON_NO_MOTION)
         self.assertIn(TOKEN_FOCUS_WRAPPED, result.tokens)
+
+
+class DecisionCrossFieldTests(unittest.TestCase):
+    """A decision that contradicts its own status must not be announced.
+
+    ``compose_shell_action_decision`` carries ``surface``/``action``/``target``
+    only for a READY decision; every other status leaves all three as None.
+    A replayed or hostile-but-bounded record breaking that invariant would
+    otherwise emit ``action_ready`` with ``no_surface``, or claim an owning
+    surface for an idle/denied action. Both are false claims to a screen
+    reader, so they must fail closed with the module's domain error.
+    """
+
+    def test_ready_without_surface_rejected(self):
+        bogus = ShellActionDecision(DECISION_READY, DECISION_REASON_OK,
+                                    None, "launch", "SECRET-TARGET")
+        with self.assertRaises(AnnouncementInputError):
+            compose(d=bogus)
+
+    def test_ready_without_action_or_target_rejected(self):
+        for bogus in (ShellActionDecision(DECISION_READY, DECISION_REASON_OK,
+                                          SURFACE_DOCK, None, "SECRET-TARGET"),
+                      ShellActionDecision(DECISION_READY, DECISION_REASON_OK,
+                                          SURFACE_DOCK, "launch", None)):
+            with self.subTest(bogus=bogus):
+                with self.assertRaises(AnnouncementInputError):
+                    compose(d=bogus)
+
+    def test_idle_with_surface_rejected(self):
+        bogus = ShellActionDecision(STATUS_IDLE, "no_action", SURFACE_DOCK,
+                                    "launch", "SECRET-TARGET")
+        with self.assertRaises(AnnouncementInputError):
+            compose(d=bogus)
+
+    def test_denied_with_surface_rejected(self):
+        bogus = ShellActionDecision(STATUS_DENIED, "ambiguous_surface",
+                                    SURFACE_LAUNCHER, "select", "SECRET-NAME")
+        with self.assertRaises(AnnouncementInputError):
+            compose(d=bogus)
+
+    def test_genuine_decisions_remain_accepted(self):
+        ready = compose()
+        self.assertIn(TOKEN_ACTION_READY, ready.tokens)
+        self.assertIn(TOKEN_SURFACE_DOCK, ready.tokens)
+        idle = compose(d=ShellActionDecision(STATUS_IDLE, "no_action"))
+        self.assertNotIn(TOKEN_ACTION_READY, idle.tokens)
+        self.assertIn(TOKEN_NO_SURFACE, idle.tokens)
 
 
 if __name__ == "__main__":

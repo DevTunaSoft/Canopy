@@ -134,7 +134,7 @@ class RecoveryReadinessSnapshotTests(unittest.TestCase):
 
     def test_long_reason_is_bounded(self):
         decision = checkpoints.RecoveryDecision(
-            checkpoints.READY, (), (), None, "x" * 500)
+            checkpoints.READY, ("shell",), (), None, "x" * 500)
         record = _m().compose(decision, _session(), _channel().stats)
         self.assertEqual(record.startup.reason, "x" * _m().MAX_CHARS)
 

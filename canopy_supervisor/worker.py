@@ -20,6 +20,11 @@ class WorkerError(RuntimeError):
     """Worker could not be started or configured."""
 
 
+def _valid_pid(pid) -> bool:
+    """Only a positive plain int can name a worker launched by this instance."""
+    return type(pid) is int and pid > 0
+
+
 def redact(text: str) -> str:
     """Remove ANSI escapes and known credential shapes from worker output."""
     clean = ANSI.sub("", text)
@@ -128,7 +133,7 @@ class WorkerLauncher:
         return process.pid
 
     def knows(self, pid: int) -> bool:
-        return pid in self._processes
+        return _valid_pid(pid) and pid in self._processes
 
     def poll(self, pid: int) -> int | None:
         """Return the real exit code for a process launched by this instance.
@@ -136,6 +141,9 @@ class WorkerLauncher:
         After a restart the OS handle is gone. Returning None is deliberate:
         the supervisor requeues such tasks instead of guessing their result.
         """
+        if not _valid_pid(pid):
+            # Wrong-type or non-positive PIDs are unknown, never a crash.
+            return None
         process = self._processes.get(pid)
         if process is None:
             return None

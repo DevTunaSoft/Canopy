@@ -16,11 +16,33 @@ small ownership ledger used to reason about rollback state and abandoned
 resources without executing a presenter.
 """
 
+import unicodedata
 from dataclasses import dataclass
 from typing import FrozenSet, Iterable, Optional
 
 IDLE = "IDLE"
 PREPARED = "PREPARED"
+
+# Theme labels are display identities, not opaque bytes. Control and format
+# scalars can reorder or hide a label, surrogates fail strict UTF-8 encoding,
+# and private-use, unassigned or separator scalars are not safe theme names.
+# Reject them at the gate so the ledger never claims a clean rollback state
+# for a theme identity the host cannot display or encode.
+_UNSAFE_THEME_CATEGORIES = frozenset(
+    {"Cc", "Cf", "Cs", "Co", "Cn", "Zl", "Zp"})
+
+
+def _valid_theme(value) -> bool:
+    """True only for an exact, non-empty, display-safe ``str`` label.
+
+    Requiring the exact type stops hostile ``str`` subclasses from overriding
+    truthiness or iteration and leaking a raw exception from ``prepare``.
+    Length is deliberately not capped here: consumers project and bound long
+    labels, and finite long labels remain valid identities.
+    """
+    return (type(value) is str and bool(value)
+            and not any(unicodedata.category(char) in _UNSAFE_THEME_CATEGORIES
+                        for char in value))
 
 
 @dataclass(frozen=True)
@@ -58,6 +80,8 @@ class ThemeTransitionRollback:
     ):
         if initial_theme is not None and not isinstance(initial_theme, str):
             raise TypeError("initial_theme must be a string or None")
+        if initial_theme is not None and not _valid_theme(initial_theme):
+            raise ValueError("initial_theme must be a display-safe label")
         resources = self._normalize(initial_resources)
         if len(resources) > self.MAX_ABANDONED:
             raise ValueError("initial resources exceed ledger capacity")
@@ -90,11 +114,12 @@ class ThemeTransitionRollback:
         rejects the request without changing state. A batch that is not an
         iterable of non-empty strings is also rejected with
         ``INVALID_RESOURCES`` rather than leaking a built-in ``TypeError``
-        from the normalizer.
+        from the normalizer. A theme label that is not an exact, non-empty,
+        display-safe ``str`` returns ``INVALID_THEME``.
         """
         if self._state != IDLE:
             return "BUSY"
-        if not isinstance(theme, str) or not theme:
+        if not _valid_theme(theme):
             return "INVALID_THEME"
         try:
             batch = self._normalize(resources)

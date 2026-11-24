@@ -212,10 +212,10 @@ def _workspace_view(inventory):
     for workspace in workspaces[:MAX_WORKSPACES]:
         if not isinstance(workspace, Workspace):
             raise SnapshotError("workspace records must be Workspace values")
-        _bounded_text(workspace.identifier, "workspace identifier")
+        identifier = _bounded_text(workspace.identifier, "workspace identifier")
         _bounded_text(workspace.name, "workspace name")
         _bounded_text(workspace.source, "workspace source")
-        identifiers.append(workspace.identifier)
+        identifiers.append(identifier)
     reasons = []
     for problem in problems[:MAX_PROBLEMS]:
         if not isinstance(problem, WorkspaceProblem):

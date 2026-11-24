@@ -69,9 +69,17 @@ const QHash<QString, QPair<int, int>> kSourceMatteRowTrim = {
 const QHash<QString, QPointF> kFiveDockCenterOffsets = {
     {QStringLiteral("browser"), QPointF(0, -8)},
     {QStringLiteral("mail"), QPointF(2, 0)},
-    {QStringLiteral("files"), QPointF(-9, 1)},
+    {QStringLiteral("files"), QPointF(-11, -1)},
     {QStringLiteral("terminal"), QPointF(-8, -3)},
-    {QStringLiteral("settings"), QPointF(-7, -2)},
+    {QStringLiteral("settings"), QPointF(-8, -5)},
+};
+
+// Only two originals have a clearly visible selection-sheet edge embedded
+// within the existing rounded mask in the genuine 62px Qt capture.
+struct SourceEdgeTrim { int left; int top; int right; int bottom; };
+const QHash<QString, SourceEdgeTrim> kFiveSourceEdgeTrim = {
+    {QStringLiteral("files"), {7, 17, 15, 2}},
+    {QStringLiteral("settings"), {6, 22, 7, 10}},
 };
 
 // Production pack is derived from precisely these five verified originals.
@@ -81,7 +89,8 @@ const QStringList kFiveProductionIds = {
     QStringLiteral("files"), QStringLiteral("terminal"),
     QStringLiteral("settings"),
 };
-constexpr auto kPackRenderer = "canopy-five-qt-v1";
+// Changing the master-derived crop semantics invalidates all old packs.
+constexpr auto kPackRenderer = "canopy-five-qt-v2";
 
 QString sha256(const QByteArray &bytes) {
     return QString::fromLatin1(
@@ -103,9 +112,24 @@ QImage renderFiveAtDensity(const QImage &original, const QString &id,
         return {};
     }
     const auto trims = kSourceMatteRowTrim.value(id);
-    const QImage source = original.copy(
-        0, trims.first, original.width(),
-        original.height() - trims.first - trims.second);
+    const auto edgeTrimIt = kFiveSourceEdgeTrim.constFind(id);
+    // Preserve Browser, Mail and Terminal pixel-for-pixel. Only Files and
+    // Settings use slightly tighter source selection-sheet boundaries.
+    // The approved 345px originals are NEVER edited; this is in-memory only.
+    const int left = edgeTrimIt == kFiveSourceEdgeTrim.cend() ? 0 : edgeTrimIt->left;
+    const int top = edgeTrimIt == kFiveSourceEdgeTrim.cend() ? trims.first : edgeTrimIt->top;
+    const int right = edgeTrimIt == kFiveSourceEdgeTrim.cend() ? 0 : edgeTrimIt->right;
+    const int bottom = edgeTrimIt == kFiveSourceEdgeTrim.cend() ? trims.second : edgeTrimIt->bottom;
+    if (left < 0 || right < 0 || top < 0 || bottom < 0 ||
+        left > 15 || right > 15 || top > 22 || bottom > 10 ||
+        original.width() - left - right < 310 ||
+        original.height() - top - bottom < 300) {
+        *error = QStringLiteral("five-icon source edge trim outside safe bounds");
+        return {};
+    }
+    const QImage source = original.copy(left, top,
+        original.width() - left - right,
+        original.height() - top - bottom);
     if (source.isNull()) {
         *error = QStringLiteral("verified five-icon source crop failed");
         return {};

@@ -7,9 +7,15 @@ are reused from the existing read-only Mint preflight. No package manager is
 called, no command is executed to install, and no system setting is changed.
 """
 import re
+from collections.abc import Mapping
 
 from tools.mint_guest_preflight import NEEDED as REQUIRED_TOOLS
 from tools.mint_guest_preflight import collect as _preflight_collect
+
+
+class DependencyProbeError(ValueError):
+    """Caller supplied a wrong-type dependency-probe input; fail closed."""
+
 
 MINIMUM_QT = (6, 4)
 MINIMUM_QT_TEXT = ".".join(str(part) for part in MINIMUM_QT)
@@ -49,7 +55,10 @@ _TRUSTED_NAMES = frozenset(p["name"] for p in QT_PACKAGES) | frozenset(REQUIRED_
 
 def parse_qt_version(value):
     """Return a comparable version tuple, or None for missing or unsafe input."""
-    if not isinstance(value, str):
+    # An exact str is required: isinstance() alone accepts a subclass whose
+    # strip() can be overridden to return a valid label, manufacturing a
+    # false sufficient-version claim for a hostile version label.
+    if type(value) is not str:
         return None
     candidate = value.strip()
     if not candidate or len(candidate) > 24 or not _VERSION_RE.fullmatch(candidate):
@@ -83,7 +92,11 @@ def filter_trusted_packages(names):
 
 def assess_dependencies(available=None, qt_version=None, requested_packages=None):
     """Pure dependency report: no host calls, no installation, no side effects."""
-    available = available or {}
+    if available is None:
+        available = {}
+    elif not isinstance(available, Mapping):
+        raise DependencyProbeError(
+            "available must be a mapping of tool names to presence flags")
     tools = {name: bool(available.get(name, False)) for name in REQUIRED_TOOLS}
     missing_tools = [name for name, present in tools.items() if not present]
 

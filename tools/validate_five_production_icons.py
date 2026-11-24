@@ -21,7 +21,7 @@ TARGET = ("browser", "mail", "files", "terminal", "settings")
 FROZEN = ("calendar", "photos", "music")
 DENSITIES = (1, 2, 3)
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
-EXPECTED_RENDERER = "canopy-five-qt-v2"
+EXPECTED_RENDERER = "canopy-five-qt-v3-alpha"
 
 
 class ProductionIconError(ValueError):

@@ -65,7 +65,7 @@ R073 comes from an in-guest preflight that distinguishes Linux Mint 22.3 from
 Ubuntu. R074 is a real Cinnamon X11 session launch of the exact binary above;
 it is not owner visual acceptance. R066 is numeric-only: three genuine
 approximately-five-minute guest samples (early idle 305.919 s / 62 samples,
-0.1167% of one core, PSS peak 150854 KiB; wakeup sample 305.912 s / 62 samples
+0.2615% of one core, PSS peak 150854 KiB; wakeup sample 305.912 s / 62 samples
 with context-switch proxies only because the kernel does not expose
 `se.nr_wakeups`; real-session sample 305.825 s / 62 samples, 0.2322% of one
 core, PSS peak 127825 KiB). R078 proves a fresh boot identity, a discovered

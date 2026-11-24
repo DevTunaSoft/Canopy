@@ -15,7 +15,7 @@ line as a command.
 from dataclasses import dataclass
 from typing import Tuple
 
-from canopy_features.apps.desktop_actions import parse_desktop_actions
+from canopy_features.apps.desktop_actions import DesktopAction, parse_desktop_actions
 from canopy_features.apps.launch_argv import (
     SHELL_METACHARACTERS,
     LaunchArgvError,
@@ -115,6 +115,40 @@ def _allowed_ids(value):
         return None
 
 
+def _source_labels_are_trusted(scan):
+    """True only for a well-formed, unambiguous parsed-source label set.
+
+    ``scan`` is a supplied source record: a deserialized or fault-injected
+    scan may carry wrong-type labels (unhashable labels escape as a raw
+    ``TypeError`` from the allowlist membership test) or repeated ids (an
+    inflated count then claims distinct actions that do not exist). Gate both
+    before any membership test, count or safe claim is produced.
+    """
+    if getattr(scan, "ok", None) is not True:
+        return False
+    if getattr(scan, "problems", None) != ():
+        return False
+    declared = getattr(scan, "declared_ids", None)
+    actions = getattr(scan, "actions", None)
+    if type(declared) is not tuple or type(actions) is not tuple:
+        return False
+    if any(type(value) is not str for value in declared):
+        return False
+    if len(set(declared)) != len(declared):
+        return False
+    seen = set()
+    for action in actions:
+        if not isinstance(action, DesktopAction):
+            return False
+        action_id = getattr(action, "action_id", None)
+        if type(action_id) is not str or action_id in seen:
+            return False
+        seen.add(action_id)
+        if type(getattr(action, "exec_line", None)) is not str:
+            return False
+    return True
+
+
 def _exec_is_safe(actions):
     """Refuse field codes and shell syntax without echoing any Exec line."""
     for action in actions:
@@ -145,7 +179,9 @@ def compose_desktop_action_launch_preview(
         return _deny(REASON_INVALID_INPUT)
 
     # Problem details embed action ids, so they are never carried forward.
-    if not scan.ok:
+    # A malformed label set must be denied before any membership test or count
+    # can turn it into a READY preview or a raw TypeError.
+    if not _source_labels_are_trusted(scan) or not scan.ok:
         return _deny(REASON_INVALID_ACTIONS)
 
     allowed = _allowed_ids(allowed_action_ids)

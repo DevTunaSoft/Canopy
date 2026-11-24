@@ -164,6 +164,34 @@ class FailClosedTests(unittest.TestCase):
         with self.assertRaises(CatalogIngestError):
             compose_launcher_catalog("org.example.X.desktop")
 
+    def test_non_printable_title_rejected(self):
+        # C1 controls, bidirectional/zero-width format characters, private
+        # use, unassigned scalars and line/paragraph separators are all
+        # valid UTF-8 but hostile display text. None may be emitted into the
+        # host bridge while the snapshot claims no invalid entry was accepted.
+        for name in (
+            "Ex\u0085ample",   # Cc (C1 NEL)
+            "Ex\u202eample",   # Cf (right-to-left override)
+            "Ex\u200bample",   # Cf (zero-width space)
+            "Ex\ue000ample",   # Co (private use)
+            "Ex\u2028ample",   # Zl (line separator)
+            "Ex\u2029ample",   # Zp (paragraph separator)
+            "Ex\u0378ample",   # Cn (unassigned)
+        ):
+            with self.subTest(name=name):
+                with self.assertRaises(CatalogIngestError):
+                    compose_launcher_catalog(
+                        (pair("org.example.X.desktop", name=name),))
+
+    def test_valid_unicode_title_accepted(self):
+        # The guard must not reject ordinary spacing or real-language text.
+        for name in ("Caf\u00e9 \u2014 \u65e5\u672c\u8a9e", "Two Words", "App 1"):
+            with self.subTest(name=name):
+                snapshot = compose_launcher_catalog(
+                    (pair("org.example.X.desktop", name=name),))
+                self.assertEqual(snapshot.to_pairs(),
+                                 (("org.example.X.desktop", name),))
+
 
 if __name__ == "__main__":
     unittest.main()

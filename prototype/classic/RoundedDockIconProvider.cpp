@@ -76,11 +76,77 @@ const QHash<QString, QPointF> kFiveDockCenterOffsets = {
 
 // Only two originals have a clearly visible selection-sheet edge embedded
 // within the existing rounded mask in the genuine 62px Qt capture.
-struct SourceEdgeTrim { int left; int top; int right; int bottom; };
-const QHash<QString, SourceEdgeTrim> kFiveSourceEdgeTrim = {
-    {QStringLiteral("files"), {7, 17, 15, 2}},
-    {QStringLiteral("settings"), {6, 22, 7, 10}},
+// Per-master visible illustration contours, independently checked against
+// each of the five SHA-locked 345x333/334 originals. Top and bottom corner
+// radii differ: a uniform huge radius clipped Tux's feet, while a uniform
+// small radius retained black contact-sheet wedges near the icon's crown.
+// All coordinates are *source* pixels; none changes a QML button or layout.
+struct AlphaContour {
+    qreal x0, y0, x1, y1, topRadius, bottomRadius;
 };
+const QHash<QString, AlphaContour> kFiveMasterContours = {
+    {QStringLiteral("browser"),  {1, 9, 344, 332, 75, 18}},
+    {QStringLiteral("mail"),     {1, 4, 344, 332, 86, 24}},
+    {QStringLiteral("files"),    {2, 2, 343, 332, 85, 14}},
+    {QStringLiteral("terminal"), {4, 14, 342, 332, 53, 16}},
+    {QStringLiteral("settings"), {5, 16, 341, 329, 94, 18}},
+};
+
+// Mask the five selected original PNGs with a genuine alpha silhouette.
+// A separate transparent ARGB mask and DestinationIn ensure 100% clear
+// outer pixels; we NEVER recolor, clone, blur or redraw the approved art.
+// The original dark penguin/terminal interiors remain completely intact.
+QImage alphaCutoutMaster(const QImage &original, const QString &id,
+                         QString *error) {
+    const auto contour = kFiveMasterContours.constFind(id);
+    if (contour == kFiveMasterContours.cend() ||
+        original.width() != 345 ||
+        (original.height() != 333 && original.height() != 334)) {
+        *error = QStringLiteral("five-icon alpha contour source mismatch");
+        return {};
+    }
+    const auto &c = contour.value();
+    if (c.x0 < 0 || c.y0 < 0 || c.x1 >= original.width() ||
+        c.y1 >= original.height() || c.topRadius < 25 ||
+        c.bottomRadius < 8 || c.topRadius > 110 || c.bottomRadius > 30 ||
+        c.x1 - c.x0 < 300 || c.y1 - c.y0 < 290) {
+        *error = QStringLiteral("unsafe five-icon source contour");
+        return {};
+    }
+    QPainterPath outline;
+    outline.moveTo(c.x0 + c.topRadius, c.y0);
+    outline.lineTo(c.x1 - c.topRadius, c.y0);
+    outline.quadTo(c.x1, c.y0, c.x1, c.y0 + c.topRadius);
+    outline.lineTo(c.x1, c.y1 - c.bottomRadius);
+    outline.quadTo(c.x1, c.y1, c.x1 - c.bottomRadius, c.y1);
+    outline.lineTo(c.x0 + c.bottomRadius, c.y1);
+    outline.quadTo(c.x0, c.y1, c.x0, c.y1 - c.bottomRadius);
+    outline.lineTo(c.x0, c.y0 + c.topRadius);
+    outline.quadTo(c.x0, c.y0, c.x0 + c.topRadius, c.y0);
+    outline.closeSubpath();
+
+    QImage alpha(original.size(), QImage::Format_ARGB32_Premultiplied);
+    alpha.fill(Qt::transparent);
+    {
+        QPainter p(&alpha);
+        p.setRenderHint(QPainter::Antialiasing, true);
+        p.fillPath(outline, Qt::white);
+    }
+    QImage cutout = original.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+    {
+        QPainter p(&cutout);
+        p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+        p.drawImage(QPoint(0, 0), alpha);
+    }
+    if (cutout.pixelColor(0, 0).alpha() ||
+        cutout.pixelColor(original.width() - 1, 0).alpha() ||
+        cutout.pixelColor(0, original.height() - 1).alpha() ||
+        cutout.pixelColor(original.width() - 1, original.height() - 1).alpha()) {
+        *error = QStringLiteral("unmasked corner in five-icon alpha derivative");
+        return {};
+    }
+    return cutout;
+}
 
 // Production pack is derived from precisely these five verified originals.
 // Never add Calendar, Photos or Music here: their Qt pixels are immutable.
@@ -90,7 +156,7 @@ const QStringList kFiveProductionIds = {
     QStringLiteral("settings"),
 };
 // Changing the master-derived crop semantics invalidates all old packs.
-constexpr auto kPackRenderer = "canopy-five-qt-v2";
+constexpr auto kPackRenderer = "canopy-five-qt-v3-alpha";
 
 QString sha256(const QByteArray &bytes) {
     return QString::fromLatin1(
@@ -111,29 +177,9 @@ QImage renderFiveAtDensity(const QImage &original, const QString &id,
         *error = QStringLiteral("invalid verified five-icon source or density");
         return {};
     }
-    const auto trims = kSourceMatteRowTrim.value(id);
-    const auto edgeTrimIt = kFiveSourceEdgeTrim.constFind(id);
-    // Preserve Browser, Mail and Terminal pixel-for-pixel. Only Files and
-    // Settings use slightly tighter source selection-sheet boundaries.
-    // The approved 345px originals are NEVER edited; this is in-memory only.
-    const int left = edgeTrimIt == kFiveSourceEdgeTrim.cend() ? 0 : edgeTrimIt->left;
-    const int top = edgeTrimIt == kFiveSourceEdgeTrim.cend() ? trims.first : edgeTrimIt->top;
-    const int right = edgeTrimIt == kFiveSourceEdgeTrim.cend() ? 0 : edgeTrimIt->right;
-    const int bottom = edgeTrimIt == kFiveSourceEdgeTrim.cend() ? trims.second : edgeTrimIt->bottom;
-    if (left < 0 || right < 0 || top < 0 || bottom < 0 ||
-        left > 15 || right > 15 || top > 22 || bottom > 10 ||
-        original.width() - left - right < 310 ||
-        original.height() - top - bottom < 300) {
-        *error = QStringLiteral("five-icon source edge trim outside safe bounds");
+    const QImage source = alphaCutoutMaster(original, id, error);
+    if (source.isNull())
         return {};
-    }
-    const QImage source = original.copy(left, top,
-        original.width() - left - right,
-        original.height() - top - bottom);
-    if (source.isNull()) {
-        *error = QStringLiteral("verified five-icon source crop failed");
-        return {};
-    }
     QImage rendered(kCanvasPixels * density, kCanvasPixels * density,
                     QImage::Format_ARGB32_Premultiplied);
     rendered.fill(Qt::transparent);
@@ -147,14 +193,10 @@ QImage renderFiveAtDensity(const QImage &original, const QString &id,
     QPainterPath outline;
     outline.addRoundedRect(face, kRoundedRadius, kRoundedRadius);
     painter.setClipPath(outline);
-    painter.fillPath(outline, QColor(QStringLiteral("#10203d")));
-    const QImage edgeFill = source.scaled(
-        14, 14, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)
-        .scaled(face.size().toSize(), Qt::IgnoreAspectRatio,
-                Qt::SmoothTransformation);
+    // No second dark-blue backing plate or blurred source-color edge. The
+    // original pixels now carry a real transparent silhouette.
     const QRectF inner(face.left() + 1, face.top() + 1,
                        face.width() - 2, face.height() - 2);
-    painter.drawImage(face, edgeFill);
     QRectF artwork = inner;
     artwork.translate(kFiveDockCenterOffsets.value(id));
     painter.drawImage(artwork, source);

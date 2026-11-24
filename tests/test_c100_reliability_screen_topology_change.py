@@ -219,5 +219,46 @@ class ScreenTopologyModelTests(unittest.TestCase):
         self.assertEqual(RecoveryAction(ACTION_NO_OP, ("x",)).detail, ("x",))
 
 
+class ContradictoryTopologyStateTests(unittest.TestCase):
+    """Decision inputs must come from durable, validated topology state."""
+
+    def test_lying_empty_flag_cannot_manufacture_suspend(self):
+        class LyingEmptyTopology(Topology):
+            @property
+            def is_empty(self):
+                return True
+
+        topology = LyingEmptyTopology([Monitor("HDMI-1", 1920, 1080, True)])
+        with self.assertRaises(TopologyError):
+            ScreenTopologyModel().apply(topology)
+
+    def test_lying_primary_flag_cannot_manufacture_reanchor(self):
+        class LyingPrimaryTopology(Topology):
+            @property
+            def primary(self):
+                return None
+
+        model = ScreenTopologyModel()
+        model.apply(topo(Monitor("HDMI-1", 1920, 1080, True)))
+        hostile = LyingPrimaryTopology([
+            Monitor("HDMI-1", 1920, 1080, True), Monitor("DP-1", 1920, 1080)])
+        with self.assertRaises(TopologyError):
+            model.apply(hostile)
+
+    def test_spoofed_connector_label_cannot_manufacture_connect(self):
+        class SpoofedConnector(Monitor):
+            def __init__(self):
+                object.__setattr__(self, "width", 1920)
+                object.__setattr__(self, "height", 1080)
+                object.__setattr__(self, "primary", False)
+
+            @property
+            def connector(self):
+                return "HDMI-1"
+
+        with self.assertRaises(TopologyError):
+            ScreenTopologyModel().apply(Topology([SpoofedConnector()]))
+
+
 if __name__ == "__main__":
     unittest.main()

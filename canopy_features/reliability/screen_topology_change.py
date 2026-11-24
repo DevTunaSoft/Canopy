@@ -141,6 +141,38 @@ class Topology:
         return None
 
 
+def _durable_monitors(topology):
+    """Project a snapshot onto validated, non-overridable decision inputs.
+
+    ``apply`` accepts ``Topology`` subclasses and ``Topology`` accepts
+    ``Monitor`` subclasses. A subclass can override ``is_empty``, ``primary``
+    or even ``connector``; trusting those derived values would let a
+    hostile-but-bounded snapshot manufacture a false connect/disconnect or
+    reanchor claim. Re-derive every decision input from the durable ``Monitor``
+    entries and fail closed with ``TopologyError`` on any disagreement.
+    """
+    monitors = topology.monitors
+    if (type(monitors) is not tuple
+            or any(type(monitor) is not Monitor for monitor in monitors)):
+        raise TopologyError("topology monitors are malformed")
+    if len(monitors) > MAX_MONITORS:
+        raise TopologyError("too many monitors")
+    seen = set()
+    for monitor in monitors:
+        if monitor.connector in seen:
+            raise TopologyError("duplicate monitor connector")
+        seen.add(monitor.connector)
+    primaries = tuple(monitor for monitor in monitors if monitor.primary)
+    if len(primaries) > 1:
+        raise TopologyError("at most one primary monitor")
+    if topology.is_empty != (not monitors):
+        raise TopologyError("emptiness flag disagrees with monitors")
+    derived_primary = primaries[0] if primaries else None
+    if topology.primary is not derived_primary:
+        raise TopologyError("primary flag disagrees with monitors")
+    return monitors
+
+
 @dataclass(frozen=True)
 class Change:
     """A single observed difference between two topologies."""
@@ -185,6 +217,7 @@ class ScreenTopologyModel:
         self._history_limit = history_limit
         self._sequence = 0
         self._current = None
+        self._current_monitors = None
         self._history = deque(maxlen=history_limit)
 
     @property
@@ -200,19 +233,22 @@ class ScreenTopologyModel:
         """Apply one observed snapshot and return its RecoveryResult."""
         if not isinstance(topology, Topology):
             raise TopologyError("apply expects a Topology")
-        previous = self._current
-        changes = self._diff(previous, topology)
-        safe = self._safe_topology(topology)
-        actions = self._decide(previous, topology, changes)
+        monitors = _durable_monitors(topology)
+        previous = self._current_monitors
+        changes = self._diff(previous, monitors)
+        safe = self._safe_topology(monitors)
+        actions = self._decide(previous, monitors, changes)
         self._sequence += 1
         result = RecoveryResult(self._sequence, changes, actions, safe)
         self._current = topology
+        self._current_monitors = monitors
         self._history.append(result)
         return result
 
     def reset(self):
         """Drop all observed state; the caller owns any real re-initialization."""
         self._current = None
+        self._current_monitors = None
         self._history.clear()
         self._sequence = 0
 
@@ -220,11 +256,11 @@ class ScreenTopologyModel:
     def _diff(previous, current):
         changes = []
         if previous is None:
-            for monitor in current.monitors:
+            for monitor in current:
                 changes.append(Change(EVENT_CONNECT, monitor.connector))
             return tuple(changes)
-        before = {m.connector: m for m in previous.monitors}
-        after = {m.connector: m for m in current.monitors}
+        before = {m.connector: m for m in previous}
+        after = {m.connector: m for m in current}
         for connector in sorted(before):
             if connector not in after:
                 changes.append(Change(EVENT_DISCONNECT, connector))
@@ -242,13 +278,13 @@ class ScreenTopologyModel:
         return tuple(changes)
 
     @staticmethod
-    def _safe_topology(topology):
+    def _safe_topology(monitors):
         """Clamp unsupported resolutions and guarantee one primary when non-empty."""
-        if topology.is_empty:
+        if not monitors:
             return Topology(())
         items = []
         primary_seen = False
-        for monitor in topology.monitors:
+        for monitor in monitors:
             candidate = monitor if monitor.supported else monitor.clamped()
             if candidate.primary:
                 if primary_seen:
@@ -264,20 +300,20 @@ class ScreenTopologyModel:
 
     @staticmethod
     def _decide(previous, current, changes):
-        if current.is_empty:
+        if not current:
             return (RecoveryAction(ACTION_SUSPEND),)
         actions = []
-        unsupported = tuple(sorted(m.connector for m in current.monitors
+        unsupported = tuple(sorted(m.connector for m in current
                                    if not m.supported))
         if unsupported:
             actions.append(RecoveryAction(ACTION_CLAMP_RESOLUTION, unsupported))
-        if previous is None or previous.is_empty:
+        if previous is None or not previous:
             actions.extend((RecoveryAction(ACTION_RESUME),
                             RecoveryAction(ACTION_REANCHOR_PRIMARY),
                             RecoveryAction(ACTION_RELAYOUT)))
             return tuple(actions)
         reanchor = any(c.kind == EVENT_PRIMARY_CHANGED for c in changes)
-        old_primary = previous.primary.connector if previous.primary else None
+        old_primary = next((m.connector for m in previous if m.primary), None)
         if old_primary is not None and any(
                 c.kind == EVENT_DISCONNECT and c.connector == old_primary
                 for c in changes):

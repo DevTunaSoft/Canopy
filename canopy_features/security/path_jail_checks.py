@@ -35,12 +35,36 @@ def _fold_component(component):
     ``ſ`` -> ``s``). Using it here would make two distinct NTFS directory
     names compare equal, so a path outside the jail root could be reported as
     contained -- a fail-open. Fold each code point independently and keep any
-    character whose lowercase form is not itself a single code point.
+    character whose lowercase form is not itself a single code point, or whose
+    lowercase does not round-trip under ``str.upper()`` (compatibility letters
+    such as ``ẞ``/``ß``, ``K``/``k`` and ``Å``/``å`` are distinct NTFS names).
+
+    On Windows the OS invariant case table (used by ``ntpath.normcase``) is
+    authoritative for NTFS identity; use it so no compatibility letter can be
+    folded into a distinct name. Elsewhere there is no host table for the
+    Windows convention, so keep the conservative Unicode fold below.
     """
+    if os.name == "nt":
+        return os.path.normcase(component)
     folded = []
     for char in component:
         lowered = char.lower()
-        folded.append(lowered if len(lowered) == 1 else char)
+        if len(lowered) != 1:
+            # Full folding would expand (ß -> ss); NTFS does not expand.
+            folded.append(char)
+            continue
+        # Only fold a *stable* cased character: one whose lowercase maps back
+        # to itself under str.upper(). Windows/NTFS case tables do not equate
+        # compatibility letters with their plain counterparts even though
+        # str.lower() does (ẞ->ß but ß.upper()==SS, K->k but k.upper()==K,
+        # Å->å but å.upper()==Å). Treating those pairs as equal would make a
+        # directory outside the jail root appear contained -- a fail-open.
+        # Keeping any non-round-tripping character verbatim can only make the
+        # comparison stricter, never widen the jail.
+        if lowered.upper() != char:
+            folded.append(char)
+            continue
+        folded.append(lowered)
     return "".join(folded)
 
 

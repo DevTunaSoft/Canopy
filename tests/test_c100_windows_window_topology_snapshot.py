@@ -320,6 +320,57 @@ class WindowTopologySnapshotTests(unittest.TestCase):
                      "PyQt6"}
         self.assertFalse(imports & forbidden)
 
+    def test_contradictory_close_status_visible_fails_closed(self):
+        # IntentResult is a public frozen dataclass without its own validator,
+        # so a caller can hand compose() a decision whose status and durable
+        # visibility flag disagree. The producer module never emits these
+        # pairs: CLOSED/ALREADY_CLOSED park a window (visible False), GUARDED/
+        # REOPENED/ALREADY_OPEN leave it shown (True), and denials have no
+        # visibility verdict (None). A contradictory pair currently composes
+        # into a false close/topology claim (e.g. CLOSED + visible True yields
+        # an overall STATUS_OK record) instead of a SnapshotError.
+        m = _m()
+        negotiation, transition = _supported()
+        contradictions = (
+            ("CLOSED", True, "parked window cannot remain visible"),
+            ("ALREADY_CLOSED", True, "already-parked window cannot be visible"),
+            ("GUARDED", False, "guarded refusal leaves the window visible"),
+            ("REOPENED", False, "reopened window cannot be hidden"),
+            ("ALREADY_OPEN", False, "shown window cannot be hidden"),
+            ("UNKNOWN_WINDOW", False, "denied close has no visibility verdict"),
+            ("OWNERSHIP_DENIED", True, "denied close has no visibility verdict"),
+        )
+        for status, visible, why in contradictions:
+            with self.subTest(status=status, why=why):
+                decision = IntentResult("files.win", status, visible,
+                                        NO_STATE, "")
+                with self.assertRaises(m.SnapshotError):
+                    m.compose(_normal_recovery(), negotiation, transition,
+                              (decision,))
+
+    def test_consistent_close_status_visible_is_accepted(self):
+        # Every status/visible pair the real CloseIntentModel can emit must
+        # still compose, so the contradiction guard cannot reject valid input.
+        m = _m()
+        negotiation, transition = _supported()
+        pairs = (
+            ("CLOSED", False),
+            ("ALREADY_CLOSED", False),
+            ("GUARDED", True),
+            ("REOPENED", True),
+            ("ALREADY_OPEN", True),
+            ("UNKNOWN_WINDOW", None),
+            ("OWNERSHIP_DENIED", None),
+        )
+        for status, visible in pairs:
+            with self.subTest(status=status, visible=visible):
+                decision = IntentResult("files.win", status, visible,
+                                        NO_STATE, "")
+                snap = m.compose(_normal_recovery(), negotiation, transition,
+                                 (decision,))
+                self.assertEqual(snap.close.statuses, (status,))
+                self.assertEqual(snap.close.visible_flags, (visible,))
+
 
 if __name__ == "__main__":
     unittest.main()

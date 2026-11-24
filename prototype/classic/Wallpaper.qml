@@ -6,9 +6,7 @@ import QtQuick
 Item {
     id: wallpaper
     objectName: "canopyWallpaper"
-    Accessible.name: canopyLandscapeWallpaperUrl.length > 0
-                     ? "Canopy mountain and lake landscape wallpaper"
-                     : "Canopy Blue Current wallpaper"
+    Accessible.name: "Canopy Classic approved alpine lake master wallpaper"
 
     Rectangle {
         anchors.fill: parent
@@ -18,12 +16,12 @@ Item {
         id: blueCurrent
         objectName: "canopyWallpaperImage"
         anchors.fill: parent
-        // A validated landscape photo takes precedence over the historical
-        // blue-wave reference. Eight user-chosen icon hashes are unchanged.
+        // Always use the exact 1920x1080 user-approved alpine master by
+        // default, including a regular launch with no special arguments.
+        // A separately validated --landscape-wallpaper remains an override.
         source: canopyLandscapeWallpaperUrl.length > 0
                 ? canopyLandscapeWallpaperUrl
-                : (canopyApprovedMode ? canopyApprovedWallpaperUrl
-                                      : "qrc:/Canopy/Classic/assets/wallpapers/blue-current.svg")
+                : "qrc:/Canopy/Classic/assets/wallpapers/Canopy_Classic_Master_Wallpaper_1920x1080.png"
         fillMode: Image.PreserveAspectCrop
         asynchronous: false
         cache: true
@@ -33,7 +31,7 @@ Item {
         sourceSize: canopyLandscapeWallpaperUrl.length > 0
                     ? Qt.size(Math.min(3840, Math.ceil(wallpaper.width * 2)),
                               Math.min(2160, Math.ceil(wallpaper.height * 2)))
-                    : (canopyApprovedMode ? Qt.size(1280, 720) : Qt.size(1920, 1080))
+                    : Qt.size(1920, 1080)
         Accessible.name: "Static desktop wallpaper artwork"
     }
     readonly property bool landscapeActive: canopyLandscapeWallpaperUrl.length > 0

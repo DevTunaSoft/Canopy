@@ -21,6 +21,23 @@ class PathJailError(ValueError):
     """Candidate path escapes its root or cannot be canonicalized."""
 
 
+def _as_path(value, label):
+    """Return a str path argument, or fail closed with PathJailError.
+
+    ``os.fspath`` already rejects non-path scalars and containers, but accepts
+    ``bytes``; ``pathlib.Path`` then raises a raw ``TypeError`` that callers
+    catching the module's domain error cannot contain. Reject bytes here so
+    every wrong-typed argument reaches callers as PathJailError.
+    """
+    try:
+        raw = os.fspath(value)
+    except TypeError as exc:
+        raise PathJailError(f"invalid {label}: {value!r}") from exc
+    if isinstance(raw, bytes):
+        raise PathJailError(f"invalid {label} type: {value!r}")
+    return raw
+
+
 def _default_case_sensitive():
     # Match the Classic Qt model: Windows compares case-insensitively.
     return os.name != "nt"
@@ -75,13 +92,9 @@ def canonicalize(path, *, must_exist=False):
     final component to exist (open-style checks). NUL bytes, symlink loops
     and permission failures become :class:`PathJailError`.
     """
-    try:
-        raw = os.fspath(path)
-    except TypeError as exc:
-        raise PathJailError(f"invalid path: {path!r}") from exc
+    raw = _as_path(path, "path")
     # Windows pathlib silently truncates at NUL; reject it at the boundary.
-    nul = b"\x00" if isinstance(raw, bytes) else "\x00"
-    if nul in raw:
+    if "\x00" in raw:
         raise PathJailError(f"embedded NUL byte in path: {path!r}")
     try:
         return Path(raw).resolve(strict=must_exist)
@@ -100,8 +113,8 @@ def is_contained(candidate, root, *, case_sensitive=None):
     """
     if case_sensitive is None:
         case_sensitive = _default_case_sensitive()
-    cand_parts = tuple(Path(candidate).parts)
-    root_parts = tuple(Path(root).parts)
+    cand_parts = tuple(Path(_as_path(candidate, "candidate")).parts)
+    root_parts = tuple(Path(_as_path(root, "root")).parts)
     if not case_sensitive:
         cand_parts = tuple(_fold_component(part) for part in cand_parts)
         root_parts = tuple(_fold_component(part) for part in root_parts)
@@ -120,13 +133,16 @@ def resolve_within(root, candidate, *, must_exist=False, case_sensitive=None):
     if not root_path.is_dir():
         raise PathJailError(f"root is not a directory: {root!r}")
 
-    raw = "" if candidate is None else str(candidate)
-    if raw.strip() == "":
+    if candidate is None:
         candidate_path = root_path
     else:
-        candidate_path = Path(candidate)
-        if not candidate_path.is_absolute():
-            candidate_path = root_path / candidate_path
+        raw = _as_path(candidate, "candidate")
+        if raw.strip() == "":
+            candidate_path = root_path
+        else:
+            candidate_path = Path(raw)
+            if not candidate_path.is_absolute():
+                candidate_path = root_path / candidate_path
 
     candidate_real = canonicalize(candidate_path, must_exist=must_exist)
     if not is_contained(candidate_real, root_path, case_sensitive=case_sensitive):

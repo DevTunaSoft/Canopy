@@ -190,5 +190,38 @@ class FailClosedTests(unittest.TestCase):
         self.assertEqual(result.reason, REASON_NO_FOCUS)
 
 
+class ContradictoryFlagTests(unittest.TestCase):
+    """A record that claims motion without distinct endpoints is corrupt.
+
+    ``DockFocusOrder`` sets ``moved = (from_id != to_id)`` for every transition
+    it produces, so a moved flag with identical endpoints cannot be a real
+    focus change. Composing it would emit a false ``ANNOUNCE`` /
+    ``focus_moved`` claim to a screen-reader bridge. A wrapped flag with no
+    motion makes no ANNOUNCE claim and is not this contradiction; keep it
+    accepted.
+    """
+
+    def test_moved_flag_with_identical_endpoints_rejected(self):
+        bogus = FocusTransition("same-id", "same-id", moved=True,
+                                wrapped=False, duration_ms=120)
+        with self.assertRaises(AnnouncementInputError):
+            compose(t=bogus)
+
+    def test_moved_flag_with_no_endpoints_rejected(self):
+        bogus = FocusTransition(None, None, moved=True,
+                                wrapped=False, duration_ms=120)
+        with self.assertRaises(AnnouncementInputError):
+            compose(t=bogus)
+
+    def test_wrapped_without_motion_remains_accepted(self):
+        # Not the contradiction under audit: no false ANNOUNCE claim is made.
+        wrapped_same = FocusTransition("solo", "solo", moved=False,
+                                       wrapped=True, duration_ms=0)
+        result = compose(t=wrapped_same)
+        self.assertEqual(result.status, STATUS_SILENT)
+        self.assertEqual(result.reason, REASON_NO_MOTION)
+        self.assertIn(TOKEN_FOCUS_WRAPPED, result.tokens)
+
+
 if __name__ == "__main__":
     unittest.main()

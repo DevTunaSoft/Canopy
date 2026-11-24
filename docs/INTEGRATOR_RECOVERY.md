@@ -33,7 +33,7 @@ lock:
 - `lock_state()` classifies `absent`, `live`, or `stale` with an explicit reason.
   A live process with a stale heartbeat is reported as
   `heartbeat_stale_but_process_alive`; it is **never** killed or unlocked.
-- Legacy integer and malformed locks are classified stale and recoverable.
+- Legacy integer locks are classified live while their PID is alive (safe migration) and stale only after that PID dies; malformed locks are stale and recoverable.
 
 `tools/qa/integrator_recovery.py` adds bounded supervision:
 

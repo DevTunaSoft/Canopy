@@ -99,7 +99,10 @@ class DockFocusOrder:
         moved = old != new
         duration = (0 if self._reduced_motion or not moved
                     else DEFAULT_TRANSITION_MS)
-        return FocusTransition(old, new, moved, wrapped, duration)
+        # `wrapped` is an actionable claim that navigation crossed an end.
+        # A degenerate one-item order can wrap its index back onto the same
+        # item, but focus did not move: never report a wrap without a move.
+        return FocusTransition(old, new, moved, wrapped and moved, duration)
 
     def focus(self, item_id):
         """Focus a known item by id; unknown ids are rejected, not guessed."""

@@ -107,6 +107,7 @@ class BoundedDeliveryChannel:
         self._seen = deque()
         self._seen_set = set()
         self._notices = deque(maxlen=capacity)
+        self._notices_cache = None
         self._last = start_sequence - 1
         self._closed = False
         self._counts = dict(sent=0, received=0, delivered=0, duplicates=0,
@@ -124,6 +125,7 @@ class BoundedDeliveryChannel:
     def _notice(self, sequence):
         notice = OverflowNotice(sequence, self._policy, len(self._pending))
         self._notices.append(notice)
+        self._notices_cache = None
         return notice
 
     def send(self, sequence, payload=None):
@@ -188,6 +190,7 @@ class BoundedDeliveryChannel:
         self._seen.clear()
         self._seen_set.clear()
         self._notices.clear()
+        self._notices_cache = None
         self._closed = True
 
     @property
@@ -203,5 +206,7 @@ class BoundedDeliveryChannel:
         return DeliveryStats(**self._counts)
 
     def overflow_notices(self):
-        """Bounded copy (at most capacity entries) of overflow fallbacks."""
-        return tuple(self._notices)
+        """Bounded immutable copy (at most capacity entries) of overflow fallbacks."""
+        if self._notices_cache is None:
+            self._notices_cache = tuple(self._notices)
+        return self._notices_cache

@@ -10,6 +10,7 @@ is separate integration work; this module alone is not a working desktop.
 from dataclasses import dataclass
 import re
 from types import MappingProxyType
+import unicodedata
 
 # Bounds keep work and memory bounded regardless of input size.
 MAX_CATEGORY_ID_BYTES = 64
@@ -22,6 +23,11 @@ MAX_APPLICATIONS = 4096
 
 # Freedesktop category names: alphanumeric and '-' (vendor X- prefixes fit).
 _CATEGORY_ID = re.compile(r"[A-Za-z][A-Za-z0-9-]{0,%d}\Z" % (MAX_CATEGORY_ID_BYTES - 1))
+
+# Display labels may contain ordinary spacing (Zs) and legitimate scripts, but
+# control/format scalars can reorder or hide a label, surrogates fail UTF-8
+# encoding later, and private-use/unassigned scalars are not safe menu text.
+_UNSAFE_UNICODE_CATEGORIES = frozenset({"Cc", "Cf", "Cs", "Co", "Cn", "Zl", "Zp"})
 
 
 class CategoryError(ValueError):
@@ -41,6 +47,9 @@ class Category:
             raise CategoryError("invalid category id")
         if type(self.display_name) is not str or not self.display_name:
             raise CategoryError("invalid category display name")
+        if any(unicodedata.category(char) in _UNSAFE_UNICODE_CATEGORIES
+               for char in self.display_name):
+            raise CategoryError("category display name contains an unsafe scalar")
         if type(self.rank) is not int:
             raise CategoryError("invalid category rank")
 

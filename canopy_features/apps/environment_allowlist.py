@@ -124,7 +124,15 @@ def build_environment(allow, source=None):
     """
     if isinstance(allow, (str, bytes)) or not hasattr(allow, "__iter__"):
         raise EnvironmentAllowlistError("allowlist must be an iterable of names")
-    names = tuple(allow)
+    try:
+        names = tuple(allow)
+    except Exception:
+        # A lazy, config-backed or otherwise hostile name iterable may raise
+        # partway through being read. No environment can be proven safe when
+        # its allowlist is unreadable, so fail closed with the module's domain
+        # error instead of leaking a raw exception to a process-launch caller.
+        raise EnvironmentAllowlistError(
+            "environment allowlist could not be read") from None
     if len(names) > MAX_VARIABLES:
         raise EnvironmentAllowlistError("environment allowlist exceeds bound")
     unique = []

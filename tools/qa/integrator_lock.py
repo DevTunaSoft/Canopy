@@ -3,8 +3,9 @@
 
 The lock file is JSON containing the owning PID, the OS process start time
 (PID-reuse guard), a UUID token (release/touch ownership guard), an ISO-8601
-heartbeat timestamp and the owner name. Legacy plain-integer lock files are
-treated as stale and are safely recoverable.
+heartbeat timestamp and the owner name. Legacy plain-integer locks are kept
+live while their PID is alive (safe migration) and recoverable only after that
+PID dies.
 
  acquire() uses O_CREAT|O_EXCL, so two contenders cannot both win.
  release() and touch() verify the UUID token before touching the file.

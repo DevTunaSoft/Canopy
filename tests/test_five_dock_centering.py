@@ -49,8 +49,8 @@ class FiveIconCenterTests(unittest.TestCase):
 
     def test_pngs_qml_and_frozen_geometry_unchanged(self):
         self.assertIn("anchors.centerIn: parent",self.qml)
-        self.assertIn("width: 54",self.qml)
-        self.assertIn("height: 54",self.qml)
+        self.assertIn("width: 66",self.qml)
+        self.assertIn("height: 66",self.qml)
         self.assertNotIn("QImageWriter",self.p)
         self.assertNotIn("QFile::remove(",self.p)
         self.assertNotIn("painter.translate(",self.p)

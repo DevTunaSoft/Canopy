@@ -68,6 +68,7 @@ class _Window:
     visible: bool
     guarded: bool
     state: dict
+    _state_view: object = None
 
 
 def _valid_token(value):
@@ -200,14 +201,22 @@ class CloseIntentModel:
         if len(merged) > MAX_STATE_FIELDS:
             raise CloseRequestError("window state field limit reached")
         record.state = merged
+        record._state_view = None
         return True
 
     def snapshot(self, window_id, owner):
-        """Read-only owned state, or an empty mapping for unknown/denied."""
+        """Read-only owned state view, or an empty mapping for unknown/denied.
+
+        The immutable view is built lazily and reused until a real state write
+        invalidates it; lifecycle changes that leave state untouched do not
+        allocate a new view.
+        """
         record, denial = self._lookup(window_id, owner)
         if denial is not None:
             return NO_STATE
-        return MappingProxyType(dict(record.state))
+        if record._state_view is None:
+            record._state_view = MappingProxyType(dict(record.state))
+        return record._state_view
 
     def release(self, window_id, owner):
         """Explicitly remove an owned record; this is the destructive path."""

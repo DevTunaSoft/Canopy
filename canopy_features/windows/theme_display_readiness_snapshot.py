@@ -190,6 +190,9 @@ def _theme_view(ledger):
     state = _text(projected.state, "theme state")
     if state not in THEME_STATES:
         raise SnapshotError("unsupported theme state")
+    candidate = _optional_name(projected.candidate, "theme candidate")
+    if (state == IDLE) != (candidate is None):
+        raise SnapshotError("theme state/candidate flags disagree")
     single_owner = _flag(projected.single_owner, "theme single-owner flag")
     live = _name_set(projected.live_resources, "live resource")
     abandoned = _name_set(projected.abandoned_resources, "abandoned resource")
@@ -198,7 +201,7 @@ def _theme_view(ledger):
     return ThemeView(
         state=state,
         active=_optional_name(projected.active, "theme active"),
-        candidate=_optional_name(projected.candidate, "theme candidate"),
+        candidate=candidate,
         single_owner=single_owner,
         live_resource_count=len(live),
         abandoned=abandoned,

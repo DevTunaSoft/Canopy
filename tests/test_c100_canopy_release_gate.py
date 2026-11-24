@@ -238,6 +238,43 @@ class JsonFileTests(unittest.TestCase):
                     self.assertRaises(gate.ReleaseGateError):
                 gate.evaluate_json(text)
 
+    def test_duplicate_json_object_keys_rejected(self):
+        """Duplicate keys must not let a hostile bundle erase a hold or claim."""
+        text = json.dumps(snapshot())
+        failing = json.dumps(verdict_record(gates(R078="FAIL")))
+        clean = json.dumps(verdict_record())
+        cases = {
+            "duplicate verdict record": (
+                '{"schema":1,"dependency_report":%s,'
+                '"acceptance_verdict":%s,"acceptance_verdict":%s}'
+                % (json.dumps(dependency()), failing, clean)),
+            "duplicate release_ready claim": text.replace(
+                '"release_ready": false',
+                '"release_ready": true, "release_ready": false', 1),
+            "duplicate gate verdict": text.replace(
+                '"R047": "BLOCKED"', '"R047": "FAIL", "R047": "PASS"', 1),
+            "duplicate held count": text.replace(
+                '"held_count": 0', '"held_count": 1, "held_count": 0', 1),
+        }
+        for label, probe in cases.items():
+            with self.subTest(label=label), self.assertRaises(gate.ReleaseGateError):
+                gate.evaluate_json(probe)
+
+    def test_duplicate_json_object_keys_rejected_from_file_and_main(self):
+        text = json.dumps(snapshot()).replace(
+            '"release_ready": false',
+            '"release_ready": true, "release_ready": false', 1)
+        path = self.root / "duplicate-keys.json"
+        path.write_text(text, encoding="utf-8")
+        with self.assertRaises(gate.ReleaseGateError):
+            gate.evaluate_file(path)
+        out, err = io.StringIO(), io.StringIO()
+        with redirect_stdout(out), redirect_stderr(err):
+            code = gate.main([str(path)])
+        self.assertEqual(code, 1)
+        self.assertIn("CANOPY_RELEASE_GATE_FAIL:", err.getvalue())
+        self.assertEqual(out.getvalue(), "")
+
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
         self.root = Path(self._tmp.name)

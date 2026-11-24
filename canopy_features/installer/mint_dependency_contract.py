@@ -71,7 +71,14 @@ def parse_version(text) -> Optional[Tuple[int, ...]]:
     if not parts or any(not part.isascii() or not part.isdigit()
                         for part in parts):
         return None
-    return tuple(int(part) for part in parts)
+    try:
+        return tuple(int(part) for part in parts)
+    except ValueError:
+        # CPython caps int(text) at sys.get_int_max_str_digits() (4300 by
+        # default). A hostile-but-bounded label with a longer digit run must
+        # follow the same fail-closed path as any other malformed version,
+        # never escape as a raw ValueError from evaluate().
+        return None
 
 
 def _compare(left: Tuple[int, ...], right: Tuple[int, ...]) -> int:

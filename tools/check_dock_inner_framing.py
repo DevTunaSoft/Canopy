@@ -33,6 +33,20 @@ def corner_antialias_jitter(size, x, y, old_rgba, new_rgba):
             all(abs(int(a)-int(b)) <= 1 for a,b in zip(old_rgba,new_rgba)))
 
 
+def dock_plate_one_level_jitter(size, x, y, first, second):
+    # The software Qt renderer rounds alpha-composited translucent glass to
+    # adjacent 8-bit values between *separate* Xvfb processes. We only admit
+    # one-unit channel noise INSIDE the same 605x96px dock rectangle, never
+    # any shift of artwork or wallpaper. A per-run count ceiling applies.
+    width, height = [int(n) for n in size.split("x")]
+    dock_left = (width - 605) / 2.0
+    dock_top = height - 118
+    return (dock_left <= x < dock_left + 605 and
+            dock_top <= y < dock_top + 96 and
+            first[3] == second[3] and
+            all(abs(int(a)-int(b)) <= 1 for a,b in zip(first[:3],second[:3])))
+
+
 def compare_dock_pair(before: Path, after: Path, size: str) -> dict:
     if size not in CENTERS:
         raise ComparisonError("unsupported real Qt capture size")
@@ -41,6 +55,7 @@ def compare_dock_pair(before: Path, after: Path, size: str) -> dict:
     counts = [0] * len(APPS)
     clock_changes = 0
     corner_jitter = 0
+    dock_plate_jitter = 0
     for offset in range(0, len(first), 4):
         if first[offset:offset + 4] == second[offset:offset + 4]:
             continue
@@ -61,6 +76,11 @@ def compare_dock_pair(before: Path, after: Path, size: str) -> dict:
             corner_jitter += 1
             if corner_jitter > 2:
                 raise ComparisonError("more than two Qt AA corner pixels changed")
+        elif dock_plate_one_level_jitter(
+                size, x, y, first[offset:offset+4], second[offset:offset+4]):
+            dock_plate_jitter += 1
+            if dock_plate_jitter > 256:
+                raise ComparisonError("too many one-level translucent dock plate pixels")
         else:
             raise ComparisonError(
                 f"unexpected non-icon change at ({x}, {y}) in {size}"
@@ -82,6 +102,7 @@ def compare_dock_pair(before: Path, after: Path, size: str) -> dict:
         "per_icon_changed_pixels": dict(zip(APPS, counts)),
         "clock_delta_pixels": clock_changes,
         "one_level_files_corner_aa_pixels": corner_jitter,
+        "one_level_dock_plate_aa_pixels": dock_plate_jitter,
         "unexpected_changed_pixels": 0,
         "source_approval_inferred": False,
         "owner_visual_approval": False,

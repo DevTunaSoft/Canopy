@@ -21,12 +21,12 @@ to the Canopy stacked-PR queue. No Canopy Qt, artwork or CI file was changed.
 
 | Check | Result | Command |
 | --- | --- | --- |
-| Supervisor unit tests | PASS — 42 tests | `py -3 -m unittest tests.test_canopy_supervisor -q` |
+| Supervisor unit tests | PASS — 82 tests (measured on branch HEAD `2835e880`; re-run before publication) | `py -3 -m unittest tests.test_canopy_supervisor -q` |
 | Regression suite (Windows-applicable modules) | PASS — 221 tests | `py -3 -m unittest -q <all tests except three POSIX-only modules>` |
 | Byte compile | PASS | `py -3 -m compileall -q canopy_supervisor tools/canopy_supervisor.py tests/test_canopy_supervisor.py` |
-| Full discovery on Windows after isolation | PASS — 282 tests, 53 POSIX-only skips | `py -3 -m unittest discover -s tests -q` |
-| Canopy draft PR #135 `foundation` check | PASS — 25 s, Ubuntu, commit `250257d` | `gh pr checks 135 --repo DevTunaSoft/Canopy` |
-| Canopy draft PR #135 `desktop-menu` check | PASS — 12 s, Ubuntu, commit `250257d` | `gh pr checks 135 --repo DevTunaSoft/Canopy` |
+| Full discovery on Windows after isolation | PASS — 354 tests, 53 POSIX-only skips (measured on branch HEAD `2835e880`) | `py -3 -m unittest discover -s tests -q` |
+| Canopy draft PR #135 `foundation` check | PASS — 19 s, Ubuntu, current head `2835e880` (25 s at `250257d`, superseded) | `gh pr checks 135 --repo DevTunaSoft/Canopy` |
+| Canopy draft PR #135 `desktop-menu` check | PASS — 14 s, Ubuntu, current head `2835e880` (12 s at `250257d`, superseded) | `gh pr checks 135 --repo DevTunaSoft/Canopy` |
 
 POSIX-only cases were isolated in commit `250257d`: the `geteuid` patch uses
 `create=True`, Desktop Entry quoting and execute-bit cases skip on Windows, and
@@ -137,7 +137,7 @@ and next actions.
 `test_step_auto_queues_successive_unattended_cycles` drives three consecutive
 unattended cycles; `test_generate_prioritizes_real_work_and_caps_campaigns`
 and `test_failed_task_respects_backoff_before_redispatch` cover priority and
-bounded retries. Full suite: 292 tests PASS (53 POSIX-only skips).
+bounded retries. Full suite: 354 tests PASS (53 POSIX-only skips).
 
 Live persistent supervisor: process PID `15576`, started from
 `C:\Users\X1\Projects\Canopy` with

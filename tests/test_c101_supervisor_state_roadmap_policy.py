@@ -1,6 +1,10 @@
-"""RED/GREEN: supervisor policy must fail closed on wrong-type base/branch."""
+"""RED/GREEN: supervisor policy refs and roadmap evidence fail closed."""
+import json
+import tempfile
 import unittest
+from pathlib import Path
 
+from canopy_supervisor import roadmap
 from canopy_supervisor.policy import PolicyError, validate_task
 
 
@@ -46,6 +50,29 @@ class TaskRefTypeGuardTests(unittest.TestCase):
             validate_task(_task(base="../bad"))
         with self.assertRaises(PolicyError):
             validate_task(_task(branch="bad branch"))
+
+
+class CampaignEvidenceTypeGuardTests(unittest.TestCase):
+    def _campaign(self, payload):
+        root = Path(tempfile.mkdtemp())
+        folder = root / "evidence" / "task-001"
+        folder.mkdir(parents=True)
+        (folder / "evidence.json").write_text(json.dumps(payload))
+        return roadmap.campaign_status({"id": "task-001"}, root)
+
+    def test_non_object_evidence_fails_closed(self):
+        for value in ([], None, 7, "text", True):
+            with self.subTest(value=repr(value)):
+                self.assertEqual(self._campaign(value), "failed")
+
+    def test_non_list_tests_fails_closed(self):
+        self.assertEqual(self._campaign({"tests": 7}), "failed")
+        self.assertEqual(self._campaign({"tests": {"result": "PASS"}}), "failed")
+
+    def test_valid_evidence_still_judged(self):
+        self.assertEqual(self._campaign({"tests": [{"result": "PASS"}]}), "success")
+        self.assertEqual(self._campaign({"tests": [{"result": "FAIL"}]}), "failed")
+        self.assertEqual(self._campaign({"tests": [{"result": "NOT RUN"}]}), "blocked")
 
 
 if __name__ == "__main__":

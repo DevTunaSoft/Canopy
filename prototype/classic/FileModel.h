@@ -25,6 +25,9 @@ class FileModel : public QAbstractListModel
     Q_PROPERTY(bool canGoUp READ canGoUp NOTIFY navigationChanged)
     Q_PROPERTY(int maxEntries READ maxEntries CONSTANT)
     Q_PROPERTY(int entryCount READ entryCount NOTIFY entriesChanged)
+    // Fixed dock label used by the Files window's native launch action.
+    // The model never stores or forwards a path, URL or caller-supplied text.
+    Q_PROPERTY(QString fileManagerDockName READ fileManagerDockName CONSTANT)
 
 public:
     enum Role {
@@ -49,6 +52,13 @@ public:
     bool canGoUp() const;
     int maxEntries() const { return kMaxEntries; }
     int entryCount() const { return m_visible.size(); }
+    // Exact, case-sensitive dock-label validation. Only the fixed "Files"
+    // label passes; paths, URLs and arbitrary strings are refused here.
+    QString fileManagerDockName() const { return QStringLiteral("Files"); }
+    Q_INVOKABLE bool isFileManagerDockName(const QString &candidate) const
+    {
+        return candidate.compare(QStringLiteral("Files"), Qt::CaseSensitive) == 0;
+    }
 
     Q_INVOKABLE bool navigate(const QString &path);
     Q_INVOKABLE bool goBack();

@@ -23,6 +23,24 @@ Rectangle {
     property string selectedFolder: ""
     readonly property string homePath: fileModel.homePath
 
+    // Native launch uses ONLY the host-owned GIO bridge. The exact dock label
+    // below is the sole value ever handed to it: never a path, URL, search
+    // text or other caller-controlled string. No shell or argv is involved.
+    readonly property string fileManagerDockName: fileModel.fileManagerDockName
+    property string fileManagerStatus: ""
+    readonly property bool fileManagerBridgeReady: {
+        if (!fileModel.isFileManagerDockName(fileManagerDockName)
+                || fileManagerDockName !== "Files")
+            return false
+        return typeof canopySystemLaunchEnabled !== "undefined"
+                && canopySystemLaunchEnabled === true
+                && typeof canopySystemLauncher !== "undefined"
+                && canopySystemLauncher !== null
+                && typeof canopySystemLauncher.canLaunch === "function"
+                && typeof canopySystemLauncher.launch === "function"
+                && canopySystemLauncher.canLaunch(fileManagerDockName) === true
+    }
+
     FileModel { id: fileModel }
 
     onSearchQueryChanged: fileModel.setSearch(searchQuery)
@@ -77,6 +95,34 @@ Rectangle {
             preview.visible = false
         else
             preview.closed()
+    }
+
+    // Fail-closed native launch. The only accepted argument is the fixed
+    // dock label owned by FileModel; everything else is refused before the
+    // bridge is touched, so no path or command can reach the launcher.
+    function canOpenInFileManager() {
+        return preview.fileManagerBridgeReady === true
+    }
+
+    function openInFileManager(dockName) {
+        if (typeof dockName !== "string"
+                || !fileModel.isFileManagerDockName(dockName)
+                || dockName !== preview.fileManagerDockName) {
+            fileManagerStatus = "File manager not opened — invalid target"
+            return false
+        }
+        if (!preview.canOpenInFileManager()) {
+            fileManagerStatus = "File manager not opened — bridge unavailable"
+            return false
+        }
+        // Existing host GIO bridge only: exact dock label, no argv or shell.
+        if (canopySystemLauncher.launch(dockName)) {
+            fileManagerStatus = "Opened system file manager"
+            return true
+        }
+        // A refused launch is never reported as a success.
+        fileManagerStatus = "File manager could not be launched"
+        return false
     }
 
     function navigateHomeFolder(name) {
@@ -547,6 +593,7 @@ Rectangle {
                 color: "#e6edf2"
             }
             Label {
+                id: statusText
                 anchors.left: parent.left
                 anchors.leftMargin: 18
                 anchors.verticalCenter: parent.verticalCenter
@@ -555,6 +602,60 @@ Rectangle {
                     : fileModel.entryCount + " shown · cap " + fileModel.maxEntries
                 font.pixelSize: 10
                 color: "#79899b"
+            }
+
+            // Clearly labeled native action. Passes only the fixed dock label
+            // to the existing host GIO bridge through openInFileManager().
+            Button {
+                id: openInFileManagerButton
+                objectName: "canopyOpenInFileManager"
+                anchors.right: parent.right
+                anchors.rightMargin: 12
+                anchors.verticalCenter: parent.verticalCenter
+                width: 138
+                height: 21
+                implicitWidth: 138
+                implicitHeight: 21
+                padding: 0
+                hoverEnabled: true
+                enabled: preview.canOpenInFileManager()
+                text: "Open in file manager"
+                Accessible.name: "Open in file manager"
+                ToolTip.visible: hovered && enabled
+                ToolTip.text: "Open in file manager"
+                onClicked: preview.openInFileManager(preview.fileManagerDockName)
+                background: Rectangle {
+                    radius: 5
+                    color: openInFileManagerButton.hovered && openInFileManagerButton.enabled
+                           ? "#dfe9f3" : "#edf3f8"
+                    border.color: "#d5e0e9"
+                    border.width: 1
+                }
+                contentItem: Label {
+                    text: openInFileManagerButton.text
+                    color: openInFileManagerButton.enabled ? "#344b62" : "#8292a3"
+                    font.pixelSize: 9
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+            }
+
+            // Fail-closed status: a failed or unavailable launch never claims
+            // success. No path or command is shown in this footer.
+            Label {
+                id: fileManagerStatusLabel
+                objectName: "canopyFileManagerStatus"
+                anchors.left: statusText.right
+                anchors.leftMargin: 12
+                anchors.right: openInFileManagerButton.left
+                anchors.rightMargin: 8
+                anchors.verticalCenter: parent.verticalCenter
+                text: preview.fileManagerStatus !== "" ? preview.fileManagerStatus
+                      : (preview.canOpenInFileManager() ? "" : "File manager unavailable")
+                color: "#79899b"
+                font.pixelSize: 9
+                elide: Text.ElideRight
+                Accessible.name: "File manager launch status"
             }
         }
     }

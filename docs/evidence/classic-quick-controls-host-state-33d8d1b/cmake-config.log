@@ -1,0 +1,29 @@
+-- The CXX compiler identification is GNU 16.2.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/msys64/ucrt64/bin/c++.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Performing Test HAVE_STDATOMIC
+-- Performing Test HAVE_STDATOMIC - Success
+-- Found WrapAtomic: TRUE
+-- Found WrapVulkanHeaders: C:/msys64/ucrt64/include
+CMake Warning (author) at C:/msys64/ucrt64/lib/cmake/Qt6Core/Qt6CoreMacros.cmake:3636 (message):
+  Qt policy QTP0001 is not set: ':/qt/qml/' is the default resource prefix
+  for QML modules.  Check https://doc.qt.io/qt-6/qt-cmake-policy-qtp0001.html
+  for policy details.  Use the qt_policy command to set the policy and
+  suppress this warning.
+
+Call Stack (most recent call first):
+  C:/msys64/ucrt64/lib/cmake/Qt6Qml/Qt6QmlMacros.cmake:819 (__qt_internal_setup_policy)
+  C:/msys64/ucrt64/lib/cmake/Qt6Qml/Qt6QmlMacros.cmake:1492 (qt6_add_qml_module)
+  CMakeLists.txt:13 (qt_add_qml_module)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+-- gio-unix-2.0 dev package absent: native app launching compiles as a disabled fallback
+-- Configuring done (63.4s)
+-- Generating done (2.1s)
+-- Build files have been written to: C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy-qc-host-build

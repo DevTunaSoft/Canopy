@@ -100,7 +100,22 @@ render evidence only, not owner visual approval.
 
 ### Full suite comparison
 
-FULL_SUITE_SECTION
+Run from pristine detached worktrees at the exact tip on the same Windows 11
+host, with `PYTHONPATH=<worktree>` and
+`python -m unittest discover -s tests -p 'test_*.py'`:
+
+- Pristine base `33d8d1bf6709abfd82f3b55829ad2cd75a3d43ad`: **3412 tests,
+  OK (skipped=45), 1772.117 s**; log `suite-base.txt`, SHA-256
+  `bd667b94d98a4db7717e6f7c015d77ee4bb4b2d8f4376ad56181e38424da68b5`.
+- Candidate worktree with this change: **3436 tests, OK (skipped=45),
+  1754.980 s**; log `suite-candidate.txt`, SHA-256
+  `af316e4270adc714d20063f72f8961ca293f3d1284964912a8f3f6ced6f9c051`.
+- Delta: +24 tests, no new failure or error; the `FAIL:`/`ERROR:` name sets are
+  both empty and skip counts are identical. The slower wall clock on the base
+  run reflects contention from other agents' concurrent suites on this host.
+
+Both logs were run under heavy host load (up to 14 concurrent unittest
+suites); they are real runs with exact exit code 0, not synthesized counts.
 
 ### Source and artifact hashes
 

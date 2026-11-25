@@ -13,6 +13,23 @@ FocusScope {
     property bool opened: false
     property alias searchQuery: searchField.text
     property string selectionMessage: ""
+    // Bounded, case-insensitive search. Empty input is explicit catalogue
+    // browsing; oversized or malformed input fails closed with no matches.
+    // LauncherModel.h applies the same bounds and selection rules to host
+    // callers. No colour, icon, geometry or dock behaviour changes here.
+    property int maxQueryChars: 128
+    property int maxNameChars: 256
+    readonly property string queryState: {
+        if (typeof searchField.text !== "string" ||
+            searchField.text.length > maxQueryChars ||
+            /[\x00-\x1f\x7f]/.test(searchField.text))
+            return "rejected"
+        if (searchField.text.trim().length === 0)
+            return "browse"
+        return "search"
+    }
+    readonly property string searchKey: queryState === "search"
+        ? searchField.text.trim().toLowerCase() : ""
     readonly property var applications: approvedMode
         ? [
             { title: "Browser" }, { title: "Mail" },
@@ -25,11 +42,51 @@ FocusScope {
             { title: "Settings" }, { title: "Photos" },
             { title: "Terminal" }, { title: "Trash" }
           ]
-    readonly property var filteredApps: applications.filter(function(app) {
-        return app.title.toLowerCase().indexOf(searchQuery.toLowerCase().trim()) >= 0
-    })
+    readonly property var filteredApps: {
+        if (queryState === "browse") return applications.slice()
+        if (queryState !== "search") return []
+        return applications.filter(function(app) {
+            return typeof app.title === "string" &&
+                   app.title.length <= maxNameChars &&
+                   app.title.toLowerCase().indexOf(searchKey) >= 0
+        })
+    }
     readonly property int catalogCount: applications.length
     readonly property int filteredCount: filteredApps.length
+    readonly property string resultCountText: queryState === "rejected"
+        ? "Search input rejected · no results"
+        : queryState === "browse"
+        ? (filteredCount === 1 ? "1 application" : filteredCount + " applications")
+        : filteredCount === 0 ? "No matching applications"
+        : filteredCount === 1 ? "1 matching application"
+        : filteredCount + " matching applications"
+    // Keyboard focus always names the result at selectedIndex. A query change
+    // resets it to the first result; invalid indices fail closed to -1.
+    property int selectedIndex: -1
+    onSearchKeyChanged: launcher.resetSelection()
+    onQueryStateChanged: launcher.resetSelection()
+    function resetSelection() {
+        selectedIndex = filteredCount > 0 ? 0 : -1
+        if (grid && filteredCount > 0) grid.currentIndex = 0
+    }
+    function selectIndex(index) {
+        if (index < 0 || index >= filteredCount) {
+            selectedIndex = -1
+            return false
+        }
+        selectedIndex = index
+        return true
+    }
+    function selectedName() {
+        return selectedIndex >= 0 && selectedIndex < filteredCount
+            ? filteredApps[selectedIndex].title : ""
+    }
+    function moveSelection(delta) {
+        if (filteredCount === 0) return false
+        var next = Math.max(0, Math.min(selectedIndex + delta, filteredCount - 1))
+        grid.currentIndex = next
+        return selectIndex(next)
+    }
     // Availability comes from the host bridge, never from a local guess.
     signal applicationSelected(string applicationName)
 
@@ -116,6 +173,8 @@ FocusScope {
             color: "#263a4f"
             selectByMouse: true
             Accessible.name: "Search available preview applications"
+            Accessible.description: launcher.resultCountText +
+                ". Use Up and Down to select, Enter to open"
             background: Rectangle {
                 radius: 12
                 color: "#ffffff"
@@ -126,12 +185,14 @@ FocusScope {
             Keys.onDownPressed: {
                 if (grid.count > 0) {
                     grid.currentIndex = 0
+                    launcher.selectIndex(0)
                     grid.forceActiveFocus()
                 }
             }
             Keys.onReturnPressed: {
-                if (launcher.filteredCount > 0)
-                    launcher.choose(launcher.filteredApps[0].title)
+                var name = launcher.selectedName()
+                if (name.length > 0)
+                    launcher.choose(name)
             }
         }
         GridView {
@@ -152,6 +213,9 @@ FocusScope {
             cellHeight: panel.height < 410 ? 98 : 116
             keyNavigationWraps: true
             activeFocusOnTab: true
+            Accessible.name: "Application results"
+            Accessible.description: launcher.resultCountText
+            onCurrentIndexChanged: launcher.selectIndex(currentIndex)
             delegate: Button {
                 id: appButton
                 objectName: "canopyLauncherAppButton"
@@ -216,8 +280,11 @@ FocusScope {
             }
             Keys.onEscapePressed: launcher.closeLauncher()
             Keys.onReturnPressed: {
-                if (currentIndex >= 0 && currentIndex < launcher.filteredCount)
-                    launcher.choose(launcher.filteredApps[currentIndex].title)
+                if (launcher.selectIndex(currentIndex)) {
+                    var name = launcher.selectedName()
+                    if (name.length > 0)
+                        launcher.choose(name)
+                }
             }
             Keys.onUpPressed: {
                 if (currentIndex < grid.columns)
@@ -259,6 +326,8 @@ FocusScope {
             elide: Text.ElideRight
             color: "#657b90"
             font.pixelSize: 11
+            Accessible.name: text
+            Accessible.description: launcher.resultCountText
         }
     }
 }

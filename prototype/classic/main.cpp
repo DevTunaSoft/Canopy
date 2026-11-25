@@ -189,6 +189,57 @@ private:
     QObject *m_status;
 };
 
+// The three remaining named dock apps (Calendar, Photos, Terminal) use the
+// SAME host-owned SystemAppLauncher service as Files, Browser and Mail. The
+// bridge is constructed with one frozen dock label from a closed set and
+// refuses every other activation before the launcher is touched. No shell,
+// argv, path, URL, second GIO code path or QML/asset edit is introduced.
+class RemainingDockLaunchBridge final : public QObject {
+    Q_OBJECT
+public:
+    RemainingDockLaunchBridge(SystemAppLauncher &launcher,
+                              QObject *statusOverlay, const QString &name,
+                              QObject *parent = nullptr)
+        : QObject(parent), m_launcher(launcher), m_status(statusOverlay),
+          m_name(name) {}
+
+    static bool isRemainingDockName(const QString &name) {
+        return name == QStringLiteral("Calendar")
+            || name == QStringLiteral("Photos")
+            || name == QStringLiteral("Terminal");
+    }
+
+public slots:
+    void activate(const QString &name) {
+        if (!isRemainingDockName(name) || name != m_name) {
+            qWarning() << "CANOPY_REMAINING_DOCK_REJECTED: unknown action";
+            return;
+        }
+        // Only the host-owned launcher may actuate. It accepts fixed desktop
+        // IDs only; a failed or unavailable launch is never reported as a
+        // success and is disclosed in the existing launcher footer.
+        if (m_launcher.launch(name)) {
+            qInfo() << "CANOPY_REMAINING_DOCK_LAUNCH_REQUESTED" << name;
+            return;
+        }
+        qWarning() << "CANOPY_REMAINING_DOCK_LAUNCH_REFUSED" << name;
+        if (!m_status)
+            return;
+        if (!QMetaObject::invokeMethod(m_status, "openLauncher",
+                                       Qt::DirectConnection)) {
+            qWarning() << "CANOPY_REMAINING_DOCK_STATUS_UNAVAILABLE";
+            return;
+        }
+        m_status->setProperty("selectionMessage",
+                              name + QStringLiteral(" could not be launched"));
+    }
+
+private:
+    SystemAppLauncher &m_launcher;
+    QObject *m_status;
+    QString m_name;
+};
+
 // Host-owned window-activation snapshot source. The adapter itself never
 // observes or actuates; the shell supplies only facts it already owns:
 // the Qt platform backend and the GIO launcher allowlist. No process or
@@ -368,6 +419,76 @@ static QQuickItem *findDockTile(QQuickItem *parent, const QString &iconName) {
             return match;
     }
     return nullptr;
+}
+
+// Compiled fixture for the three remaining named dock apps. It proves that
+// the exact frozen label reaches the single GIO bridge and that a refusal is
+// visible in the launcher footer. A hostile lookalike label is refused before
+// the launcher is touched and never changes the user-visible status.
+static bool runRemainingDockFixture(QQuickWindow *window,
+                                    SystemAppLauncher &launcher,
+                                    const QString &name, bool statusCase)
+{
+    if (!window || !RemainingDockLaunchBridge::isRemainingDockName(name))
+        return false;
+    const QString tag = name.toUpper();
+    const bool installed = launcher.canLaunch(name);
+    if (statusCase && installed) {
+        qCritical() << qPrintable(tag) << "_DOCK_FIXTURE_FAIL: status case needs no app";
+        return false;
+    }
+    if (!statusCase && !installed) {
+        qCritical() << qPrintable(tag) << "_DOCK_FIXTURE_FAIL: GIO app unavailable";
+        return false;
+    }
+    auto *tile = findDockTile(window->contentItem(), name);
+    auto *overlay = findVisualItem(window->contentItem(),
+                                   QStringLiteral("canopyApplicationLauncher"));
+    auto *status = findVisualItem(window->contentItem(),
+                                  QStringLiteral("canopyLauncherStatus"));
+    if (!tile || !overlay || !status) {
+        qCritical() << qPrintable(tag) << "_DOCK_FIXTURE_FAIL: frozen dock or footer missing";
+        return false;
+    }
+    const QString initialStatus = status->property("text").toString();
+    const QString hostile = name + QStringLiteral(";echo bad");
+    if (!QMetaObject::invokeMethod(tile, "activated", Qt::DirectConnection,
+                                   Q_ARG(QString, hostile))) {
+        qCritical() << qPrintable(tag) << "_DOCK_FIXTURE_FAIL: signal not invokable";
+        return false;
+    }
+    QCoreApplication::processEvents();
+    if (overlay->property("opened").toBool()
+            || status->property("text").toString() != initialStatus) {
+        qCritical() << qPrintable(tag) << "_DOCK_FIXTURE_FAIL: unknown action accepted";
+        return false;
+    }
+    if (!QMetaObject::invokeMethod(tile, "activated", Qt::DirectConnection,
+                                   Q_ARG(QString, name))) {
+        qCritical() << qPrintable(tag) << "_DOCK_FIXTURE_FAIL: dock activation failed";
+        return false;
+    }
+    QCoreApplication::processEvents();
+    if (statusCase) {
+        const QString shown = status->property("text").toString();
+        if (!overlay->property("opened").toBool()
+                || !shown.contains(name + QStringLiteral(" could not be launched"))) {
+            qCritical() << qPrintable(tag) << "_DOCK_FIXTURE_FAIL: refusal not visible";
+            return false;
+        }
+        const QString marker = tag + QStringLiteral("_DOCK_STATUS_FIXTURE_PASS");
+        qInfo() << qPrintable(marker) << "refusal visible in launcher footer";
+    } else {
+        if (overlay->property("opened").toBool()
+                || status->property("text").toString() != initialStatus) {
+            qCritical() << qPrintable(tag) << "_DOCK_FIXTURE_FAIL: launch reported a refusal";
+            return false;
+        }
+        const QString marker = tag + QStringLiteral("_DOCK_LAUNCH_FIXTURE_PASS");
+        qInfo() << qPrintable(marker) << "dock signal reached GIO service";
+    }
+    QTimer::singleShot(0, QCoreApplication::instance(), &QCoreApplication::quit);
+    return true;
 }
 
 static int countReadyFolderTiles(QQuickItem *parent) {
@@ -1291,10 +1412,23 @@ int main(int argc, char *argv[]) {
             window->contentItem(), QStringLiteral("canopyApplicationLauncher"));
         auto *intentBridge = new IntentDockBridge(
             systemLauncher, activationState, intentStatusOverlay, &app);
-        static const QStringList gatedDockNames = {
+        auto *remainingStatusOverlay = findVisualItem(
+            window->contentItem(), QStringLiteral("canopyApplicationLauncher"));
+        static const QStringList remainingDockNames = {
             QStringLiteral("Calendar"), QStringLiteral("Photos"),
-            QStringLiteral("Music"), QStringLiteral("Terminal"),
-            QStringLiteral("Settings")
+            QStringLiteral("Terminal")
+        };
+        for (const QString &name : remainingDockNames) {
+            if (auto *tile = findDockTile(window->contentItem(), name)) {
+                auto *bridge = new RemainingDockLaunchBridge(
+                    systemLauncher, remainingStatusOverlay, name, &app);
+                QObject::connect(tile, SIGNAL(activated(QString)),
+                                 bridge, SLOT(activate(QString)));
+                qInfo() << "CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED" << name;
+            }
+        }
+        static const QStringList gatedDockNames = {
+            QStringLiteral("Music"), QStringLiteral("Settings")
         };
         for (const QString &name : gatedDockNames) {
             if (auto *tile = findDockTile(window->contentItem(), name)) {
@@ -1720,6 +1854,41 @@ int main(int argc, char *argv[]) {
             qInfo() << "MAIL_DOCK_LAUNCH_FIXTURE_PASS: dock signal reached GIO service";
         }
         QTimer::singleShot(0, &app, &QCoreApplication::quit);
+    }
+    const bool calendarDockStatusFixture = args.contains(
+        QStringLiteral("--self-test-calendar-dock-status"));
+    const bool calendarDockLaunchFixture = args.contains(
+        QStringLiteral("--self-test-calendar-dock-fixture"));
+    const bool photosDockStatusFixture = args.contains(
+        QStringLiteral("--self-test-photos-dock-status"));
+    const bool photosDockLaunchFixture = args.contains(
+        QStringLiteral("--self-test-photos-dock-fixture"));
+    const bool terminalDockStatusFixture = args.contains(
+        QStringLiteral("--self-test-terminal-dock-status"));
+    const bool terminalDockLaunchFixture = args.contains(
+        QStringLiteral("--self-test-terminal-dock-fixture"));
+    if (calendarDockStatusFixture || calendarDockLaunchFixture
+            || photosDockStatusFixture || photosDockLaunchFixture
+            || terminalDockStatusFixture || terminalDockLaunchFixture) {
+        if (!enableSystemApps || !approvedMode) {
+            qCritical() << "REMAINING_DOCK_FIXTURE_FAIL: native launch and approved dock required";
+            return 1;
+        }
+        if ((calendarDockStatusFixture || calendarDockLaunchFixture)
+                && !runRemainingDockFixture(window, systemLauncher,
+                                            QStringLiteral("Calendar"),
+                                            calendarDockStatusFixture))
+            return 1;
+        if ((photosDockStatusFixture || photosDockLaunchFixture)
+                && !runRemainingDockFixture(window, systemLauncher,
+                                            QStringLiteral("Photos"),
+                                            photosDockStatusFixture))
+            return 1;
+        if ((terminalDockStatusFixture || terminalDockLaunchFixture)
+                && !runRemainingDockFixture(window, systemLauncher,
+                                            QStringLiteral("Terminal"),
+                                            terminalDockStatusFixture))
+            return 1;
     }
     const int sizeIndex = args.indexOf(QStringLiteral("--self-test-size"));
     if (sizeIndex >= 0) {

@@ -1,0 +1,128 @@
+name: Classic Qt build and smoke test
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qt-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source regression tests (before Qt package installation)
+        run: python3 -m unittest discover -s tests -p 'test_classic_source.py' -v
+      - name: Verify immutable approved artwork manifest contract
+        run: python3 -m unittest discover -s tests -p 'test_approved_manifest_contract.py' -v
+      - name: Validate original vector wallpaper before Qt build
+        run: python3 tools/check_art_asset.py prototype/classic/assets/wallpapers/blue-current.svg
+      - name: Validate original dock icons before Qt build
+        run: python3 tools/check_icon_set.py prototype/classic/assets/icons
+      - name: Install Qt build and headless runtime dependencies
+        timeout-minutes: 16
+        run: |
+          # GitHub's regional EC2 Ubuntu mirror has repeatedly stalled on large Qt packages.
+          # Use Ubuntu's primary archive endpoint; preserve security and non-Ubuntu sources.
+          sudo sed -i 's@http://us-east-2.ec2.archive.ubuntu.com/ubuntu@http://archive.ubuntu.com/ubuntu@g' /etc/apt/sources.list.d/ubuntu.sources
+          sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 update
+          sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 install -y --no-install-recommends \
+            build-essential cmake ninja-build xvfb \
+            qt6-base-dev qt6-declarative-dev qt6-declarative-dev-tools libqt6svg6 \
+            qml6-module-qtquick qml6-module-qtquick-controls \
+            qml6-module-qtquick-layouts qml6-module-qtquick-window \
+            qml6-module-qtquick-templates qml6-module-qtqml \
+            qml6-module-qtqml-workerscript
+      - name: Configure
+        run: cmake -S prototype/classic -B build/classic -G Ninja -DCMAKE_BUILD_TYPE=Release
+      - name: Compile
+        timeout-minutes: 5
+        run: cmake --build build/classic --parallel 2
+      - name: Reject missing approved icon assets (no substitution)
+        timeout-minutes: 1
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          set +e
+          ./build/classic/canopy-classic-spike --self-test-approved >test-missing-art.log 2>&1
+          code=$?
+          set -e
+          test "$code" -eq 2
+          grep -q 'APPROVED_ART_FAIL' test-missing-art.log
+          set +e
+          ./build/classic/canopy-classic-spike --approved-art-dir /tmp/canopy-missing-approved-art --self-test-approved >test-bad-art.log 2>&1
+          code=$?
+          set -e
+          test "$code" -eq 3
+          grep -q 'APPROVED_ART_FAIL' test-bad-art.log
+          echo "PASS: missing user-approved artwork rejected before Qt scene loads"
+      - name: Validate optional landscape wallpaper on real Qt runtime
+        timeout-minutes: 3
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          mkdir -p test-artifacts
+          python3 tools/create_wallpaper_fixture.py test-artifacts/landscape-test-fixture.png
+          set +e
+          QT_QPA_PLATFORM=offscreen ./build/classic/canopy-classic-spike --landscape-wallpaper >test-landscape-missing-arg.log 2>&1
+          missing_code=$?
+          QT_QPA_PLATFORM=offscreen ./build/classic/canopy-classic-spike --landscape-wallpaper /tmp/canopy-no-such-wallpaper.png >test-landscape-missing-file.log 2>&1
+          missing_file_code=$?
+          printf 'malformed fake png' >test-artifacts/malformed.png
+          QT_QPA_PLATFORM=offscreen ./build/classic/canopy-classic-spike --landscape-wallpaper test-artifacts/malformed.png >test-landscape-malformed.log 2>&1
+          malformed_code=$?
+          set -e
+          test "$missing_code" -eq 2
+          test "$missing_file_code" -eq 3
+          test "$malformed_code" -eq 3
+          grep -q LANDSCAPE_WALLPAPER_FAIL test-landscape-missing-arg.log
+          grep -q LANDSCAPE_WALLPAPER_FAIL test-landscape-missing-file.log
+          grep -q LANDSCAPE_WALLPAPER_FAIL test-landscape-malformed.log
+          timeout 30s xvfb-run -a ./build/classic/canopy-classic-spike --landscape-wallpaper test-artifacts/landscape-test-fixture.png --self-test-size 1200x750 --self-test-screenshot test-artifacts/classic-landscape-fixture.png >test-landscape-qt.log 2>&1 || { cat test-landscape-qt.log; exit 1; }
+          grep -q 'SELF_TEST_PASS: validated custom landscape wallpaper loaded' test-landscape-qt.log
+          python3 tools/check_screenshot.py test-artifacts/classic-landscape-fixture.png 1200 750
+          echo 'PASS: independent high-res PNG validated and rendered by Qt; invalid images rejected'
+      - name: Autonomous UI screenshot test
+        timeout-minutes: 2
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          mkdir -p test-artifacts
+          timeout 30s xvfb-run -a ./build/classic/canopy-classic-spike --self-test-size 1200x750 --self-test-screenshot test-artifacts/classic-standard.png
+          python3 tools/check_screenshot.py test-artifacts/classic-standard.png 1200 750
+          timeout 30s xvfb-run -a ./build/classic/canopy-classic-spike --self-test-size 760x500 --self-test-screenshot test-artifacts/classic-compact.png
+          python3 tools/check_screenshot.py test-artifacts/classic-compact.png 760 500
+          timeout 30s xvfb-run -a -s '-screen 0 2048x1200x24' ./build/classic/canopy-classic-spike --self-test-size 1920x1080 --self-test-screenshot test-artifacts/classic-1080p.png
+          python3 tools/check_screenshot.py test-artifacts/classic-1080p.png 1920 1080
+      - name: Capture informational CPU and PSS baseline
+        timeout-minutes: 2
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: xvfb-run -a python3 tools/measure_qt.py build/classic/canopy-classic-spike test-artifacts/qt-resource-baseline.json --seconds 5
+      - name: Upload UI test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: canopy-classic-ui-evidence
+          path: test-artifacts/
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Headless QML smoke test
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: xvfb-run -a python3 tools/qt_smoke.py build/classic/canopy-classic-spike
+      - name: Package exact compiled Qt6 runtime for independent screenshot reproduction
+        timeout-minutes: 3
+        run: bash tools/package_qt_runtime.sh build/classic/canopy-classic-spike build/canopy-qt6-portable
+      - name: Upload compiled Qt6 runtime (not a visual approval)
+        uses: actions/upload-artifact@v4
+        with:
+          name: canopy-qt6-compiled-runtime
+          path: build/canopy-qt6-portable/
+          if-no-files-found: error
+          retention-days: 3

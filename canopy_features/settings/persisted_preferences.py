@@ -117,15 +117,34 @@ def _path_text(value):
     return text
 
 
+# A drive-qualified path is system-owned by its tail on every host. Both
+# separator spellings must be recognized before the prefix comparison.
+_WINDOWS_DRIVE = re.compile(r"[a-z]:[/\\]", re.IGNORECASE)
+
+
+def _is_privileged_windows_tail(tail):
+    lowered = "\\" + tail.replace("/", "\\").lstrip("\\")
+    return any(lowered == prefix or lowered.startswith(prefix + "\\")
+               for prefix in _PRIVILEGED_WINDOWS)
+
+
 def _is_privileged_path(text):
-    """True for an obvious system-owned absolute location, not a user tree."""
+    """True for an obvious system-owned absolute location, not a user tree.
+
+    ``C:/WINDOWS`` and ``C:\\WINDOWS`` name the same system location. Both
+    separators are normalized before prefix matching, on the POSIX branch
+    as well as on Windows, so a Windows path never slips past the gate
+    because of the interpreter or the caller's path spelling.
+    """
     normalized = os.path.normcase(os.path.normpath(text))
+    unified = normalized.replace("\\", "/")
     if os.name == "nt":
-        _, tail = os.path.splitdrive(normalized)
-        lowered = "\\" + tail.lstrip("\\")
-        return any(lowered == prefix or lowered.startswith(prefix + "\\")
-                   for prefix in _PRIVILEGED_WINDOWS)
-    return any(normalized == prefix or normalized.startswith(prefix + "/")
+        _, tail = os.path.splitdrive(unified)
+        return _is_privileged_windows_tail(tail)
+    match = _WINDOWS_DRIVE.match(normalized)
+    if match is not None:
+        return _is_privileged_windows_tail(normalized[match.end() - 1:])
+    return any(unified == prefix or unified.startswith(prefix + "/")
                for prefix in _PRIVILEGED_POSIX)
 
 

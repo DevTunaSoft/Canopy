@@ -41,6 +41,18 @@ Linux Mint acceptance.
 * A successful save writes a `0o600` temporary file in a `0o700` parent and
   atomically renames it; POSIX mode bits are asserted by the test suite.
 
+### Windows separator normalization (PR #618 QA regression)
+
+PR #618 QA found that a Windows system location could pass the privileged-path
+gate when its path was spelled with `/` instead of `\`. The comparison in
+`_is_privileged_path` now normalizes both separators before matching the
+`_PRIVILEGED_WINDOWS` prefixes, and recognizes a drive-qualified path on the
+POSIX host branch as well. `C:/WINDOWS/...`, `C:\WINDOWS\...` and mixed
+separator spellings are refused before any filesystem access, while ordinary
+user paths and POSIX system paths keep their earlier decisions. The `..`,
+absolute-escape and symlink checks are unchanged; they are re-tested with mixed
+separators and with all write entry points spied on.
+
 ### Surrogate-safe corrupt-state handling
 
 PR #602 review found that a lone-surrogate JSON key decoded by `json.loads`
@@ -106,6 +118,64 @@ The RED log SHA-256 is
 targeted GREEN log SHA-256 is
 `242f57dbe9153ea5ccacdf5e0efb6b6c8ee4f535c20be6ec0fb2fab6b3e494d6`.
 `git diff --check` passes.
+
+### PR #618 QA separator regression (exact evidence)
+
+Worktree base: `integration/canopy-classic-20261123` at
+`b9d93138a4990aa8fe4544a788af4a704572dd78` (verified with `git ls-remote`);
+private feature branch `fix/windows-privileged-path-separators-b9d9313`. The
+runner is uv's isolated pytest with the worktree on `PYTHONPATH`; this host has
+no project pytest dependency. `os.name` is patched only inside the new tests to
+exercise the POSIX host branch on a Windows runner.
+
+RED, new test file against the untouched base worktree:
+
+```
+PYTHONPATH=. uv run --no-project pytest tests/test_c100_settings_persistence_isolation.py -q
+9 failed, 22 passed, 1 skipped, 35 subtests passed in 1.90s
+```
+
+Log SHA-256 `5971954ed6ad950fc817fecd489f02e3844a9bd6781930a3761b7f19ebdb0422`. The nine subtest failures are
+`WindowsPrivilegedSeparatorTests.test_windows_system_prefix_matches_either_separator`
+(`C:/WINDOWS`, `C:\WINDOWS`, mixed casing and the Program Files / ProgramData
+prefixes on the POSIX branch) and
+`WindowsPrivilegedSeparatorTests.test_windows_privileged_path_is_refused_without_any_write`
+(three separator spellings were accepted by the constructor). The ordinary
+user-path and escape/symlink tests were green on base as negative controls;
+they were kept as coverage, not claimed as reproduced defects.
+
+GREEN, same host, after the production change:
+
+```
+PYTHONPATH=. uv run --no-project pytest \
+  tests/test_c100_settings_persistence_isolation.py \
+  tests/test_c100_settings_persisted_preferences.py -q
+47 passed, 1 skipped, 65 subtests passed in 1.72s
+```
+
+Log SHA-256 `47709d46ec015d7db5c2370af7539c807c2c4e3ba79e46349d7ed4256477a56c`. `python3 tools/check_foundation.py` → PASS on the
+fixed tree.
+
+Full suite, `PYTHONPATH=. uv run --no-project python -m unittest discover -s tests`,
+run in parallel on two private worktrees pinned to the same base SHA:
+
+| tree | result | normalized FAIL/ERROR set SHA-256 | log SHA-256 |
+| --- | --- | --- | --- |
+| untouched base `b9d9313` | Ran `3524` tests in `1006.209`s; `OK (skipped=46)` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` | `5ff97a8f10c279f9e358dee63e307d19ebfd4c958ef5265180d6445a677587b1` |
+| fixed tree | Ran `3528` tests in `963.590`s; `OK (skipped=46)` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` | `ac33839f7a515c26b833e45ebb56d84d82f391359b3b98b15df5bf13d9cfb294` |
+
+The test-file delta is `+4` tests, and the full-suite delta is `+4`
+tests; no new failure or error name was introduced. Base failure names:
+`none`. Fixed-tree failure names: `none`.
+`git diff --check` passes.
+
+Resource / evidence note: measured here are exact test counts, durations and
+log SHA-256s from local CPython 3.14.9 gates on Windows 11 (`SYNTHETIC`,
+not a compiled-runtime profile). Deliberately not measured: shell-owned PSS,
+CPU, GPU, wakeups, compiled Qt render, real Mint session behavior and
+screen-reader behavior — all `NOT_RUN`. This is a pure decision gate with no
+new allocation path, no service, no visual or accessibility change, so no
+stability, security, accessibility or approved-visual tradeoff is made.
 
 ## Non-claims
 

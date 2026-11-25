@@ -21,7 +21,7 @@ Scope: Calendar, Photos and Terminal dock tiles join Files, Browser and Mail on 
 - `cmake-config.log` `26e42d914105b0e357f528635322c065cd8c99c4e8a3ac57e3d906a43ffae21b`
 - `compile.log` `8284ee19f3499355ac2a259e02f73ba6e6d01b14b0dac1abb3a3431d1c0ea003`
 - `compiled-qt.log` `aad4cc6e248064a4fa4a550a53b663f155abf511bb76b42c287731ca69e5ffc6`
-- `evidence.md` `f1e66143bf2f97e4b556a293ae2bf111d5c2cd8935c48a9cb84df062fd15da90`
+- `evidence.md` `f2f253948accffdfb820908daae8c3f8364b647f626be53255d2d478a4d61c0f`
 - `foundation-check.txt` `129871f6cc021e47dda115aa0fd87eb66c0d65ce785dab53a4bff19dd0af606f`
 - `recompile.log` `66d2325af77174fe1ef857d27f05e27247c5658b52c3fbff81b1eb02fbb9f19b`
 - `red-proof.txt` `8cfcf369cc0471dc6dd313184300cd8ee4bd5830f27a2a9ba5af3c98ec6cb3fd`
@@ -30,6 +30,8 @@ Scope: Calendar, Photos and Terminal dock tiles join Files, Browser and Mail on 
 - `suite-baseline.txt` `cbcf188030f23b25f091c3627d60ead0c84b96b91226f0eff95c3830a0666950`
 - `suite-candidate.txt` `1f6ba032e227f6288dd6e552ef2ab2245889c2d62d71dadbee20693f2c994384`
 - `target-test.txt` `065c7d15facfd20f14fb9182747be315f3349fa1d5e1a0e966047509f4bfa9b1`
+
+Normalization note: every SHA-256 above is taken over the exact committed blob bytes. The evidence directory pins `* -text`, so `evidence.md` stays CRLF in both blob and worktree (`i/crlf w/crlf attr/-text`); `sha256sum` on the checked-out file and `git cat-file blob | sha256sum` both give `f2f253948accffdfb820908daae8c3f8364b647f626be53255d2d478a4d61c0f`. An LF-normalized copy hashes differently and is not authoritative. This self-citation therefore restates the authoritative pre-correction blob hash recorded in `sha256.txt`; correcting the citation necessarily changes the file blob, so no follow-up edit to the frozen manifest is made.
 
 ## Resource / evidence note
 - Measured: Windows 11 host, MSYS2 UCRT64 Qt 6, `QT_QPA_PLATFORM=offscreen`, software rendering, three approved-art captures (1920x1080, 1200x750, 760x500); source-contract and full-suite wall-clock counts above are `SYNTHETIC` host evidence, not Linux Mint acceptance.

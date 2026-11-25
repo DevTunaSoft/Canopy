@@ -12,6 +12,29 @@ integration branch, and a compilable Classic Qt prototype exists in the draft
 stack (see #151). No release candidate has passed owner visual acceptance and
 Linux Mint guest acceptance; see release blocker #132. Modern is planned.
 
+## Resource targets and evidence labels (read before citing a number)
+
+- **Targets, not verified results:** under 100 MiB incremental idle PSS for
+  Canopy Classic where technically achievable, under 0.1% average idle CPU of
+  one core, and low GPU/compositor cost and wakeups. Measure shell-owned
+  consumption on a real desktop before claiming attainment; no target may be
+  reported as a measured result.
+- **SYNTHETIC**: the Windows 11 `offscreen` Qt host samples in
+  [the ce408f4 runtime evidence](docs/perf-windows-runtime-evidence-ce408f4.md)
+  (working set, CPU activity proxy, startup timings). They are not Mint, not
+  real-desktop and not release evidence.
+- **CI-SCOPED**: Ubuntu Actions/Xvfb captures compiled by
+  [the Classic Qt workflow](.github/workflows/classic-qt.yml). A green run is
+  source/Ubuntu-runtime evidence only; it is not visual or Mint acceptance.
+- **NOT_RUN**: real five-minute shell-owned PSS on a real desktop, GPU/compositor
+  cost, true scheduler wakeups, screen-reader behavior and automatic CI-on-guest
+  acceptance. No proxy, static gate or host-orchestrated report may be relabeled
+  as one of these.
+- **R066 is BLOCKED** until those real measurements exist; release readiness
+  stays false. See [the Mint evidence gate](docs/MINT_ACCEPTANCE_REPORT_GATE.md).
+  These labels are editing/evidence rules, not a weakening of any acceptance
+  gate.
+
 ## Continuous engineering contract
 
 Hermes maintains at least four active engineering subagents plus itself, each

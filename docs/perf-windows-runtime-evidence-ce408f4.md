@@ -5,6 +5,12 @@ This is a Windows host running an `offscreen` Qt platform build. It is not
 Linux Mint evidence, not a 5-minute PSS idle run, not a real-desktop/GPU run,
 and not release acceptance. No visual asset was changed and nothing was merged.
 
+**Read every number below as SYNTHETIC.** The 15 s CPU/working-set activity
+proxy is not a scheduler-wakeup measurement: true wakeups are **NOT_RUN**.
+GPU/compositor cost is **NOT_RUN** (software raster only). Real five-minute
+shell-owned PSS on a real desktop is **NOT_RUN**. The idle PSS and idle CPU
+engineering targets in README.md remain targets, not attained values.
+
 ## Exact artifacts and provenance
 
 | Item | Value |
@@ -69,7 +75,11 @@ the measured SHA and the later tips in the observed merges.
 Two full measurement passes were run on the same binary; both are reported
 rather than averaged into a single "win".
 
-## Results (measured, not estimated)
+## Results (SYNTHETIC Windows-host samples; no real-desktop claim)
+
+All rows are SYNTHETIC host observations on the pinned `offscreen` binary, not
+estimates of real Mint behaviour and not target attainment. The idle CPU and
+active-window rows are a 20 ms activity proxy, not measured wakeups (**NOT_RUN**).
 
 | Metric | Pass A | Pass B (results JSON) |
 |---|---|---|
@@ -90,16 +100,19 @@ speedup claim is made. Cold and warm medians differ by ~28 ms in Pass B and
 are inside the host noise floor; there is no demonstrated cold-cache penalty
 beyond the first launch.
 
-### Largest measured bottleneck
+### Largest measured bottleneck on the SYNTHETIC host
 
-QML/Quick scene initialization plus first-frame composition dominates startup:
-net warm startup 0.30–0.66 s versus 0.058–0.108 s for QtCore-only startup in
-the same binary — roughly 5–11× the core path, with the scene delta measured
-at 0.297 s (Pass B) and 0.552 s (Pass A). The 1.000 s pre-capture timer is a
-fixed self-test delay, not application work, and is excluded from that
-comparison. Idle is not a bottleneck: 0% sampled CPU and zero active windows
-over 299/454 samples; the largest idle cost is resident memory (~62.5–62.8 MiB
-working set), not wakeups.
+QML/Quick scene initialization plus first-frame composition dominates the
+SYNTHETIC startup samples: net warm startup 0.30–0.66 s versus 0.058–0.108 s
+for QtCore-only startup in the same binary — roughly 5–11× the core path, with
+the scene delta measured at 0.297 s (Pass B) and 0.552 s (Pass A). The 1.000 s
+pre-capture timer is a fixed self-test delay, not application work, and is
+excluded from that comparison. On this offscreen host the activity proxy showed
+0.00% sampled CPU and zero active 20 ms windows over 299/454 samples, with a
+~62.5–62.8 MiB working set; this is **not** a wakeup measurement (wakeups
+**NOT_RUN**), not a GPU measurement (**NOT_RUN**) and not the real five-minute
+PSS target (**NOT_RUN**). No speedup or target attainment is claimed from the
+noisy host timings.
 
 ## Bounded regression gate added
 
@@ -108,18 +121,20 @@ working set), not wakeups.
 initially stopped QML timer, the `refreshScheduled` property, the wall-clock
 alignment expression, and no animation/per-frame timer type. It includes a
 mutated-source RED case. This gate is deterministic and has **no timing
-threshold**, so it cannot flake on the noisy host; it protects the mechanism
-that produced the measured 0% idle CPU / zero active-window profile. It is not
-a Mint gate and does not grant release approval.
+threshold**, so it cannot flake on the noisy host; it guards the static timer
+mechanism seen alongside the SYNTHETIC activity-proxy profile. It does not
+measure wakeups (**NOT_RUN**), GPU (**NOT_RUN**) or real five-minute PSS
+(**NOT_RUN**), is not a Mint gate and does not grant release approval.
 
 ## Exclusions / unmeasured surfaces
 
-- **NOT_RUN**: Linux Mint guest, Xvfb/real desktop, 5-minute PSS/idle target,
-  `/proc/smaps_rollup`, CI-on-guest acceptance and visual approval.
-- No GPU/compositor path (offscreen software raster only).
-- No ETW context-switch or true frame-rate measurement; wakeup proxy only.
+- **NOT_RUN**: Linux Mint guest, Xvfb/real desktop, real five-minute PSS and
+  idle target, `/proc/smaps_rollup`, CI-on-guest acceptance and visual approval.
+- **NOT_RUN**: GPU/compositor path (offscreen software raster only).
+- **NOT_RUN**: true scheduler wakeups and frame-rate measurement; a 20 ms CPU
+  activity proxy was sampled instead.
 - No standby-list/disk-cache flush: "cold" is operational, not a cold disk read.
-- No screen-reader or accessibility behavior measurement.
+- **NOT_RUN**: screen-reader or accessibility behavior measurement.
 - No visual, layout, artwork or QML geometry change in this workstream.
 - No commit to main and no merge; changes live on a dedicated perf branch.
 

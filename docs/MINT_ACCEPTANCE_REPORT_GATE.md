@@ -77,21 +77,24 @@ pins 24 reports and passes the fail-closed SHA chain.
 |---|---|---|
 | R073 | PASS | `reports/mint_guest_boot_and_preflight_run2.json` (`5f34ee4ebaf5101b9e5384734bd338d7d9451e4c444a68565e2c1035e5a2e631`) |
 | R074 | PASS_SCOPED | `reports/agent_c_r074_cinnamon_session_20261123T2206Z.json` (`fdac389ff489c6bde577e4b632bfdbf2348ca64d411f943447b5b276f130f644`) |
-| R066 | PASS_NUMERIC_SCOPED | `reports/agent_c_r066_five_minute_idle_20261123T2012Z.json` (`9a3469662b779bb2c2437e3f449256f04b94fa6a0efad1340942ccaad6bc99e1`), `reports/agent_c_r066_wakeups_20261123T2056Z.json` (`e8a7df5b4b5d650f9c07c671fb52f2ce9fb2c1e116c784de17d617ee05af30fa`) |
+| R066 | BLOCKED | Pinned host-orchestrated artifacts only, **CI-SCOPED / NOT proof of the gate**: `reports/agent_c_r066_five_minute_idle_20261123T2012Z.json` (`9a3469662b779bb2c2437e3f449256f04b94fa6a0efad1340942ccaad6bc99e1`), `reports/agent_c_r066_wakeups_20261123T2056Z.json` (`e8a7df5b4b5d650f9c07c671fb52f2ce9fb2c1e116c784de17d617ee05af30fa`) |
 | R078 | PARTIAL_SCOPED | `reports/agent_c_r078_composed_20261124T001919Z.json` (`1672bd5f728e158ec5778844c6012d5cea687b0d0833c70748354eae0767e55d`) |
 | R086 | NOT_RUN | `reports/agent_c_r086_feasibility_20261123T232528Z.json` (`a9c055fd9e8b520fdb253c4bf7b29707157f37f827e78ab274a1edefd2229b36`) |
 | R047 / R050 | BLOCKED | owner visual approval pending; approved at least 1920x1080 alpine wallpaper asset absent |
 
 R073 comes from an in-guest preflight that distinguishes Linux Mint 22.3 from
 Ubuntu. R074 is a real Cinnamon X11 session launch of the exact binary above;
-it is not owner visual acceptance. R066 is numeric-only: three genuine
-approximately-five-minute guest samples (early idle 305.919 s / 62 samples,
-0.2615% of one core, PSS peak 150854 KiB; wakeup sample 305.912 s / 62 samples
-with context-switch proxies only because the kernel does not expose
-`se.nr_wakeups`; real-session sample 305.825 s / 62 samples, 0.2322% of one
-core, PSS peak 127825 KiB). R078 proves a fresh boot identity, a discovered
-Cinnamon X11 login, the exact binary window, clean exit and intact desktop
-rollback, but **not** a clean guest-initiated reboot.
+it is not owner visual acceptance. R066 is **BLOCKED**: the two pinned reports
+are host-orchestrated, CI-SCOPED artifacts, not proof of the gate. Their sample
+durations and any CPU/PSS percentages they contain are SYNTHETIC/CI-SCOPED
+observations under a scoped session; they are not a verified real five-minute
+shell-owned PSS run. Real five-minute PSS on a real desktop is **NOT_RUN**,
+GPU/compositor cost is **NOT_RUN**, and scheduler wakeups are **NOT_RUN** (the
+kernel does not expose `se.nr_wakeups`; only context-switch proxies exist).
+No number from these reports may be presented as a target attained or as
+release evidence. R078 proves a fresh boot identity, a discovered Cinnamon
+X11 login, the exact binary window, clean exit and intact desktop rollback,
+but **not** a clean guest-initiated reboot.
 
 Current blockers, recorded rather than resolved:
 
@@ -105,9 +108,13 @@ Current blockers, recorded rather than resolved:
   1280x720 wave master SHA-256
   `1efa6e83deee160ce9cf225db010025f4f162975f4dfc23e6da3f3ca0973528a` is
   preserved; no substitute wallpaper was used or approved.
-- Scheduler wakeups are unmeasured; release readiness stays false.
+- R066 is BLOCKED: real five-minute shell-owned PSS on a real desktop is
+  **NOT_RUN**, scheduler wakeups are **NOT_RUN** and GPU/compositor cost is
+  **NOT_RUN**. Host-orchestrated numbers are CI-SCOPED only and never PASS.
+  Release readiness stays false.
 
-`python tools/check_foundation.py` passed on this branch both before and after
-the edit.
-This documentation change alters no tool behaviour, visual asset, CI workflow
-or owner instruction file.
+This correction changes only evidence labels and wording: no tool behaviour,
+acceptance logic, visual asset, gate assertion or measured value was altered.
+The CI workflow step label and the static gate's docstring were reworded;
+neither the step command nor the gate assertions changed. Verification
+commands and exact results for this branch are recorded in the PR body.

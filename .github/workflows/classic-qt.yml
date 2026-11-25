@@ -62,6 +62,18 @@ jobs:
             xvfb-run -a ./build/classic/canopy-classic-spike --enable-system-apps --self-test-system-apps-fixture
           test -f "$marker"
 
+      - name: Verify Files dock reaches the real GIO launcher
+        timeout-minutes: 3
+        run: |
+          set -e
+          mkdir -p test-artifacts/gio-xdg/applications
+          dock_marker="$PWD/test-artifacts/gio-dock-launch-marker"
+          rm -f "$dock_marker"
+          printf '[Desktop Entry]\nType=Application\nName=Canopy Files Dock Fixture\nExec=/bin/sh -c "touch %s"\nNoDisplay=false\nTerminal=false\n' "$dock_marker" > test-artifacts/gio-xdg/applications/nemo.desktop
+          XDG_DATA_HOME="$PWD/test-artifacts/gio-xdg" XDG_DATA_DIRS="$PWD/test-artifacts/gio-xdg" \
+            xvfb-run -a ./build/classic/canopy-classic-spike --enable-system-apps --self-test-files-dock-fixture
+          test -f "$dock_marker"
+
       - name: Verify approved eight-icon artwork
         run: python3 -m unittest tests.test_approved_art tests.test_approved_manifest_contract tests.test_approved_art_zip -v
 

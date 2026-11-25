@@ -27,6 +27,45 @@
 #include <QJsonObject>
 #include <QUrl>
 
+// Host-side adapter for the single frozen Files dock interaction. It owns
+// no launcher logic: it forwards only the exact dock label to the existing
+// SystemAppLauncher and reports a refusal in the existing launcher footer.
+class FilesDockLaunchBridge final : public QObject {
+    Q_OBJECT
+public:
+    FilesDockLaunchBridge(SystemAppLauncher &launcher, QObject *statusOverlay,
+                          QObject *parent = nullptr)
+        : QObject(parent), m_launcher(launcher), m_status(statusOverlay) {}
+
+public slots:
+    void activate(const QString &name) {
+        if (name != QStringLiteral("Files")) {
+            qWarning() << "CANOPY_FILES_DOCK_REJECTED: unknown action";
+            return;
+        }
+        if (m_launcher.launch(name)) {
+            qInfo() << "CANOPY_FILES_DOCK_LAUNCH_REQUESTED";
+            return;
+        }
+        qWarning() << "CANOPY_FILES_DOCK_LAUNCH_REFUSED";
+        if (!m_status)
+            return;
+        // openLauncher() clears the prior message, so set the refusal
+        // AFTER opening; the existing footer Label binds to this text.
+        if (!QMetaObject::invokeMethod(m_status, "openLauncher",
+                                       Qt::DirectConnection)) {
+            qWarning() << "CANOPY_FILES_DOCK_STATUS_UNAVAILABLE";
+            return;
+        }
+        m_status->setProperty("selectionMessage",
+                              QStringLiteral("Files could not be launched"));
+    }
+
+private:
+    SystemAppLauncher &m_launcher;
+    QObject *m_status;
+};
+
 // A Repeater can give its delegates QObject owners different from their
 // visual parents. Traverse the actual QQuickItem scene tree for UI assertions.
 static QQuickItem *findVisualItem(QQuickItem *parent, const QString &name) {
@@ -453,8 +492,8 @@ int main(int argc, char *argv[]) {
             QStringLiteral("Trash")
         };
         for (const QString &name : dockNames) {
-            // Files keeps its frozen sample-preview toggle; native Files
-            // launching is available through the launcher overlay.
+            // Files is wired to the same host service below, with a status
+            // path; all other tiles keep their original direct connection.
             if (name == QStringLiteral("Files"))
                 continue;
             if (auto *tile = findDockTile(window->contentItem(), name))
@@ -462,6 +501,22 @@ int main(int argc, char *argv[]) {
                                  &systemLauncher, SLOT(launch(QString)));
         }
         qInfo() << "CANOPY_SYSTEM_APP_DOCK_CONNECTED: opt-in, fixed allowlist only";
+
+        // Connect the EXISTING Files dock interaction (its frozen QML
+        // `activated("Files")` signal) to real desktop behavior. No QML,
+        // artwork, dock geometry or color is changed: this is a host-side
+        // adapter over the single SystemAppLauncher service.
+        auto *filesLaunchTile = findDockTile(window->contentItem(),
+                                              QStringLiteral("Files"));
+        auto *filesStatusOverlay = findVisualItem(
+            window->contentItem(), QStringLiteral("canopyApplicationLauncher"));
+        if (filesLaunchTile) {
+            auto *filesBridge = new FilesDockLaunchBridge(
+                systemLauncher, filesStatusOverlay, &app);
+            QObject::connect(filesLaunchTile, SIGNAL(activated(QString)),
+                             filesBridge, SLOT(activate(QString)));
+            qInfo() << "CANOPY_FILES_DOCK_NATIVE_LAUNCH_CONNECTED";
+        }
     }
     if (launcherFixture) {
         // Drive the actual QML overlay's choose("Files") path. CI supplies a
@@ -481,6 +536,75 @@ int main(int argc, char *argv[]) {
         }
         qInfo() << "SELF_TEST_PASS: QML launcher choose() activated native GIO app";
         qInfo() << "LAUNCHER_LAUNCH_FIXTURE_PASS: QML launcher activation verified";
+        QTimer::singleShot(0, &app, &QCoreApplication::quit);
+    }
+    const bool filesDockStatusFixture = args.contains(
+        QStringLiteral("--self-test-files-dock-status"));
+    const bool filesDockLaunchFixture = args.contains(
+        QStringLiteral("--self-test-files-dock-fixture"));
+    if (filesDockStatusFixture || filesDockLaunchFixture) {
+        if (!enableSystemApps) {
+            qCritical() << "FILES_DOCK_FIXTURE_FAIL: native launch not enabled";
+            return 1;
+        }
+        const bool canLaunchFiles =
+            systemLauncher.canLaunch(QStringLiteral("Files"));
+        if (filesDockStatusFixture && canLaunchFiles) {
+            qCritical() << "FILES_DOCK_FIXTURE_FAIL: status case needs no file manager";
+            return 1;
+        }
+        if (filesDockLaunchFixture && !canLaunchFiles) {
+            qCritical() << "FILES_DOCK_FIXTURE_FAIL: GIO file manager unavailable";
+            return 1;
+        }
+        auto *filesTile = findDockTile(
+            window->contentItem(), QStringLiteral("Files"));
+        auto *filesOverlay = findVisualItem(
+            window->contentItem(), QStringLiteral("canopyApplicationLauncher"));
+        auto *filesStatus = findVisualItem(
+            window->contentItem(), QStringLiteral("canopyLauncherStatus"));
+        if (!filesTile || !filesOverlay || !filesStatus) {
+            qCritical() << "FILES_DOCK_FIXTURE_FAIL: frozen dock or status footer missing";
+            return 1;
+        }
+        const QString initialStatus = filesStatus->property("text").toString();
+        // A hostile lookalike label must change neither launcher nor status.
+        if (!QMetaObject::invokeMethod(
+                filesTile, "activated", Qt::DirectConnection,
+                Q_ARG(QString, QStringLiteral("Browser;echo bad")))) {
+            qCritical() << "FILES_DOCK_FIXTURE_FAIL: signal not invokable";
+            return 1;
+        }
+        QCoreApplication::processEvents();
+        if (filesOverlay->property("opened").toBool()
+            || filesStatus->property("text").toString() != initialStatus) {
+            qCritical() << "FILES_DOCK_FIXTURE_FAIL: unknown action accepted";
+            return 1;
+        }
+        if (!QMetaObject::invokeMethod(
+                filesTile, "activated", Qt::DirectConnection,
+                Q_ARG(QString, QStringLiteral("Files")))) {
+            qCritical() << "FILES_DOCK_FIXTURE_FAIL: dock activation failed";
+            return 1;
+        }
+        QCoreApplication::processEvents();
+        if (filesDockStatusFixture) {
+            const QString shown = filesStatus->property("text").toString();
+            if (!filesOverlay->property("opened").toBool()
+                || !shown.contains(QStringLiteral("Files could not be launched"))) {
+                qCritical() << "FILES_DOCK_FIXTURE_FAIL: refusal not visible to user";
+                return 1;
+            }
+            qInfo() << "FILES_DOCK_STATUS_FIXTURE_PASS: refusal visible in launcher footer";
+        } else {
+            if (filesOverlay->property("opened").toBool()
+                || filesStatus->property("text").toString() != initialStatus) {
+                qCritical() << "FILES_DOCK_FIXTURE_FAIL: native launch reported a refusal";
+                return 1;
+            }
+            qInfo() << "SELF_TEST_PASS: Files dock activated native GIO launch";
+            qInfo() << "FILES_DOCK_LAUNCH_FIXTURE_PASS: dock signal reached GIO service";
+        }
         QTimer::singleShot(0, &app, &QCoreApplication::quit);
     }
     const int sizeIndex = args.indexOf(QStringLiteral("--self-test-size"));
@@ -997,3 +1121,5 @@ int main(int argc, char *argv[]) {
     }
     return app.exec();
 }
+
+#include "main.moc"

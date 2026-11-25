@@ -306,7 +306,7 @@ jobs:
             --size "$size" \
             --output "test-artifacts/dock-five-center-identity-$size.json"
 
-      - name: Measure five-minute idle CPU and PSS
+      - name: Sample SYNTHETIC CI-SCOPED idle CPU/PSS proxy under Xvfb (real 5-min PSS/GPU/wakeups NOT_RUN)
         timeout-minutes: 9
         env:
           QT_QUICK_BACKEND: software

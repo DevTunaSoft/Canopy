@@ -1,11 +1,13 @@
-"""Bounded regression gate for the measured Classic Qt idle-wakeup contract.
+"""Bounded regression gate for the Classic Qt idle-timer contract.
 
-Runtime evidence on the Windows host (QT_QPA_PLATFORM=offscreen, 15 s idle,
-454 samples): 0.00% CPU of one core, 0 active 20 ms CPU windows, ~65.5 MiB
-working set. The mechanism behind that profile is one wall-clock-aligned
-60-second one-shot QML timer with no animation loop. This gate is a static,
-deterministic guard on that mechanism; it deliberately contains no timing
-threshold, because the host is noisy. It is NOT Mint acceptance evidence.
+The source mechanism is a wall-clock-aligned 60-second one-shot QML timer with
+no animation loop. The supporting Windows-host numbers were SYNTHETIC:
+15 s offscreen samples showed 0.00% CPU of one core, 0 active 20 ms CPU
+windows and ~65.5 MiB working set. True scheduler wakeups are NOT_RUN (only a
+20 ms activity proxy was sampled), GPU/compositor cost is NOT_RUN, and real
+five-minute shell-owned PSS is NOT_RUN. This gate is a static, deterministic
+guard on the timer mechanism; it deliberately contains no timing threshold,
+because the host is noisy. It is NOT Mint acceptance evidence.
 """
 from pathlib import Path
 import re
@@ -49,7 +51,7 @@ def check_idle_contract(text):
 
 
 class IdleWakeupContractGate(unittest.TestCase):
-    def test_compiled_source_keeps_measured_idle_contract(self):
+    def test_compiled_source_keeps_static_idle_timer_contract(self):
         check_idle_contract(SOURCE.read_text(encoding="utf-8"))
 
     def test_gate_rejects_a_per_frame_timer_variant(self):

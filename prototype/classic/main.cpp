@@ -33,11 +33,112 @@
 #include <QQmlComponent>
 #include <QQmlProperty>
 #include <QUrl>
+#include <QAction>
+#include <QSettings>
 
 static void showActivationStatus(QObject *status, const QString &message);
 static QString activationRefusal(const WindowActivationState &state,
                                  const QString &name,
                                  const QString &intent);
+
+// Classic settings bridge. In-process QSettings only: no daemon, no privileged
+// path, no host probing. The value domain mirrors
+// canopy_features/accessibility/reduced_motion_contract.py; every other key is
+// disclosed as unavailable rather than pretending to work. Corrupt stored
+// values are discarded to the safe default without rewriting the store.
+class SettingsPreferencesBridge final : public QObject {
+    Q_OBJECT
+public:
+    explicit SettingsPreferencesBridge(QObject *parent = nullptr)
+        : QObject(parent), m_settings(QStringLiteral("DevTunaSoft"),
+                                      QStringLiteral("Canopy Classic")) {
+        const QString stored = m_settings.value(
+            QStringLiteral("accessibility/reduced_motion")).toString();
+        m_reducedMotion = allowedValues().contains(stored)
+                ? stored : QStringLiteral("unset");
+        if (!stored.isEmpty() && stored != m_reducedMotion)
+            qWarning() << "CANOPY_SETTINGS_INVALID_STORED_VALUE_DISCARDED";
+    }
+
+    Q_INVOKABLE QVariantMap view(const QString &key) const {
+        QVariantMap result;
+        result.insert(QStringLiteral("key"), key);
+        result.insert(QStringLiteral("title"), titleFor(key));
+        result.insert(QStringLiteral("value"), QString());
+        result.insert(QStringLiteral("available"), false);
+        result.insert(QStringLiteral("source"), QStringLiteral("none"));
+        result.insert(QStringLiteral("disclosure"),
+                      QStringLiteral("Unavailable — unknown preference key"));
+        if (key == QStringLiteral("reduced_motion")) {
+            result.insert(QStringLiteral("value"), m_reducedMotion);
+            result.insert(QStringLiteral("available"), true);
+            result.insert(QStringLiteral("source"),
+                          QStringLiteral("reduced_motion_contract"));
+            result.insert(QStringLiteral("disclosure"), QStringLiteral(
+                "Saved for the host; approved preview visuals do not change"));
+        } else if (key == QStringLiteral("network") || key == QStringLiteral("audio")
+                   || key == QStringLiteral("shell_pack")
+                   || key == QStringLiteral("notifications")) {
+            result.insert(QStringLiteral("disclosure"), QStringLiteral(
+                "Unavailable — no host control interface"));
+        } else if (key == QStringLiteral("power") || key == QStringLiteral("session")) {
+            result.insert(QStringLiteral("disclosure"), QStringLiteral(
+                "Unavailable — privileged host changes are not performed"));
+        } else if (key == QStringLiteral("theme")) {
+            result.insert(QStringLiteral("disclosure"), QStringLiteral(
+                "Unavailable — approved visual identity is unchanged"));
+        }
+        return result;
+    }
+
+    Q_INVOKABLE bool setPreference(const QString &key, const QString &value) {
+        // Only the one contract-backed preference may ever reach durable state.
+        if (key != QStringLiteral("reduced_motion")
+            || !allowedValues().contains(value))
+            return false;
+        if (m_reducedMotion == value)
+            return true;
+        m_reducedMotion = value;
+        m_settings.setValue(QStringLiteral("accessibility/reduced_motion"), value);
+        m_settings.sync();
+        emit preferenceChanged(key, value);
+        return true;
+    }
+
+    QString reducedMotion() const { return m_reducedMotion; }
+
+signals:
+    void preferenceChanged(const QString &key, const QString &value);
+
+private:
+    static QString titleFor(const QString &key) {
+        if (key == QStringLiteral("reduced_motion"))
+            return QStringLiteral("Reduced motion");
+        if (key == QStringLiteral("network"))
+            return QStringLiteral("Network");
+        if (key == QStringLiteral("audio"))
+            return QStringLiteral("Sound");
+        if (key == QStringLiteral("power"))
+            return QStringLiteral("Power");
+        if (key == QStringLiteral("session"))
+            return QStringLiteral("Session");
+        if (key == QStringLiteral("shell_pack"))
+            return QStringLiteral("Shell pack");
+        if (key == QStringLiteral("notifications"))
+            return QStringLiteral("Notifications");
+        if (key == QStringLiteral("theme"))
+            return QStringLiteral("Appearance");
+        return QStringLiteral("Unknown");
+    }
+
+    static QStringList allowedValues() {
+        return { QStringLiteral("unset"), QStringLiteral("full"),
+                 QStringLiteral("reduce") };
+    }
+
+    QSettings m_settings;
+    QString m_reducedMotion;
+};
 
 // Host-side adapter for the single frozen Files dock interaction. It owns
 // no launcher logic: it forwards only the exact dock label to the existing
@@ -793,6 +894,7 @@ int main(int argc, char *argv[]) {
     const bool enableSystemApps = args.contains(QStringLiteral("--enable-system-apps"));
     SystemAppLauncher systemLauncher(enableSystemApps);
     WindowActivationState activationState;
+    SettingsPreferencesBridge settingsPreferences;
     const QString activationBackend = activationBackendId();
     activationState.applySnapshot(
         hostActivationSnapshot(systemLauncher, activationBackend, 1));
@@ -1126,6 +1228,8 @@ int main(int argc, char *argv[]) {
     engine.rootContext()->setContextProperty(
         QStringLiteral("canopySystemLauncher"), &systemLauncher);
     engine.rootContext()->setContextProperty(
+        QStringLiteral("canopySettingsPreferences"), &settingsPreferences);
+    engine.rootContext()->setContextProperty(
         QStringLiteral("canopyIconFramingReview"), framingReviewMode);
     engine.rootContext()->setContextProperty(
         QStringLiteral("canopyLandscapeWallpaperUrl"),
@@ -1207,6 +1311,55 @@ int main(int argc, char *argv[]) {
         });
         qInfo() << "CANOPY_QUICK_CONTROLS_REGISTERED: hidden until requested, "
                    "no host control bridge, no visual asset changes";
+    }
+
+    // Classic settings panel: host-side registration without editing any
+    // approved QML or artwork. Only the trusted preference bridge is injected;
+    // the panel starts hidden and every unimplemented setting stays disclosed.
+    QAction *settingsOpener = nullptr;
+    QQuickItem *settingsOverlay = nullptr;
+    {
+        QQmlComponent component(&engine,
+            QUrl(QStringLiteral("qrc:/Canopy/Classic/SettingsPanel.qml")));
+        if (!component.isReady() || component.isError()) {
+            qCritical().noquote() << "SETTINGS_PANEL_FAIL: QML component:"
+                                  << component.errorString();
+            return 1;
+        }
+        QVariantMap initial;
+        initial.insert(QStringLiteral("width"), window->contentItem()->width());
+        initial.insert(QStringLiteral("height"), window->contentItem()->height());
+        initial.insert(QStringLiteral("controller"),
+                       QVariant::fromValue<QObject *>(&settingsPreferences));
+        settingsOverlay = qobject_cast<QQuickItem *>(
+            component.createWithInitialProperties(initial, engine.rootContext()));
+        if (!settingsOverlay) {
+            qCritical().noquote() << "SETTINGS_PANEL_FAIL: could not instantiate:"
+                                  << component.errorString();
+            return 1;
+        }
+        auto *content = window->contentItem();
+        settingsOverlay->setParent(content);
+        settingsOverlay->setParentItem(content);
+        settingsOverlay->setZ(101);
+        const auto syncSettingsGeometry = [settingsOverlay, content]() {
+            settingsOverlay->setWidth(content->width());
+            settingsOverlay->setHeight(content->height());
+        };
+        QObject::connect(content, &QQuickItem::widthChanged,
+                         settingsOverlay, syncSettingsGeometry);
+        QObject::connect(content, &QQuickItem::heightChanged,
+                         settingsOverlay, syncSettingsGeometry);
+        settingsOpener = new QAction(window);
+        settingsOpener->setShortcutContext(Qt::ApplicationShortcut);
+        settingsOpener->setShortcut(QKeySequence(QStringLiteral("Ctrl+Alt+S")));
+        QObject::connect(settingsOpener, &QAction::triggered,
+                         settingsOverlay, [settingsOverlay]() {
+            QMetaObject::invokeMethod(settingsOverlay, "togglePanel",
+                                      Qt::DirectConnection);
+        });
+        qInfo() << "CANOPY_SETTINGS_PANEL_REGISTERED: hidden until requested, "
+                   "one contract-backed preference, no approved visual changes";
     }
 
     if (enableSystemApps) {
@@ -1489,6 +1642,104 @@ int main(int argc, char *argv[]) {
                    " disclosure visible, refresh disabled, close works";
         QTimer::singleShot(0, &app, &QCoreApplication::quit);
     }
+    if (args.contains(QStringLiteral("--self-test-settings"))) {
+        if (!settingsOpener || !settingsOverlay) {
+            qCritical() << "SETTINGS_FIXTURE_FAIL: panel or opener missing";
+            return 1;
+        }
+        if (settingsOverlay->property("opened").toBool()
+            || settingsOverlay->isVisible()) {
+            qCritical() << "SETTINGS_FIXTURE_FAIL: panel must start hidden";
+            return 1;
+        }
+        if (settingsOverlay->property("rowCount").toInt() != 8) {
+            qCritical() << "SETTINGS_FIXTURE_FAIL: expected eight setting rows";
+            return 1;
+        }
+        if (!QMetaObject::invokeMethod(settingsOpener, "triggered",
+                                       Qt::DirectConnection)) {
+            qCritical() << "SETTINGS_FIXTURE_FAIL: opener not invokable";
+            return 1;
+        }
+        QCoreApplication::processEvents();
+        if (!settingsOverlay->property("opened").toBool()
+            || !settingsOverlay->isVisible()) {
+            qCritical() << "SETTINGS_FIXTURE_FAIL: opener did not open panel";
+            return 1;
+        }
+        QVector<QQuickItem *> rows;
+        QVector<QQuickItem *> disclosures;
+        QVector<QQuickItem *> disabledButtons;
+        QVector<QQuickItem *> optionButtons;
+        collectVisualItems(window->contentItem(),
+                           QStringLiteral("canopySettingsRow"), &rows);
+        collectVisualItems(window->contentItem(),
+                           QStringLiteral("canopySettingsDisclosure"), &disclosures);
+        collectVisualItems(window->contentItem(),
+                           QStringLiteral("canopySettingsUnavailableButton"),
+                           &disabledButtons);
+        collectVisualItems(window->contentItem(),
+                           QStringLiteral("canopySettingsOptionButton"),
+                           &optionButtons);
+        int visibleDisabled = 0;
+        for (QQuickItem *button : disabledButtons) {
+            if (button->property("enabled").toBool()) {
+                qCritical() << "SETTINGS_FIXTURE_FAIL: unavailable setting enabled";
+                return 1;
+            }
+            if (button->isVisible())
+                ++visibleDisabled;
+        }
+        if (rows.size() != 8 || disclosures.size() != 8
+            || disabledButtons.size() != 8 || visibleDisabled != 7
+            || optionButtons.size() != 3) {
+            qCritical() << "SETTINGS_FIXTURE_FAIL: incomplete instantiated rows"
+                        << rows.size() << disclosures.size()
+                        << disabledButtons.size() << visibleDisabled
+                        << optionButtons.size();
+            return 1;
+        }
+        for (QQuickItem *label : disclosures) {
+            if (!label->property("text").toString().startsWith(
+                    QStringLiteral("Unavailable — "))
+                && !label->property("text").toString().startsWith(
+                    QStringLiteral("Saved for the host"))) {
+                qCritical() << "SETTINGS_FIXTURE_FAIL: missing honest disclosure";
+                return 1;
+            }
+        }
+        auto *systemButton = findVisualItem(window->contentItem(),
+            QStringLiteral("canopySettingsOpenSystem"));
+        if (!systemButton || systemButton->property("enabled").toBool()) {
+            qCritical() << "SETTINGS_FIXTURE_FAIL: system bridge must fail closed by default";
+            return 1;
+        }
+        // Persist only the contract-backed value; refusal must not write.
+        const QString original = settingsPreferences.reducedMotion();
+        const QString probe = original == QStringLiteral("reduce")
+                ? QStringLiteral("full") : QStringLiteral("reduce");
+        if (!settingsPreferences.setPreference(QStringLiteral("reduced_motion"), probe)
+            || settingsPreferences.reducedMotion() != probe
+            || settingsPreferences.setPreference(
+                QStringLiteral("power"), QStringLiteral("suspend"))
+            || settingsPreferences.setPreference(
+                QStringLiteral("reduced_motion"), QStringLiteral("danger"))
+            || settingsPreferences.reducedMotion() != probe) {
+            qCritical() << "SETTINGS_FIXTURE_FAIL: persistence allowlist broken";
+            return 1;
+        }
+        settingsPreferences.setPreference(QStringLiteral("reduced_motion"), original);
+        if (!QMetaObject::invokeMethod(settingsOverlay, "closePanel",
+                                       Qt::DirectConnection)
+            || settingsOverlay->isVisible()) {
+            qCritical() << "SETTINGS_FIXTURE_FAIL: panel close failed";
+            return 1;
+        }
+        qInfo() << "SELF_TEST_PASS: Classic settings panel fail closed in compiled shell";
+        qInfo() << "SETTINGS_FIXTURE_PASS: one persisted preference, seven disclosed,"
+                   " approved visuals unchanged";
+        QTimer::singleShot(0, &app, &QCoreApplication::quit);
+    }
     if (launcherFixture) {
         // Drive the actual QML overlay's choose("Files") path. CI supplies a
         // disposable GIO desktop entry and checks its marker, not a real app.
@@ -1769,7 +2020,8 @@ int main(int argc, char *argv[]) {
             ? args.at(launcherShotIndex + 1) : QString();
         QTimer::singleShot(1000, window,
             [window, screenshotPath, launcherScreenshotPath, approvedMode, landscapeMode,
-             framingReviewMode, quickSettingsExpected,
+             framingReviewMode, quickSettingsExpected, settingsOverlay,
+             settingsOpen = args.contains(QStringLiteral("--self-test-settings-open")),
              terminalCandidateMode = !terminalCandidatePath.isEmpty()]() {
             auto *bar = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBar"));
             auto *clock = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBarClock"));
@@ -1779,6 +2031,13 @@ int main(int argc, char *argv[]) {
             auto *wallpaper = window->findChild<QQuickItem *>(QStringLiteral("canopyWallpaper"));
             if (!bar || !dock || !launcher || !preview || !wallpaper) {
                 qCritical() << "SELF_TEST_FAIL: missing required desktop chrome";
+                QCoreApplication::exit(1);
+                return;
+            }
+            if (settingsOpen && settingsOverlay
+                && !QMetaObject::invokeMethod(settingsOverlay, "openPanel",
+                                              Qt::DirectConnection)) {
+                qCritical() << "SELF_TEST_FAIL: settings panel could not open for capture";
                 QCoreApplication::exit(1);
                 return;
             }

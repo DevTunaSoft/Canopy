@@ -30,25 +30,24 @@ onto the eleven pinned keyboard steps.
   The build used the disabled GIO fallback (`gio-unix-2.0` header absent), recorded as a
   build condition; no QML, C++ or asset file was edited.
 - Task-pinned integration tip: `d53f0e731da97b86883c16dc9ac23b180a19eb54` (PR #599 merge).
-- Live integration tip at PR creation: `684f706af7a5526e6f64786da9e13ff057532bc4`;
-  its delta touches only CI/docs/test files, none of them owned here or under
-  `prototype/classic`. This branch was rebased onto that tip; the gate run used source SHA
-  `9d2370f2da62a65758aa068594b9409719b451fa` (the code commit before evidence finalization).
-  No code changed afterwards; the final PR head is recorded in the PR body only.
-- Compiled binary: `canopy-classic-spike.exe`, SHA-256 `40c9724fef73815b9578391d2842792e718c8bd3c581470902ba6fb1b2de714b`.
+- Live integration tip at PR creation: `4e504dbaf45b0c974de1fd28fc5de9e65f69a0cb`;
+  its delta added the notification-centre QML/C++ and CI/docs files, none of them owned
+  here. This branch was rebased onto that tip and the compiled binary rebuilt from that
+  source; the gate run used source SHA `f800e576816cb2395cf2c66c4d3be3353d305a49` (the code commit before evidence finalization). No code changed afterwards; the final PR head is recorded in the PR body only.
+- Compiled binary: `canopy-classic-spike.exe`, SHA-256 `bf5f5cbab72ae90b953f6dddec3b2263a171d5991abebf84f55dd9f3331f0bc1`.
 - Runtime env: `QT_QPA_PLATFORM=offscreen`, `QT_FORCE_STDERR_LOGGING=1`,
   `QT_QPA_PLATFORM_PLUGIN_PATH=C:/msys64/ucrt64/share/qt6/plugins/platforms`, `DISPLAY` removed.
 - Size `1200x750`, per-invocation timeout `40 s`, two bounded
   invocations, `shell=False`, stdout/stderr capped at 128 KiB per invocation.
 
-## Exact command (run from the worktree root; source SHA `9d2370f2da62a65758aa068594b9409719b451fa`)
+## Exact command (run from the worktree root; source SHA `f800e576816cb2395cf2c66c4d3be3353d305a49`)
 
 ```
 export QT_QPA_PLATFORM_PLUGIN_PATH=C:/msys64/ucrt64/share/qt6/plugins/platforms
 python -m tools.qa.classic_keyboard_accessibility_gate \
   --source-root <worktree> \
-  --expected-source-sha 9d2370f2da62a65758aa068594b9409719b451fa \
-  --expected-binary-sha256 40c9724fef73815b9578391d2842792e718c8bd3c581470902ba6fb1b2de714b \
+  --expected-source-sha f800e576816cb2395cf2c66c4d3be3353d305a49 \
+  --expected-binary-sha256 bf5f5cbab72ae90b953f6dddec3b2263a171d5991abebf84f55dd9f3331f0bc1 \
   --compiled-binary <scratch-build>/canopy-classic-spike.exe \
   --approved-art-dir <worktree>/prototype/classic/assets/approved \
   --self-test-size 1200x750 --timeout 40 \
@@ -89,8 +88,8 @@ Observed stdout: `VERDICT PASS`, exit code `0`.
 
 Offscreen screenshots produced by the compiled binary in this run (SHA-256 recorded in
 `gate-outcome.json` and matched against the on-disk PNGs):
-- `canopy-keyboard-desktop.png`: `d0b4475b66f8bdfad6ae104329ef6973fc8eca913b56b4a53035a922ff915159`
-- `canopy-keyboard-launcher.png`: `9e8bc700d7dbe648c58d6dd89227b2af06f8c2216da1cad9b3be3ca4074a7639`
+- `canopy-keyboard-desktop.png`: `fd988a1b1f4bc30d1e55228731b60bf68848278c4564b152f17055d3c877ce63`
+- `canopy-keyboard-launcher.png`: `e4f653a088f3d52f378fe3a52113134ae9876ca85e8eec8b5665a5c09d76a251`
 
 Screenshots are functional-render evidence only; the live top-bar clock makes their bytes
 time-dependent, so they are not byte-stable across separate runs. No visual approval is claimed.
@@ -106,12 +105,12 @@ source SHA above: 18 tests, `OK`.
 
 ## Full-suite comparison
 
-- Pristine worktree at live base `684f706`: 3380 tests,
-  `OK (skipped=45)`, 359.199 s. Log `suite-livebase.txt`,
-  SHA-256 `f91fc13d8808829646c1096f8d54446cab589b1991668edf7b2a9f8fd385e029`.
-- Same worktree with this change (source SHA `9d2370f2da62a65758aa068594b9409719b451fa`): 3385 tests,
-  `OK (skipped=45)`, 362.084 s. Log `suite-final.txt`,
-  SHA-256 `dd8827fae89b817bc6c730052a82d68304b7c370764b6564e97cce1993bbca94`.
+- Pristine worktree at live base `4e504db`: 3394 tests,
+  `OK (skipped=45)`, 282.859 s. Log `suite-newbase.txt`,
+  SHA-256 `05698d488a0a8ee9126dcbbd4cf9e94afc28f3994496e40392210226ca0b9251`.
+- Same worktree with this change (source SHA `f800e576816cb2395cf2c66c4d3be3353d305a49`): 3399 tests,
+  `OK (skipped=45)`, 283.482 s. Log `suite-head.txt`,
+  SHA-256 `8517a2e1b5e491a95cf09935c97292c271f5c40b98ed98950fbe4a46cbd7f183`.
 - Delta: +5 tests, zero new failures/errors;
   FAIL/ERROR name sets are both empty.
 - Earlier comparison at the task-pinned tip `d53f0e7`: 3361 tests base versus
@@ -120,13 +119,13 @@ source SHA above: 18 tests, `OK`.
 
 ## Artifact SHA-256 index
 
-- `gate-outcome.json`: `c2c546d9da8f21e8686e8153cf6eefe76cf324a7d052feb55a7777cf164a2b73`
+- `gate-outcome.json`: `a74c72a9b33fbdd0658d3fcef32978f70184306c44b0a403c156d0ef5c212aef`
 - `gate-stdout.txt`: `06e78cf06db1b87d7dcd86029e9c125c6f5c304857e25f54e50cd0f8b0872245`
-- `self-test-markers.txt`: `4ed96774d308e288aeda31f0d49a283e1092d0c01cacf7f47b865207cf12cdfb`
-- `raw-launcher-stderr.txt`: `5c9ff7ca535859c73e9d6724c2bef3c1e6c3f86cc305979c9acddcc7834414da`
-- `raw-activation-stderr.txt`: `5997fd188e38fbc3d49736bb8f26ca2a3f844ff230da03e5ea6d1c3c21032254`
-- `canopy-keyboard-desktop.png`: `d0b4475b66f8bdfad6ae104329ef6973fc8eca913b56b4a53035a922ff915159`
-- `canopy-keyboard-launcher.png`: `9e8bc700d7dbe648c58d6dd89227b2af06f8c2216da1cad9b3be3ca4074a7639`
+- `self-test-markers.txt`: `fd53196918cba337426f58c23c07ef409a90b2522d2a7adabbb195fb993281b9`
+- `raw-launcher-stderr.txt`: `d827aa67f2078dbbfe5005655233be4988a749e03e64efbad1a634ed7dff9d97`
+- `raw-activation-stderr.txt`: `f29b1a583d1e1131eeb80c90c50e6a5d7d65e87451e0c0488a2880793ac75ab6`
+- `canopy-keyboard-desktop.png`: `fd988a1b1f4bc30d1e55228731b60bf68848278c4564b152f17055d3c877ce63`
+- `canopy-keyboard-launcher.png`: `e4f653a088f3d52f378fe3a52113134ae9876ca85e8eec8b5665a5c09d76a251`
 
 ## What this does not prove
 

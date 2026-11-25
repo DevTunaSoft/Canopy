@@ -1,9 +1,9 @@
 {
   "compiled_qt_offscreen": {
-    "binary_sha256": "40c9724fef73815b9578391d2842792e718c8bd3c581470902ba6fb1b2de714b",
+    "binary_sha256": "bf5f5cbab72ae90b953f6dddec3b2263a171d5991abebf84f55dd9f3331f0bc1",
     "compiled_self_test": {
       "binary_name": "canopy-classic-spike.exe",
-      "binary_sha256": "40c9724fef73815b9578391d2842792e718c8bd3c581470902ba6fb1b2de714b",
+      "binary_sha256": "bf5f5cbab72ae90b953f6dddec3b2263a171d5991abebf84f55dd9f3331f0bc1",
       "execution": "compiled-binary-self-test",
       "invocations": 2,
       "observed_activation_markers": [
@@ -38,6 +38,7 @@
         "launcher": [
           "SELF_TEST_PASS: local top bar clock updates and fits",
           "SELF_TEST_PASS: quick controls registered and fail closed",
+          "SELF_TEST_PASS: notification centre registered and fail closed",
           "SELF_TEST_PASS: actual launcher image component count 8",
           "SELF_TEST_PASS: actual launcher button image geometry centered 8",
           "SELF_TEST_PASS: actual Qt launcher opens, searches and closes",
@@ -60,8 +61,8 @@
         ]
       },
       "screenshots_sha256": {
-        "desktop_sha256": "d0b4475b66f8bdfad6ae104329ef6973fc8eca913b56b4a53035a922ff915159",
-        "launcher_sha256": "9e8bc700d7dbe648c58d6dd89227b2af06f8c2216da1cad9b3be3ca4074a7639"
+        "desktop_sha256": "fd988a1b1f4bc30d1e55228731b60bf68848278c4564b152f17055d3c877ce63",
+        "launcher_sha256": "e4f653a088f3d52f378fe3a52113134ae9876ca85e8eec8b5665a5c09d76a251"
       },
       "size": "1200x750",
       "step_markers": {
@@ -95,7 +96,7 @@
   "source_files_sha256": {
     "prototype/classic/DockTile.qml": "65c701a61eb9dde354acd49894e2da1311254b1d208a2fb92f337915396e263e",
     "prototype/classic/LauncherOverlay.qml": "a723ebb138ecf47ef1ff277e1ad41970e8c76d0ba77fce068dbba516480385c3",
-    "prototype/classic/Main.qml": "cf94af4d6c0dcc237d58f9542b3d7926909e55e11cceccf08c3fc7e9a6d83608",
+    "prototype/classic/Main.qml": "6d8bcaa24201441e8b6b5570fd686694cb9ce3b711d134096bc349aee3f45df7",
     "prototype/classic/PreviewWindow.qml": "22e402e418e5ffc94f9154a3135457c4f9ca6c3b9a3dbec3457ef6799081ae51",
     "prototype/classic/QuickControlsOverlay.qml": "81bfa30080437ef7715915d866f2a75eb03f7fcf1546abbb6038b7d730e08f2a",
     "prototype/classic/WindowActivationState.cpp": "f7a1d3c644f08dba78e5d6691660f609845f5f4bd6d0b8c96e1b18502b00e4ec"

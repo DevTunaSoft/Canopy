@@ -1,5 +1,6 @@
 SELF_TEST_PASS: local top bar clock updates and fits
 SELF_TEST_PASS: quick controls registered and fail closed
+SELF_TEST_PASS: notification centre registered and fail closed
 SELF_TEST_PASS: actual launcher image component count 8
 SELF_TEST_PASS: actual launcher button image geometry centered 8
 SELF_TEST_PASS: actual Qt launcher opens, searches and closes

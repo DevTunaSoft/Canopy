@@ -20,6 +20,18 @@
 ## Validation evidence
 Record commit SHA, hardware, distro/kernel, graphics driver, compositor, commands, duration, before/after metrics, screenshots, and PASS/FAIL/BLOCKED/NOT RUN. Never report a target as a measurement.
 
+### Compiled Qt pixel-gate compositing noise
+
+`tools/check_five_dock_centering.py` compares screenshots from separate headless
+Xvfb processes. The software renderer may round the translucent dock by one
+8-bit RGB level inside the dock rectangle, including inside a frozen icon
+slot. That specific noise is recorded, not rejected, only when alpha is
+unchanged, every channel delta is at most one and the count stays bounded
+(eight pixels per frozen icon and 256 across the run). Any larger artwork
+delta, alpha change, out-of-dock change, missing target icon or other desktop
+change still fails closed. This is runtime evidence only: it never infers
+visual approval or replaces real Linux Mint acceptance.
+
 ## PR acceptance
 Unit and integration tests green, no unexplained performance regression, original asset licensing checked, docs current, and user-visible visuals reviewed. Keep a PR draft only until exact-SHA evidence and independent review exist; then promote eligible nonvisual work within the current integration cycle.
 

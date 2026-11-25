@@ -37,7 +37,9 @@ class ClassicWindowActivationHostTests(unittest.TestCase):
                                (SOURCE, PR573_SOURCE_SHA)):
             with self.subTest(path=path.name):
                 self.assertTrue(path.is_file())
-                self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(),
+                normalized = path.read_text(encoding="utf-8").replace(
+                    chr(13) + chr(10), "\n").encode("utf-8")
+                self.assertEqual(hashlib.sha256(normalized).hexdigest(),
                                  expected)
 
     def test_shell_build_registers_component_and_qml_adapter(self):

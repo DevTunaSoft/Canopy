@@ -1,0 +1,144 @@
+{
+  "schema": 1,
+  "description": "Cross-language fail-closed contract vectors for WindowActivationState. Each case starts from a fresh instance; optional preapply is applied first.",
+  "cases": [
+    {
+      "name": "empty_snapshot_untrusted",
+      "snapshot": {},
+      "expected": {"applied": false, "trusted": false, "status": "UNAVAILABLE", "sequence": -1, "running": [], "active": [], "resolutions": {"Files|Canopy": "REJECT"}}
+    },
+    {
+      "name": "fresh_valid_indicators_and_intents",
+      "snapshot": {
+        "schema": 1, "backend": "x11", "negotiation": "PARTIAL", "sequence": 1,
+        "installed": ["Browser", "Files"],
+        "owners": [{"pid": 101, "app_id": "Files"}],
+        "grants": [["Canopy", "Files"]],
+        "launcherEnabled": true,
+        "focus": {"app_id": "Files", "window_id": 7, "serial": 1, "status": "GRANTED"}
+      },
+      "expected": {"applied": true, "trusted": true, "status": "READY", "sequence": 1, "running": ["Files"], "active": ["Files"], "resolutions": {"Files|Canopy": "FOCUS", "Browser|Canopy": "LAUNCH", "Files|Mail": "REJECT", "Settings|Canopy": "REJECT"}}
+    },
+    {
+      "name": "stale_sequence_ignored",
+      "preapply": {
+        "schema": 1, "backend": "x11", "negotiation": "PARTIAL", "sequence": 1,
+        "installed": ["Browser", "Files"], "owners": [{"pid": 101, "app_id": "Files"}],
+        "grants": [["Canopy", "Files"]], "launcherEnabled": true,
+        "focus": {"app_id": "Files", "window_id": 7, "serial": 1, "status": "GRANTED"}
+      },
+      "snapshot": {
+        "schema": 1, "backend": "wayland", "negotiation": "SUPPORTED", "sequence": 0,
+        "installed": [], "owners": [], "grants": [], "launcherEnabled": false
+      },
+      "expected": {"applied": false, "trusted": true, "status": "READY", "sequence": 1, "running": ["Files"], "active": ["Files"], "resolutions": {"Files|Canopy": "FOCUS"}}
+    },
+    {
+      "name": "duplicate_pid_clears_all_indicators",
+      "snapshot": {
+        "schema": 1, "backend": "x11", "negotiation": "SUPPORTED", "sequence": 3,
+        "installed": ["Files", "Mail"],
+        "owners": [{"pid": 101, "app_id": "Files"}, {"pid": 101, "app_id": "Mail"}],
+        "grants": [], "launcherEnabled": true
+      },
+      "expected": {"applied": false, "trusted": false, "status": "UNAVAILABLE", "sequence": -1, "running": [], "active": [], "resolutions": {"Files|Canopy": "REJECT"}}
+    },
+    {
+      "name": "unknown_backend_fails_closed",
+      "snapshot": {
+        "schema": 1, "backend": "mutter", "negotiation": "SUPPORTED", "sequence": 1,
+        "installed": ["Files"], "owners": [{"pid": 101, "app_id": "Files"}],
+        "grants": [], "launcherEnabled": true
+      },
+      "expected": {"applied": false, "trusted": false, "status": "UNAVAILABLE", "sequence": -1, "running": [], "active": [], "resolutions": {"Files|Canopy": "REJECT"}}
+    },
+    {
+      "name": "unapproved_owner_app_fails_closed",
+      "snapshot": {
+        "schema": 1, "backend": "x11", "negotiation": "SUPPORTED", "sequence": 1,
+        "installed": ["Files"], "owners": [{"pid": 101, "app_id": "nemo"}],
+        "grants": [], "launcherEnabled": true
+      },
+      "expected": {"applied": false, "trusted": false, "status": "UNAVAILABLE", "sequence": -1, "running": [], "active": [], "resolutions": {"Files|Canopy": "REJECT"}}
+    },
+    {
+      "name": "launcher_disabled_returns_ignore",
+      "snapshot": {
+        "schema": 1, "backend": "x11", "negotiation": "SUPPORTED", "sequence": 2,
+        "installed": ["Browser", "Files"], "owners": [{"pid": 101, "app_id": "Files"}],
+        "grants": [["Canopy", "Files"]], "launcherEnabled": false
+      },
+      "expected": {"applied": true, "trusted": true, "status": "READY", "sequence": 2, "running": ["Files"], "active": [], "resolutions": {"Files|Canopy": "IGNORE", "Browser|Canopy": "REJECT"}}
+    },
+    {
+      "name": "non_granted_focus_is_not_active",
+      "snapshot": {
+        "schema": 1, "backend": "x11", "negotiation": "SUPPORTED", "sequence": 2,
+        "installed": ["Files"], "owners": [{"pid": 101, "app_id": "Files"}],
+        "grants": [["Canopy", "Files"]], "launcherEnabled": true,
+        "focus": {"app_id": "Files", "window_id": 7, "serial": 1, "status": "DENIED"}
+      },
+      "expected": {"applied": true, "trusted": true, "status": "READY", "sequence": 2, "running": ["Files"], "active": [], "resolutions": {"Files|Canopy": "FOCUS"}}
+    },
+    {
+      "name": "cross_app_focus_requires_explicit_grant",
+      "snapshot": {
+        "schema": 1, "backend": "x11", "negotiation": "PARTIAL", "sequence": 1,
+        "installed": ["Files"], "owners": [{"pid": 101, "app_id": "Files"}],
+        "grants": [], "launcherEnabled": true,
+        "focus": {"app_id": "Files", "window_id": 7, "serial": 1, "status": "GRANTED"}
+      },
+      "expected": {"applied": true, "trusted": true, "status": "READY", "sequence": 1, "running": ["Files"], "active": ["Files"], "resolutions": {"Files|Canopy": "REJECT", "Files|Files": "FOCUS"}}
+    },
+    {
+      "name": "boolean_sequence_rejected",
+      "snapshot": {
+        "schema": 1, "backend": "x11", "negotiation": "SUPPORTED", "sequence": true,
+        "installed": [], "owners": [], "grants": [], "launcherEnabled": true
+      },
+      "expected": {"applied": false, "trusted": false, "status": "UNAVAILABLE", "sequence": -1, "running": [], "active": [], "resolutions": {"Files|Canopy": "REJECT"}}
+    },
+    {
+      "name": "non_integral_sequence_rejected",
+      "snapshot": {
+        "schema": 1, "backend": "x11", "negotiation": "SUPPORTED", "sequence": 1.5,
+        "installed": [], "owners": [], "grants": [], "launcherEnabled": true
+      },
+      "expected": {"applied": false, "trusted": false, "status": "UNAVAILABLE", "sequence": -1, "running": [], "active": [], "resolutions": {"Files|Canopy": "REJECT"}}
+    },
+    {
+      "name": "pid_zero_rejected",
+      "snapshot": {
+        "schema": 1, "backend": "x11", "negotiation": "SUPPORTED", "sequence": 1,
+        "installed": [], "owners": [{"pid": 0, "app_id": "Files"}],
+        "grants": [], "launcherEnabled": true
+      },
+      "expected": {"applied": false, "trusted": false, "status": "UNAVAILABLE", "sequence": -1, "running": [], "active": [], "resolutions": {"Files|Canopy": "REJECT"}}
+    },
+    {
+      "name": "extra_keys_ignored_by_allowlist",
+      "snapshot": {
+        "schema": 1, "backend": "headless", "negotiation": "UNSUPPORTED", "sequence": 4,
+        "installed": [], "owners": [], "grants": [], "launcherEnabled": false,
+        "unknownField": "ignored"
+      },
+      "expected": {"applied": true, "trusted": true, "status": "READY", "sequence": 4, "running": [], "active": [], "resolutions": {"Files|Canopy": "REJECT"}}
+    },
+    {
+      "name": "per_app_pid_bound_rejected",
+      "snapshot": {
+        "schema": 1, "backend": "x11", "negotiation": "SUPPORTED", "sequence": 1,
+        "installed": ["Files"],
+        "owners": [
+          {"pid": 1, "app_id": "Files"}, {"pid": 2, "app_id": "Files"},
+          {"pid": 3, "app_id": "Files"}, {"pid": 4, "app_id": "Files"},
+          {"pid": 5, "app_id": "Files"}, {"pid": 6, "app_id": "Files"},
+          {"pid": 7, "app_id": "Files"}, {"pid": 8, "app_id": "Files"},
+          {"pid": 9, "app_id": "Files"}
+        ],
+        "grants": [], "launcherEnabled": true
+      },
+      "expected": {"applied": false, "trusted": false, "status": "UNAVAILABLE", "sequence": -1, "running": [], "active": [], "resolutions": {"Files|Canopy": "REJECT"}}
+    }
+  ]
+}

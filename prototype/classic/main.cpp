@@ -1006,6 +1006,229 @@ static bool verifyLandscapeWallpaper(const QString &filePath,
     return true;
 }
 
+// In-process host-state controller for Classic quick controls. It reuses the
+// already-defined canopy_core.host_events v2 contract: the trusted owner
+// delivers an *already-produced*, bounded payload on an allowlisted topic
+// directly in this process. This class never creates an event bus, subscribes
+// to a transport, opens a socket, starts a service/daemon, spawns a process or
+// changes the host. No new topic or field name is introduced; every label is a
+// fixed token from canopy_features.system.quick_controls_state. QML receives
+// only view(domain), the same contract the Python adapter implements.
+class QuickControlsHostStateController final : public QObject {
+    Q_OBJECT
+public:
+    explicit QuickControlsHostStateController(QObject *parent = nullptr)
+        : QObject(parent) {}
+
+    // Trusted, in-process delivery. The whole payload is validated before any
+    // member changes; a malformed field leaves the previous snapshot intact
+    // (fail closed). Unknown fields belong to other consumers: ignored, never
+    // echoed. No caller text ever reaches a status label.
+    Q_INVOKABLE bool applyHostEvent(const QString &topic, const QVariantMap &payload) {
+        static const QSet<QString> allowedTopics = {
+            QStringLiteral("capabilities.report"),
+            QStringLiteral("app.catalog.changed"),
+            QStringLiteral("window.state.changed"),
+            QStringLiteral("session.state.changed"),
+        };
+        if (!allowedTopics.contains(topic))
+            return false;
+
+        bool haveNetwork = false, network = false;
+        bool haveMuted = false, muted = false;
+        bool haveCharging = false, charging = false;
+        int volume = -1, brightness = -1;
+        bool settingsBridge = m_settingsBridge;
+        QString source = m_source;
+        for (auto it = payload.cbegin(); it != payload.cend(); ++it) {
+            const QString key = it.key();
+            const QVariant value = it.value();
+            if (key == QStringLiteral("network_connected")) {
+                if (value.metaType() != QMetaType(QMetaType::Bool))
+                    return false;
+                network = value.toBool();
+                haveNetwork = true;
+            } else if (key == QStringLiteral("audio_muted")) {
+                if (value.metaType() != QMetaType(QMetaType::Bool))
+                    return false;
+                muted = value.toBool();
+                haveMuted = true;
+            } else if (key == QStringLiteral("battery_charging")) {
+                if (value.metaType() != QMetaType(QMetaType::Bool))
+                    return false;
+                charging = value.toBool();
+                haveCharging = true;
+            } else if (key == QStringLiteral("volume_percent")
+                       || key == QStringLiteral("brightness_percent")) {
+                // A bool is an int in Qt's variant system: reject it explicitly
+                // so a hostile caller cannot turn "true" into volume 1.
+                if (value.metaType() != QMetaType(QMetaType::Int))
+                    return false;
+                const int percent = value.toInt();
+                if (percent < 0 || percent > 100)
+                    return false;
+                if (key == QStringLiteral("volume_percent"))
+                    volume = percent;
+                else
+                    brightness = percent;
+            } else if (key == QStringLiteral("settings_bridge")) {
+                if (value.metaType() != QMetaType(QMetaType::Bool))
+                    return false;
+                settingsBridge = value.toBool();
+            } else if (key == QStringLiteral("source")) {
+                if (value.metaType() != QMetaType(QMetaType::QString))
+                    return false;
+                source = value.toString();
+                if (source.size() > 64)
+                    return false;
+                for (const QChar ch : source) {
+                    const ushort code = ch.unicode();
+                    const bool legal = (code >= 'a' && code <= 'z')
+                        || (code >= '0' && code <= '9')
+                        || code == '_' || code == '.' || code == ':'
+                        || code == '-';
+                    if (!legal)
+                        return false;
+                }
+            }
+            // Other consumers' fields are ignored; nothing is interpolated.
+        }
+
+        // Commit only after every field passed validation.
+        m_hasNetwork = haveNetwork;
+        m_network = network;
+        m_hasMuted = haveMuted;
+        m_muted = muted;
+        m_hasCharging = haveCharging;
+        m_charging = charging;
+        m_volume = volume;
+        m_brightness = brightness;
+        m_settingsBridge = settingsBridge;
+        m_source = source;
+        emit viewChanged();
+        return true;
+    }
+
+    // The single read-only view() surface consumed by QuickControlsOverlay.qml.
+    Q_INVOKABLE QVariantMap view(const QString &domain) const {
+        QVariantMap result;
+        if (domain != QStringLiteral("network") && domain != QStringLiteral("audio")
+                && domain != QStringLiteral("power")
+                && domain != QStringLiteral("session")) {
+            result.insert(QStringLiteral("domain"), QStringLiteral("unknown"));
+            result.insert(QStringLiteral("status"), QStringLiteral("unknown"));
+            result.insert(QStringLiteral("status_label"),
+                          QStringLiteral("Unknown — no host status"));
+            result.insert(QStringLiteral("source"), QStringLiteral("none"));
+            result.insert(QStringLiteral("observed"), false);
+            result.insert(QStringLiteral("availability"), QStringLiteral("UNAVAILABLE"));
+            insertDecision(result, QStringLiteral("control"), false,
+                           QStringLiteral("invalid-domain"));
+            insertDecision(result, QStringLiteral("settings"), false,
+                           QStringLiteral("invalid-domain"));
+            return result;
+        }
+
+        QString token;
+        bool observed = false;
+        if (domain == QStringLiteral("network") && m_hasNetwork) {
+            token = m_network ? QStringLiteral("connected")
+                              : QStringLiteral("disconnected");
+            observed = true;
+        } else if (domain == QStringLiteral("audio") && m_hasMuted) {
+            token = m_muted ? QStringLiteral("muted") : QStringLiteral("unmuted");
+            observed = true;
+        } else if (domain == QStringLiteral("power") && m_hasCharging) {
+            token = m_charging ? QStringLiteral("charging")
+                               : QStringLiteral("discharging");
+            observed = true;
+        }
+        // Session stays unknown: the compiled shell has no reconciled session
+        // source and must not invent one.
+
+        result.insert(QStringLiteral("domain"), domain);
+        result.insert(QStringLiteral("status"),
+                      token.isEmpty() ? QStringLiteral("unknown") : token);
+        result.insert(QStringLiteral("status_label"), labelFor(token));
+        result.insert(QStringLiteral("source"),
+                      observed ? m_source : QStringLiteral("none"));
+        result.insert(QStringLiteral("observed"), observed);
+
+        const bool privileged = domain == QStringLiteral("power")
+                             || domain == QStringLiteral("session");
+        insertDecision(result, QStringLiteral("control"), false,
+                       privileged ? QStringLiteral("privileged-host-change")
+                                  : QStringLiteral("no-host-interface"));
+        insertDecision(result, QStringLiteral("settings"), m_settingsBridge,
+                       m_settingsBridge ? QStringLiteral("ok")
+                                        : QStringLiteral("bridge-disabled"));
+        result.insert(QStringLiteral("availability"),
+                      m_settingsBridge ? QStringLiteral("AVAILABLE")
+                                       : QStringLiteral("UNAVAILABLE"));
+
+        QString kind;
+        int value = -1;
+        if (domain == QStringLiteral("audio") && m_volume >= 0) {
+            kind = QStringLiteral("volume");
+            value = m_volume;
+        } else if (domain == QStringLiteral("power") && m_brightness >= 0) {
+            kind = QStringLiteral("brightness");
+            value = m_brightness;
+        }
+        result.insert(QStringLiteral("detail_kind"), kind);
+        result.insert(QStringLiteral("detail_value"), value);
+        return result;
+    }
+
+signals:
+    // Emitted only after a complete, validated commit. The compiled shell
+    // rebinds the existing hostState property so QML bindings that call
+    // view() are invalidated without editing any visual QML.
+    void viewChanged();
+
+private:
+    static QString labelFor(const QString &token) {
+        if (token == QStringLiteral("connected")) return QStringLiteral("Connected");
+        if (token == QStringLiteral("disconnected")) return QStringLiteral("Not connected");
+        if (token == QStringLiteral("muted")) return QStringLiteral("Muted");
+        if (token == QStringLiteral("unmuted")) return QStringLiteral("Sound on");
+        if (token == QStringLiteral("charging")) return QStringLiteral("Charging");
+        if (token == QStringLiteral("discharging")) return QStringLiteral("On battery");
+        return QStringLiteral("Unknown — no host status");
+    }
+
+    static void insertDecision(QVariantMap &view, const QString &key,
+                               bool allowed, const QString &reason) {
+        QString disclosure;
+        if (reason == QStringLiteral("ok"))
+            disclosure = QStringLiteral("Available");
+        else if (reason == QStringLiteral("bridge-disabled"))
+            disclosure = QStringLiteral("Unavailable — host control bridge disabled");
+        else if (reason == QStringLiteral("privileged-host-change"))
+            disclosure = QStringLiteral("Unavailable — privileged host changes are not performed");
+        else if (reason == QStringLiteral("invalid-domain"))
+            disclosure = QStringLiteral("Unavailable — unknown control domain");
+        else
+            disclosure = QStringLiteral("Unavailable — no host control interface");
+        QVariantMap decision;
+        decision.insert(QStringLiteral("allowed"), allowed);
+        decision.insert(QStringLiteral("reason"), reason);
+        decision.insert(QStringLiteral("disclosure"), disclosure);
+        view.insert(key, decision);
+    }
+
+    bool m_hasNetwork = false;
+    bool m_network = false;
+    bool m_hasMuted = false;
+    bool m_muted = false;
+    bool m_hasCharging = false;
+    bool m_charging = false;
+    int m_volume = -1;
+    int m_brightness = -1;
+    bool m_settingsBridge = false;
+    QString m_source = QStringLiteral("host-events");
+};
+
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
     QGuiApplication::setApplicationDisplayName(QStringLiteral("Canopy Classic Spike"));
@@ -1016,6 +1239,9 @@ int main(int argc, char *argv[]) {
     SystemAppLauncher systemLauncher(enableSystemApps);
     WindowActivationState activationState;
     SettingsPreferencesBridge settingsPreferences;
+    // Declared before the QQmlApplicationEngine below so this trusted controller
+    // outlives the engine, the context property and every QML object using it.
+    QuickControlsHostStateController hostStateController;
     const QString activationBackend = activationBackendId();
     activationState.applySnapshot(
         hostActivationSnapshot(systemLauncher, activationBackend, 1));
@@ -1370,6 +1596,24 @@ int main(int argc, char *argv[]) {
     NotificationHostSource notificationSource;
     engine.rootContext()->setContextProperty(
         QStringLiteral("canopyNotificationSource"), &notificationSource);
+    // Real in-process host-state injection: the trusted shell delivers one
+    // bounded, already-produced payload on an existing host-event topic. No
+    // bus, transport, process or privileged write is created. The controller
+    // is read-only to QML and declared before the engine, so it outlives every
+    // object that points at it.
+    {
+        QVariantMap hostFacts;
+        hostFacts.insert(QStringLiteral("source"), QStringLiteral("host-events"));
+        hostFacts.insert(QStringLiteral("settings_bridge"),
+                         enableSystemApps
+                         && systemLauncher.canLaunch(QStringLiteral("Settings")));
+        if (!hostStateController.applyHostEvent(
+                QStringLiteral("capabilities.report"), hostFacts))
+            qWarning() << "CANOPY_QUICK_CONTROLS_HOST_REJECTED_FAIL_CLOSED";
+    }
+    engine.rootContext()->setContextProperty(
+        QStringLiteral("canopyHostState"), &hostStateController);
+    qInfo() << "CANOPY_QUICK_CONTROLS_HOST_INJECTED: in-process view() only";
     engine.load(QUrl(QStringLiteral("qrc:/Canopy/Classic/Main.qml")));
     if (engine.rootObjects().isEmpty())
         return 1;
@@ -1404,6 +1648,8 @@ int main(int argc, char *argv[]) {
         QVariantMap initial;
         initial.insert(QStringLiteral("width"), window->contentItem()->width());
         initial.insert(QStringLiteral("height"), window->contentItem()->height());
+        initial.insert(QStringLiteral("hostState"),
+                       QVariant::fromValue(static_cast<QObject *>(&hostStateController)));
         quickControlsOverlay = qobject_cast<QQuickItem *>(
             component.createWithInitialProperties(initial, engine.rootContext()));
         if (!quickControlsOverlay) {
@@ -1423,6 +1669,18 @@ int main(int argc, char *argv[]) {
                          quickControlsOverlay, syncGeometry);
         QObject::connect(content, &QQuickItem::heightChanged,
                          quickControlsOverlay, syncGeometry);
+        // A trusted host update invalidates the live view() bindings without
+        // touching any visual QML: rebind the same controller on the overlay.
+        // The connection is scoped to the overlay, which is owned by the QML
+        // engine; the controller is declared before the engine and outlives it.
+        QObject::connect(&hostStateController,
+                         &QuickControlsHostStateController::viewChanged,
+                         quickControlsOverlay,
+                         [quickControlsOverlay, &hostStateController]() {
+            quickControlsOverlay->setProperty("hostState", QVariant());
+            quickControlsOverlay->setProperty("hostState",
+                QVariant::fromValue(static_cast<QObject *>(&hostStateController)));
+        });
         quickControlsShortcut = new QShortcut(
             QKeySequence(QStringLiteral("Ctrl+Alt+Q")), window);
         QObject::connect(quickControlsShortcut, &QShortcut::activated,
@@ -1733,6 +1991,111 @@ int main(int argc, char *argv[]) {
         qInfo() << "SELF_TEST_PASS: quick controls registered in compiled shell";
         qInfo() << "QUICK_CONTROLS_FIXTURE_PASS: opener wired, four domains fail closed,"
                    " approved visuals unchanged";
+        QTimer::singleShot(0, &app, &QCoreApplication::quit);
+    }
+    if (args.contains(QStringLiteral("--self-test-quick-controls-host"))) {
+        // Prove the *compiled* path: a trusted in-process host event updates
+        // the injected controller and the live QML scene renders bounded real
+        // values, while privileged controls stay denied and hostile input is
+        // rejected atomically. No bus, socket, process or host change is used.
+        if (!quickControlsOverlay || !quickControlsShortcut) {
+            qCritical() << "QUICK_CONTROLS_HOST_FIXTURE_FAIL: overlay/opener missing";
+            return 1;
+        }
+        QObject *wired = quickControlsOverlay->property("hostState").value<QObject *>();
+        if (wired != &hostStateController) {
+            qCritical() << "QUICK_CONTROLS_HOST_FIXTURE_FAIL: controller not wired";
+            return 1;
+        }
+        QVariantMap facts;
+        facts.insert(QStringLiteral("network_connected"), true);
+        facts.insert(QStringLiteral("audio_muted"), false);
+        facts.insert(QStringLiteral("battery_charging"), false);
+        facts.insert(QStringLiteral("volume_percent"), 42);
+        facts.insert(QStringLiteral("brightness_percent"), 68);
+        facts.insert(QStringLiteral("source"), QStringLiteral("host-events"));
+        if (!hostStateController.applyHostEvent(
+                QStringLiteral("capabilities.report"), facts)) {
+            qCritical() << "QUICK_CONTROLS_HOST_FIXTURE_FAIL: bounded event rejected";
+            return 1;
+        }
+        if (!QMetaObject::invokeMethod(quickControlsShortcut, "activated",
+                                       Qt::DirectConnection)) {
+            qCritical() << "QUICK_CONTROLS_HOST_FIXTURE_FAIL: opener not invokable";
+            return 1;
+        }
+        QCoreApplication::processEvents();
+        if (!quickControlsOverlay->property("opened").toBool()) {
+            qCritical() << "QUICK_CONTROLS_HOST_FIXTURE_FAIL: overlay did not open";
+            return 1;
+        }
+        auto *content = window->contentItem();
+        QVector<QQuickItem *> statuses;
+        QVector<QQuickItem *> disclosures;
+        QVector<QQuickItem *> controlButtons;
+        collectVisualItems(content, QStringLiteral("canopyQuickStatus"), &statuses);
+        collectVisualItems(content, QStringLiteral("canopyQuickDisclosure"), &disclosures);
+        collectVisualItems(content, QStringLiteral("canopyQuickControlButton"),
+                           &controlButtons);
+        const QStringList expected = {
+            QStringLiteral("Connected"),
+            QStringLiteral("Sound on · Volume 42%"),
+            QStringLiteral("On battery · Brightness 68%"),
+            QStringLiteral("Unknown — no host status"),
+        };
+        if (statuses.size() != expected.size() || disclosures.size() != 4
+                || controlButtons.size() != 4) {
+            qCritical() << "QUICK_CONTROLS_HOST_FIXTURE_FAIL: incomplete row scene";
+            return 1;
+        }
+        for (int i = 0; i < expected.size(); ++i) {
+            if (statuses.at(i)->property("text").toString() != expected.at(i)) {
+                qCritical().noquote() << "QUICK_CONTROLS_HOST_FIXTURE_FAIL: row"
+                                      << i << statuses.at(i)->property("text").toString();
+                return 1;
+            }
+        }
+        for (QQuickItem *label : disclosures) {
+            if (!label->property("text").toString().startsWith(
+                    QStringLiteral("Unavailable — "))) {
+                qCritical() << "QUICK_CONTROLS_HOST_FIXTURE_FAIL: disclosure lost";
+                return 1;
+            }
+        }
+        for (QQuickItem *button : controlButtons) {
+            if (button->property("enabled").toBool()) {
+                qCritical() << "QUICK_CONTROLS_HOST_FIXTURE_FAIL: privileged/direct control enabled";
+                return 1;
+            }
+        }
+        // Atomic rejection: malformed value or unlisted topic must leave the
+        // rendered observations byte-for-byte unchanged.
+        QVariantMap hostile;
+        hostile.insert(QStringLiteral("volume_percent"), 999);
+        hostile.insert(QStringLiteral("network_connected"), QStringLiteral("true"));
+        if (hostStateController.applyHostEvent(
+                QStringLiteral("capabilities.report"), hostile)
+                || hostStateController.applyHostEvent(
+                    QStringLiteral("wifi.scan.changed"), facts)) {
+            qCritical() << "QUICK_CONTROLS_HOST_FIXTURE_FAIL: hostile event accepted";
+            return 1;
+        }
+        QCoreApplication::processEvents();
+        for (int i = 0; i < expected.size(); ++i) {
+            if (statuses.at(i)->property("text").toString() != expected.at(i)) {
+                qCritical() << "QUICK_CONTROLS_HOST_FIXTURE_FAIL: hostile event mutated view";
+                return 1;
+            }
+        }
+        if (!QMetaObject::invokeMethod(quickControlsOverlay, "closeControls",
+                                       Qt::DirectConnection)) {
+            qCritical() << "QUICK_CONTROLS_HOST_FIXTURE_FAIL: overlay close failed";
+            return 1;
+        }
+        QCoreApplication::processEvents();
+        qInfo() << "SELF_TEST_PASS: quick-controls host state rendered in compiled shell";
+        qInfo() << "QUICK_CONTROLS_HOST_SELF_TEST_PASS: wired=ok details=ok "
+                   "privileged=denied hostile=rejected visuals=unchanged";
         QTimer::singleShot(0, &app, &QCoreApplication::quit);
     }
     if (args.contains(QStringLiteral("--self-test-notification-center"))) {

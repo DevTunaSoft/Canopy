@@ -8,6 +8,7 @@ claim Qt, artwork, theme or Linux Mint acceptance.
 import importlib.util
 import json
 import os
+import posixpath
 from pathlib import Path
 import stat
 import tempfile
@@ -297,6 +298,100 @@ class NoPrivilegedWriteTests(_BoundedTempMixin, unittest.TestCase):
         self.assertTrue(store.set("reduced_motion", motion.FULL))
         self.assertEqual(stat.S_IMODE(store.path.stat().st_mode), 0o600)
         self.assertEqual(stat.S_IMODE(store.path.parent.stat().st_mode), 0o700)
+
+
+
+class WindowsPrivilegedSeparatorTests(_BoundedTempMixin, unittest.TestCase):
+    """PR #618 QA: separator spelling must not open the privileged gate.
+
+    ``_is_privileged_path`` branches on ``os.name``. A POSIX interpreter
+    receiving a Windows-style path kept the privileged prefixes unmatched,
+    so the same system location was refused on one host branch and accepted
+    on the other. Patching only ``os.name`` exercises that branch decision on
+    any host; ``os.path`` stays the native module so no fixture depends on a
+    host-specific pathlib rendering.
+    """
+
+    _PRIVILEGED = (
+        "C:/WINDOWS/System32/canopy-preferences.json",
+        "C:\\WINDOWS\\System32\\canopy-preferences.json",
+        "C:/WINDOWS\\System32/canopy-preferences.json",
+        "c:/windows/system32/canopy-preferences.json",
+        "C:/Program Files/App/canopy-preferences.json",
+        "C:/ProgramData/App/canopy-preferences.json",
+    )
+
+    _ORDINARY = (
+        "C:/Users/alice/.config/preferences.json",
+        "C:\\Users\\alice\\AppData\\Roaming\\preferences.json",
+        "C:/projects/canopy/state/preferences.json",
+        "/home/alice/.config/preferences.json",
+    )
+
+    def _host_branch(self, name):
+        return mock.patch.object(source.os, "name", name)
+
+    def test_windows_system_prefix_matches_either_separator(self):
+        for text in self._PRIVILEGED:
+            for name in ("posix", "nt"):
+                with self.subTest(path=text, host=name):
+                    with self._host_branch(name):
+                        self.assertTrue(source._is_privileged_path(text))
+
+    def test_windows_prefix_ignores_the_active_os_path_module(self):
+        # Foundation CI runs on Linux: os.path is posixpath even when a test
+        # exercises the nt branch. A drive-qualified system path must still
+        # be recognized; the branch must not depend on splitdrive's module.
+        for text in self._PRIVILEGED:
+            for name in ("nt", "posix"):
+                with self.subTest(path=text, host=name):
+                    with mock.patch.object(source.os, "path", posixpath), \
+                            self._host_branch(name):
+                        self.assertTrue(source._is_privileged_path(text))
+
+    def test_ordinary_user_paths_are_not_privileged_with_either_separator(self):
+        for text in self._ORDINARY:
+            for name in ("posix", "nt"):
+                with self.subTest(path=text, host=name):
+                    with self._host_branch(name):
+                        self.assertFalse(source._is_privileged_path(text))
+
+    def test_windows_privileged_path_is_refused_without_any_write(self):
+        for text in ("C:/WINDOWS/System32/canopy-preferences.json",
+                     "C:\\WINDOWS\\System32\\canopy-preferences.json",
+                     "C:/WINDOWS\\System32/canopy-preferences.json"):
+            with self.subTest(path=text):
+                with self._host_branch("posix"):
+                    with mock.patch("pathlib.Path.mkdir") as mkdir, \
+                            mock.patch("os.replace") as replace, \
+                            mock.patch("os.chmod") as chmod, \
+                            mock.patch("tempfile.NamedTemporaryFile") as tmp:
+                        with self.assertRaises(PersistedPreferencesError) as ctx:
+                            PersistedPreferences(text)
+                        self.assertIn("privileged", str(ctx.exception))
+                        for call in (mkdir, replace, chmod, tmp):
+                            self.assertFalse(call.called)
+
+    def test_escape_and_symlink_attempts_with_mixed_separators_still_refuse(self):
+        root = self._root()
+        outside = self._root()
+        alias = root / "alias"
+        self._link(outside, alias)
+        attempts = (
+            str(root) + "/alias/../users/alice/preferences.json",
+            str(alias / "users" / "alice" / "preferences.json"),
+        )
+        for text in attempts:
+            with self.subTest(path=text):
+                with self._host_branch("posix"):
+                    with mock.patch("pathlib.Path.mkdir") as mkdir, \
+                            mock.patch("os.replace") as replace, \
+                            mock.patch("os.chmod") as chmod, \
+                            mock.patch("tempfile.NamedTemporaryFile") as tmp:
+                        with self.assertRaises(PersistedPreferencesError):
+                            PersistedPreferences(text, root=root)
+                        for call in (mkdir, replace, chmod, tmp):
+                            self.assertFalse(call.called)
 
 
 if __name__ == "__main__":

@@ -148,8 +148,68 @@ jobs:
           XDG_DATA_HOME="$PWD/test-artifacts/mail-status-xdg" XDG_DATA_DIRS="$PWD/test-artifacts/mail-status-xdg" \
             xvfb-run -a ./build/classic/canopy-classic-spike --enable-system-apps --approved-art-dir prototype/classic/assets/approved --self-test-mail-dock-status
 
-      - name: Verify Browser and Mail dock source contracts
-        run: python3 -m unittest tests.test_classic_browser_dock_integration tests.test_classic_mail_dock_integration tests.test_classic_desktop_integration -v
+      - name: Verify Calendar dock reaches the real GIO launcher
+        timeout-minutes: 3
+        run: |
+          set -e
+          mkdir -p test-artifacts/calendar-gio-xdg/applications
+          marker="$PWD/test-artifacts/calendar-dock-launch-marker"
+          rm -f "$marker"
+          printf '[Desktop Entry]\nType=Application\nName=Canopy Calendar Dock Fixture\nExec=/bin/sh -c "touch %s"\nNoDisplay=false\nTerminal=false\n' "$marker" > test-artifacts/calendar-gio-xdg/applications/org.gnome.Calendar.desktop
+          XDG_DATA_HOME="$PWD/test-artifacts/calendar-gio-xdg" XDG_DATA_DIRS="$PWD/test-artifacts/calendar-gio-xdg" \
+            xvfb-run -a ./build/classic/canopy-classic-spike --enable-system-apps --approved-art-dir prototype/classic/assets/approved --self-test-calendar-dock-fixture
+          test -f "$marker"
+
+      - name: Verify Calendar dock refusal is visible without the app
+        timeout-minutes: 3
+        run: |
+          set -e
+          mkdir -p test-artifacts/calendar-status-xdg/applications
+          XDG_DATA_HOME="$PWD/test-artifacts/calendar-status-xdg" XDG_DATA_DIRS="$PWD/test-artifacts/calendar-status-xdg" \
+            xvfb-run -a ./build/classic/canopy-classic-spike --enable-system-apps --approved-art-dir prototype/classic/assets/approved --self-test-calendar-dock-status
+
+      - name: Verify Photos dock reaches the real GIO launcher
+        timeout-minutes: 3
+        run: |
+          set -e
+          mkdir -p test-artifacts/photos-gio-xdg/applications
+          marker="$PWD/test-artifacts/photos-dock-launch-marker"
+          rm -f "$marker"
+          printf '[Desktop Entry]\nType=Application\nName=Canopy Photos Dock Fixture\nExec=/bin/sh -c "touch %s"\nNoDisplay=false\nTerminal=false\n' "$marker" > test-artifacts/photos-gio-xdg/applications/org.gnome.Loupe.desktop
+          XDG_DATA_HOME="$PWD/test-artifacts/photos-gio-xdg" XDG_DATA_DIRS="$PWD/test-artifacts/photos-gio-xdg" \
+            xvfb-run -a ./build/classic/canopy-classic-spike --enable-system-apps --approved-art-dir prototype/classic/assets/approved --self-test-photos-dock-fixture
+          test -f "$marker"
+
+      - name: Verify Photos dock refusal is visible without the app
+        timeout-minutes: 3
+        run: |
+          set -e
+          mkdir -p test-artifacts/photos-status-xdg/applications
+          XDG_DATA_HOME="$PWD/test-artifacts/photos-status-xdg" XDG_DATA_DIRS="$PWD/test-artifacts/photos-status-xdg" \
+            xvfb-run -a ./build/classic/canopy-classic-spike --enable-system-apps --approved-art-dir prototype/classic/assets/approved --self-test-photos-dock-status
+
+      - name: Verify Terminal dock reaches the real GIO launcher
+        timeout-minutes: 3
+        run: |
+          set -e
+          mkdir -p test-artifacts/terminal-gio-xdg/applications
+          marker="$PWD/test-artifacts/terminal-dock-launch-marker"
+          rm -f "$marker"
+          printf '[Desktop Entry]\nType=Application\nName=Canopy Terminal Dock Fixture\nExec=/bin/sh -c "touch %s"\nNoDisplay=false\nTerminal=false\n' "$marker" > test-artifacts/terminal-gio-xdg/applications/gnome-terminal.desktop
+          XDG_DATA_HOME="$PWD/test-artifacts/terminal-gio-xdg" XDG_DATA_DIRS="$PWD/test-artifacts/terminal-gio-xdg" \
+            xvfb-run -a ./build/classic/canopy-classic-spike --enable-system-apps --approved-art-dir prototype/classic/assets/approved --self-test-terminal-dock-fixture
+          test -f "$marker"
+
+      - name: Verify Terminal dock refusal is visible without the app
+        timeout-minutes: 3
+        run: |
+          set -e
+          mkdir -p test-artifacts/terminal-status-xdg/applications
+          XDG_DATA_HOME="$PWD/test-artifacts/terminal-status-xdg" XDG_DATA_DIRS="$PWD/test-artifacts/terminal-status-xdg" \
+            xvfb-run -a ./build/classic/canopy-classic-spike --enable-system-apps --approved-art-dir prototype/classic/assets/approved --self-test-terminal-dock-status
+
+      - name: Verify Classic dock launch source contracts
+        run: python3 -m unittest tests.test_classic_browser_dock_integration tests.test_classic_mail_dock_integration tests.test_classic_remaining_dock_integration tests.test_classic_desktop_integration -v
 
       - name: Verify approved eight-icon artwork
         run: python3 -m unittest tests.test_approved_art tests.test_approved_manifest_contract tests.test_approved_art_zip -v

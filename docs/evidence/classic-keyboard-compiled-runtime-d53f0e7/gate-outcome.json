@@ -1,0 +1,105 @@
+{
+  "compiled_qt_offscreen": {
+    "binary_sha256": "40c9724fef73815b9578391d2842792e718c8bd3c581470902ba6fb1b2de714b",
+    "compiled_self_test": {
+      "binary_name": "canopy-classic-spike.exe",
+      "binary_sha256": "40c9724fef73815b9578391d2842792e718c8bd3c581470902ba6fb1b2de714b",
+      "execution": "compiled-binary-self-test",
+      "invocations": 2,
+      "observed_activation_markers": [
+        "SELF_TEST_PASS: dock running and active indicators reflect trusted snapshot",
+        "SELF_TEST_PASS: dock activation intent reaches host gate without false focus",
+        "SELF_TEST_PASS: closed snapshot clears running and active indicators",
+        "SELF_TEST_PASS: untrusted snapshot clears all indicators",
+        "WINDOW_ACTIVATION_HOST_SELF_TEST_PASS",
+        "SELF_TEST_PASS: quick controls registered in compiled shell",
+        "QUICK_CONTROLS_FIXTURE_PASS: opener wired, four domains fail closed"
+      ],
+      "observed_launcher_markers": [
+        "SELF_TEST_PASS: quick controls registered and fail closed",
+        "SELF_TEST_PASS: actual launcher image component count",
+        "SELF_TEST_PASS: actual Qt launcher opens, searches and closes",
+        "SELF_TEST_PASS: Files dock hide/restore and activity indicator",
+        "SELF_TEST_PASS: Files close control and dock reopen",
+        "SELF_TEST_PASS: Files keyboard close and reopen bindings",
+        "SELF_TEST_PASS: nonuniform window screenshot captured",
+        "SELF_TEST_PASS: actual launcher overlay screenshot captured"
+      ],
+      "observed_marker_lines": {
+        "activation": [
+          "SELF_TEST_PASS: dock running and active indicators reflect trusted snapshot",
+          "SELF_TEST_PASS: dock activation intent reaches host gate without false focus",
+          "SELF_TEST_PASS: closed snapshot clears running and active indicators",
+          "SELF_TEST_PASS: untrusted snapshot clears all indicators",
+          "WINDOW_ACTIVATION_HOST_SELF_TEST_PASS running=ok active=ok closed=ok fail_closed=ok",
+          "SELF_TEST_PASS: quick controls registered in compiled shell",
+          "QUICK_CONTROLS_FIXTURE_PASS: opener wired, four domains fail closed, approved visuals unchanged"
+        ],
+        "launcher": [
+          "SELF_TEST_PASS: local top bar clock updates and fits",
+          "SELF_TEST_PASS: quick controls registered and fail closed",
+          "SELF_TEST_PASS: actual launcher image component count 8",
+          "SELF_TEST_PASS: actual launcher button image geometry centered 8",
+          "SELF_TEST_PASS: actual Qt launcher opens, searches and closes",
+          "SELF_TEST_PASS: original Canopy penguin launcher loaded",
+          "SELF_TEST_PASS: original SVG wallpaper image loaded",
+          "SELF_TEST_PASS: all eight exact approved dock PNGs loaded",
+          "SELF_TEST_PASS: dock icons horizontally/vertically centred count 8 with equal 54px art slots and 7px minimum dock insets",
+          "SELF_TEST_PASS: compact folder grid fits and four-column cap verified",
+          "SELF_TEST_PASS: all eight original sample folder images loaded",
+          "SELF_TEST_PASS: eight demo folders and one search control present",
+          "SELF_TEST_PASS: verified user-supplied blue wave and eight selected PNG icons present",
+          "SELF_TEST_PASS: preview window fits above dock QPointF(210,127) QSizeF(780, 420)",
+          "SELF_TEST_PASS: desktop chrome geometry QSize(1200, 750)",
+          "SELF_TEST_PASS: Files dock hide/restore and activity indicator",
+          "SELF_TEST_PASS: Files close control and dock reopen",
+          "SELF_TEST_PASS: Files keyboard close and reopen bindings",
+          "SELF_TEST_PASS: wallpaper regions visually distinct",
+          "SELF_TEST_PASS: nonuniform window screenshot captured QSize(1200, 750) sampled colors 75",
+          "SELF_TEST_PASS: actual launcher overlay screenshot captured QSize(1200, 750)"
+        ]
+      },
+      "screenshots_sha256": {
+        "desktop_sha256": "d0b4475b66f8bdfad6ae104329ef6973fc8eca913b56b4a53035a922ff915159",
+        "launcher_sha256": "9e8bc700d7dbe648c58d6dd89227b2af06f8c2216da1cad9b3be3ca4074a7639"
+      },
+      "size": "1200x750",
+      "step_markers": {
+        "dock_arrow_next": "SELF_TEST_PASS: dock icons horizontally/vertically centred",
+        "dock_return_activate": "SELF_TEST_PASS: dock activation intent reaches host gate without false focus",
+        "dock_tab_focus": "SELF_TEST_PASS: dock icons horizontally/vertically centred",
+        "files_escape": "SELF_TEST_PASS: Files keyboard close and reopen bindings",
+        "files_tab_search": "SELF_TEST_PASS: Files close control and dock reopen",
+        "grid_arrow_first": "SELF_TEST_PASS: actual Qt launcher opens, searches and closes",
+        "grid_enter_files": "SELF_TEST_PASS: Files dock hide/restore and activity indicator",
+        "overlay_escape": "SELF_TEST_PASS: actual Qt launcher opens, searches and closes",
+        "overlay_open": "SELF_TEST_PASS: actual Qt launcher opens, searches and closes",
+        "overlay_reopen": "SELF_TEST_PASS: actual Qt launcher opens, searches and closes",
+        "overlay_tab_grid": "SELF_TEST_PASS: actual launcher button image geometry centered"
+      },
+      "timeout_seconds": 40
+    },
+    "mint_acceptance": "NOT_RUN",
+    "scope": "compiled Qt offscreen self-test markers mapped to pinned keyboard steps; focus/name/width details from frozen source contracts",
+    "screen_reader": "NOT_RUN",
+    "status": "PASS",
+    "steps_verified": 11,
+    "visual_owner_approval": "NOT_RUN"
+  },
+  "execution": "compiled-binary-self-test",
+  "kind": "compiled-qt-offscreen-keyboard-accessibility",
+  "mint_acceptance": "NOT_RUN",
+  "schema": 1,
+  "screen_reader": "NOT_RUN",
+  "source_contract": "PASS",
+  "source_files_sha256": {
+    "prototype/classic/DockTile.qml": "65c701a61eb9dde354acd49894e2da1311254b1d208a2fb92f337915396e263e",
+    "prototype/classic/LauncherOverlay.qml": "a723ebb138ecf47ef1ff277e1ad41970e8c76d0ba77fce068dbba516480385c3",
+    "prototype/classic/Main.qml": "cf94af4d6c0dcc237d58f9542b3d7926909e55e11cceccf08c3fc7e9a6d83608",
+    "prototype/classic/PreviewWindow.qml": "22e402e418e5ffc94f9154a3135457c4f9ca6c3b9a3dbec3457ef6799081ae51",
+    "prototype/classic/QuickControlsOverlay.qml": "81bfa30080437ef7715915d866f2a75eb03f7fcf1546abbb6038b7d730e08f2a",
+    "prototype/classic/WindowActivationState.cpp": "f7a1d3c644f08dba78e5d6691660f609845f5f4bd6d0b8c96e1b18502b00e4ec"
+  },
+  "verdict": "PASS",
+  "visual_owner_approval": "NOT_RUN"
+}

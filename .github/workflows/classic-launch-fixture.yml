@@ -21,9 +21,6 @@ jobs:
   fake-gio-launch-fixture:
     runs-on: ubuntu-24.04
     timeout-minutes: 12
-    env:
-      FIXTURE_LOG_DIR: ${{ runner.temp }}/canopy-fake-gio-launch-fixture
-      FIXTURE_TIP: HEAD
     steps:
       - uses: actions/checkout@v4
         with:
@@ -42,14 +39,14 @@ jobs:
         timeout-minutes: 6
         env:
           REPO: ${{ github.workspace }}
-          TIP: ${{ env.FIXTURE_TIP }}
-          OUTPUT_DIR: ${{ env.FIXTURE_LOG_DIR }}
+          TIP: HEAD
+          OUTPUT_DIR: ${{ runner.temp }}/canopy-fake-gio-launch-fixture
         run: bash tools/qa/fake_gio_launch_fixture/run_fixture.sh
 
       - name: Assert exact case contract and emit labelled evidence
         timeout-minutes: 2
         env:
-          OUTPUT_DIR: ${{ env.FIXTURE_LOG_DIR }}
+          OUTPUT_DIR: ${{ runner.temp }}/canopy-fake-gio-launch-fixture
         run: |
           set -euo pipefail
           python3 tools/qa/fake_gio_evidence_gate.py \

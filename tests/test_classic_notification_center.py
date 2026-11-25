@@ -121,5 +121,40 @@ class CompiledShellWiringTests(unittest.TestCase):
         self.assertNotIn("notificationCenter.visible = true", MAIN_CPP)
 
 
+class TrustedHostSourceAlignmentTests(unittest.TestCase):
+    """The panel accepts only records a trusted host adapter can really emit."""
+
+    def test_source_identity_is_checked_before_any_snapshot_read(self):
+        self.assertIn("typeof controller.source !== \"function\"", QML)
+        self.assertIn("controller.source() !== hostEventSource", QML)
+        self.assertIn("!connectedFromController() || !contractMatchesController()",
+                      QML)
+
+    def test_duplicate_allowed_topics_are_rejected(self):
+        self.assertIn("allowed.indexOf(allowed[i]) !== i", QML)
+
+    def test_duplicate_notice_ids_are_rejected(self):
+        self.assertIn("var seenIds", QML)
+        self.assertIn("seenIds[record.id] === true", QML)
+        self.assertIn("seenIds[record.id] = true", QML)
+
+    def test_panel_bounds_match_the_trusted_adapter(self):
+        from canopy_features.notifications.host_event_source import (
+            MAX_ITEMS, SOURCE,
+        )
+
+        self.assertIn("readonly property int maxItems: %d" % MAX_ITEMS, QML)
+        self.assertIn("readonly property string hostEventSource: \"%s\"" % SOURCE,
+                      QML)
+        self.assertIn("record.title.length > 120", QML)
+        self.assertIn("record.body.length > 280", QML)
+
+    def test_panel_never_creates_or_emits_an_event(self):
+        for forbidden in ("HostEvent(", "HostEvents(", "emit(", "Math.random",
+                          "setTimeout", "Timer {"):
+            with self.subTest(forbidden=forbidden):
+                self.assertNotIn(forbidden, QML)
+
+
 if __name__ == "__main__":
     unittest.main()

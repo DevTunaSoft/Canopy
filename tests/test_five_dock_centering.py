@@ -1,4 +1,5 @@
 """Five-icon dock gates: bounded frozen jitter, verified v3 pack, CI contracts."""
+import hashlib
 import json
 from pathlib import Path
 import re
@@ -10,7 +11,11 @@ import zlib
 from tests.test_classic_icon_frame_diff import make_rgba_png, png_chunk
 from tools.check_classic_icon_frame_diff import APPS, CENTERS, ComparisonError
 from tools.check_five_dock_centering import (
-    FROZEN, FROZEN_JITTER_MAX, TARGET, compare_five, verify_pack_activation
+    APPROVED_SOURCE_MANIFEST_SHA256, FROZEN, FROZEN_JITTER_MAX, TARGET,
+    V3_NORMALIZED_PACK_SHA256, V3_NORMALIZED_RGB_BUCKET, V3_PACK_FILES,
+    V3_PACK_RENDERER, compare_five, compare_pack_pixels,
+    normalize_rgb_channel, normalized_pack_digest, verify_pack_activation,
+    verify_v3_pack_identity
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,8 +25,11 @@ ACCEPTANCE = ROOT / "docs" / "CLASSIC_FIVE_DOCK_PRODUCTION_ACCEPTANCE.md"
 V3_PACK_MANIFEST_SHA256 = (
     "df0b7166b0a3269d7f99484d5196633193162eba56b334b25a1ea39f9682a360"
 )
-CI_V3_PACK_MANIFEST_SHA256 = (
-    "3464d1d03648d8f7814f4337174691d874faa4415c38d5c245dc5fe3f09981ac"
+# Historical evidence only: these raw exported-manifest bytes are NOT the
+# gate, because software antialiasing makes them runner-dependent.
+HISTORICAL_CI_EXPORT_SHA256S = (
+    "3464d1d03648d8f7814f4337174691d874faa4415c38d5c245dc5fe3f09981ac",
+    "8879e5272bad316f5dcc25e4a42666c9da89ab4472ebfbee7eeac3cf46a704d7",
 )
 V3_RENDERER = "canopy-five-qt-v3"
 
@@ -40,6 +48,53 @@ def make_exact_rgba_png(width, height, changes):
     return (b"\x89PNG\r\n\x1a\n" + png_chunk(b"IHDR", ihdr) +
             png_chunk(b"IDAT", zlib.compress(scanlines)) +
             png_chunk(b"IEND", b""))
+
+
+def make_v3_pack(root, pixel_changes=None):
+    """Build a synthetic but structurally valid five-icon v3 export pack."""
+    pixel_changes = pixel_changes or {}
+    root = Path(root)
+    root.mkdir(parents=True, exist_ok=True)
+    rows = []
+    for rel in sorted(V3_PACK_FILES):
+        density = int(rel.split("x", 1)[0])
+        side = 192 * density
+        changes = dict(pixel_changes.get(rel, {}))
+        for x, y in ((0, 0), (side - 1, 0), (0, side - 1), (side - 1, side - 1)):
+            changes[(x, y)] = (25, 35, 45, 0)
+        blob = make_exact_rgba_png(side, side, changes)
+        target = root / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(blob)
+        rows.append({
+            "path": rel, "sha256": hashlib.sha256(blob).hexdigest(),
+            "pixels": side,
+        })
+    manifest = {
+        "schema_version": 1, "renderer": V3_RENDERER,
+        "source_manifest_sha256": APPROVED_SOURCE_MANIFEST_SHA256,
+        "files": rows,
+    }
+    (root / "manifest.json").write_text(
+        json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    return root
+
+
+def lf_approved_art(root):
+    """Copy approved art with LF manifest so Windows worktrees match CI bytes."""
+    root = Path(root)
+    root.mkdir(parents=True, exist_ok=True)
+    source = QT / "assets" / "approved"
+    for entry in source.rglob("*"):
+        rel = entry.relative_to(source)
+        target = root / rel
+        if entry.is_dir():
+            target.mkdir(parents=True, exist_ok=True)
+        elif entry.name == "manifest.json":
+            target.write_bytes(entry.read_bytes().replace(b"\r\n", b"\n"))
+        else:
+            target.write_bytes(entry.read_bytes())
+    return root
 
 
 class FiveIconSourceContractTests(unittest.TestCase):
@@ -287,6 +342,105 @@ class VerifiedProductionPackActivationTests(unittest.TestCase):
                 ["--pack-log", str(log), "--output", str(report)]))
 
 
+class V3PackNormalizedIdentityTests(unittest.TestCase):
+    """RED/GREEN controls for the bounded exported-pack identity gate."""
+
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.reference = make_v3_pack(self.root / "reference")
+        self.candidate = make_v3_pack(self.root / "candidate")
+        self.approved = lf_approved_art(self.root / "approved")
+
+    def noise(self, count, value=26):
+        return {"1x/browser.png": {
+            (4 + i, 4): (value, 35, 45, 255) for i in range(count)}}
+
+    def write_candidate(self, changes):
+        make_v3_pack(self.candidate, changes)
+
+    def test_identical_exports_pass_bounded_comparison(self):
+        report = compare_pack_pixels(self.reference, self.candidate)
+        self.assertEqual(set(report["per_png_changed_channels"].values()), {0})
+        self.assertEqual(report["alpha_changes"], 0)
+        self.assertEqual(report["missing_pngs"], 0)
+        self.assertEqual(normalized_pack_digest(self.reference),
+                         normalized_pack_digest(self.candidate))
+
+    def test_one_level_noise_up_to_cap_is_recorded_not_rejected(self):
+        self.write_candidate(self.noise(11))
+        report = compare_pack_pixels(self.reference, self.candidate)
+        self.assertEqual(report["per_png_changed_channels"]["1x/browser.png"], 11)
+        self.assertEqual(normalized_pack_digest(self.reference),
+                         normalized_pack_digest(self.candidate))
+
+    def test_larger_delta_alpha_and_excess_channels_fail_closed(self):
+        with self.subTest(case="two levels"):
+            self.write_candidate(self.noise(1, 27))
+            with self.assertRaisesRegex(ComparisonError, "per-channel delta"):
+                compare_pack_pixels(self.reference, self.candidate)
+        with self.subTest(case="alpha shift"):
+            self.write_candidate({"1x/browser.png": {(4, 4): (25, 35, 45, 254)}})
+            with self.assertRaisesRegex(ComparisonError, "alpha changed"):
+                compare_pack_pixels(self.reference, self.candidate)
+        with self.subTest(case="over channel cap"):
+            self.write_candidate(self.noise(12))
+            with self.assertRaisesRegex(ComparisonError,
+                                        "exceeds 11 changed RGB channels"):
+                compare_pack_pixels(self.reference, self.candidate)
+        with self.subTest(case="aggregate over densities"):
+            changes = self.noise(6)
+            changes["2x/browser.png"] = {
+                (4 + i, 4): (26, 35, 45, 255) for i in range(6)}
+            self.write_candidate(changes)
+            with self.assertRaisesRegex(ComparisonError,
+                                        "icon browser exceeds 11 changed RGB channels"):
+                compare_pack_pixels(self.reference, self.candidate)
+
+    def test_missing_and_extra_pngs_fail_closed(self):
+        (self.candidate / "2x/mail.png").unlink()
+        with self.assertRaisesRegex(ComparisonError, "missing pack files"):
+            compare_pack_pixels(self.reference, self.candidate)
+        self.write_candidate({})
+        (self.candidate / "stray.png").write_bytes(b"not a v3 PNG")
+        with self.assertRaisesRegex(ComparisonError, "unexpected pack file"):
+            compare_pack_pixels(self.reference, self.candidate)
+
+    def test_rounding_merges_observed_aa_pairs_but_not_larger_steps(self):
+        self.assertEqual(V3_NORMALIZED_PACK_SHA256,
+                         "ccf5bf9f09d4235a266227ed46f1f39f77e17641fd618f2f438062503a7b6bf8")
+        self.assertEqual(V3_NORMALIZED_RGB_BUCKET, 4)
+        for old, new in ((128, 127), (43, 42), (26, 25), (60, 59),
+                         (98, 97), (116, 115), (2, 1)):
+            with self.subTest(pair=(old, new)):
+                self.assertEqual(normalize_rgb_channel(old),
+                                 normalize_rgb_channel(new))
+        self.assertNotEqual(normalize_rgb_channel(128),
+                            normalize_rgb_channel(130))
+        # A two-level step can land in one bucket; the raw delta bound, not
+        # the rounding alone, is what rejects it.
+        self.write_candidate({"1x/browser.png": {(4, 4): (27, 35, 45, 255)}})
+        with self.assertRaisesRegex(ComparisonError, "per-channel delta"):
+            compare_pack_pixels(self.reference, self.candidate)
+
+    def test_full_identity_gate_accepts_bounded_noise_and_rejects_wrong_pin(self):
+        expected = normalized_pack_digest(self.reference)
+        self.write_candidate(self.noise(11))
+        result = verify_v3_pack_identity(
+            self.reference, self.candidate, self.approved,
+            expected_normalized_sha=expected)
+        self.assertTrue(result["master_sha256_exact"])
+        self.assertTrue(result["renderer_and_file_sha256_exact"])
+        self.assertFalse(result["byte_exact_exported_manifest_gate"])
+        self.assertEqual(result["per_png_changed_channels"]["1x/browser.png"], 11)
+        with self.assertRaisesRegex(ComparisonError,
+                                    "normalized pack identity mismatch"):
+            verify_v3_pack_identity(
+                self.reference, self.candidate, self.approved,
+                expected_normalized_sha="0" * 64)
+
+
 class CiPackStagingContractTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -298,12 +452,18 @@ class CiPackStagingContractTests(unittest.TestCase):
         self.assertIn("--export-five-production-icons build/classic/production-icons", wf)
         self.assertIn("tools/validate_five_production_icons.py", wf)
         self.assertIn("--production-dir build/classic/production-icons", wf)
-        self.assertIn("diff -r build/classic/production-icons "
-                      "test-artifacts/reproducible-five-icons", wf)
         self.assertIn("production-icons/manifest.json", wf)
         self.assertIn("sha256sum build/classic/production-icons/manifest.json", wf)
-        self.assertIn(CI_V3_PACK_MANIFEST_SHA256, wf)
-        self.assertIn("| sha256sum -c -", wf)
+        self.assertIn("--pack-dir build/classic/production-icons", wf)
+        self.assertIn("--reproducible-dir test-artifacts/reproducible-five-icons", wf)
+        self.assertIn("--approved-art-dir prototype/classic/assets/approved", wf)
+        self.assertIn("V3_PACK_NORMALIZED_IDENTITY_PASS", wf)
+        self.assertIn("five-production-pack-identity.json", wf)
+        # The exported raster is runner-dependent: no byte-exact gate remains.
+        self.assertNotIn("| sha256sum -c -", wf)
+        self.assertNotIn("diff -r build/classic/production-icons", wf)
+        for raw_hash in HISTORICAL_CI_EXPORT_SHA256S:
+            self.assertNotIn(raw_hash, wf)
 
     def test_ci_verifies_default_activation_identity_not_a_widened_rectangle(self):
         wf = self.workflow
@@ -329,6 +489,15 @@ class CiPackStagingContractTests(unittest.TestCase):
         self.assertNotIn("rejects even one changed", doc)
         self.assertIn(V3_PACK_MANIFEST_SHA256, doc)
         self.assertIn(V3_RENDERER, doc)
+
+    def test_acceptance_doc_records_normalized_pack_identity_not_raw_hash(self):
+        doc = self.acceptance
+        self.assertIn(V3_NORMALIZED_PACK_SHA256, doc)
+        self.assertIn("bounded normalized", doc)
+        self.assertIn("MAX_PACK_CHANNELS_PER_ICON", doc)
+        for raw_hash in HISTORICAL_CI_EXPORT_SHA256S:
+            self.assertIn(raw_hash, doc)
+        self.assertNotIn("An independent re-export must byte-match", doc)
 
 
 if __name__ == "__main__":

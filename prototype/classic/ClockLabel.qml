@@ -9,7 +9,10 @@ Label {
     property date currentTime: new Date()
     readonly property bool refreshScheduled: nextMinute.running
 
-    text: Qt.formatDateTime(currentTime, "ddd d MMM  h:mm AP")
+    // An explicit separator keeps a one-digit day legible next to the time.
+    // Font, colour, geometry and the single minute-wakeup timer are unchanged.
+    text: Qt.formatDateTime(currentTime, "ddd d MMM") + " · " +
+          Qt.formatTime(currentTime, "h:mm AP")
     color: "#f7f5eb"
     font.pixelSize: 12
     font.weight: Font.Medium

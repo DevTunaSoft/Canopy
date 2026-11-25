@@ -8,7 +8,10 @@ import QtQuick.Layouts
 // trusted host source that reports itself connected and supplies bounded
 // records tied to an ALREADY DEFINED canopy_core.host_events topic. The
 // preview host source is disconnected, so the panel always opens to a visible
-// disclosure and zero rows. Opening, refreshing and closing are real local
+// disclosure and zero rows. A real host may inject a trusted
+// canopy_features.notifications.host_event_source.TrustedHostEventSource as
+// controller: every row then comes from a HostEvent delivered by the existing
+// canopy_core.host_events bus. Opening, refreshing and closing are real local
 // actions; no row claims an action Classic cannot perform.
 FocusScope {
     id: notificationCenter
@@ -40,7 +43,8 @@ FocusScope {
     readonly property int itemCount: records.length
     readonly property bool sourceConnected: reason === "ok"
     readonly property bool controllerPresent:
-        controller !== null && typeof controller.snapshot === "function"
+        controller !== null && typeof controller !== "undefined"
+        && typeof controller.snapshot === "function"
 
     signal notificationSelected(string identifier)
 
@@ -59,6 +63,14 @@ FocusScope {
     }
 
     function contractMatchesController() {
+        if (typeof controller.source !== "function")
+            return false
+        try {
+            if (controller.source() !== hostEventSource)
+                return false
+        } catch (error) {
+            return false
+        }
         if (typeof controller.allowedTopics !== "function")
             return false
         var allowed
@@ -71,7 +83,8 @@ FocusScope {
             return false
         for (var i = 0; i < allowed.length; ++i) {
             if (typeof allowed[i] !== "string"
-                    || contractTopics.indexOf(allowed[i]) < 0)
+                    || contractTopics.indexOf(allowed[i]) < 0
+                    || allowed.indexOf(allowed[i]) !== i)
                 return false
         }
         return true
@@ -121,13 +134,15 @@ FocusScope {
             return false
         }
         var accepted = []
+        var seenIds = Object.create(null)
         for (var i = 0; i < supplied.length; ++i) {
             var record = supplied[i]
-            if (!validRecord(record)) {
+            if (!validRecord(record) || seenIds[record.id] === true) {
                 records = []
                 reason = "invalid-host-notification-source"
                 return false
             }
+            seenIds[record.id] = true
             accepted.push({
                 id: record.id,
                 title: record.title,

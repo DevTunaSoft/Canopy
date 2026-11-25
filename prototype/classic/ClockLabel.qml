@@ -9,7 +9,10 @@ Label {
     property date currentTime: new Date()
     readonly property bool refreshScheduled: nextMinute.running
 
-    text: Qt.formatDateTime(currentTime, "ddd d MMM  h:mm AP")
+    // The original font, colour and geometry stay frozen; only the date/time
+    // separator is explicit so a one-digit day cannot read as a stray glyph.
+    text: Qt.formatDateTime(currentTime, "ddd d MMM") + " · " +
+          Qt.formatTime(currentTime, "h:mm AP")
     color: "#f7f5eb"
     font.pixelSize: 12
     font.weight: Font.Medium

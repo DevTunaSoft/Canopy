@@ -141,10 +141,10 @@ FocusScope {
             anchors.topMargin: 14
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.bottom: footer.top
+            anchors.bottom: keyHints.top
             anchors.leftMargin: 21
             anchors.rightMargin: 21
-            anchors.bottomMargin: 8
+            anchors.bottomMargin: 6
             clip: true
             model: launcher.filteredApps
             readonly property int columns: width < 470 ? 3 : 4
@@ -171,9 +171,12 @@ FocusScope {
                 background: Rectangle {
                     anchors.margins: 4
                     radius: 15
-                    color: appButton.hovered || appButton.activeFocus
+                    color: appButton.hovered || appButton.activeFocus ||
+                           (grid.activeFocus && grid.currentIndex === appButton.index)
                            ? "#dceaf5" : "transparent"
-                    border.width: appButton.activeFocus ? 1 : 0
+                    border.width: appButton.activeFocus ||
+                                  (grid.activeFocus && grid.currentIndex === appButton.index)
+                                  ? 1 : 0
                     border.color: "#5687b3"
                 }
                 contentItem: Column {
@@ -217,6 +220,21 @@ FocusScope {
                     searchField.forceActiveFocus()
             }
             Keys.onBacktabPressed: searchField.forceActiveFocus()
+        }
+        Label {
+            id: keyHints
+            objectName: "canopyLauncherKeyHints"
+            anchors.bottom: footer.top
+            anchors.bottomMargin: 2
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width - 36
+            height: 16
+            text: "Up/Down select · Enter open · Esc close"
+            horizontalAlignment: Text.AlignHCenter
+            elide: Text.ElideRight
+            color: "#657b90"
+            font.pixelSize: 11
+            Accessible.name: "Launcher keyboard shortcuts: " + text
         }
         Label {
             id: footer

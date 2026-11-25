@@ -63,7 +63,13 @@ class ClassicDesktopIntegrationTests(unittest.TestCase):
                        "canopySystemLaunchEnabled",
                        "SIGNAL(activated(QString))",
                        "SLOT(launch(QString))",
-                       "LAUNCHER_LAUNCH_FIXTURE_PASS"):
+                       "LAUNCHER_LAUNCH_FIXTURE_PASS",
+                       "CANOPY_FILES_DOCK_NATIVE_LAUNCH_CONNECTED",
+                       "CANOPY_FILES_DOCK_LAUNCH_REFUSED",
+                       "--self-test-files-dock-status",
+                       "--self-test-files-dock-fixture",
+                       "FILES_DOCK_STATUS_FIXTURE_PASS",
+                       "FILES_DOCK_LAUNCH_FIXTURE_PASS"):
             with self.subTest(marker=marker):
                 self.assertIn(marker, cpp)
 
@@ -80,6 +86,25 @@ class ClassicDesktopIntegrationTests(unittest.TestCase):
         start = main.index("    Rectangle {\n        id: dock")
         self.assertEqual(fnv1a64(main[start:-1].encode("ascii")),
                          APPROVED_DOCK_FNV64)
+
+
+    def test_files_dock_reuses_host_launcher_without_visual_edits(self):
+        # One frozen dock interaction is adapted in C++ only: no QML,
+        # icon, wallpaper, geometry, font or colour is touched.
+        cpp = (SOURCE / "main.cpp").read_text(encoding="utf-8")
+        self.assertIn("class FilesDockLaunchBridge final : public QObject", cpp)
+        self.assertIn("SIGNAL(activated(QString))", cpp)
+        self.assertIn("SLOT(activate(QString))", cpp)
+        self.assertIn('if (name != QStringLiteral("Files"))', cpp)
+        self.assertIn("m_launcher.launch(name)", cpp)
+        self.assertIn('setProperty("selectionMessage"', cpp)
+        self.assertIn('"openLauncher"', cpp)
+        self.assertNotIn("QProcess", cpp)
+        self.assertNotIn("build_launch_argv", cpp)
+        self.assertNotIn("gio launch", cpp)
+        overlay = (SOURCE / "LauncherOverlay.qml").read_text(encoding="utf-8")
+        self.assertIn('objectName: "canopyLauncherStatus"', overlay)
+        self.assertIn("launcher.selectionMessage", overlay)
 
 
 if __name__ == "__main__":

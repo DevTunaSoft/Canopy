@@ -12,8 +12,9 @@ two baseline runs.
 ## Exact pins
 
 - Integration base: `integration/canopy-classic-20261123` tip
-  `177c380b389db24b55e80d604ce5a086b15d79e8` (re-queried with `git ls-remote`
-  at measurement time; same tip now).
+  `58d245e8db266e92260825b18434fcf967d4c444` at final rebase; original A/B
+  measurements were captured at `177c380b389db24b55e80d604ce5a086b15d79e8`.
+  Suite logs were refreshed at the final rebased head.
 - Production diff paths: `prototype/classic/ShellMenuBar.qml`,
   `prototype/classic/ShellMenuPopupSet.qml` (new),
   `prototype/classic/CMakeLists.txt`, the two Classic source-contract tests
@@ -85,7 +86,7 @@ still assert those strings across the two documents.
 - Idle-wakeup contract preserved: scene histogram reports exactly one
   `QQmlTimer` in both binaries; the change adds no timer, polling loop, worker
   or network/process activity.
-- Full suites at both worktrees on the final tree: 3217 tests, `OK (skipped=43)`
+- Full suites at both worktrees on the final rebased tree: 3222 tests, `OK (skipped=43)`
   with no new FAIL/ERROR; logs in the artifacts below.
 - Screen-reader behaviour: **NOT_RUN** (no Mint guest, no accessibility bus).
   Accessible names are unchanged text, and the deferred objects are created
@@ -110,12 +111,12 @@ still assert those strings across the two documents.
 - `docs/evidence/perf-deferred-menus-177c380/batch2.json` —
   `ab7a912e4e9fdb941c1522da595ddc34d1dca8a06848c69adf10658c17760326`
 - `docs/evidence/perf-deferred-menus-177c380/batch3.json` —
-  `94fc8826ef04af36a452528c66e216a9d203ab1e3bcd17f03469559fc0b70487`
+  `a0088644514e1e0b6aaf017e0036e014c7c4fb67af7cff584814edd7a3fa2ff8`
 - `docs/evidence/perf-deferred-menus-177c380/batch4.json` —
-  `12d6565c067a87e227baef624081b278bf0030b8442c2278e2d70ef8c5430605`
+  `bfcf0b4c4d60090e63d9ea9f5f69f82db2e694a33273dfa855973269720e223c`
 - `docs/evidence/perf-deferred-menus-177c380/combined.json` —
-  `65730c844f7074509266a68cbbe4133bcc1a34420e15c2e1d116b424959d0534`
+  `6f92e2c6a7281c0fe120a02ee672cae71718a1fd70b58463bd53dbdd54b80db7`
 - `docs/evidence/perf-deferred-menus-177c380/suite-base.txt` —
-  `8a9170d12fe5c6024ad7e0276407fc656e4bca6ba7069080f713d46af444ce84`
+  `4215d653424b7b9daff5e48ed1e1c8dc7d6d26db4217a861b06515bc411007b8`
 - `docs/evidence/perf-deferred-menus-177c380/suite-candidate.txt` —
-  `5b41d88848df675ce4516180bbfb3cbd7753c3fd6edcb457bd5155319b48ed7a`
+  `4fc4da2cdd11aaab3d58cf28b9e7d7eeb8b1f9bb33fc463892b878688cdde4f3`

@@ -231,5 +231,212 @@ class KeyboardAccessibilityGateTests(unittest.TestCase):
         self.assertIn("VERDICT PASS", verified.stdout)
 
 
+# Exact marker lines observed from the compiled Classic binary at d53f0e7 with
+# QT_QPA_PLATFORM=offscreen and the built-in self-test hooks.
+REAL_LAUNCHER_MARKERS = (
+    "SELF_TEST_PASS: quick controls registered and fail closed",
+    "SELF_TEST_PASS: actual launcher image component count 8",
+    "SELF_TEST_PASS: actual launcher button image geometry centered 8",
+    "SELF_TEST_PASS: actual Qt launcher opens, searches and closes",
+    "SELF_TEST_PASS: Files dock hide/restore and activity indicator",
+    "SELF_TEST_PASS: Files close control and dock reopen",
+    "SELF_TEST_PASS: Files keyboard close and reopen bindings",
+    "SELF_TEST_PASS: dock icons horizontally/vertically centred count 8 with equal 54px art slots and 7px minimum dock insets",
+    "SELF_TEST_PASS: nonuniform window screenshot captured QSize(1200, 750) sampled colors 75",
+    "SELF_TEST_PASS: actual launcher overlay screenshot captured QSize(1200, 750)",
+)
+REAL_ACTIVATION_MARKERS = (
+    "SELF_TEST_PASS: dock running and active indicators reflect trusted snapshot",
+    "SELF_TEST_PASS: dock activation intent reaches host gate without false focus",
+    "SELF_TEST_PASS: closed snapshot clears running and active indicators",
+    "SELF_TEST_PASS: untrusted snapshot clears all indicators",
+    "WINDOW_ACTIVATION_HOST_SELF_TEST_PASS running=ok active=ok closed=ok fail_closed=ok",
+    "SELF_TEST_PASS: quick controls registered in compiled shell",
+    "QUICK_CONTROLS_FIXTURE_PASS: opener wired, four domains fail closed, approved visuals unchanged",
+)
+
+
+def _marker_bytes(lines):
+    return ("\n".join(lines) + "\n").encode("utf-8")
+
+
+class CompiledSelfTestHarnessTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.binary = self.root / "classic.exe"
+        self.binary.write_bytes(b"compiled-binary-stand-in")
+        self.binary.chmod(0o700)
+        self.art = self.root / "approved"
+        self.art.mkdir()
+        (self.art / "manifest.json").write_text("{}", encoding="utf-8")
+        self.artifacts = self.root / "artifacts"
+        self.artifacts.mkdir()
+        self.markers = {
+            "launcher": REAL_LAUNCHER_MARKERS,
+            "activation": REAL_ACTIVATION_MARKERS,
+        }
+
+    def _fake_run(self, calls):
+        import unittest.mock as mock
+
+        def runner(command, **kwargs):
+            calls.append((command, kwargs))
+            payload = (REAL_ACTIVATION_MARKERS
+                       if "--self-test-window-activation-fixture" in command
+                       else REAL_LAUNCHER_MARKERS)
+            for index, argument in enumerate(command):
+                if argument in ("--self-test-screenshot",
+                                "--self-test-launcher-screenshot"):
+                    Path(command[index + 1]).write_bytes(
+                        gate.PNG_SIGNATURE + b"bounded-fake-png")
+            return subprocess.CompletedProcess(command, 0, b"",
+                                               _marker_bytes(payload))
+        return mock.patch.object(gate.subprocess, "run", side_effect=runner)
+
+    def test_real_compiled_markers_map_to_all_eleven_pinned_steps(self):
+        lines = gate._compiled_step_lines(self.markers,
+                                          gate.inspect_source(REPO_ROOT))
+        self.assertEqual(len(lines), len(gate.STEPS))
+        steps = [gate._parse_step_line(line) for line in lines]
+        for step, (step_id, key, detail) in zip(steps, gate.STEPS):
+            step["key"] = key
+            self.assertEqual(step["id"], step_id)
+            self.assertEqual(set(step["detail"]), set(detail))
+            for field, expected in detail.items():
+                self.assertEqual(step["detail"][field], expected)
+        evidence = {"execution": "compiled-binary-self-test", "invocations": 2}
+        verdict = gate.assess(
+            {"schema": gate.SCHEMA, "kind": gate.KIND,
+             "platform": "offscreen", "source_sha": SHA,
+             "binary_sha256": BINARY, "driver": gate.COMPILED_DRIVER,
+             "input_mode": "keyboard-only", "steps": steps,
+             "screen_reader": gate.NOT_RUN,
+             "mint_acceptance": gate.NOT_RUN,
+             "visual_approval": gate.NOT_RUN},
+            expected_source_sha=SHA,
+            expected_binary_sha256=BINARY, compiled_evidence=evidence)
+        self.assertEqual(verdict["status"], "PASS")
+        self.assertEqual(verdict["compiled_self_test"], evidence)
+        self.assertIn("source contracts", verdict["scope"])
+
+    def test_missing_duplicate_and_source_drift_fail_closed(self):
+        key_marker = "SELF_TEST_PASS: actual Qt launcher opens, searches and closes"
+        without = tuple(line for line in REAL_LAUNCHER_MARKERS
+                        if line != key_marker)
+        with self.assertRaisesRegex(gate.GateError, "missing compiled marker"):
+            gate._compiled_step_lines(
+                {"launcher": without, "activation": REAL_ACTIVATION_MARKERS},
+                {"status": "PASS"})
+        with self.assertRaisesRegex(gate.GateError, "duplicate compiled marker"):
+            gate._compiled_step_lines(
+                {"launcher": REAL_LAUNCHER_MARKERS + (key_marker,),
+                 "activation": REAL_ACTIVATION_MARKERS},
+                {"status": "PASS"})
+        with self.assertRaisesRegex(gate.GateError, "source contract must pass"):
+            gate._compiled_step_lines(self.markers, {"status": "FAIL"})
+        import unittest.mock as mock
+        drifted = tuple((step_id + "_x", key, detail)
+                        for step_id, key, detail in gate.STEPS)
+        with mock.patch.object(gate, "STEPS", drifted):
+            with self.assertRaisesRegex(gate.GateError, "drifted"):
+                gate._compiled_step_lines(self.markers, {"status": "PASS"})
+
+    def test_harness_executes_two_bounded_offscreen_invocations(self):
+        calls = []
+        with self._fake_run(calls):
+            report, evidence = gate.run_compiled_self_test(
+                binary=self.binary, approved_art_dir=self.art,
+                source_root=REPO_ROOT, source_sha=SHA,
+                artifact_dir=self.artifacts, timeout_seconds=12)
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(report["driver"], gate.COMPILED_DRIVER)
+        self.assertEqual(len(report["steps"]), len(gate.STEPS))
+        self.assertEqual(evidence["invocations"], 2)
+        self.assertEqual(evidence["execution"], "compiled-binary-self-test")
+        self.assertEqual(len(evidence["screenshots_sha256"]), 2)
+        self.assertTrue(evidence["observed_marker_lines"]["launcher"])
+        self.assertTrue(evidence["observed_marker_lines"]["activation"])
+        for command, kwargs in calls:
+            self.assertEqual(kwargs["env"]["QT_QPA_PLATFORM"], "offscreen")
+            self.assertEqual(kwargs["env"]["QT_FORCE_STDERR_LOGGING"], "1")
+            self.assertNotIn("DISPLAY", kwargs["env"])
+            self.assertFalse(kwargs["shell"])
+            self.assertEqual(kwargs["timeout"], 12)
+        self.assertIn("--self-test-window-activation-fixture", calls[1][0])
+        self.assertIn("--self-test-launcher-screenshot", calls[0][0])
+        self.assertTrue((self.artifacts / "canopy-keyboard-desktop.png").is_file())
+        self.assertTrue((self.artifacts / "canopy-keyboard-launcher.png").is_file())
+        outcome = gate.evaluate(REPO_ROOT, report, expected_source_sha=SHA,
+                                expected_binary_sha256=report["binary_sha256"],
+                                compiled_evidence=evidence)
+        self.assertEqual(outcome["verdict"], "PASS")
+        self.assertEqual(outcome["execution"], "compiled-binary-self-test")
+
+    def test_harness_rejects_failure_marker_nonzero_exit_and_bad_inputs(self):
+        import unittest.mock as mock
+        for payload, expected in (
+            (_marker_bytes(["SELF_TEST_FAIL: injected"]), "failure marker"),
+            (b"", "missing compiled launcher marker"),
+        ):
+            with self.subTest(expected=expected):
+                with mock.patch.object(gate.subprocess, "run", return_value=
+                                       subprocess.CompletedProcess([], 0, b"", payload)):
+                    with self.assertRaisesRegex(gate.GateError, expected):
+                        gate.run_compiled_self_test(
+                            binary=self.binary, approved_art_dir=self.art,
+                            source_root=REPO_ROOT, source_sha=SHA)
+        with mock.patch.object(gate.subprocess, "run", return_value=
+                               subprocess.CompletedProcess([], 3, b"", b"")):
+            with self.assertRaisesRegex(gate.GateError, "exited nonzero"):
+                gate.run_compiled_self_test(
+                    binary=self.binary, approved_art_dir=self.art,
+                    source_root=REPO_ROOT, source_sha=SHA)
+        for size in ("719x480", "1200X750", "3841x2160", "1200x750x1"):
+            with self.subTest(size=size):
+                with self.assertRaises(gate.GateError):
+                    gate.run_compiled_self_test(
+                        binary=self.binary, approved_art_dir=self.art,
+                        source_root=REPO_ROOT, source_sha=SHA, size=size)
+
+    def test_cli_compiled_mode_reports_execution_and_rejects_mixing(self):
+        import unittest.mock as mock
+        evidence = {"execution": "compiled-binary-self-test", "invocations": 2}
+        report = {"schema": gate.SCHEMA, "kind": gate.KIND,
+                  "platform": "offscreen", "source_sha": SHA,
+                  "binary_sha256": BINARY, "driver": gate.COMPILED_DRIVER,
+                  "input_mode": "keyboard-only", "steps": [],
+                  "screen_reader": gate.NOT_RUN,
+                  "mint_acceptance": gate.NOT_RUN,
+                  "visual_approval": gate.NOT_RUN}
+        base = ["--source-root", str(REPO_ROOT), "--expected-source-sha", SHA]
+        compiled_args = ["--compiled-binary", str(self.binary),
+                         "--approved-art-dir", str(self.art)]
+        with mock.patch.object(gate, "run_compiled_self_test",
+                               return_value=(report, evidence)):
+            self.assertEqual(gate.main(base + compiled_args), 1)
+            self.assertEqual(gate.main(base + compiled_args +
+                                       ["--expected-binary-sha256", BINARY]), 1)
+            full = dict(report)
+            full["steps"] = [gate._parse_step_line(line) for line in
+                             gate._compiled_step_lines(
+                                 self.markers, gate.inspect_source(REPO_ROOT))]
+            for step, (_, key, _) in zip(full["steps"], gate.STEPS):
+                step["key"] = key
+            with mock.patch.object(gate, "run_compiled_self_test",
+                                   return_value=(full, evidence)):
+                output = self.root / "compiled-outcome.json"
+                self.assertEqual(gate.main(base + compiled_args + [
+                    "--expected-binary-sha256", BINARY,
+                    "--json-out", str(output)]), 0)
+        payload = json.loads(output.read_text(encoding="utf-8"))
+        self.assertEqual(payload["execution"], "compiled-binary-self-test")
+        self.assertEqual(payload["compiled_qt_offscreen"]["status"], "PASS")
+        self.assertEqual(gate.main(base + [
+            "--compiled-binary", str(self.binary),
+            "--approved-art-dir", str(self.art), "--report", str(output)]), 1)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -24,6 +24,43 @@ ApplicationWindow {
     // Original static artwork; no rotating placeholder rectangles.
     Wallpaper { anchors.fill: parent }
 
+    // Default desktop image is the SHA-locked approved alpine master.
+    // The host may still override it with a separately validated
+    // --landscape-wallpaper; only one Image is ever decoded.
+    // tools/check_wallpaper.py enforces the exact approved bytes.
+    readonly property string approvedMasterWallpaperUrl: {
+        const waveUrl = canopyApprovedWallpaperUrl.toString()
+        const separator = waveUrl.lastIndexOf('/')
+        if (canopyApprovedMode && separator >= 0)
+            return waveUrl.substring(0, separator + 1) + "Canopy_Classic_Master_Wallpaper_1920x1080.png"
+        return "file:prototype/classic/assets/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png"
+    }
+    Component.onCompleted: {
+        let wallpaperItem = null
+        for (let i = 0; i < contentItem.children.length; ++i) {
+            if (contentItem.children[i].objectName === "canopyWallpaper") {
+                wallpaperItem = contentItem.children[i]
+                break
+            }
+        }
+        if (!wallpaperItem) {
+            console.error("CANOPY_WALLPAPER_FAIL: wallpaper component missing")
+            return
+        }
+        for (let i = 0; i < wallpaperItem.children.length; ++i) {
+            const child = wallpaperItem.children[i]
+            if (child.objectName === "canopyWallpaperImage") {
+                child.source = Qt.binding(function() {
+                    return canopyLandscapeWallpaperUrl.length > 0
+                        ? canopyLandscapeWallpaperUrl
+                        : approvedMasterWallpaperUrl
+                })
+                return
+            }
+        }
+        console.error("CANOPY_WALLPAPER_FAIL: wallpaper image missing")
+    }
+
     // The Files window owns navigation state. Main only shows it and forwards
     // menu requests through its explicit interface. Geometry stays unchanged.
     PreviewWindow {

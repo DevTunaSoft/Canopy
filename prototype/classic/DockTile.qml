@@ -19,6 +19,15 @@ Button {
           + iconName.toLowerCase() + ".svg"
     readonly property bool roundedArtActive: canopyApprovedMode
     readonly property bool iconReady: iconArt.status === Image.Ready
+    // The approved illustration slot stays exactly 54px: the compiled
+    // geometry self-test bounds it to 50..56px and the v3 five-icon pack is
+    // SHA-locked at that presentation size. The *interaction plate* is a
+    // separate 62px square (54 + 4px on each side) so hover/focus framing is
+    // identical for every tile and matches the 62x62 optical crop used by
+    // the frozen-five evidence. Nothing here resamples approved artwork.
+    readonly property int artSize: 54
+    readonly property int presentationSize: 62
+    readonly property int presentationRadius: 18
     width: 58
     height: 70
     implicitWidth: 58
@@ -32,15 +41,20 @@ Button {
     ToolTip.text: iconName === "Files" ? "Toggle Files preview" : iconName + " — preview only"
     background: Item {
         Rectangle {
-            // Align the hover/focus halo with the icon, not the top of
-            // the tall (70px) button. Keep an equal visual gap on both
-            // sides of the 88px dock, at every tested resolution.
+            // Align the hover/focus plate with the 54px art, not the top of
+            // the tall (70px) button. The 62px square is the single
+            // presentation size for all eight tiles, leaving an equal 4px
+            // ring around every approved icon at every tested resolution.
+            // Contrast was raised one step over the old 0x18/0x30 plates so
+            // the interaction state remains visible on the pale dock plate;
+            // this is interaction chrome only and never samples or recolors
+            // the SHA-locked artwork.
             anchors.centerIn: parent
-            width: 56
-            height: 56
-            radius: 16
+            width: tile.presentationSize
+            height: tile.presentationSize
+            radius: tile.presentationRadius
             visible: tile.hovered || tile.activeFocus
-            color: tile.hovered ? "#30ffffff" : "#18ffffff"
+            color: tile.hovered ? "#3dffffff" : "#24ffffff"
             border.color: tile.activeFocus ? "#aac9f2ff" : "transparent"
             border.width: tile.activeFocus ? 2 : 0
         }
@@ -63,8 +77,8 @@ Button {
             // A centered 54px image inside a 70px dock tile leaves 8px
             // on top and bottom. The old topMargin: 2 pushed every icon
             // visually high, despite having correct rounded corners.
-            width: 54
-            height: 54
+            width: tile.artSize
+            height: tile.artSize
             source: tile.iconUrl
             sourceSize: Qt.size(192, 192)
             fillMode: Image.PreserveAspectFit

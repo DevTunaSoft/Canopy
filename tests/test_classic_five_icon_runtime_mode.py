@@ -17,11 +17,17 @@ import subprocess
 import unittest
 from pathlib import Path
 
+from tools.check_five_dock_centering import (
+    ComparisonError, PRESENTATION_BOX_PX, measure_optical_centroids,
+)
+
 ROOT = Path(__file__).resolve().parents[1]
 CLASSIC = ROOT / "prototype" / "classic"
 MAIN = CLASSIC / "main.cpp"
 PROVIDER = CLASSIC / "RoundedDockIconProvider.cpp"
 HEADER = CLASSIC / "RoundedDockIconProvider.h"
+TILE = CLASSIC / "DockTile.qml"
+REVIEW = ROOT / "docs" / "ICON_OPTICAL_REVIEW.md"
 
 # Byte identity of the already-merged PR #580 renderer at integration tip
 # a3714ef; this change activates it from main.cpp and must not edit it.
@@ -232,6 +238,42 @@ class ClassicFiveIconRuntimeModeTests(unittest.TestCase):
                 self.assertIn(marker, self.provider)
         self.assertIn("bool fiveOnlyCenterReviewMode = false", self.header)
         self.assertIn("bool cleanSourceEdgesReviewMode = false", self.header)
+
+
+    def test_dock_tile_keeps_54px_art_and_uses_one_62px_interaction_plate(self):
+        qml = TILE.read_text(encoding="utf-8")
+        for marker in (
+                "readonly property int artSize: 54",
+                "readonly property int presentationSize: 62",
+                "readonly property int presentationRadius: 18",
+                "width: tile.artSize",
+                "height: tile.artSize",
+                "width: tile.presentationSize",
+                "height: tile.presentationSize",
+                "anchors.centerIn: parent",
+                'visible: tile.hovered || tile.activeFocus'):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, qml)
+        # The plate is interaction chrome: it must never become a second
+        # artwork slot, and it only paints on hover/focus.
+        self.assertEqual(PRESENTATION_BOX_PX, 62)
+        self.assertNotIn('visible: true', qml)
+        # Compiled geometry gate still bounds the art to 50..56px.
+        self.assertIn("art->width() < 50 || art->width() > 56", self.main)
+
+    def test_optical_centroid_diagnostic_is_bounded_and_read_only(self):
+        with self.assertRaisesRegex(ComparisonError, "unsupported"):
+            measure_optical_centroids(TILE, "1x1")
+        self.assertEqual(PRESENTATION_BOX_PX, 62)
+
+    def test_optical_review_documents_measurement_not_visual_approval(self):
+        doc = REVIEW.read_text(encoding="utf-8")
+        for marker in (
+                "edge-energy centroid", "62px", "crop/offset",
+                "plate contrast", "frozen-identity",
+                "owner visual approval", "NOT_RUN"):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, doc)
 
 
 if __name__ == "__main__":

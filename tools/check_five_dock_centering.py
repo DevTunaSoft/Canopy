@@ -69,6 +69,10 @@ WINDOW_CORNER = {"1200x750": (210, 123), "760x500": (36, 62),
 # packs round to the same four-level RGB buckets below. SHA checks on the
 # approved source manifest, the registered renderer and the source masters
 # stay exact; only the generated PNG raster is compared with bounded noise.
+# Presentation-box contract used by the frozen-five optical evidence: the
+# approved art slot stays 54px, and the interaction plate is a single 62px
+# square centred on that slot (see DockTile.qml).
+PRESENTATION_BOX_PX = 62
 V3_PACK_RENDERER = "canopy-five-qt-v3"
 APPROVED_SOURCE_MANIFEST_SHA256 = (
     "5aa040ddbfeddbd38dcbd1808710676982efbc4146987c42e93eaa57ad0d4737"
@@ -399,11 +403,62 @@ def verify_v3_pack_identity(
     }
 
 
+def measure_optical_centroids(png: Path, size: str) -> dict:
+    """Report per-slot edge-energy centroids from a real Qt capture.
+
+    Diagnostic only: it never changes artwork or grants visual approval.
+    The same frozen/target inventory and 54px slot geometry that drive the
+    pixel lock are reused here, so a layout drift cannot be hidden by a
+    different sampling rectangle. Stdlib only, bounded to one screenshot.
+    """
+    if size not in CENTERS:
+        raise ComparisonError("unsupported real-Qt screenshot size")
+    width, height, rgba, png_sha = _read_png(png, size)
+    pixels = CENTERS[size]["desktop"]
+    radius = HALF_SLOT - 3  # central ~91% of the 54px art slot
+    gray = bytearray(width * height)
+    for offset in range(0, len(rgba), 4):
+        gray[offset // 4] = (
+            77 * rgba[offset] + 150 * rgba[offset + 1] + 29 * rgba[offset + 2]
+        ) // 256
+    report = {}
+    for app, (cx, cy) in zip(APPS, pixels):
+        total = sx = sy = 0.0
+        for dy in range(-radius + 1, radius):
+            y = cy + dy
+            for dx in range(-radius + 1, radius):
+                x = cx + dx
+                base = y * width + x
+                energy = abs(gray[base + 1] - gray[base - 1]) + \
+                    abs(gray[base + width] - gray[base - width])
+                if energy > 24:
+                    total += energy
+                    sx += energy * dx
+                    sy += energy * dy
+        report[app] = {
+            "dx": round(sx / total, 3) if total else 0.0,
+            "dy": round(sy / total, 3) if total else 0.0,
+            "frozen": app in FROZEN,
+            "presentation_box_px": PRESENTATION_BOX_PX,
+        }
+    return {
+        "resolution": size,
+        "screenshot_sha256": png_sha,
+        "slot_half_px": HALF_SLOT,
+        "sample_half_px": radius,
+        "per_icon": report,
+        "owner_visual_approval_inferred": False,
+        "note": "edge-energy diagnostic; not a crop, repaint or approval",
+    }
+
+
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--before", type=Path)
     p.add_argument("--after", type=Path)
     p.add_argument("--size")
+    p.add_argument("--optical-centroids", action="store_true",
+                   help="report measured per-slot edge centroids (diagnostic only)")
     p.add_argument("--frozen-identity", action="store_true",
                    help="compare two v3 five-center captures; do not require target changes")
     p.add_argument("--pack-log", type=Path,
@@ -418,6 +473,15 @@ def main(argv=None) -> int:
     a = p.parse_args(argv)
     try:
         pack_mode = any((a.pack_dir, a.reproducible_dir, a.approved_art_dir))
+        if a.optical_centroids:
+            if a.before or a.after is None or a.pack_log or pack_mode or not a.size:
+                raise ComparisonError(
+                    "optical centroid mode needs --after, --size and --output only")
+            result = measure_optical_centroids(a.after, a.size)
+            a.output.parent.mkdir(parents=True, exist_ok=True)
+            a.output.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+            print("FIVE_DOCK_OPTICAL_CENTROIDS_RECORDED:", a.size)
+            return 0
         if pack_mode:
             if not (a.pack_dir and a.reproducible_dir and a.approved_art_dir):
                 raise ComparisonError(

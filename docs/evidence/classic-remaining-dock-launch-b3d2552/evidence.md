@@ -2,6 +2,7 @@
 
 Base: `b3d2552db0205e2f7821cb3bd7955453347051a0` (`integration/canopy-classic-20261123`).
 Scope: Calendar, Photos and Terminal dock tiles join Files, Browser and Mail on the existing host-owned `SystemAppLauncher`; no QML, artwork, wallpaper, dock geometry or colour byte was changed.
+Correction applied at integration tip `ec4ccc65a07071f85c0ce627447bc06c0dc3e0ad`; only this evidence note was corrected (self-citation removed, SHA citations recomputed from raw committed blob bytes).
 
 ## What was verified
 - Source contracts: 6 tests pass on the candidate; the same file fails on the pristine base with 8 failures across 6 tests (RED then GREEN).
@@ -21,17 +22,17 @@ Scope: Calendar, Photos and Terminal dock tiles join Files, Browser and Mail on 
 - `cmake-config.log` `26e42d914105b0e357f528635322c065cd8c99c4e8a3ac57e3d906a43ffae21b`
 - `compile.log` `8284ee19f3499355ac2a259e02f73ba6e6d01b14b0dac1abb3a3431d1c0ea003`
 - `compiled-qt.log` `aad4cc6e248064a4fa4a550a53b663f155abf511bb76b42c287731ca69e5ffc6`
-- `evidence.md` `f2f253948accffdfb820908daae8c3f8364b647f626be53255d2d478a4d61c0f`
+- `evidence.md` - no self-hash; verify externally (git blob ID / raw-byte SHA-256, see normalization note)
 - `foundation-check.txt` `129871f6cc021e47dda115aa0fd87eb66c0d65ce785dab53a4bff19dd0af606f`
 - `recompile.log` `66d2325af77174fe1ef857d27f05e27247c5658b52c3fbff81b1eb02fbb9f19b`
 - `red-proof.txt` `8cfcf369cc0471dc6dd313184300cd8ee4bd5830f27a2a9ba5af3c98ec6cb3fd`
-- `sha256.txt` `5b2ac034f1afd89c799eb48a683927138be45af581becc301500ed79e7949f8c`
+- `sha256.txt` `cde85a8bc4d2901cfded1b08afb5c18a7225adcf10a8e517b556cd1974d6c90a`
 - `status-fixtures.log` `850ab89a33b8c39e655698faa78f3ad84070f9b6dcec140352c0fc5f7df2ace5`
 - `suite-baseline.txt` `cbcf188030f23b25f091c3627d60ead0c84b96b91226f0eff95c3830a0666950`
 - `suite-candidate.txt` `1f6ba032e227f6288dd6e552ef2ab2245889c2d62d71dadbee20693f2c994384`
 - `target-test.txt` `065c7d15facfd20f14fb9182747be315f3349fa1d5e1a0e966047509f4bfa9b1`
 
-Normalization note: every SHA-256 above is taken over the exact committed blob bytes. The evidence directory pins `* -text`, so `evidence.md` stays CRLF in both blob and worktree (`i/crlf w/crlf attr/-text`); `sha256sum` on the checked-out file and `git cat-file blob | sha256sum` both give `f2f253948accffdfb820908daae8c3f8364b647f626be53255d2d478a4d61c0f`. An LF-normalized copy hashes differently and is not authoritative. This self-citation therefore restates the authoritative pre-correction blob hash recorded in `sha256.txt`; correcting the citation necessarily changes the file blob, so no follow-up edit to the frozen manifest is made.
+Normalization note: every SHA-256 in the table is over the exact committed blob bytes. The evidence directory pins `* -text`, so CRLF bytes are authoritative (`git ls-files --eol`: `i/crlf w/crlf attr/-text`); an LF-normalized copy hashes differently and is not authoritative. No SHA-256 is recorded for `evidence.md` itself: a file cannot contain its own final digest, so the previous self-citation was stale by construction (it named the pre-#610 blob `f2f25394...`). Verify this file externally with `git rev-parse <commit>:docs/evidence/classic-remaining-dock-launch-b3d2552/evidence.md` (git blob ID) and `git cat-file blob <commit>:<path> | sha256sum` (raw-byte SHA-256). The `sha256.txt` citation above is the raw SHA-256 of that manifest's committed blob, `cde85a8b...`, not the stale `5b2ac034...` and not the LF-normalized `939e4f6a...`. The manifest's own `evidence.md` row still records the historical pre-#610 blob `f2f25394...`; it is not a claim about the current bytes of this file. The frozen manifest and all logs/screenshots were left untouched.
 
 ## Resource / evidence note
 - Measured: Windows 11 host, MSYS2 UCRT64 Qt 6, `QT_QPA_PLATFORM=offscreen`, software rendering, three approved-art captures (1920x1080, 1200x750, 760x500); source-contract and full-suite wall-clock counts above are `SYNTHETIC` host evidence, not Linux Mint acceptance.

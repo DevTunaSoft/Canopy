@@ -46,6 +46,37 @@ jobs:
         timeout-minutes: 6
         run: cmake --build build/classic --parallel 2
 
+      - name: Stage exact SHA-verified v3 five-icon production pack
+        # The compiled binary reads ./production-icons beside itself. Without
+        # a staged pack it reports FIVE_PRODUCTION_PACK_FALLBACK, which is not
+        # acceptance of the production pack. Export from the exact SHA-locked
+        # eight masters with the registered canopy-five-qt-v3 renderer, verify
+        # all fifteen PNG hashes, and prove a byte-identical second export.
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          mkdir -p test-artifacts
+          rm -rf build/classic/production-icons test-artifacts/reproducible-five-icons
+          QT_QPA_PLATFORM=offscreen ./build/classic/canopy-classic-spike \
+            --approved-art-dir prototype/classic/assets/approved \
+            --export-five-production-icons build/classic/production-icons
+          QT_QPA_PLATFORM=offscreen ./build/classic/canopy-classic-spike \
+            --approved-art-dir prototype/classic/assets/approved \
+            --export-five-production-icons test-artifacts/reproducible-five-icons
+          python3 tools/validate_five_production_icons.py \
+            --approved-art-dir prototype/classic/assets/approved \
+            --production-dir build/classic/production-icons \
+            --report test-artifacts/five-production-pack-integrity.json
+          python3 tools/validate_five_production_icons.py \
+            --approved-art-dir prototype/classic/assets/approved \
+            --production-dir test-artifacts/reproducible-five-icons \
+            --report test-artifacts/five-production-pack-reproducible-integrity.json
+          diff -r build/classic/production-icons test-artifacts/reproducible-five-icons
+          sha256sum build/classic/production-icons/manifest.json \
+            | tee test-artifacts/five-production-pack-manifest-sha256.txt
+          cp -a build/classic/production-icons test-artifacts/production-icons
+          echo "CANOPY_V3_PRODUCTION_PACK_STAGED: 15 SHA-checked v3 PNGs beside binary"
+
       - name: Verify real GIO launcher path and opt-in safety
         timeout-minutes: 3
         run: |
@@ -120,6 +151,40 @@ jobs:
       - name: Verify approved eight-icon artwork
         run: python3 -m unittest tests.test_approved_art tests.test_approved_manifest_contract tests.test_approved_art_zip -v
 
+      - name: Require verified v3 production pack in the compiled runtime
+        # tools.check_five_dock_centering.verify_pack_activation fails closed
+        # on a fallback, a FAIL marker, a duplicate or a missing VERIFIED marker.
+        # A fallback renderer is deliberately NOT accepted as pack evidence.
+        timeout-minutes: 4
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          set -euo pipefail
+          test -s build/classic/production-icons/manifest.json
+          xvfb-run -a ./build/classic/canopy-classic-spike \
+            --approved-art-dir prototype/classic/assets/approved \
+            --require-five-production-icons \
+            --self-test-approved --self-test-size 1200x750 \
+            --self-test-screenshot test-artifacts/five-pack-runtime-1200x750.png \
+            > test-artifacts/five-production-runtime.log 2>&1
+          python3 tools/check_five_dock_centering.py \
+            --pack-log test-artifacts/five-production-runtime.log \
+            --output test-artifacts/five-production-activation.json \
+            | tee test-artifacts/five-production-activation.txt
+          grep -qx 'FIVE_PRODUCTION_PACK_VERIFIED=1' \
+            test-artifacts/five-production-activation.txt
+          if grep -q 'FIVE_PRODUCTION_PACK_FALLBACK\|FIVE_PRODUCTION_PACK_FAIL' \
+             test-artifacts/five-production-runtime.log; then
+            echo "FIVE_PRODUCTION_PACK_NOT_VERIFIED: fallback or failure in runtime log" >&2
+            exit 1
+          fi
+          python3 tools/check_screenshot.py \
+            test-artifacts/five-pack-runtime-1200x750.png 1200 750
+
+      - name: Verify five-dock gates and CI pack contracts
+        run: python3 -m unittest tests.test_five_dock_centering tests.test_five_production_pack_version_gate tests.test_classic_five_icon_runtime_mode -v
+
       - name: Headless startup smoke test
         timeout-minutes: 2
         env:
@@ -141,6 +206,35 @@ jobs:
           timeout 40s xvfb-run -a ./build/classic/canopy-classic-spike --approved-art-dir prototype/classic/assets/approved --self-test-approved --self-test-size 760x500 --self-test-screenshot test-artifacts/classic-760x500.png
           python3 tools/check_screenshot.py test-artifacts/classic-760x500.png 760 500
           sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
+
+      - name: Verify bounded frozen-icon pixel lock with the staged v3 pack
+        timeout-minutes: 5
+        env:
+          QT_QUICK_BACKEND: software
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          set -euo pipefail
+          size=1200x750
+          xvfb-run -a ./build/classic/canopy-classic-spike \
+            --approved-art-dir prototype/classic/assets/approved \
+            --dock-clean-edges-review --self-test-approved \
+            --self-test-size "$size" \
+            --self-test-screenshot "test-artifacts/dock-clean-edges-$size.png" \
+            > "test-artifacts/dock-clean-edges-$size.log" 2>&1
+          xvfb-run -a ./build/classic/canopy-classic-spike \
+            --approved-art-dir prototype/classic/assets/approved \
+            --dock-five-center-review --require-five-production-icons \
+            --self-test-approved --self-test-size "$size" \
+            --self-test-screenshot "test-artifacts/dock-five-center-$size.png" \
+            > "test-artifacts/dock-five-center-$size.log" 2>&1
+          python3 tools/check_five_dock_centering.py \
+            --pack-log "test-artifacts/dock-five-center-$size.log" \
+            --output "test-artifacts/dock-five-center-activation-$size.json"
+          python3 tools/check_five_dock_centering.py \
+            --before "test-artifacts/dock-clean-edges-$size.png" \
+            --after "test-artifacts/dock-five-center-$size.png" \
+            --size "$size" \
+            --output "test-artifacts/dock-five-center-diff-$size.json"
 
       - name: Measure five-minute idle CPU and PSS
         timeout-minutes: 9

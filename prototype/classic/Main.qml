@@ -215,6 +215,25 @@ ApplicationWindow {
         }
     }
 
+    // Notification centre is registered in the compiled shell but starts
+    // hidden, so the approved resting desktop is byte-for-byte unchanged.
+    // The controller is a trusted host boundary; the preview host reports
+    // itself disconnected, so every opening shows a disclosure and no rows.
+    NotificationCenter {
+        id: notificationCenter
+        anchors.fill: parent
+        z: 101
+        controller: typeof canopyNotificationSource !== "undefined"
+                    ? canopyNotificationSource : null
+    }
+
+    // Local preview-window shortcut only: no global binding, no daemon.
+    Shortcut {
+        objectName: "canopyNotificationCenterShortcut"
+        sequence: "Ctrl+Alt+N"
+        onActivated: notificationCenter.toggleCenter()
+    }
+
     // The Files dock tile toggles the preview; other tiles keep the approved
     // visual composition without claiming session-level actions.
     Rectangle {

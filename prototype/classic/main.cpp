@@ -321,6 +321,27 @@ private:
     QObject *m_status;
 };
 
+// Trusted host boundary for the notification centre. The preview has NO
+// notification service: connected() is always false and snapshot() is always
+// empty. It exists only to carry the already-defined host event topic contract
+// to QML, so the panel can validate a future host adapter without inventing a
+// new event topic, daemon or notification. No D-Bus, socket, process or poll.
+class NotificationHostSource final : public QObject {
+    Q_OBJECT
+public:
+    Q_INVOKABLE bool connected() const { return false; }
+    Q_INVOKABLE QString source() const { return QStringLiteral("none"); }
+    Q_INVOKABLE QStringList allowedTopics() const {
+        return {
+            QStringLiteral("app.catalog.changed"),
+            QStringLiteral("window.state.changed"),
+            QStringLiteral("session.state.changed"),
+            QStringLiteral("capabilities.report")
+        };
+    }
+    Q_INVOKABLE QVariantList snapshot() const { return QVariantList(); }
+};
+
 // A Repeater can give its delegates QObject owners different from their
 // visual parents. Traverse the actual QQuickItem scene tree for UI assertions.
 static QQuickItem *findVisualItem(QQuickItem *parent, const QString &name) {
@@ -574,6 +595,73 @@ static bool verifyQuickControlsScene(QQuickItem *content, bool settingsExpected,
     QCoreApplication::processEvents();
     if (overlay->property("opened").toBool() || overlay->isVisible()) {
         *reason = QStringLiteral("overlay did not close");
+        return false;
+    }
+    return true;
+}
+
+// The notification centre must stay fail closed in the compiled shell: no
+// invented rows, a visible host-source disclosure, a disabled refresh control
+// and a working close path. This inspects the live QML scene, not source text.
+static bool verifyNotificationCenterScene(QQuickItem *content, QString *reason) {
+    auto *center = findVisualItem(content, QStringLiteral("canopyNotificationCenterOverlay"));
+    if (!center) {
+        *reason = QStringLiteral("notification centre absent from compiled scene");
+        return false;
+    }
+    if (center->property("opened").toBool() || center->isVisible()) {
+        *reason = QStringLiteral("notification centre must start hidden");
+        return false;
+    }
+    if (center->property("sourceConnected").toBool()
+        || center->property("itemCount").toInt() != 0) {
+        *reason = QStringLiteral("preview claimed a host notification source or rows");
+        return false;
+    }
+    if (!QMetaObject::invokeMethod(center, "openCenter", Qt::DirectConnection)) {
+        *reason = QStringLiteral("openCenter() not invokable");
+        return false;
+    }
+    QCoreApplication::processEvents();
+    if (!center->property("opened").toBool() || !center->isVisible()) {
+        *reason = QStringLiteral("notification centre did not open");
+        return false;
+    }
+    if (!findVisualItem(content, QStringLiteral("canopyNotificationCenterPanel"))
+        || !findVisualItem(content, QStringLiteral("canopyNotificationEmptyState"))) {
+        *reason = QStringLiteral("panel or empty state not instantiated");
+        return false;
+    }
+    auto *disclosure = findVisualItem(content, QStringLiteral("canopyNotificationDisclosure"));
+    if (!disclosure || !disclosure->isVisible()
+        || !disclosure->property("text").toString().startsWith(
+            QStringLiteral("Unavailable — "))) {
+        *reason = QStringLiteral("missing visible fail-closed disclosure");
+        return false;
+    }
+    QVector<QQuickItem *> rows;
+    collectVisualItems(content, QStringLiteral("canopyNotificationRow"), &rows);
+    if (!rows.isEmpty()) {
+        *reason = QStringLiteral("notification rows were fabricated without a host source");
+        return false;
+    }
+    auto *refresh = findVisualItem(content, QStringLiteral("canopyNotificationRefreshButton"));
+    if (!refresh || refresh->property("enabled").toBool()) {
+        *reason = QStringLiteral("refresh control enabled without a connected host source");
+        return false;
+    }
+    auto *closeButton = findVisualItem(content, QStringLiteral("canopyNotificationCloseButton"));
+    if (!closeButton || !closeButton->property("enabled").toBool()) {
+        *reason = QStringLiteral("working close control missing");
+        return false;
+    }
+    if (!QMetaObject::invokeMethod(center, "closeCenter", Qt::DirectConnection)) {
+        *reason = QStringLiteral("closeCenter() not invokable");
+        return false;
+    }
+    QCoreApplication::processEvents();
+    if (center->property("opened").toBool() || center->isVisible()) {
+        *reason = QStringLiteral("notification centre did not close");
         return false;
     }
     return true;
@@ -1051,6 +1139,12 @@ int main(int argc, char *argv[]) {
         approvedMode ? QUrl::fromLocalFile(
             approvedRoot + QStringLiteral("/wallpaper/canopy-wave-preview.png")).toString()
                      : QString());
+    // Trusted, disconnected host boundary for the notification centre. It is
+    // registered before QML load but exposes no notifications and no new event
+    // topic; the panel therefore opens to a disclosure in every preview run.
+    NotificationHostSource notificationSource;
+    engine.rootContext()->setContextProperty(
+        QStringLiteral("canopyNotificationSource"), &notificationSource);
     engine.load(QUrl(QStringLiteral("qrc:/Canopy/Classic/Main.qml")));
     if (engine.rootObjects().isEmpty())
         return 1;
@@ -1352,6 +1446,47 @@ int main(int argc, char *argv[]) {
         qInfo() << "SELF_TEST_PASS: quick controls registered in compiled shell";
         qInfo() << "QUICK_CONTROLS_FIXTURE_PASS: opener wired, four domains fail closed,"
                    " approved visuals unchanged";
+        QTimer::singleShot(0, &app, &QCoreApplication::quit);
+    }
+    if (args.contains(QStringLiteral("--self-test-notification-center"))) {
+        auto *center = findVisualItem(
+            window->contentItem(), QStringLiteral("canopyNotificationCenterOverlay"));
+        auto *opener = window->findChild<QObject *>(
+            QStringLiteral("canopyNotificationCenterShortcut"));
+        if (!center) {
+            qCritical() << "NOTIFICATION_CENTER_FIXTURE_FAIL: centre missing from visual scene";
+            return 1;
+        }
+        if (!opener) {
+            qCritical() << "NOTIFICATION_CENTER_FIXTURE_FAIL: opener shortcut missing";
+            return 1;
+        }
+        // Trigger the real QML shortcut connection rather than calling the
+        // QML function directly, so compiled-shell wiring is under test.
+        if (!QMetaObject::invokeMethod(opener, "activated", Qt::DirectConnection)) {
+            qCritical() << "NOTIFICATION_CENTER_FIXTURE_FAIL: opener not invokable";
+            return 1;
+        }
+        QCoreApplication::processEvents();
+        if (!center->property("opened").toBool() || !center->isVisible()) {
+            qCritical() << "NOTIFICATION_CENTER_FIXTURE_FAIL: opener did not open centre";
+            return 1;
+        }
+        // The verifier expects the resting (closed) state, as in the quick
+        // controls fixture: close through the real QML path first.
+        if (!QMetaObject::invokeMethod(center, "closeCenter", Qt::DirectConnection)) {
+            qCritical() << "NOTIFICATION_CENTER_FIXTURE_FAIL: close not invokable";
+            return 1;
+        }
+        QCoreApplication::processEvents();
+        QString reason;
+        if (!verifyNotificationCenterScene(window->contentItem(), &reason)) {
+            qCritical().noquote() << "NOTIFICATION_CENTER_FIXTURE_FAIL:" << reason;
+            return 1;
+        }
+        qInfo() << "SELF_TEST_PASS: notification centre registered in compiled shell";
+        qInfo() << "NOTIFICATION_CENTER_FIXTURE_PASS: opener wired, zero host rows,"
+                   " disclosure visible, refresh disabled, close works";
         QTimer::singleShot(0, &app, &QCoreApplication::quit);
     }
     if (launcherFixture) {
@@ -1689,6 +1824,18 @@ int main(int argc, char *argv[]) {
                 return;
             }
             qInfo() << "SELF_TEST_PASS: quick controls registered and fail closed";
+
+            // Exercise the compiled notification centre and leave it closed
+            // so the captured frame stays the approved resting composition.
+            QString notificationReason;
+            if (!verifyNotificationCenterScene(window->contentItem(),
+                                               &notificationReason)) {
+                qCritical().noquote() << "SELF_TEST_FAIL: notification centre:"
+                                      << notificationReason;
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SELF_TEST_PASS: notification centre registered and fail closed";
 
             // Exercise the integrated QML launcher on the actual compiled
             // scene, then close it before capturing the resting desktop.

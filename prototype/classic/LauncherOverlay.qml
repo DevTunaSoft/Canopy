@@ -107,12 +107,12 @@ FocusScope {
             id: searchField
             objectName: "canopyLauncherSearch"
             anchors.top: heading.bottom
-            anchors.topMargin: 15
+            anchors.topMargin: 16
             anchors.horizontalCenter: parent.horizontalCenter
             width: Math.min(parent.width - 42, 590)
-            height: 40
+            height: 42
             placeholderText: "Find an application"
-            font.pixelSize: 14
+            font.pixelSize: 15
             color: "#263a4f"
             selectByMouse: true
             Accessible.name: "Search available preview applications"
@@ -138,13 +138,13 @@ FocusScope {
             id: grid
             objectName: "canopyLauncherGrid"
             anchors.top: searchField.bottom
-            anchors.topMargin: 14
+            anchors.topMargin: 16
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.bottom: footer.top
+            anchors.bottom: keyHints.top
             anchors.leftMargin: 21
             anchors.rightMargin: 21
-            anchors.bottomMargin: 8
+            anchors.bottomMargin: 6
             clip: true
             model: launcher.filteredApps
             readonly property int columns: width < 470 ? 3 : 4
@@ -171,14 +171,20 @@ FocusScope {
                 background: Rectangle {
                     anchors.margins: 4
                     radius: 15
-                    color: appButton.hovered || appButton.activeFocus
+                    // Hover previews; keyboard focus and grid selection share
+                    // the already-approved focus accent so the active tile is
+                    // unmistakable without introducing a new colour.
+                    color: appButton.hovered || appButton.activeFocus ||
+                           (grid.activeFocus && grid.currentIndex === appButton.index)
                            ? "#dceaf5" : "transparent"
-                    border.width: appButton.activeFocus ? 1 : 0
+                    border.width: appButton.activeFocus ||
+                                  (grid.activeFocus && grid.currentIndex === appButton.index)
+                                  ? 2 : 0
                     border.color: "#5687b3"
                 }
                 contentItem: Column {
                     anchors.centerIn: parent
-                    spacing: 6
+                    spacing: 7
                     Image {
                         objectName: "canopyLauncherIcon"
                         readonly property bool imageReady: status === Image.Ready
@@ -201,7 +207,8 @@ FocusScope {
                         width: appButton.width - 8
                         text: appButton.modelData.title
                         color: "#2c4055"
-                        font.pixelSize: 12
+                        font.pixelSize: 13
+                        font.weight: Font.Medium
                         horizontalAlignment: Text.AlignHCenter
                         elide: Text.ElideRight
                     }
@@ -218,14 +225,31 @@ FocusScope {
             }
             Keys.onBacktabPressed: searchField.forceActiveFocus()
         }
+        // Static, single-line discoverability strip. Reuses the status colour
+        // and the existing middle-dot separator; no timer, effect or artwork.
+        Label {
+            id: keyHints
+            objectName: "canopyLauncherKeyHints"
+            anchors.bottom: footer.top
+            anchors.bottomMargin: 3
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width - 36
+            height: 16
+            text: "Up/Down select · Enter open · Esc close"
+            horizontalAlignment: Text.AlignHCenter
+            elide: Text.ElideRight
+            color: "#657b90"
+            font.pixelSize: 11
+            Accessible.name: "Launcher keyboard shortcuts: " + text
+        }
         Label {
             id: footer
             objectName: "canopyLauncherStatus"
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 15
+            anchors.bottomMargin: 16
             anchors.horizontalCenter: parent.horizontalCenter
             width: parent.width - 36
-            height: 19
+            height: 20
             text: launcher.selectionMessage.length > 0 ? launcher.selectionMessage :
                   launcher.filteredCount === 0 ? "No matching applications" :
                   canopySystemLaunchEnabled

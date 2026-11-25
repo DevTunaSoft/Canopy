@@ -20,6 +20,9 @@ ACCEPTANCE = ROOT / "docs" / "CLASSIC_FIVE_DOCK_PRODUCTION_ACCEPTANCE.md"
 V3_PACK_MANIFEST_SHA256 = (
     "df0b7166b0a3269d7f99484d5196633193162eba56b334b25a1ea39f9682a360"
 )
+CI_V3_PACK_MANIFEST_SHA256 = (
+    "3464d1d03648d8f7814f4337174691d874faa4415c38d5c245dc5fe3f09981ac"
+)
 V3_RENDERER = "canopy-five-qt-v3"
 
 
@@ -120,6 +123,35 @@ class FiveIconPixelLockTests(unittest.TestCase):
             before[pt] = (156, 175, 183, 255)
             after[pt] = (155, 175, 183, 255)
         return before, after
+
+    def test_frozen_identity_mode_accepts_identical_v3_captures(self):
+        with tempfile.TemporaryDirectory() as d:
+            a = Path(d) / "default.png"
+            b = Path(d) / "explicit.png"
+            a.write_bytes(make_exact_rgba_png(760, 500, {}))
+            b.write_bytes(make_exact_rgba_png(760, 500, {}))
+            result = compare_five(a, b, "760x500", frozen_identity=True)
+            self.assertTrue(result["frozen_identity_mode"])
+            self.assertFalse(result["target_change_required"])
+            self.assertIsNone(result["five_targets_genuinely_changed"])
+            self.assertTrue(result["calendar_photos_music_pixel_perfect"])
+
+    def test_frozen_identity_still_rejects_artwork_and_non_icon_changes(self):
+        with tempfile.TemporaryDirectory() as d:
+            a = Path(d) / "default.png"
+            b = Path(d) / "explicit.png"
+            a.write_bytes(make_exact_rgba_png(760, 500, {}))
+            frozen = CENTERS["760x500"]["desktop"][APPS.index("Photos")]
+            with self.subTest(case="frozen"):
+                b.write_bytes(make_exact_rgba_png(
+                    760, 500, {frozen: (155, 35, 45, 255)}))
+                with self.assertRaisesRegex(ComparisonError, "frozen Photos"):
+                    compare_five(a, b, "760x500", frozen_identity=True)
+            with self.subTest(case="non-icon"):
+                b.write_bytes(make_exact_rgba_png(
+                    760, 500, {(20, 200): (155, 35, 45, 255)}))
+                with self.assertRaisesRegex(ComparisonError, "unexpected non-icon"):
+                    compare_five(a, b, "760x500", frozen_identity=True)
 
     def test_five_changes_and_clock_allowed(self):
         result = self.pair(self.five + [(750, 10)])
@@ -270,6 +302,15 @@ class CiPackStagingContractTests(unittest.TestCase):
                       "test-artifacts/reproducible-five-icons", wf)
         self.assertIn("production-icons/manifest.json", wf)
         self.assertIn("sha256sum build/classic/production-icons/manifest.json", wf)
+        self.assertIn(CI_V3_PACK_MANIFEST_SHA256, wf)
+        self.assertIn("| sha256sum -c -", wf)
+
+    def test_ci_verifies_default_activation_identity_not_a_widened_rectangle(self):
+        wf = self.workflow
+        self.assertIn("--frozen-identity", wf)
+        self.assertIn('--before "test-artifacts/classic-$size.png"', wf)
+        self.assertIn("dock-five-center-identity-$size.json", wf)
+        self.assertNotIn("--dock-clean-edges-review", wf)
 
     def test_ci_requires_verified_runtime_and_rejects_fallback(self):
         wf = self.workflow

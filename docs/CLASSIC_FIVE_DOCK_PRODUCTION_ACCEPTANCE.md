@@ -9,7 +9,7 @@ Renderer provenance is not new artwork and is not owner visual approval. Owner v
 - Keep all **eight original approved source PNGs** and `assets/approved/manifest.json` byte-for-byte unchanged. No generated, downloaded or synthetic substitute is accepted.
 - The registered production renderer is exactly `canopy-five-qt-v3`. The original approved manifest SHA-256 is `5aa040ddbfeddbd38dcbd1808710676982efbc4146987c42e93eaa57ad0d4737`. The revised v3 pack manifest recorded with the compiled-Qt evidence is `df0b7166b0a3269d7f99484d5196633193162eba56b334b25a1ea39f9682a360` (`WS2_EDGE_CORRECTION_EVIDENCE.md`, evidence manifest `4fe913740bc250e6712479a3b63c426ef98856b9c3fc28271fc9b166e447af4e`). Only Mail, Terminal and Settings changed relative to v2; Browser and Files stayed byte-identical and the three frozen icons never enter the production path.
 - The compiled Qt binary exports the five icons at **192×192, 384×384 and 576×576** (15 PNGs, from the masters rather than upscaled) plus a `manifest.json`. `tools/validate_five_production_icons.py` verifies the eight source masters, exact `schema_version`, exact renderer string, source-manifest digest, all fifteen per-file SHA-256s and PNG geometry/alpha, and rejects extra files or symlinks. An independent re-export must byte-match the staged pack.
-- CI stages the exported pack at `build/classic/production-icons/` beside the binary before any approved-art run. Without that directory the binary deliberately falls back to the identical in-memory renderer; fallback is **not** proof of production-pack acceptance.
+- CI stages the exported pack at `build/classic/production-icons/` beside the binary before any approved-art run. Without that directory the binary deliberately falls back to the identical in-memory renderer; fallback is **not** proof of production-pack acceptance. The exact v3 pack manifest SHA-256 observed on the authoritative `ubuntu-24.04` runner is `3464d1d03648d8f7814f4337174691d874faa4415c38d5c245dc5fe3f09981ac` (CI run `45589523882`); CI checks it with `sha256sum -c -` and also proves a byte-identical second export.
 
 ## Runtime activation is asserted, not inferred
 
@@ -29,7 +29,7 @@ A two-level or larger delta, an alpha shift, a change outside the dock, a change
 ## Other CI requirements
 
 - Capture real Qt screenshots at **760×500, 1200×750 and 1920×1080** and check exact dimensions and the bounded five-only pixel lock.
-- Verify the normal approved startup matches the explicit five-center composition at the same resolution, aside from the bounded dynamic clock.
+- Verify the ordinary approved startup matches the explicit five-center composition at the same resolution via `tools/check_five_dock_centering.py --frozen-identity` (bounded dynamic clock and one-level compositing noise excepted). This is an identity check: no unchanged target icon is required, but frozen artwork and every non-icon pixel stay locked; no ignored rectangle is widened.
 - Preserve the existing five-minute resource measurement and unrelated agent changes.
 - Preserved rollbacks: `--dock-clean-edges-review` restores the pre-centering clean-matte appearance; `--dock-original-fit` restores historical source-fit. Neither rollback reads the generated pack.
 - Wallpaper integration is a separate workstream. Do not change wallpaper, QML dock geometry, controls, launcher, the eight masters or the frozen icons as part of this work.

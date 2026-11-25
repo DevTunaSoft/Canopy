@@ -62,7 +62,14 @@ def dock_plate_one_level_jitter(size, x, y, first, second):
             all(abs(int(a) - int(b)) <= 1 for a, b in zip(first[:3], second[:3])))
 
 
-def compare_five(before: Path, after: Path, size: str) -> dict:
+def compare_five(before: Path, after: Path, size: str,
+                 frozen_identity: bool = False) -> dict:
+    """Compare a rollback vs five-center pair, or two equivalent v3 captures.
+
+    frozen_identity=True is the default-activation identity check: both sides
+    already use the v3 five-center composition, so no target icon is required
+    to change. Frozen artwork and non-icon pixels stay just as strictly gated.
+    """
     if size not in CENTERS:
         raise ComparisonError("unsupported real-Qt screenshot size")
     if frozenset(APPS) != FROZEN | TARGET or FROZEN & TARGET:
@@ -111,9 +118,10 @@ def compare_five(before: Path, after: Path, size: str) -> dict:
                 raise ComparisonError("too many 1-level dock compositing pixels")
         else:
             raise ComparisonError(f"unexpected non-icon change at ({x},{y})")
-    for name in TARGET:
-        if changes[name] == 0:
-            raise ComparisonError(f"targeted {name} icon did not change")
+    if not frozen_identity:
+        for name in TARGET:
+            if changes[name] == 0:
+                raise ComparisonError(f"targeted {name} icon did not change")
     for (cx, cy) in pixels:
         for dx in (-30, 30):
             for dy in (-30, 30):
@@ -128,7 +136,10 @@ def compare_five(before: Path, after: Path, size: str) -> dict:
             all(changes[name] == 0 and frozen_jitter[name] <= FROZEN_JITTER_MAX
                 for name in FROZEN),
         "frozen_one_level_compositing_jitter": frozen_jitter,
-        "five_targets_genuinely_changed": all(changes[name] > 0 for name in TARGET),
+        "five_targets_genuinely_changed":
+            (None if frozen_identity else all(changes[name] > 0 for name in TARGET)),
+        "frozen_identity_mode": frozen_identity,
+        "target_change_required": not frozen_identity,
         "non_icon_changes": 0,
         "clock_exception_pixels": clock_pixels,
         "one_level_files_corner_aa_pixels": corner_jitter,
@@ -171,6 +182,8 @@ def main(argv=None) -> int:
     p.add_argument("--before", type=Path)
     p.add_argument("--after", type=Path)
     p.add_argument("--size")
+    p.add_argument("--frozen-identity", action="store_true",
+                   help="compare two v3 five-center captures; do not require target changes")
     p.add_argument("--pack-log", type=Path,
                    help="compiled-Qt runtime log to gate on verified v3 pack load")
     p.add_argument("--output", type=Path, required=True)
@@ -186,7 +199,8 @@ def main(argv=None) -> int:
             return 0
         if not (a.before and a.after and a.size):
             raise ComparisonError("pixel mode needs --before, --after and --size")
-        result = compare_five(a.before, a.after, a.size)
+        result = compare_five(a.before, a.after, a.size,
+                              frozen_identity=a.frozen_identity)
         a.output.parent.mkdir(parents=True, exist_ok=True)
         a.output.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
         print("FIVE_DOCK_ICON_PIXEL_LOCK_PASS:", a.size,

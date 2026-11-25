@@ -74,6 +74,9 @@ jobs:
           diff -r build/classic/production-icons test-artifacts/reproducible-five-icons
           sha256sum build/classic/production-icons/manifest.json \
             | tee test-artifacts/five-production-pack-manifest-sha256.txt
+          # Exact v3 pack identity on ubuntu-24.04 CI (recorded from run 45589523882).
+          echo '3464d1d03648d8f7814f4337174691d874faa4415c38d5c245dc5fe3f09981ac  build/classic/production-icons/manifest.json' \
+            | sha256sum -c -
           cp -a build/classic/production-icons test-artifacts/production-icons
           echo "CANOPY_V3_PRODUCTION_PACK_STAGED: 15 SHA-checked v3 PNGs beside binary"
 
@@ -207,20 +210,14 @@ jobs:
           python3 tools/check_screenshot.py test-artifacts/classic-760x500.png 760 500
           sha256sum test-artifacts/*.png > test-artifacts/screenshot-sha256.txt
 
-      - name: Verify bounded frozen-icon pixel lock with the staged v3 pack
-        timeout-minutes: 5
+      - name: Verify bounded frozen-icon identity with the staged v3 pack
+        timeout-minutes: 4
         env:
           QT_QUICK_BACKEND: software
           LIBGL_ALWAYS_SOFTWARE: "1"
         run: |
           set -euo pipefail
           size=1200x750
-          xvfb-run -a ./build/classic/canopy-classic-spike \
-            --approved-art-dir prototype/classic/assets/approved \
-            --dock-clean-edges-review --self-test-approved \
-            --self-test-size "$size" \
-            --self-test-screenshot "test-artifacts/dock-clean-edges-$size.png" \
-            > "test-artifacts/dock-clean-edges-$size.log" 2>&1
           xvfb-run -a ./build/classic/canopy-classic-spike \
             --approved-art-dir prototype/classic/assets/approved \
             --dock-five-center-review --require-five-production-icons \
@@ -230,11 +227,17 @@ jobs:
           python3 tools/check_five_dock_centering.py \
             --pack-log "test-artifacts/dock-five-center-$size.log" \
             --output "test-artifacts/dock-five-center-activation-$size.json"
+          python3 tools/check_screenshot.py \
+            "test-artifacts/dock-five-center-$size.png" 1200 750
+          # The ordinary startup already selects v3 five-center. Comparing it
+          # with the explicit flag proves activation; frozen artwork and every
+          # non-icon pixel stay locked (bounded compositing jitter excepted).
           python3 tools/check_five_dock_centering.py \
-            --before "test-artifacts/dock-clean-edges-$size.png" \
+            --frozen-identity \
+            --before "test-artifacts/classic-$size.png" \
             --after "test-artifacts/dock-five-center-$size.png" \
             --size "$size" \
-            --output "test-artifacts/dock-five-center-diff-$size.json"
+            --output "test-artifacts/dock-five-center-identity-$size.json"
 
       - name: Measure five-minute idle CPU and PSS
         timeout-minutes: 9

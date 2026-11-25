@@ -8,6 +8,7 @@ claim Qt, artwork, theme or Linux Mint acceptance.
 import importlib.util
 import json
 import os
+import posixpath
 from pathlib import Path
 import stat
 import tempfile
@@ -335,6 +336,17 @@ class WindowsPrivilegedSeparatorTests(_BoundedTempMixin, unittest.TestCase):
             for name in ("posix", "nt"):
                 with self.subTest(path=text, host=name):
                     with self._host_branch(name):
+                        self.assertTrue(source._is_privileged_path(text))
+
+    def test_windows_prefix_ignores_the_active_os_path_module(self):
+        # Foundation CI runs on Linux: os.path is posixpath even when a test
+        # exercises the nt branch. A drive-qualified system path must still
+        # be recognized; the branch must not depend on splitdrive's module.
+        for text in self._PRIVILEGED:
+            for name in ("nt", "posix"):
+                with self.subTest(path=text, host=name):
+                    with mock.patch.object(source.os, "path", posixpath), \
+                            self._host_branch(name):
                         self.assertTrue(source._is_privileged_path(text))
 
     def test_ordinary_user_paths_are_not_privileged_with_either_separator(self):

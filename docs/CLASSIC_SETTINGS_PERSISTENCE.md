@@ -164,10 +164,42 @@ run in parallel on two private worktrees pinned to the same base SHA:
 | untouched base `b9d9313` | Ran `3524` tests in `1006.209`s; `OK (skipped=46)` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` | `5ff97a8f10c279f9e358dee63e307d19ebfd4c958ef5265180d6445a677587b1` |
 | fixed tree | Ran `3528` tests in `963.590`s; `OK (skipped=46)` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` | `ac33839f7a515c26b833e45ebb56d84d82f391359b3b98b15df5bf13d9cfb294` |
 
-The test-file delta is `+4` tests, and the full-suite delta is `+4`
-tests; no new failure or error name was introduced. Base failure names:
+The stage-1 test-file delta was `+4` tests and the full-suite delta was
+`+4` tests; stage 2 below adds one more regression test. No new failure or
+error name was introduced. Base failure names:
 `none`. Fixed-tree failure names: `none`.
 `git diff --check` passes.
+
+### Stage 2: Linux CI revealed an `os.path` module dependency
+
+The first draft passed every local Windows gate, but the draft PR's Ubuntu
+foundation check failed 14 assertions in
+`test_windows_system_prefix_matches_either_separator`: `os.path.normcase` does
+not lower-case on POSIX, and the `nt` branch called
+`posixpath.splitdrive` when `os.name` was patched. The gate must not depend on
+either. A new regression test patches `source.os.path` to `posixpath` for both
+host branches; RED on the stage-1 production code:
+
+```
+PYTHONPATH=. uv run --no-project pytest tests/test_c100_settings_persistence_isolation.py -q
+11 failed, 23 passed, 1 skipped, 45 subtests passed in 2.21s
+```
+
+Log SHA-256 `e8aa42d1c983bccdbade491019f8498016311b3c84d05d774ffcc0cee80d830b`.
+`_is_privileged_windows_tail` now folds case explicitly, and a drive-qualified
+path is matched from the unified separator form before any `os.name` or
+`os.path.splitdrive` branch is taken. GREEN on the same host:
+
+```
+PYTHONPATH=. uv run --no-project pytest \
+  tests/test_c100_settings_persistence_isolation.py \
+  tests/test_c100_settings_persisted_preferences.py -q
+48 passed, 1 skipped, 77 subtests passed in 6.41s
+```
+
+Log SHA-256 `dd5ea0dbacc60efdae034c9cb40dd509a778318603afe9afc0a98048f30eb120`.
+`tools/check_foundation.py` and `git diff --check` both pass again. The final
+exact-head full suite and the re-run CI checks are recorded in the PR body.
 
 Resource / evidence note: measured here are exact test counts, durations and
 log SHA-256s from local CPython 3.14.9 gates on Windows 11 (`SYNTHETIC`,

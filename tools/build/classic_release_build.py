@@ -8,10 +8,13 @@ gate from tools/qa/classic_build_gate.py.
 
     python tools/build/classic_release_build.py \
         --source C:/Users/X1/Projects/Canopy \
+        <full-source-sha> \
         --out C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy-classic-release
 
-No network access, no main merge, no edits to source files, and no changes
-outside the scratch --out directory.
+--source-sha is mandatory and is never inferred from the worktree: the caller
+must state the exact commit it trusts. A different HEAD is rejected before any
+build runs. No network access, no main merge, no edits to source files, and no
+changes outside the scratch --out directory.
 """
 
 from __future__ import annotations
@@ -25,7 +28,8 @@ import subprocess
 import sys
 import time
 
-SOURCE_SHA = "b31c995a650202b66c08064a7cc3b7b4f0609d2d"
+# Synthetic validation alphabet only; no repository SHA is pinned in code.
+HEX_CHARS = frozenset("0123456789abcdefABCDEF")
 UCRT_BIN = "C:/msys64/ucrt64/bin"
 PACMAN = "C:/msys64/usr/bin/pacman.exe"
 EXE = {
@@ -46,6 +50,15 @@ REQUIRED_SHOT_MARKERS = (
 
 def native(path: Path) -> str:
     return str(path).replace("\\", "/")
+
+
+def canonical_sha(value: object):
+    """Canonical lowercase SHA-256 hex, or None for anything else (fail closed)."""
+    if not isinstance(value, str) or len(value) != 40:
+        return None
+    if any(char not in HEX_CHARS for char in value):
+        return None
+    return value.lower()
 
 
 def run(command, *, env, cwd=None, timeout=900):
@@ -77,10 +90,16 @@ def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", required=True,
                         help="native path of the integration-tip worktree")
+    parser.add_argument("--source-sha", required=True,
+                        help="exact source commit SHA-256 the caller trusts; never inferred")
     parser.add_argument("--out", required=True,
                         help="native scratch path for build and evidence bundle")
     args = parser.parse_args(argv)
 
+    expected_sha = canonical_sha(args.source_sha)
+    if expected_sha is None:
+        print("BUILD_FAIL: --source-sha must be a 40-character SHA-256 hex string")
+        return 1
     source = Path(args.source).resolve()
     out = Path(args.out).resolve()
     if out == Path(out.anchor) or source == Path(source.anchor):
@@ -95,9 +114,9 @@ def main(argv=None) -> int:
 
     head = run(["git", "-C", native(source), "rev-parse", "HEAD"],
                env=os.environ.copy(), timeout=60)[0]
-    if head.returncode != 0 or head.stdout.strip() != SOURCE_SHA:
+    if head.returncode != 0 or canonical_sha(head.stdout.strip()) != expected_sha:
         print("BUILD_FAIL: source HEAD is %r, expected %s"
-              % (head.stdout.strip(), SOURCE_SHA))
+              % (head.stdout.strip(), expected_sha))
         return 1
     tree = run(["git", "-C", native(source), "rev-parse", "HEAD^{tree}"],
                env=os.environ.copy(), timeout=60)[0]
@@ -196,6 +215,17 @@ def main(argv=None) -> int:
         build_hashes.append(sha256(built))
         shutil.copy2(built, out / ("pass%d-canopy-classic-spike.exe" % pass_number))
         shutil.copy2(built, binary_copy)
+    # A source moved underneath the build would make the recorded pin a lie.
+    head_after = run(["git", "-C", native(source), "rev-parse", "HEAD"],
+                     env=os.environ.copy(), timeout=60)[0]
+    dirty_after = run(["git", "-C", native(source), "diff", "--quiet"],
+                      env=os.environ.copy(), timeout=60)[0]
+    if (head_after.returncode != 0
+            or canonical_sha(head_after.stdout.strip()) != expected_sha
+            or dirty_after.returncode != 0):
+        print("BUILD_FAIL: source HEAD or tracked files changed during the build")
+        return 1
+
     if build_hashes[0] != build_hashes[1]:
         print("BUILD_FAIL: clean rebuild was not byte-identical: %s vs %s"
               % tuple(build_hashes))
@@ -258,7 +288,7 @@ def main(argv=None) -> int:
     (evidence / "commands.txt").write_text("\n".join(commands) + "\n", encoding="utf-8")
     bundle = {
         "schema_version": 1,
-        "source_sha": SOURCE_SHA,
+        "source_sha": expected_sha,
         "source_tree_sha": tree.stdout.strip(),
         "source_worktree_tracked_clean": True,
         "artifact": "Canopy Classic spike at pinned integration tip",
@@ -296,7 +326,7 @@ def main(argv=None) -> int:
     import classic_build_gate as gate
     manifest = gate.write_manifest(evidence, bundle)
     print("MANIFEST entries=%d" % len(manifest))
-    return gate.verify(evidence, SOURCE_SHA)
+    return gate.verify(evidence, expected_sha)
 
 
 if __name__ == "__main__":

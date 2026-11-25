@@ -2,8 +2,12 @@
 """Fail-closed gate for the reproducible Classic UCRT64 build evidence bundle.
 
 Usage:
-    python tools/qa/classic_build_gate.py verify --evidence DIR [--source-sha SHA]
+    python tools/qa/classic_build_gate.py verify --evidence DIR --source-sha SHA
     python tools/qa/classic_build_gate.py selftest [--keep]
+
+--source-sha is mandatory on verify: the caller must state the exact source
+commit it trusts. The gate never infers a pin from the bundle it is checking,
+so a stale or absent pin cannot silently pass.
 
 The verify mode reads only the evidence directory: it never builds, never
 contacts the network and never trusts a hash without recomputing it. Every
@@ -26,7 +30,9 @@ import tempfile
 import zlib
 
 SCHEMA_VERSION = 1
-EXPECTED_SOURCE_SHA = "b31c995a650202b66c08064a7cc3b7b4f0609d2d"
+# Synthetic fixture only. Never used as a default for production verification.
+FIXTURE_SOURCE_SHA = "f" * 40
+HEX_CHARS = frozenset("0123456789abcdefABCDEF")
 SIZES = ((1920, 1080), (1200, 750), (760, 500))
 BINARY_REL = "binary/canopy-classic-spike.exe"
 MANIFEST_NAME = "artifact_manifest.json"
@@ -60,6 +66,15 @@ MAX_IDAT_BYTES = 80_000_000
 
 class GateError(Exception):
     """Gate-level failure with a stable report code."""
+
+
+def normalize_source_sha(value: object):
+    """Canonical lowercase SHA-256 hex, or None for anything else (fail closed)."""
+    if not isinstance(value, str) or len(value) != 40:
+        return None
+    if any(char not in HEX_CHARS for char in value):
+        return None
+    return value.lower()
 
 
 def sha256_file(path: Path) -> str:
@@ -222,10 +237,11 @@ def verify(root: Path, source_sha: str) -> int:
 
     try:
         actual_source = evidence.get("source_sha")
-        check("SOURCE_SHA", isinstance(actual_source, str)
-              and actual_source.lower() == source_sha.lower()
-              and len(actual_source) == 40, "pinned=%s actual=%s"
-              % (source_sha, str(actual_source)[:40]))
+        pinned = normalize_source_sha(source_sha)
+        actual = normalize_source_sha(actual_source)
+        check("SOURCE_SHA", pinned is not None and actual is not None
+              and pinned == actual, "pinned=%s actual=%s"
+              % (str(source_sha)[:40], str(actual_source)[:40]))
         toolchain = evidence.get("toolchain")
         toolchain_text = _read_text(root / TOOLCHAIN_NAME)
         toolchain_ok = isinstance(toolchain, dict) and all(
@@ -365,7 +381,7 @@ def make_png(width: int, height: int, uniform: bool = False) -> bytes:
             + _chunk(b"IEND", b""))
 
 
-def make_bundle(root: Path, *, source_sha: str = EXPECTED_SOURCE_SHA) -> dict:
+def make_bundle(root: Path, *, source_sha: str = FIXTURE_SOURCE_SHA) -> dict:
     """Create a small, fully valid synthetic evidence bundle."""
     (root / "binary").mkdir(parents=True, exist_ok=True)
     (root / "screenshots").mkdir(parents=True, exist_ok=True)
@@ -433,12 +449,12 @@ def selftest(keep: bool = False) -> int:
     base = Path(tempfile.mkdtemp(prefix="classic-build-gate-"))
     cases = []
 
-    def run(label, expected_first):
+    def run(label, expected_first, pin=FIXTURE_SOURCE_SHA):
         import contextlib
         import io
         buffer = io.StringIO()
         with contextlib.redirect_stdout(buffer):
-            rc = verify(base / "case", EXPECTED_SOURCE_SHA)
+            rc = verify(base / "case", pin)
         text = buffer.getvalue()
         first = next((line.split()[1] for line in text.splitlines()
                       if line.startswith("FIRST ")), "NONE")
@@ -471,6 +487,13 @@ def selftest(keep: bool = False) -> int:
             make_bundle(case)
             mutate(case)
             run(label, expected)
+
+        # Pin-integrity controls: the bundle is untouched, only the caller's
+        # declared pin is wrong or malformed. Both must fail at SOURCE_SHA.
+        shutil.rmtree(case)
+        make_bundle(case)
+        run("stale-pin", "SOURCE_SHA", "a" * 40)
+        run("malformed-pin", "SOURCE_SHA", "not-a-sha")
 
         ok = all(first == expected and (rc == (0 if expected == "NONE" else 1))
                  for _, expected, first, rc in cases)
@@ -529,7 +552,8 @@ def main(argv=None) -> int:
     sub = parser.add_subparsers(dest="mode", required=True)
     verify_parser = sub.add_parser("verify")
     verify_parser.add_argument("--evidence", required=True)
-    verify_parser.add_argument("--source-sha", default=EXPECTED_SOURCE_SHA)
+    verify_parser.add_argument("--source-sha", required=True,
+                               help="exact source commit SHA-256 the caller trusts")
     selftest_parser = sub.add_parser("selftest")
     selftest_parser.add_argument("--keep", action="store_true")
     args = parser.parse_args(argv)

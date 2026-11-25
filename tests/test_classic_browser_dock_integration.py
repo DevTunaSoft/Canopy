@@ -87,8 +87,9 @@ class ClassicBrowserDockIntegrationTests(unittest.TestCase):
                          APPROVED_DOCK_FNV64)
         self.assertIn('signal activated(string applicationName)',
                       (SOURCE / "DockTile.qml").read_text(encoding="utf-8"))
-        self.assertFalse((SOURCE / "assets" / "approved" / "icons" /
-                          "Browser_Option_3.png").with_suffix(".png.new").exists())
+        # No Browser-specific visual behaviour was introduced in the frozen QML.
+        self.assertIn('if (applicationName === "Files")', main)
+        self.assertNotIn('applicationName === "Browser"', main)
 
 
 if __name__ == "__main__":

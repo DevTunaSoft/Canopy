@@ -66,6 +66,48 @@ private:
     QObject *m_status;
 };
 
+// Workstream A: the Browser dock tile uses the SAME validated SystemAppLauncher
+// service through an adapter identical in shape to the Files one above. It owns
+// no launcher logic, accepts only the exact frozen dock label, and reports a
+// refusal in the existing launcher footer. No QML, artwork, geometry or colour
+// changes; this bridge mirrors the reviewed Files adapter rather than adding
+// any second GIO/shell code path.
+class BrowserDockLaunchBridge final : public QObject {
+    Q_OBJECT
+public:
+    BrowserDockLaunchBridge(SystemAppLauncher &launcher, QObject *statusOverlay,
+                            QObject *parent = nullptr)
+        : QObject(parent), m_launcher(launcher), m_status(statusOverlay) {}
+
+public slots:
+    void activate(const QString &name) {
+        if (name != QStringLiteral("Browser")) {
+            qWarning() << "CANOPY_BROWSER_DOCK_REJECTED: unknown action";
+            return;
+        }
+        if (m_launcher.launch(name)) {
+            qInfo() << "CANOPY_BROWSER_DOCK_LAUNCH_REQUESTED";
+            return;
+        }
+        qWarning() << "CANOPY_BROWSER_DOCK_LAUNCH_REFUSED";
+        if (!m_status)
+            return;
+        // openLauncher() clears the prior message, so set the refusal
+        // AFTER opening; the existing footer Label binds to this text.
+        if (!QMetaObject::invokeMethod(m_status, "openLauncher",
+                                       Qt::DirectConnection)) {
+            qWarning() << "CANOPY_BROWSER_DOCK_STATUS_UNAVAILABLE";
+            return;
+        }
+        m_status->setProperty("selectionMessage",
+                              QStringLiteral("Browser could not be launched"));
+    }
+
+private:
+    SystemAppLauncher &m_launcher;
+    QObject *m_status;
+};
+
 // A Repeater can give its delegates QObject owners different from their
 // visual parents. Traverse the actual QQuickItem scene tree for UI assertions.
 static QQuickItem *findVisualItem(QQuickItem *parent, const QString &name) {
@@ -492,9 +534,10 @@ int main(int argc, char *argv[]) {
             QStringLiteral("Trash")
         };
         for (const QString &name : dockNames) {
-            // Files is wired to the same host service below, with a status
-            // path; all other tiles keep their original direct connection.
-            if (name == QStringLiteral("Files"))
+            // Files and Browser are wired to the same host service below,
+            // with a fail-closed status path; other tiles keep their original
+            // direct connection.
+            if (name == QStringLiteral("Files") || name == QStringLiteral("Browser"))
                 continue;
             if (auto *tile = findDockTile(window->contentItem(), name))
                 QObject::connect(tile, SIGNAL(activated(QString)),
@@ -516,6 +559,21 @@ int main(int argc, char *argv[]) {
             QObject::connect(filesLaunchTile, SIGNAL(activated(QString)),
                              filesBridge, SLOT(activate(QString)));
             qInfo() << "CANOPY_FILES_DOCK_NATIVE_LAUNCH_CONNECTED";
+        }
+
+        // Same host-side adapter for the existing Browser dock interaction.
+        // No QML/asset edits: the frozen `activated("Browser")` signal alone is
+        // connected, and Browser is removed from the direct-connect loop above.
+        auto *browserLaunchTile = findDockTile(window->contentItem(),
+                                                QStringLiteral("Browser"));
+        auto *browserStatusOverlay = findVisualItem(
+            window->contentItem(), QStringLiteral("canopyApplicationLauncher"));
+        if (browserLaunchTile) {
+            auto *browserBridge = new BrowserDockLaunchBridge(
+                systemLauncher, browserStatusOverlay, &app);
+            QObject::connect(browserLaunchTile, SIGNAL(activated(QString)),
+                             browserBridge, SLOT(activate(QString)));
+            qInfo() << "CANOPY_BROWSER_DOCK_NATIVE_LAUNCH_CONNECTED";
         }
     }
     if (launcherFixture) {
@@ -604,6 +662,75 @@ int main(int argc, char *argv[]) {
             }
             qInfo() << "SELF_TEST_PASS: Files dock activated native GIO launch";
             qInfo() << "FILES_DOCK_LAUNCH_FIXTURE_PASS: dock signal reached GIO service";
+        }
+        QTimer::singleShot(0, &app, &QCoreApplication::quit);
+    }
+    const bool browserDockStatusFixture = args.contains(
+        QStringLiteral("--self-test-browser-dock-status"));
+    const bool browserDockLaunchFixture = args.contains(
+        QStringLiteral("--self-test-browser-dock-fixture"));
+    if (browserDockStatusFixture || browserDockLaunchFixture) {
+        if (!enableSystemApps) {
+            qCritical() << "BROWSER_DOCK_FIXTURE_FAIL: native launch not enabled";
+            return 1;
+        }
+        const bool canLaunchBrowser =
+            systemLauncher.canLaunch(QStringLiteral("Browser"));
+        if (browserDockStatusFixture && canLaunchBrowser) {
+            qCritical() << "BROWSER_DOCK_FIXTURE_FAIL: status case needs no browser";
+            return 1;
+        }
+        if (browserDockLaunchFixture && !canLaunchBrowser) {
+            qCritical() << "BROWSER_DOCK_FIXTURE_FAIL: GIO browser unavailable";
+            return 1;
+        }
+        auto *browserTile = findDockTile(
+            window->contentItem(), QStringLiteral("Browser"));
+        auto *browserOverlay = findVisualItem(
+            window->contentItem(), QStringLiteral("canopyApplicationLauncher"));
+        auto *browserStatus = findVisualItem(
+            window->contentItem(), QStringLiteral("canopyLauncherStatus"));
+        if (!browserTile || !browserOverlay || !browserStatus) {
+            qCritical() << "BROWSER_DOCK_FIXTURE_FAIL: frozen dock or status footer missing";
+            return 1;
+        }
+        const QString initialStatus = browserStatus->property("text").toString();
+        // A hostile lookalike label must change neither launcher nor status.
+        if (!QMetaObject::invokeMethod(
+                browserTile, "activated", Qt::DirectConnection,
+                Q_ARG(QString, QStringLiteral("Browser;echo bad")))) {
+            qCritical() << "BROWSER_DOCK_FIXTURE_FAIL: signal not invokable";
+            return 1;
+        }
+        QCoreApplication::processEvents();
+        if (browserOverlay->property("opened").toBool()
+            || browserStatus->property("text").toString() != initialStatus) {
+            qCritical() << "BROWSER_DOCK_FIXTURE_FAIL: unknown action accepted";
+            return 1;
+        }
+        if (!QMetaObject::invokeMethod(
+                browserTile, "activated", Qt::DirectConnection,
+                Q_ARG(QString, QStringLiteral("Browser")))) {
+            qCritical() << "BROWSER_DOCK_FIXTURE_FAIL: dock activation failed";
+            return 1;
+        }
+        QCoreApplication::processEvents();
+        if (browserDockStatusFixture) {
+            const QString shown = browserStatus->property("text").toString();
+            if (!browserOverlay->property("opened").toBool()
+                || !shown.contains(QStringLiteral("Browser could not be launched"))) {
+                qCritical() << "BROWSER_DOCK_FIXTURE_FAIL: refusal not visible to user";
+                return 1;
+            }
+            qInfo() << "BROWSER_DOCK_STATUS_FIXTURE_PASS: refusal visible in launcher footer";
+        } else {
+            if (browserOverlay->property("opened").toBool()
+                || browserStatus->property("text").toString() != initialStatus) {
+                qCritical() << "BROWSER_DOCK_FIXTURE_FAIL: native launch reported a refusal";
+                return 1;
+            }
+            qInfo() << "SELF_TEST_PASS: Browser dock activated native GIO launch";
+            qInfo() << "BROWSER_DOCK_LAUNCH_FIXTURE_PASS: dock signal reached GIO service";
         }
         QTimer::singleShot(0, &app, &QCoreApplication::quit);
     }

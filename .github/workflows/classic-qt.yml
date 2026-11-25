@@ -74,6 +74,29 @@ jobs:
             xvfb-run -a ./build/classic/canopy-classic-spike --enable-system-apps --self-test-files-dock-fixture
           test -f "$dock_marker"
 
+      - name: Verify Browser dock reaches the real GIO launcher
+        timeout-minutes: 3
+        run: |
+          set -e
+          mkdir -p test-artifacts/browser-gio-xdg/applications
+          browser_marker="$PWD/test-artifacts/browser-dock-launch-marker"
+          rm -f "$browser_marker"
+          printf '[Desktop Entry]\nType=Application\nName=Canopy Browser Dock Fixture\nExec=/bin/sh -c "touch %s"\nNoDisplay=false\nTerminal=false\n' "$browser_marker" > test-artifacts/browser-gio-xdg/applications/firefox.desktop
+          XDG_DATA_HOME="$PWD/test-artifacts/browser-gio-xdg" XDG_DATA_DIRS="$PWD/test-artifacts/browser-gio-xdg" \
+            xvfb-run -a ./build/classic/canopy-classic-spike --enable-system-apps --self-test-browser-dock-fixture
+          test -f "$browser_marker"
+
+      - name: Verify Browser dock refusal is visible without a browser
+        timeout-minutes: 3
+        run: |
+          set -e
+          mkdir -p test-artifacts/browser-status-xdg/applications
+          XDG_DATA_HOME="$PWD/test-artifacts/browser-status-xdg" XDG_DATA_DIRS="$PWD/test-artifacts/browser-status-xdg" \
+            xvfb-run -a ./build/classic/canopy-classic-spike --enable-system-apps --self-test-browser-dock-status
+
+      - name: Verify Browser dock source contracts
+        run: python3 -m unittest tests.test_classic_browser_dock_integration tests.test_classic_desktop_integration -v
+
       - name: Verify approved eight-icon artwork
         run: python3 -m unittest tests.test_approved_art tests.test_approved_manifest_contract tests.test_approved_art_zip -v
 

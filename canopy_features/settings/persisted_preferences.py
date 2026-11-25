@@ -11,8 +11,10 @@ Every key is pinned to an existing configuration contract:
 * Unavailable settings reuse the fixed disclosure strings and reason codes of
   ``canopy_features.system.quick_controls_state`` rather than inventing new
   protocol text.
-* The existing ``canopy_core.host_events`` topic set is checked so this module
-  never introduces a fifth private topic.
+* The existing ``canopy_core.host_events`` topic set is checked for uniqueness
+  and exact set equality with the pinned protocol-v2 set, so this module can
+  never introduce a fifth private topic or accept a duplicated topic that
+  hides an omitted approved one.
 
 "Deciding is not executing": a view says whether a presentation may offer a
 setting and why. The caller owns any persistence and any action. Corrupt,
@@ -42,6 +44,8 @@ __all__ = [
     "PreferenceView",
     "PersistedPreferencesError",
     "PersistedPreferences",
+    "HOST_EVENT_TOPICS",
+    "checked_host_event_topics",
     "view_for_key",
 ]
 
@@ -55,10 +59,8 @@ REDUCED_MOTION_KEY = "reduced_motion"
 UNSET = _motion.UNSET
 _KEY_PATTERN = re.compile(r"[a-z][a-z0-9_]{0,63}\Z")
 
-# The host event protocol is fixed. This module adds no topic of its own.
-if "capabilities.report" not in _HOST_EVENT_TOPICS:  # pragma: no cover
-    raise RuntimeError("host event contract no longer names capabilities.report")
-
+# The host event protocol is fixed. The exact-set gate that enforces this is
+# defined just below, after the module's domain error class.
 # Fixed disclosures borrowed from the existing fail-closed quick-controls
 # contract. No new reason code or free-form host string reaches the UI.
 _NO_INTERFACE = _quick.DISCLOSURES[_quick.REASON_NO_HOST_INTERFACE]
@@ -69,6 +71,46 @@ _FROZEN_VISUAL = "Unavailable — approved visual identity is unchanged"
 
 class PersistedPreferencesError(ValueError):
     """Invalid key, value, state document or storage boundary."""
+
+
+# Protocol v2 pins exactly these four topics (docs/HOST_EVENT_CONTRACT.md).
+_APPROVED_HOST_EVENT_TOPICS = frozenset({
+    "app.catalog.changed",
+    "window.state.changed",
+    "session.state.changed",
+    "capabilities.report",
+})
+
+
+def checked_host_event_topics(topics):
+    """Return the approved immutable topic set, or fail closed on drift.
+
+    A length test plus one membership test is not an exact-set claim: a source
+    with a duplicated approved topic and another approved topic omitted keeps
+    the same length and still has no private settings topic. Require both
+    uniqueness and exact equality before any settings view can trust it.
+    """
+    if (isinstance(topics, (str, bytes, bytearray))
+            or not isinstance(topics, collections.abc.Iterable)):
+        raise PersistedPreferencesError("host event topics must be an iterable")
+    try:
+        entries = tuple(topics)
+    except TypeError as exc:
+        raise PersistedPreferencesError("invalid host event topics") from exc
+    if any(type(entry) is not str for entry in entries):
+        raise PersistedPreferencesError("invalid host event topic name")
+    if len(set(entries)) != len(entries):
+        raise PersistedPreferencesError("duplicate host event topic")
+    if frozenset(entries) != _APPROVED_HOST_EVENT_TOPICS:
+        raise PersistedPreferencesError(
+            "host event topic set differs from the approved contract")
+    return frozenset(entries)
+
+
+try:
+    HOST_EVENT_TOPICS = checked_host_event_topics(_HOST_EVENT_TOPICS)
+except PersistedPreferencesError as exc:  # pragma: no cover - contract drift
+    raise RuntimeError("host event topic contract drift in settings panel") from exc
 
 
 class PreferenceView:

@@ -68,8 +68,10 @@ class KeyboardAccessibilityGateTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.driver = self.root / "fake-driver.py"
         self.driver.write_text(FAKE_DRIVER, encoding="utf-8")
+        self.driver.chmod(0o700)
         self.binary = self.root / "fake-classic.bin"
         self.binary.write_bytes(b"inert compiled-binary stand-in")
+        self.binary.chmod(0o700)
         self.report = gate.run_driver(
             driver=self.driver, binary=self.binary, source_sha=SHA,
             timeout_seconds=10)

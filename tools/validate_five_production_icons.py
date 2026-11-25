@@ -4,6 +4,12 @@
 No image editing, aesthetic inference, network, Pillow, or external resources.
 Accept EXACTLY five names x three densities, all SHA-256-verified. The other
 three icons must not be present in the production derivative directory.
+
+Only the exact registered renderer version is accepted. Version registration
+is intentional: the v3 renderer is the bounded Mail/Terminal/Settings source
+edge correction whose compiled-Qt captures proved Browser/Files/Calendar/
+Photos/Music pixel-identical and changed only the three rejected icons.
+Stale v1/v2 packs and any unregistered renderer must fail closed.
 """
 import argparse
 import hashlib
@@ -21,7 +27,7 @@ TARGET = ("browser", "mail", "files", "terminal", "settings")
 FROZEN = ("calendar", "photos", "music")
 DENSITIES = (1, 2, 3)
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
-EXPECTED_RENDERER = "canopy-five-qt-v2"
+EXPECTED_RENDERER = "canopy-five-qt-v3"
 
 
 class ProductionIconError(ValueError):
@@ -30,6 +36,24 @@ class ProductionIconError(ValueError):
 
 def digest(blob):
     return hashlib.sha256(blob).hexdigest()
+
+
+def verify_pack_provenance(pack, source_digest):
+    """Fail closed unless the pack declares the one registered renderer.
+
+    This is deliberately an exact-string check, not a prefix or family match:
+    a stale v1/v2 pack or a new unregistered renderer must never pass.
+    """
+    if not isinstance(pack, dict):
+        raise ProductionIconError("production pack manifest is not an object")
+    schema = pack.get("schema_version")
+    renderer = pack.get("renderer")
+    if type(schema) is not int or schema != 1:
+        raise ProductionIconError("production pack provenance or version mismatch")
+    if type(renderer) is not str or renderer != EXPECTED_RENDERER:
+        raise ProductionIconError("production pack provenance or version mismatch")
+    if pack.get("source_manifest_sha256") != source_digest:
+        raise ProductionIconError("production pack points to wrong original source manifest")
 
 
 def read_secure(path, limit=3_000_000):
@@ -57,10 +81,7 @@ def verify_pack(master_dir: Path, output_dir: Path):
 
     pack_path = output_dir / "manifest.json"
     pack = json.loads(read_secure(pack_path, 128_000))
-    if pack.get("schema_version") != 1 or pack.get("renderer") != EXPECTED_RENDERER:
-        raise ProductionIconError("production pack provenance or version mismatch")
-    if pack.get("source_manifest_sha256") != digest(mbytes):
-        raise ProductionIconError("production pack points to wrong original source manifest")
+    verify_pack_provenance(pack, digest(mbytes))
     files = pack.get("files")
     if not isinstance(files, list) or len(files) != 15:
         raise ProductionIconError("expected exactly five x three production PNGs")

@@ -91,6 +91,24 @@
   "kind": "compiled-qt-offscreen-keyboard-accessibility",
   "mint_acceptance": "NOT_RUN",
   "schema": 1,
+  "hash_normalization_annotation": {
+    "audit_artifact_sha256": "95c38dba34d540806aa390f0e50e20918f48111860d4e4c7da48d05cd9f393ea",
+    "hash_semantics": "sha256(CRLF-normalized worktree bytes)",
+    "note": "Every original value in source_files_sha256 is sha256(CRLF-normalized worktree bytes) of the named tracked source file at task tip fda7c0c, not SHA-256 of the canonical LF git blob. The raw blob digests below are SHA-256 over the exact git blob bytes. This annotation adds provenance only; all original hashes, markers and verdicts are unchanged.",
+    "source_files_raw_blob_sha256": {
+      "prototype/classic/DockTile.qml": "cfcd23d2dd3d1e5a662660752694250f9994c3d6aed4345cc7aafd4de8de01c5",
+      "prototype/classic/LauncherOverlay.qml": "3d99e431f91c901e847acf8bcaca1ba01f332622fa290c610b111199ea73d4e9",
+      "prototype/classic/Main.qml": "6c55ef62a8b1cdaf53b081eeb40093bd8309b07e56bd8500c4a7252792fba6ab",
+      "prototype/classic/PreviewWindow.qml": "8f937d493a4768a6b2f130fd16b9445c9fbbc57d3a2c4322bf5c5b3d39c54908",
+      "prototype/classic/QuickControlsOverlay.qml": "292be15cbc84412dc3bf5456bd7a1b0079a685f40d2a0bf8619ac33b78b24a2d",
+      "prototype/classic/WindowActivationState.cpp": "f3ad4325cc072f7a750cbe0a07d7d38bf421a7db6d69d57b9a55274d5cbaf4e4"
+    },
+    "superseded_self_citation": {
+      "sha256_crlf_normalized": "a74c72a9b33fbdd0658d3fcef32978f70184306c44b0a403c156d0ef5c212aef",
+      "sha256_raw_blob": "52070a2aa1d1fa8772afdd6318622fab4bef9c52131333f2f57ba2601669d951",
+      "reason": "Adding this provenance changed the bytes of gate-outcome.json. The pre-annotation digests are preserved here as SUPERSEDED_BY_ANNOTATION; current digests are recorded in README.md only, so this file never hashes its own final bytes."
+    }
+  },
   "screen_reader": "NOT_RUN",
   "source_contract": "PASS",
   "source_files_sha256": {

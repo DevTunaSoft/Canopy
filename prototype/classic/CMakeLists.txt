@@ -13,7 +13,7 @@ qt_add_executable(canopy-classic-spike main.cpp WindowActivationState.cpp Window
 qt_add_qml_module(canopy-classic-spike
     URI Canopy.Classic
     VERSION 1.0
-    QML_FILES Main.qml Theme.qml ClockLabel.qml LauncherOverlay.qml DockTile.qml PreviewWindow.qml Wallpaper.qml FolderTile.qml ShellMenuBar.qml ShellMenuPopupSet.qml WindowActivationIndicators.qml QuickControlsOverlay.qml
+    QML_FILES Main.qml Theme.qml ClockLabel.qml LauncherOverlay.qml DockTile.qml PreviewWindow.qml Wallpaper.qml FolderTile.qml ShellMenuBar.qml ShellMenuPopupSet.qml WindowActivationIndicators.qml QuickControlsOverlay.qml NotificationCenter.qml
     SOURCES FileModel.cpp FileModel.h
 )
 qt_add_resources(canopy-classic-spike "canopy-original-art"

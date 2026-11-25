@@ -1,13 +1,17 @@
 """Contract tests for the fail-closed Classic settings panel."""
 
+import importlib.util
 import json
 import os
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
 
+import canopy_core.host_events as host_events
 from canopy_core.host_events import TOPICS
 from canopy_features.accessibility import reduced_motion_contract as motion
+import canopy_features.settings.persisted_preferences as preferences_source
 from canopy_features.system import quick_controls_state as quick
 from canopy_features.settings import (
     KEYS,
@@ -48,9 +52,12 @@ class PersistedPreferencesTests(unittest.TestCase):
                          quick.DISCLOSURES[quick.REASON_PRIVILEGED_HOST_CHANGE])
 
     def test_no_new_host_event_topic(self):
-        # The settings contract must not invent a private event topic.
+        # Exact approved identity: no new topic, and no duplicate standing in
+        # for an omitted approved one.
         self.assertEqual(len(TOPICS), 4)
         self.assertNotIn("settings.changed", TOPICS)
+        self.assertEqual(len(set(TOPICS)), len(TOPICS))
+        self.assertEqual(set(TOPICS), preferences_source.HOST_EVENT_TOPICS)
 
     def test_only_reduced_motion_is_writable(self):
         self.assertEqual(
@@ -168,6 +175,97 @@ class PersistedPreferencesTests(unittest.TestCase):
         leftovers = [name for name in os.listdir(self.path.parent)
                      if name.startswith(".canopy-prefs-")]
         self.assertEqual(leftovers, [])
+
+
+class HostEventTopicSourceContractTests(unittest.TestCase):
+    """Negative controls for the settings panel's host-topic source contract.
+
+    A length check plus a single membership check is not an exact-set claim:
+    duplicating one approved topic while omitting another keeps the entry
+    count and still contains no private settings topic. These controls feed
+    exactly that shape to the settings module's import-time source gate and
+    require it to fail closed.
+    """
+
+    APPROVED_TOPICS = (
+        "app.catalog.changed",
+        "window.state.changed",
+        "session.state.changed",
+        "capabilities.report",
+    )
+
+    def _load_with_topics(self, topics):
+        """Import a fresh settings module against a crafted topic source."""
+        spec = importlib.util.spec_from_file_location(
+            "_settings_topic_contract_probe", preferences_source.__file__)
+        self.assertIsNotNone(spec)
+        module = importlib.util.module_from_spec(spec)
+        with mock.patch.object(host_events, "TOPICS", topics):
+            spec.loader.exec_module(module)
+        return module
+
+    def _topic_gate(self):
+        gate = getattr(preferences_source, "checked_host_event_topics", None)
+        self.assertIsNotNone(
+            gate, "settings source contract must expose a topic-set gate")
+        return gate
+
+    def test_duplicate_topic_with_one_omitted_is_rejected_on_load(self):
+        # Four entries, capabilities.report present and no "settings.changed":
+        # both old checks pass even though session.state.changed is omitted.
+        crafted = ("app.catalog.changed", "window.state.changed",
+                   "window.state.changed", "capabilities.report")
+        with self.assertRaises(RuntimeError):
+            self._load_with_topics(crafted)
+
+    def test_unapproved_extra_topic_with_one_omitted_is_rejected_on_load(self):
+        # Same length, capabilities.report present, no "settings.changed",
+        # but session.state.changed was replaced by a private-looking topic.
+        crafted = ("app.catalog.changed", "window.state.changed",
+                   "capabilities.report", "capabilities.extra")
+        with self.assertRaises(RuntimeError):
+            self._load_with_topics(crafted)
+
+    def test_duplicate_appended_to_approved_set_is_rejected_on_load(self):
+        crafted = self.APPROVED_TOPICS + ("capabilities.report",)
+        with self.assertRaises(RuntimeError):
+            self._load_with_topics(crafted)
+
+    def test_topic_gate_rejects_duplicate_with_one_omitted(self):
+        crafted = ("app.catalog.changed", "window.state.changed",
+                   "window.state.changed", "capabilities.report")
+        with self.assertRaises(PersistedPreferencesError):
+            self._topic_gate()(crafted)
+
+    def test_topic_gate_rejects_unapproved_extra_topic(self):
+        crafted = ("app.catalog.changed", "window.state.changed",
+                   "capabilities.report", "capabilities.extra")
+        with self.assertRaises(PersistedPreferencesError):
+            self._topic_gate()(crafted)
+
+    def test_topic_gate_accepts_only_the_approved_set(self):
+        gate = self._topic_gate()
+        self.assertEqual(gate(self.APPROVED_TOPICS),
+                         frozenset(self.APPROVED_TOPICS))
+        for crafted in (("app.catalog.changed",), None, "capabilities.report",
+                        [1, 2, 3, 4]):
+            with self.subTest(crafted=crafted):
+                with self.assertRaises(PersistedPreferencesError):
+                    gate(crafted)
+
+    def test_topic_guard_performs_no_privileged_writes(self):
+        crafted = ("app.catalog.changed", "window.state.changed",
+                   "window.state.changed", "capabilities.report")
+        with mock.patch("pathlib.Path.write_bytes") as write_bytes, \
+                mock.patch("pathlib.Path.mkdir") as mkdir, \
+                mock.patch("os.replace") as replace, \
+                mock.patch("os.chmod") as chmod:
+            with self.assertRaises(RuntimeError):
+                self._load_with_topics(crafted)
+            self.assertFalse(write_bytes.called)
+            self.assertFalse(mkdir.called)
+            self.assertFalse(replace.called)
+            self.assertFalse(chmod.called)
 
 
 if __name__ == "__main__":

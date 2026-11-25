@@ -1,0 +1,66 @@
+{
+  "label": "SYNTHETIC / WINDOWS-RUNTIME offscreen software raster; scoped, NOT Mint, NOT GPU, NOT release evidence",
+  "batches": [
+    {
+      "artifact": "C:/Users/X1/AppData/Local/hermes/cache/scratch/wc-c-paired/results.json",
+      "artifact_sha256": "71b9c9d7ece77eebfea66ed47705d2108bce07a6ffeaf4e2afa10397e8cbbd45",
+      "binary_base_sha256": "dee53e14fa165ef923309f6925b8e9fdcb3787b6bfb578ea4ea3cf8ad475c2de",
+      "binary_cand_sha256": "023f3a706ac628743b135894f5ccb8d4201c53e0cde79a327b42ceea16573b3b",
+      "pairs": 10,
+      "base_median_ms": 224.0,
+      "cand_median_ms": 204.0,
+      "positive_pairs": 8,
+      "frame_mismatch_pairs": [
+        6
+      ]
+    },
+    {
+      "artifact": "C:/Users/X1/AppData/Local/hermes/cache/scratch/wc-c-paired2/results.json",
+      "artifact_sha256": "ab7a912e4e9fdb941c1522da595ddc34d1dca8a06848c69adf10658c17760326",
+      "binary_base_sha256": "dee53e14fa165ef923309f6925b8e9fdcb3787b6bfb578ea4ea3cf8ad475c2de",
+      "binary_cand_sha256": "023f3a706ac628743b135894f5ccb8d4201c53e0cde79a327b42ceea16573b3b",
+      "pairs": 10,
+      "base_median_ms": 207.5,
+      "cand_median_ms": 205.5,
+      "positive_pairs": 9,
+      "frame_mismatch_pairs": [
+        9
+      ]
+    },
+    {
+      "artifact": "C:/Users/X1/AppData/Local/hermes/cache/scratch/wc-c-paired3/results.json",
+      "artifact_sha256": "94fc8826ef04af36a452528c66e216a9d203ab1e3bcd17f03469559fc0b70487",
+      "binary_base_sha256": "dee53e14fa165ef923309f6925b8e9fdcb3787b6bfb578ea4ea3cf8ad475c2de",
+      "binary_cand_sha256": "023f3a706ac628743b135894f5ccb8d4201c53e0cde79a327b42ceea16573b3b",
+      "pairs": 16,
+      "base_median_ms": 214.5,
+      "cand_median_ms": 202.5,
+      "positive_pairs": 12,
+      "frame_mismatch_pairs": []
+    },
+    {
+      "artifact": "C:/Users/X1/AppData/Local/hermes/cache/scratch/wc-c-final-paired/results.json",
+      "artifact_sha256": "12d6565c067a87e227baef624081b278bf0030b8442c2278e2d70ef8c5430605",
+      "binary_base_sha256": "dee53e14fa165ef923309f6925b8e9fdcb3787b6bfb578ea4ea3cf8ad475c2de",
+      "binary_cand_sha256": "98beda09c2ac1b18ac664a298fb1533e292fdfd0ea1a0ff3e89840a34f079a0a",
+      "pairs": 16,
+      "base_median_ms": 191.0,
+      "cand_median_ms": 184.0,
+      "positive_pairs": 14,
+      "frame_mismatch_pairs": []
+    }
+  ],
+  "total_pairs": 52,
+  "positive_pairs_base_slower": 43,
+  "median_pair_delta_ms": 8.0,
+  "trimmed_outliers_abs_ge_100ms": [
+    -413,
+    324,
+    453
+  ],
+  "trimmed_median_pair_delta_ms": 8,
+  "frame_mismatch_pairs": [
+    6,
+    9
+  ]
+}

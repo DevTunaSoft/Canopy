@@ -186,7 +186,8 @@ class ClassicSourceTests(unittest.TestCase):
         self.assertNotIn("dock->findChildren<QQuickItem *>", runtime)
 
     def test_menu_bar_actions_are_real_files_interface_calls(self):
-        menus = (ROOT / "ShellMenuBar.qml").read_text()
+        menus = ((ROOT / "ShellMenuBar.qml").read_text()
+                 + (ROOT / "ShellMenuPopupSet.qml").read_text())
         main = (ROOT / "Main.qml").read_text()
         for title in ("File", "Edit", "View", "Go", "Window", "Help"):
             self.assertIn('title: "' + title + '"', menus)

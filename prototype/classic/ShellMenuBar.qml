@@ -17,6 +17,16 @@ Item {
     signal showLauncherRequested()
     signal aboutRequested()
 
+    // The bar owns the palette instance and hands it to the deferred popup
+    // payload. All presentation values come from the existing Theme tokens:
+    // no new color, artwork, geometry, timer, daemon or menu action.
+    Theme { id: menuTheme }
+
+    readonly property var menuPalette: menuTheme
+    readonly property var menuPresentation: menusLoader.item
+                                            ? menusLoader.item.presentation
+                                            : null
+
     // Bounded nonvisual startup change: the six approved popups live in their
     // own QML document and are neither compiled into the resting scene nor
     // instantiated until a menu is actually opened. Stable proxies keep the
@@ -26,6 +36,7 @@ Item {
         active: false
         source: "ShellMenuPopupSet.qml"
         onLoaded: {
+            menusLoader.item.menuPaletteSource = Qt.binding(function() { return menuTheme })
             menusLoader.item.filesWindow = Qt.binding(function() { return shellMenus.filesWindow })
             menusLoader.item.homePath = Qt.binding(function() { return shellMenus.homePath })
         }

@@ -34,10 +34,14 @@ Code review: **NOT YET REVIEWED / REVIEW IN PROGRESS / REVIEWED**
 Green CI **alone never authorizes merging**. Do not merge visually rejected
 work, unverified Mint integration or a stacked PR that would transitively
 merge an unapproved ancestor. Document source changes before changing status
-to ready.
+to ready. Draft status is temporary: promote verified PRs promptly rather
+than leaving them in draft indefinitely.
 
-Routine nonvisual work may be reviewed and integrated by the autonomous
-engineering process after exact-SHA verification and regression tests; mark
+Routine verified engineering changes and bounded non-substantive visual
+refinements may be promoted from draft and integrated into
+`integration/canopy-classic-20261123` by the autonomous engineering process
+after exact-SHA verification, independent review and regression tests; mark
 that as **AGENT REVIEWED**, never as human approval. Obtain explicit owner
-approval for visual changes, high-risk security decisions and release
-acceptance. A named PR hold is never overridden by general authorization.
+approval for substantial visual changes, high-risk security decisions and
+final release acceptance into `main`. Named PR holds (including #151 and
+#278) are never overridden by general authorization.

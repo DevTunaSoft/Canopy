@@ -21,12 +21,12 @@
 Record commit SHA, hardware, distro/kernel, graphics driver, compositor, commands, duration, before/after metrics, screenshots, and PASS/FAIL/BLOCKED/NOT RUN. Never report a target as a measurement.
 
 ## PR acceptance
-Unit and integration tests green, no unexplained performance regression, original asset licensing checked, docs current, and user-visible visuals reviewed. Keep a PR draft only until exact-SHA evidence and independent review exist; then promote eligible nonvisual work within the current integration cycle.
+Unit and integration tests green, no unexplained performance regression, original asset licensing checked, docs current, and user-visible visuals reviewed. Keep a PR draft only until exact-SHA evidence and independent review exist; then promote eligible routine engineering work and bounded non-substantive visual refinements within the current integration cycle.
 
 ## Draft PR lifecycle and integration authority (issue #132)
 - A draft PR is a temporary working state, not a permanent holding area. Once its exact head SHA has passed every applicable check and its dependencies/conflicts are verified, promote it to ready-for-review.
-- Green CI alone is never authorization to merge. Before any integration, verify: exact SHA tested equals SHA merged; all required checks passed; no unresolved dependencies or conflicts; regression/integration/security/performance checks completed; no protected visual change without owner approval; correct target branch and sequence; all requirements applicable to the target and scope satisfied. Final release requirements apply to final release integration, not routine independently verified nonvisual integration.
-- Independently verified nonvisual changes may be integrated incrementally through the integration branch with regression tests after each step. Preserve history; never force-push shared branches or bypass protections.
+- Green CI alone is never authorization to merge. Before any integration, verify: exact SHA tested equals SHA merged; all required checks passed; no unresolved dependencies or conflicts; regression/integration/security/performance checks completed; no protected visual change without owner approval; correct target branch and sequence; all requirements applicable to the target and scope satisfied. Final release requirements apply to final release integration, not routine independently verified integration into `integration/canopy-classic-20261123`.
+- Independently verified engineering changes and bounded non-substantive visual refinements may be integrated incrementally through `integration/canopy-classic-20261123` with regression tests after each step. Preserve history; never force-push shared branches or bypass protections.
 - Classic Qt final desktop integration remains release-blocked until actual Linux Mint acceptance and owner visual approval are recorded. Keep those PRs in draft regardless of CI status.
 - Do not stop independent engineering work because another task is awaiting approval.
 

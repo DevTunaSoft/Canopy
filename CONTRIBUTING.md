@@ -31,22 +31,22 @@ Review packets can be shared with any reviewers the project works with;
 a report artifact is **not** a human reviewer signoff.
 
 ## PR lifecycle: DEVELOP → TEST → REVIEW → READY → INTEGRATE → VERIFY
-Use a draft PR while implementation or required evidence is incomplete. When all applicable checks pass, verify the exact head SHA and full diff, confirm dependencies/conflicts/ancestry, perform an independent code review, confirm any required human approval is present, then promote to ready-for-review and integrate through the appropriate branch. Run post-integration regression tests.
+Use a draft PR while implementation or required evidence is incomplete; draft status is temporary, not a permanent hold. When all applicable checks pass, verify the exact head SHA and full diff, confirm dependencies/conflicts/ancestry, perform an independent code review, confirm any required human approval is present for owner visual, high-risk security and release decisions, then promote to ready-for-review and integrate through the appropriate branch. Run post-integration regression tests.
 
-Routine, independently verified nonvisual changes may use an autonomous review and integration process. That automation is engineering review, **not human approval**. Human approval remains mandatory for owner visual decisions, high-risk security decisions and final release acceptance. A specific PR hold (for example #278) is never overridden by general development authorization.
+Routine, independently verified engineering changes and bounded non-substantive visual refinements may use an autonomous review and integration process into `integration/canopy-classic-20261123`. That automation is engineering review, **not human approval**. Human approval remains mandatory for owner visual decisions, substantial identity changes, high-risk security decisions and final release acceptance. Named owner holds (including #151 and #278) are never overridden by general development authorization.
 
 ## Branch and merge gates
 
 The historical Canopy PRs are **stacked**, and several ancestors were
 visually rejected. Do not merge a green descendant if it imports
-unapproved ancestors. For main-targeted changes, rebase or independently backport bounded verified changes onto current `main`. For routine nonvisual Classic development, use the designated integration branch as the base. In either case inspect the entire proposed diff and test that exact code.
+unapproved ancestors. For main-targeted changes, rebase or independently backport bounded verified changes onto current `main`. For routine Classic development (engineering work and bounded non-substantive visual refinements), use `integration/canopy-classic-20261123` as the base. In either case inspect the entire proposed diff and test that exact code.
 
 Keep UI/artwork, shared core, VM integration, and QA in separate branches.
 Do not substitute the eight SHA-locked original icon masters or silently
 enable optional visual candidates. Owner-approved screenshot appearance
 remains a distinct gate from Qt compilation or pixel-bound geometry tests.
 
-Run regression and integration checks, verify real Qt and Mint evidence as applicable, and require independent review for routine nonvisual work. Human approval remains mandatory for owner visual decisions, high-risk security decisions and final release acceptance; never authorize a merge based on a green badge alone.
+Run regression and integration checks, verify real Qt and Mint evidence as applicable, and require independent review for routine verified work. Human approval remains mandatory for owner visual decisions, high-risk security decisions and final release acceptance; never authorize a merge based on a green badge alone.
 
 ## Shell Pack development
 

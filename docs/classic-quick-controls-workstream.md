@@ -81,7 +81,9 @@ Scratch harness path: `C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy-qc-
 (temporary; may be pruned). It is not part of the repository. The source-level
 test file is not a substitute for the compiled harness above.
 
-Source hashes (SHA-256, at this workstream's implementation commit):
+Source hashes (SHA-256, at this workstream's implementation commit
+`64b41aecd504a832d0a55995d03df89746516e40`; the PR head SHA is recorded in the
+draft PR body):
 
 - `prototype/classic/QuickControlsOverlay.qml` — `292be15cbc84412dc3bf5456bd7a1b0079a685f40d2a0bf8619ac33b78b24a2d`
 - `canopy_features/system/quick_controls_state.py` — `8e49bb5439ac416e57ec7c46747a7d828bb533729ae5c836586b4d0437e0ffd1`

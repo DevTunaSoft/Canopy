@@ -208,7 +208,7 @@ class MintQtSmokeTests(unittest.TestCase):
 
     @unittest.skipIf(os.name == "nt", "POSIX pipe selector required for Qt smoke")
     def test_detailed_marker_lines_are_accepted(self):
-        """Real Qt builds append detail after markers; 19 lines must still pass."""
+        """Real Qt builds append detail after markers; extra lines must still pass."""
         with patch.dict(os.environ, {"CANOPY_FAKE_QT_MODE": "detailed_marker"}):
             report = self.run_smoke()
         self.assertEqual(report["qt_smoke"], "PASS")

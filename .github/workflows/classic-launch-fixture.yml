@@ -1,0 +1,86 @@
+name: Classic fake-GIO launch fixture (synthetic, not Mint)
+
+# Separate, additive QA gate for the unmodified SystemAppLauncher mapping and
+# refusal logic. It compiles the real production C++ against a deterministic
+# fake GIO shim with Qt6::Core only. A green run is SYNTHETIC source-level
+# evidence: not real GIO, not Linux Mint, not a desktop/application launch,
+# not visual approval and not screen-reader evidence.
+# This workflow never edits classic-qt.yml or the active icon-gate fix.
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: canopy-classic-fake-gio-fixture-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fake-gio-launch-fixture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      FIXTURE_LOG_DIR: ${{ runner.temp }}/canopy-fake-gio-launch-fixture
+      FIXTURE_TIP: HEAD
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install Qt 6 build dependencies (no GLib/GIO dev package)
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          sudo sed -i 's@http://us-east-2.ec2.archive.ubuntu.com/ubuntu@http://archive.ubuntu.com/ubuntu@g' /etc/apt/sources.list.d/ubuntu.sources
+          sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 update
+          sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 install -y --no-install-recommends \
+            build-essential cmake ninja-build qt6-base-dev
+
+      - name: Build and run fake-GIO mapping and refusal fixture
+        timeout-minutes: 6
+        env:
+          REPO: ${{ github.workspace }}
+          TIP: ${{ env.FIXTURE_TIP }}
+          OUTPUT_DIR: ${{ env.FIXTURE_LOG_DIR }}
+        run: bash tools/qa/fake_gio_launch_fixture/run_fixture.sh
+
+      - name: Assert exact case contract and emit labelled evidence
+        timeout-minutes: 2
+        env:
+          OUTPUT_DIR: ${{ env.FIXTURE_LOG_DIR }}
+        run: |
+          set -euo pipefail
+          python3 tools/qa/fake_gio_evidence_gate.py \
+            --log-dir "$OUTPUT_DIR" \
+            --output test-artifacts/fake-gio-launch-evidence.json
+          grep -q 'SUMMARY: cases=11 result=ALL_PASS' "$OUTPUT_DIR/gio-fixture.log"
+          grep -q 'SUMMARY: cases=1 result=ALL_PASS' "$OUTPUT_DIR/gio-fallback.log"
+          for name in Browser Terminal Calendar Photos Mail Files; do
+            grep -q "CASE_PASS: mapping:$name |" "$OUTPUT_DIR/gio-fixture.log"
+          done
+          for name in opt-in-disabled unknown-action unavailable launch-failure-no-fallback; do
+            grep -q "CASE_PASS: refusal:$name |" "$OUTPUT_DIR/gio-fixture.log"
+          done
+          grep -q 'CASE_PASS: refusal:no-gio-fallback-build |' "$OUTPUT_DIR/gio-fallback.log"
+          grep -q '"classification": "SYNTHETIC"' test-artifacts/fake-gio-launch-evidence.json
+          grep -q '"linux_mint": false' test-artifacts/fake-gio-launch-evidence.json
+          mkdir -p test-artifacts/fake-gio-fixture-logs
+          cp "$OUTPUT_DIR"/*.log "$OUTPUT_DIR"/fake-gio-call-log.txt \
+            "$OUTPUT_DIR"/source-sha256-check.txt \
+            "$OUTPUT_DIR"/source-sha256-verify.txt \
+            test-artifacts/fake-gio-fixture-logs/
+          echo 'CLASSIFICATION: SYNTHETIC (fake GIO shim, Qt6::Core only, no real GLib/GIO)'
+          echo 'NOT_MINT: no Linux Mint guest, desktop session or application launch'
+          echo 'REAL_GIO: NOT_RUN | MINT_ACCEPTANCE: NOT_RUN | VISUAL_APPROVAL: NOT_RUN | SCREEN_READER: NOT_RUN'
+          echo 'FAKE_GIO_LAUNCH_FIXTURE_CI_PASS: six dock mappings plus refusal paths'
+
+      - name: Upload synthetic fixture evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: canopy-fake-gio-launch-evidence
+          path: test-artifacts/
+          if-no-files-found: warn
+          retention-days: 14

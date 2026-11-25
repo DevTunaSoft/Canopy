@@ -1,0 +1,484 @@
+{
+  "label": "SYNTHETIC / WINDOWS-RUNTIME offscreen software raster; NOT Mint, NOT GPU, NOT release evidence",
+  "integration_tip": "177c380b389db24b55e80d604ce5a086b15d79e8",
+  "remote_tip": "177c380b389db24b55e80d604ce5a086b15d79e8\trefs/heads/integration/canopy-classic-20261123",
+  "base_main_sha256": "c3f1d20ca42af988eb25d194d484e130da2cbe459e768007dfb6156dcd708fe3",
+  "cand_main_sha256": "c3f1d20ca42af988eb25d194d484e130da2cbe459e768007dfb6156dcd708fe3",
+  "base_shellmenu_sha256": "dec8c45d9e4020542885699cddbb2f78251db96f85a383aa0f48750028a85e05",
+  "cand_shellmenu_sha256": "917414b66472ce21908c7b8a28555a7de24fe431ffdca6c8e17266d7eb456076",
+  "cand_popupset_sha256": "93fe18d3cfec371ce6d727194f88119ae925c145f13c8c2a148af9647d9bdbbc",
+  "binary_sha256": {
+    "base": "dee53e14fa165ef923309f6925b8e9fdcb3787b6bfb578ea4ea3cf8ad475c2de",
+    "cand": "023f3a706ac628743b135894f5ccb8d4201c53e0cde79a327b42ceea16573b3b"
+  },
+  "method": "2 warmups each, then 10 alternating pairs (odd: base,cand; even: cand,base); 1 s gap; engine.load from instrumented QElapsedTimer; frame from grabWindow PNG after fixed 1 s delay",
+  "warmup": [
+    {
+      "tag": "warm1-base",
+      "kind": "base",
+      "exit_code": 0,
+      "wall_s": 1.352,
+      "t_engine_ms": 22,
+      "t_rounded_ms": 60,
+      "t_load_ms": 210,
+      "items": 322,
+      "objects": 598,
+      "frame_sha256": "38357feace39d578568a2d6736df3a0a556bc21f07cea4f901538c13528699ec",
+      "binary_sha256": "dee53e14fa165ef923309f6925b8e9fdcb3787b6bfb578ea4ea3cf8ad475c2de"
+    },
+    {
+      "tag": "warm1-cand",
+      "kind": "cand",
+      "exit_code": 0,
+      "wall_s": 1.336,
+      "t_engine_ms": 23,
+      "t_rounded_ms": 59,
+      "t_load_ms": 208,
+      "items": 162,
+      "objects": 320,
+      "frame_sha256": "38357feace39d578568a2d6736df3a0a556bc21f07cea4f901538c13528699ec",
+      "binary_sha256": "023f3a706ac628743b135894f5ccb8d4201c53e0cde79a327b42ceea16573b3b"
+    },
+    {
+      "tag": "warm2-base",
+      "kind": "base",
+      "exit_code": 0,
+      "wall_s": 1.341,
+      "t_engine_ms": 21,
+      "t_rounded_ms": 57,
+      "t_load_ms": 202,
+      "items": 322,
+      "objects": 598,
+      "frame_sha256": "38357feace39d578568a2d6736df3a0a556bc21f07cea4f901538c13528699ec",
+      "binary_sha256": "dee53e14fa165ef923309f6925b8e9fdcb3787b6bfb578ea4ea3cf8ad475c2de"
+    },
+    {
+      "tag": "warm2-cand",
+      "kind": "cand",
+      "exit_code": 0,
+      "wall_s": 1.43,
+      "t_engine_ms": 24,
+      "t_rounded_ms": 131,
+      "t_load_ms": 272,
+      "items": 162,
+      "objects": 320,
+      "frame_sha256": "38357feace39d578568a2d6736df3a0a556bc21f07cea4f901538c13528699ec",
+      "binary_sha256": "023f3a706ac628743b135894f5ccb8d4201c53e0cde79a327b42ceea16573b3b"
+    }
+  ],
+  "pairs": [
+    {
+      "pair": 1,
+      "order": [
+        "base",
+        "cand"
+      ],
+      "runs": {
+        "base": {
+          "tag": "p01-base",
+          "kind": "base",
+          "exit_code": 0,
+          "wall_s": 1.496,
+          "t_engine_ms": 26,
+          "t_rounded_ms": 65,
+          "t_load_ms": 230,
+          "items": 322,
+          "objects": 598,
+          "frame_sha256": "38357feace39d578568a2d6736df3a0a556bc21f07cea4f901538c13528699ec",
+          "binary_sha256": "dee53e14fa165ef923309f6925b8e9fdcb3787b6bfb578ea4ea3cf8ad475c2de"
+        },
+        "cand": {
+          "tag": "p01-cand",
+          "kind": "cand",
+          "exit_code": 0,
+          "wall_s": 1.37,
+          "t_engine_ms": 21,
+          "t_rounded_ms": 56,
+          "t_load_ms": 205,
+          "items": 162,
+          "objects": 320,
+          "frame_sha256": "38357feace39d578568a2d6736df3a0a556bc21f07cea4f901538c13528699ec",
+          "binary_sha256": "023f3a706ac628743b135894f5ccb8d4201c53e0cde79a327b42ceea16573b3b"
+        }
+      },
+      "frame_equal": true,
+      "delta_ms_base_minus_cand": 25
+    },
+    {
+      "pair": 2,
+      "order": [
+        "cand",
+        "base"
+      ],
+      "runs": {
+        "cand": {
+          "tag": "p02-cand",
+          "kind": "cand",
+          "exit_code": 0,
+          "wall_s": 1.879,
+          "t_engine_ms": 29,
+          "t_rounded_ms": 374,
+          "t_load_ms": 635,
+          "items": 162,
+          "objects": 320,
+          "frame_sha256": "38357feace39d578568a2d6736df3a0a556bc21f07cea4f901538c13528699ec",
+          "binary_sha256": "023f3a706ac628743b135894f5ccb8d4201c53e0cde79a327b42ceea16573b3b"
+        },
+        "base": {
+          "tag": "p02-base",
+          "kind": "base",
+          "exit_code": 0,
+          "wall_s": 1.383,
+          "t_engine_ms": 24,
+          "t_rounded_ms": 60,
+          "t_load_ms": 222,
+          "items": 322,
+          "objects": 598,
+          "frame_sha256": "38357feace39d578568a2d6736df3a0a556bc21f07cea4f901538c13528699ec",
+          "binary_sha256": "dee53e14fa165ef923309f6925b8e9fdcb3787b6bfb578ea4ea3cf8ad475c2de"
+        }
+      },
+      "frame_equal": true,
+      "delta_ms_base_minus_cand": -413
+    },
+    {
+      "pair": 3,
+      "order": [
+        "base",
+        "cand"
+      ],
+      "runs": {
+        "base": {
+          "tag": "p03-base",
+          "kind": "base",
+          "exit_code": 0,
+          "wall_s": 1.356,
+          "t_engine_ms": 23,
+          "t_rounded_ms": 60,
+          "t_load_ms": 219,
+          "items": 322,
+          "objects": 598,
+          "frame_sha256": "38357feace39d578568a2d6736df3a0a556bc21f07cea4f901538c13528699ec",
+          "binary_sha256": "dee53e14fa165ef923309f6925b8e9fdcb3787b6bfb578ea4ea3cf8ad475c2de"
+        },
+        "cand": {
+          "tag": "p03-cand",
+          "kind": "cand",
+          "exit_code": 0,
+          "wall_s": 1.366,
+          "t_engine_ms": 25,
+          "t_rounded_ms": 65,
+          "t_load_ms": 234,
+          "items": 162,
+          "objects": 320,
+          "frame_sha256": "38357feace39d578568a2d6736df3a0a556bc21f07cea4f901538c13528699ec",
+          "binary_sha256": "023f3a706ac628743b135894f5ccb8d4201c53e0cde79a327b42ceea16573b3b"
+        }
+      },
+      "frame_equal": true,
+      "delta_ms_base_minus_cand": -15
+    },
+    {
+      "pair": 4,
+      "order": [
+        "cand",
+        "base"
+      ],
+      "runs": {
+        "cand": {
+          "tag": "p04-cand",
+          "kind": "cand",
+          "exit_code": 0,
+          "wall_s": 1.334,
+          "t_engine_ms": 23,
+          "t_rounded_ms": 57,
+          "t_load_ms": 196,
+          "items": 162,
+          "objects": 320,
+          "frame_sha256": "38357feace39d578568a2d6736df3a0a556bc21f07cea4f901538c13528699ec",
+          "binary_sha256": "023f3a706ac628743b135894f5ccb8d4201c53e0cde79a327b42ceea16573b3b"
+        },
+        "base": {
+          "tag": "p04-base",
+          "kind": "base",
+          "exit_code": 0,
+          "wall_s": 1.363,
+          "t_engine_ms": 24,
+          "t_rounded_ms": 59,
+          "t_load_ms": 207,
+          "items": 322,
+          "objects": 598,
+          "frame_sha256": "38357feace39d578568a2d6736df3a0a556bc21f07cea4f901538c13528699ec",
+          "binary_sha256": "dee53e14fa165ef923309f6925b8e9fdcb3787b6bfb578ea4ea3cf8ad475c2de"
+        }
+      },
+      "frame_equal": true,
+      "delta_ms_base_minus_cand": 11
+    },
+    {
+      "pair": 5,
+      "order": [
+        "base",
+        "cand"
+      ],
+      "runs": {
+        "base": {
+          "tag": "p05-base",
+          "kind": "base",
+          "exit_code": 0,
+          "wall_s": 1.482,
+          "t_engine_ms": 23,
+          "t_rounded_ms": 75,
+          "t_load_ms": 241,
+          "items": 322,
+          "objects": 598,
+          "frame_sha256": "38357feace39d578568a2d6736df3a0a556bc21f07cea4f901538c13528699ec",
+          "binary_sha256": "dee53e14fa165ef923309f6925b8e9fdcb3787b6bfb578ea4ea3cf8ad475c2de"
+        },
+        "cand": {
+          "tag": "p05-cand",
+          "kind": "cand",
+          "exit_code": 0,
+          "wall_s": 1.363,
+          "t_engine_ms": 22,
+          "t_rounded_ms": 63,
+          "t_load_ms": 214,
+          "items": 162,
+          "objects": 320,
+          "frame_sha256": "38357feace39d578568a2d6736df3a0a556bc21f07cea4f901538c13528699ec",
+          "binary_sha256": "023f3a706ac628743b135894f5ccb8d4201c53e0cde79a327b42ceea16573b3b"
+        }
+      },
+      "frame_equal": true,
+      "delta_ms_base_minus_cand": 27
+    },
+    {
+      "pair": 6,
+      "order": [
+        "cand",
+        "base"
+      ],
+      "runs": {
+        "cand": {
+          "tag": "p06-cand",
+          "kind": "cand",
+          "exit_code": 0,
+          "wall_s": 1.333,
+          "t_engine_ms": 22,
+          "t_rounded_ms": 57,
+          "t_load_ms": 196,
+          "items": 162,
+          "objects": 320,
+          "frame_sha256": "38357feace39d578568a2d6736df3a0a556bc21f07cea4f901538c13528699ec",
+          "binary_sha256": "023f3a706ac628743b135894f5ccb8d4201c53e0cde79a327b42ceea16573b3b"
+        },
+        "base": {
+          "tag": "p06-base",
+          "kind": "base",
+          "exit_code": 0,
+          "wall_s": 1.374,
+          "t_engine_ms": 21,
+          "t_rounded_ms": 56,
+          "t_load_ms": 226,
+          "items": 322,
+          "objects": 598,
+          "frame_sha256": "5e66a9ea4749918a9624d19e189b07281e573fb3b3346b15d02784fb17dbefa4",
+          "binary_sha256": "dee53e14fa165ef923309f6925b8e9fdcb3787b6bfb578ea4ea3cf8ad475c2de"
+        }
+      },
+      "frame_equal": false,
+      "delta_ms_base_minus_cand": 30
+    },
+    {
+      "pair": 7,
+      "order": [
+        "base",
+        "cand"
+      ],
+      "runs": {
+        "base": {
+          "tag": "p07-base",
+          "kind": "base",
+          "exit_code": 0,
+          "wall_s": 1.347,
+          "t_engine_ms": 26,
+          "t_rounded_ms": 63,
+          "t_load_ms": 213,
+          "items": 322,
+          "objects": 598,
+          "frame_sha256": "5e66a9ea4749918a9624d19e189b07281e573fb3b3346b15d02784fb17dbefa4",
+          "binary_sha256": "dee53e14fa165ef923309f6925b8e9fdcb3787b6bfb578ea4ea3cf8ad475c2de"
+        },
+        "cand": {
+          "tag": "p07-cand",
+          "kind": "cand",
+          "exit_code": 0,
+          "wall_s": 1.356,
+          "t_engine_ms": 21,
+          "t_rounded_ms": 56,
+          "t_load_ms": 203,
+          "items": 162,
+          "objects": 320,
+          "frame_sha256": "5e66a9ea4749918a9624d19e189b07281e573fb3b3346b15d02784fb17dbefa4",
+          "binary_sha256": "023f3a706ac628743b135894f5ccb8d4201c53e0cde79a327b42ceea16573b3b"
+        }
+      },
+      "frame_equal": true,
+      "delta_ms_base_minus_cand": 10
+    },
+    {
+      "pair": 8,
+      "order": [
+        "cand",
+        "base"
+      ],
+      "runs": {
+        "cand": {
+          "tag": "p08-cand",
+          "kind": "cand",
+          "exit_code": 0,
+          "wall_s": 1.334,
+          "t_engine_ms": 23,
+          "t_rounded_ms": 57,
+          "t_load_ms": 199,
+          "items": 162,
+          "objects": 320,
+          "frame_sha256": "5e66a9ea4749918a9624d19e189b07281e573fb3b3346b15d02784fb17dbefa4",
+          "binary_sha256": "023f3a706ac628743b135894f5ccb8d4201c53e0cde79a327b42ceea16573b3b"
+        },
+        "base": {
+          "tag": "p08-base",
+          "kind": "base",
+          "exit_code": 0,
+          "wall_s": 1.363,
+          "t_engine_ms": 22,
+          "t_rounded_ms": 56,
+          "t_load_ms": 211,
+          "items": 322,
+          "objects": 598,
+          "frame_sha256": "5e66a9ea4749918a9624d19e189b07281e573fb3b3346b15d02784fb17dbefa4",
+          "binary_sha256": "dee53e14fa165ef923309f6925b8e9fdcb3787b6bfb578ea4ea3cf8ad475c2de"
+        }
+      },
+      "frame_equal": true,
+      "delta_ms_base_minus_cand": 12
+    },
+    {
+      "pair": 9,
+      "order": [
+        "base",
+        "cand"
+      ],
+      "runs": {
+        "base": {
+          "tag": "p09-base",
+          "kind": "base",
+          "exit_code": 0,
+          "wall_s": 1.382,
+          "t_engine_ms": 21,
+          "t_rounded_ms": 59,
+          "t_load_ms": 248,
+          "items": 322,
+          "objects": 598,
+          "frame_sha256": "5e66a9ea4749918a9624d19e189b07281e573fb3b3346b15d02784fb17dbefa4",
+          "binary_sha256": "dee53e14fa165ef923309f6925b8e9fdcb3787b6bfb578ea4ea3cf8ad475c2de"
+        },
+        "cand": {
+          "tag": "p09-cand",
+          "kind": "cand",
+          "exit_code": 0,
+          "wall_s": 1.353,
+          "t_engine_ms": 25,
+          "t_rounded_ms": 63,
+          "t_load_ms": 221,
+          "items": 162,
+          "objects": 320,
+          "frame_sha256": "5e66a9ea4749918a9624d19e189b07281e573fb3b3346b15d02784fb17dbefa4",
+          "binary_sha256": "023f3a706ac628743b135894f5ccb8d4201c53e0cde79a327b42ceea16573b3b"
+        }
+      },
+      "frame_equal": true,
+      "delta_ms_base_minus_cand": 27
+    },
+    {
+      "pair": 10,
+      "order": [
+        "cand",
+        "base"
+      ],
+      "runs": {
+        "cand": {
+          "tag": "p10-cand",
+          "kind": "cand",
+          "exit_code": 0,
+          "wall_s": 1.334,
+          "t_engine_ms": 23,
+          "t_rounded_ms": 57,
+          "t_load_ms": 195,
+          "items": 162,
+          "objects": 320,
+          "frame_sha256": "5e66a9ea4749918a9624d19e189b07281e573fb3b3346b15d02784fb17dbefa4",
+          "binary_sha256": "023f3a706ac628743b135894f5ccb8d4201c53e0cde79a327b42ceea16573b3b"
+        },
+        "base": {
+          "tag": "p10-base",
+          "kind": "base",
+          "exit_code": 0,
+          "wall_s": 1.374,
+          "t_engine_ms": 25,
+          "t_rounded_ms": 63,
+          "t_load_ms": 233,
+          "items": 322,
+          "objects": 598,
+          "frame_sha256": "5e66a9ea4749918a9624d19e189b07281e573fb3b3346b15d02784fb17dbefa4",
+          "binary_sha256": "dee53e14fa165ef923309f6925b8e9fdcb3787b6bfb578ea4ea3cf8ad475c2de"
+        }
+      },
+      "frame_equal": true,
+      "delta_ms_base_minus_cand": 38
+    }
+  ],
+  "summary": {
+    "base_t_load_ms": [
+      230,
+      222,
+      219,
+      207,
+      241,
+      226,
+      213,
+      211,
+      248,
+      233
+    ],
+    "cand_t_load_ms": [
+      205,
+      635,
+      234,
+      196,
+      214,
+      196,
+      203,
+      199,
+      221,
+      195
+    ],
+    "base_median_ms": 224.0,
+    "cand_median_ms": 204.0,
+    "pair_deltas_ms": [
+      25,
+      -413,
+      -15,
+      11,
+      27,
+      30,
+      10,
+      12,
+      27,
+      38
+    ],
+    "positive_pairs_base_slower": 8,
+    "all_frames_equal": false,
+    "all_exits_zero": true
+  }
+}

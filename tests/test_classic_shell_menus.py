@@ -8,7 +8,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "prototype" / "classic"
 MAIN = (ROOT / "Main.qml").read_text(encoding="utf-8")
-MENUS = (ROOT / "ShellMenuBar.qml").read_text(encoding="utf-8")
+# The six approved popups now live in a deferred QML document. Source
+# contracts inspect both documents as one menu definition surface.
+MENUS = ((ROOT / "ShellMenuBar.qml").read_text(encoding="utf-8")
+         + (ROOT / "ShellMenuPopupSet.qml").read_text(encoding="utf-8"))
 LAUNCHER = (ROOT / "LauncherOverlay.qml").read_text(encoding="utf-8")
 
 MENU_NAMES = ("File", "Edit", "View", "Go", "Window", "Help")

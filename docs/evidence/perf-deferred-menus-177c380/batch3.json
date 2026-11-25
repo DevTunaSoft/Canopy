@@ -11,7 +11,7 @@
     "base": "dee53e14fa165ef923309f6925b8e9fdcb3787b6bfb578ea4ea3cf8ad475c2de",
     "cand": "023f3a706ac628743b135894f5ccb8d4201c53e0cde79a327b42ceea16573b3b"
   },
-  "method": "2 warmups each, then 10 alternating pairs (odd: base,cand; even: cand,base); 1 s gap; engine.load from instrumented QElapsedTimer; frame from grabWindow PNG after fixed 1 s delay",
+  "method": "2 warmups each, then 16 alternating pairs (odd: base,cand; even: cand,base); 1 s gap; engine.load from instrumented QElapsedTimer; frame from grabWindow PNG after fixed 1 s delay",
   "warmup": [
     {
       "tag": "warm1-base",

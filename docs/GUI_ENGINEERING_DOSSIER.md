@@ -12,7 +12,7 @@
 |---|---|
 | Integration branch | `integration/canopy-classic-20261123` (live tip re-queried with `git ls-remote` at this refresh: `a3714ef6914471b27c332c6ac8419d613e5c38ec`, matching the local pin) |
 | Exact integration SHA (evidence pin) | `a3714ef6914471b27c332c6ac8419d613e5c38ec` — merge of PR #583 (`style(classic): light-theme sidebar scrollbar in Files preview`), head `6fa4870ff751c6dfb06f5e50ebe816047d3ed166`; full Python suite re-run here at this exact SHA (§7) |
-| Live branch tip at refresh | `a3714ef6914471b27c332c6ac8419d613e5c38ec` — same as the evidence pin; no later commit observed by `git ls-remote` |
+| Live branch tip at refresh | `c989e1e5330d55f6e01002688221fa138d6c917e` — merge of #588 (head `52c0608a8e3d6032a6011e26f5d90d3fee1b93dd`), advanced after this refresh began from the `a3714ef` evidence pin; intervening merges #582 `4ee337377806fa9baf0b1195cdc23bf5c237b60a` (head `53264e30c0d60246f3f7d5f20615cf92712fe8f3`) and #590 `ead77318b776faae12c82b24a18974d59daea2b3` (head `6d71df02b7f5228b469316395861b635fd9dd3f0`). Python gates below were run at `a3714ef` and are **NOT RUN** at `c989e1e`; the advance touches no owned docs path |
 | Dossier worktree | isolated `docs-refresh-a3714ef` worktree at the exact pin; only `docs/GUI_ENGINEERING_DOSSIER.md` and `docs/PRODUCT_COMPLETION_MATRIX.md` owned |
 | Default branch | `main` — no merge into `main`; final Classic integration stays draft until Mint acceptance and owner visual acceptance |
 | Preserved matrix baseline | `docs/PRODUCT_COMPLETION_MATRIX.md` refreshed to `a3714ef` in this same change; older evidence at `9cf39ebeaf0bc5f6a25279ec81d12b29cdeda3c2` / `941d6d00676f07499e3e29cff7fcf871dfe50119` / `177c380` / `58d245e` is retained below as historical, not promoted |
@@ -27,6 +27,7 @@
 | #587 | `607fbb1678fbc1cc051a7a0148a8b914d7856e84` | `98c904c278b0d08ec28f8036d9e00bc19bf0e27c` | CRLF normalization in window-activation hash assertions | MERGED; test-only, no product behavior |
 | #583 | `a3714ef6914471b27c332c6ac8419d613e5c38ec` | `6fa4870ff751c6dfb06f5e50ebe816047d3ed166` | Light-theme sidebar scrollbar in Files preview | MERGED; **not compiled or visually accepted at this tip** — `NOT RUN` |
 | #581 / #584 | `648ca97` / `afb60af` | `6e1753c` / `a8f3c8e` | Documentation/matrix and workflow reconciliation merges in the same range | MERGED; documentation only |
+| #582 / #590 / #588 | `4ee337377806fa9baf0b1195cdc23bf5c237b60a` / `ead77318b776faae12c82b24a18974d59daea2b3` / `c989e1e5330d55f6e01002688221fa138d6c917e` | `53264e30c0d60246f3f7d5f20615cf92712fe8f3` / `6d71df02b7f5228b469316395861b635fd9dd3f0` / `52c0608a8e3d6032a6011e26f5d90d3fee1b93dd` | Quick-controls state, quick-controls wiring, and launcher/clock polish merged **after** the `a3714ef` evidence pin; #588 is the current live tip | MERGED; not compiled or visually accepted here — `NOT RUN`. No owned docs path in the delta, so gates are not re-run at the new tip |
 
 Compiled artifacts that back the evidence (scopes are explicit; none is an owner-approved visual baseline):
 
@@ -148,7 +149,7 @@ Commands run in the isolated `docs-refresh-a3714ef` worktree at `a3714ef6914471b
 - `python3 tools/check_foundation.py` → **PASS** (exit 0), output `PASS: foundation files, tagline, and local Markdown links`; log `C:/Users/X1/AppData/Local/hermes/cache/scratch/docs-refresh-a3714ef-logs/foundation.log`, SHA-256 `cd7ce3ea44ff12d436ec0af5e64de94b552f5bdfd4b210f14372c29537f937ad`. Re-run after the two docs were edited → **PASS**, log SHA-256 `cd7ce3ea44ff12d436ec0af5e64de94b552f5bdfd4b210f14372c29537f937ad` (unchanged, same recomputed content).
 - `python3 -m unittest discover -s tests` → **PASS** (exit 0), `Ran 3296 tests in 294.810s`, `OK (skipped=45)`; log `C:/Users/X1/AppData/Local/hermes/cache/scratch/docs-refresh-a3714ef-logs/fullsuite2.log`, SHA-256 `b9e855e9b2db9302c00dece0ac0c7364b6839a55d1b82936d301b4e0cb902e72`. A first capture limited to 300 s was killed mid-run and discarded; the completed 600 s run above is authoritative. The two-file docs delta touches no `tests/` or `tools/` path.
 - These replace the stale `941d6d0` figures (3231 tests / 43 skips) and `9cf39eb` figures (3256 tests / 44 skips). Counts are from a real run at this exact pin, not an inherited claim. The Python gates do not verify compiled Qt, Mint acceptance or owner visual approval; those verdicts remain scoped to §5 artifacts.
-- `git ls-remote origin refs/heads/integration/canopy-classic-20261123` at refresh returned `a3714ef6914471b27c332c6ac8419d613e5c38ec`, matching the evidence pin. `gh pr view` re-query: #579/#580/#583/#586/#587 `MERGED`; #572/#574/#578/#585/#588/#589/#590 `OPEN` (all drafts). #589 targets `feat/classic-qt-port-buildable-20261121`, not the integration branch.
+- `git ls-remote origin refs/heads/integration/canopy-classic-20261123` returned `a3714ef6914471b27c332c6ac8419d613e5c38ec` when the gates were run (evidence pin), then `c989e1e5330d55f6e01002688221fa138d6c917e` at the final re-check (live tip after #582/#590/#588 merged). `gh pr view` re-query: #579/#580/#582/#583/#586/#587/#588/#590 `MERGED`; #572/#574/#578/#585/#589 `OPEN` (all drafts). #589 targets `feat/classic-qt-port-buildable-20261121`, not the integration branch. Gates at `c989e1e`: **NOT RUN** here; that delta touches no `docs/GUI_ENGINEERING_DOSSIER.md` or `docs/PRODUCT_COMPLETION_MATRIX.md` path.
 - `gh issue view` at refresh confirmed #85, #94, #107, #132 and #290 all `OPEN`. `AGENTS.md` was not edited; only the two owned docs are changed.
 
 ---
@@ -195,6 +196,7 @@ AGENTS.md ownership-transfer editing is handled by the lead; WS4 does not touch 
 | Full Python suite at `a3714ef` (`check_foundation` + 3296 tests / 45 skips) | **PASS** (§7) |
 | v3 correction (Mail/Terminal/Settings) integration status | **MERGED** via #580 (`2002f54…`) but **NOT runtime-active**; owner visual `NOT_RUN`; source drafts #572/#574 still OPEN |
 | Wallpaper default #578 | **BLOCKED** — OPEN draft, tool-blocked, not merged; #290 OPEN |
-| Open PRs #585/#588/#589/#590 | **`IN REVIEW`** / draft, not merged, not accepted |
+| Open PRs #585/#589 (plus #572/#574/#578) | `IN REVIEW` / draft, not merged, not accepted; #588/#590/#582 merged after the `a3714ef` evidence pin |
+| Python suite at live tip `c989e1e` | **NOT RUN** here; tip advance touches no owned docs path |
 | Five-minute shell-owned PSS/CPU, GPU, true wakeups, screen reader | **NOT RUN** |
 | Owner visual acceptance / full Mint acceptance / release | **NOT RUN** |

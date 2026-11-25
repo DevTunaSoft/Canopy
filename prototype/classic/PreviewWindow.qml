@@ -197,7 +197,22 @@ Rectangle {
             contentHeight: sidebarList.implicitHeight + 9
             flickableDirection: Flickable.VerticalFlick
             boundsBehavior: Flickable.StopAtBounds
-            ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+            // The default control paints a pure-black thumb/stepper strip
+            // against the pale sidebar whenever the list overflows (seen at
+            // 1200x750 and 760x500). Colour-only override: the geometry,
+            // policy and scrolling behaviour stay identical, with no timers,
+            // animation, blur or shader work.
+            ScrollBar.vertical: ScrollBar {
+                policy: ScrollBar.AsNeeded
+                background: Rectangle {
+                    color: "#e8f0f8"
+                    radius: 3
+                }
+                contentItem: Rectangle {
+                    radius: 3
+                    color: parent.active ? "#8fb0cd" : "#b3c9de"
+                }
+            }
             Column {
                 id: sidebarList
                 width: sidebarScroll.width - 5

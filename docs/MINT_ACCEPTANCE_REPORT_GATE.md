@@ -22,13 +22,34 @@ created elsewhere does **not** authenticate their claimed Linux Mint origin.
 The checker requires the *existing* fixed schema, a successful smoke
 status with explicit `PARTIAL_SMOKE_ONLY` and `NOT_RUN` limitations,
 exactly 1920×1080, 1200×750, 760×500, individually numbered successful
-rows, original Qt self-test counts, exact screenshot filenames, independent
-SHA-256 checks and the original smoke runner's strict CRC/decompressed PNG
-variation and dimensions verifier. Source and binary hashes must match
-external caller-provided pins. It rejects symlinked files/path components,
-missing or duplicate evidence, malformed/oversize JSON, non-finite numbers,
-unrecognized schema and a report claiming owner approval or real
-compositor testing. No screenshot bytes or private file paths are reported.
+rows, exact screenshot filenames, independent SHA-256 checks and the
+original smoke runner's strict CRC/decompressed PNG variation and dimensions
+verifier. Source and binary hashes must match external caller-provided pins.
+It rejects symlinked files/path components, missing or duplicate evidence,
+malformed/oversize JSON, non-finite numbers, unrecognized schema and a report
+claiming owner approval or real compositor testing. No screenshot bytes or
+private file paths are reported.
+
+### Self-test marker-count contract
+
+The smoke runner counts `SELF_TEST_PASS:` lines, including detailed variants
+emitted by real compiled Qt. A runner PASS requires each mandatory marker
+prefix exactly once (three markers, plus the opt-in framing marker when
+enabled); duplicate or wrong-name lines leave the report at FAIL. This
+offline gate cannot see marker names in the fixed schema, so it bounds the
+recorded count per resolution: at least the mandatory marker count, at most
+64, and identical across all three rows. The cap exceeds the authentic counts
+observed so far (21 per resolution in the real Mint report; 19 and 23 in
+earlier scoped offscreen evidence) while still rejecting implausible counts.
+Missing, non-integer, inflated or inconsistent counts fail closed, as do
+corrupted report fields even when the marker count is authentic.
+
+Re-verified 2026-11-25 against the authentic guest report at
+`C:/Users/X1/AppData/Local/hermes/cache/scratch/mint_acceptance_8269ec9/host-evidence/report.json`
+(SHA-256 `a30aeb9ccc83f84bfe51ec5237cd0f5655a6119bfc4911f84012f5a3119752db`,
+21 markers at each resolution): gate verdict `status=PASS`, exit code 0. This
+is internal evidence consistency only; Mint provenance and owner visual
+approval remain separate gates.
 
 Output `status=PASS` means **internal evidence consistency only**. It is
 not proof of a genuine Mint guest: the runner reports its own platform,
@@ -36,7 +57,7 @@ and this verifier cannot independently attest a virtual machine,
 capture chain, artist approval, app/window integration, low resource usage
 or OS session behavior. A failing audit exits nonzero; no files are altered.
 
-The ten negative/positive test scenarios build PNGs with actual valid
+The synthetic test scenarios build PNGs with actual valid
 CRC and visible scanline variation; they do not claim execution in a
 Linux Mint guest. Keep the owner-supplied icon and landscape wallpaper
 assets private; neither is required by this verification tool.

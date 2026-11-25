@@ -18,6 +18,12 @@ import sys
 from tools import mint_classic_qt_smoke as qt
 
 MAX_REPORT_BYTES = 128_000
+# The smoke runner counts every SELF_TEST_PASS detail line, not just the
+# required marker prefixes. Authentic compiled Qt emitted 21 per resolution
+# for the real Mint report; prior scoped runs emitted 19 and 23. The cap is
+# well above those bounded, documented outputs but still rejects implausible
+# counts that cannot come from the self-test runner.
+MAX_MARKER_LINES = 64
 SOURCE_SHA = re.compile(r"[0-9a-f]{40}\Z")
 BINARY_SHA = re.compile(r"[0-9a-f]{64}\Z")
 EXPECTED_SIZES = {(f"{width}x{height}", width, height) for width, height in qt.SIZES}
@@ -96,6 +102,11 @@ def validate(directory, *, expected_source_sha, expected_binary_sha256):
     if type(rows) is not list or len(rows) != len(qt.SIZES):
         raise EvidenceError("required three-resolution matrix incomplete")
     seen = set()
+    marker_counts = set()
+    # A runner PASS requires each mandatory marker exactly once; duplicates or
+    # wrong names keep the report at FAIL. This gate cannot see marker names
+    # in the fixed schema, so it bounds the recorded line count instead.
+    required_markers = len(qt.REQUIRED_MARKERS) + (1 if report["framing_review"] else 0)
     checks = 0
     for row in rows:
         if type(row) is not dict or set(row) != ROW_KEYS:
@@ -111,11 +122,19 @@ def validate(directory, *, expected_source_sha, expected_binary_sha256):
         name = f"qt-{size}.png"
         if (row["screenshot"] != name or row["status"] != "PASS"
                 or type(row["exit_code"]) is not int or row["exit_code"] != 0
-                or type(row["markers_observed"]) is not int
-                or row["markers_observed"] != (4 if report["framing_review"] else 3)
                 or type(row["screenshot_sha256"]) is not str
                 or not BINARY_SHA.fullmatch(row["screenshot_sha256"])):
             raise EvidenceError("invalid PASS row, marker or screenshot name")
+        observed = row["markers_observed"]
+        if type(observed) is not int:
+            raise EvidenceError("self-test marker count must be an integer")
+        if observed < required_markers:
+            raise EvidenceError("missing required self-test markers")
+        if observed > MAX_MARKER_LINES:
+            raise EvidenceError("implausible self-test marker count")
+        marker_counts.add(observed)
+        if len(marker_counts) != 1:
+            raise EvidenceError("inconsistent self-test marker counts across resolutions")
         path = root / name
         try:
             actual = qt.png_size(path)  # CRC, zlib, bounds, visible variation

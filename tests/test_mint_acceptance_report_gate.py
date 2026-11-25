@@ -83,6 +83,72 @@ class MintEvidenceGateTests(unittest.TestCase):
         self.assertIs(evidence["linux_mint_execution_independently_proven"], False)
         self.assertEqual(evidence["owner_visual_approval"], "NOT_ESTABLISHED")
 
+    def test_authentic_detail_marker_counts_pass(self):
+        # The real compiled Qt binary emits 21 detailed SELF_TEST_PASS lines
+        # per resolution; each required prefix still appears exactly once.
+        for row in self.report["tests"]:
+            row["markers_observed"] = 21
+        self.write_report()
+        evidence = self.check()
+        self.assertEqual(evidence["status"], "PASS")
+        self.assertEqual(evidence["screenshots_verified"], 3)
+
+    def test_authentic_detail_marker_counts_pass_with_framing_review(self):
+        self.report["framing_review"] = True
+        for row in self.report["tests"]:
+            row["markers_observed"] = 22
+        self.write_report()
+        self.assertEqual(self.check()["status"], "PASS")
+
+    def test_missing_required_markers_rejected(self):
+        for framing, counts in ((False, (0, 1, 2, -1)), (True, (0, 1, 2, 3))):
+            self.report["framing_review"] = framing
+            for count in counts:
+                for row in self.report["tests"]:
+                    row["markers_observed"] = count
+                self.write_report()
+                with self.subTest(framing=framing, count=count):
+                    with self.assertRaisesRegex(gate.EvidenceError, "missing required self-test markers"):
+                        self.check()
+
+    def test_implausible_marker_counts_rejected(self):
+        for count in (65, 999):
+            for row in self.report["tests"]:
+                row["markers_observed"] = count
+            self.write_report()
+            with self.subTest(count=count):
+                with self.assertRaisesRegex(gate.EvidenceError, "implausible self-test marker count"):
+                    self.check()
+
+    def test_non_integer_marker_counts_rejected(self):
+        for value in (True, 21.0, "21", None):
+            for row in self.report["tests"]:
+                row["markers_observed"] = value
+            self.write_report()
+            with self.subTest(value=repr(value)):
+                with self.assertRaisesRegex(gate.EvidenceError, "marker count must be an integer"):
+                    self.check()
+
+    def test_inconsistent_marker_counts_across_resolutions_rejected(self):
+        for row, count in zip(self.report["tests"], (21, 20, 21)):
+            row["markers_observed"] = count
+        self.write_report()
+        with self.assertRaisesRegex(gate.EvidenceError, "inconsistent self-test marker counts"):
+            self.check()
+
+    def test_detail_count_does_not_waive_corrupted_report_fields(self):
+        for row in self.report["tests"]:
+            row["markers_observed"] = 21
+        self.report["tests"][0]["screenshot_sha256"] = "0" * 64
+        self.write_report()
+        with self.assertRaisesRegex(gate.EvidenceError, "SHA-256 mismatch"):
+            self.check()
+        self.report["tests"][0]["screenshot_sha256"] = self.original["tests"][0]["screenshot_sha256"]
+        self.report["verified_binary_sha256"] = "c" * 64
+        self.write_report()
+        with self.assertRaisesRegex(gate.EvidenceError, "provenance mismatch"):
+            self.check()
+
     def test_wrong_immutable_source_or_binary_pin_fails_closed(self):
         for source, binary in (("c" * 40, BINARY), (SOURCE, "c" * 64),
                                ("../untrusted", BINARY), (SOURCE, "x")):

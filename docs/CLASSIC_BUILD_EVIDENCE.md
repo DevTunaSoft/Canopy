@@ -1,24 +1,43 @@
-# Classic reproducible build evidence — 2026-11-25
+# Classic reproducible build evidence — current integration tip 9cf39eb
 
-Workstream 5 (build/release engineering). Priority 0 directive: one reproducible
-integrated Classic build. This document records the exact executed run; it is
-not a claim of visual approval, Mint acceptance, installer readiness or a
-`main` merge. All build output is scratch-only under
-`C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy-classic-release/`.
+Workstream 5 (build/release engineering). This document records the exact
+executed run at the live integration tip `9cf39ebeaf0bc5f6a25279ec81d12b29cdeda3c2`.
+It is **not** a claim of visual approval, Mint acceptance, installer readiness
+or a `main` merge. All build output is scratch-only under
+`C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy-classic-release-9cf39eb/`.
 
-## Source pin
+## Source pin: explicit, caller-supplied, never inferred
+
+The obsolete `SOURCE_SHA = b31c995...` constant was removed from
+`tools/build/classic_release_build.py` and `EXPECTED_SOURCE_SHA` was removed
+from `tools/qa/classic_build_gate.py`. No 40-hex repository SHA is hardcoded in
+either file. The pin is now an explicit argument to both programs:
 
 | Field | Exact value |
 |---|---|
-| Source commit (HEAD) | `b31c995a650202b66c08064a7cc3b7b4f0609d2d` |
-| Source tree SHA | `e399189824e6c6da7e3dd6f42d2c59ee9004bca7` |
-| Integration ref observed locally | `pr-278-ws1`, `integration/canopy-classic-20261123` |
-| Worktree | `C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy-ws5` (isolated, branch `build/classic-reproducible-evidence-20261125`) |
+| Source commit (HEAD) | `9cf39ebeaf0bc5f6a25279ec81d12b29cdeda3c2` |
+| Source tree SHA | `83c7df9557c59b9acdb9ef0f9e69c15ff536a0b1` |
+| Integration ref observed locally | `integration/canopy-classic-20261123` (remote tip `9cf39eb`) |
+| Build source worktree | `C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy-pin-base-9cf39eb` (detached at `9cf39eb`, clean) |
+| Changed tooling worktree | `C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy-pin-fix-9cf39eb` (branch `fix/classic-build-source-pin-9cf39eb`) |
 | Tracked/staged source changes during build | none (`git diff --quiet` and `git diff --cached --quiet` both 0) |
 | Build target | `prototype/classic/CMakeLists.txt` → `canopy-classic-spike.exe` (Release) |
 
-The shared checkout at `C:/Users/X1/Projects/Canopy` was deliberately not
-rebuilt: it is at a different tip and contains other agents' work.
+Fail-closed behaviour proved on this bundle:
+
+```
+python tools/qa/classic_build_gate.py verify --evidence <out>/evidence --source-sha b31c995a650202b66c08064a7cc3b7b4f0609d2d
+CHECK SOURCE_SHA FAIL pinned=b31c995a650202b66c08064a7cc3b7b4f0609d2d actual=9cf39ebeaf0bc5f6a25279ec81d12b29cdeda3c2
+SUMMARY checks=12 pass=11 fail=1
+FIRST SOURCE_SHA
+VERDICT FAIL   (exit 1)
+```
+
+The build entry point rejects a HEAD that differs from `--source-sha` before
+configuring anything, rejects a malformed/non-40-hex pin, and re-checks HEAD
+plus the tracked tree after both builds. The verify CLI makes `--source-sha`
+required and normalizes only strict 40-character hex; no pin is taken from the
+bundle being verified. A stale or absent pin can therefore never pass silently.
 
 ## Toolchain (exact `pacman`/version output)
 
@@ -40,8 +59,9 @@ binary emits no observable self-test lines on this host.
 
 ```sh
 python tools/build/classic_release_build.py \
-  --source C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy-ws5 \
-  --out C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy-classic-release
+  --source C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy-pin-base-9cf39eb \
+  --source-sha 9cf39ebeaf0bc5f6a25279ec81d12b29cdeda3c2 \
+  --out C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy-classic-release-9cf39eb
 ```
 
 Executed sequence (recorded verbatim in the evidence bundle's `commands.txt`):
@@ -56,7 +76,7 @@ cmake --build <out>/build --parallel 2
 <binary> --approved-art-dir <art> --self-test-approved --self-test-size 1920x1080 --self-test-screenshot <shot-1920x1080>
 <binary> --approved-art-dir <art> --self-test-approved --self-test-size 1200x750 --self-test-screenshot <shot-1200x750>
 <binary> --approved-art-dir <art> --self-test-approved --self-test-size 760x500 --self-test-screenshot <shot-760x500>
-python tools/qa/classic_build_gate.py verify --evidence <out>/evidence --source-sha b31c995a650202b66c08064a7cc3b7b4f0609d2d
+python tools/qa/classic_build_gate.py verify --evidence <out>/evidence --source-sha 9cf39ebeaf0bc5f6a25279ec81d12b29cdeda3c2
 ```
 
 The script performs two full clean builds (build directory deleted between
@@ -78,11 +98,11 @@ produced the same binary bytes. This is recorded in
 | Field | Exact value |
 |---|---|
 | Binary | `binary/canopy-classic-spike.exe` |
-| SHA-256 | `4def58335e50fdade18dd46457f1b1b5c5514b05195ad8d7dbc90efed8d683d8` |
-| Size | `2,060,642` bytes |
-| Clean build 1 SHA-256 | `4def58335e50fdade18dd46457f1b1b5c5514b05195ad8d7dbc90efed8d683d8` |
-| Clean build 2 SHA-256 | `4def58335e50fdade18dd46457f1b1b5c5514b05195ad8d7dbc90efed8d683d8` |
-| Byte-identical rebuild | yes (two fully clean passes) |
+| SHA-256 | `458291aa2f08c6ea0729e5183e3f8d763cabb2c591f0a56192fa13756521b0c6` |
+| Size | `2,119,663` bytes |
+| Clean build 1 SHA-256 | `458291aa2f08c6ea0729e5183e3f8d763cabb2c591f0a56192fa13756521b0c6` |
+| Clean build 2 SHA-256 | `458291aa2f08c6ea0729e5183e3f8d763cabb2c591f0a56192fa13756521b0c6` |
+| Byte-identical rebuild | yes (two fully clean passes, ~221 s and ~190 s compile) |
 
 A build without `SOURCE_DATE_EPOCH=0` or without the `qmldir` mtime pin is NOT
 byte-reproducible on this host; those runs were rejected during development.
@@ -106,26 +126,26 @@ self-test invocations returned rc=0; no `SELF_TEST_FAIL` line was emitted.
 
 ## Three screenshot resolutions
 
-| Resolution | Bundle path | SHA-256 (this run) | Self-test log |
+| Resolution | Bundle path | SHA-256 (this run) | Gate-sampled colors |
 |---|---|---|---|
-| 1920×1080 | `screenshots/classic-1920x1080.png` | `a072fb3b2bff9e2428ae1c0d3a40b5a57077dc81e769752fda3ae00003647f55` | `selftest-1920x1080.log` |
-| 1200×750 | `screenshots/classic-1200x750.png` | `f9532ba1d42a71301a332712d90d13a2cddbbf70c8cfc5891cc1a77841e9e7fe` | `selftest-1200x750.log` |
-| 760×500 | `screenshots/classic-760x500.png` | `aca3c113c06620d4069f074073d198a41f199bc120b218df2858cba1c4ef8852` | `selftest-760x500.log` |
+| 1920×1080 | `screenshots/classic-1920x1080.png` | `0a08c38b73029327492f943e65ee4cd5284a13ade6435f15ecda14e54a496b11` | 43 |
+| 1200×750 | `screenshots/classic-1200x750.png` | `48526f486e03a9f1a304e33e6afe281a4259b34da7cc5132eeca678742a6db91` | 44 |
+| 760×500 | `screenshots/classic-760x500.png` | `68465e0e157e96f529d3408ea9f0558a4527dc102565e26c34f97790cb139ce0` | 34 |
 
-The binary itself verifies each PNG is non-uniform and has exact dimensions;
-the independent gate re-parses the PNG bytes (bounded 8-bit RGB/RGBA, no
-interlace, CRC and scanline filters checked) and requires at least eight
-sampled colors. Gate observed 43/44/34 sampled colors in the bundle.
+Each PNG has its own `selftest-<size>.log`. The binary verifies non-uniformity
+and exact dimensions; the independent gate re-parses the PNG bytes (bounded
+8-bit RGB/RGBA, no interlace, CRC and scanline filters checked) and requires at
+least eight sampled colors.
 
 ## Artifact manifest (SHA-256, recomputed by the gate)
 
 ```
-binary/canopy-classic-spike.exe  4def58335e50fdade18dd46457f1b1b5c5514b05195ad8d7dbc90efed8d683d8
-commands.txt                     bf7ddd1e09cbf4bedfd74ab1dfcf249f9f1fc55af69284aa2532671b814ca1ae
-evidence.json                    8b173b6fa683ff4078027e03e9009d1eb4af5bd60526c6b59fbe5c83471c3cc8
-screenshots/classic-1200x750.png f9532ba1d42a71301a332712d90d13a2cddbbf70c8cfc5891cc1a77841e9e7fe
-screenshots/classic-1920x1080.png a072fb3b2bff9e2428ae1c0d3a40b5a57077dc81e769752fda3ae00003647f55
-screenshots/classic-760x500.png  aca3c113c06620d4069f074073d198a41f199bc120b218df2858cba1c4ef8852
+binary/canopy-classic-spike.exe  458291aa2f08c6ea0729e5183e3f8d763cabb2c591f0a56192fa13756521b0c6
+commands.txt                     c1410776ffef7b6e6a3969f71002a0887895a810de2d850ffa37f2e0f611dd2f
+evidence.json                    503a9642aa89bd82d058a7a058da8df2db2de82c4e7f8749e3a679bfd1c07eaf
+screenshots/classic-1200x750.png 48526f486e03a9f1a304e33e6afe281a4259b34da7cc5132eeca678742a6db91
+screenshots/classic-1920x1080.png 0a08c38b73029327492f943e65ee4cd5284a13ade6435f15ecda14e54a496b11
+screenshots/classic-760x500.png  68465e0e157e96f529d3408ea9f0558a4527dc102565e26c34f97790cb139ce0
 selftest-1200x750.log            c61212948b6e29bdf49ca4244a65cbd76dc48cb3aeb3ebe5442dfb0c678e1941
 selftest-1920x1080.log           0b7e902b7295ca0b558fda0088cf95c99ef32bbd122908f584c02973af3524c0
 selftest-760x500.log             a268a9fc9cc16ec73bb5bfedb5dc717f7cabc49e6850ee6309a824ed25fd9409
@@ -134,16 +154,16 @@ selftest-optin-refusal.log       6cd81acb22f654bec1d2f0a78254784b84b62d6d8869289
 toolchain.txt                    371095a76d5e25a877b7d797939e22ed213939671458d5c574b4f797bf779587
 ```
 
-## Gate result
+## Gate result at the correct pin
 
 ```
 CHECK SCHEMA PASS schema_version=1
-CHECK SOURCE_SHA PASS pinned=b31c995a650202b66c08064a7cc3b7b4f0609d2d actual=b31c995a650202b66c08064a7cc3b7b4f0609d2d
+CHECK SOURCE_SHA PASS pinned=9cf39ebeaf0bc5f6a25279ec81d12b29cdeda3c2 actual=9cf39ebeaf0bc5f6a25279ec81d12b29cdeda3c2
 CHECK TOOLCHAIN PASS required fields recorded in toolchain.txt
 CHECK COMMANDS PASS cmake/ninja/self-test commands recorded
-CHECK REPRO_HASHES PASS build_hashes=2 binary_sha256=4def58335e50
+CHECK REPRO_HASHES PASS build_hashes=2 binary_sha256=458291aa2f08
 CHECK MANIFEST_KEYS PASS expected=12 actual=12
-CHECK BINARY PASS sha256=4def58335e50
+CHECK BINARY PASS sha256=458291aa2f08
 CHECK FILE_HASHES PASS recomputed 12 manifest entries
 CHECK SCREENSHOTS PASS 1920x1080 colors=43; 1200x750 colors=44; 760x500 colors=34
 CHECK SELFTEST_LOGS PASS selftest-1920x1080.log:ok; selftest-1200x750.log:ok; selftest-760x500.log:ok
@@ -153,17 +173,37 @@ SUMMARY checks=12 pass=12 fail=0
 VERDICT PASS
 ```
 
-Regression suite:
+Regression suites at this change:
 
 ```
 python -m unittest tools.build.tests.test_classic_build_gate -v
-Ran 15 tests ... OK
+Ran 21 tests ... OK (skipped=1)
+
+python -m unittest discover -s tests
+Ran 3277 tests ... OK (skipped=45)     # base at 9cf39eb: 3256 OK, skipped=44
 ```
 
-It includes the gate's own 11-case RED/GREEN mutation control
+The 21 tests include stale-pin, correct-pin, malformed/absent-pin cases, a
+no-hardcoded-SHA source scan, CLI-required-pin and build-script stale-pin
+rejection, plus the gate's 13-case RED/GREEN mutation control
 (`python tools/qa/classic_build_gate.py selftest`), pinning exact FIRST codes:
-`SOURCE_SHA`, `TOOLCHAIN`, `REPRO_HASHES`, `BINARY`, `MANIFEST_KEYS`,
+`SOURCE_SHA` (twice), `TOOLCHAIN`, `REPRO_HASHES`, `BINARY`, `MANIFEST_KEYS`,
 `FILE_HASHES`, `SELFTEST_LOGS`, `SCREENSHOTS` (twice) and `CAPABILITY_LOG`.
+`tests/test_classic_build_gate.py` mirrors these cases into Foundation CI's
+`unittest discover -s tests`; the +21-test delta is exactly that mirror.
+
+## Resource / evidence note
+
+- Measured on this Windows UCRT64 host: two clean Release builds (binary SHA
+  above), five Qt self-test invocations and three offscreen screenshot captures.
+  The binary size, per-pass hashes and all log/manifest hashes are on disk in
+  the scratch bundle; gate fixture cases are `SYNTHETIC`.
+- `NOT_RUN`: five-minute idle CPU/PSS, real desktop/Mint session, installer
+  behaviour and screen-reader/announcement behavior. This change touches only
+  Python tooling, docs and tests; no UI, QML or announcement code changed, so
+  no screen-reader behaviour was measured or altered.
+- No stability, security, accessibility or approved-visual tradeoff was made:
+  the gate only tightens how the caller declares the source pin.
 
 ## Known limitations and failure modes
 
@@ -186,13 +226,14 @@ It includes the gate's own 11-case RED/GREEN mutation control
   build hashes disagree.
 - Omitting `QT_FORCE_STDERR_LOGGING=1` yields empty logs and a red
   `SELFTEST_LOGS`/`CAPABILITY_LOG` gate on this GUI-subsystem binary.
-- A source HEAD other than the pinned tip fails before any build is attempted.
+- A source HEAD or caller pin that differs from `--source-sha` fails before any
+  build; a verify run with a stale or missing pin fails at `SOURCE_SHA`.
 
 ## Scope ownership
 
-New files only: `tools/build/classic_release_build.py`,
+Changed only `tools/build/classic_release_build.py`,
 `tools/build/tests/test_classic_build_gate.py`,
-`tools/build/.gitattributes`, `tools/qa/classic_build_gate.py`,
+`tools/qa/classic_build_gate.py`, `tests/test_classic_build_gate.py` and
 `docs/CLASSIC_BUILD_EVIDENCE.md`. Scratch build outputs stay outside the
-worktree. No PR #279, PR #567/#564 integration, GUI artwork path, Mint session
-work or dossier file was touched. No merge to `main`.
+worktree. No source/QML/asset/dossier/AGENTS path, no other agent's path and no
+merge to `main` was performed.

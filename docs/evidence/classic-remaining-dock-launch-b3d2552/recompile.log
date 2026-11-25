@@ -1,0 +1,5 @@
+[1/34] Automatic MOC and UIC for target canopy-classic-spike
+[2/33] Running AUTOMOC file extraction for target canopy-classic-spike
+[3/33] Running moc --collect-json for target canopy-classic-spike
+[4/5] Building CXX object CMakeFiles/canopy-classic-spike.dir/main.cpp.obj
+[5/5] Linking CXX executable canopy-classic-spike.exe

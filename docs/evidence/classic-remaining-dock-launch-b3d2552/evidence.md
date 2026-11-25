@@ -1,0 +1,38 @@
+# Classic remaining dock launches: verification evidence
+
+Base: `b3d2552db0205e2f7821cb3bd7955453347051a0` (`integration/canopy-classic-20261123`).
+Scope: Calendar, Photos and Terminal dock tiles join Files, Browser and Mail on the existing host-owned `SystemAppLauncher`; no QML, artwork, wallpaper, dock geometry or colour byte was changed.
+
+## What was verified
+- Source contracts: 6 tests pass on the candidate; the same file fails on the pristine base with 8 failures across 6 tests (RED then GREEN).
+- Full `unittest discover -s tests` on the pristine base: 3399 tests, OK (skipped=45), 486.291s.
+- Full `unittest discover -s tests` on the candidate: 3405 tests, OK (skipped=45), 176.032s; the +6 are this PR's contract tests, with no FAIL/ERROR on either side.
+- Foundation contract check: PASS.
+- Qt: MSYS2 UCRT64 Qt 6 CMake/Ninja configure and compile succeeded (52 build steps). `gio-unix-2.0` is absent on this Windows host, so the launcher compiles as its documented disabled fallback; no GIO-enabled native launch is claimed locally.
+- Compiled runtime: 63 `SELF_TEST_PASS` markers across three approved-art self-test runs; three valid PNG screenshots at 1920x1080, 1200x750 and 760x500, each checked with `tools/check_screenshot.py`.
+- Compiled fail-closed disclosure: `CALENDAR_`, `PHOTOS_` and `TERMINAL_DOCK_STATUS_FIXTURE_PASS` each emitted with rc=0 on the disabled-backend build; hostile `Name;echo bad` activation was refused before the launcher was touched.
+
+## Artifact SHA-256
+
+- `.gitattributes` `705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da`
+- `classic-1200x750.png` `dd13497b3d232b68ede1fbecc09a4086ad71de331328a8449471edfd14049ce4`
+- `classic-1920x1080.png` `b844754d864525b9e737b79cdc5324536953b855a1ff616c9f2f29b3aaacc6db`
+- `classic-760x500.png` `710b1d8c6da8abac1f77def58ed4d1928f1fd1f3d8f600d9bc86119a766f6515`
+- `cmake-config.log` `26e42d914105b0e357f528635322c065cd8c99c4e8a3ac57e3d906a43ffae21b`
+- `compile.log` `8284ee19f3499355ac2a259e02f73ba6e6d01b14b0dac1abb3a3431d1c0ea003`
+- `compiled-qt.log` `aad4cc6e248064a4fa4a550a53b663f155abf511bb76b42c287731ca69e5ffc6`
+- `evidence.md` `f1e66143bf2f97e4b556a293ae2bf111d5c2cd8935c48a9cb84df062fd15da90`
+- `foundation-check.txt` `129871f6cc021e47dda115aa0fd87eb66c0d65ce785dab53a4bff19dd0af606f`
+- `recompile.log` `66d2325af77174fe1ef857d27f05e27247c5658b52c3fbff81b1eb02fbb9f19b`
+- `red-proof.txt` `8cfcf369cc0471dc6dd313184300cd8ee4bd5830f27a2a9ba5af3c98ec6cb3fd`
+- `sha256.txt` `5b2ac034f1afd89c799eb48a683927138be45af581becc301500ed79e7949f8c`
+- `status-fixtures.log` `850ab89a33b8c39e655698faa78f3ad84070f9b6dcec140352c0fc5f7df2ace5`
+- `suite-baseline.txt` `cbcf188030f23b25f091c3627d60ead0c84b96b91226f0eff95c3830a0666950`
+- `suite-candidate.txt` `1f6ba032e227f6288dd6e552ef2ab2245889c2d62d71dadbee20693f2c994384`
+- `target-test.txt` `065c7d15facfd20f14fb9182747be315f3349fa1d5e1a0e966047509f4bfa9b1`
+
+## Resource / evidence note
+- Measured: Windows 11 host, MSYS2 UCRT64 Qt 6, `QT_QPA_PLATFORM=offscreen`, software rendering, three approved-art captures (1920x1080, 1200x750, 760x500); source-contract and full-suite wall-clock counts above are `SYNTHETIC` host evidence, not Linux Mint acceptance.
+- NOT_RUN: GIO-enabled launch fixtures (Ubuntu Xvfb CI owns them), real Linux Mint guest acceptance, real desktop/window-activation focus, idle CPU/PSS sampling, GPU-backed rendering and owner visual approval.
+- Screen-reader: no accessibility metadata or QML was edited. Refusals reuse the existing `canopyLauncherStatus` Label already present in the launcher overlay; screen-reader behaviour was NOT_RUN locally.
+- No stability, security, accessibility or approved-visual trade was made for a performance gain; the change only forwards one frozen dock label to the already-reviewed launcher and discloses refusal.

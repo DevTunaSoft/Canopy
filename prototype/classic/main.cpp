@@ -28,6 +28,7 @@
 #include <QJsonObject>
 #include <QJsonParseError>
 #include <QQmlComponent>
+#include <QQmlProperty>
 #include <QUrl>
 
 static void showActivationStatus(QObject *status, const QString &message);
@@ -363,6 +364,70 @@ static int countReadyDockTiles(QQuickItem *parent) {
     for (QQuickItem *child : parent->childItems())
         ready += countReadyDockTiles(child);
     return ready;
+}
+
+static QVariant tileProperty(const QObject *object, const QString &name)
+{
+    return object->property(name.toUtf8().constData());
+}
+
+static void setTileProperty(QObject *object, const QString &name,
+                            const QVariant &value)
+{
+    object->setProperty(name.toUtf8().constData(), value);
+}
+
+// Apply trusted state to the frozen DockTile QObjects from the host. No
+// visual QML byte is changed: these are dynamic object properties and the
+// existing accessibility attached property, updated only on stateChanged.
+static void updateDockActivationProperties(QQuickItem *root,
+                                           WindowActivationState &state,
+                                           QObject *adapter)
+{
+    if (!root || !adapter)
+        return;
+    const bool available = adapter->property("indicatorsAvailable").toBool();
+    const int sequence = adapter->property("sequence").toInt();
+    static const QStringList approved = {
+        QStringLiteral("Browser"), QStringLiteral("Mail"),
+        QStringLiteral("Files"), QStringLiteral("Calendar"),
+        QStringLiteral("Photos"), QStringLiteral("Music"),
+        QStringLiteral("Terminal"), QStringLiteral("Settings")
+    };
+    for (const QString &name : approved) {
+        QQuickItem *tile = findDockTile(root, name);
+        if (!tile)
+            continue;
+        const bool running = available && state.isRunning(name);
+        const bool active = available && state.isActive(name);
+        const QString intent = available
+                ? state.resolveActivation(name, QStringLiteral("Canopy"))
+                : QStringLiteral("REJECT");
+        setTileProperty(tile, QStringLiteral("activationAvailable"), available);
+        setTileProperty(tile, QStringLiteral("activationSequence"), sequence);
+        setTileProperty(tile, QStringLiteral("windowRunning"), running);
+        setTileProperty(tile, QStringLiteral("windowActive"), active);
+        setTileProperty(tile, QStringLiteral("activationIntent"), intent);
+
+        QString description;
+        if (!available)
+            description = name + QStringLiteral(" window activation state unavailable");
+        else if (active)
+            description = name + QStringLiteral(" active window");
+        else if (running)
+            description = name + QStringLiteral(" running; focus requires an explicit grant");
+        else if (intent == QStringLiteral("LAUNCH"))
+            description = name + QStringLiteral(" available to launch");
+        else if (intent == QStringLiteral("IGNORE"))
+            description = name + QStringLiteral(" activation ignored");
+        else
+            description = name + QStringLiteral(" preview only; not installed in this session");
+        QQmlProperty accessibleDescription(
+            tile, QStringLiteral("Accessible.description"),
+            QQmlEngine::contextForObject(tile));
+        if (accessibleDescription.isValid())
+            accessibleDescription.write(description);
+    }
 }
 
 // A rendered launcher must contain actual ready QML Image objects.
@@ -772,6 +837,13 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     qInfo() << "CANOPY_CLASSIC_WINDOW_READY";
+    QObject::connect(&activationState, &WindowActivationState::stateChanged,
+                     &app, [window, &activationState, activationAdapter]() {
+        updateDockActivationProperties(
+            window->contentItem(), activationState, activationAdapter);
+    });
+    updateDockActivationProperties(
+        window->contentItem(), activationState, activationAdapter);
     if (enableSystemApps) {
         // Dock integration without editing the frozen dock QML bytes: wire the
         // existing DockTile `activated` signal to the host-owned GIO service.
@@ -890,12 +962,21 @@ int main(int argc, char *argv[]) {
             return 1;
         }
         QCoreApplication::processEvents();
-        if (!filesTile->property("windowRunning").toBool()
-                || !filesTile->property("windowActive").toBool()
-                || filesTile->property("activationIntent").toString()
+        if (!tileProperty(filesTile, QStringLiteral("windowRunning")).toBool()
+                || !tileProperty(filesTile, QStringLiteral("windowActive")).toBool()
+                || tileProperty(filesTile, QStringLiteral("activationIntent")).toString()
                         != QStringLiteral("FOCUS")
                 || !activationAdapter->property("indicatorsAvailable").toBool()) {
             qCritical() << "WINDOW_ACTIVATION_HOST_FIXTURE_FAIL: indicators";
+            return 1;
+        }
+        const QQmlProperty trustedDescription(
+            filesTile, QStringLiteral("Accessible.description"),
+            QQmlEngine::contextForObject(filesTile));
+        if (!trustedDescription.isValid()
+                || !trustedDescription.read().toString().contains(
+                       QStringLiteral("active window"))) {
+            qCritical() << "WINDOW_ACTIVATION_HOST_FIXTURE_FAIL: accessibility disclosure";
             return 1;
         }
         qInfo() << "SELF_TEST_PASS: dock running and active indicators reflect trusted snapshot";
@@ -924,9 +1005,9 @@ int main(int argc, char *argv[]) {
             return 1;
         }
         QCoreApplication::processEvents();
-        if (filesTile->property("windowRunning").toBool()
-                || filesTile->property("windowActive").toBool()
-                || filesTile->property("activationIntent").toString()
+        if (tileProperty(filesTile, QStringLiteral("windowRunning")).toBool()
+                || tileProperty(filesTile, QStringLiteral("windowActive")).toBool()
+                || tileProperty(filesTile, QStringLiteral("activationIntent")).toString()
                         != QStringLiteral("LAUNCH")) {
             qCritical() << "WINDOW_ACTIVATION_HOST_FIXTURE_FAIL: closed state";
             return 1;
@@ -943,12 +1024,21 @@ int main(int argc, char *argv[]) {
         QCoreApplication::processEvents();
         if (applyActivationJson(activationState, invalid)
                 || activationState.status() != QStringLiteral("UNAVAILABLE")
-                || filesTile->property("activationAvailable").toBool()
-                || filesTile->property("windowRunning").toBool()
-                || filesTile->property("activationIntent").toString()
+                || tileProperty(filesTile, QStringLiteral("activationAvailable")).toBool()
+                || tileProperty(filesTile, QStringLiteral("windowRunning")).toBool()
+                || tileProperty(filesTile, QStringLiteral("activationIntent")).toString()
                         != QStringLiteral("REJECT")
                 || activationAdapter->property("indicatorsAvailable").toBool()) {
             qCritical() << "WINDOW_ACTIVATION_HOST_FIXTURE_FAIL: fail closed";
+            return 1;
+        }
+        const QQmlProperty clearedDescription(
+            filesTile, QStringLiteral("Accessible.description"),
+            QQmlEngine::contextForObject(filesTile));
+        if (!clearedDescription.isValid()
+                || !clearedDescription.read().toString().contains(
+                       QStringLiteral("window activation state unavailable"))) {
+            qCritical() << "WINDOW_ACTIVATION_HOST_FIXTURE_FAIL: cleared disclosure";
             return 1;
         }
         qInfo() << "SELF_TEST_PASS: untrusted snapshot clears all indicators";

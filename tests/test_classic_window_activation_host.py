@@ -120,6 +120,8 @@ class ClassicWindowActivationHostTests(unittest.TestCase):
                 "WINDOW_ACTIVATION_HOST_FIXTURE_FAIL: focus disclosed",
                 "WINDOW_ACTIVATION_HOST_FIXTURE_FAIL: closed snapshot",
                 "WINDOW_ACTIVATION_HOST_FIXTURE_FAIL: fail closed",
+                "WINDOW_ACTIVATION_HOST_FIXTURE_FAIL: accessibility disclosure",
+                "WINDOW_ACTIVATION_HOST_FIXTURE_FAIL: cleared disclosure",
                 "SELF_TEST_PASS: dock running and active indicators reflect trusted snapshot",
                 "SELF_TEST_PASS: dock activation intent reaches host gate without false focus",
                 "SELF_TEST_PASS: closed snapshot clears running and active indicators",
@@ -142,33 +144,38 @@ class ClassicWindowActivationHostTests(unittest.TestCase):
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, adapter)
 
-    def test_dock_disclosure_changes_text_only_not_visual_identity(self):
-        dock = self.dock
+    def test_dock_stays_byte_frozen_and_state_is_applied_by_host(self):
+        import hashlib
+
+        # The frozen DockTile.qml blob is deliberately untouched. State is
+        # applied to the QObjects from main.cpp, not by editing visual QML.
+        # Read universal-newline text so both LF CI and CRLF Windows checkouts
+        # normalize back to the same committed blob bytes.
+        tile_blob = DOCK.read_text(encoding="utf-8").encode("utf-8")
+        blob_sha = hashlib.sha1(b"blob " + str(len(tile_blob)).encode() +
+                                b"\0" + tile_blob).hexdigest()
+        self.assertEqual(blob_sha, "07dbf4f447eb0a67f8df5e15948d40559539cc6e")
+        cpp = self.cpp
         for marker in (
-                "readonly property bool activationAvailable",
-                "readonly property int activationSequence",
-                "readonly property bool windowRunning",
-                "readonly property bool windowActive",
-                "readonly property string activationIntent",
-                "readonly property string activationDescription",
-                "Accessible.description: tile.activationDescription",
-                'ToolTip.text: iconName === "Files" ? "Toggle Files preview" '
-                ': iconName + " — preview only"',
-                "width: 58", "height: 70", "radius: 16", 'color: "#2f4f69"',
-                "visible: tile.previewActive",
-                "onClicked: tile.activated(tile.iconName)"):
+                "static void updateDockActivationProperties(",
+                "static void setTileProperty(",
+                'setTileProperty(tile, QStringLiteral("activationAvailable"), available)',
+                'setTileProperty(tile, QStringLiteral("activationSequence"), sequence)',
+                'setTileProperty(tile, QStringLiteral("windowRunning"), running)',
+                'setTileProperty(tile, QStringLiteral("windowActive"), active)',
+                'setTileProperty(tile, QStringLiteral("activationIntent"), intent)',
+                'QQmlProperty accessibleDescription(',
+                '&WindowActivationState::stateChanged',
+                "updateDockActivationProperties(\n"
+                "        window->contentItem(), activationState, activationAdapter)"):
             with self.subTest(marker=marker):
-                self.assertIn(marker, dock)
-        for forbidden in ("Rectangle {", "Image {", "Timer {",
-                          "NumberAnimation", "Canvas {"):
-            # The two original background Rectangles and the icon Image are
-            # frozen; no new visual element may be introduced.
-            if forbidden == "Rectangle {":
-                self.assertEqual(dock.count(forbidden), 2)
-            elif forbidden == "Image {":
-                self.assertEqual(dock.count(forbidden), 1)
-            else:
-                self.assertNotIn(forbidden, dock)
+                self.assertIn(marker, cpp)
+        # No visual QML source was added or changed.
+        self.assertNotIn("activationDescription", self.dock)
+        self.assertNotIn("windowRunning", self.dock)
+        self.assertIn(
+            'ToolTip.text: iconName === "Files" ? "Toggle Files preview" '
+            ': iconName + " — preview only"', self.dock)
 
 
 if __name__ == "__main__":

@@ -9,34 +9,6 @@ Button {
     objectName: "canopyDockTile"
     required property string iconName
     property bool previewActive: false
-    // Non-visual activation state disclosure: the compiled shell supplies
-    // canopyWindowActivation from the fail-closed host adapter.
-    readonly property bool activationAvailable: canopyWindowActivation
-        ? canopyWindowActivation.indicatorsAvailable : false
-    readonly property int activationSequence: canopyWindowActivation
-        ? canopyWindowActivation.sequence : -1
-    readonly property bool windowRunning: activationAvailable
-        && activationSequence >= 0
-        && canopyWindowActivation.running(iconName)
-    readonly property bool windowActive: activationAvailable
-        && activationSequence >= 0
-        && canopyWindowActivation.active(iconName)
-    readonly property string activationIntent: activationAvailable
-        && activationSequence >= 0
-        ? canopyWindowActivation.activation(iconName, "Canopy") : "REJECT"
-    readonly property string activationDescription: {
-        if (!activationAvailable)
-            return iconName + " window activation state unavailable"
-        if (windowActive)
-            return iconName + " active window"
-        if (windowRunning)
-            return iconName + " running; focus requires an explicit grant"
-        if (activationIntent === "LAUNCH")
-            return iconName + " available to launch"
-        if (activationIntent === "IGNORE")
-            return iconName + " activation ignored"
-        return iconName + " preview only; not installed in this session"
-    }
     signal activated(string applicationName)
     // Approved icon bytes are verified first, then drawn into a single
     // cached rounded-alpha image with a consistent inset and full-image fit.
@@ -55,7 +27,7 @@ Button {
     hoverEnabled: true
     onClicked: tile.activated(tile.iconName)
     Accessible.name: iconName + " preview"
-    Accessible.description: tile.activationDescription
+    Accessible.description: "Original demonstration artwork, not a working app launcher"
     ToolTip.visible: hovered
     ToolTip.text: iconName === "Files" ? "Toggle Files preview" : iconName + " — preview only"
     background: Item {

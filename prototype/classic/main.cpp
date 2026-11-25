@@ -19,6 +19,9 @@
 #include <QSet>
 #include <QVector>
 #include <QQmlContext>
+#include <QQmlComponent>
+#include <QShortcut>
+#include <QKeySequence>
 #include <QCryptographicHash>
 #include <QFile>
 #include <QFileInfo>
@@ -477,6 +480,105 @@ static int countVisualItems(QQuickItem *parent, const QString &objectName) {
     return count;
 }
 
+static void collectVisualItems(QQuickItem *parent, const QString &objectName,
+                               QVector<QQuickItem *> *found) {
+    if (!parent)
+        return;
+    if (parent->objectName() == objectName)
+        found->append(parent);
+    for (QQuickItem *child : parent->childItems())
+        collectVisualItems(child, objectName, found);
+}
+
+// The registered overlay must remain fail closed in the compiled shell:
+// four named domains, unknown status, visible unavailable disclosures,
+// disabled direct controls, and Settings only when the existing opt-in host
+// launcher can actually handle it. This inspects the live QML scene, not
+// source strings or a scratch harness.
+static bool verifyQuickControlsScene(QQuickItem *content, bool settingsExpected,
+                                     QString *reason) {
+    auto *overlay = findVisualItem(content, QStringLiteral("canopyQuickControlsOverlay"));
+    if (!overlay) {
+        *reason = QStringLiteral("registered overlay missing from scene");
+        return false;
+    }
+    if (overlay->property("opened").toBool() || overlay->isVisible()) {
+        *reason = QStringLiteral("overlay must start hidden so approved desktop visuals stay unchanged");
+        return false;
+    }
+    if (overlay->property("domainCount").toInt() != 4) {
+        *reason = QStringLiteral("expected four quick-control domains");
+        return false;
+    }
+    if (!QMetaObject::invokeMethod(overlay, "openControls", Qt::DirectConnection)) {
+        *reason = QStringLiteral("openControls() not invokable");
+        return false;
+    }
+    QCoreApplication::processEvents();
+    if (!overlay->property("opened").toBool() || !overlay->isVisible()) {
+        *reason = QStringLiteral("overlay did not open");
+        return false;
+    }
+    QVector<QQuickItem *> rows;
+    QVector<QQuickItem *> statuses;
+    QVector<QQuickItem *> disclosures;
+    QVector<QQuickItem *> settingsButtons;
+    QVector<QQuickItem *> controlButtons;
+    collectVisualItems(content, QStringLiteral("canopyQuickControlRow"), &rows);
+    collectVisualItems(content, QStringLiteral("canopyQuickStatus"), &statuses);
+    collectVisualItems(content, QStringLiteral("canopyQuickDisclosure"), &disclosures);
+    collectVisualItems(content, QStringLiteral("canopyQuickSettingsButton"), &settingsButtons);
+    collectVisualItems(content, QStringLiteral("canopyQuickControlButton"), &controlButtons);
+    if (rows.size() != 4 || statuses.size() != 4 || disclosures.size() != 4
+        || settingsButtons.size() != 4 || controlButtons.size() != 4) {
+        *reason = QStringLiteral("incomplete instantiated control rows");
+        return false;
+    }
+    int privilegedDisclosures = 0;
+    for (QQuickItem *label : statuses) {
+        if (label->property("text").toString()
+            != QStringLiteral("Unknown — no host status")) {
+            *reason = QStringLiteral("status was guessed instead of disclosed as unknown");
+            return false;
+        }
+    }
+    for (QQuickItem *label : disclosures) {
+        const QString text = label->property("text").toString();
+        if (!text.startsWith(QStringLiteral("Unavailable — "))) {
+            *reason = QStringLiteral("unavailable control lacks a visible disclosure");
+            return false;
+        }
+        if (text.contains(QStringLiteral("privileged host changes")))
+            ++privilegedDisclosures;
+    }
+    if (privilegedDisclosures != 2) {
+        *reason = QStringLiteral("Power and Session must disclose privileged host changes");
+        return false;
+    }
+    for (QQuickItem *button : settingsButtons) {
+        if (button->property("enabled").toBool() != settingsExpected) {
+            *reason = QStringLiteral("Settings bridge state does not match the host adapter");
+            return false;
+        }
+    }
+    for (QQuickItem *button : controlButtons) {
+        if (button->property("enabled").toBool()) {
+            *reason = QStringLiteral("direct control enabled without a host action bridge");
+            return false;
+        }
+    }
+    if (!QMetaObject::invokeMethod(overlay, "closeControls", Qt::DirectConnection)) {
+        *reason = QStringLiteral("closeControls() not invokable");
+        return false;
+    }
+    QCoreApplication::processEvents();
+    if (overlay->property("opened").toBool() || overlay->isVisible()) {
+        *reason = QStringLiteral("overlay did not close");
+        return false;
+    }
+    return true;
+}
+
 // An approved visual is never loaded from a guessed path or a replacement
 // file. The manifest is source-controlled, and all nine external PNGs must
 // match the exact source bytes before Qt is allowed to open the scene.
@@ -844,6 +946,54 @@ int main(int argc, char *argv[]) {
     });
     updateDockActivationProperties(
         window->contentItem(), activationState, activationAdapter);
+
+    // Register the PR #582 overlay in the compiled shell without changing
+    // Main.qml or any approved QML/asset bytes. It is created hidden, filled
+    // to the window and raised above the existing chrome; the only opener is
+    // a local host shortcut, mirroring the existing host-side dock bridges.
+    QShortcut *quickControlsShortcut = nullptr;
+    QQuickItem *quickControlsOverlay = nullptr;
+    {
+        QQmlComponent component(&engine,
+            QUrl(QStringLiteral("qrc:/Canopy/Classic/QuickControlsOverlay.qml")));
+        if (!component.isReady() || component.isError()) {
+            qCritical().noquote() << "QUICK_CONTROLS_FAIL: QML component:"
+                                  << component.errorString();
+            return 1;
+        }
+        QVariantMap initial;
+        initial.insert(QStringLiteral("width"), window->contentItem()->width());
+        initial.insert(QStringLiteral("height"), window->contentItem()->height());
+        quickControlsOverlay = qobject_cast<QQuickItem *>(
+            component.createWithInitialProperties(initial, engine.rootContext()));
+        if (!quickControlsOverlay) {
+            qCritical().noquote() << "QUICK_CONTROLS_FAIL: could not instantiate overlay:"
+                                  << component.errorString();
+            return 1;
+        }
+        auto *content = window->contentItem();
+        quickControlsOverlay->setParent(content);
+        quickControlsOverlay->setParentItem(content);
+        quickControlsOverlay->setZ(100);
+        const auto syncGeometry = [quickControlsOverlay, content]() {
+            quickControlsOverlay->setWidth(content->width());
+            quickControlsOverlay->setHeight(content->height());
+        };
+        QObject::connect(content, &QQuickItem::widthChanged,
+                         quickControlsOverlay, syncGeometry);
+        QObject::connect(content, &QQuickItem::heightChanged,
+                         quickControlsOverlay, syncGeometry);
+        quickControlsShortcut = new QShortcut(
+            QKeySequence(QStringLiteral("Ctrl+Alt+Q")), window);
+        QObject::connect(quickControlsShortcut, &QShortcut::activated,
+                         quickControlsOverlay, [quickControlsOverlay]() {
+            QMetaObject::invokeMethod(quickControlsOverlay, "toggleControls",
+                                      Qt::DirectConnection);
+        });
+        qInfo() << "CANOPY_QUICK_CONTROLS_REGISTERED: hidden until requested, "
+                   "no host control bridge, no visual asset changes";
+    }
+
     if (enableSystemApps) {
         // Dock integration without editing the frozen dock QML bytes: wire the
         // existing DockTile `activated` signal to the host-owned GIO service.
@@ -1044,6 +1194,43 @@ int main(int argc, char *argv[]) {
         qInfo() << "SELF_TEST_PASS: untrusted snapshot clears all indicators";
         qInfo() << "WINDOW_ACTIVATION_HOST_SELF_TEST_PASS"
                 << "running=ok active=ok closed=ok fail_closed=ok";
+        QTimer::singleShot(0, &app, &QCoreApplication::quit);
+    }
+    if (args.contains(QStringLiteral("--self-test-quick-controls"))) {
+        const bool settingsExpected =
+            enableSystemApps && systemLauncher.canLaunch(QStringLiteral("Settings"));
+        if (!quickControlsShortcut || !quickControlsOverlay) {
+            qCritical() << "QUICK_CONTROLS_FIXTURE_FAIL: overlay or opener missing";
+            return 1;
+        }
+        // Trigger the real host shortcut connection, not the QML function
+        // directly, so the compiled-shell opener is part of the evidence.
+        if (!QMetaObject::invokeMethod(quickControlsShortcut, "activated",
+                                       Qt::DirectConnection)) {
+            qCritical() << "QUICK_CONTROLS_FIXTURE_FAIL: opener not invokable";
+            return 1;
+        }
+        QCoreApplication::processEvents();
+        if (!quickControlsOverlay->property("opened").toBool()
+            || !quickControlsOverlay->isVisible()) {
+            qCritical() << "QUICK_CONTROLS_FIXTURE_FAIL: opener did not open overlay";
+            return 1;
+        }
+        if (!QMetaObject::invokeMethod(quickControlsOverlay, "closeControls",
+                                       Qt::DirectConnection)) {
+            qCritical() << "QUICK_CONTROLS_FIXTURE_FAIL: overlay close failed";
+            return 1;
+        }
+        QCoreApplication::processEvents();
+        QString reason;
+        if (!verifyQuickControlsScene(window->contentItem(), settingsExpected,
+                                      &reason)) {
+            qCritical().noquote() << "QUICK_CONTROLS_FIXTURE_FAIL:" << reason;
+            return 1;
+        }
+        qInfo() << "SELF_TEST_PASS: quick controls registered in compiled shell";
+        qInfo() << "QUICK_CONTROLS_FIXTURE_PASS: opener wired, four domains fail closed,"
+                   " approved visuals unchanged";
         QTimer::singleShot(0, &app, &QCoreApplication::quit);
     }
     if (launcherFixture) {
@@ -1313,6 +1500,8 @@ int main(int argc, char *argv[]) {
         qCritical() << "Launcher screenshot must not replace desktop screenshot";
         return 2;
     }
+    const bool quickSettingsExpected =
+        enableSystemApps && systemLauncher.canLaunch(QStringLiteral("Settings"));
     const int screenshotIndex = args.indexOf(QStringLiteral("--self-test-screenshot"));
     if (screenshotIndex >= 0) {
         if (screenshotIndex + 1 >= args.size()) {
@@ -1324,7 +1513,8 @@ int main(int argc, char *argv[]) {
             ? args.at(launcherShotIndex + 1) : QString();
         QTimer::singleShot(1000, window,
             [window, screenshotPath, launcherScreenshotPath, approvedMode, landscapeMode,
-             framingReviewMode, terminalCandidateMode = !terminalCandidatePath.isEmpty()]() {
+             framingReviewMode, quickSettingsExpected,
+             terminalCandidateMode = !terminalCandidatePath.isEmpty()]() {
             auto *bar = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBar"));
             auto *clock = window->findChild<QQuickItem *>(QStringLiteral("canopyTopBarClock"));
             auto *dock = window->findChild<QQuickItem *>(QStringLiteral("canopyDock"));
@@ -1365,6 +1555,19 @@ int main(int argc, char *argv[]) {
                 return;
             }
             qInfo() << "SELF_TEST_PASS: local top bar clock updates and fits";
+
+            // Exercise the registered quick-controls overlay on the real
+            // compiled scene, then leave it closed so the captured desktop
+            // remains the approved resting composition at every resolution.
+            QString quickReason;
+            if (!verifyQuickControlsScene(window->contentItem(),
+                                          quickSettingsExpected, &quickReason)) {
+                qCritical().noquote() << "SELF_TEST_FAIL: quick controls:"
+                                      << quickReason;
+                QCoreApplication::exit(1);
+                return;
+            }
+            qInfo() << "SELF_TEST_PASS: quick controls registered and fail closed";
 
             // Exercise the integrated QML launcher on the actual compiled
             // scene, then close it before capturing the resting desktop.

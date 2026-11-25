@@ -16,6 +16,11 @@ FocusScope {
     // Optional trusted host adapter exposing view(domain) -> QVariantMap.
     // The Python contract lives in canopy_features/system/quick_controls_state.py.
     property var controller: null
+    // Optional read-only host-state controller from
+    // canopy_features/quick_controls/host_state.py. It uses the same view()
+    // contract and adds bounded detail_kind/detail_value fields for real
+    // volume and brightness observations. Absent by default: fail closed.
+    property var hostState: null
     // Optional trusted host adapter exposing request(domain, action) -> bool.
     // Absent by default: direct controls must not pretend to work.
     property var actionBridge: null
@@ -67,14 +72,42 @@ FocusScope {
         }
     }
 
-    function viewFor(domain) {
-        if (controller && typeof controller.view === "function") {
-            const supplied = controller.view(domain)
-            if (supplied && typeof supplied === "object"
-                    && typeof supplied.control === "object"
-                    && typeof supplied.settings === "object")
-                return supplied
+    // Accept only bounded, enumerated host observations. A broken adapter can
+    // never inject unbounded text or an unenumerated detail kind into the UI.
+    function trustedView(domain, adapter) {
+        if (!adapter || typeof adapter.view !== "function")
+            return null
+        var supplied
+        try {
+            supplied = adapter.view(domain)
+        } catch (error) {
+            return null
         }
+        if (!supplied || typeof supplied !== "object"
+                || typeof supplied.status_label !== "string"
+                || supplied.status_label.length > 64
+                || !supplied.control || typeof supplied.control !== "object"
+                || !supplied.settings || typeof supplied.settings !== "object")
+            return null
+        var kind = supplied.detail_kind
+        if (kind !== undefined && kind !== "" && kind !== "volume"
+                && kind !== "brightness")
+            return null
+        var value = supplied.detail_value
+        if (kind === "volume" || kind === "brightness") {
+            if (typeof value !== "number" || value < 0 || value > 100
+                    || Math.floor(value) !== value)
+                return null
+        }
+        return supplied
+    }
+
+    function viewFor(domain) {
+        var supplied = trustedView(domain, hostState)
+        if (!supplied)
+            supplied = trustedView(domain, controller)
+        if (supplied)
+            return supplied
         return fallbackView(domain)
     }
 
@@ -100,7 +133,18 @@ FocusScope {
 
     function statusFor(domain) {
         var view = viewFor(domain)
-        return view.status_label || "Unknown — no host status"
+        var label = view.status_label || "Unknown — no host status"
+        if (typeof label !== "string" || label.length > 64)
+            label = "Unknown — no host status"
+        var kind = view.detail_kind
+        var value = view.detail_value
+        if ((kind === "volume" || kind === "brightness")
+                && typeof value === "number" && value >= 0 && value <= 100
+                && Math.floor(value) === value) {
+            const prefix = kind === "volume" ? " · Volume " : " · Brightness "
+            return label + prefix + value + "%"
+        }
+        return label
     }
 
     function disclosureFor(domain) {

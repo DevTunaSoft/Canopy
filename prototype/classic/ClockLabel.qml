@@ -16,8 +16,12 @@ Label {
     color: "#f7f5eb"
     font.pixelSize: 12
     font.weight: Font.Medium
+    // Screen readers get the unabbreviated local date; the rendered Label.text
+    // above and every visual input remain byte-identical to the approved mode.
+    readonly property string spokenDateTime: Qt.formatDate(currentTime, "dddd, d MMMM") +
+                                             ", " + Qt.formatTime(currentTime, "h:mm AP")
     Accessible.role: Accessible.StaticText
-    Accessible.name: "Local date and time: " + text
+    Accessible.name: "Local date and time: " + spokenDateTime
 
     function refreshClock() {
         const now = new Date()

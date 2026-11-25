@@ -63,34 +63,47 @@ const QHash<QString, QPair<int, int>> kSourceMatteRowTrim = {
 // Measured from high-contrast feature centers in genuine 1920x1080 Qt captures
 // of the unchanged source-aware clean-matte renderer, NOT from the button
 // rectangle or a generated dock mockup. After Qt's 54/192 reduction these
-// are roughly: Browser (0,-2.3), Mail (+0.6,0),
-// Files (-2.5,+0.3), Terminal (-2.3,-0.8), Settings (-2.0,-0.6)px.
+// are roughly: Browser (0,-2.3), Mail (+0.6,+2.5),
+// Files (-2.5,+0.3), Terminal (-2.3,+0.3), Settings (-1.4,+0.8)px.
+// Only Mail, Terminal and Settings were revised in the bounded WS2 pass:
+// their genuine Qt slots carried interior selection-sheet matte and their
+// bright-feature centroids sat high/right of the fixed 62px art slot.
+// Browser and Files stay byte-identical in rendered output.
 // Calendar, Photos and Music MUST NEVER appear in this map or be altered.
 const QHash<QString, QPointF> kFiveDockCenterOffsets = {
     {QStringLiteral("browser"), QPointF(0, -8)},
-    {QStringLiteral("mail"), QPointF(2, 0)},
+    {QStringLiteral("mail"), QPointF(2, 9)},
     {QStringLiteral("files"), QPointF(-9, -1)},
-    {QStringLiteral("terminal"), QPointF(-8, -3)},
-    {QStringLiteral("settings"), QPointF(-8, -5)},
+    {QStringLiteral("terminal"), QPointF(-9, 1)},
+    {QStringLiteral("settings"), QPointF(-5, 3)},
 };
 
-// Only two originals have a clearly visible selection-sheet edge embedded
-// within the existing rounded mask in the genuine 62px Qt capture.
+// Selection-sheet edge pixels inside the fixed rounded mask. Browser and
+// Files retain their previously verified trim exactly; the other three
+// entries remove only measured matte bands from the immutable originals.
+// The originals are never edited; all crops happen in memory.
 struct SourceEdgeTrim { int left; int top; int right; int bottom; };
 const QHash<QString, SourceEdgeTrim> kFiveSourceEdgeTrim = {
     {QStringLiteral("files"), {7, 17, 15, 2}},
-    {QStringLiteral("settings"), {6, 22, 7, 10}},
+    // Mail: opaque dark lower selection-sheet gutter (rows 315-332).
+    {QStringLiteral("mail"), {0, 6, 0, 18}},
+    // Terminal: near-black band at the top (rows 0-17) and the lower matte.
+    {QStringLiteral("terminal"), {0, 18, 2, 16}},
+    // Settings: the old trim clipped the top gear rim and kept lower matte.
+    {QStringLiteral("settings"), {2, 14, 2, 15}},
 };
 
 // Production pack is derived from precisely these five verified originals.
 // Never add Calendar, Photos or Music here: their Qt pixels are immutable.
+// Browser and Files are rendered with their exact previous trim and offset;
+// only Mail, Terminal and Settings use the bounded WS2 edge correction.
 const QStringList kFiveProductionIds = {
     QStringLiteral("browser"), QStringLiteral("mail"),
     QStringLiteral("files"), QStringLiteral("terminal"),
     QStringLiteral("settings"),
 };
 // Changing the master-derived crop semantics invalidates all old packs.
-constexpr auto kPackRenderer = "canopy-five-qt-v2";
+constexpr auto kPackRenderer = "canopy-five-qt-v3";
 
 QString sha256(const QByteArray &bytes) {
     return QString::fromLatin1(
@@ -113,15 +126,15 @@ QImage renderFiveAtDensity(const QImage &original, const QString &id,
     }
     const auto trims = kSourceMatteRowTrim.value(id);
     const auto edgeTrimIt = kFiveSourceEdgeTrim.constFind(id);
-    // Preserve Browser, Mail and Terminal pixel-for-pixel. Only Files and
-    // Settings use slightly tighter source selection-sheet boundaries.
+    // Browser and Files keep their previously verified source boundaries;
+    // only Mail, Terminal and Settings use the bounded WS2 matte correction.
     // The approved 345px originals are NEVER edited; this is in-memory only.
     const int left = edgeTrimIt == kFiveSourceEdgeTrim.cend() ? 0 : edgeTrimIt->left;
     const int top = edgeTrimIt == kFiveSourceEdgeTrim.cend() ? trims.first : edgeTrimIt->top;
     const int right = edgeTrimIt == kFiveSourceEdgeTrim.cend() ? 0 : edgeTrimIt->right;
     const int bottom = edgeTrimIt == kFiveSourceEdgeTrim.cend() ? trims.second : edgeTrimIt->bottom;
     if (left < 0 || right < 0 || top < 0 || bottom < 0 ||
-        left > 15 || right > 15 || top > 22 || bottom > 10 ||
+        left > 15 || right > 15 || top > 22 || bottom > 18 ||
         original.width() - left - right < 310 ||
         original.height() - top - bottom < 300) {
         *error = QStringLiteral("five-icon source edge trim outside safe bounds");

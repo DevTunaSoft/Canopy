@@ -13,6 +13,18 @@ Item {
     signal showLauncherRequested()
     signal aboutRequested()
 
+    // One static typography and padding contract for all 15 actions.
+    // No new artwork, blur, animation, timer, menu entry or action change.
+    component PremiumMenuItem: MenuItem {
+        leftPadding: 18
+        rightPadding: 18
+        topPadding: 7
+        bottomPadding: 7
+        font.pixelSize: 13
+        font.weight: Font.Medium
+        Accessible.description: enabled ? "Activate " + text : text + " (unavailable)"
+    }
+
     function menuFor(name) {
         switch (name) {
         case "File": return fileMenu
@@ -29,7 +41,7 @@ Item {
         id: fileMenu
         objectName: "canopyMenuFile"
         title: "File"
-        MenuItem {
+        PremiumMenuItem {
             objectName: "canopyMenuFileOpen"
             text: "Open Files"
             Accessible.name: "Open Files window"
@@ -40,7 +52,7 @@ Item {
                 shellMenus.filesWindow.navigate(shellMenus.homePath)
             }
         }
-        MenuItem {
+        PremiumMenuItem {
             objectName: "canopyMenuFileClose"
             text: "Close Files"
             Accessible.name: "Close Files window"
@@ -48,7 +60,7 @@ Item {
             onTriggered: shellMenus.filesWindow.requestClose()
         }
         MenuSeparator {}
-        MenuItem {
+        PremiumMenuItem {
             objectName: "canopyMenuFileHome"
             text: "Go Home"
             Accessible.name: "Go to Files home"
@@ -60,13 +72,13 @@ Item {
         id: editMenu
         objectName: "canopyMenuEdit"
         title: "Edit"
-        MenuItem {
+        PremiumMenuItem {
             objectName: "canopyMenuEditFind"
             text: "Find"
             Accessible.name: "Find in Files"
             onTriggered: shellMenus.filesWindow.setSearch("")
         }
-        MenuItem {
+        PremiumMenuItem {
             objectName: "canopyMenuEditClear"
             text: "Clear Search"
             Accessible.name: "Clear Files search"
@@ -78,7 +90,7 @@ Item {
         id: viewMenu
         objectName: "canopyMenuView"
         title: "View"
-        MenuItem {
+        PremiumMenuItem {
             objectName: "canopyMenuViewToggle"
             text: shellMenus.filesWindow && shellMenus.filesWindow.visible
                   ? "Hide Files" : "Show Files"
@@ -90,7 +102,7 @@ Item {
                     shellMenus.filesWindow.visible = true
             }
         }
-        MenuItem {
+        PremiumMenuItem {
             objectName: "canopyMenuViewFocusSearch"
             text: "Focus Search"
             Accessible.name: "Focus Files search field"
@@ -98,7 +110,7 @@ Item {
                              shellMenus.filesWindow.searchQuery)
         }
         MenuSeparator {}
-        MenuItem {
+        PremiumMenuItem {
             objectName: "canopyMenuViewPath"
             enabled: false
             text: shellMenus.filesWindow
@@ -112,14 +124,14 @@ Item {
         id: goMenu
         objectName: "canopyMenuGo"
         title: "Go"
-        MenuItem {
+        PremiumMenuItem {
             objectName: "canopyMenuGoBack"
             text: "Back"
             Accessible.name: "Go back in Files"
             enabled: shellMenus.filesWindow && shellMenus.filesWindow.canGoBack
             onTriggered: shellMenus.filesWindow.goBack()
         }
-        MenuItem {
+        PremiumMenuItem {
             objectName: "canopyMenuGoUp"
             text: "Up"
             Accessible.name: "Go up in Files"
@@ -127,7 +139,7 @@ Item {
             onTriggered: shellMenus.filesWindow.goUp()
         }
         MenuSeparator {}
-        MenuItem {
+        PremiumMenuItem {
             objectName: "canopyMenuGoHome"
             text: "Home"
             Accessible.name: "Go to Files home folder"
@@ -139,7 +151,7 @@ Item {
         id: windowMenu
         objectName: "canopyMenuWindow"
         title: "Window"
-        MenuItem {
+        PremiumMenuItem {
             objectName: "canopyMenuWindowFiles"
             text: "Files"
             Accessible.name: "Bring Files window to front"
@@ -148,7 +160,7 @@ Item {
             onTriggered: shellMenus.filesWindow.visible = checked
         }
         MenuSeparator {}
-        MenuItem {
+        PremiumMenuItem {
             objectName: "canopyMenuWindowClose"
             text: "Close Files"
             Accessible.name: "Close Files window from Window menu"
@@ -161,13 +173,13 @@ Item {
         id: helpMenu
         objectName: "canopyMenuHelp"
         title: "Help"
-        MenuItem {
+        PremiumMenuItem {
             objectName: "canopyMenuHelpApplications"
             text: "Browse Applications"
             Accessible.name: "Browse installed applications"
             onTriggered: shellMenus.showLauncherRequested()
         }
-        MenuItem {
+        PremiumMenuItem {
             objectName: "canopyMenuHelpAbout"
             text: "About Canopy Classic"
             Accessible.name: "About Canopy Classic"

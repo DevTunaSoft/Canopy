@@ -108,6 +108,48 @@ private:
     QObject *m_status;
 };
 
+// Workstream A third app: the Mail dock tile uses the SAME validated
+// SystemAppLauncher service through an adapter identical in shape to the
+// reviewed Files/Browser ones. It owns no launcher logic, accepts only the
+// exact frozen dock label, and reports a refusal in the existing launcher
+// footer. No QML, artwork, geometry or colour changes; no second GIO/shell
+// code path is introduced.
+class MailDockLaunchBridge final : public QObject {
+    Q_OBJECT
+public:
+    MailDockLaunchBridge(SystemAppLauncher &launcher, QObject *statusOverlay,
+                         QObject *parent = nullptr)
+        : QObject(parent), m_launcher(launcher), m_status(statusOverlay) {}
+
+public slots:
+    void activate(const QString &name) {
+        if (name != QStringLiteral("Mail")) {
+            qWarning() << "CANOPY_MAIL_DOCK_REJECTED: unknown action";
+            return;
+        }
+        if (m_launcher.launch(name)) {
+            qInfo() << "CANOPY_MAIL_DOCK_LAUNCH_REQUESTED";
+            return;
+        }
+        qWarning() << "CANOPY_MAIL_DOCK_LAUNCH_REFUSED";
+        if (!m_status)
+            return;
+        // openLauncher() clears the prior message, so set the refusal
+        // AFTER opening; the existing footer Label binds to this text.
+        if (!QMetaObject::invokeMethod(m_status, "openLauncher",
+                                       Qt::DirectConnection)) {
+            qWarning() << "CANOPY_MAIL_DOCK_STATUS_UNAVAILABLE";
+            return;
+        }
+        m_status->setProperty("selectionMessage",
+                              QStringLiteral("Mail could not be launched"));
+    }
+
+private:
+    SystemAppLauncher &m_launcher;
+    QObject *m_status;
+};
+
 // A Repeater can give its delegates QObject owners different from their
 // visual parents. Traverse the actual QQuickItem scene tree for UI assertions.
 static QQuickItem *findVisualItem(QQuickItem *parent, const QString &name) {
@@ -534,10 +576,12 @@ int main(int argc, char *argv[]) {
             QStringLiteral("Trash")
         };
         for (const QString &name : dockNames) {
-            // Files and Browser are wired to the same host service below,
-            // with a fail-closed status path; other tiles keep their original
-            // direct connection.
+            // Files, Browser and Mail are wired to the same host service
+            // below, with a fail-closed status path; other tiles keep their
+            // original direct connection.
             if (name == QStringLiteral("Files") || name == QStringLiteral("Browser"))
+                continue;
+            if (name == QStringLiteral("Mail"))
                 continue;
             if (auto *tile = findDockTile(window->contentItem(), name))
                 QObject::connect(tile, SIGNAL(activated(QString)),
@@ -574,6 +618,22 @@ int main(int argc, char *argv[]) {
             QObject::connect(browserLaunchTile, SIGNAL(activated(QString)),
                              browserBridge, SLOT(activate(QString)));
             qInfo() << "CANOPY_BROWSER_DOCK_NATIVE_LAUNCH_CONNECTED";
+        }
+
+        // Same host-side adapter for the existing Mail dock interaction.
+        // Mail is present in the approved eight-icon dock; the frozen QML
+        // `activated("Mail")` signal alone is connected and Mail is removed
+        // from the direct-connect loop above. No QML or asset bytes change.
+        auto *mailLaunchTile = findDockTile(window->contentItem(),
+                                            QStringLiteral("Mail"));
+        auto *mailStatusOverlay = findVisualItem(
+            window->contentItem(), QStringLiteral("canopyApplicationLauncher"));
+        if (mailLaunchTile) {
+            auto *mailBridge = new MailDockLaunchBridge(
+                systemLauncher, mailStatusOverlay, &app);
+            QObject::connect(mailLaunchTile, SIGNAL(activated(QString)),
+                             mailBridge, SLOT(activate(QString)));
+            qInfo() << "CANOPY_MAIL_DOCK_NATIVE_LAUNCH_CONNECTED";
         }
     }
     if (launcherFixture) {
@@ -731,6 +791,80 @@ int main(int argc, char *argv[]) {
             }
             qInfo() << "SELF_TEST_PASS: Browser dock activated native GIO launch";
             qInfo() << "BROWSER_DOCK_LAUNCH_FIXTURE_PASS: dock signal reached GIO service";
+        }
+        QTimer::singleShot(0, &app, &QCoreApplication::quit);
+    }
+    const bool mailDockStatusFixture = args.contains(
+        QStringLiteral("--self-test-mail-dock-status"));
+    const bool mailDockLaunchFixture = args.contains(
+        QStringLiteral("--self-test-mail-dock-fixture"));
+    if (mailDockStatusFixture || mailDockLaunchFixture) {
+        if (!enableSystemApps) {
+            qCritical() << "MAIL_DOCK_FIXTURE_FAIL: native launch not enabled";
+            return 1;
+        }
+        // Mail is a tile only in the approved eight-icon dock. Requesting it
+        // explicitly keeps the frozen visual source untouched.
+        if (!approvedMode) {
+            qCritical() << "MAIL_DOCK_FIXTURE_FAIL: approved dock required";
+            return 1;
+        }
+        const bool canLaunchMail = systemLauncher.canLaunch(QStringLiteral("Mail"));
+        if (mailDockStatusFixture && canLaunchMail) {
+            qCritical() << "MAIL_DOCK_FIXTURE_FAIL: status case needs no mail app";
+            return 1;
+        }
+        if (mailDockLaunchFixture && !canLaunchMail) {
+            qCritical() << "MAIL_DOCK_FIXTURE_FAIL: GIO mail app unavailable";
+            return 1;
+        }
+        auto *mailTile = findDockTile(
+            window->contentItem(), QStringLiteral("Mail"));
+        auto *mailOverlay = findVisualItem(
+            window->contentItem(), QStringLiteral("canopyApplicationLauncher"));
+        auto *mailStatus = findVisualItem(
+            window->contentItem(), QStringLiteral("canopyLauncherStatus"));
+        if (!mailTile || !mailOverlay || !mailStatus) {
+            qCritical() << "MAIL_DOCK_FIXTURE_FAIL: frozen dock or status footer missing";
+            return 1;
+        }
+        const QString initialStatus = mailStatus->property("text").toString();
+        // A hostile lookalike label must change neither launcher nor status.
+        if (!QMetaObject::invokeMethod(
+                mailTile, "activated", Qt::DirectConnection,
+                Q_ARG(QString, QStringLiteral("Mail;echo bad")))) {
+            qCritical() << "MAIL_DOCK_FIXTURE_FAIL: signal not invokable";
+            return 1;
+        }
+        QCoreApplication::processEvents();
+        if (mailOverlay->property("opened").toBool()
+            || mailStatus->property("text").toString() != initialStatus) {
+            qCritical() << "MAIL_DOCK_FIXTURE_FAIL: unknown action accepted";
+            return 1;
+        }
+        if (!QMetaObject::invokeMethod(
+                mailTile, "activated", Qt::DirectConnection,
+                Q_ARG(QString, QStringLiteral("Mail")))) {
+            qCritical() << "MAIL_DOCK_FIXTURE_FAIL: dock activation failed";
+            return 1;
+        }
+        QCoreApplication::processEvents();
+        if (mailDockStatusFixture) {
+            const QString shown = mailStatus->property("text").toString();
+            if (!mailOverlay->property("opened").toBool()
+                || !shown.contains(QStringLiteral("Mail could not be launched"))) {
+                qCritical() << "MAIL_DOCK_FIXTURE_FAIL: refusal not visible to user";
+                return 1;
+            }
+            qInfo() << "MAIL_DOCK_STATUS_FIXTURE_PASS: refusal visible in launcher footer";
+        } else {
+            if (mailOverlay->property("opened").toBool()
+                || mailStatus->property("text").toString() != initialStatus) {
+                qCritical() << "MAIL_DOCK_FIXTURE_FAIL: native launch reported a refusal";
+                return 1;
+            }
+            qInfo() << "SELF_TEST_PASS: Mail dock activated native GIO launch";
+            qInfo() << "MAIL_DOCK_LAUNCH_FIXTURE_PASS: dock signal reached GIO service";
         }
         QTimer::singleShot(0, &app, &QCoreApplication::quit);
     }

@@ -94,8 +94,28 @@ jobs:
           XDG_DATA_HOME="$PWD/test-artifacts/browser-status-xdg" XDG_DATA_DIRS="$PWD/test-artifacts/browser-status-xdg" \
             xvfb-run -a ./build/classic/canopy-classic-spike --enable-system-apps --self-test-browser-dock-status
 
-      - name: Verify Browser dock source contracts
-        run: python3 -m unittest tests.test_classic_browser_dock_integration tests.test_classic_desktop_integration -v
+      - name: Verify Mail dock reaches the real GIO launcher
+        timeout-minutes: 3
+        run: |
+          set -e
+          mkdir -p test-artifacts/mail-gio-xdg/applications
+          mail_marker="$PWD/test-artifacts/mail-dock-launch-marker"
+          rm -f "$mail_marker"
+          printf '[Desktop Entry]\nType=Application\nName=Canopy Mail Dock Fixture\nExec=/bin/sh -c "touch %s"\nNoDisplay=false\nTerminal=false\n' "$mail_marker" > test-artifacts/mail-gio-xdg/applications/thunderbird.desktop
+          XDG_DATA_HOME="$PWD/test-artifacts/mail-gio-xdg" XDG_DATA_DIRS="$PWD/test-artifacts/mail-gio-xdg" \
+            xvfb-run -a ./build/classic/canopy-classic-spike --enable-system-apps --approved-art-dir prototype/classic/assets/approved --self-test-mail-dock-fixture
+          test -f "$mail_marker"
+
+      - name: Verify Mail dock refusal is visible without a mail app
+        timeout-minutes: 3
+        run: |
+          set -e
+          mkdir -p test-artifacts/mail-status-xdg/applications
+          XDG_DATA_HOME="$PWD/test-artifacts/mail-status-xdg" XDG_DATA_DIRS="$PWD/test-artifacts/mail-status-xdg" \
+            xvfb-run -a ./build/classic/canopy-classic-spike --enable-system-apps --approved-art-dir prototype/classic/assets/approved --self-test-mail-dock-status
+
+      - name: Verify Browser and Mail dock source contracts
+        run: python3 -m unittest tests.test_classic_browser_dock_integration tests.test_classic_mail_dock_integration tests.test_classic_desktop_integration -v
 
       - name: Verify approved eight-icon artwork
         run: python3 -m unittest tests.test_approved_art tests.test_approved_manifest_contract tests.test_approved_art_zip -v

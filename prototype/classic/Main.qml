@@ -60,9 +60,11 @@ ApplicationWindow {
 
         RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: root.compactLayout ? 14 : 22
-            anchors.rightMargin: root.compactLayout ? 14 : 22
-            spacing: root.compactLayout ? 12 : 20
+            // Slightly wider inset and calmer rhythm keep the approved bar
+            // height and item ordering while giving small labels room to read.
+            anchors.leftMargin: root.compactLayout ? 16 : 24
+            anchors.rightMargin: root.compactLayout ? 16 : 24
+            spacing: root.compactLayout ? 10 : 18
 
             // User-requested full-color Tux: charcoal, white, amber and gold.
             // Retains the reference silhouette, never an Apple-owned logo.
@@ -75,10 +77,16 @@ ApplicationWindow {
                 Layout.minimumHeight: 29
                 padding: 0
                 Accessible.name: "Canopy penguin launcher"
+                Accessible.description: "Open the Canopy applications menu"
+                ToolTip.text: "Canopy menu"
+                ToolTip.visible: tuxMark.hovered || tuxMark.activeFocus
                 onClicked: launcherMenu.open()
                 background: Rectangle {
                     radius: 5
-                    color: tuxMark.hovered || launcherMenu.visible ? "#44565d5a" : "transparent"
+                    color: tuxMark.hovered || tuxMark.activeFocus || launcherMenu.visible
+                           ? "#44565d5a" : "transparent"
+                    border.color: "#f7f5eb"
+                    border.width: tuxMark.activeFocus ? 1 : 0
                 }
                 contentItem: Image {
                     id: penguinArt
@@ -109,7 +117,7 @@ ApplicationWindow {
                 text: "Files"
                 color: "#f7f5eb"
                 font.pixelSize: 13
-                font.weight: Font.DemiBold
+                font.weight: Font.Medium
                 font.family: "Sans Serif"
             }
 
@@ -127,18 +135,24 @@ ApplicationWindow {
                     hoverEnabled: true
                     Layout.preferredHeight: 27
                     padding: 6
-                    font.pixelSize: 12
+                    font.pixelSize: 13
+                    font.weight: Font.Medium
                     Accessible.name: modelData + " menu"
+                    Accessible.description: "Open the " + modelData + " menu"
                     onClicked: actionMenu.open()
                     background: Rectangle {
                         radius: 5
-                        color: topMenuButton.hovered || actionMenu.visible
+                        color: topMenuButton.hovered || topMenuButton.activeFocus
+                               || actionMenu.visible
                                ? "#38ffffff" : "transparent"
+                        border.color: "#f7f5eb"
+                        border.width: topMenuButton.activeFocus ? 1 : 0
                     }
                     contentItem: Label {
                         text: topMenuButton.text
                         color: "#f7f5eb"
-                        font.pixelSize: 12
+                        font.pixelSize: topMenuButton.font.pixelSize
+                        font.weight: Font.Medium
                         verticalAlignment: Text.AlignVCenter
                         horizontalAlignment: Text.AlignHCenter
                     }
@@ -147,6 +161,7 @@ ApplicationWindow {
             Item { Layout.fillWidth: true }
             ClockLabel {
                 Layout.alignment: Qt.AlignVCenter
+                Accessible.description: "Local date and time; refreshes once per minute"
             }
         }
     }

@@ -9,11 +9,11 @@ if(PkgConfig_FOUND)
     pkg_check_modules(GIO_UNIX QUIET IMPORTED_TARGET gio-unix-2.0)
 endif()
 qt_standard_project_setup()
-qt_add_executable(canopy-classic-spike main.cpp RoundedDockIconProvider.cpp RoundedDockIconProvider.h SystemAppLauncher.cpp SystemAppLauncher.h)
+qt_add_executable(canopy-classic-spike main.cpp WindowActivationState.cpp WindowActivationState.h RoundedDockIconProvider.cpp RoundedDockIconProvider.h SystemAppLauncher.cpp SystemAppLauncher.h)
 qt_add_qml_module(canopy-classic-spike
     URI Canopy.Classic
     VERSION 1.0
-    QML_FILES Main.qml Theme.qml ClockLabel.qml LauncherOverlay.qml DockTile.qml PreviewWindow.qml Wallpaper.qml FolderTile.qml ShellMenuBar.qml ShellMenuPopupSet.qml
+    QML_FILES Main.qml Theme.qml ClockLabel.qml LauncherOverlay.qml DockTile.qml PreviewWindow.qml Wallpaper.qml FolderTile.qml ShellMenuBar.qml ShellMenuPopupSet.qml WindowActivationIndicators.qml
     SOURCES FileModel.cpp FileModel.h
 )
 qt_add_resources(canopy-classic-spike "canopy-original-art"

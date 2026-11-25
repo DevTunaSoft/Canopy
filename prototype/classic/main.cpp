@@ -1,5 +1,6 @@
 #include "RoundedDockIconProvider.h"
 #include "SystemAppLauncher.h"
+#include "WindowActivationState.h"
 
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
@@ -25,7 +26,14 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QJsonParseError>
+#include <QQmlComponent>
 #include <QUrl>
+
+static void showActivationStatus(QObject *status, const QString &message);
+static QString activationRefusal(const WindowActivationState &state,
+                                 const QString &name,
+                                 const QString &intent);
 
 // Host-side adapter for the single frozen Files dock interaction. It owns
 // no launcher logic: it forwards only the exact dock label to the existing
@@ -33,9 +41,9 @@
 class FilesDockLaunchBridge final : public QObject {
     Q_OBJECT
 public:
-    FilesDockLaunchBridge(SystemAppLauncher &launcher, QObject *statusOverlay,
-                          QObject *parent = nullptr)
-        : QObject(parent), m_launcher(launcher), m_status(statusOverlay) {}
+    FilesDockLaunchBridge(SystemAppLauncher &launcher, WindowActivationState &state,
+                          QObject *statusOverlay, QObject *parent = nullptr)
+        : QObject(parent), m_launcher(launcher), m_state(state), m_status(statusOverlay) {}
 
 public slots:
     void activate(const QString &name) {
@@ -43,6 +51,14 @@ public slots:
             qWarning() << "CANOPY_FILES_DOCK_REJECTED: unknown action";
             return;
         }
+        const QString intent = m_state.resolveActivation(
+            name, QStringLiteral("Canopy"));
+        if (intent != QStringLiteral("LAUNCH")) {
+            qWarning() << "CANOPY_FILES_DOCK_INTENT_REFUSED" << intent;
+            showActivationStatus(m_status, activationRefusal(m_state, name, intent));
+            return;
+        }
+        // Intent is authoritative: only LAUNCH may reach the GIO service.
         if (m_launcher.launch(name)) {
             qInfo() << "CANOPY_FILES_DOCK_LAUNCH_REQUESTED";
             return;
@@ -63,6 +79,7 @@ public slots:
 
 private:
     SystemAppLauncher &m_launcher;
+    WindowActivationState &m_state;
     QObject *m_status;
 };
 
@@ -75,9 +92,9 @@ private:
 class BrowserDockLaunchBridge final : public QObject {
     Q_OBJECT
 public:
-    BrowserDockLaunchBridge(SystemAppLauncher &launcher, QObject *statusOverlay,
-                            QObject *parent = nullptr)
-        : QObject(parent), m_launcher(launcher), m_status(statusOverlay) {}
+    BrowserDockLaunchBridge(SystemAppLauncher &launcher, WindowActivationState &state,
+                            QObject *statusOverlay, QObject *parent = nullptr)
+        : QObject(parent), m_launcher(launcher), m_state(state), m_status(statusOverlay) {}
 
 public slots:
     void activate(const QString &name) {
@@ -85,6 +102,14 @@ public slots:
             qWarning() << "CANOPY_BROWSER_DOCK_REJECTED: unknown action";
             return;
         }
+        const QString intent = m_state.resolveActivation(
+            name, QStringLiteral("Canopy"));
+        if (intent != QStringLiteral("LAUNCH")) {
+            qWarning() << "CANOPY_BROWSER_DOCK_INTENT_REFUSED" << intent;
+            showActivationStatus(m_status, activationRefusal(m_state, name, intent));
+            return;
+        }
+        // Intent is authoritative: only LAUNCH may reach the GIO service.
         if (m_launcher.launch(name)) {
             qInfo() << "CANOPY_BROWSER_DOCK_LAUNCH_REQUESTED";
             return;
@@ -105,6 +130,7 @@ public slots:
 
 private:
     SystemAppLauncher &m_launcher;
+    WindowActivationState &m_state;
     QObject *m_status;
 };
 
@@ -117,9 +143,9 @@ private:
 class MailDockLaunchBridge final : public QObject {
     Q_OBJECT
 public:
-    MailDockLaunchBridge(SystemAppLauncher &launcher, QObject *statusOverlay,
-                         QObject *parent = nullptr)
-        : QObject(parent), m_launcher(launcher), m_status(statusOverlay) {}
+    MailDockLaunchBridge(SystemAppLauncher &launcher, WindowActivationState &state,
+                         QObject *statusOverlay, QObject *parent = nullptr)
+        : QObject(parent), m_launcher(launcher), m_state(state), m_status(statusOverlay) {}
 
 public slots:
     void activate(const QString &name) {
@@ -127,6 +153,14 @@ public slots:
             qWarning() << "CANOPY_MAIL_DOCK_REJECTED: unknown action";
             return;
         }
+        const QString intent = m_state.resolveActivation(
+            name, QStringLiteral("Canopy"));
+        if (intent != QStringLiteral("LAUNCH")) {
+            qWarning() << "CANOPY_MAIL_DOCK_INTENT_REFUSED" << intent;
+            showActivationStatus(m_status, activationRefusal(m_state, name, intent));
+            return;
+        }
+        // Intent is authoritative: only LAUNCH may reach the GIO service.
         if (m_launcher.launch(name)) {
             qInfo() << "CANOPY_MAIL_DOCK_LAUNCH_REQUESTED";
             return;
@@ -147,6 +181,139 @@ public slots:
 
 private:
     SystemAppLauncher &m_launcher;
+    WindowActivationState &m_state;
+    QObject *m_status;
+};
+
+// Host-owned window-activation snapshot source. The adapter itself never
+// observes or actuates; the shell supplies only facts it already owns:
+// the Qt platform backend and the GIO launcher allowlist. No process or
+// window telemetry is invented: owners/grants/focus stay empty unless a
+// trusted host snapshot is explicitly supplied.
+static QString activationBackendId()
+{
+    const QString platform = QGuiApplication::platformName().toLower();
+    if (platform.contains(QStringLiteral("wayland")))
+        return QStringLiteral("wayland");
+    if (platform.contains(QStringLiteral("xcb"))
+            || platform.contains(QStringLiteral("x11")))
+        return QStringLiteral("x11");
+    if (platform.contains(QStringLiteral("offscreen"))
+            || platform.contains(QStringLiteral("minimal")))
+        return QStringLiteral("headless");
+    return QString();  // unknown backend: adapter fails closed
+}
+
+static QVariantMap hostActivationSnapshot(SystemAppLauncher &launcher,
+                                          const QString &backend,
+                                          int sequence)
+{
+    QVariantMap snapshot;
+    snapshot.insert(QStringLiteral("schema"), WindowActivationState::kSchema);
+    snapshot.insert(QStringLiteral("sequence"), sequence);
+    snapshot.insert(QStringLiteral("backend"), backend);
+    snapshot.insert(QStringLiteral("negotiation"),
+                    backend.isEmpty()
+                        ? QStringLiteral("UNSUPPORTED")
+                        : (backend == QStringLiteral("headless")
+                               ? QStringLiteral("PARTIAL")
+                               : QStringLiteral("SUPPORTED")));
+    snapshot.insert(QStringLiteral("launcherEnabled"), launcher.isEnabled());
+
+    QVariantList installed;
+    static const QStringList approved = {
+        QStringLiteral("Browser"), QStringLiteral("Mail"),
+        QStringLiteral("Files"), QStringLiteral("Calendar"),
+        QStringLiteral("Photos"), QStringLiteral("Music"),
+        QStringLiteral("Terminal"), QStringLiteral("Settings")
+    };
+    for (const QString &name : approved) {
+        if (launcher.canLaunch(name))
+            installed.append(name);
+    }
+    snapshot.insert(QStringLiteral("installed"), installed);
+    snapshot.insert(QStringLiteral("owners"), QVariantList());
+    snapshot.insert(QStringLiteral("grants"), QVariantList());
+    return snapshot;
+}
+
+static bool applyActivationJson(WindowActivationState &state,
+                                const QByteArray &json)
+{
+    QJsonParseError parseError{};
+    const QJsonDocument document = QJsonDocument::fromJson(json, &parseError);
+    if (parseError.error != QJsonParseError::NoError || !document.isObject()) {
+        state.applySnapshot(QVariantMap());  // clear every indicator
+        return false;
+    }
+    return state.applySnapshot(document.toVariant().toMap());
+}
+
+static bool loadActivationSnapshotFile(WindowActivationState &state,
+                                       const QString &path)
+{
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly) || file.size() > 65536) {
+        state.applySnapshot(QVariantMap());
+        return false;
+    }
+    return applyActivationJson(state, file.readAll());
+}
+
+static void showActivationStatus(QObject *status, const QString &message)
+{
+    if (!status)
+        return;
+    // openLauncher() clears the prior message, so set the disclosure AFTER
+    // opening; the existing footer Label binds to this text.
+    if (!QMetaObject::invokeMethod(status, "openLauncher", Qt::DirectConnection))
+        return;
+    status->setProperty("selectionMessage", message);
+}
+
+static QString activationRefusal(const WindowActivationState &state,
+                                 const QString &name,
+                                 const QString &intent)
+{
+    if (state.status() != QStringLiteral("READY"))
+        return name + QStringLiteral(" window activation state unavailable");
+    if (intent == QStringLiteral("FOCUS"))
+        return name + QStringLiteral(" is running; focus is unavailable");
+    if (intent == QStringLiteral("IGNORE"))
+        return name + QStringLiteral(" activation ignored: launcher disabled");
+    return name + QStringLiteral(" could not be launched");
+}
+
+// The remaining approved dock tiles use the same fail-closed intent gate.
+// FOCUS is disclosed rather than actuated: Classic owns no window-focus
+// backend, so claiming focus would be a false success.
+class IntentDockBridge final : public QObject {
+    Q_OBJECT
+public:
+    IntentDockBridge(SystemAppLauncher &launcher, WindowActivationState &state,
+                     QObject *statusOverlay, QObject *parent = nullptr)
+        : QObject(parent), m_launcher(launcher), m_state(state),
+          m_status(statusOverlay) {}
+
+public slots:
+    void activate(const QString &name) {
+        const QString intent = m_state.resolveActivation(
+            name, QStringLiteral("Canopy"));
+        if (intent == QStringLiteral("LAUNCH")) {
+            if (m_launcher.launch(name))
+                qInfo() << "CANOPY_INTENT_DOCK_LAUNCH_REQUESTED" << name;
+            else
+                showActivationStatus(m_status, activationRefusal(
+                                         m_state, name, QStringLiteral("REJECT")));
+            return;
+        }
+        qWarning() << "CANOPY_INTENT_DOCK_REFUSED" << name << intent;
+        showActivationStatus(m_status, activationRefusal(m_state, name, intent));
+    }
+
+private:
+    SystemAppLauncher &m_launcher;
+    WindowActivationState &m_state;
     QObject *m_status;
 };
 
@@ -370,6 +537,27 @@ int main(int argc, char *argv[]) {
     // geometry and screenshot contracts are unchanged when the flag is absent.
     const bool enableSystemApps = args.contains(QStringLiteral("--enable-system-apps"));
     SystemAppLauncher systemLauncher(enableSystemApps);
+    WindowActivationState activationState;
+    const QString activationBackend = activationBackendId();
+    activationState.applySnapshot(
+        hostActivationSnapshot(systemLauncher, activationBackend, 1));
+    const int activationSnapshotIndex = args.indexOf(
+        QStringLiteral("--window-activation-snapshot"));
+    if (activationSnapshotIndex >= 0) {
+        if (activationSnapshotIndex + 1 >= args.size()
+                || args.at(activationSnapshotIndex + 1).startsWith(QLatin1Char('-'))) {
+            qCritical() << "CANOPY_ACTIVATION_SNAPSHOT_FAIL: missing path";
+            return 2;
+        }
+        if (loadActivationSnapshotFile(
+                    activationState, args.at(activationSnapshotIndex + 1))) {
+            qInfo() << "CANOPY_ACTIVATION_SNAPSHOT_APPLIED";
+        } else {
+            qWarning() << "CANOPY_ACTIVATION_SNAPSHOT_REJECTED_FAIL_CLOSED";
+        }
+    } else if (activationBackend.isEmpty()) {
+        qWarning() << "CANOPY_ACTIVATION_BACKEND_UNKNOWN_FAIL_CLOSED";
+    }
     const bool launcherFixture = args.contains(QStringLiteral("--self-test-launcher-launch-fixture"));
     if (args.contains(QStringLiteral("--self-test-system-apps-capability"))) {
 #ifdef CANOPY_HAVE_GIO
@@ -537,6 +725,25 @@ int main(int argc, char *argv[]) {
                        " owner visual approval NOT granted";
         }
     }
+    engine.rootContext()->setContextProperty(
+        QStringLiteral("canopyWindowActivationState"), &activationState);
+    QQmlComponent activationComponent(
+        &engine, QUrl(QStringLiteral(
+            "qrc:/Canopy/Classic/WindowActivationIndicators.qml")));
+    if (activationComponent.isError()) {
+        qCritical() << "WINDOW_ACTIVATION_ADAPTER_FAIL: QML component error";
+        return 1;
+    }
+    QObject *activationAdapter = activationComponent.create();
+    if (!activationAdapter) {
+        qCritical() << "WINDOW_ACTIVATION_ADAPTER_FAIL: no QML instance";
+        return 1;
+    }
+    activationAdapter->setParent(&engine);
+    engine.rootContext()->setContextProperty(
+        QStringLiteral("canopyWindowActivation"), activationAdapter);
+    qInfo() << "WINDOW_ACTIVATION_ADAPTER_LOADED";
+
     engine.rootContext()->setContextProperty(QStringLiteral("canopyApprovedMode"), approvedMode);
     engine.rootContext()->setContextProperty(
         QStringLiteral("canopySystemLaunchEnabled"), enableSystemApps);
@@ -583,11 +790,15 @@ int main(int argc, char *argv[]) {
                 continue;
             if (name == QStringLiteral("Mail"))
                 continue;
+            if (name != QStringLiteral("Trash"))
+                continue;  // approved names use the intent gate below
             if (auto *tile = findDockTile(window->contentItem(), name))
                 QObject::connect(tile, SIGNAL(activated(QString)),
                                  &systemLauncher, SLOT(launch(QString)));
         }
         qInfo() << "CANOPY_SYSTEM_APP_DOCK_CONNECTED: opt-in, fixed allowlist only";
+    }
+
 
         // Connect the EXISTING Files dock interaction (its frozen QML
         // `activated("Files")` signal) to real desktop behavior. No QML,
@@ -599,7 +810,8 @@ int main(int argc, char *argv[]) {
             window->contentItem(), QStringLiteral("canopyApplicationLauncher"));
         if (filesLaunchTile) {
             auto *filesBridge = new FilesDockLaunchBridge(
-                systemLauncher, filesStatusOverlay, &app);
+                systemLauncher, activationState,
+                filesStatusOverlay, &app);
             QObject::connect(filesLaunchTile, SIGNAL(activated(QString)),
                              filesBridge, SLOT(activate(QString)));
             qInfo() << "CANOPY_FILES_DOCK_NATIVE_LAUNCH_CONNECTED";
@@ -614,7 +826,8 @@ int main(int argc, char *argv[]) {
             window->contentItem(), QStringLiteral("canopyApplicationLauncher"));
         if (browserLaunchTile) {
             auto *browserBridge = new BrowserDockLaunchBridge(
-                systemLauncher, browserStatusOverlay, &app);
+                systemLauncher, activationState,
+                browserStatusOverlay, &app);
             QObject::connect(browserLaunchTile, SIGNAL(activated(QString)),
                              browserBridge, SLOT(activate(QString)));
             qInfo() << "CANOPY_BROWSER_DOCK_NATIVE_LAUNCH_CONNECTED";
@@ -630,11 +843,118 @@ int main(int argc, char *argv[]) {
             window->contentItem(), QStringLiteral("canopyApplicationLauncher"));
         if (mailLaunchTile) {
             auto *mailBridge = new MailDockLaunchBridge(
-                systemLauncher, mailStatusOverlay, &app);
+                systemLauncher, activationState,
+                mailStatusOverlay, &app);
             QObject::connect(mailLaunchTile, SIGNAL(activated(QString)),
                              mailBridge, SLOT(activate(QString)));
             qInfo() << "CANOPY_MAIL_DOCK_NATIVE_LAUNCH_CONNECTED";
         }
+
+        auto *intentStatusOverlay = findVisualItem(
+            window->contentItem(), QStringLiteral("canopyApplicationLauncher"));
+        auto *intentBridge = new IntentDockBridge(
+            systemLauncher, activationState, intentStatusOverlay, &app);
+        static const QStringList gatedDockNames = {
+            QStringLiteral("Calendar"), QStringLiteral("Photos"),
+            QStringLiteral("Music"), QStringLiteral("Terminal"),
+            QStringLiteral("Settings")
+        };
+        for (const QString &name : gatedDockNames) {
+            if (auto *tile = findDockTile(window->contentItem(), name)) {
+                QObject::connect(tile, SIGNAL(activated(QString)),
+                                 intentBridge, SLOT(activate(QString)));
+                qInfo() << "CANOPY_INTENT_DOCK_CONNECTED" << name;
+            }
+        }
+    const bool activationFixture = args.contains(
+        QStringLiteral("--self-test-window-activation-fixture"));
+    if (activationFixture) {
+        // Trusted host snapshot: running + active + explicit grant.
+        const QByteArray trusted = R"JSON({
+          "schema": 1, "backend": "x11", "negotiation": "SUPPORTED",
+          "sequence": 10, "launcherEnabled": true,
+          "installed": ["Files"],
+          "owners": [{"pid": 4242, "app_id": "Files"}],
+          "grants": [["Canopy", "Files"]],
+          "focus": {"app_id": "Files", "window_id": 7,
+                    "serial": 1, "status": "GRANTED"}
+        })JSON";
+        auto *filesTile = findDockTile(window->contentItem(),
+                                       QStringLiteral("Files"));
+        auto *status = findVisualItem(
+            window->contentItem(), QStringLiteral("canopyLauncherStatus"));
+        if (!applyActivationJson(activationState, trusted)
+                || !filesTile || !status
+                || activationState.status() != QStringLiteral("READY")) {
+            qCritical() << "WINDOW_ACTIVATION_HOST_FIXTURE_FAIL: trusted snapshot";
+            return 1;
+        }
+        QCoreApplication::processEvents();
+        if (!filesTile->property("windowRunning").toBool()
+                || !filesTile->property("windowActive").toBool()
+                || filesTile->property("activationIntent").toString()
+                        != QStringLiteral("FOCUS")
+                || !activationAdapter->property("indicatorsAvailable").toBool()) {
+            qCritical() << "WINDOW_ACTIVATION_HOST_FIXTURE_FAIL: indicators";
+            return 1;
+        }
+        qInfo() << "SELF_TEST_PASS: dock running and active indicators reflect trusted snapshot";
+        if (!QMetaObject::invokeMethod(
+                    filesTile, "activated", Qt::DirectConnection,
+                    Q_ARG(QString, QStringLiteral("Files")))) {
+            qCritical() << "WINDOW_ACTIVATION_HOST_FIXTURE_FAIL: activation";
+            return 1;
+        }
+        QCoreApplication::processEvents();
+        if (!status->property("text").toString().contains(
+                    QStringLiteral("focus is unavailable"))) {
+            qCritical() << "WINDOW_ACTIVATION_HOST_FIXTURE_FAIL: focus disclosed";
+            return 1;
+        }
+        qInfo() << "SELF_TEST_PASS: dock activation intent reaches host gate without false focus";
+
+        // Closed state: no owners and no focus for the same app.
+        const QByteArray closed = R"JSON({
+          "schema": 1, "backend": "x11", "negotiation": "SUPPORTED",
+          "sequence": 11, "launcherEnabled": true,
+          "installed": ["Files"], "owners": [], "grants": []
+        })JSON";
+        if (!applyActivationJson(activationState, closed)) {
+            qCritical() << "WINDOW_ACTIVATION_HOST_FIXTURE_FAIL: closed snapshot";
+            return 1;
+        }
+        QCoreApplication::processEvents();
+        if (filesTile->property("windowRunning").toBool()
+                || filesTile->property("windowActive").toBool()
+                || filesTile->property("activationIntent").toString()
+                        != QStringLiteral("LAUNCH")) {
+            qCritical() << "WINDOW_ACTIVATION_HOST_FIXTURE_FAIL: closed state";
+            return 1;
+        }
+        qInfo() << "SELF_TEST_PASS: closed snapshot clears running and active indicators";
+
+        // Unknown backend must clear every indicator and remove trust.
+        const QByteArray invalid = R"JSON({
+          "schema": 1, "backend": "unknown", "negotiation": "SUPPORTED",
+          "sequence": 12, "launcherEnabled": true,
+          "installed": ["Files"],
+          "owners": [{"pid": 4242, "app_id": "Files"}], "grants": []
+        })JSON";
+        QCoreApplication::processEvents();
+        if (applyActivationJson(activationState, invalid)
+                || activationState.status() != QStringLiteral("UNAVAILABLE")
+                || filesTile->property("activationAvailable").toBool()
+                || filesTile->property("windowRunning").toBool()
+                || filesTile->property("activationIntent").toString()
+                        != QStringLiteral("REJECT")
+                || activationAdapter->property("indicatorsAvailable").toBool()) {
+            qCritical() << "WINDOW_ACTIVATION_HOST_FIXTURE_FAIL: fail closed";
+            return 1;
+        }
+        qInfo() << "SELF_TEST_PASS: untrusted snapshot clears all indicators";
+        qInfo() << "WINDOW_ACTIVATION_HOST_SELF_TEST_PASS"
+                << "running=ok active=ok closed=ok fail_closed=ok";
+        QTimer::singleShot(0, &app, &QCoreApplication::quit);
     }
     if (launcherFixture) {
         // Drive the actual QML overlay's choose("Files") path. CI supplies a

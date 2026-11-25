@@ -1,0 +1,9 @@
+********* Start testing of qmltestrunner *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by GCC 16.2.0), windows 11
+PASS   : qmltestrunner::quickControlsHostState::initTestCase()
+PASS   : qmltestrunner::quickControlsHostState::test_failClosedWithoutAdapter()
+PASS   : qmltestrunner::quickControlsHostState::test_hostileAdapterIsRejected()
+PASS   : qmltestrunner::quickControlsHostState::test_realHostStateFromPythonAdapter()
+PASS   : qmltestrunner::quickControlsHostState::cleanupTestCase()
+Totals: 5 passed, 0 failed, 0 skipped, 0 blacklisted, 405ms
+********* Finished testing of qmltestrunner *********

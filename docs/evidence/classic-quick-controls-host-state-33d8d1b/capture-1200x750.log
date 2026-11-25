@@ -1,0 +1,328 @@
+CANOPY_APPROVED_ART_VERIFIED: eight exact PNG icons and legacy blue wave
+FIVE_PRODUCTION_PACK_FALLBACK: exact original-derived Qt renderer
+DOCK_CLEAN_EDGES_ACTIVE: exact approved source cleanup selected for normal startup; frozen PNGs and QML geometry unchanged
+DOCK_FIVE_CENTER_ACTIVE: Browser, Mail, Files, Terminal, Settings v3 composition inside unchanged mask; Calendar/Photos/Music exact pixel lock retained
+CANOPY_ROUNDED_DOCK_VERIFIED: eight original icons, padded, alpha-clipped
+WINDOW_ACTIVATION_ADAPTER_LOADED
+qrc:/Canopy/Classic/LauncherOverlay.qml:119:25: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0b7c030, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/PreviewWindow.qml:627:29: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0b7c210, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/PreviewWindow.qml:410:33: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0b7ce40, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/PreviewWindow.qml:388:33: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0b7cf30, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/PreviewWindow.qml:374:33: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0b7c8a0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/PreviewWindow.qml:360:33: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0b7c300, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/PreviewWindow.qml:257:30: QML QQuickRectangle: The current style does not support customization of this control (property: "contentItem" item: QQuickRectangle(0x1eda0b7d4d0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/PreviewWindow.qml:181:29: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0b7c990, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/PreviewWindow.qml:253:29: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0b7ca80, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/DockTile.qml:58:18: QML QQuickItem: The current style does not support customization of this control (property: "contentItem" item: QQuickItem(0x1eda0b7d2f0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/DockTile.qml:33:17: QML QQuickItem: The current style does not support customization of this control (property: "background" item: QQuickItem(0x1eda0bcf660, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/DockTile.qml:58:18: QML QQuickItem: The current style does not support customization of this control (property: "contentItem" item: QQuickItem(0x1eda0bceee0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/DockTile.qml:33:17: QML QQuickItem: The current style does not support customization of this control (property: "background" item: QQuickItem(0x1eda0bcf2a0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/DockTile.qml:58:18: QML QQuickItem: The current style does not support customization of this control (property: "contentItem" item: QQuickItem(0x1eda0bd0470, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/DockTile.qml:33:17: QML QQuickItem: The current style does not support customization of this control (property: "background" item: QQuickItem(0x1eda0bceb20, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/DockTile.qml:58:18: QML QQuickItem: The current style does not support customization of this control (property: "contentItem" item: QQuickItem(0x1eda0bd0740, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/DockTile.qml:33:17: QML QQuickItem: The current style does not support customization of this control (property: "background" item: QQuickItem(0x1eda0bd00b0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/DockTile.qml:58:18: QML QQuickItem: The current style does not support customization of this control (property: "contentItem" item: QQuickItem(0x1eda0c03460, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/DockTile.qml:33:17: QML QQuickItem: The current style does not support customization of this control (property: "background" item: QQuickItem(0x1eda0c02470, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/DockTile.qml:58:18: QML QQuickItem: The current style does not support customization of this control (property: "contentItem" item: QQuickItem(0x1eda0c02dd0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/DockTile.qml:33:17: QML QQuickItem: The current style does not support customization of this control (property: "background" item: QQuickItem(0x1eda0c03190, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/DockTile.qml:58:18: QML QQuickItem: The current style does not support customization of this control (property: "contentItem" item: QQuickItem(0x1eda0c02b00, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/DockTile.qml:33:17: QML QQuickItem: The current style does not support customization of this control (property: "background" item: QQuickItem(0x1eda0c02290, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/DockTile.qml:58:18: QML QQuickItem: The current style does not support customization of this control (property: "contentItem" item: QQuickItem(0x1eda0c02a10, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/DockTile.qml:33:17: QML QQuickItem: The current style does not support customization of this control (property: "background" item: QQuickItem(0x1eda0c02ec0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/LauncherOverlay.qml:171:29: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0c1aaa0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/LauncherOverlay.qml:185:30: QML Column: The current style does not support customization of this control (property: "contentItem" item: QQuickColumn(0x1eda0c0ee00, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/Main.qml:143:33: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0c1a9b0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/Main.qml:151:34: QML Label: The current style does not support customization of this control (property: "contentItem" item: Label_QMLTYPE_9(0x1eda0c19ba0, parent=0x0, geometry=0,0 0x0 ?)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/Main.qml:143:33: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0c19600, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/Main.qml:151:34: QML Label: The current style does not support customization of this control (property: "contentItem" item: Label_QMLTYPE_9(0x1eda0c1ae60, parent=0x0, geometry=0,0 0x0 ?)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/Main.qml:143:33: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0c197e0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/Main.qml:151:34: QML Label: The current style does not support customization of this control (property: "contentItem" item: Label_QMLTYPE_9(0x1eda0c198d0, parent=0x0, geometry=0,0 0x0 ?)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/Main.qml:143:33: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0c7c3e0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/Main.qml:151:34: QML Label: The current style does not support customization of this control (property: "contentItem" item: Label_QMLTYPE_9(0x1eda0c7d6a0, parent=0x0, geometry=0,0 0x0 ?)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/Main.qml:143:33: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0c7c110, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/Main.qml:151:34: QML Label: The current style does not support customization of this control (property: "contentItem" item: Label_QMLTYPE_9(0x1eda0c7cb60, parent=0x0, geometry=0,0 0x0 ?)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/Main.qml:143:33: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0c7c5c0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/Main.qml:151:34: QML Label: The current style does not support customization of this control (property: "contentItem" item: Label_QMLTYPE_9(0x1eda0c7d2e0, parent=0x0, geometry=0,0 0x0 ?)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/PreviewWindow.qml:634:30: QML Label: The current style does not support customization of this control (property: "contentItem" item: Label_QMLTYPE_9(0x1eda0c7c200, parent=0x0, geometry=0,0 0x0 ?)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/FolderTile.qml:31:18: QML QQuickItem: The current style does not support customization of this control (property: "contentItem" item: QQuickItem(0x1eda0d08900, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/FolderTile.qml:24:17: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0d0a610, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/FolderTile.qml:31:18: QML QQuickItem: The current style does not support customization of this control (property: "contentItem" item: QQuickItem(0x1eda0d0a430, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/FolderTile.qml:24:17: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0d08bd0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/FolderTile.qml:31:18: QML QQuickItem: The current style does not support customization of this control (property: "contentItem" item: QQuickItem(0x1eda0d0aac0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/FolderTile.qml:24:17: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0d08180, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/FolderTile.qml:31:18: QML QQuickItem: The current style does not support customization of this control (property: "contentItem" item: QQuickItem(0x1eda0d08540, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/FolderTile.qml:24:17: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0d0a520, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/FolderTile.qml:31:18: QML QQuickItem: The current style does not support customization of this control (property: "contentItem" item: QQuickItem(0x1eda0d09800, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/FolderTile.qml:24:17: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0d07af0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/FolderTile.qml:31:18: QML QQuickItem: The current style does not support customization of this control (property: "contentItem" item: QQuickItem(0x1eda0d09cb0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/FolderTile.qml:24:17: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0d07820, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/FolderTile.qml:31:18: QML QQuickItem: The current style does not support customization of this control (property: "contentItem" item: QQuickItem(0x1eda0d07eb0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/FolderTile.qml:24:17: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0d09260, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/FolderTile.qml:31:18: QML QQuickItem: The current style does not support customization of this control (property: "contentItem" item: QQuickItem(0x1eda0d09ad0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/FolderTile.qml:24:17: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0d09da0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/PreviewWindow.qml:295:37: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0d0aca0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/PreviewWindow.qml:300:38: QML Row: The current style does not support customization of this control (property: "contentItem" item: QQuickRow(0x1eda0ec58b0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/PreviewWindow.qml:295:37: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0ed46f0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/PreviewWindow.qml:300:38: QML Row: The current style does not support customization of this control (property: "contentItem" item: QQuickRow(0x1eda0ec4b30, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/PreviewWindow.qml:295:37: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0ed2080, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/PreviewWindow.qml:300:38: QML Row: The current style does not support customization of this control (property: "contentItem" item: QQuickRow(0x1eda0ec5430, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/PreviewWindow.qml:295:37: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0ed2ad0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/PreviewWindow.qml:300:38: QML Row: The current style does not support customization of this control (property: "contentItem" item: QQuickRow(0x1eda0ec7ef0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/PreviewWindow.qml:295:37: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0ed2da0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/PreviewWindow.qml:300:38: QML Row: The current style does not support customization of this control (property: "contentItem" item: QQuickRow(0x1eda0ec8910, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/PreviewWindow.qml:295:37: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0ed3160, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/PreviewWindow.qml:300:38: QML Row: The current style does not support customization of this control (property: "contentItem" item: QQuickRow(0x1eda0ec6bd0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/PreviewWindow.qml:295:37: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0ed3250, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/PreviewWindow.qml:300:38: QML Row: The current style does not support customization of this control (property: "contentItem" item: QQuickRow(0x1eda0ecb970, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/PreviewWindow.qml:295:37: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0ed4330, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/PreviewWindow.qml:300:38: QML Row: The current style does not support customization of this control (property: "contentItem" item: QQuickRow(0x1eda0ecaad0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/PreviewWindow.qml:295:37: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0ed2170, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/PreviewWindow.qml:300:38: QML Row: The current style does not support customization of this control (property: "contentItem" item: QQuickRow(0x1eda0ec9450, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/PreviewWindow.qml:295:37: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0ed4ab0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/PreviewWindow.qml:300:38: QML Row: The current style does not support customization of this control (property: "contentItem" item: QQuickRow(0x1eda0eca770, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+CANOPY_CLASSIC_WINDOW_READY
+qrc:/Canopy/Classic/QuickControlsOverlay.qml:359:45: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0f43f40, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/QuickControlsOverlay.qml:330:45: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0f44e40, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/QuickControlsOverlay.qml:368:46: QML Label: The current style does not support customization of this control (property: "contentItem" item: Label_QMLTYPE_9(0x1eda0f45980, parent=0x0, geometry=0,0 0x0 ?)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/QuickControlsOverlay.qml:339:46: QML Label: The current style does not support customization of this control (property: "contentItem" item: Label_QMLTYPE_9(0x1eda0f44f30, parent=0x0, geometry=0,0 0x0 ?)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/QuickControlsOverlay.qml:359:45: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0f457a0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/QuickControlsOverlay.qml:330:45: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0f463d0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/QuickControlsOverlay.qml:368:46: QML Label: The current style does not support customization of this control (property: "contentItem" item: Label_QMLTYPE_9(0x1eda0f444e0, parent=0x0, geometry=0,0 0x0 ?)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/QuickControlsOverlay.qml:339:46: QML Label: The current style does not support customization of this control (property: "contentItem" item: Label_QMLTYPE_9(0x1eda0f464c0, parent=0x0, geometry=0,0 0x0 ?)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/QuickControlsOverlay.qml:359:45: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0f44300, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/QuickControlsOverlay.qml:330:45: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0f446c0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/QuickControlsOverlay.qml:368:46: QML Label: The current style does not support customization of this control (property: "contentItem" item: Label_QMLTYPE_9(0x1eda0f45890, parent=0x0, geometry=0,0 0x0 ?)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/QuickControlsOverlay.qml:339:46: QML Label: The current style does not support customization of this control (property: "contentItem" item: Label_QMLTYPE_9(0x1eda0f448a0, parent=0x0, geometry=0,0 0x0 ?)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/QuickControlsOverlay.qml:359:45: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0f46e20, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/QuickControlsOverlay.qml:330:45: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0f46f10, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/QuickControlsOverlay.qml:368:46: QML Label: The current style does not support customization of this control (property: "contentItem" item: Label_QMLTYPE_9(0x1eda0f443f0, parent=0x0, geometry=0,0 0x0 ?)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/QuickControlsOverlay.qml:339:46: QML Label: The current style does not support customization of this control (property: "contentItem" item: Label_QMLTYPE_9(0x1eda0f47000, parent=0x0, geometry=0,0 0x0 ?)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+CANOPY_QUICK_CONTROLS_REGISTERED: hidden until requested, no host control bridge, no visual asset changes
+CANOPY_FILES_DOCK_NATIVE_LAUNCH_CONNECTED
+CANOPY_BROWSER_DOCK_NATIVE_LAUNCH_CONNECTED
+CANOPY_MAIL_DOCK_NATIVE_LAUNCH_CONNECTED
+CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED "Calendar"
+CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED "Photos"
+CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED "Terminal"
+CANOPY_INTENT_DOCK_CONNECTED "Music"
+CANOPY_INTENT_DOCK_CONNECTED "Settings"
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/LauncherOverlay.qml:171:29: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda0c7c4d0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/LauncherOverlay.qml:185:30: QML Column: The current style does not support customization of this control (property: "contentItem" item: QQuickColumn(0x1eda1005200, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/LauncherOverlay.qml:171:29: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda103d470, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/LauncherOverlay.qml:185:30: QML Column: The current style does not support customization of this control (property: "contentItem" item: QQuickColumn(0x1eda1003160, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/LauncherOverlay.qml:171:29: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda103ecd0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/LauncherOverlay.qml:185:30: QML Column: The current style does not support customization of this control (property: "contentItem" item: QQuickColumn(0x1eda10096a0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/LauncherOverlay.qml:171:29: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda103da10, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/LauncherOverlay.qml:185:30: QML Column: The current style does not support customization of this control (property: "contentItem" item: QQuickColumn(0x1eda1009220, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/LauncherOverlay.qml:171:29: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda103d290, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/LauncherOverlay.qml:185:30: QML Column: The current style does not support customization of this control (property: "contentItem" item: QQuickColumn(0x1eda1007f00, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/LauncherOverlay.qml:171:29: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda103f450, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/LauncherOverlay.qml:185:30: QML Column: The current style does not support customization of this control (property: "contentItem" item: QQuickColumn(0x1eda10086e0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/LauncherOverlay.qml:171:29: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda103c1b0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/LauncherOverlay.qml:185:30: QML Column: The current style does not support customization of this control (property: "contentItem" item: QQuickColumn(0x1eda10767e0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+SELF_TEST_PASS: local top bar clock updates and fits
+SELF_TEST_PASS: quick controls registered and fail closed
+SELF_TEST_PASS: notification centre registered and fail closed
+SELF_TEST_PASS: actual launcher image component count 8
+SELF_TEST_PASS: actual launcher button image geometry centered 8
+qrc:/Canopy/Classic/LauncherOverlay.qml:171:29: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda11c0d70, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/LauncherOverlay.qml:185:30: QML Column: The current style does not support customization of this control (property: "contentItem" item: QQuickColumn(0x1eda107aec0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/LauncherOverlay.qml:171:29: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda11bfe70, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/LauncherOverlay.qml:185:30: QML Column: The current style does not support customization of this control (property: "contentItem" item: QQuickColumn(0x1eda1079840, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/LauncherOverlay.qml:171:29: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda11be7f0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/LauncherOverlay.qml:185:30: QML Column: The current style does not support customization of this control (property: "contentItem" item: QQuickColumn(0x1eda107ac80, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/LauncherOverlay.qml:171:29: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda11c14f0, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/LauncherOverlay.qml:185:30: QML Column: The current style does not support customization of this control (property: "contentItem" item: QQuickColumn(0x1eda1078f40, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/LauncherOverlay.qml:171:29: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda11c0230, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/LauncherOverlay.qml:185:30: QML Column: The current style does not support customization of this control (property: "contentItem" item: QQuickColumn(0x1eda1200f80, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/LauncherOverlay.qml:171:29: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda11bee80, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/LauncherOverlay.qml:185:30: QML Column: The current style does not support customization of this control (property: "contentItem" item: QQuickColumn(0x1eda1200d40, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/LauncherOverlay.qml:171:29: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda11bf240, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/LauncherOverlay.qml:185:30: QML Column: The current style does not support customization of this control (property: "contentItem" item: QQuickColumn(0x1eda11fd980, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/LauncherOverlay.qml:171:29: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda11c4970, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/LauncherOverlay.qml:185:30: QML Column: The current style does not support customization of this control (property: "contentItem" item: QQuickColumn(0x1eda1200200, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+qrc:/Canopy/Classic/LauncherOverlay.qml:171:29: QML QQuickRectangle: The current style does not support customization of this control (property: "background" item: QQuickRectangle(0x1eda11c3c50, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+OpenThemeData() failed for theme 0 (BUTTON). (The handle is invalid.)
+qrc:/Canopy/Classic/LauncherOverlay.qml:185:30: QML Column: The current style does not support customization of this control (property: "contentItem" item: QQuickColumn(0x1eda11fd620, parent=0x0, geometry=0,0 0x0)). Please customize a non-native style (such as Basic, Fusion, Material, etc). For more information, see: https://doc.qt.io/qt-6/qtquickcontrols2-customize.html#customization-reference
+SELF_TEST_PASS: actual Qt launcher opens, searches and closes
+SELF_TEST_PASS: original Canopy penguin launcher loaded
+SELF_TEST_PASS: original SVG wallpaper image loaded
+SELF_TEST_PASS: all eight exact approved dock PNGs loaded
+SELF_TEST_PASS: dock icons horizontally/vertically centred count 8 with equal 54px art slots and 7px minimum dock insets
+SELF_TEST_PASS: compact folder grid fits and four-column cap verified
+SELF_TEST_PASS: all eight original sample folder images loaded
+SELF_TEST_PASS: eight demo folders and one search control present
+SELF_TEST_PASS: verified user-supplied blue wave and eight selected PNG icons present
+SELF_TEST_PASS: preview window fits above dock QPointF(210,127) QSizeF(780, 420)
+SELF_TEST_PASS: desktop chrome geometry QSize(1200, 750)
+CANOPY_FILES_DOCK_INTENT_REFUSED "REJECT"
+CANOPY_FILES_DOCK_INTENT_REFUSED "REJECT"
+SELF_TEST_PASS: Files dock hide/restore and activity indicator
+CANOPY_FILES_DOCK_INTENT_REFUSED "REJECT"
+SELF_TEST_PASS: Files close control and dock reopen
+SELF_TEST_PASS: Files keyboard close and reopen bindings
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+OpenThemeData() failed for theme 8 (SCROLLBAR). (The handle is invalid.)
+SELF_TEST_PASS: wallpaper regions visually distinct
+SELF_TEST_PASS: nonuniform window screenshot captured QSize(1200, 750) sampled colors 75

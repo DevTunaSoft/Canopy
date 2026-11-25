@@ -219,17 +219,21 @@ def scan_session_entries(directory):
 
     Invalid entries are reported and excluded without stopping healthy ones.
     This is metadata inspection only; no entry is installed or executed.
+    Candidates are counted as they are read, so an oversized directory fails
+    after at most MAX_ENTRIES + 1 buffered paths instead of materializing and
+    sorting every entry in the directory.
     """
     root = _as_path(directory, "session entry directory")
     if root.is_symlink() or not root.is_dir():
         raise SessionEntryError("session entry directory must be a real directory")
-    candidates = sorted(
-        (item for item in root.iterdir()
-         if item.suffix == ".desktop" and not item.is_dir()),
-        key=lambda item: item.name,
-    )
-    if len(candidates) > MAX_ENTRIES:
-        raise SessionEntryError("session entry directory exceeds 32 files")
+    candidates = []
+    for item in root.iterdir():
+        if item.suffix != ".desktop" or item.is_dir():
+            continue
+        candidates.append(item)
+        if len(candidates) > MAX_ENTRIES:
+            raise SessionEntryError("session entry directory exceeds 32 files")
+    candidates.sort(key=lambda item: item.name)
 
     entries, problems = [], []
     for candidate in candidates:

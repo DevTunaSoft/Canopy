@@ -37,14 +37,17 @@ Linux Mint guest acceptance; see release blocker #132. Modern is planned.
 
 ## Continuous engineering contract
 
-Hermes maintains at least four active engineering subagents plus itself, each
-in an isolated worktree with explicit file ownership. Routine nonvisual work
-follows DEVELOP → TEST → INDEPENDENT REVIEW → READY → MERGE → VERIFY on the
-designated integration branch. Draft PRs are temporary; eligible verified
-nonvisual work is promoted and integrated promptly. Visual design, artwork,
-wallpaper, dock geometry, colors and typography remain exclusively owned by
-ChatGPT and the owner; their approval never blocks unrelated engineering.
-See [AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUTING.md) and
+Hermes leads up to **10 concurrent engineering subagents**, each in an isolated
+worktree with explicit file ownership; this is a ceiling, not a quota, and
+supersedes the earlier 15/9/7/4-agent configurations. Routine independently
+verified engineering follows DEVELOP → TEST → INDEPENDENT REVIEW → READY →
+INTEGRATE → VERIFY on `integration/canopy-classic-20261123`. Draft PRs are
+temporary; post-merge regression runs **after** a merge, never as a
+pre-merge gate. The approved Classic visual identity is frozen; bounded GUI
+refinement may proceed without waiting on acceptance, but final visual
+acceptance and any merge to `main` are owner-gated. Named holds on #279, #151
+and #278 are preserved. See [workforce policy](docs/AGENTS_WORKFORCE.md),
+[AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUTING.md) and
 [quality gates](docs/QUALITY.md).
 
 ## LacOS and expandable Canopy Shell Packs — future goals

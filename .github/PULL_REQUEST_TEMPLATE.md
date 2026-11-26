@@ -37,11 +37,14 @@ merge an unapproved ancestor. Document source changes before changing status
 to ready. Draft status is temporary: promote verified PRs promptly rather
 than leaving them in draft indefinitely.
 
-Routine verified engineering changes and bounded non-substantive visual
-refinements may be promoted from draft and integrated into
+Routine verified engineering changes and authorized bounded GUI refinements
+may be promoted from draft and integrated into
 `integration/canopy-classic-20261123` by the autonomous engineering process
-after exact-SHA verification, independent review and regression tests; mark
-that as **AGENT REVIEWED**, never as human approval. Obtain explicit owner
-approval for substantial visual changes, high-risk security decisions and
-final release acceptance into `main`. Named PR holds (including #151 and
-#278) are never overridden by general authorization.
+after exact-SHA verification, independent review and applicable checks; mark
+that as **AGENT REVIEWED**, never as human approval. Run post-merge regression
+**after** integration; it is not a pre-merge gate. Obtain explicit owner
+approval for final visual acceptance, substantial identity changes, high-risk
+security decisions and final acceptance into `main`. Named holds on #279, #151
+and #278 are never overridden by general authorization. The workforce ceiling
+is 10 engineering subagents plus Hermes as lead; see
+[workforce policy](../docs/AGENTS_WORKFORCE.md).

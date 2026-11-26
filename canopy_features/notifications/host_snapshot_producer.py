@@ -113,7 +113,15 @@ def _bounded_text(value, limit, label, *, nonempty=False):
 
 
 def _validate_record(record):
-    if not isinstance(record, Mapping) or frozenset(record) != RECORD_KEYS:
+    if not isinstance(record, Mapping):
+        raise SnapshotProducerError("record has an unexpected key set")
+    try:
+        keys = frozenset(record)
+    except TypeError as exc:
+        # A hostile Mapping can iterate an unhashable key. That is a rejected
+        # record, never a raw built-in exception from the public compose().
+        raise SnapshotProducerError("record has an unexpected key set") from exc
+    if keys != RECORD_KEYS:
         raise SnapshotProducerError("record has an unexpected key set")
     topic = record["topic"]
     if type(topic) is not str or topic not in ALLOWED_TOPICS:

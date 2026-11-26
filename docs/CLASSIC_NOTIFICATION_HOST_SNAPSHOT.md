@@ -31,7 +31,8 @@ producer that such a bridge could consume later.
   or payload;
 - `compose(records)` projects the source's bounded records into one frozen
   wire-format snapshot; the whole input is validated before any row is
-  returned;
+  returned, and any rejected record raises `SnapshotProducerError` rather
+  than a built-in exception;
 - any rejected input fails closed: `snapshot()` returns empty rows and a fixed
   `refusal` token, never a partial, plausible-looking list.
 
@@ -81,6 +82,7 @@ ever published.
 | Control character | `body="status=ok\nhidden"` | whole input rejected | `test_control_character_in_body_is_rejected` |
 | Bidirectional override | `title="\u202ereport"` | whole input rejected | `test_bidirectional_override_in_title_is_rejected` |
 | Wrong field type | `body` is `7`, `True`, `None`, `[]` or `{}` | whole input rejected; no raw `TypeError` | `test_non_string_record_field_is_rejected` |
+| Unhashable mapping key | synthetic `Mapping` whose key iteration yields a `list` | `compose()` raises `SnapshotProducerError`, never a raw `TypeError`; `snapshot()` keeps zero rows and the fixed refusal token | `test_unhashable_mapping_key_is_rejected_with_domain_error`, `test_unhashable_mapping_key_snapshot_fails_closed` |
 | Extra or missing key | added `extra`; deleted `topic` | whole input rejected | `test_extra_record_key_is_rejected`, `test_missing_record_key_is_rejected` |
 | Wrong container type | `str`, `bytes`, mapping, `frozenset`, `None`, `int`, `bool` | whole input rejected | `test_unexpected_record_collection_type_is_rejected` |
 | Wrong entry type | `None`, `str`, `int`, `list`, `bool` entry | whole input rejected | `test_non_mapping_record_entry_is_rejected` |
@@ -115,7 +117,7 @@ python -m unittest tests.test_c100_notification_host_snapshot -v
 python tools/check_foundation.py
 ```
 
-All 34 tests are **SYNTHETIC** contract tests: they use real in-process
+All 36 tests are **SYNTHETIC** contract tests: they use real in-process
 `HostEvent` deliveries for positive cases and synthetic record dictionaries
 for validator controls; they never fabricate a `HostEvent`. The targeted
 suite and any offscreen/compiled fixture are **SYNTHETIC** or **CI-SCOPED**

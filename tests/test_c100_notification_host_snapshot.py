@@ -9,6 +9,7 @@ notification delivery. Run:
 """
 import json
 import unittest
+from collections.abc import Mapping
 from dataclasses import FrozenInstanceError
 
 from canopy_core.host_events import TOPICS as HOST_EVENT_TOPICS
@@ -91,6 +92,23 @@ def _record(**overrides):
     return base
 
 
+class _UnhashableKeyMapping(Mapping):
+    """Synthetic Mapping that iterates one unhashable key during key-set checks."""
+
+    def __init__(self, values):
+        self._values = values
+
+    def __iter__(self):
+        yield []
+        yield from self._values
+
+    def __len__(self):
+        return len(self._values) + 1
+
+    def __getitem__(self, key):
+        return self._values[key]
+
+
 class HostileRecordTests(unittest.TestCase):
     def test_unapproved_topic_is_rejected(self):
         with self.assertRaises(SnapshotProducerError):
@@ -116,6 +134,10 @@ class HostileRecordTests(unittest.TestCase):
     def test_extra_record_key_is_rejected(self):
         with self.assertRaises(SnapshotProducerError):
             compose([_record(extra="unapproved")])
+
+    def test_unhashable_mapping_key_is_rejected_with_domain_error(self):
+        with self.assertRaises(SnapshotProducerError):
+            compose([_UnhashableKeyMapping(_record())])
 
     def test_missing_record_key_is_rejected(self):
         record = _record()
@@ -203,6 +225,22 @@ class FailClosedTests(unittest.TestCase):
                 self.assertEqual(producer.as_dict(),
                                  {"source": SOURCE, "records": []})
             self.assertIsNotNone(producer.refusal)
+            self.assertEqual(len(producer.snapshot().records), 1)
+            self.assertIsNone(producer.refusal)
+        finally:
+            producer.close()
+
+    def test_unhashable_mapping_key_snapshot_fails_closed(self):
+        from unittest.mock import patch
+
+        producer = HostSnapshotProducer()
+        try:
+            producer.publish("session.state.changed", {"state": "valid"})
+            self.assertEqual(len(producer.snapshot().records), 1)
+            with patch.object(producer._source, "snapshot",
+                              return_value=[_UnhashableKeyMapping(_record())]):
+                self.assertEqual(producer.snapshot().records, ())
+                self.assertEqual(producer.refusal, "INVALID_SNAPSHOT_RECORD")
             self.assertEqual(len(producer.snapshot().records), 1)
             self.assertIsNone(producer.refusal)
         finally:

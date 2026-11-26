@@ -12,6 +12,25 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "prototype" / "classic"
 
+# PR #685 status accessibility contract: the name follows the rendered text;
+# AlertMessage (QML role 8) is required. Alert is a C++ Event enum (2), never
+# a QML role (where it silently becomes MenuBar).
+DYNAMIC_STATUS_NAME = "Accessible.name: fileManagerStatusLabel.text"
+LEGACY_STATUS_NAME = 'Accessible.name: "File manager launch status"'
+ALERT_MESSAGE_ROLE = "Accessible.role: Accessible.AlertMessage"
+ALERT_EVENT_ROLE = "Accessible.role: Accessible.Alert"
+
+
+def assert_status_a11y(source: str) -> None:
+    if LEGACY_STATUS_NAME in source:
+        raise AssertionError("stale constant accessible name in Files status")
+    if DYNAMIC_STATUS_NAME not in source:
+        raise AssertionError("Files status name is not bound to rendered text")
+    if ALERT_MESSAGE_ROLE not in source:
+        raise AssertionError("Files status is not an AlertMessage (role 8)")
+    if re.search(r"Accessible\.role:\s*Accessible\.Alert\b", source):
+        raise AssertionError("Alert event enum (2) used as a QML role")
+
 
 class ClassicFilesFileManagerLaunchSourceTests(unittest.TestCase):
     @classmethod
@@ -86,7 +105,9 @@ class ClassicFilesFileManagerLaunchSourceTests(unittest.TestCase):
             with self.subTest(status=status):
                 self.assertIn('"' + status + '"', self.window)
         self.assertIn('objectName: "canopyFileManagerStatus"', self.window)
-        self.assertIn('Accessible.name: "File manager launch status"', self.window)
+        self.assertIn(DYNAMIC_STATUS_NAME, self.window)
+        self.assertNotIn(LEGACY_STATUS_NAME, self.window)
+        assert_status_a11y(self.window)
         # The success message is reachable only inside the launch() success
         # branch; refusal messages are the failure branches.
         success = self.window.index('fileManagerStatus = "Opened system file manager"')
@@ -96,6 +117,20 @@ class ClassicFilesFileManagerLaunchSourceTests(unittest.TestCase):
         self.assertLess(success, refusal)
         self.assertEqual(
             self.window.count('fileManagerStatus = "Opened system file manager"'), 1)
+
+    def test_status_name_and_role_negative_controls(self):
+        # AlertMessage is role 8; Alert is a C++ Event enum (2). Mutating the
+        # owned QML to either stale contract must fail the source gate.
+        for hostile, label in (
+            (self.window.replace(DYNAMIC_STATUS_NAME, LEGACY_STATUS_NAME, 1),
+             "constant accessible name"),
+            (self.window.replace(ALERT_MESSAGE_ROLE, ALERT_EVENT_ROLE, 1),
+             "Alert event enum used as role"),
+        ):
+            with self.subTest(mutation=label):
+                self.assertNotEqual(hostile, self.window)
+                with self.assertRaises(AssertionError):
+                    assert_status_a11y(hostile)
 
     def test_no_shell_argv_path_or_process_api(self):
         for forbidden in ("QProcess", "QNetworkAccessManager", "QUdpSocket",

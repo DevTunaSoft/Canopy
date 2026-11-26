@@ -48,6 +48,10 @@ BASE_VISUAL_PROJECTION_SHA256 = {
 ANNOUNCE_BEGIN = "// A11Y-ANNOUNCE-BEGIN"
 ANNOUNCE_END = "// A11Y-ANNOUNCE-END"
 ROLE_LINE = "Accessible.role: Accessible.AlertMessage"
+# QML Accessible.AlertMessage is role 8; Accessible.Alert is a C++ Event
+# enum of value 2 (and becomes MenuBar if assigned as a QML role).
+ALERT_MESSAGE_ROLE_VALUE = 8
+ALERT_EVENT_VALUE = 2
 NATIVE_GUARD = "canopyStatusAnnouncer.nativeAnnounceAvailable"
 NATIVE_CALL = "Accessible.announce(text, Accessible.Assertive)"
 CONSTANT_NAME = 'Accessible.name: "File manager launch status"'
@@ -194,6 +198,17 @@ class ClassicStatusAccessibilityTests(unittest.TestCase):
                 self.assertNotIn(CONSTANT_NAME, self.sources[name])
                 check_label(self.sources[name], obj, label_id)
 
+    def test_role_enum_semantics_are_pinned(self):
+        self.assertEqual(ALERT_MESSAGE_ROLE_VALUE, 8)
+        self.assertEqual(ALERT_EVENT_VALUE, 2)
+        self.assertNotEqual(ALERT_MESSAGE_ROLE_VALUE, ALERT_EVENT_VALUE)
+        for name, obj, label_id in STATUS_LABELS:
+            with self.subTest(label=obj):
+                block = label_block(self.sources[name], obj)
+                self.assertEqual(block.count(ROLE_LINE), 1)
+                self.assertIsNone(
+                    re.search(r"Accessible\.role:\s*Accessible\.Alert\b", block))
+
     def test_alertmessage_role_and_empty_ignored_on_every_label(self):
         for name, obj, label_id in STATUS_LABELS:
             with self.subTest(label=obj):
@@ -246,6 +261,9 @@ class ClassicStatusAccessibilityTests(unittest.TestCase):
         raw = self.sources["PreviewWindow.qml"]
         hostile = raw.replace(ROLE_LINE, "Accessible.role: Accessible.Alert", 1)
         self.assertNotEqual(hostile, raw)
+        self.assertEqual(hostile.count("Accessible.role: Accessible.Alert"), 1)
+        self.assertEqual(ALERT_MESSAGE_ROLE_VALUE, 8)   # AlertMessage role
+        self.assertEqual(ALERT_EVENT_VALUE, 2)          # Alert C++ event
         with self.assertRaises(AssertionError):
             check_label(hostile, "canopyFileManagerStatus", "fileManagerStatusLabel")
 
@@ -274,11 +292,14 @@ class ClassicStatusAccessibilityTests(unittest.TestCase):
             check_label(hostile, "canopyQuickControlsMessage", "message")
 
     def test_negative_control_cpp_guard_removal_fails(self):
-        hostile = self.main_src.replace(
-            "#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)", "#if 1", 1)
-        self.assertNotEqual(hostile, self.main_src)
-        with self.assertRaises(AssertionError):
-            check_main(hostile)
+        guard = "#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)"
+        for hostile_guard in ("#if 1",
+                              "#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)"):
+            with self.subTest(guard=hostile_guard):
+                hostile = self.main_src.replace(guard, hostile_guard, 1)
+                self.assertNotEqual(hostile, self.main_src)
+                with self.assertRaises(AssertionError):
+                    check_main(hostile)
 
 
 if __name__ == "__main__":

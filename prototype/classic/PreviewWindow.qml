@@ -668,7 +668,21 @@ Rectangle {
                 color: "#79899b"
                 font.pixelSize: 9
                 elide: Text.ElideRight
-                Accessible.name: "File manager launch status"
+                Accessible.name: fileManagerStatusLabel.text
+                Accessible.role: Accessible.AlertMessage
+                Accessible.ignored: fileManagerStatusLabel.text === ""
+                // A11Y-ANNOUNCE-BEGIN
+                property bool a11yAnnounceReady: false
+                Component.onCompleted: a11yAnnounceReady = true
+                onTextChanged: {
+                    if (text === "" || !a11yAnnounceReady)
+                        return;
+                    if (canopyStatusAnnouncer.nativeAnnounceAvailable)
+                        Accessible.announce(text, Accessible.Assertive);
+                    else
+                        canopyStatusAnnouncer.announce(fileManagerStatusLabel, text);
+                }
+                // A11Y-ANNOUNCE-END
             }
         }
     }

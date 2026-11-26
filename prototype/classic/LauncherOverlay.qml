@@ -354,6 +354,20 @@ FocusScope {
             font.pixelSize: 11
             Accessible.name: text
             Accessible.description: launcher.resultCountText
+            Accessible.role: Accessible.AlertMessage
+            Accessible.ignored: footer.text === ""
+            // A11Y-ANNOUNCE-BEGIN
+            property bool a11yAnnounceReady: false
+            Component.onCompleted: a11yAnnounceReady = true
+            onTextChanged: {
+                if (text === "" || !a11yAnnounceReady)
+                    return;
+                if (canopyStatusAnnouncer.nativeAnnounceAvailable)
+                    Accessible.announce(text, Accessible.Assertive);
+                else
+                    canopyStatusAnnouncer.announce(footer, text);
+            }
+            // A11Y-ANNOUNCE-END
         }
     }
 }

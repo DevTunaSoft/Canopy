@@ -1127,6 +1127,112 @@ static bool verifyOwnerIconsPreview(const QString &dirPath, QString *error) {
     return true;
 }
 
+// Owner-icons preview source. This provider deliberately contains NO painter,
+// crop, matte, offset, scale or regeneration step: the QImage returned here
+// is decoded straight from a file whose exact bytes were SHA-256 locked and
+// alpha validated at startup (and re-hashed below). Any failure empties the
+// cache so QQuickImage reports a missing image instead of a substitute.
+OwnerIconsPreviewProvider::OwnerIconsPreviewProvider(
+    const QString &previewRoot, QString *error)
+    : QQuickImageProvider(QQuickImageProvider::Image) {
+    const QString canonicalRoot = QDir(previewRoot).canonicalPath();
+    if (canonicalRoot.isEmpty()) {
+        *error = QStringLiteral("owner icons preview directory is missing");
+        return;
+    }
+    QFile manifest(QStringLiteral(
+        ":/Canopy/Classic/assets/owner_icons_20261126/manifest.json"));
+    if (!manifest.open(QIODevice::ReadOnly)) {
+        *error = QStringLiteral("embedded owner icons manifest missing");
+        return;
+    }
+    const QJsonDocument json = QJsonDocument::fromJson(manifest.readAll());
+    if (!json.isObject() || json.object().value(
+            QStringLiteral("schema_version")).toInt() != 1) {
+        *error = QStringLiteral("owner icons manifest is invalid");
+        return;
+    }
+    const QJsonArray entries = json.object().value(
+        QStringLiteral("icons")).toArray();
+    if (entries.size() != 8) {
+        *error = QStringLiteral("owner icons manifest needs exactly eight entries");
+        return;
+    }
+    QSet<QString> names;
+    for (const QJsonValue &value : entries) {
+        const QJsonObject item = value.toObject();
+        const QString name = item.value(QStringLiteral("name")).toString();
+        const QString relative = item.value(QStringLiteral("path")).toString();
+        const QString digest = item.value(QStringLiteral("sha256")).toString();
+        const QStringList parts = relative.split(QLatin1Char('/'));
+        if (name.isEmpty() || names.contains(name) ||
+            relative.isEmpty() || parts.size() != 2 ||
+            parts.first() != QStringLiteral("icons") ||
+            !relative.endsWith(QStringLiteral(".png")) ||
+            relative.contains(QLatin1Char('\\')) ||
+            parts.contains(QStringLiteral("..")) || digest.size() != 64) {
+            *error = QStringLiteral("invalid owner icons manifest entry");
+            m_images.clear();
+            return;
+        }
+        names.insert(name);
+        const QString path = QDir(canonicalRoot).filePath(relative);
+        const QFileInfo info(path);
+        if (!info.exists() || !info.isFile() || info.isSymLink() ||
+            info.size() > 4'000'000 ||
+            !info.canonicalFilePath().startsWith(
+                canonicalRoot + QLatin1Char('/'))) {
+            *error = QStringLiteral("owner icon file is missing or unsafe");
+            m_images.clear();
+            return;
+        }
+        QFile file(path);
+        if (!file.open(QIODevice::ReadOnly)) {
+            *error = QStringLiteral("owner icon file is unreadable");
+            m_images.clear();
+            return;
+        }
+        const QByteArray bytes = file.readAll();
+        if (QString::fromLatin1(QCryptographicHash::hash(
+                bytes, QCryptographicHash::Sha256).toHex()).toLower() !=
+            digest.toLower()) {
+            *error = QStringLiteral("owner icon SHA-256 mismatch, refusing substitute");
+            m_images.clear();
+            return;
+        }
+        QImageReader reader(path);
+        const QSize size = reader.size();
+        if (reader.format().toLower() != "png" ||
+            !size.isValid() || size.width() != size.height() ||
+            size.width() < 512 || size.width() > 4096) {
+            *error = QStringLiteral("owner icon is not a bounded square PNG");
+            m_images.clear();
+            return;
+        }
+        const QImage image = reader.read();
+        if (image.isNull() || !image.hasAlphaChannel()) {
+            *error = QStringLiteral("owner icon has no transparency");
+            m_images.clear();
+            return;
+        }
+        m_images.insert(name.toLower(), image);
+    }
+}
+
+QImage OwnerIconsPreviewProvider::requestImage(const QString &id, QSize *size,
+                                               const QSize &requestedSize) {
+    Q_UNUSED(requestedSize);
+    const QImage exact = m_images.value(id.toLower());
+    if (exact.isNull()) {
+        if (size)
+            *size = QSize();
+        return QImage(); // No SVG or regenerated fallback is ever consulted.
+    }
+    if (size)
+        *size = exact.size();
+    return exact; // Exact decoded PNG bytes; QML owns the frozen 54px slot.
+}
+
 // Local photo only; never download artwork, follow symlinks, or decode an
 // unbounded image. QImageReader checks headers without allocating a bitmap.
 static bool verifyLandscapeWallpaper(const QString &filePath,

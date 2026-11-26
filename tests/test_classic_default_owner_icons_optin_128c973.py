@@ -127,8 +127,6 @@ class OwnerIconsOptInTests(unittest.TestCase):
     def setUpClass(cls):
         cls.manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
         cls.cpp = (CLASSIC / "main.cpp").read_text(encoding="utf-8")
-        cls.provider_cpp = (CLASSIC / "RoundedDockIconProvider.cpp").read_text(
-            encoding="utf-8")
         cls.provider_h = (CLASSIC / "RoundedDockIconProvider.h").read_text(
             encoding="utf-8")
         cls.tile = (CLASSIC / "DockTile.qml").read_text(encoding="utf-8")
@@ -243,9 +241,9 @@ class OwnerIconsOptInTests(unittest.TestCase):
                       self.main_qml)
 
     def test_owner_provider_returns_exact_bytes_without_regeneration(self):
-        start = self.provider_cpp.index(
+        start = self.cpp.index(
             "OwnerIconsPreviewProvider::OwnerIconsPreviewProvider")
-        owner_impl = self.provider_cpp[start:]
+        owner_impl = self.cpp[start:]
         self.assertIn("return exact; // Exact decoded PNG bytes", owner_impl)
         self.assertNotIn("QPainter", owner_impl)
         self.assertNotIn("drawImage", owner_impl)

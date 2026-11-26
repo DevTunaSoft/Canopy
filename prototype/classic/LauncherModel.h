@@ -2,6 +2,7 @@
 
 #include <QString>
 #include <QStringList>
+#include <QVariantList>
 #include <QVector>
 
 #include <algorithm>
@@ -171,4 +172,54 @@ private:
         }
         return true;
     }
+};
+
+// One validated row of the opt-in desktop-entry catalogue. The compiled host
+// never walks XDG directories or parses .desktop files: a trusted caller
+// supplies an already-produced snapshot, mirroring the pure-Python
+// launcher_catalog_ingest contract (app id + display title, first id wins).
+struct LauncherCatalogRow {
+    QString appId;
+    QString title;
+};
+
+// Read-only, bounded host model for the compiled launcher. Every mutation
+// validates the whole input before committing; any malformed, oversized or
+// hostile input leaves the previous state untouched (fail closed). No process,
+// socket, daemon, timer or privileged path is involved.
+class LauncherCatalogModel final {
+public:
+    static constexpr int MaxSnapshotBytes = 64 * 1024;
+    static constexpr int MaxRows = 1024;
+    static constexpr int MaxTitleChars = 256;
+
+    bool active() const { return m_active; }
+    int rowCount() const { return m_rows.size(); }
+    int rawCount() const { return m_rawCount; }
+    int duplicateIdCount() const { return m_duplicateIdCount; }
+    QStringList titles() const;
+    // QML-facing shape: [{"title": name}, ...], in snapshot order.
+    QVariantList applications() const;
+    LauncherModel::View browse() const;
+    LauncherModel::View filter(const QString &query,
+                               int limit = LauncherModel::MaxResults) const;
+
+    static bool validAppId(const QString &appId);
+    static bool validTitle(const QString &title);
+
+    bool applyRows(const QVector<LauncherCatalogRow> &rows);
+    // Strict, LF-only, headerless "app_id<TAB>title" snapshot text.
+    bool loadFromText(const QString &text);
+    // Explicit-path, read-only, byte-bounded snapshot file. No scanning.
+    bool loadFromFile(const QString &path);
+
+    // Deterministic in-memory probes used by both the compiled binary and
+    // the Python-compiled harness. Prints CATALOG_PASS/CATALOG_FAIL markers.
+    static bool selfTest();
+
+private:
+    QVector<LauncherCatalogRow> m_rows;
+    int m_rawCount = 0;
+    int m_duplicateIdCount = 0;
+    bool m_active = false;
 };

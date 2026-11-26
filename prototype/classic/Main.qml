@@ -27,16 +27,26 @@ ApplicationWindow {
     // Original static artwork; no rotating placeholder rectangles.
     Wallpaper { anchors.fill: parent }
 
-    // Default desktop image is the SHA-locked approved alpine master.
+    // Default desktop image is the SHA-locked approved alpine master. The
+    // exact PNG is compiled into the binary by qt_add_resources, so the
+    // installed executable needs no CWD path or separate asset install rule.
     // The host may still override it with a separately validated
-    // --landscape-wallpaper; only one Image is ever decoded.
+    // --landscape-wallpaper or --approved-art-dir; only one Image is decoded.
     // tools/check_wallpaper.py enforces the exact approved bytes.
+    readonly property string approvedMasterWallpaperQrcUrl:
+        "qrc:/Canopy/Classic/assets/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png"
+    readonly property string approvedMasterWallpaperSourceUrl:
+        "file:prototype/classic/assets/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png"
     readonly property string approvedMasterWallpaperUrl: {
         const waveUrl = canopyApprovedWallpaperUrl.toString()
         const separator = waveUrl.lastIndexOf('/')
         if (canopyApprovedMode && separator >= 0)
             return waveUrl.substring(0, separator + 1) + "Canopy_Classic_Master_Wallpaper_1920x1080.png"
-        return "file:prototype/classic/assets/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png"
+        // Compiled Main.qml resolves against qrc:. The CWD-relative fallback
+        // is only for an uncompiled source-tree preview, and names the same
+        // approved master — never a substitute or a legacy wave.
+        const compiled = Qt.resolvedUrl("Main.qml").toString().startsWith("qrc:")
+        return compiled ? approvedMasterWallpaperQrcUrl : approvedMasterWallpaperSourceUrl
     }
     Component.onCompleted: {
         let wallpaperItem = null

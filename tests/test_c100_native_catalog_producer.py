@@ -10,6 +10,7 @@ from pathlib import Path
 import os
 import tempfile
 import unittest
+from unittest import mock
 
 from canopy_features.launcher import native_catalog_producer as producer
 
@@ -255,6 +256,63 @@ class ProducerHostileInputTests(unittest.TestCase):
         self.assertIn("NOT_RUN", text)
         self.assertIn("app_id<TAB>title", text)
         self.assertIn("512", text)
+
+
+class ProducerBoundedEnumerationTests(unittest.TestCase):
+    def test_thousand_names_stop_at_limit_plus_one_without_partial_output(self):
+        """Negative control for the directory-entry bound.
+
+        The proxy is finite (1000 synthetic files), so unfixed code fails
+        fast on the consumed-count assertion instead of hanging. It proves
+        the scan stops on the first entry *after* the cap instead of
+        materializing the whole hostile directory first.
+        """
+        with tempfile.TemporaryDirectory(prefix="canopy-native-catalog-") as folder:
+            apps = Path(folder) / "applications"
+            apps.mkdir()
+            # File bodies are irrelevant here: a bounded scan must refuse
+            # before reading any of them, so only the 1000 names matter.
+            for index in range(1000):
+                (apps / f"org.example.App{index:04d}.desktop").touch()
+            before = tree_snapshot(Path(folder))
+
+            real_scandir = os.scandir
+            consumed = []
+
+            class CountingScandir:
+                """Finite proxy that records each name the producer consumes."""
+
+                def __init__(self, path):
+                    self._real = real_scandir(path)
+
+                def __enter__(self):
+                    self._real.__enter__()
+                    return self
+
+                def __exit__(self, *args):
+                    return self._real.__exit__(*args)
+
+                def __iter__(self):
+                    for entry in self._real:
+                        consumed.append(entry.name)
+                        yield entry
+
+            with mock.patch.object(producer.os, "scandir", CountingScandir):
+                with self.assertRaises(producer.NativeCatalogError):
+                    producer.produce_catalog_bytes(apps)
+
+            # 512 names may be retained; entry 513 must refuse the snapshot
+            # before the remaining 487 names are ever yielded.
+            self.assertEqual(len(consumed), producer.MAX_DIRECTORY_ENTRIES + 1)
+            self.assertLess(len(consumed), 1000)
+            # No partial bytes and no output file: the call refused and the
+            # synthetic tree is byte-for-byte unchanged.
+            self.assertEqual(tree_snapshot(Path(folder)), before)
+            self.assertEqual(
+                [p.name for p in Path(folder).iterdir()
+                 if p.name != "applications"],
+                [],
+            )
 
 
 if __name__ == "__main__":

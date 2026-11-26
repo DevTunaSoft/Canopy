@@ -1,6 +1,6 @@
 # Classic native launcher catalog producer
 
-Status: **implemented, offline-only**. Base: `af97e11` (exact integration tip
+Status: **implemented, offline-only**. Base: `97a151b` (exact integration tip
 `integration/canopy-classic-20261123` at task start). This change owns only
 `canopy_features/launcher/native_catalog_producer.py`,
 `tests/test_c100_native_catalog_producer.py` and this document. It touches no
@@ -36,7 +36,7 @@ path, globs, walks recursively, launches a process or opens a socket.
 
 | Guard | Limit | Refusal |
 | --- | --- | --- |
-| Directory entries scanned | 512 | fail closed before reading file bodies |
+| Directory entries scanned | 512 (refuse at 513) | counted one at a time from `scandir`; at most 512 names retained, before any file body is read |
 | Filename characters | 256 | fail closed |
 | Per-entry bytes | 64 KiB (parser default) | bounded read of limit + 1, then refuse |
 | Catalog rows | 1024 (`MAX_ENTRIES`) | existing ingest contract refuses |
@@ -44,9 +44,12 @@ path, globs, walks recursively, launches a process or opens a socket.
 | Total snapshot bytes | 64 KiB | refuse before returning |
 
 Only immediate children are considered. A subdirectory is never descended
-into; a non-`.desktop` regular file is ignored after the name and symlink
-checks. All caller bounds are strict `int` values inside those ceilings, so a
-host cannot raise them past the compiled model's limits.
+into; the name/symlink checks run in this order — length, character and
+desktop-id grammar first, then `lstat` on names that match the grammar. An
+entry whose name is not a valid desktop id is therefore skipped before any
+`lstat` or symlink check, so a non-`.desktop` file is never stat'ed. All caller
+bounds are strict `int` values inside those ceilings, so a host cannot raise
+them past the compiled model's limits.
 
 ## Refusals and negative controls
 
@@ -81,31 +84,38 @@ in `CLASSIC_LAUNCHER_RUNTIME_CATALOG.md`.
 
 ## Verification and labels
 
-Targeted command (from the worktree root), exit 0:
+Targeted commands (from the worktree root) at the final head, all exit 0:
 
 ```text
 python -m unittest tests.test_c100_native_catalog_producer -v
-Ran 15 tests in 0.502s
+Ran 16 tests in 8.317s
 OK
 python tools/check_foundation.py
 PASS: foundation files, tagline, and local Markdown links
+python -m py_compile canopy_features/launcher/native_catalog_producer.py tests/test_c100_native_catalog_producer.py
+(exit 0, no output)
 ```
 
-`SYNTHETIC` sensitivity probes on the same tree changed one guard at a time
-(explicit row sort, non-regular/symlink refusal, snapshot byte cap, directory
-entry cap). The narrowest covering test failed for each mutation; the source
-was restored byte-identically after every probe (final SHA-256
-`b92e3e55926a3dc062a65c00e5df95860e7fc210a370d352157ea35e601552d1`).
+`SYNTHETIC` RED/GREEN negative control: the new test creates 1000 synthetic
+names in a fresh temp directory and wraps `os.scandir` with a finite counting
+proxy. On the untouched base it failed with `AssertionError: 1000 != 513` —
+every name was materialized before the cap was checked. After the incremental
+count fix it passed with exactly 513 consumed entries (`MAX_DIRECTORY_ENTRIES`
++ 1), no partial bytes or output file, and a byte-identical tree. The other 15
+tests are unchanged and still pass.
 Full `unittest discover -s tests` is `NOT_RUN` as authoring evidence here: the
 local run exceeded a 600-second foreground limit on this host. All fixtures
 are fresh `tempfile.TemporaryDirectory()` trees; no test reads a real host
 `XDG_DATA_HOME`, no network endpoint, no privileged operation and no compiled
 Qt binary.
 
-Producer SHA-256 at commit time:
-`b92e3e55926a3dc062a65c00e5df95860e7fc210a370d352157ea35e601552d1`.
-Test SHA-256 at commit time:
-`75fb100213eab2cd2517d69cca45803e4943ab3728c2313c8f7536a8e3af4b19`.
+Producer SHA-256 of the committed LF blob (`git show HEAD:<path> | sha256sum`):
+`b48fffff5aefb62abe3981013a03f128e01cd45b29b380a36cdccb480a3088bb`.
+Test SHA-256 of the committed LF blob:
+`afc713436398ec9daaa77cac97265b77bacbbd9c489363b8863c694376ee5f42`.
+The worktree files are CRLF under `core.autocrlf=true`; their byte SHA-256
+values are `9c3f0fdf7d4e517eda36fbf81cdb092dce4fb44a59028c2b1c1232ac1fca82e7`
+and `9d11aad5913c34f2d0bb0f446c09638186d1702640acec4be991d2353971ec01`.
 
 - `SYNTHETIC` — unittest evidence from synthetic temp directories only,
   including byte-for-byte TSV assertions, bounds at their edges, symlink

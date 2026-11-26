@@ -8,6 +8,7 @@ notification delivery. Run:
     python -m unittest tests.test_c100_notification_host_snapshot -v
 """
 import json
+import traceback
 import unittest
 from collections.abc import Mapping
 from dataclasses import FrozenInstanceError
@@ -125,6 +126,22 @@ class _RaisingMapping(Mapping):
         raise RuntimeError("hostile lookup SECRET_MARKER")
 
 
+class _SecretTypeErrorMapping(Mapping):
+    """Mapping whose key iteration raises a TypeError carrying a secret."""
+
+    def __init__(self, values):
+        self._values = values
+
+    def __iter__(self):
+        raise TypeError("hostile key iteration SECRET_MARKER")
+
+    def __len__(self):
+        return len(self._values)
+
+    def __getitem__(self, key):
+        return self._values[key]
+
+
 class HostileRecordTests(unittest.TestCase):
     def test_unapproved_topic_is_rejected(self):
         with self.assertRaises(SnapshotProducerError):
@@ -154,6 +171,25 @@ class HostileRecordTests(unittest.TestCase):
     def test_unhashable_mapping_key_is_rejected_with_domain_error(self):
         with self.assertRaises(SnapshotProducerError):
             compose([_UnhashableKeyMapping(_record())])
+
+    def test_typeerror_cause_carries_no_secret_into_the_traceback(self):
+        hostile = _SecretTypeErrorMapping(_record())
+        # Negative control: the hostile Mapping really does raise a
+        # secret-bearing TypeError before compose() translates it.
+        with self.assertRaises(TypeError) as raised:
+            iter(hostile).__next__()
+        self.assertIn("SECRET_MARKER", str(raised.exception))
+
+        with self.assertRaises(SnapshotProducerError) as caught:
+            compose([hostile])
+        error = caught.exception
+        self.assertEqual(str(error), "record has an unexpected key set")
+        self.assertIsNone(error.__cause__)
+        self.assertTrue(error.__suppress_context__)
+        formatted = "".join(traceback.format_exception(
+            type(error), error, error.__traceback__))
+        self.assertNotIn("SECRET_MARKER", formatted)
+        self.assertNotIn("TypeError", formatted)
 
     def test_hostile_mapping_lookup_leaks_no_builtin_or_secret(self):
         with self.assertRaises(SnapshotProducerError) as caught:

@@ -126,10 +126,11 @@ def _validate_record(record):
         raise SnapshotProducerError("record has an unexpected key set")
     try:
         keys = frozenset(record)
-    except TypeError as exc:
-        # A hostile Mapping can iterate an unhashable key. That is a rejected
-        # record, never a raw built-in exception from the public compose().
-        raise SnapshotProducerError("record has an unexpected key set") from exc
+    except TypeError:
+        # A hostile Mapping can iterate an unhashable key or raise a
+        # secret-bearing TypeError. That is a rejected record, never a raw
+        # built-in exception or a chained cause from the public compose().
+        raise SnapshotProducerError("record has an unexpected key set") from None
     if keys != RECORD_KEYS:
         raise SnapshotProducerError("record has an unexpected key set")
     topic = record["topic"]

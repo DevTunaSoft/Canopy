@@ -24,10 +24,17 @@ PROVIDER = CLASSIC / "RoundedDockIconProvider.cpp"
 HEADER = CLASSIC / "RoundedDockIconProvider.h"
 
 # Byte identity of the already-merged PR #580 renderer at integration tip
-# a3714ef; this change activates it from main.cpp and must not edit it.
-PROVIDER_SHA256_AT_A3714EF = (
-    "cd23bd9ce75766c3288f63f5424ed90e0d85e8c8ccc6331a01e6e94ff145e25a"
+# a3714ef. PE-019 added a bounded byte-reuse path to the constructor, so the
+# whole-file digest moved; the renderer region itself stays byte-identical and
+# is pinned separately below. No rendering code was changed by PE-019.
+PROVIDER_SHA256_AT_PE019_HEAD = (
+    "c271db84346196ad656cdd34def2a448b79fd5b185754e40de640310531b825e"
 )
+RENDERER_REGION_SHA256 = (
+    "3cbf9ca95ecf9749cfb56fc8521f3dfbb2ae6348d6612880cecf2d750d54af06"
+)
+RENDERER_REGION_START = 'constexpr auto kPackRenderer = "canopy-five-qt-v3";'
+RENDERER_REGION_END = "RoundedDockIconProvider::RoundedDockIconProvider("
 BASE_TIP = "da74616f09d943ccb3c4fb5a5d624e0e6b25bc93"  # integration tip this branch was rebased onto (PR #590 merged)
 TARGET_FIVE = ("browser", "mail", "files", "terminal", "settings")
 FROZEN_THREE = ("calendar", "photos", "music")
@@ -76,7 +83,13 @@ class ClassicFiveIconRuntimeModeTests(unittest.TestCase):
     def test_merged_v3_renderer_is_activated_not_modified(self):
         provider_bytes = committed_bytes(PROVIDER).replace(b"\r\n", b"\n")
         self.assertEqual(hashlib.sha256(provider_bytes).hexdigest(),
-                         PROVIDER_SHA256_AT_A3714EF)
+                         PROVIDER_SHA256_AT_PE019_HEAD)
+        renderer_text = provider_bytes.decode("utf-8")
+        renderer_bytes = renderer_text[
+            renderer_text.index(RENDERER_REGION_START):
+            renderer_text.index(RENDERER_REGION_END)].encode("utf-8")
+        self.assertEqual(hashlib.sha256(renderer_bytes).hexdigest(),
+                         RENDERER_REGION_SHA256)
         self.assertIn('constexpr auto kPackRenderer = "canopy-five-qt-v3";',
                       self.provider)
         self.assertIn("renderFiveAtDensity", self.provider)
@@ -94,7 +107,7 @@ class ClassicFiveIconRuntimeModeTests(unittest.TestCase):
                 "(dockFiveCenterReviewMode || !dockCleanEdgesReviewMode);",
                 "approvedRoot, terminalCandidatePath, false, &roundedError,",
                 "dockCleanEdgesReviewModeSelected, dockFiveCenterModeSelected,",
-                "productionPackRoot);",
+                "productionPackRoot, &verifiedArtBytes);",
                 "DOCK_FIVE_CENTER_ACTIVE: Browser, Mail, Files, Terminal, Settings",
         ):
             with self.subTest(marker=marker):

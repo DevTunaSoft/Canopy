@@ -1007,7 +1007,8 @@ static bool verifyNotificationCenterScene(QQuickItem *content, QString *reason) 
 // An approved visual is never loaded from a guessed path or a replacement
 // file. The manifest is source-controlled, and all nine external PNGs must
 // match the exact source bytes before Qt is allowed to open the scene.
-static bool verifyExactArtwork(const QString &dirPath, bool requireWave, QString *error) {
+static bool verifyExactArtwork(const QString &dirPath, bool requireWave, QString *error,
+                               QHash<QString, QByteArray> *verifiedBytes = nullptr) {
     const QDir root(dirPath);
     const QString canonicalRoot = root.canonicalPath();
     if (canonicalRoot.isEmpty() || QFileInfo(dirPath).isSymLink()) {
@@ -1034,7 +1035,7 @@ static bool verifyExactArtwork(const QString &dirPath, bool requireWave, QString
         return false;
     }
     QSet<QString> checkedPaths;
-    auto verify = [&](const QJsonObject &item) -> bool {
+    auto verify = [&](const QJsonObject &item, bool keepBytes) -> bool {
         const QString relative = item.value(QStringLiteral("path")).toString();
         const QString sha = item.value(QStringLiteral("sha256")).toString();
         if (relative.isEmpty() || !relative.endsWith(QStringLiteral(".png")) ||
@@ -1058,19 +1059,28 @@ static bool verifyExactArtwork(const QString &dirPath, bool requireWave, QString
             *error = QStringLiteral("cannot read approved art: ") + relative;
             return false;
         }
+        const QByteArray bytes = file.readAll();
+        if (bytes.isEmpty()) {
+            *error = QStringLiteral("cannot read approved art: ") + relative;
+            return false;
+        }
         const QByteArray digest = QCryptographicHash::hash(
-            file.readAll(), QCryptographicHash::Sha256).toHex();
+            bytes, QCryptographicHash::Sha256).toHex();
         if (digest != sha.toLatin1()) {
             *error = QStringLiteral("SHA-256 mismatch, refusing substitute: ") + relative;
             return false;
         }
+        // The already-verified bytes are reused by the approved icon provider,
+        // so startup does not open and read the same eight PNGs a second time.
+        if (verifiedBytes && keepBytes)
+            verifiedBytes->insert(relative, bytes);
         return true;
     };
     for (const QJsonValue &item : icons) {
-        if (!item.isObject() || !verify(item.toObject()))
+        if (!item.isObject() || !verify(item.toObject(), true))
             return false;
     }
-    if ((requireWave && !verify(wallpaper)) ||
+    if ((requireWave && !verify(wallpaper, false)) ||
         checkedPaths.size() != (requireWave ? 9 : 8)) {
         if (error->isEmpty())
             *error = QStringLiteral("incomplete approved-art set");
@@ -1840,6 +1850,10 @@ int main(int argc, char *argv[]) {
         return 2;
     }
     QString approvedRoot;
+    // Byte-exact PNG payloads already hashed by the approved-art gate. They
+    // are handed to the icon provider so startup never reopens the same files;
+    // cleared as soon as the provider has decoded its fixed cache.
+    QHash<QString, QByteArray> verifiedArtBytes;
     if (approvedMode) {
         if (approvedIndex + 1 >= args.size() || args.at(approvedIndex + 1).startsWith(QLatin1Char('-'))) {
             qCritical() << "APPROVED_ART_FAIL: missing --approved-art-dir PATH";
@@ -1847,7 +1861,8 @@ int main(int argc, char *argv[]) {
         }
         const QString requested = args.at(approvedIndex + 1);
         QString error;
-        if (!verifyExactArtwork(requested, !landscapeMode, &error)) {
+        if (!verifyExactArtwork(requested, !landscapeMode, &error,
+                                &verifiedArtBytes)) {
             qCritical().noquote() << "APPROVED_ART_FAIL:" << error;
             return 3;
         }
@@ -1964,7 +1979,7 @@ int main(int argc, char *argv[]) {
             approvedRoot, terminalCandidatePath, false, &roundedError,
             dockBalancedFitReviewMode, dockOpticalBalanceReviewMode,
             dockCleanEdgesReviewModeSelected, dockFiveCenterModeSelected,
-            productionPackRoot);
+            productionPackRoot, &verifiedArtBytes);
         if (!roundedIcons->isValid() || !roundedIcons->allCornersClipped()) {
             qCritical().noquote() << "APPROVED_ART_FAIL: rounded dock rendering:"
                                    << roundedError;
@@ -1994,7 +2009,8 @@ int main(int argc, char *argv[]) {
         if (framingReviewMode) {
             QString reviewError;
             auto *launcherReviewIcons = new RoundedDockIconProvider(
-                approvedRoot, terminalCandidatePath, true, &reviewError);
+                approvedRoot, terminalCandidatePath, true, &reviewError,
+                false, false, false, false, QString(), &verifiedArtBytes);
             if (!launcherReviewIcons->isValid() ||
                 !launcherReviewIcons->allCornersClipped()) {
                 qCritical().noquote()
@@ -2009,6 +2025,9 @@ int main(int argc, char *argv[]) {
                        " review, dock provider and original masters unchanged;"
                        " owner visual approval NOT granted";
         }
+        // Verified payloads are no longer needed after the providers have
+        // decoded their bounded caches; do not retain them for the session.
+        verifiedArtBytes.clear();
         }
     }
     engine.rootContext()->setContextProperty(

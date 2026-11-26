@@ -25,8 +25,11 @@ before any filesystem access, and every failure path writes nothing.
 
 "Deciding is not executing": a view says whether a presentation may offer a
 setting and why. The caller owns any persistence and any action. Corrupt,
-duplicate-keyed, oversized or unknown state is discarded so the store starts
-empty (fail closed), mirroring ``canopy_features.launcher.launcher_favorites``.
+duplicate-keyed or unknown state is discarded so the store starts empty (fail
+closed), mirroring ``canopy_features.launcher.launcher_favorites``. The raw
+bytes of a rejected state file are kept in a bounded quarantine sidecar before
+any successful write replaces them; no file content is logged, and an
+unreadable or oversized state file is never overwritten.
 """
 from __future__ import annotations
 
@@ -47,6 +50,8 @@ __all__ = [
     "SCHEMA_VERSION",
     "MAX_STATE_BYTES",
     "MAX_KEY_BYTES",
+    "CORRUPT_SUFFIX",
+    "MAX_CORRUPT_COPIES",
     "REDUCED_MOTION_KEY",
     "STATE_BASENAME",
     "USER_SEGMENT",
@@ -65,6 +70,10 @@ SCHEMA_VERSION = 1
 MAX_STATE_BYTES = 4096
 MAX_KEY_BYTES = 64
 MAX_KEYS = 16
+# Bounded recovery: at most three corrupt snapshots, each no larger than
+# MAX_STATE_BYTES, kept beside the state file before it is replaced.
+CORRUPT_SUFFIX = ".corrupt"
+MAX_CORRUPT_COPIES = 3
 
 STATE_BASENAME = "preferences.json"
 USER_SEGMENT = "users"
@@ -392,31 +401,37 @@ def _reject_constant(value):
 
 
 def _validate_document(document):
-    """Return a bounded value mapping or fail closed with an empty document."""
+    """Return a bounded value mapping, or None for a corrupt document.
+
+    ``None`` distinguishes an untrusted document from a legitimate empty
+    preference set, so the reader can quarantine only the former. Invalid
+    fields still discard the whole document for the in-memory view (the
+    established fail-closed contract).
+    """
     if not isinstance(document, collections.abc.Mapping):
-        return {}
+        return None
     if set(document) - {"version", "values"}:
-        return {}
+        return None
     version = document.get("version", SCHEMA_VERSION)
     if type(version) is not int or version != SCHEMA_VERSION:
-        return {}
+        return None
     values = document.get("values", {})
     if not isinstance(values, collections.abc.Mapping):
-        return {}
+        return None
     if len(values) > MAX_KEYS:
-        return {}
+        return None
     checked = {}
     for key, value in values.items():
         if type(key) is not str:
-            return {}
+            return None
         size = _utf8_key_size(key)
         if size is None or size > MAX_KEY_BYTES or key not in KEYS:
-            return {}
+            return None
         definition = KEYS[key]
         if not definition["available"]:
-            return {}
+            return None
         if type(value) is not str or value not in definition["values"]:
-            return {}
+            return None
         checked[key] = value
     return checked
 
@@ -430,7 +445,9 @@ class PersistedPreferences:
     and write. Without ``root`` the legacy absolute-path form is retained but
     still rejects system locations and symlinked components. The constructor
     never creates directories and never writes; only an explicit successful
-    :meth:`set` saves. A single instance owns one state file.
+    :meth:`set` saves. A single instance owns one state file. Rejected state
+    bytes are quarantined, never logged, before a successful save replaces
+    the file.
     """
 
     def __init__(self, path, *, root=None):
@@ -445,6 +462,8 @@ class PersistedPreferences:
             self._path = _legacy_path(text)
         else:
             self._path, self._root = _resolve_user_path(root, text)
+        self._corrupt_raw = None
+        self._unrecoverable = False
         self._values = self._read()
 
     @classmethod
@@ -464,12 +483,27 @@ class PersistedPreferences:
             self._path, self._root = _resolve_user_path(self._root, self._path)
 
     def _read(self):
+        """Load a bounded document, recording rejected bytes for recovery.
+
+        Reads at most ``MAX_STATE_BYTES + 1`` bytes so an arbitrarily large
+        file can never be materialized in memory. Only fixed category strings
+        are used for failures; no file content reaches a log or an exception.
+        """
         try:
             self._check_path()
-            raw = self._path.read_bytes()
-        except (PersistedPreferencesError, OSError, ValueError):
+            with self._path.open("rb") as stream:
+                raw = stream.read(MAX_STATE_BYTES + 1)
+        except FileNotFoundError:
+            return {}
+        except PersistedPreferencesError:
+            return {}
+        except (OSError, ValueError):
+            # The existing bytes cannot be inspected, so they cannot be
+            # quarantined safely. Refuse to overwrite them later.
+            self._unrecoverable = True
             return {}
         if len(raw) > MAX_STATE_BYTES:
+            self._unrecoverable = True
             return {}
         try:
             document = json.loads(
@@ -478,21 +512,30 @@ class PersistedPreferences:
                 parse_constant=_reject_constant,
             )
         except (UnicodeError, ValueError, TypeError):
+            self._corrupt_raw = raw
             return {}
-        return _validate_document(document)
+        checked = _validate_document(document)
+        if checked is None:
+            self._corrupt_raw = raw
+            return {}
+        return checked
 
-    def _save(self):
+    def _quarantine_path(self, index=0):
+        """Return a boundary-checked corrupt-state snapshot path."""
+        suffix = CORRUPT_SUFFIX if index == 0 else "%s.%d" % (CORRUPT_SUFFIX,
+                                                              index)
+        candidate = Path(str(self._path) + suffix)
         self._check_path()
-        document = {
-            "version": SCHEMA_VERSION,
-            "values": dict(sorted(self._values.items())),
-        }
-        payload = json.dumps(document, sort_keys=True).encode("utf-8")
-        if len(payload) > MAX_STATE_BYTES:
-            raise PersistedPreferencesError("preference state exceeds byte cap")
-        parent = self._path.parent
+        if self._root is None:
+            return _legacy_path(str(candidate))
+        checked, _ = _resolve_user_path(self._root, candidate)
+        return checked
+
+    def _write_atomically(self, target, payload):
+        """Write bounded bytes to ``target`` via a private 0o600 temp file."""
         temporary = None
         try:
+            parent = target.parent
             parent.mkdir(mode=0o700, parents=True, exist_ok=True)
             import tempfile
             with tempfile.NamedTemporaryFile(
@@ -503,7 +546,7 @@ class PersistedPreferences:
                 stream.write(payload)
                 stream.flush()
                 os.fsync(stream.fileno())
-            os.replace(str(temporary), str(self._path))
+            os.replace(str(temporary), str(target))
             # Ownership of the temporary file transferred to the final path.
             temporary = None
         except OSError as exc:
@@ -515,6 +558,35 @@ class PersistedPreferences:
                         temporary.unlink()
                 except OSError:  # pragma: no cover - best-effort cleanup
                     pass
+
+    def _quarantine_corrupt(self, raw):
+        """Keep the most recent bounded corrupt snapshots, oldest rotated out."""
+        try:
+            for index in range(MAX_CORRUPT_COPIES - 1, 0, -1):
+                older = self._quarantine_path(index - 1)
+                if older.exists():
+                    os.replace(str(older), str(self._quarantine_path(index)))
+        except OSError as exc:
+            raise PersistedPreferencesError(
+                "could not quarantine preference state") from exc
+        self._write_atomically(self._quarantine_path(0), raw)
+
+    def _save(self):
+        self._check_path()
+        if self._unrecoverable:
+            raise PersistedPreferencesError(
+                "unreadable preference state must be removed before writing")
+        document = {
+            "version": SCHEMA_VERSION,
+            "values": dict(sorted(self._values.items())),
+        }
+        payload = json.dumps(document, sort_keys=True).encode("utf-8")
+        if len(payload) > MAX_STATE_BYTES:
+            raise PersistedPreferencesError("preference state exceeds byte cap")
+        if self._corrupt_raw is not None:
+            self._quarantine_corrupt(self._corrupt_raw)
+            self._corrupt_raw = None
+        self._write_atomically(self._path, payload)
 
     def view(self, key):
         _check_key(key)

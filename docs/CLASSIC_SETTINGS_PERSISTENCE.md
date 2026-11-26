@@ -64,6 +64,28 @@ unavailable key, a wrong-typed value, a duplicate key, a bad version, a JSON
 constant and an oversized key or document all discard the whole document and
 start the store empty.
 
+### Corrupt-config recovery (PE-009)
+
+* Reads are capped at `MAX_STATE_BYTES + 1` bytes. An oversized or unreadable
+  state file yields the safe unset preference and is never overwritten: a
+  bounded copy cannot be made, so `set()` raises `PersistedPreferencesError`
+  with a fixed message until the file is removed by its owner.
+* A rejected document (bad JSON, duplicate key, JSON constant, unknown or
+  unavailable key, wrong value type, bad schema version or lone surrogate)
+  still starts the store empty. Its exact raw bytes are retained in
+  `preferences.json.corrupt` before the first successful `set()` replaces the
+  state file, so recovery never silently destroys the previous file.
+* Quarantine copies rotate through at most `MAX_CORRUPT_COPIES` (3) snapshots,
+  each capped at `MAX_STATE_BYTES` (4096) bytes. The newest is
+  `preferences.json.corrupt`; older ones are `.corrupt.1` and `.corrupt.2`.
+* Every quarantine path is boundary-checked like the state path (no traversal,
+  no symlinked component, no privileged location) and written through the same
+  private `0o600` temporary file plus atomic rename. A rejected symlink in the
+  quarantine path fails closed without modifying either file.
+* No file content, log record or exception message carries state bytes. All
+  diagnostic strings are fixed categories; tests use synthetic marker text
+  only. This changes no visual, QML, artwork or Qt compiled input.
+
 ### Atomic failure rollback
 
 `set()` snapshots the value mapping before saving. Any failure — including a
@@ -208,6 +230,56 @@ CPU, GPU, wakeups, compiled Qt render, real Mint session behavior and
 screen-reader behavior — all `NOT_RUN`. This is a pure decision gate with no
 new allocation path, no service, no visual or accessibility change, so no
 stability, security, accessibility or approved-visual tradeoff is made.
+
+### PE-009 targeted verification (worktree at `90dd463`)
+
+Branch `fix/settings-recovery-90dd463`, isolated worktree. Runner: uv isolated
+pytest with the worktree on `PYTHONPATH` (`PYTHONPATH=. uv run --no-project
+pytest`, pytest 9.2.0 on CPython 3.12 from uv). Only targeted settings tests
+were run; no full suite, Qt build or VM action is claimed here.
+
+RED, new recovery test file on the unmodified base tree:
+
+```
+PYTHONPATH=. uv run --no-project pytest tests/test_c100_settings_corrupt_config_recovery.py -q
+6 failed, 2 passed in 5.31s
+```
+
+Log SHA-256 `65ff35bc3ae33cb7cbda7bd2d7cde4de8df264fd914952d0d9d1c1d2315bff6c`.
+The two green cases were negative controls (valid-config round trip and no
+temporary leftovers), kept as coverage rather than claimed defects.
+
+GREEN, same host after the production change:
+
+```
+PYTHONPATH=. uv run --no-project pytest \
+  tests/test_c100_settings_corrupt_config_recovery.py \
+  tests/test_c100_settings_persisted_preferences.py \
+  tests/test_c100_settings_persistence_isolation.py -q
+56 passed, 1 skipped, 77 subtests passed in 11.44s
+```
+
+Log SHA-256 `115010125cedf58624f3ea0402b535dcda55770a421553f651fa697285e04d3d`.
+The skip is the pre-existing POSIX mode-bit assertion on Windows.
+`python3 tools/check_foundation.py` → PASS (log SHA-256
+`cd7ce3ea44ff12d436ec0af5e64de94b552f5bdfd4b210f14372c29537f937ad`);
+`git diff --check` → exit 0.
+
+Sensitivity probe: removing only the quarantine call from `_save` produced 5
+named failures in the new test file; the source was restored byte-identically
+(SHA-256 `253001f6b88a7c97851a5bbdd190abcbaabf2469d3d26b38d77965c5bf1fb286`
+before and after), `__pycache__` was cleared and the targeted GREEN was rerun.
+Probe log SHA-256
+`b4fd5fcbad74e65c77d0273b026aa3a62043f9e3da7cc2d9a5649226e8c9b327`.
+
+Resource / evidence note: measured here are targeted test counts, durations
+and log SHA-256s from local CPython/uv gates on Windows 11 (`SYNTHETIC`, not a
+compiled-runtime profile). Deliberately not measured: full-suite counts,
+shell-owned PSS, CPU, GPU, wakeups, compiled Qt render, real Mint session
+behavior and screen-reader behavior — all `NOT_RUN`. The change adds one
+bounded read and at most three 4096-byte snapshots on a corrupt-state write
+path; no service, polling loop, visual or accessibility behavior is added, so
+no stability, security, accessibility or approved-visual tradeoff is made.
 
 ## Non-claims
 

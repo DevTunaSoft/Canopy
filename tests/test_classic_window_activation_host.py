@@ -45,7 +45,8 @@ class ClassicWindowActivationHostTests(unittest.TestCase):
     def test_shell_build_registers_component_and_qml_adapter(self):
         self.assertIn(
             "qt_add_executable(canopy-classic-spike main.cpp "
-            "WindowActivationState.cpp WindowActivationState.h "
+            "LauncherModel.cpp LauncherModel.h WindowActivationState.cpp "
+            "WindowActivationState.h "
             "RoundedDockIconProvider.cpp RoundedDockIconProvider.h "
             "SystemAppLauncher.cpp SystemAppLauncher.h)", self.cmake)
         self.assertIn("ShellMenuPopupSet.qml WindowActivationIndicators.qml",

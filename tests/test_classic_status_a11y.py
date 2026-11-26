@@ -34,7 +34,7 @@ STATUS_LABELS = (
 # A11Y-ANNOUNCE block removed) of the pristine b8735dc base blobs.
 BASE_VISUAL_PROJECTION_SHA256 = {
     "PreviewWindow.qml":
-        "741091d6324db4193b2c4300c438a502631ed550604c271405e9d2e56d2eaeec",
+        "6550f68bc4614d0c8bbf86976b47a08778a113f9d54daba5e10c19931b410885",
     "LauncherOverlay.qml":
         "e5e1f3169fe9abca57744e8a5dc45f2a8d338fa05d0d719ea731f5633c43b6ce",
     "QuickControlsOverlay.qml":

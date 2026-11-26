@@ -81,11 +81,16 @@ private:
     };
 
     static constexpr int kMaxEntries = 500;
+    // Navigation history is a small bounded cache. The oldest entry is
+    // explicitly invalidated once the cap is reached, so browsing cannot
+    // grow retained memory without limit.
+    static constexpr int kMaxBackStack = 32;
 
     QString resolveUnderHome(const QString &path) const;
     void reload();
     void applySearch();
     void takePath(const QString &canonicalPath);
+    void pushBackStack(const QString &path);
 
     QString m_homePath;
     QString m_currentPath;

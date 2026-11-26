@@ -65,6 +65,17 @@ bool FileModel::canGoUp() const
     return !resolveUnderHome(parent.absolutePath()).isEmpty();
 }
 
+void FileModel::pushBackStack(const QString &path)
+{
+    // Appending a new path explicitly invalidates the oldest history entry
+    // once the cap is exceeded. Retained history and its memory stay constant
+    // however long the user browses; the newest paths are always kept so
+    // goBack() still walks the most recent history first.
+    m_backStack.append(path);
+    while (m_backStack.size() > kMaxBackStack)
+        m_backStack.removeFirst();
+}
+
 bool FileModel::navigate(const QString &path)
 {
     const QString target = resolveUnderHome(path);
@@ -78,7 +89,7 @@ bool FileModel::navigate(const QString &path)
     }
     if (target.compare(m_currentPath, kCase) == 0)
         return true;
-    m_backStack.append(m_currentPath);
+    pushBackStack(m_currentPath);
     takePath(target);
     return true;
 }
@@ -102,7 +113,7 @@ bool FileModel::goUp()
         emit navigationRejected(QStringLiteral("path outside home"));
         return false;
     }
-    m_backStack.append(m_currentPath);
+    pushBackStack(m_currentPath);
     takePath(target);
     return true;
 }

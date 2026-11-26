@@ -19,6 +19,8 @@ import re
 import tempfile
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
+from canopy_features.reliability import bounded_config_recovery as _recovery
+
 SCHEMA = 1
 STATE_NAME = "startup.json"
 MAX_STEPS = 64
@@ -121,6 +123,8 @@ class StartupCheckpoints:
         if self._path.is_symlink():
             raise CheckpointError("state file must not be a symlink")
         self._steps = tuple(names)
+        self._corrupt_raw = b""
+        self._unrecoverable = False
 
     @property
     def steps(self) -> Tuple[str, ...]:
@@ -149,21 +153,35 @@ class StartupCheckpoints:
         return None
 
     def _read(self) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
-        if self._path.is_symlink():
+        """Load a bounded journal, recording rejected bytes for recovery.
+
+        The read never materializes more than ``MAX_STATE_BYTES + 1`` bytes,
+        and no file content reaches an error string. Bytes that fail parsing
+        or validation are retained only in memory until an explicit reset
+        preserves them in a bounded snapshot.
+        """
+        self._corrupt_raw = b""
+        self._unrecoverable = False
+        loaded = _recovery.read_bounded_config(
+            self._path, max_bytes=MAX_STATE_BYTES)
+        if loaded.status == _recovery.MISSING:
+            return None, "no checkpoint"
+        if loaded.status == _recovery.UNSAFE_PATH:
+            self._unrecoverable = True
             return None, "checkpoint path is a symlink"
-        try:
-            if not self._path.exists():
-                return None, "no checkpoint"
-            if self._path.stat().st_size > MAX_STATE_BYTES:
-                return None, "checkpoint exceeds byte bound"
-            raw = self._path.read_bytes()
-        except OSError:
+        if loaded.status == _recovery.UNREADABLE:
+            self._unrecoverable = True
             return None, "checkpoint is unreadable"
-        try:
-            record = json.loads(raw.decode("utf-8"))
-        except (UnicodeError, ValueError):
+        if loaded.status == _recovery.OVERSIZE:
+            self._unrecoverable = True
+            return None, "checkpoint exceeds byte bound"
+        if loaded.status == _recovery.CORRUPT:
+            self._corrupt_raw = loaded.raw
             return None, "checkpoint is not valid UTF-8 JSON"
-        return record, self._check(record)
+        error = self._check(loaded.document)
+        if error is not None:
+            self._corrupt_raw = loaded.raw
+        return loaded.document, error
 
     def _check(self, record: Any) -> Optional[str]:
         if type(record) is not dict or set(record) != {
@@ -206,7 +224,24 @@ class StartupCheckpoints:
             raise CheckpointError(failure)
 
     def reset(self) -> None:
-        """Explicitly discard prior state and publish a fresh plan atomically."""
+        """Explicitly discard prior state and publish a fresh plan atomically.
+
+        Rejected bytes are preserved in bounded snapshots before the fresh
+        plan is written. Unreadable, oversized or symlinked state is never
+        overwritten because its bytes cannot be preserved safely.
+        """
+        self._read()
+        if self._unrecoverable:
+            raise CheckpointError(
+                "unreadable checkpoint must be removed before reset")
+        if self._corrupt_raw:
+            try:
+                _recovery.quarantine_config(
+                    self._path, self._corrupt_raw, max_bytes=MAX_STATE_BYTES)
+            except _recovery.ConfigRecoveryError as exc:
+                raise CheckpointError(
+                    "could not quarantine checkpoint bytes") from exc
+            self._corrupt_raw = b""
         failure = self._write(self._new_record())
         if failure:
             raise CheckpointError(failure)

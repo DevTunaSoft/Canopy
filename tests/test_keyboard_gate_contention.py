@@ -41,9 +41,9 @@ class ContentionReproGuard(unittest.TestCase):
         self.binary.write_bytes(b"inert stand-in")
         self.binary.chmod(0o700)
 
-    def run_gate(self):
+    def run_gate(self, timeout_seconds=10):
         return gate.run_driver(driver=self.driver, binary=self.binary,
-                               source_sha=SHA, timeout_seconds=10)
+                               source_sha=SHA, timeout_seconds=timeout_seconds)
 
     def test_one_delayed_launch_then_success_is_absorbed(self):
         """Models the observed 10 s startup miss without sleeping 10 s."""
@@ -78,7 +78,10 @@ class ContentionReproGuard(unittest.TestCase):
             "    print(line, flush=True)\n", encoding="utf-8")
         steps = "|".join(_step_lines().decode("utf-8").splitlines())
         with mock.patch.dict(os.environ, {"CANOPY_STEPS": steps}):
-            report = self.run_gate()
+            # Positive control for a fast driver: give the real process a
+            # generous per-attempt bound on this contended host. The gate's
+            # own timeout bounds and negative controls stay strict below.
+            report = self.run_gate(timeout_seconds=60)
         self.assertEqual(report["platform"], "offscreen")
         self.assertEqual(len(report["steps"]), len(gate.STEPS))
 

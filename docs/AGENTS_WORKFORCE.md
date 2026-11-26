@@ -1,10 +1,17 @@
 # Agent workforce and integration policy
 
-Authoritative source: `canopy_master_supplemental_directive_20261126.md`,
-SHA-256 `f3ec49fba9317c01354dbd34cf1c5cfedb2625b604f25117c720ae0f44781eae`
-(verified on disk). This file is a concise repository-facing summary; where
-wording elsewhere conflicts, the directive governs. It does not grant a merge
-or visual approval.
+Authoritative source (external to this repository): the composer-pasted master
+supplemental directive, preserved on disk at
+`C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy_master_supplemental_directive_20261126.md`
+with SHA-256 `f3ec49fba9317c01354dbd34cf1c5cfedb2625b604f25117c720ae0f44781eae`
+(recomputed from on-disk bytes at verification). The bare filename
+`canopy_master_supplemental_directive_20261126.md` is **NOT in the tree** at exact
+tip `84684a0f77c81cb0e84d9a679ec57a429dc5c1db` (`git cat-file -e` fails) and is
+recorded `MISSING` in
+`C:/Users/X1/AppData/Local/hermes/cache/scratch/final_git_tree_provenance_84684a0.json`;
+no repository blob backs this citation. This file is a concise repository-facing
+summary; where wording elsewhere conflicts, the external directive governs. It
+does not grant a merge or visual approval.
 
 ## Workforce
 

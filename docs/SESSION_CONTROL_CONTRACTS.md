@@ -75,7 +75,7 @@ Commands run from the exact worktree at the final head:
 
 ```text
 python -m unittest tests.test_pe048_session_controls -v
-Ran 25 tests in 0.268s
+Ran 25 tests
 OK
 python -m py_compile canopy_features/system/session_controls.py tests/test_pe048_session_controls.py
 exit 0, no output

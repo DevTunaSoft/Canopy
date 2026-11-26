@@ -13,6 +13,28 @@ FocusScope {
     property bool opened: false
     property alias searchQuery: searchField.text
     property string selectionMessage: ""
+    // One user-facing action hint for every refused launch: dock bridges,
+    // launcher choices and the Files footer compose their text through this
+    // same QML boundary. No colour, icon, geometry or dock behaviour changes.
+    readonly property string retryHint: "Check availability, then try again"
+    function feedback(message) {
+        if (typeof message !== "string" || message.length === 0)
+            return ""
+        // Success notices are not failures and keep their wording.
+        if (message.indexOf("Opened ") === 0)
+            return message
+        return message + " · " + launcher.retryHint
+    }
+    readonly property string visibleStatus: {
+        const hinted = launcher.feedback(launcher.selectionMessage)
+        if (hinted.length > 0)
+            return hinted
+        if (launcher.filteredCount === 0)
+            return "No matching applications"
+        return canopySystemLaunchEnabled
+            ? "Select an installed application to launch"
+            : "Files opens the in-preview window · native launch is opt-in"
+    }
     // Bounded, case-insensitive search. Empty input is explicit catalogue
     // browsing; oversized or malformed input fails closed with no matches.
     // LauncherModel.h applies the same bounds and selection rules to host
@@ -325,11 +347,7 @@ FocusScope {
             anchors.horizontalCenter: parent.horizontalCenter
             width: parent.width - 36
             height: 20
-            text: launcher.selectionMessage.length > 0 ? launcher.selectionMessage :
-                  launcher.filteredCount === 0 ? "No matching applications" :
-                  canopySystemLaunchEnabled
-                  ? "Select an installed application to launch"
-                  : "Files opens the in-preview window · native launch is opt-in"
+            text: launcher.visibleStatus
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
             color: "#657b90"

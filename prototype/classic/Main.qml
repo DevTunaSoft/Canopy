@@ -141,14 +141,23 @@ ApplicationWindow {
                     id: launcherMenu
                     MenuItem {
                         text: "Browse applications"
+                        objectName: "canopyLauncherMenuBrowse"
+                        Accessible.name: "Browse applications"
+                        Accessible.description: "Open the application catalogue"
                         onTriggered: appLauncher.openLauncher()
                     }
                     MenuItem {
                         text: "About Canopy Classic"
+                        objectName: "canopyLauncherMenuAbout"
+                        Accessible.name: "About Canopy Classic"
+                        Accessible.description: "Show information about this preview"
                         onTriggered: aboutPopup.open()
                     }
                     MenuItem {
                         text: "Show Files"
+                        objectName: "canopyLauncherMenuFiles"
+                        Accessible.name: "Show Files"
+                        Accessible.description: "Open the in-preview Files window"
                         onTriggered: filesPreview.visible = true
                     }
                 }

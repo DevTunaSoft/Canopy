@@ -520,6 +520,11 @@ Rectangle {
                 clip: true
                 focus: visible
                 model: fileModel
+                activeFocusOnTab: true
+                Accessible.name: "Files in " + preview.currentPath
+                Accessible.description: "Tab reaches the file list after search. " +
+                        "Arrow keys select, Return or Space opens the focused folder, " +
+                        "Backspace goes up, Escape closes"
                 boundsBehavior: Flickable.StopAtBounds
                 ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
                 Keys.onPressed: function(event) {
@@ -530,6 +535,18 @@ Rectangle {
                         preview.requestClose()
                         event.accepted = true
                     }
+                }
+                function activateFocusedFileRow(event) {
+                    if (currentItem && currentItem.isDir) {
+                        preview.navigate(currentItem.path)
+                        event.accepted = true
+                    }
+                }
+                Keys.onReturnPressed: function(event) {
+                    activateFocusedFileRow(event)
+                }
+                Keys.onSpacePressed: function(event) {
+                    activateFocusedFileRow(event)
                 }
                 delegate: Item {
                     objectName: "canopyFileRow"

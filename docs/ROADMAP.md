@@ -2,6 +2,10 @@
 
 Status legend: PLANNED / IN PROGRESS / VERIFIED / BLOCKED.
 
+## ACTIVE GOAL — 2026-11-26 supplemental directive
+
+Finish one installable, functional, secure, stable, premium, resource-efficient Linux Mint Classic desktop. Workforce ceiling: 10 engineering subagents plus Hermes when productive non-overlapping work exists; throttle heavy operations to protect orchestrator stability. Priorities: security/stability/data integrity; real Mint functionality; integration of existing components; installation/startup/recovery; premium GUI; low resources; independent verification; release documentation. No main merge or final release without explicit owner authorization. Authoritative directive: `canopy_master_supplemental_directive_20261126.md` (SHA-256 `f3ec49fba9317c01354dbd34cf1c5cfedb2625b604f25117c720ae0f44781eae`).
+
 1. **Foundation — VERIFIED for core contracts:** agent rules, architecture, quality budgets and repository CI are present and checked; continued maintenance remains in progress.
 2. **Technology spike — IN PROGRESS:** Qt/QML prototype compiled and smoke-tested; GTK/native comparison remains open.
 3. **Classic vertical slice — IN PROGRESS:** module-level launch, dock, keyboard and session work is integrated; launchable isolated session and end-to-end acceptance are not yet proven.

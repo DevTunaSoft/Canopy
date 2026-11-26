@@ -11,8 +11,11 @@ A missing application stays UNAVAILABLE and never grants launch permission.
 Re-checking is explicit and bounded: one refresh call probes at most
 ``MAX_REFRESH_ATTEMPTS`` times, a transient single positive probe cannot flip
 the state, and a tracker allows at most ``MAX_REFRESH_CYCLES`` refreshes before
-freezing on ``refresh_exhausted``. Probe exceptions and malformed probe shapes
-become a fixed reason instead of leaking a raw exception to the host.
+freezing on ``refresh_exhausted``. Probe exceptions and malformed or partial probe shapes
+become a fixed reason instead of leaking a raw exception to the host. A probe
+mapping must carry explicit ``tryexec_ok`` and ``entry_readable`` booleans:
+omitted facts are a failed probe, never an assumed positive, so catalog
+presence alone can never grant launch permission.
 """
 from __future__ import annotations
 
@@ -192,7 +195,12 @@ def classify_missing_app(
 
 
 def _probe_facts(raw):
-    """Translate a probe result into strict booleans or fail closed."""
+    """Translate a probe result into strict booleans or fail closed.
+
+    A complete positive fact set is required: omitting TryExec or read facts
+    is never treated as a positive default. The historical bool shorthand
+    stays a complete fact set for backward compatibility.
+    """
     if type(raw) is bool:
         return {
             "in_catalog": raw,
@@ -200,10 +208,12 @@ def _probe_facts(raw):
             "entry_readable": raw,
         }
     if isinstance(raw, Mapping) and "in_catalog" in raw:
+        if "tryexec_ok" not in raw or "entry_readable" not in raw:
+            raise MissingAppError("probe omitted required availability facts")
         return {
             "in_catalog": raw["in_catalog"],
-            "tryexec_ok": raw.get("tryexec_ok", True),
-            "entry_readable": raw.get("entry_readable", True),
+            "tryexec_ok": raw["tryexec_ok"],
+            "entry_readable": raw["entry_readable"],
         }
     raise MissingAppError("probe returned an unsupported availability shape")
 

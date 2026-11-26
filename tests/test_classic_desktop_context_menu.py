@@ -26,6 +26,8 @@ class DesktopContextMenuContracts(unittest.TestCase):
     def test_view_is_registered_and_wired_once(self):
         self.assertTrue((CLASSIC / "DesktopContextMenu.qml").is_file())
         self.assertIn("DesktopContextMenu.qml", CMAKE)
+        # Foundation's existing CMake contract pins this exact prefix order.
+        self.assertIn("Main.qml Theme.qml", CMAKE)
         self.assertEqual(MAIN.count("DesktopContextMenu {"), 1)
         for wiring in (
             "onOpenLauncherRequested: appLauncher.openLauncher()",

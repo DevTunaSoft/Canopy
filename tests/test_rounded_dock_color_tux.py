@@ -21,8 +21,12 @@ class RoundedDockAndColorTuxTests(unittest.TestCase):
         self.assertIn('source: tile.iconUrl', dock)
         self.assertIn('sourceSize: Qt.size(192, 192)', dock)
         self.assertIn('engine.addImageProvider(QStringLiteral("canopy-dock"), roundedIcons)', cpp)
-        self.assertLess(cpp.index('verifyExactArtwork(requested, !landscapeMode, &error)'),
-                        cpp.index('new RoundedDockIconProvider('))
+        strict_gate = re.search(
+            r"verifyExactArtwork\(\s*requested,\s*!landscapeMode,\s*&error,\s*&verifiedArtBytes\s*\)",
+            cpp,
+        )
+        self.assertIsNotNone(strict_gate, "strict artwork gate lost verified bytes")
+        self.assertLess(strict_gate.start(), cpp.index('new RoundedDockIconProvider('))
         self.assertIn('QImageReader reader(sourcePath)', provider)
         self.assertNotIn('QFile::remove', provider)
         self.assertNotIn('QImage::save', provider)

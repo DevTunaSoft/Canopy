@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QByteArray>
 #include <QHash>
 #include <QImage>
 #include <QQuickImageProvider>
@@ -17,7 +18,8 @@ public:
                                      bool opticalBalanceReviewMode = false,
                                      bool cleanSourceEdgesReviewMode = false,
                                      bool fiveOnlyCenterReviewMode = false,
-                                     const QString &productionPackRoot = QString());
+                                     const QString &productionPackRoot = QString(),
+                                     QHash<QString, QByteArray> *verifiedBytes = nullptr);
 
     bool isValid() const { return m_images.size() == 8; }
     bool allCornersClipped() const;

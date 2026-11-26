@@ -4,6 +4,7 @@ Source-only integrity checks; these do not claim images are available or approve
 runtime screenshots have been captured.
 """
 import json
+import re
 import unittest
 from pathlib import Path
 
@@ -59,7 +60,16 @@ class ApprovedManifestContractTests(unittest.TestCase):
         cpp = (ROOT / "prototype" / "classic" / "main.cpp").read_text(encoding="utf-8")
         dock = (ROOT / "prototype" / "classic" / "DockTile.qml").read_text(encoding="utf-8")
         wallpaper = (ROOT / "prototype" / "classic" / "Wallpaper.qml").read_text(encoding="utf-8")
-        self.assertIn("verifyExactArtwork(requested, !landscapeMode, &error)", cpp)
+        # PE-019 passes the already SHA-verified PNG payloads to the dock
+        # provider. Require the full four-argument call, not the old
+        # three-argument prefix, so a revert to duplicate file reads fails.
+        self.assertIsNotNone(
+            re.search(
+                r"verifyExactArtwork\(\s*requested,\s*!landscapeMode,\s*&error,\s*&verifiedArtBytes\s*\)",
+                cpp,
+            ),
+            "strict artwork gate must reuse the verified byte payload",
+        )
         self.assertIn("QCryptographicHash::Sha256", cpp)
         self.assertIn("return 3;", cpp)
         self.assertIn("canopyApprovedMode", dock)

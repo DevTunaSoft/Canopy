@@ -1,5 +1,6 @@
 #include "RoundedDockIconProvider.h"
 
+#include <QBuffer>
 #include <QCryptographicHash>
 #include <QDir>
 #include <QFileInfo>
@@ -191,7 +192,8 @@ RoundedDockIconProvider::RoundedDockIconProvider(
     const QString &approvedRoot, const QString &terminalCandidatePath,
     bool framingReviewMode, QString *error, bool balancedDockFitMode,
     bool opticalBalanceReviewMode, bool cleanSourceEdgesReviewMode,
-    bool fiveOnlyCenterReviewMode, const QString &productionPackRoot)
+    bool fiveOnlyCenterReviewMode, const QString &productionPackRoot,
+    QHash<QString, QByteArray> *verifiedBytes)
     : QQuickImageProvider(QQuickImageProvider::Image) {
     if (fiveOnlyCenterReviewMode && !cleanSourceEdgesReviewMode) {
         *error = QStringLiteral("five-icon centering requires the existing clean-matte renderer");
@@ -290,8 +292,24 @@ RoundedDockIconProvider::RoundedDockIconProvider(
         const QString sourcePath =
             id == QStringLiteral("terminal") && !terminalCandidatePath.isEmpty()
                 ? terminalCandidatePath : root.filePath(relative);
-        QImageReader reader(sourcePath);
-        const QImage original = reader.read();
+        QImage original;
+        if (verifiedBytes && sourcePath == root.filePath(relative)) {
+            // Decode the exact bytes already SHA-verified by the startup gate;
+            // no second open/read of the same PNG on the startup path.
+            auto verified = verifiedBytes->find(relative);
+            if (verified != verifiedBytes->end() && !verified.value().isEmpty()) {
+                QBuffer buffer(&verified.value());
+                if (buffer.open(QIODevice::ReadOnly)) {
+                    QImageReader reader(&buffer);
+                    reader.setFormat("PNG");
+                    original = reader.read();
+                }
+            }
+        }
+        if (original.isNull()) {
+            QImageReader reader(sourcePath);
+            original = reader.read();
+        }
         if (original.isNull()) {
             *error = QStringLiteral("verified icon cannot be decoded: ") + id;
             m_images.clear();

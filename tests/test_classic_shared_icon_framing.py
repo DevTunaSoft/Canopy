@@ -23,7 +23,13 @@ class SharedIconFramingTests(unittest.TestCase):
         self.assertIn('args.contains(QStringLiteral("--icon-framing-review"))', self.cpp)
         self.assertIn("if (framingReviewMode && !approvedMode)", self.cpp)
         self.assertIn("ICON_FRAMING_REVIEW_FAIL", self.cpp)
-        self.assertIn("verifyExactArtwork(requested, !landscapeMode, &error)", self.cpp)
+        self.assertIsNotNone(
+            re.search(
+                r"verifyExactArtwork\(\s*requested,\s*!landscapeMode,\s*&error,\s*&verifiedArtBytes\s*\)",
+                self.cpp,
+            ),
+            "strict artwork gate must reuse the verified byte payload",
+        )
         self.assertIn("false, &roundedError", self.cpp)
         self.assertIn("true, &reviewError", self.cpp)
         self.assertNotIn("framingReviewMode = true", self.cpp)

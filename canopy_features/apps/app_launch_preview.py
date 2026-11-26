@@ -20,6 +20,7 @@ from canopy_features.apps.launch_policy_snapshot import (
     compose_launch_policy_snapshot,
 )
 from canopy_features.apps.launch_argv import DESKTOP_ID, SHELL_METACHARACTERS
+from canopy_features.catalog.missing_app_availability import AppAvailability
 from canopy_features.launcher.launcher_intent_summary import (
     STATUS_NOT_APPROVED as INTENT_NOT_APPROVED,
     STATUS_NO_MATCH as INTENT_NO_MATCH,
@@ -33,6 +34,7 @@ STATUS_NOT_APPROVED = "NOT_APPROVED"
 STATUS_DENIED = "DENIED"
 
 REASON_OK = "ok"
+REASON_APP_UNAVAILABLE = "app_unavailable"
 REASON_NO_MATCH = "no_match"
 REASON_NOT_APPROVED = "not_approved"
 REASON_POLICY_DENIED = "policy_denied"
@@ -64,6 +66,7 @@ __all__ = [
     "CLAIM_NO_VALUE_ECHO",
     "FIXED_CLAIMS",
     "REASON_AGREEMENT_MISMATCH",
+    "REASON_APP_UNAVAILABLE",
     "REASON_INVALID_INPUT",
     "REASON_NOT_APPROVED",
     "REASON_NO_MATCH",
@@ -139,13 +142,16 @@ def _argv_agrees(intent, policy):
 
 def compose_app_launch_preview(
     query, catalog, *, favorites=(), allowed_app_ids=None,
-    env_allow=(), env_source=None,
+    env_allow=(), env_source=None, availability=None,
 ):
     """Compose one no-echo launch preview from the two tested decisions.
 
     ``query``/``catalog``/``favorites``/``allowed_app_ids`` feed the launcher
     intent summary; ``env_allow``/``env_source`` and the selected app id feed
     the launch policy snapshot. Neither source value is copied into the result.
+    When supplied, ``availability`` must be an ``AppAvailability`` record whose
+    ``launch_permitted`` flag allows the launch; a missing application can
+    never produce a READY preview or a phantom launch intent.
     """
     # A caller may hand in a bounded but hostile lazy iterable whose read
     # raises an arbitrary built-in mid-consumption. This is the composition
@@ -180,6 +186,12 @@ def compose_app_launch_preview(
 
     if not _argv_agrees(intent, policy):
         return _deny(STATUS_DENIED, REASON_AGREEMENT_MISMATCH)
+
+    if availability is not None:
+        if not isinstance(availability, AppAvailability):
+            return _deny(STATUS_DENIED, REASON_INVALID_INPUT)
+        if not availability.launch_permitted:
+            return _deny(STATUS_DENIED, REASON_APP_UNAVAILABLE)
 
     return AppLaunchPreview(
         status=STATUS_READY,

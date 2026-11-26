@@ -137,13 +137,19 @@ def produce_catalog_bytes(
     if not stat.S_ISDIR(_lstat(root).st_mode):
         raise NativeCatalogError("applications source is not a directory")
 
+    # Count while scanning: a hostile directory must never be fully
+    # materialized just to discover that it is too large. Keep at most the
+    # allowed number of names and refuse on the first entry beyond it.
+    names = []
     try:
         with os.scandir(root) as entries:
-            names = [entry.name for entry in entries]
+            for entry in entries:
+                if len(names) >= max_directory_entries:
+                    raise NativeCatalogError(
+                        "applications directory exceeds entry bound")
+                names.append(entry.name)
     except OSError:
         raise NativeCatalogError("applications directory is unreadable") from None
-    if len(names) > max_directory_entries:
-        raise NativeCatalogError("applications directory exceeds entry bound")
 
     sources = []
     for name in names:

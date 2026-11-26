@@ -94,10 +94,10 @@ class ClassicDockInteractionAuditTests(unittest.TestCase):
         })
 
     def test_tooltip_binding_is_present_on_hover(self):
-        # Focus disclosure is provided by the halo border and accessible
-        # name; adding focus to the tooltip would edit frozen visual QML and
-        # is outside this verification-only change.
-        for needle in ("ToolTip.visible: hovered",
+        # PE-037 / PR #671 approved the focus-aware tooltip binding. The
+        # hover path stays covered by ``tile.hovered``; the full-byte pin
+        # below still locks every frozen visual line in DockTile.qml.
+        for needle in ("ToolTip.visible: tile.hovered || tile.activeFocus",
                        'ToolTip.text: iconName === "Files" ? '
                        '"Toggle Files preview" : iconName + " — preview only"'):
             with self.subTest(needle=needle):

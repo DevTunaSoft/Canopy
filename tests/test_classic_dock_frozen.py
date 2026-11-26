@@ -13,7 +13,11 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 CLASSIC = ROOT / "prototype" / "classic"
 APPROVED_DOCK_FNV64 = 0x4ac162b6d0fd5d40
-DOCK_TILE_GIT_BLOB_SHA1 = "07dbf4f447eb0a67f8df5e15948d40559539cc6e"
+# PE-037 / PR #671 approved an accessibility-only one-line change:
+# ``ToolTip.visible: hovered`` -> ``tile.hovered || tile.activeFocus``.
+# This is a full-byte pin of that reviewed blob; geometry, artwork, colours,
+# strings, timers and every other visual line stay byte-identical.
+DOCK_TILE_GIT_BLOB_SHA1 = "856d5da7f1ae6c18fd9884b17b716d4faf80ad32"
 APPROVED_MANIFEST_GIT_BLOB_SHA1 = "b120dc891a614ddbc5ef863514424112c02efee6"
 
 

@@ -64,6 +64,20 @@ ApplicationWindow {
         console.error("CANOPY_WALLPAPER_FAIL: wallpaper image missing")
     }
 
+    // Opt-in desktop context menu. The component is an invisible view over
+    // the desktop area only; it stays disabled unless the trusted host passes
+    // --enable-desktop-context-menu. Its actions reuse the existing launcher,
+    // Files preview and About dialog instead of a second menu/panel service.
+    DesktopContextMenu {
+        id: desktopContextMenu
+        anchors.fill: parent
+        topInset: canopyTheme.barHeight
+        bottomInset: canopyTheme.dockSize + 22
+        onOpenLauncherRequested: appLauncher.openLauncher()
+        onShowFilesRequested: filesPreview.visible = true
+        onAboutRequested: aboutPopup.open()
+    }
+
     // The Files window owns navigation state. Main only shows it and forwards
     // menu requests through its explicit interface. Geometry stays unchanged.
     PreviewWindow {

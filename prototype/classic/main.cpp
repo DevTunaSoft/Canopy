@@ -142,6 +142,54 @@ private:
     QString m_reducedMotion;
 };
 
+// Host boundary for the opt-in desktop context menu. It is an adapter over the
+// single existing SystemAppLauncher service: it owns no menu, panel, process,
+// shell command or polling. When native launching is disabled or Terminal is
+// not available it refuses activation and exposes a disclosure instead of a
+// false success. Visual actions are forwarded by QML to existing UI.
+class DesktopContextMenuBridge final : public QObject {
+    Q_OBJECT
+    Q_PROPERTY(bool enabled READ enabled CONSTANT)
+    Q_PROPERTY(bool nativeAvailable READ nativeAvailable CONSTANT)
+    Q_PROPERTY(QString disclosure READ disclosure CONSTANT)
+public:
+    explicit DesktopContextMenuBridge(SystemAppLauncher &launcher, bool enabled,
+                                      QObject *parent = nullptr)
+        : QObject(parent), m_launcher(launcher), m_enabled(enabled) {}
+
+    bool enabled() const { return m_enabled; }
+
+    bool nativeAvailable() const {
+        return m_enabled && m_launcher.isEnabled()
+                && m_launcher.canLaunch(QStringLiteral("Terminal"));
+    }
+
+    QString disclosure() const {
+        if (!m_enabled)
+            return QStringLiteral("Unavailable — desktop context menu is not enabled");
+        if (!m_launcher.isEnabled() || !m_launcher.canLaunch(QStringLiteral("Terminal")))
+            return QStringLiteral("Unavailable — native application launching is not enabled");
+        return QString();
+    }
+
+    Q_INVOKABLE bool openTerminal() const {
+        if (!nativeAvailable()) {
+            qWarning() << "CANOPY_DESKTOP_CONTEXT_NATIVE_REFUSED: unavailable";
+            return false;
+        }
+        if (!m_launcher.launch(QStringLiteral("Terminal"))) {
+            qWarning() << "CANOPY_DESKTOP_CONTEXT_NATIVE_REFUSED: launch failed";
+            return false;
+        }
+        qInfo() << "CANOPY_DESKTOP_CONTEXT_NATIVE_LAUNCH_REQUESTED";
+        return true;
+    }
+
+private:
+    SystemAppLauncher &m_launcher;
+    bool m_enabled;
+};
+
 // Host-side adapter for the single frozen Files dock interaction. It owns
 // no launcher logic: it forwards only the exact dock label to the existing
 // SystemAppLauncher and reports a refusal in the existing launcher footer.
@@ -1531,6 +1579,13 @@ int main(int argc, char *argv[]) {
     // geometry and screenshot contracts are unchanged when the flag is absent.
     const bool enableSystemApps = args.contains(QStringLiteral("--enable-system-apps"));
     SystemAppLauncher systemLauncher(enableSystemApps);
+    // Desktop right-click wiring is a separate opt-in: default startup has no
+    // new mouse surface and no context menu. The bridge stays alive for the
+    // whole QML engine lifetime and only adapts the service above.
+    const bool enableDesktopContextMenu =
+        args.contains(QStringLiteral("--enable-desktop-context-menu"));
+    DesktopContextMenuBridge desktopContextMenuBridge(
+        systemLauncher, enableDesktopContextMenu);
     WindowActivationState activationState;
     SettingsPreferencesBridge settingsPreferences;
     // Declared before the QQmlApplicationEngine below so this trusted controller
@@ -1930,6 +1985,8 @@ int main(int argc, char *argv[]) {
         QStringLiteral("canopySystemLaunchEnabled"), enableSystemApps);
     engine.rootContext()->setContextProperty(
         QStringLiteral("canopySystemLauncher"), &systemLauncher);
+    engine.rootContext()->setContextProperty(
+        QStringLiteral("canopyDesktopContextMenu"), &desktopContextMenuBridge);
     engine.rootContext()->setContextProperty(
         QStringLiteral("canopySettingsPreferences"), &settingsPreferences);
     engine.rootContext()->setContextProperty(
@@ -2339,6 +2396,66 @@ int main(int argc, char *argv[]) {
         qInfo() << "SELF_TEST_PASS: untrusted snapshot clears all indicators";
         qInfo() << "WINDOW_ACTIVATION_HOST_SELF_TEST_PASS"
                 << "running=ok active=ok closed=ok fail_closed=ok";
+        QTimer::singleShot(0, &app, &QCoreApplication::quit);
+    }
+    if (args.contains(QStringLiteral("--self-test-desktop-context-menu"))) {
+        // Prove the real QML view and host bridge, without launching an app:
+        // default startup is inert; opt-in wires one Menu to existing actions;
+        // native launch stays fail-closed when GIO launching is unavailable.
+        auto *contextItem = findVisualItem(
+            window->contentItem(), QStringLiteral("canopyDesktopContextMenu"));
+        auto *surface = findVisualItem(
+            window->contentItem(), QStringLiteral("canopyDesktopContextSurface"));
+        auto *popup = window->findChild<QObject *>(
+            QStringLiteral("canopyDesktopContextMenuPopup"));
+        if (!contextItem || !surface || !popup) {
+            qCritical() << "DESKTOP_CONTEXT_FIXTURE_FAIL: wiring missing";
+            return 1;
+        }
+        if (contextItem->property("contextEnabled").toBool() != enableDesktopContextMenu
+            || surface->property("enabled").toBool() != enableDesktopContextMenu
+            || contextItem->property("menuVisible").toBool()) {
+            qCritical() << "DESKTOP_CONTEXT_FIXTURE_FAIL: opt-in or resting state";
+            return 1;
+        }
+        if (desktopContextMenuBridge.enabled() != enableDesktopContextMenu
+            || (desktopContextMenuBridge.nativeAvailable() && !enableSystemApps)) {
+            qCritical() << "DESKTOP_CONTEXT_FIXTURE_FAIL: bridge availability";
+            return 1;
+        }
+        const QString disclosure = desktopContextMenuBridge.disclosure();
+        if (desktopContextMenuBridge.nativeAvailable() != disclosure.isEmpty()) {
+            qCritical() << "DESKTOP_CONTEXT_FIXTURE_FAIL: disclosure mismatch";
+            return 1;
+        }
+        // Never call openTerminal() when native launching is available: the
+        // self-test must not start a real application on the test host.
+        if (!desktopContextMenuBridge.nativeAvailable()
+            && desktopContextMenuBridge.openTerminal()) {
+            qCritical() << "DESKTOP_CONTEXT_FIXTURE_FAIL: unavailable launch accepted";
+            return 1;
+        }
+        QVariant opened;
+        const bool invoked = QMetaObject::invokeMethod(
+            contextItem, "openAt", Qt::DirectConnection,
+            Q_RETURN_ARG(QVariant, opened),
+            Q_ARG(QVariant, 40), Q_ARG(QVariant, 160));
+        if (!invoked || opened.toBool() != enableDesktopContextMenu
+            || contextItem->property("menuVisible").toBool() != enableDesktopContextMenu) {
+            qCritical() << "DESKTOP_CONTEXT_FIXTURE_FAIL: popup gate";
+            return 1;
+        }
+        QVariant closed;
+        if (!QMetaObject::invokeMethod(contextItem, "closeMenu", Qt::DirectConnection,
+                                       Q_RETURN_ARG(QVariant, closed))
+            || !closed.toBool() || contextItem->property("menuVisible").toBool()) {
+            qCritical() << "DESKTOP_CONTEXT_FIXTURE_FAIL: popup close";
+            return 1;
+        }
+        qInfo() << "SELF_TEST_PASS: desktop context menu opt-in and fail-closed bridge";
+        qInfo() << "DESKTOP_CONTEXT_FIXTURE_PASS: enabled=" << enableDesktopContextMenu
+                << "nativeAvailable=" << desktopContextMenuBridge.nativeAvailable()
+                << "no app launched; visuals untouched";
         QTimer::singleShot(0, &app, &QCoreApplication::quit);
     }
     if (args.contains(QStringLiteral("--self-test-quick-controls"))) {

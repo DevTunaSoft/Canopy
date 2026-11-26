@@ -185,7 +185,9 @@ class ControllerHappyPathTests(unittest.TestCase):
             controller.apply(MAX)
             controller.apply(RES)
         self.assertIs(controller.state, WindowState.NORMAL)
-        self.assertEqual(set(controller.__slots__), {"_negotiation", "_state"})
+        self.assertEqual(set(controller.__slots__),
+                         {"_negotiation", "_state", "_registry"})
+        self.assertIsNone(controller.reference_registry)
 
 
 class ControllerRejectionTests(unittest.TestCase):

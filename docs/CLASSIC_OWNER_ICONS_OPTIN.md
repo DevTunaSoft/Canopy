@@ -85,16 +85,19 @@ SHA-256 `8e160a5b8f327226d7dc22dd9a9acc251e998252d895ce7cb116d3879e554cd4`.
 
 | Size | Screenshot (scratch artifact) | SHA-256 | `check_screenshot.py` |
 | --- | --- | --- | --- |
-| 1920x1080 | `C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy_owner_icons_evidence/owner-icons-1920x1080.png` | `f5832cb1e7a207978faa3e19f23e14d624143284cd6f2e3878a486292752add4` | PASS |
-| 1200x750 | `C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy_owner_icons_evidence/owner-icons-1200x750.png` | `e674cf12680f7fc9b827222a275a7c87c60d10112b788c4a9088cc5b5dfeabe0` | PASS |
-| 760x500 | `C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy_owner_icons_evidence/owner-icons-760x500.png` | `0fef46ed9599baa66fa212ef2b6c3016545047d62d51d9ae3ba28a9440e318ae` | PASS |
+| 1920x1080 | `C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy_owner_icons_evidence/final/owner-icons-1920x1080.png` | `852c664bf59d50f004e32d716abf126ccb04dae203b5805288bb1c516bf3b6bb` | PASS |
+| 1200x750 | `C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy_owner_icons_evidence/final/owner-icons-1200x750.png` | `9822b52116774cbcdf704213e8255582f69e256ce69f6f18b95f21bbe544db37` | PASS |
+| 760x500 | `C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy_owner_icons_evidence/final/owner-icons-760x500.png` | `7743284dea8d092e4d4d2eb45f3792ed89ed23dbba3392e04524510d6e02cd21` | PASS |
 
 Every run exited 0 and logged `CANOPY_OWNER_ICONS_VERIFIED`,
 `CANOPY_OWNER_DOCK_FROST_ACTIVE`, and
 `SELF_TEST_PASS: owner exact-PNG icons and dark frosted dock at frozen 54px slots`.
 A default (no opt-in) run of the same binary exited 0 with no owner markers,
-confirming the approved runtime is unchanged. Screenshot bytes are live offscreen
-Qt captures; they are **not** owner visual approval.
+confirming the approved runtime is unchanged. The final re-run logs are
+`.../canopy_owner_icons_evidence/final/owner-icons-WxH.log`; each has
+`SELF_TEST_FAIL` count exactly 0, one `CANOPY_OWNER_ICONS_VERIFIED` and one
+`SELF_TEST_PASS: owner exact-PNG icons and dark frosted dock at frozen 54px slots`.
+Screenshot bytes are live offscreen Qt captures; they are **not** owner visual approval.
 
 ## Resource / evidence note
 

@@ -2,6 +2,7 @@
 #include "SystemAppLauncher.h"
 #include "WindowActivationState.h"
 #include "LauncherModel.h"
+#include "ReducedMotionPolicy.h"
 
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
@@ -140,6 +141,61 @@ private:
 
     QSettings m_settings;
     QString m_reducedMotion;
+};
+
+// Read-only policy bridge for QML animation durations. Native accessibility
+// state is authoritative when it asks for reduced motion; the one persisted
+// Canopy preference is the only app-level input. No animation is created
+// here, no visual constant is touched, and QML keeps a single duration entry
+// point: duration: canopyReducedMotion.duration(nominalMs).
+class ReducedMotionBridge final : public QObject {
+    Q_OBJECT
+public:
+    explicit ReducedMotionBridge(const QString &user, QObject *parent = nullptr)
+        : QObject(parent),
+          m_native(canopyReducedMotion::nativePreference()),
+          m_user(canopyReducedMotion::normalize(user)) {}
+
+    Q_PROPERTY(bool reduced READ reduced NOTIFY reducedChanged)
+    Q_PROPERTY(QString nativePreference READ nativePreference NOTIFY reducedChanged)
+    Q_PROPERTY(QString userPreference READ userPreference NOTIFY reducedChanged)
+
+    bool reduced() const {
+        return canopyReducedMotion::reduced(m_native, m_user);
+    }
+    QString nativePreference() const { return m_native; }
+    QString userPreference() const { return m_user; }
+
+    // Bound by any QML animation that may be introduced later; zero duration
+    // means an instant state change, never a redesigned visual state.
+    Q_INVOKABLE int duration(int nominalMs) const {
+        return canopyReducedMotion::duration(nominalMs, reduced());
+    }
+    Q_INVOKABLE bool motionAllowed() const { return !reduced(); }
+
+public slots:
+    void setUserPreference(const QString &value) {
+        const QString normalized = canopyReducedMotion::normalize(value);
+        if (normalized == m_user)
+            return;
+        m_user = normalized;
+        emit reducedChanged();
+    }
+
+    void refreshNativePreference() {
+        const QString native = canopyReducedMotion::nativePreference();
+        if (native == m_native)
+            return;
+        m_native = native;
+        emit reducedChanged();
+    }
+
+signals:
+    void reducedChanged();
+
+private:
+    QString m_native;
+    QString m_user;
 };
 
 // Host-side adapter for the single frozen Files dock interaction. It owns
@@ -1533,6 +1589,21 @@ int main(int argc, char *argv[]) {
     SystemAppLauncher systemLauncher(enableSystemApps);
     WindowActivationState activationState;
     SettingsPreferencesBridge settingsPreferences;
+    // QML animation durations read this one policy object. It is declared
+    // before the engine so it outlives every binding that references it.
+    ReducedMotionBridge reducedMotion(settingsPreferences.reducedMotion());
+    QObject::connect(&settingsPreferences,
+                     &SettingsPreferencesBridge::preferenceChanged,
+                     &reducedMotion,
+                     [&reducedMotion](const QString &key, const QString &value) {
+        if (key == QStringLiteral("reduced_motion"))
+            reducedMotion.setUserPreference(value);
+    });
+#if QT_VERSION >= QT_VERSION_CHECK(6, 12, 0)
+    QObject::connect(QGuiApplication::styleHints()->accessibility(),
+                     &QAccessibilityHints::motionPreferenceChanged, &reducedMotion,
+                     [&reducedMotion] { reducedMotion.refreshNativePreference(); });
+#endif
     // Declared before the QQmlApplicationEngine below so this trusted controller
     // outlives the engine, the context property and every QML object using it.
     QuickControlsHostStateController hostStateController;
@@ -1932,6 +2003,9 @@ int main(int argc, char *argv[]) {
         QStringLiteral("canopySystemLauncher"), &systemLauncher);
     engine.rootContext()->setContextProperty(
         QStringLiteral("canopySettingsPreferences"), &settingsPreferences);
+    // Non-visual policy for QML animation durations; no visual input changes.
+    engine.rootContext()->setContextProperty(
+        QStringLiteral("canopyReducedMotion"), &reducedMotion);
     engine.rootContext()->setContextProperty(
         QStringLiteral("canopyIconFramingReview"), framingReviewMode);
     engine.rootContext()->setContextProperty(

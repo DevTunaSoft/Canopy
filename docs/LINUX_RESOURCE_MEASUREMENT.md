@@ -43,6 +43,27 @@ strictly. Malformed values, duplicate JSON keys, unbounded intervals (>300 s),
 wrong types, short stat records and non-monotonic startup phases fail closed
 with `MeasurementError`.
 
+## Rollup parsing and read safety
+
+Real `smaps_rollup` files mix memory counters with descriptive fields that
+have no unit. `THPEligible` is exposed without a unit on some kernels, and
+`ProtectionKey` and `VmFlags` are never `kB` values. The parser skips exactly
+those three known non-memory fields; every other line must still be a strict
+`name: N kB` record within the 1 MiB bound. An unknown unitless line or a
+malformed/out-of-range memory line still fails closed, so relaxing the rollup
+contract does not hide corrupt `Rss`/`Pss` data. This is what lets
+`--source proc` read a modern Linux rollup without falling back or failing.
+
+Every proc read is confined to the caller's `--proc-root`. Each path component
+between that root and the target file is checked for symlinks, not just the
+final component: a symlinked pid directory that redirects into another tree is
+refused with `MeasurementError`, as is a symlink at the file itself. Bytes from
+a proc file must decode as strict UTF-8; a `UnicodeDecodeError` is translated
+to `MeasurementError` so a bad snapshot can never surface as a raw built-in
+exception. Committed fixture tests cover a realistic modern rollup, the
+end-to-end `proc` source path, and negative controls for malformed/out-of-range
+lines, unknown unitless lines, symlinked parents and invalid UTF-8.
+
 ## Run it
 
 From the repository root:

@@ -17,5 +17,10 @@ jobs:
           python-version: '3.12'
       - name: Check engineering contract
         run: python tools/check_foundation.py
+      - name: Verify visual lock (approved assets byte-exact)
+        # Read-only gate: exits 0 for PASS/AWAITING_CHATGPT_VISUAL_APPROVAL and
+        # non-zero when approved assets are missing, modified or the manifest
+        # is invalid. AWAITING is reported as JSON, never silently blessed.
+        run: python tools/check_visual_lock.py --json
       - name: Run regression tests
         run: python -m unittest discover -s tests -v

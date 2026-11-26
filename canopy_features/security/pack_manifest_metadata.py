@@ -183,6 +183,16 @@ def to_safe_metadata(manifest: Mapping[str, Any]) -> SafePackMetadata:
     """
     if not isinstance(manifest, Mapping):
         raise PackValidationError("metadata must be a mapping")
+    # Apply the MAX_FIELDS bound before materializing the caller's mapping.
+    # dict() would otherwise copy every supplied field before _scan checks
+    # the size, so an oversized untrusted mapping could force an unbounded
+    # allocation. len() is untrusted too: fail closed if it raises.
+    try:
+        field_count = len(manifest)
+    except Exception as exc:
+        raise PackValidationError("cannot size metadata mapping") from exc
+    if field_count > MAX_FIELDS:
+        raise PackValidationError("metadata has too many fields")
     data = dict(manifest)
     _scan(data, 0, [0])
 

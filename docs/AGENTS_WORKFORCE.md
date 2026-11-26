@@ -13,16 +13,26 @@ no repository blob backs this citation. This file is a concise repository-facing
 summary; where wording elsewhere conflicts, the external directive governs. It
 does not grant a merge or visual approval.
 
+Newer owner directive (received after the external source above, 2026-11-26):
+the authorized ceiling is **up to 12 concurrent engineering subagents plus
+Hermes as lead orchestrator** when productive, independent, non-overlapping
+work exists. This owner directive is newer than the external directive cited
+above and supersedes only its 10-agent ceiling; all other requirements and
+acceptance gates in that external directive remain in force. It grants no
+merge, visual or release approval.
+
 ## Workforce
 
-- Authorized ceiling: **10 concurrent engineering subagents plus Hermes as
-  lead orchestrator**. This supersedes all earlier 15-, nine-, seven- and
-  four-agent configurations. Ten is a ceiling, not a quota: assign work only
-  when independent, productive and resource-permitting, and do not manufacture
-  assignments to fill slots.
-- Indicative allocation: 3 core/runtime integration, 2 GUI/usability, 2
+- Authorized ceiling: **up to 12 concurrent engineering subagents plus Hermes as
+  lead orchestrator** under the newer owner directive (superseding the earlier
+  10-agent ceiling in the external directive above, and all earlier 15-, nine-,
+  seven- and four-agent configurations). This is a ceiling, not a quota: assign
+  work only when independent, productive, non-overlapping and
+  resource-permitting, and do not manufacture assignments to fill slots.
+- Indicative initial allocation: 3 core/runtime integration, 2 GUI/usability, 2
   Mint/session/installation, 1 performance/clean code, 1 independent QA,
-  1 GitHub/release; redistribute by actual need.
+  1 GitHub/release (10 initially allocated within the 12-agent ceiling);
+  redistribute by actual need.
 - Isolated worktrees, exact backticked file ownership, disjoint branches and
   dependency-aware assignment remain mandatory. No agent approves its own
   implementation; independent review is required. Throttle heavy builds,
@@ -56,8 +66,9 @@ does not grant a merge or visual approval.
   `AGENTS.md`, `docs/ROADMAP.md`, workflow, test, visual-asset and source paths
   are outside its ownership and were not edited here.
 - Known residual wording outside this scope: `AGENTS.md` and `docs/ROADMAP.md`
-  still contain a "at least four active subagents" floor alongside the 10-agent
+  still contain a "at least four active subagents" floor alongside the 12-agent
   ceiling in `docs/ROADMAP.md`. Their owners must reconcile that text; this
-  file and the cited directive are authoritative until then.
+  file (including the newer owner ceiling) and the cited external directive
+  remain authoritative until then.
 - No new visual, security or release approval is claimed by this documentation
   change.

@@ -30,18 +30,26 @@ FocusScope {
     }
     readonly property string searchKey: queryState === "search"
         ? searchField.text.trim().toLowerCase() : ""
-    readonly property var applications: approvedMode
-        ? [
-            { title: "Browser" }, { title: "Mail" },
-            { title: "Files" }, { title: "Calendar" },
-            { title: "Photos" }, { title: "Music" },
-            { title: "Terminal" }, { title: "Settings" }
-          ]
-        : [
-            { title: "Files" }, { title: "Browser" },
-            { title: "Settings" }, { title: "Photos" },
-            { title: "Terminal" }, { title: "Trash" }
-          ]
+    // Opt-in desktop-entry catalogue from the compiled host. Without the
+    // explicit CLI flag, or when the host rejected the snapshot, the approved
+    // eight-item order below is used unchanged: no visual or geometry change.
+    readonly property var applications: {
+        if (typeof canopyLauncherCatalog !== "undefined" && canopyLauncherCatalog
+                && canopyLauncherCatalog.active)
+            return canopyLauncherCatalog.applications()
+        return approvedMode
+            ? [
+                { title: "Browser" }, { title: "Mail" },
+                { title: "Files" }, { title: "Calendar" },
+                { title: "Photos" }, { title: "Music" },
+                { title: "Terminal" }, { title: "Settings" }
+              ]
+            : [
+                { title: "Files" }, { title: "Browser" },
+                { title: "Settings" }, { title: "Photos" },
+                { title: "Terminal" }, { title: "Trash" }
+              ]
+    }
     readonly property var filteredApps: {
         if (queryState === "browse") return applications.slice()
         if (queryState !== "search") return []

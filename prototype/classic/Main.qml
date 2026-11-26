@@ -15,6 +15,9 @@ ApplicationWindow {
     Theme { id: canopyTheme }
     readonly property bool compactLayout: width < 900
     readonly property bool approvedAssetsActive: canopyApprovedMode
+    // Trusted host flag for the explicit owner-icons preview. It is false at
+    // every default startup; approved QML geometry and colours stay frozen.
+    readonly property bool ownerIconsPreviewActive: typeof canopyOwnerIconsPreview !== "undefined" && canopyOwnerIconsPreview
     // Keep the resting desktop composition unchanged until explicitly opened.
     Shortcut {
         sequence: "Ctrl+Space"

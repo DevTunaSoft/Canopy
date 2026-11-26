@@ -355,5 +355,126 @@ class LinuxResourceProbeTests(unittest.TestCase):
         self.assertFalse(output.exists())
 
 
+    # Regression: a modern smaps_rollup carries unitless non-memory fields
+    # (THPeligible on some kernels, ProtectionKey and VmFlags on all of them).
+    # These are not "N kB" lines and must not make --source proc fail closed.
+    _REALISTIC_ROLLUP = (
+        "Rss:                8192 kB\n"
+        "Pss:                4096 kB\n"
+        "Pss_Anon:           3072 kB\n"
+        "Pss_File:            896 kB\n"
+        "Pss_Shmem:           128 kB\n"
+        "Shared_Clean:        512 kB\n"
+        "Shared_Dirty:        256 kB\n"
+        "Private_Clean:       768 kB\n"
+        "Private_Dirty:      6656 kB\n"
+        "Referenced:         7808 kB\n"
+        "Anonymous:          6144 kB\n"
+        "KSM:                   0 kB\n"
+        "LazyFree:              0 kB\n"
+        "AnonHugePages:         0 kB\n"
+        "ShmemPmdMapped:        0 kB\n"
+        "FilePmdMapped:         0 kB\n"
+        "Shared_Hugetlb:        0 kB\n"
+        "Private_Hugetlb:       0 kB\n"
+        "Swap:                  0 kB\n"
+        "SwapPss:               0 kB\n"
+        "Locked:                0 kB\n"
+        "THPeligible:          12\n"
+        "ProtectionKey:         0\n"
+        "VmFlags: rd ex wr mr mp\n"
+    )
+
+    def test_read_memory_accepts_realistic_rollup_unitless_fields(self):
+        pid_dir = self._pid_dir(4300)
+        (pid_dir / "smaps_rollup").write_text(
+            self._REALISTIC_ROLLUP, encoding="utf-8", newline="\n"
+        )
+        self.assertEqual(
+            read_memory(4300, self.proc),
+            {"pid": 4300, "pss_kib": 4096, "rss_kib": 8192,
+             "source": "smaps_rollup"},
+        )
+
+    def test_measure_proc_source_accepts_realistic_rollup(self):
+        self._pid_dir(4301)
+        (self.proc / "4301" / "smaps_rollup").write_text(
+            self._REALISTIC_ROLLUP, encoding="utf-8", newline="\n"
+        )
+        self._write_stat(4301, 10)
+        clock_values = iter([1.0, 2.0])
+        report = measure(
+            [4301], proc_root=self.proc, source="proc", session="linux-host",
+            clock_ticks_per_second=100, clock=lambda: next(clock_values),
+            sleep=lambda _: None,
+            included=[{"pid": 4301, "label": "shell", "reason": "owned"}],
+            excluded=[],
+        )
+        self.assertEqual(report["evidence_class"], "LINUX_PROC_SCOPED")
+        sample = report["memory"]["samples"]["start"][0]
+        self.assertEqual(sample["source"], "smaps_rollup")
+        self.assertEqual(sample["pss_kib"], 4096)
+        self.assertEqual(sample["rss_kib"], 8192)
+
+    # Negative controls: relaxing the rollup parser must not relax the
+    # strict "N kB" contract for real memory fields or their bounds.
+    def test_read_memory_rejects_malformed_kib_line_beside_unitless_fields(self):
+        pid_dir = self._pid_dir(4302)
+        (pid_dir / "smaps_rollup").write_text(
+            "Rss: 10 kB\nPss: not-a-number kB\nVmFlags: rd ex\n",
+            encoding="utf-8", newline="\n",
+        )
+        with self.assertRaises(MeasurementError):
+            read_memory(4302, self.proc)
+
+    def test_read_memory_rejects_out_of_range_kib_value(self):
+        pid_dir = self._pid_dir(4303)
+        (pid_dir / "smaps_rollup").write_text(
+            f"Rss: {1 << 21} kB\nPss: 5 kB\nTHPeligible: 12\n",
+            encoding="utf-8", newline="\n",
+        )
+        with self.assertRaises(MeasurementError):
+            read_memory(4303, self.proc)
+
+    def test_read_memory_rejects_unknown_unitless_line(self):
+        pid_dir = self._pid_dir(4304)
+        (pid_dir / "smaps_rollup").write_text(
+            "Rss: 10 kB\nPss: 5 kB\nUnexpectedUnitless: 7\n",
+            encoding="utf-8", newline="\n",
+        )
+        with self.assertRaises(MeasurementError):
+            read_memory(4304, self.proc)
+
+    # Path containment: only the final component was checked before, so a
+    # symlinked parent could redirect a proc read outside proc_root.
+    def test_read_memory_rejects_symlinked_parent_under_proc_root(self):
+        outside = Path(self.temp.name) / "outside"
+        outside.mkdir()
+        real_pid = outside / "4305"
+        real_pid.mkdir()
+        (real_pid / "smaps_rollup").write_text(
+            "Rss: 10 kB\nPss: 5 kB\n", encoding="utf-8", newline="\n"
+        )
+        (self.proc / "4305").symlink_to(real_pid, target_is_directory=True)
+        with self.assertRaises(MeasurementError):
+            read_memory(4305, self.proc)
+
+    def test_read_memory_rejects_symlinked_smaps_rollup_file(self):
+        pid_dir = self._pid_dir(4306)
+        target = Path(self.temp.name) / "rollup-target"
+        target.write_text("Rss: 10 kB\nPss: 5 kB\n", encoding="utf-8", newline="\n")
+        (pid_dir / "smaps_rollup").symlink_to(target)
+        with self.assertRaises(MeasurementError):
+            read_memory(4306, self.proc)
+
+    # Invalid UTF-8 must surface as the module's fail-closed domain error,
+    # never as a raw UnicodeDecodeError from bytes.decode().
+    def test_read_memory_translates_invalid_utf8_to_measurement_error(self):
+        pid_dir = self._pid_dir(4307)
+        (pid_dir / "smaps_rollup").write_bytes(b"Rss: 10 kB\nPss: \xff\xfe kB\n")
+        with self.assertRaises(MeasurementError):
+            read_memory(4307, self.proc)
+
+
 if __name__ == "__main__":
     unittest.main()

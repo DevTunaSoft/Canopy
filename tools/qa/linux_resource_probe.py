@@ -27,6 +27,13 @@ STARTUP_PHASES = ("launch_request", "process_spawn", "first_frame", "ready")
 
 _KIB_LINE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*):[ \t]+([0-9]+)[ \t]+kB[ \t]*$")
 
+# Real smaps_rollup output mixes "N kB" memory counters with fields that carry
+# no unit: THPeligible is unitless on some kernels, and ProtectionKey/VmFlags
+# are never kB values. These names are known non-memory fields; skip them so a
+# genuine modern rollup parses, while every other line still has to be a
+# strict, bounded "name: N kB" record.
+_NON_KIB_FIELDS = frozenset(("THPeligible", "ProtectionKey", "VmFlags"))
+
 
 class MeasurementError(ValueError):
     """Fail-closed domain error for invalid or unreadable measurement input."""
@@ -38,7 +45,25 @@ def _require_pid(pid):
     return pid
 
 
-def _read_bounded(path):
+def _read_bounded(path, proc_root=None):
+    """Read one bounded regular proc file, rejecting symlink path escapes.
+
+    ``proc_root`` is the trusted base. When supplied, every component between
+    it and ``path`` is checked for symlinks: checking only the final component
+    lets a symlinked pid directory redirect the read outside the proc tree.
+    """
+    path = Path(path)
+    if proc_root is not None:
+        root = Path(proc_root)
+        try:
+            relative = path.relative_to(root)
+        except ValueError as exc:
+            raise MeasurementError("proc path outside proc root") from exc
+        cursor = root
+        for part in relative.parts:
+            cursor = cursor / part
+            if cursor.is_symlink():
+                raise MeasurementError(f"symlink in proc path: {part}")
     try:
         if path.is_symlink() or not path.is_file():
             raise MeasurementError(f"not a regular proc file: {path.name}")
@@ -50,12 +75,19 @@ def _read_bounded(path):
         raise MeasurementError(f"proc file too large: {path.name}")
     # Normalise CRLF proc dumps: on Windows a fixture written with Path.write_text
     # gains carriage returns, which must not change field parsing semantics.
-    return data.decode("utf-8", errors="strict").replace("\r\n", "\n").replace("\r", "\n")
+    try:
+        text = data.decode("utf-8", errors="strict")
+    except UnicodeDecodeError as exc:
+        raise MeasurementError(f"invalid utf-8 in proc file: {path.name}") from exc
+    return text.replace("\r\n", "\n").replace("\r", "\n")
 
 
 def _kib_fields(text):
     fields = {}
     for line in text.splitlines():
+        name, colon, _unused = line.partition(":")
+        if colon and name in _NON_KIB_FIELDS:
+            continue
         match = _KIB_LINE.fullmatch(line)
         if match is None:
             raise MeasurementError("malformed proc memory line")
@@ -92,13 +124,13 @@ def read_memory(pid, proc_root=Path("/proc")):
     rollup = pid_dir / "smaps_rollup"
     fields = {}
     if rollup.exists():
-        fields = _kib_fields(_read_bounded(rollup))
+        fields = _kib_fields(_read_bounded(rollup, root))
 
     if "Rss" in fields:
         return {"pid": pid, "pss_kib": fields.get("Pss"),
                 "rss_kib": fields["Rss"], "source": "smaps_rollup"}
 
-    text = _read_bounded(pid_dir / "smaps")
+    text = _read_bounded(pid_dir / "smaps", root)
     pss = rss = 0
     for line in text.splitlines():
         value = _kib_field(line, "Pss")
@@ -138,7 +170,8 @@ def validate_interval(seconds):
 def read_cpu_ticks(pid, proc_root=Path("/proc")):
     """Read cumulative scheduler ticks and the process start tick from stat."""
     pid = _require_pid(pid)
-    text = _read_bounded(Path(proc_root) / str(pid) / "stat")
+    root = Path(proc_root)
+    text = _read_bounded(root / str(pid) / "stat", root)
     close = text.rfind(")")
     if close < 0 or not text.startswith(f"{pid} ("):
         raise MeasurementError("malformed proc stat command field")
@@ -209,8 +242,8 @@ def compute_cpu(start_samples, end_samples, clock_ticks_per_second,
     }
 
 
-def _read_optional(path):
-    return _read_bounded(path) if path.exists() else None
+def _read_optional(path, proc_root=None):
+    return _read_bounded(path, proc_root) if path.exists() else None
 
 
 def _numeric_field(text, name):
@@ -234,12 +267,14 @@ def _numeric_field(text, name):
 def read_wakeups(pid, proc_root=Path("/proc")):
     """Read the optional ``nr_wakeups`` counter from ``/proc/pid/sched``."""
     pid = _require_pid(pid)
-    text = _read_optional(Path(proc_root) / str(pid) / "sched")
+    root = Path(proc_root)
+    text = _read_optional(root / str(pid) / "sched", root)
     return _numeric_field(text, "nr_wakeups")
 
 
 def _context_switches(pid, proc_root):
-    text = _read_optional(Path(proc_root) / str(pid) / "status")
+    root = Path(proc_root)
+    text = _read_optional(root / str(pid) / "status", root)
     voluntary = _numeric_field(text, "voluntary_ctxt_switches")
     nonvoluntary = _numeric_field(text, "nonvoluntary_ctxt_switches")
     if voluntary is None or nonvoluntary is None:

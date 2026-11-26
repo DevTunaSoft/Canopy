@@ -233,9 +233,19 @@ class RuntimeCatalogCompiledTests(unittest.TestCase):
             command = [gpp, "-std=c++17", "-fPIC", *include_args, str(probe),
                        str(SOURCE), "-L" + libs, "-lQt6Core", "-o", str(binary)]
 
+            compile_env = os.environ.copy()
+            # cc1plus.exe resolves libisl-23.dll from UCRT64/bin on
+            # Windows. g++ may be found by absolute path while that DLL
+            # is missing from PATH, producing rc=1 with empty output.
+            # Give the compiler the same supported PATH as the probe run.
+            compile_env["PATH"] = (
+                "C:/msys64/ucrt64/bin" + os.pathsep
+                + compile_env.get("PATH", ""))
+
             def compile_once():
                 return subprocess.run(command, cwd=str(work), stdout=subprocess.PIPE,
-                                      stderr=subprocess.STDOUT, timeout=180, check=False)
+                                      stderr=subprocess.STDOUT, timeout=180, check=False,
+                                      env=compile_env)
 
             built = compile_once()
             if built.returncode != 0 and not built.stdout.strip():
@@ -244,7 +254,7 @@ class RuntimeCatalogCompiledTests(unittest.TestCase):
             if built.returncode != 0:
                 self.fail("compiled catalogue probe failed:\n"
                           + built.stdout.decode("utf-8", "replace")[-4000:])
-            env = os.environ.copy()
+            env = compile_env.copy()
             env["PATH"] = "C:/msys64/ucrt64/bin" + os.pathsep + env.get("PATH", "")
             env["QT_FORCE_STDERR_LOGGING"] = "1"
             env.pop("DISPLAY", None)

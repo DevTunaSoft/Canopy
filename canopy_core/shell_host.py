@@ -324,6 +324,11 @@ class ShellHost:
         try:
             previous_id = self._active_id
             if self._needs_recovery:
+                # Shutdown is terminal even when an earlier failure froze
+                # transitions. Release the last focus adapter and its
+                # host-supplied authorize callback here too; diagnostics keep
+                # the recovery flag and counts, not a live adapter.
+                self._focus_adapter = None
                 return SwitchResult(previous_id, None, "RECOVERY_REQUIRED",
                                     previous_id, False)
             if self._active_view is None:

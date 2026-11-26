@@ -109,6 +109,22 @@ class _UnhashableKeyMapping(Mapping):
         return self._values[key]
 
 
+class _RaisingMapping(Mapping):
+    """Synthetic Mapping whose lookup raises a secret-bearing built-in error."""
+
+    def __init__(self, values):
+        self._values = values
+
+    def __iter__(self):
+        return iter(self._values)
+
+    def __len__(self):
+        return len(self._values)
+
+    def __getitem__(self, key):
+        raise RuntimeError("hostile lookup SECRET_MARKER")
+
+
 class HostileRecordTests(unittest.TestCase):
     def test_unapproved_topic_is_rejected(self):
         with self.assertRaises(SnapshotProducerError):
@@ -138,6 +154,16 @@ class HostileRecordTests(unittest.TestCase):
     def test_unhashable_mapping_key_is_rejected_with_domain_error(self):
         with self.assertRaises(SnapshotProducerError):
             compose([_UnhashableKeyMapping(_record())])
+
+    def test_hostile_mapping_lookup_leaks_no_builtin_or_secret(self):
+        with self.assertRaises(SnapshotProducerError) as caught:
+            compose([_RaisingMapping(_record())])
+        self.assertNotIn("SECRET_MARKER", str(caught.exception))
+
+    def test_surrogate_in_record_field_is_rejected_with_domain_error(self):
+        with self.assertRaises(SnapshotProducerError) as caught:
+            compose([_record(title="\ud800hidden")])
+        self.assertNotIn("hidden", str(caught.exception))
 
     def test_missing_record_key_is_rejected(self):
         record = _record()
@@ -239,6 +265,22 @@ class FailClosedTests(unittest.TestCase):
             self.assertEqual(len(producer.snapshot().records), 1)
             with patch.object(producer._source, "snapshot",
                               return_value=[_UnhashableKeyMapping(_record())]):
+                self.assertEqual(producer.snapshot().records, ())
+                self.assertEqual(producer.refusal, "INVALID_SNAPSHOT_RECORD")
+            self.assertEqual(len(producer.snapshot().records), 1)
+            self.assertIsNone(producer.refusal)
+        finally:
+            producer.close()
+
+    def test_source_exception_snapshot_fails_closed_without_echo(self):
+        from unittest.mock import patch
+
+        producer = HostSnapshotProducer()
+        try:
+            producer.publish("session.state.changed", {"state": "valid"})
+            self.assertEqual(len(producer.snapshot().records), 1)
+            with patch.object(producer._source, "snapshot",
+                              side_effect=RuntimeError("SECRET_MARKER")):
                 self.assertEqual(producer.snapshot().records, ())
                 self.assertEqual(producer.refusal, "INVALID_SNAPSHOT_RECORD")
             self.assertEqual(len(producer.snapshot().records), 1)

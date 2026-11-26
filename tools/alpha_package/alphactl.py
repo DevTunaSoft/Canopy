@@ -55,7 +55,10 @@ CHUNK = 64 * 1024
 HEX = frozenset("0123456789abcdef")
 MODES = frozenset((0o600, 0o644, 0o755))
 NATIVE_MINT = "NOT_RUN"
-BUILD_STATUSES = ("COMPILE_NOT_RUN", "COMPILED_EVIDENCE_VERIFIED")
+# This label claims only that a PE-002-labelled evidence record's digest
+# matched the staged binary. It does not claim an independent compile audit.
+PE002_DIGEST_EVIDENCE_MATCHED = "PE002_DIGEST_EVIDENCE_MATCHED"
+BUILD_STATUSES = ("COMPILE_NOT_RUN", PE002_DIGEST_EVIDENCE_MATCHED)
 PROTECTED = (
     "/etc", "/usr", "/var", "/opt", "/boot", "/proc", "/sys", "/dev",
     "/snap", "/root", "C:\\Windows", "C:\\Program Files",
@@ -64,7 +67,14 @@ PROTECTED = (
 TOKEN = re.compile(r"[A-Za-z0-9._-]{1,80}\Z")
 HASH64 = re.compile(r"[0-9a-f]{64}\Z")
 HASH40 = re.compile(r"[0-9a-f]{40}\Z")
-BANNED_EXEC = ('"', "\\", "$", "`", "%", "\n", "\r", "\x00")
+# Conservative unquoted Exec characters. Anything outside this set is quoted
+# per the freedesktop Desktop Entry spec (reserved characters, spaces, etc.).
+EXEC_UNQUOTED = frozenset(
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/:._+-")
+# Inside a quoted Exec field these four characters must be backslash-escaped.
+EXEC_ESCAPE = frozenset('"\\$`')
+# Exec field codes are expanded by launchers and cannot be escaped safely.
+EXEC_FORBIDDEN = frozenset("%")
 
 
 class AlphaPackageError(ValueError):
@@ -308,16 +318,28 @@ def _absent(path):
             "target": str(path)}
 
 
+def _exec_field(raw):
+    """Return a spec-conforming Exec field for one executable path."""
+    if any(char in EXEC_FORBIDDEN for char in raw):
+        raise AlphaPackageError("binary path contains an Exec field code")
+    if all(char in EXEC_UNQUOTED for char in raw):
+        return raw
+    escaped = []
+    for char in raw:
+        if char in EXEC_ESCAPE:
+            escaped.append("\\")
+        escaped.append(char)
+    return '"' + "".join(escaped) + '"'
+
+
 def _entry(binary):
     raw = _text(binary, "binary")
-    if any(char in raw for char in BANNED_EXEC):
-        raise AlphaPackageError("binary path contains a shell-unsafe character")
     return (
         "[Desktop Entry]\n"
         "Type=Application\n"
         "Name=Canopy Classic (alpha)\n"
         "Comment=Canopy Classic alpha preview - user-level reversible entry\n"
-        "Exec=" + raw + "\n"
+        "Exec=" + _exec_field(raw) + "\n"
         "Terminal=false\n"
         "Categories=Utility;\n"
     ).encode("utf-8")
@@ -506,13 +528,18 @@ def _assert_clean(home, snapshot, *, require_state_absent=True):
     return reasons
 
 
-def plan_install(root, home):
+def _install_inputs(root):
+    """Re-read and fully verify the package before any install mutation.
+
+    Returns exactly the values used to derive both the plan and the state so
+    that a manifest/payload swap between the two cannot be trusted.
+    """
     doc = load_manifest(root)
     checked = verify_package(root, doc)
     if checked["verdict"] != "PASS":
         raise AlphaPackageError("package verification failed: " +
                                 "; ".join(checked["reasons"]))
-    if doc["build"]["status"] != "COMPILED_EVIDENCE_VERIFIED":
+    if doc["build"]["status"] != PE002_DIGEST_EVIDENCE_MATCHED:
         raise AlphaPackageError("COMPILE_NOT_RUN: no exact binary evidence; "
                                 "install refused")
     base = Path(_text(root, "package root"))
@@ -524,14 +551,38 @@ def plan_install(root, home):
     digest, size = _stream_sha(binary, MAX_BINARY_BYTES)
     if digest != payload["sha256"] or size != payload["size"]:
         raise AlphaPackageError("payload binary does not match its pinned hash")
+    entry = _entry(str(binary))
+    marker = _marker(entry)
+    return {
+        "doc": doc, "binary": binary, "digest": digest, "size": size,
+        "entry": entry, "marker": marker,
+        "package_sha256": _sha(_read_bytes(
+            base / MANIFEST_FILE, MAX_MANIFEST, "manifest")),
+    }
+
+
+def _confirm_install_inputs(inputs, plan):
+    if (inputs["package_sha256"] != plan["package_sha256"]
+            or str(inputs["binary"]) != plan["binary_path"]
+            or inputs["digest"] != plan["binary_sha256"]
+            or inputs["size"] != plan["binary_size"]
+            or _sha(inputs["entry"]) != plan["after_expected"]["desktop"]["sha256"]
+            or _sha(inputs["marker"]) != plan["after_expected"]["manifest"]["sha256"]):
+        raise AlphaPackageError("package changed before install")
+
+
+def plan_install(root, home):
+    inputs = _install_inputs(root)
+    binary = inputs["binary"]
+    digest = inputs["digest"]
+    entry = inputs["entry"]
+    marker = inputs["marker"]
     normalized = _data_home(home)
     owned = _owned(normalized)
     snapshot = _snapshot(normalized)
     reasons = _assert_clean(normalized, snapshot)
     if reasons:
         raise AlphaPackageError("install refused: " + "; ".join(reasons))
-    entry = _entry(str(binary))
-    marker = _marker(entry)
     if len(entry) > MAX_ENTRY or len(marker) > MAX_MARKER:
         raise AlphaPackageError("projected entry exceeds its byte bound")
     plan = _common("install", normalized, snapshot)
@@ -540,9 +591,10 @@ def plan_install(root, home):
         "desktop": _projected(owned["desktop"], entry, 0o644),
         "manifest": _projected(owned["manifest"], marker, 0o600),
     }
-    plan["package_sha256"] = _sha(_read_bytes(
-        base / MANIFEST_FILE, MAX_MANIFEST, "manifest"))
+    plan["package_sha256"] = inputs["package_sha256"]
+    plan["binary_path"] = str(binary)
     plan["binary_sha256"] = digest
+    plan["binary_size"] = inputs["size"]
     plan["steps"] = _steps(
         {"phase": "snapshot", "description": "Recheck all managed paths."},
         {"phase": "verify-package", "description": "Recheck exact file hashes.",
@@ -659,15 +711,37 @@ def load_state(home):
     _hash64(state["binary_sha256"], "state binary_sha256")
     _hash64(state["entry_sha256"], "state entry_sha256")
     _hash64(state["marker_sha256"], "state marker_sha256")
+    for phase in ("before", "after"):
+        if (not isinstance(state[phase], dict)
+                or set(state[phase]) != set(OWNED_KEYS)):
+            raise AlphaPackageError("unexpected " + phase + " state map")
     for key in OWNED_KEYS:
-        for phase in ("before", "after"):
-            piece = state[phase][key]
-            if not isinstance(piece, dict) or piece.get("kind") not in (
-                    "ABSENT", "REGULAR_FILE"):
-                raise AlphaPackageError("unsafe recorded " + phase + " state")
-            if piece["kind"] == "REGULAR_FILE":
-                _payload(piece, MAX_ENTRY if key == "desktop" else MAX_MARKER,
-                         key)
+        limit = MAX_ENTRY if key == "desktop" else MAX_MARKER
+        before = state["before"][key]
+        if not isinstance(before, dict) or before.get("kind") != "ABSENT":
+            raise AlphaPackageError("unsafe recorded before state: " + key)
+        # apply_install can only record ABSENT before paths: any claim of a
+        # pre-existing file is inconsistent and must refuse before deletions.
+        if any(before.get(field) is not None for field in (
+                "size", "mode", "sha256", "payload_base64")):
+            raise AlphaPackageError("inconsistent recorded before state: " + key)
+        after = state["after"][key]
+        if not isinstance(after, dict) or after.get("kind") not in (
+                "ABSENT", "REGULAR_FILE"):
+            raise AlphaPackageError("unsafe recorded after state: " + key)
+        if after["kind"] == "ABSENT":
+            if any(after.get(field) is not None for field in (
+                    "size", "mode", "sha256", "payload_base64")):
+                raise AlphaPackageError(
+                    "inconsistent recorded after state: " + key)
+        else:
+            data = _payload(after, limit, key)
+            if (data is None
+                    or _hash64(after.get("sha256"), key + " after sha256")
+                    != _sha(data) or _int(after.get("size"), key + " after size")
+                    != len(data)):
+                raise AlphaPackageError(
+                    "inconsistent recorded after state: " + key)
     return state
 
 
@@ -678,11 +752,12 @@ def apply_install(root, home):
     for key in SNAPSHOT_KEYS:
         if not _same_state(fresh[key], plan["before"][key]):
             raise AlphaPackageError("managed state changed before install")
-    doc = load_manifest(root)
-    base = Path(_text(root, "package root"))
-    binary = base.joinpath(*doc["payload"]["path"].split("/"))
-    entry = _entry(str(binary))
-    marker = _marker(entry)
+    inputs = _install_inputs(root)
+    _confirm_install_inputs(inputs, plan)
+    doc = inputs["doc"]
+    binary = inputs["binary"]
+    entry = inputs["entry"]
+    marker = inputs["marker"]
     state = _make_state(doc, normalized, binary, fresh, entry, marker)
     owned = _owned(normalized)
     created = []

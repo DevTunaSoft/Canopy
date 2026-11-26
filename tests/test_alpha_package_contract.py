@@ -6,6 +6,7 @@ compile, a Linux Mint session or owner acceptance.
 """
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 from pathlib import Path
@@ -66,7 +67,7 @@ class AlphaPackageContractTests(unittest.TestCase):
     def test_verify_package_passes_and_detects_tampering(self):
         checked = alphactl.verify_package(self.staging)
         self.assertEqual(checked["verdict"], "PASS", checked)
-        self.assertEqual(checked["build_status"], "COMPILED_EVIDENCE_VERIFIED")
+        self.assertEqual(checked["build_status"], "PE002_DIGEST_EVIDENCE_MATCHED")
         (self.staging / "tools/alpha_package/NOTICE.md").write_bytes(b"tampered\n")
         checked = alphactl.verify_package(self.staging)
         self.assertEqual(checked["verdict"], "FAIL")
@@ -170,6 +171,107 @@ class AlphaPackageContractTests(unittest.TestCase):
                       "--home", str(self.home), "--apply")
         self.assertEqual(removed.returncode, 0, removed.stderr)
         self.assertFalse(self.owned["desktop"].exists())
+
+    def test_exec_field_quotes_reserved_characters_and_escapes_specials(self):
+        for char in ' \'"\\$`><~|&;*?#()':
+            raw = "/tmp/canopy" + char + "classic"
+            entry = alphactl._entry(raw).decode("utf-8")
+            line = next(line for line in entry.splitlines()
+                        if line.startswith("Exec="))
+            self.assertTrue(line.startswith('Exec="'), (char, line))
+            self.assertTrue(line.endswith('"'), (char, line))
+
+        raw = '/tmp/a b/"q"\\$`c'
+        expected = ('Exec="' + "/tmp/a b/" + '\\"' + "q" + '\\"'
+                    + '\\\\' + '\\$' + '\\`' + 'c' + '"')
+        entry = alphactl._entry(raw).decode("utf-8")
+        self.assertIn(expected, entry.splitlines())
+
+        with self.assertRaises(alphactl.AlphaPackageError):
+            alphactl._entry("/tmp/percent%path")
+        with self.assertRaises(alphactl.AlphaPackageError):
+            alphactl._entry("/tmp/control\npath")
+
+    def test_install_writes_quoted_exec_for_spaced_binary_path(self):
+        spaced = Path(self.tmp.name) / "my app" / "canopy-classic"
+        spaced.parent.mkdir()
+        spaced.write_bytes(b"#!/bin/sh\nprintf synthetic\n")
+        spaced.chmod(0o755)
+        digest = hashlib.sha256(spaced.read_bytes()).hexdigest()
+        staged = Path(self.tmp.name) / "my stage" / "spaced-stage"
+        build_package.build_package(staged, SOURCE, "spaced-alpha", spaced,
+                                    digest, self.evidence)
+        self.assertEqual(alphactl.apply_install(staged, self.home)["verdict"],
+                         "PASS")
+        lines = self.owned["desktop"].read_text(encoding="utf-8").splitlines()
+        self.assertIn('Exec="' + str(staged / "payload/canopy-classic") + '"',
+                      lines)
+
+    def _resign_payload(self, evil):
+        """Make a swapped payload fully self-consistent inside the package."""
+        manifest = self.staging / "MANIFEST.json"
+        doc = json.loads(manifest.read_text(encoding="utf-8"))
+        digest = hashlib.sha256(evil).hexdigest()
+        rel = build_package.PAYLOAD_REL
+        doc["build"]["binary_sha256"] = digest
+        doc["payload"]["sha256"] = digest
+        doc["payload"]["size"] = len(evil)
+        doc["files"][rel]["sha256"] = digest
+        doc["files"][rel]["size"] = len(evil)
+        manifest.write_text(
+            json.dumps(doc, sort_keys=True, ensure_ascii=False) + "\n",
+            encoding="utf-8")
+        lines = [hashlib.sha256(manifest.read_bytes()).hexdigest()
+                 + "  MANIFEST.json\n"]
+        for path, record in sorted(doc["files"].items()):
+            data = self.staging.joinpath(*path.split("/")).read_bytes()
+            lines.append(hashlib.sha256(data).hexdigest() + "  " + path + "\n")
+        (self.staging / "CHECKSUMS.sha256").write_bytes(
+            "".join(lines).encode("utf-8"))
+
+    def test_apply_install_refuses_package_swapped_after_plan(self):
+        real_snapshot = alphactl._snapshot
+        calls = []
+
+        def snapshot(home):
+            calls.append(home)
+            result = real_snapshot(home)
+            if len(calls) == 2:
+                evil = b"#!/bin/sh\nprintf EVIL\n"
+                (self.staging / build_package.PAYLOAD_REL).write_bytes(evil)
+                self._resign_payload(evil)
+            return result
+
+        alphactl._snapshot = snapshot
+        try:
+            with self.assertRaises(alphactl.AlphaPackageError):
+                alphactl.apply_install(self.staging, self.home)
+        finally:
+            alphactl._snapshot = real_snapshot
+        self.assertFalse(self.owned["desktop"].exists())
+        self.assertFalse(self.owned["manifest"].exists())
+        self.assertFalse(self.state.exists())
+
+    def test_load_state_refuses_non_absent_before_record(self):
+        self._install()
+        state = json.loads(self.state.read_text(encoding="utf-8"))
+        original = b"[Desktop Entry]\nName=Preexisting\n"
+        state["before"]["desktop"] = {
+            "kind": "REGULAR_FILE", "size": len(original), "mode": 0o644,
+            "sha256": hashlib.sha256(original).hexdigest(),
+            "payload_base64": base64.b64encode(original).decode("ascii"),
+            "safe": True, "reason": None,
+        }
+        raw = (json.dumps(state, sort_keys=True, ensure_ascii=False)
+               + "\n").encode("utf-8")
+        self.state.write_bytes(raw)
+        with self.assertRaises(alphactl.AlphaPackageError):
+            alphactl.load_state(self.home)
+        with self.assertRaises(alphactl.AlphaPackageError):
+            alphactl.apply_uninstall(self.staging, self.home)
+        self.assertEqual(self.state.read_bytes(), raw)
+        self.assertTrue(self.owned["desktop"].is_file())
+        self.assertTrue(self.owned["manifest"].is_file())
 
 
 if __name__ == "__main__":

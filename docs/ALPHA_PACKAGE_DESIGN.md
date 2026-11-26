@@ -1,11 +1,16 @@
 # Alpha package design: install, uninstall, rollback
 
-**Pin:** `90dd463dc96d70bae00cfe4b2391784a86fb0b12`
+**Original pin:** `90dd463dc96d70bae00cfe4b2391784a86fb0b12`
+**Refreshed source commit / PR base tip:**
+`c6de24153eef0b58f921a8bffdaeaa8033288a75`
 **Branch:** `release/package-alpha-90dd463`
 **PR base:** `integration/canopy-classic-20261123`
 **Compile status:** `COMPILE_NOT_RUN` until PE-002 publishes the exact binary
-SHA-256 and build evidence. This document and the scripts never claim a
-compiled binary, a verified Mint session or owner visual approval.
+SHA-256 and build evidence. The compiled-input label is
+`PE002_DIGEST_EVIDENCE_MATCHED`: it claims only that a PE-002-labelled
+terminal-success record pins the staged binary digest. This document and the
+scripts never claim an independent compile audit, a verified Mint session or
+owner visual approval.
 
 ## Scope
 
@@ -45,20 +50,30 @@ edits that file.
   uname/gname; gzip mtime is 0. Two builds from identical inputs produce the
   same tarball digest. This is a **SYNTHETIC** determinism property, not a
   statement about compiled behavior.
+- Build and plan results echo `package_id` and `source_commit`. Published
+  manifest/tarball digests are only reproducible with the exact
+  `--package-id` used to produce them; changing the id changes both digests.
+  A digest without its package id is not a complete reproduction recipe.
 
 ## Compile gate
 
 `build_package.py plan` stages `COMPILE_NOT_RUN`, a null payload and no binary.
 `alphactl.py install` refuses that manifest. `build_package.py build` requires
-an explicit 64-hex `--binary-sha256` plus an evidence JSON whose `sha256`
-matches that pin, whose optional `source_commit` matches the pinned commit,
-whose optional `status` is a terminal-success compile status, and whose
-binary streams to the same digest. A mismatched or absent evidence file stages
-nothing. The evidence digest is recorded as `build.evidence_sha256`.
+an explicit 64-hex `--binary-sha256` plus an evidence JSON that carries all of:
+`id="PE-002"`, a terminal-success `status`, the matching `source_commit` and a
+`sha256` equal to that pin. The binary must stream to the same digest. Missing
+or mismatched fields stage nothing. The evidence file digest is recorded as
+`build.evidence_sha256`, and the manifest status is
+`PE002_DIGEST_EVIDENCE_MATCHED`. That label means a self-declared PE-002 record
+matched the binary digest; it does **not** claim an independent compile audit
+or PE-002 authorship verification.
 
 ## Install contract
 
-1. Verify the package checksums and the pinned payload.
+1. Verify the package checksums and the pinned payload; `apply_install`
+   re-reads and re-verifies the exact package bytes immediately before any
+   mutation and refuses a manifest, payload or launcher digest that changed
+   since the dry-run plan.
 2. Require a user-level absolute `home` with no `..`, no symlink components
    and no protected prefix (`/etc`, `/usr`, `/var`, `/opt`, `/boot`, `/proc`,
    `/sys`, `/dev`, `/snap`, `/root`, Windows system roots).
@@ -71,16 +86,23 @@ nothing. The evidence digest is recorded as `build.evidence_sha256`.
 5. Re-snapshot and compare exact bytes, sizes and modes. Any mismatch unwinds
    only the files created in this run.
 
-The desktop entry has no icon and no `Exec` shell metacharacters; quoted or
-backslash-containing binary paths are refused. The marker is the existing
+The desktop entry has no icon. Its `Exec` path is left bare only for the
+conservative unquoted character set; any space or Desktop Entry Spec reserved
+character triggers a double-quoted field with `\`, `"`, `$` and backtick
+backslash-escaped, while `%` field codes are refused. Binary paths with
+reserved characters therefore produce a parseable launcher rather than an
+unquoted multi-argument `Exec`. The marker is the existing
 `{"schema":1,"sha256":<entry digest>}` format.
 
 ## Uninstall and rollback contract
 
 - Uninstall requires an exact match to the recorded post-install state before
-  deleting anything. It deletes the desktop entry, then the marker. If marker
-  deletion fails, the desktop entry's exact bytes and mode are restored and
-  the result is `FAIL` with `rollback_restored`. On success it verifies that
+  deleting anything. State loading refuses any `before` record that is not a
+  fully `ABSENT`, so a legacy or tampered claim of a pre-existing owned file
+  cannot cause an unrestored deletion. It deletes the desktop entry, then the
+  marker. If marker deletion fails, the desktop entry's exact bytes and mode
+  are restored and the result is `FAIL` with `rollback_restored`. On success it
+  verifies that
   both owned paths match the original pre-install state and then removes the
   state record. `original_desktop_restored` is reported from that comparison.
 - `rollback --target before` reconciles the live state against the recorded
@@ -96,8 +118,10 @@ backslash-containing binary paths are refused. The marker is the existing
 ## Verification performed here
 
 Targeted Python tests live in `tests/test_alpha_package_contract.py` and
-`tests/test_alpha_package_build.py`. Results, exact head and SHA-256 sidecars
-are recorded under `scratch/master_directive_20261126/evidence/package_alpha`.
+`tests/test_alpha_package_build.py`. Current results (20 targeted tests), exact
+head and SHA-256 sidecars are recorded under
+`scratch/master_directive_20261126/evidence/package_findings_fix`; the earlier
+author run is under `scratch/master_directive_20261126/evidence/package_alpha`.
 ShellCheck was unavailable on this host, so no shell script was introduced
 and that check is reported `NOT_RUN`.
 

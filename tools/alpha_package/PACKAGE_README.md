@@ -8,8 +8,9 @@ State at build time is recorded in `MANIFEST.json`:
 
 - `COMPILE_NOT_RUN` — a plan-only artifact. It contains **no compiled binary**
   and `alphactl.py install` refuses it.
-- `COMPILED_EVIDENCE_VERIFIED` — a binary was staged only after its SHA-256
-  matched the PE-002 compile evidence.
+- `PE002_DIGEST_EVIDENCE_MATCHED` — a PE-002-labelled, terminal-success
+  evidence record pinned the staged binary's SHA-256. This is a **digest
+  match only**, not an independently audited compile or a provenance grant.
 
 Commands (from the extracted tarball, `python3 3.8+`):
 
@@ -29,8 +30,14 @@ absolute, non-traversing, user-level XDG data home. Installed files are only:
 - `$XDG_DATA_HOME/canopy-alpha/install-state.json` (small restore record)
 
 Install refuses when any managed path already exists: existing configuration
-is never overwritten. Uninstall deletes only byte-exact owned files and, if
-marker deletion fails, restores the desktop entry's exact bytes and mode.
+is never overwritten. The `Exec` path is quoted when it contains spaces or
+Desktop Entry Spec reserved characters (with spec escaping for `"`, `\`, `$`
+and backtick); `%` field codes are refused. Apply re-verifies the exact package
+bytes before writing and refuses a package swapped after the dry-run plan.
+
+Uninstall deletes only byte-exact owned files and, if marker deletion fails,
+restores the desktop entry's exact bytes and mode. A state record claiming a
+pre-existing owned file is refused before any deletion occurs.
 `rollback --target before` restores the original desktop state;
 `--target after` re-creates the recorded installed state. Modified or
 unmanaged files are never deleted automatically.

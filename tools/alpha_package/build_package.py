@@ -9,10 +9,13 @@ Two modes:
          exact compiled artifact hash and build evidence.
 
   build  Require an already-compiled binary, an explicit SHA-256 pin and a
-         PE-002 evidence JSON whose digest matches that pin. Only then stage
-         payload/canopy-classic and set COMPILED_EVIDENCE_VERIFIED.
+         PE-002 evidence JSON whose digest matches that pin. The evidence must
+         carry PE-002 identity, a terminal-success status and the pinned
+         source commit. Only then stage payload/canopy-classic and set
+         PE002_DIGEST_EVIDENCE_MATCHED.
 
 Neither mode compiles, downloads, installs, uses root or edits a session.
+This label claims a matching evidence digest, not an independent compile audit.
 Staging and tarball output must not already exist: nothing is overwritten.
 """
 from __future__ import annotations
@@ -42,6 +45,8 @@ PAYLOAD_REL = "payload/canopy-classic"
 CHECKSUM_MODES = {"MANIFEST.json": "0644",
                   alphactl.CHECKSUMS_FILE: "0644"}
 EVIDENCE_STATUSES = ("COMPILED", "COMPILED_VERIFIED", "PASS")
+EVIDENCE_ID = "PE-002"
+COMPLETION = alphactl.PE002_DIGEST_EVIDENCE_MATCHED
 
 
 class BuildError(ValueError):
@@ -149,6 +154,7 @@ def plan_package(staging, source_commit, package_id):
     if any(path.name == "canopy-classic" for path in target.rglob("*")):
         raise BuildError("plan package must not contain a binary")
     return {"verdict": "PASS", "mode": "plan", "completion": "COMPILE_NOT_RUN",
+            "package_id": package_id, "source_commit": source_commit,
             "staging": str(target), "manifest_sha256": _sha(
                 (target / alphactl.MANIFEST_FILE).read_bytes()),
             "file_count": len(doc["files"])}
@@ -170,11 +176,11 @@ def _read_evidence(path, binary_sha, source_commit):
     if (not isinstance(digest, str) or not alphactl.HASH64.fullmatch(digest)
             or digest != binary_sha):
         raise BuildError("evidence digest does not pin the supplied binary")
-    if "id" in doc and doc["id"] not in ("PE-002", "native-build"):
-        raise BuildError("evidence is not from the compile workstream")
-    if "status" in doc and doc["status"] not in EVIDENCE_STATUSES:
+    if doc.get("id") != EVIDENCE_ID:
+        raise BuildError("evidence is not from the PE-002 compile workstream")
+    if doc.get("status") not in EVIDENCE_STATUSES:
         raise BuildError("compile evidence is not terminal-success")
-    if ("source_commit" in doc and doc["source_commit"] != source_commit):
+    if doc.get("source_commit") != source_commit:
         raise BuildError("evidence source commit mismatch")
     artifact = doc.get("artifact")
     if artifact is not None and (not isinstance(artifact, str) or not artifact):
@@ -205,14 +211,14 @@ def build_package(staging, source_commit, package_id, binary, binary_sha,
     if os.name != "nt":
         destination.chmod(0o755)
     files[PAYLOAD_REL] = {"sha256": actual, "size": size, "mode": "0755"}
-    build = {"status": "COMPILED_EVIDENCE_VERIFIED", "binary_sha256": digest,
+    build = {"status": COMPLETION, "binary_sha256": digest,
              "evidence_sha256": evidence_sha,
              "artifact": artifact or str(source)}
     payload = {"path": PAYLOAD_REL, "sha256": actual, "size": size,
                "mode": "0755"}
     doc = _finalize(target, package_id, source_commit, build, payload, files)
-    return {"verdict": "PASS", "mode": "build",
-            "completion": "COMPILED_EVIDENCE_VERIFIED",
+    return {"verdict": "PASS", "mode": "build", "completion": COMPLETION,
+            "package_id": package_id, "source_commit": source_commit,
             "staging": str(target), "binary_sha256": actual,
             "evidence_sha256": evidence_sha,
             "manifest_sha256": _sha((target / alphactl.MANIFEST_FILE).read_bytes()),
@@ -259,6 +265,7 @@ def write_tarball(staging, tarball):
                     info.uname = info.gname = ""
                     archive.addfile(info, io.BytesIO(data))
     return {"verdict": "PASS", "tarball": str(output),
+            "package_id": doc["package_id"],
             "tarball_sha256": _sha(output.read_bytes()),
             "byte_size": output.stat().st_size,
             "build_status": doc["build"]["status"]}

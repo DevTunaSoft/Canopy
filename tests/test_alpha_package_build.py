@@ -57,7 +57,7 @@ class AlphaPackageBuildTests(unittest.TestCase):
 
     def test_build_requires_matching_evidence_and_pin(self):
         result = self._build("good")
-        self.assertEqual(result["completion"], "COMPILED_EVIDENCE_VERIFIED")
+        self.assertEqual(result["completion"], "PE002_DIGEST_EVIDENCE_MATCHED")
         self.assertEqual(result["binary_sha256"], self.sha)
         manifest = json.loads((self.base / "good/MANIFEST.json").read_text(
             encoding="utf-8"))
@@ -106,6 +106,50 @@ class AlphaPackageBuildTests(unittest.TestCase):
         checksums = (self.base / "a/CHECKSUMS.sha256").read_bytes()
         self.assertTrue(checksums.endswith(b"\n"))
         self.assertNotIn(b"\r", checksums)
+
+    def test_digest_only_or_mislabelled_evidence_is_refused(self):
+        cases = [
+            {"sha256": self.sha},
+            {"id": "PE-002", "status": "COMPILED", "sha256": self.sha},
+            {"id": "PE-002", "source_commit": SOURCE, "sha256": self.sha},
+            {"id": "native-build", "status": "COMPILED",
+             "source_commit": SOURCE, "sha256": self.sha},
+            {"id": "PE-002", "status": "FAILED", "source_commit": SOURCE,
+             "sha256": self.sha},
+        ]
+        for number, record in enumerate(cases):
+            path = self.base / ("evidence-%d.json" % number)
+            path.write_text(json.dumps(record), encoding="utf-8")
+            with self.assertRaises(build_package.BuildError):
+                self._build("evidence-refused-%d" % number, evidence=path)
+            self.assertFalse(
+                (self.base / ("evidence-refused-%d" % number)).exists())
+
+    def test_successful_build_uses_honest_evidence_label(self):
+        result = self._build("honest-label")
+        self.assertEqual(result["completion"], "PE002_DIGEST_EVIDENCE_MATCHED")
+        manifest = json.loads((self.base / "honest-label/MANIFEST.json").read_text(
+            encoding="utf-8"))
+        self.assertEqual(manifest["build"]["status"],
+                         "PE002_DIGEST_EVIDENCE_MATCHED")
+
+    def test_manifest_and_tarball_digests_bind_package_id(self):
+        first = build_package.plan_package(self.base / "id-a", SOURCE,
+                                           "alpha-id-a")
+        second = build_package.plan_package(self.base / "id-b", SOURCE,
+                                            "alpha-id-b")
+        repeat = build_package.plan_package(self.base / "id-a-repeat", SOURCE,
+                                            "alpha-id-a")
+        self.assertEqual(first["package_id"], "alpha-id-a")
+        self.assertEqual(second["package_id"], "alpha-id-b")
+        self.assertNotEqual(first["manifest_sha256"],
+                            second["manifest_sha256"])
+        self.assertEqual(first["manifest_sha256"], repeat["manifest_sha256"])
+        one = build_package.write_tarball(self.base / "id-a",
+                                          self.base / "id-a.tar.gz")
+        two = build_package.write_tarball(self.base / "id-b",
+                                          self.base / "id-b.tar.gz")
+        self.assertNotEqual(one["tarball_sha256"], two["tarball_sha256"])
 
 
 if __name__ == "__main__":

@@ -28,6 +28,16 @@ Rectangle {
     // text or other caller-controlled string. No shell or argv is involved.
     readonly property string fileManagerDockName: fileModel.fileManagerDockName
     property string fileManagerStatus: ""
+    // Same user-facing action hint as the launcher footer. Dock, launcher and
+    // Files refusals differ only in their reason; the recovery step is shared.
+    readonly property string retryHint: "Check availability, then try again"
+    function feedback(message) {
+        if (typeof message !== "string" || message.length === 0)
+            return ""
+        if (message.indexOf("Opened ") === 0)
+            return message
+        return message + " · " + preview.retryHint
+    }
     readonly property bool fileManagerBridgeReady: {
         if (!fileModel.isFileManagerDockName(fileManagerDockName)
                 || fileManagerDockName !== "Files")
@@ -650,8 +660,11 @@ Rectangle {
                 anchors.right: openInFileManagerButton.left
                 anchors.rightMargin: 8
                 anchors.verticalCenter: parent.verticalCenter
-                text: preview.fileManagerStatus !== "" ? preview.fileManagerStatus
-                      : (preview.canOpenInFileManager() ? "" : "File manager unavailable")
+                text: {
+                    const status = preview.fileManagerStatus !== "" ? preview.fileManagerStatus
+                        : (preview.canOpenInFileManager() ? "" : "File manager unavailable")
+                    return preview.feedback(status)
+                }
                 color: "#79899b"
                 font.pixelSize: 9
                 elide: Text.ElideRight

@@ -192,12 +192,22 @@ def _require_unprivileged():
     _unprivileged()
 
 
-def install(home, binary, *, art=None, wallpaper=None, terminal=None, native_apps=False):
-    _require_unprivileged()
-    p = paths(home)
-    _safe_folders(p)
-    if status(home) != "NOT_INSTALLED":
-        raise RegistrationError("existing registration: refusing overwrite")
+def _planner():
+    """Import the read-only planner, allowing direct script invocation."""
+    root = str(Path(__file__).resolve().parents[1])
+    if root not in sys.path:
+        sys.path.insert(0, root)
+    from canopy_features.mint import install_recovery_plan as planner
+    return planner
+
+
+def desktop_entry(binary, *, art=None, wallpaper=None, terminal=None,
+                  native_apps=False):
+    """Build the exact desktop-entry payload without writing or executing.
+
+    Sharing this pure builder with the install/recovery planner guarantees
+    that a dry-run's projected SHA-256 is the same bytes a real install writes.
+    """
     exe = _resource(binary, "Canopy binary")
     if exe is None:
         raise RegistrationError(
@@ -220,7 +230,7 @@ def install(home, binary, *, art=None, wallpaper=None, terminal=None, native_app
     if native_apps:
         args.append("--enable-system-apps")
     command = " ".join(_quote(x) for x in args)
-    payload = (
+    return (
         "[Desktop Entry]\nType=Application\nVersion=1.0\n"
         "Name=Canopy Classic Preview\n"
         "Comment=Experimental application, not a replacement Cinnamon session\n"
@@ -228,8 +238,31 @@ def install(home, binary, *, art=None, wallpaper=None, terminal=None, native_app
         "Terminal=false\nIcon=computer\nCategories=Utility;\n"
         "StartupNotify=false\nX-Canopy-Preview=true\n"
     ).encode("utf-8")
-    marker = json.dumps({"schema": 1, "sha256": _sha(payload)},
-                        sort_keys=True).encode("utf-8")
+
+
+def ownership_marker(payload):
+    """Build the exact ownership marker bytes for a desktop-entry payload."""
+    return json.dumps({"schema": 1, "sha256": _sha(payload)},
+                      sort_keys=True).encode("utf-8")
+
+
+def install(home, binary, *, art=None, wallpaper=None, terminal=None,
+            native_apps=False, dry_run=False):
+    _unprivileged() if dry_run else _require_unprivileged()
+    if dry_run:
+        # Lazy import avoids a module cycle: the planner reuses this module's
+        # paths and pure builders. A dry-run returns a plan and writes nothing.
+        planner = _planner()
+        return planner.plan_install(
+            home, binary, art=art, wallpaper=wallpaper, terminal=terminal,
+            native_apps=native_apps)
+    p = paths(home)
+    _safe_folders(p)
+    if status(home) != "NOT_INSTALLED":
+        raise RegistrationError("existing registration: refusing overwrite")
+    payload = desktop_entry(binary, art=art, wallpaper=wallpaper,
+                            terminal=terminal, native_apps=native_apps)
+    marker = ownership_marker(payload)
     for key in ("data", "parent", "folder", "apps"):
         path = p[key]
         _require_real_path_components(path, "unsafe linked directory")
@@ -255,8 +288,11 @@ def install(home, binary, *, art=None, wallpaper=None, terminal=None, native_app
     return p["desktop"]
 
 
-def uninstall(home):
-    _require_unprivileged()
+def uninstall(home, *, dry_run=False):
+    _unprivileged() if dry_run else _require_unprivileged()
+    if dry_run:
+        planner = _planner()
+        return planner.plan_uninstall(home)
     p = paths(home)
     if status(home) != "INSTALLED":
         raise RegistrationError("not exact-byte owned; removed nothing")
@@ -297,8 +333,14 @@ def main(argv=None):
     add.add_argument("--landscape-wallpaper", type=Path)
     add.add_argument("--terminal-refinement", type=Path)
     add.add_argument("--enable-system-apps", action="store_true")
+    add.add_argument("--dry-run", action="store_true",
+                    help="validate and print a JSON plan; write nothing")
     sub.add_parser("status")
-    sub.add_parser("uninstall")
+    rem = sub.add_parser("uninstall")
+    rem.add_argument("--dry-run", action="store_true",
+                    help="validate and print a JSON plan; write nothing")
+    ver = sub.add_parser("verify-plan")
+    ver.add_argument("--plan", required=True, type=Path)
     a = parser.parse_args(argv)
     try:
         home = data_home()
@@ -306,10 +348,25 @@ def main(argv=None):
             result = install(home, a.binary, art=a.approved_art_dir,
                              wallpaper=a.landscape_wallpaper,
                              terminal=a.terminal_refinement,
-                             native_apps=a.enable_system_apps)
-            print("CANOPY_PREVIEW_REGISTERED:", result)
+                             native_apps=a.enable_system_apps,
+                             dry_run=a.dry_run)
+            if a.dry_run:
+                print("CANOPY_PREVIEW_DRY_RUN:",
+                      json.dumps(result, sort_keys=True))
+            else:
+                print("CANOPY_PREVIEW_REGISTERED:", result)
         elif a.command == "uninstall":
-            print("CANOPY_PREVIEW_" + uninstall(home))
+            result = uninstall(home, dry_run=a.dry_run)
+            if a.dry_run:
+                print("CANOPY_PREVIEW_DRY_RUN:",
+                      json.dumps(result, sort_keys=True))
+            else:
+                print("CANOPY_PREVIEW_" + result)
+        elif a.command == "verify-plan":
+            planner = _planner()
+            verdict = planner.verify_plan_file(a.plan)
+            print("CANOPY_PREVIEW_VERIFY:", verdict["verdict"])
+            return 0 if verdict["verdict"] == "PASS" else 1
         else:
             print("CANOPY_PREVIEW_" + status(home))
     except (RegistrationError, ValueError, OSError) as exc:

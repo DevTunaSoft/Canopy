@@ -1,6 +1,7 @@
 #include "RoundedDockIconProvider.h"
 #include "SystemAppLauncher.h"
 #include "WindowActivationState.h"
+#include "LauncherModel.h"
 
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
@@ -493,6 +494,30 @@ public:
         };
     }
     Q_INVOKABLE QVariantList snapshot() const { return QVariantList(); }
+};
+
+// Read-only QML face of the opt-in desktop-entry catalogue. The model is a
+// plain bounded C++ value owned by main(): no Q_OBJECT on it, no signals,
+// timers, sockets, process calls or privileged paths. QML sees only the
+// already-validated snapshot and its row count.
+class LauncherCatalogBridge final : public QObject {
+    Q_OBJECT
+    Q_PROPERTY(bool active READ active CONSTANT)
+    Q_PROPERTY(int rowCount READ rowCount CONSTANT)
+public:
+    explicit LauncherCatalogBridge(const LauncherCatalogModel &model,
+                                   QObject *parent = nullptr)
+        : QObject(parent), m_model(model) {}
+
+    bool active() const { return m_model.active(); }
+    int rowCount() const { return m_model.rowCount(); }
+    Q_INVOKABLE QVariantList applications() const
+    {
+        return m_model.applications();
+    }
+
+private:
+    const LauncherCatalogModel &m_model;
 };
 
 // A Repeater can give its delegates QObject owners different from their
@@ -1511,6 +1536,10 @@ int main(int argc, char *argv[]) {
     // Declared before the QQmlApplicationEngine below so this trusted controller
     // outlives the engine, the context property and every QML object using it.
     QuickControlsHostStateController hostStateController;
+    // Opt-in desktop-entry catalogue: inactive unless --launcher-catalog is
+    // given with a valid, bounded snapshot. Both objects outlive the engine.
+    LauncherCatalogModel launcherCatalog;
+    LauncherCatalogBridge launcherCatalogBridge(launcherCatalog);
     const QString activationBackend = activationBackendId();
     activationState.applySnapshot(
         hostActivationSnapshot(systemLauncher, activationBackend, 1));
@@ -1530,6 +1559,25 @@ int main(int argc, char *argv[]) {
         }
     } else if (activationBackend.isEmpty()) {
         qWarning() << "CANOPY_ACTIVATION_BACKEND_UNKNOWN_FAIL_CLOSED";
+    }
+    if (args.contains(QStringLiteral("--self-test-launcher-catalog-model")))
+        return LauncherCatalogModel::selfTest() ? 0 : 1;
+    // Opt-in host bridge: one explicit, read-only snapshot file. Absence,
+    // wrong arguments or any malformed row leaves the approved catalogue and
+    // all visuals untouched. No XDG walk, network or privileged operation.
+    const int launcherCatalogIndex = args.indexOf(
+        QStringLiteral("--launcher-catalog"));
+    if (launcherCatalogIndex >= 0) {
+        if (launcherCatalogIndex + 1 >= args.size()
+            || args.at(launcherCatalogIndex + 1).startsWith(QLatin1Char('-'))) {
+            qWarning() << "CANOPY_LAUNCHER_CATALOG_REJECTED_FAIL_CLOSED: missing path";
+        } else if (launcherCatalog.loadFromFile(
+                       args.at(launcherCatalogIndex + 1))) {
+            qInfo() << "CANOPY_LAUNCHER_CATALOG_CONNECTED: opt-in rows"
+                    << launcherCatalog.rowCount();
+        } else {
+            qWarning() << "CANOPY_LAUNCHER_CATALOG_REJECTED_FAIL_CLOSED";
+        }
     }
     const bool launcherFixture = args.contains(QStringLiteral("--self-test-launcher-launch-fixture"));
     if (args.contains(QStringLiteral("--self-test-system-apps-capability"))) {
@@ -1904,6 +1952,11 @@ int main(int argc, char *argv[]) {
     NotificationHostSource notificationSource;
     engine.rootContext()->setContextProperty(
         QStringLiteral("canopyNotificationSource"), &notificationSource);
+    // The read-only catalogue bridge is always registered so QML can use a
+    // plain typeof guard; it reports active=false unless a valid opt-in
+    // snapshot was loaded above.
+    engine.rootContext()->setContextProperty(
+        QStringLiteral("canopyLauncherCatalog"), &launcherCatalogBridge);
     // Real in-process host-state injection: the trusted shell delivers one
     // bounded, already-produced payload on an existing host-event topic. No
     // bus, transport, process or privileged write is created. The controller
@@ -2873,6 +2926,13 @@ int main(int argc, char *argv[]) {
     }
     const bool quickSettingsExpected =
         enableSystemApps && systemLauncher.canLaunch(QStringLiteral("Settings"));
+    // The opt-in catalogue changes only the result set; default approved
+    // ordering and geometry stay exactly as before.
+    const bool launcherCatalogActive = launcherCatalog.active();
+    const int expectedLauncherCount = launcherCatalogActive
+        ? launcherCatalog.rowCount() : (approvedMode ? 8 : 6);
+    const QStringList expectedLauncherTitles = launcherCatalogActive
+        ? launcherCatalog.titles() : QStringList();
     const int screenshotIndex = args.indexOf(QStringLiteral("--self-test-screenshot"));
     if (screenshotIndex >= 0) {
         if (screenshotIndex + 1 >= args.size()) {
@@ -2885,6 +2945,7 @@ int main(int argc, char *argv[]) {
         QTimer::singleShot(1000, window,
             [window, screenshotPath, launcherScreenshotPath, approvedMode,
              ownerIconsMode, landscapeMode,
+             launcherCatalogActive, expectedLauncherCount, expectedLauncherTitles,
              framingReviewMode, quickSettingsExpected, settingsOverlay,
              settingsOpen = args.contains(QStringLiteral("--self-test-settings-open")),
              terminalCandidateMode = !terminalCandidatePath.isEmpty()]() {
@@ -2969,7 +3030,7 @@ int main(int argc, char *argv[]) {
                 window->contentItem(), QStringLiteral("canopyLauncherSearch"));
             if (!applicationLauncher || !launcherSearch
                 || applicationLauncher->property("catalogCount").toInt() !=
-                    (approvedMode ? 8 : 6)
+                    expectedLauncherCount
                 || !QMetaObject::invokeMethod(applicationLauncher, "openLauncher",
                                                Qt::DirectConnection)
                 || !applicationLauncher->isVisible() || !dock->isVisible()) {
@@ -2981,7 +3042,7 @@ int main(int argc, char *argv[]) {
             QCoreApplication::processEvents();
             const int launcherImageCount = countVisualItems(
                 applicationLauncher, QStringLiteral("canopyLauncherIcon"));
-            if (launcherImageCount != (approvedMode ? 8 : 6)
+            if (launcherImageCount != expectedLauncherCount
                 || countReadyLauncherImages(applicationLauncher) != launcherImageCount) {
                 qCritical() << "SELF_TEST_FAIL: incomplete launcher image catalogue"
                             << launcherImageCount;
@@ -3011,16 +3072,33 @@ int main(int argc, char *argv[]) {
             const bool restoredMatch =
                 applicationLauncher->setProperty("searchQuery", QString())
                 && applicationLauncher->property("filteredCount").toInt() ==
-                    (approvedMode ? 8 : 6);
+                    expectedLauncherCount;
+            // Compiled proof that the host snapshot, not a copied QML list,
+            // reached the actual launcher: titles must match in order.
+            bool catalogMatches = true;
+            if (launcherCatalogActive) {
+                const QVariantList actual =
+                    applicationLauncher->property("applications").toList();
+                catalogMatches = actual.size() == expectedLauncherTitles.size();
+                for (int i = 0; catalogMatches && i < actual.size(); ++i) {
+                    catalogMatches =
+                        actual.at(i).toMap().value(QStringLiteral("title")).toString()
+                        == expectedLauncherTitles.at(i);
+                }
+            }
             const bool closed = QMetaObject::invokeMethod(
                 applicationLauncher, "closeLauncher", Qt::DirectConnection)
                 && !applicationLauncher->isVisible() && dock->isVisible();
-            if (!selectedMatch || !emptyMatch || !restoredMatch || !closed) {
+            if (!selectedMatch || !emptyMatch || !restoredMatch || !catalogMatches
+                || !closed) {
                 qCritical() << "SELF_TEST_FAIL: launcher search or dismissal inconsistent";
                 QCoreApplication::exit(1);
                 return;
             }
             qInfo() << "SELF_TEST_PASS: actual Qt launcher opens, searches and closes";
+            if (launcherCatalogActive)
+                qInfo() << "SELF_TEST_PASS: opt-in desktop-entry catalogue reached QML"
+                        << expectedLauncherCount;
             if (framingReviewMode)
                 qInfo() << "SELF_TEST_PASS: launcher-only Qt frame review enabled; dock frozen";
 

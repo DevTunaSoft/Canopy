@@ -155,12 +155,13 @@ class CompiledInjectionContractTests(unittest.TestCase):
             with self.subTest(marker=marker):
                 self.assertIn(marker, self.cpp)
 
-    def test_no_visual_or_cmake_source_change_is_needed(self):
-        # The controller lives entirely in main.cpp, so no new source file is
-        # registered and no visual QML or approved asset is touched.
+    def test_no_visual_or_new_host_source_change_is_needed(self):
+        # The controller lives entirely in main.cpp, so no new quick-controls
+        # source is registered and no visual QML or approved asset is touched.
+        # The separately reviewed opt-in launcher model may be present.
         self.assertIn(
             "qt_add_executable(canopy-classic-spike main.cpp "
-            "WindowActivationState.cpp", self.cmake)
+            "LauncherModel.cpp LauncherModel.h WindowActivationState.cpp", self.cmake)
         self.assertNotIn("QuickControlsHostState", self.cmake)
         for marker in ("property var hostState: null", "function trustedView(",
                        'objectName: "canopyQuickControlsOverlay"'):

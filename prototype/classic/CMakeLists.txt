@@ -9,7 +9,7 @@ if(PkgConfig_FOUND)
     pkg_check_modules(GIO_UNIX QUIET IMPORTED_TARGET gio-unix-2.0)
 endif()
 qt_standard_project_setup()
-qt_add_executable(canopy-classic-spike main.cpp WindowActivationState.cpp WindowActivationState.h RoundedDockIconProvider.cpp RoundedDockIconProvider.h SystemAppLauncher.cpp SystemAppLauncher.h)
+qt_add_executable(canopy-classic-spike main.cpp LauncherModel.cpp LauncherModel.h WindowActivationState.cpp WindowActivationState.h RoundedDockIconProvider.cpp RoundedDockIconProvider.h SystemAppLauncher.cpp SystemAppLauncher.h)
 qt_add_qml_module(canopy-classic-spike
     URI Canopy.Classic
     VERSION 1.0

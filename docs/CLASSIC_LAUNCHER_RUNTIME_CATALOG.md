@@ -1,9 +1,36 @@
 # Classic launcher desktop-entry catalogue: compiled-runtime bridge record
 
-Status: **APPLIED at exact integration tip `af97e116b59620b7e9c0e51b7b042dc40e5cb77d` — compiled host injection wired by merged PR #637; still opt-in and SYNTHETIC, with no owner visual or Mint acceptance.**
-Correction record: the earlier `128c973` base and the BLOCKED wiring note below are retained as historical context only; #635 made the compile probe deterministic and #637 applied the wiring at `af97e116b59620b7e9c0e51b7b042dc40e5cb77d`.
+## FINAL TIP CORRECTION — exact tip `dd079d4a60c3fd0fa5cf975ce26af27215e77b55` (supersedes the archived `af97e11` correction and every earlier pin below)
 
-Base at task start: `128c973e8dc64b5ce1b3c1a3e06fe1e55ed64366`; corrected to exact live tip `af97e116b59620b7e9c0e51b7b042dc40e5cb77d` (merge of PR #637, head `9777dfafa6c84e2a8bcd883f736586a74198db00`), which contains the applied wiring. Live-branch note: this correction is pinned to the exact audited base `af97e11`; PR #638 later advanced `integration/canopy-classic-20261123` to `d2876cc7766ea10a29fc3cfd06f6517f710b331c` with governance-doc changes outside this ownership. No claim here is made about that later tip and no governance file is touched. Visual lock: no approved asset, dock, theme, main-window, icon-provider
+Live integration tip: `dd079d4a60c3fd0fa5cf975ce26af27215e77b55` — merge of PR #645 from head `7f58777ef7beb4c2fd128be5785c0a8a99018691` on `integration/canopy-classic-20261123`. Verified in this isolated worktree with `git rev-parse HEAD`, `git ls-remote origin refs/heads/integration/canopy-classic-20261123` (returns `dd079d4a60c3fd0fa5cf975ce26af27215e77b55`) and a fresh `gh pr view` for every PR below. `origin/main` remains `65a9e0de107355e04f91356db7358debf751760a`; nothing merges to `main`. This docs-only change is pinned to that exact tip and owns only the three files named in the task; no source, QML, artwork, asset or test path is touched. The earlier `af97e116b59620b7e9c0e51b7b042dc40e5cb77d` (#637), `128c973e8dc64b5ce1b3c1a3e06fe1e55ed64366` (#625) and `dcb41bde55f37a4a433a0fa4b473f32ea6cc0055` (#624) pins below are **merged ancestors / archived evidence pins only**: every log hash, screenshot hash, suite count and scoped verdict there is preserved verbatim and is **not re-attributed** to `dd079d4a60c3fd0fa5cf975ce26af27215e77b55`. In particular, the `Ran 3660 tests in 861.683s`, `OK (skipped=46)` full-suite result, the `Ran 12 tests` docs-gate result and the deterministic launcher-model compile probe belong **only** to exact tip `af97e116b59620b7e9c0e51b7b042dc40e5cb77d`. No full suite has been run at `dd079d4a60c3fd0fa5cf975ce26af27215e77b55`: the final full suite is **PENDING / NOT RUN** and no count is claimed for this tip.
+
+Merged chain after `af97e116b59620b7e9c0e51b7b042dc40e5cb77d` (all eight re-queried with `gh pr view` as `MERGED`; exact heads and merge SHAs recorded verbatim):
+
+| PR | Exact head SHA | Exact merge SHA | What landed |
+|---|---|---|---|
+| #638 | `0e944444134ef686b3fdd99d398370e306997a7a` | `d2876cc7766ea10a29fc3cfd06f6517f710b331c` | Governance/workforce/PR-lifecycle reconciliation docs |
+| #639 | `67a7a60cc0ad560479ac53c631242d8936b805b2` | `c11e508e469b56e12828b9cf73693184f3a2bbb3` | Bounded native catalog producer |
+| #640 | `733e20235d3f8f1ce620f401a4c5c307e8549dcc` | `97a151b7c5fec512245b308eb4cc3b13ee21da64` | Read-only Linux resource probe |
+| #641 | `488278e3f862fe6b3eb193ac9bf84b4cad2e64b6` | `f47b48d5c3f14af2ac238b14b132b1222f3f1c16` | Bounded trusted quick-controls host status producer |
+| #642 | `5a3c9c0a75616825ddf28b819d1323cc38a3df76` | `0b82f0dfeea9ef23aa874d1cad225498dedcbab9` | Bounded read-only notification host snapshot producer |
+| #643 | `f0131c2072fb9a77d2f587fbb6078b75029a20a8` | `721cba08c282a7f90739c3bae042d6b9077a6396` | Prior stale-docs correction at `af97e11` |
+| #644 | `34770419158281bfb0d4d36307d74ef2fb54248c` | `f3555d89b7f0325ed2b67fb47946d5e0cde9fd51` | Fix for #639 native catalog bounded directory enumeration |
+| #645 | `7f58777ef7beb4c2fd128be5785c0a8a99018691` | `dd079d4a60c3fd0fa5cf975ce26af27215e77b55` | Fix for #640 real `smaps_rollup` parsing and confined proc reads |
+
+**Fixes applied at the live tip (not merely proposed):** #644 (`f3555d8…`, head `34770419…`) bounds native catalog directory enumeration by counting `os.scandir` entries one at a time and refusing at 513 before materializing names or reading file bodies, and skips invalid desktop-id names before `lstat`; its `SYNTHETIC` negative control produced `1000 != 513` on the untouched base and passed at the fix head (16 targeted tests `OK`). #645 (`dd079d4…`, head `7f58777e…`) parses real `smaps_rollup` files by skipping exactly the three known unitless non-memory fields (`THPeligible`, `ProtectionKey`, `VmFlags`) while keeping strict `name: N kB` and 1 MiB-bound fail-closed behavior for every other line, confines each proc read to `--proc-root` by checking every intermediate path component for symlinks, and translates invalid UTF-8 to `MeasurementError`; its realistic rollup and symlink/UTF-8 negative controls are fixture-scoped (`LINUX_PROC_SCOPED`), **not** a real five-minute shell-owned PSS/CPU/wakeup measurement. Both fixes are already in the checked-out live source tree; this docs PR does not change their code.
+
+#279 remains **PROTECTED — OPEN DRAFT, HOLD** at head `17bb473e9b9740481f0269440391ab92e528139d`; it is a visual-lock guard only and never merge authorization. No self-approval, no promotion and no merge is performed by this change. A separate queued job re-audits these corrected docs for zero stale claims; that job is also barred from self-approval and merge.
+
+Gates re-run on the exact corrected docs tree at `dd079d4a60c3fd0fa5cf975ce26af27215e77b55` (Windows 11 host, `PYTHONDONTWRITEBYTECODE=1`): `python3 tools/check_foundation.py` **PASS**, exit 0, output `PASS: foundation files, tagline, and local Markdown links`, log `C:/Users/X1/AppData/Local/hermes/cache/scratch/final_docs_gates_dd079d4/foundation.log`, SHA-256 `cd7ce3ea44ff12d436ec0af5e64de94b552f5bdfd4b210f14372c29537f937ad`; `python3 -m unittest tests.test_foundation tests.test_foundation_link_scope_guard -v` **PASS**, exit 0, `Ran 12 tests`, `OK`, log `C:/Users/X1/AppData/Local/hermes/cache/scratch/final_docs_gates_dd079d4/docs_tests.log`. Both gates were executed on this exact corrected docs tree; they are documentation gates only and do not re-run or re-attribute the 3660-test suite at `af97e11`.
+
+Acceptance labels are unchanged: `SYNTHETIC` for compile probes, synthetic fixtures and scoped rollup/catalog evidence; `NOT_RUN` for real Mint session acceptance, live desktop launch, live screen-reader announcement, five-minute shell-owned PSS/CPU/GPU/wakeup profiling, owner visual signoff, release readiness and the final full suite at `dd079d4a60c3fd0fa5cf975ce26af27215e77b55`; Mint acceptance remains `NOT_ESTABLISHED` (the #620 report gate is internal `evidence-consistency PASS` only); owner visual acceptance remains `NOT_RUN` for every build, the v2 preview remains pending owner signoff, and no merged PR is described as owner-accepted. No false Mint or owner acceptance is claimed anywhere in this correction.
+
+---
+
+Status: **APPLIED and FIXED at exact live integration tip `dd079d4a60c3fd0fa5cf975ce26af27215e77b55` — compiled host injection wired by merged #637; #644 bounded native-catalog enumeration and #645 real `smaps_rollup` parsing / confined proc reads applied in later merges; still opt-in and SYNTHETIC, with no owner visual or Mint acceptance.**
+Correction record: the earlier `128c973` base, the `af97e116b59620b7e9c0e51b7b042dc40e5cb77d` wiring tip and the BLOCKED wiring note below are retained as archived historical context only; #635 made the compile probe deterministic, #637 applied the wiring at `af97e116b59620b7e9c0e51b7b042dc40e5cb77d`, and #644/#645 fixes are applied at the live tip `dd079d4a60c3fd0fa5cf975ce26af27215e77b55`.
+
+Base at task start: `128c973e8dc64b5ce1b3c1a3e06fe1e55ed64366`; corrected to archived tip `af97e116b59620b7e9c0e51b7b042dc40e5cb77d` (merge of PR #637, head `9777dfafa6c84e2a8bcd883f736586a74198db00`), which contains the applied wiring. Live tip: `dd079d4a60c3fd0fa5cf975ce26af27215e77b55` (merge of #645); PRs #638–#645 are MERGED with exact heads and merge SHAs in the FINAL TIP CORRECTION section above; #644/#645 fixes are applied there. No governance file is touched by this docs-only change. Visual lock: no approved asset, dock, theme, main-window, icon-provider
 or geometry file is touched by this change.
 
 ## Audit finding
@@ -73,7 +100,7 @@ or scan XDG directories. The Python contract remains the parser/ingest owner;
 the compiled model is the bounded consumer. This keeps the bridge opt-in,
 read-only and free of privileged or network paths.
 
-## APPLIED — compiled host injection wired by merged PR #637 at `af97e116b59620b7e9c0e51b7b042dc40e5cb77d`
+## APPLIED — compiled host injection wired by merged PR #637 at `af97e116b59620b7e9c0e51b7b042dc40e5cb77d` (archived tip; still applied at `dd079d4a60c3fd0fa5cf975ce26af27215e77b55`)
 
 At `af97e116b59620b7e9c0e51b7b042dc40e5cb77d` the equivalent of the fragment below is **APPLIED** by merged PR #637: `prototype/classic/CMakeLists.txt` builds `LauncherModel.cpp/.h` and `prototype/classic/main.cpp` registers the read-only `canopyLauncherCatalog` bridge with the opt-in `--launcher-catalog` snapshot path and fail-closed rejection. PR #635 made the compile probe deterministic. Default approved ordering stays `8 : 6` and no visual path changed. The historical prose below records the original proposal; the verification and owner gates remain:
 
@@ -360,4 +387,4 @@ for a minor gain. Screen-reader behaviour is unchanged in approved mode; in
 opt-in mode the existing `Accessible.name`/`description` bindings derive from
 the same validated titles, and no new announcement is emitted.
 
-Remaining blockers: **NOT_RUN** — owner visual review before any opt-in catalogue becomes a default, real Mint desktop acceptance and real desktop launch. The wiring itself is **APPLIED** at `af97e116b59620b7e9c0e51b7b042dc40e5cb77d` (#637); no further source integration is pending.
+Remaining blockers: **NOT_RUN** — owner visual review before any opt-in catalogue becomes a default, real Mint desktop acceptance and real desktop launch. The wiring itself is **APPLIED** at archived `af97e116b59620b7e9c0e51b7b042dc40e5cb77d` (#637) and still applied at live `dd079d4a60c3fd0fa5cf975ce26af27215e77b55`; #644/#645 fixes are applied there; no further source integration is pending.

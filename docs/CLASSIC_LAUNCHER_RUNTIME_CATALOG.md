@@ -1,10 +1,9 @@
 # Classic launcher desktop-entry catalogue: compiled-runtime bridge record
 
-Status: **PARTIAL — host model and guarded QML landing here; compiled host
-injection is BLOCKED on owner-locked `main.cpp` / `CMakeLists.txt`.**
+Status: **APPLIED at exact integration tip `af97e116b59620b7e9c0e51b7b042dc40e5cb77d` — compiled host injection wired by merged PR #637; still opt-in and SYNTHETIC, with no owner visual or Mint acceptance.**
+Correction record: the earlier `128c973` base and the BLOCKED wiring note below are retained as historical context only; #635 made the compile probe deterministic and #637 applied the wiring at `af97e116b59620b7e9c0e51b7b042dc40e5cb77d`.
 
-Base: `128c973e8dc64b5ce1b3c1a3e06fe1e55ed64366` (integration tip at task
-start). Visual lock: no approved asset, dock, theme, main-window, icon-provider
+Base at task start: `128c973e8dc64b5ce1b3c1a3e06fe1e55ed64366`; corrected to exact live tip `af97e116b59620b7e9c0e51b7b042dc40e5cb77d` (merge of PR #637, head `9777dfafa6c84e2a8bcd883f736586a74198db00`), which contains the applied wiring. Live-branch note: this correction is pinned to the exact audited base `af97e11`; PR #638 later advanced `integration/canopy-classic-20261123` to `d2876cc7766ea10a29fc3cfd06f6517f710b331c` with governance-doc changes outside this ownership. No claim here is made about that later tip and no governance file is touched. Visual lock: no approved asset, dock, theme, main-window, icon-provider
 or geometry file is touched by this change.
 
 ## Audit finding
@@ -28,7 +27,7 @@ or geometry file is touched by this change.
 - Before this change there was **no compiled-host consumer** of that catalog
   contract: Python records stayed outside the Qt runtime. Event topics such as
   `app.catalog.changed` are transport/QA observability only, not compiled
-  wiring.
+  wiring. At `af97e11` that gap is closed: PR #637 added the compiled-host consumer described below.
 
 ## What this change adds (owned paths only)
 
@@ -74,17 +73,11 @@ or scan XDG directories. The Python contract remains the parser/ingest owner;
 the compiled model is the bounded consumer. This keeps the bridge opt-in,
 read-only and free of privileged or network paths.
 
-## BLOCKED — compiled host injection needs owner-locked files
+## APPLIED — compiled host injection wired by merged PR #637 at `af97e116b59620b7e9c0e51b7b042dc40e5cb77d`
 
-`prototype/classic/main.cpp` and `prototype/classic/CMakeLists.txt` are owned
-by another agent until its owner-icon PR merges. They are **not modified in
-this PR**. Without the fragment below, the QML guard evaluates false and the
-approved hard-coded catalogue remains the compiled runtime's only catalogue;
-the model is compiled only by the standalone test probe. Integration steps
-for the serialised follow-up:
+At `af97e116b59620b7e9c0e51b7b042dc40e5cb77d` the equivalent of the fragment below is **APPLIED** by merged PR #637: `prototype/classic/CMakeLists.txt` builds `LauncherModel.cpp/.h` and `prototype/classic/main.cpp` registers the read-only `canopyLauncherCatalog` bridge with the opt-in `--launcher-catalog` snapshot path and fail-closed rejection. PR #635 made the compile probe deterministic. Default approved ordering stays `8 : 6` and no visual path changed. The historical prose below records the original proposal; the verification and owner gates remain:
 
-1. Apply the exact patch below on the post-owner-icon integration tip (do not
-   rebase this PR across that owner's branch).
+1. The exact patch below is the historical proposal; its equivalent is already APPLIED at `af97e11` by #637 (do not rebase across an owner branch).
 2. Build once, then run the default approved screenshot self-test; it must
    still report `8` items and `CANOPY_APPROVED_ART_VERIFIED`.
 3. Run the opt-in self-test with a host-produced fixture; expect
@@ -278,8 +271,7 @@ diff --git a/prototype/classic/main.cpp b/prototype/classic/main.cpp
 
 ## On-disk reproducible targeted log (included in this PR)
 
-Captured after reverting the owner-locked files, at base head
-`128c973e8dc64b5ce1b3c1a3e06fe1e55ed64366`, with
+Captured after reverting the then owner-locked files at historical base head `128c973e8dc64b5ce1b3c1a3e06fe1e55ed64366`; the wiring is applied at `af97e116b59620b7e9c0e51b7b042dc40e5cb77d`. Logged with
 `PYTHONHASHSEED` default, Qt 6 UCRT64 toolchain and
 `QT_QPA_PLATFORM=offscreen`. Full raw log (including Qt style warnings):
 `C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy_launcher_targeted_evidence.txt`.
@@ -336,6 +328,8 @@ the owned source paths make the run reproducible.
 
 ## Evidence and labels
 
+- `COMPILED (SYNTHETIC, applied at af97e11)` — PR #635 made the g++/Qt6 launcher-model probe deterministic; PR #637 applied the compiled wiring. At `af97e116b59620b7e9c0e51b7b042dc40e5cb77d` three bounded repeats of `test_compiled_model_consumes_python_snapshot_and_fails_closed` returned `Ran 1 test ... OK` (log SHA-256s `3d3696833787c160782dd10c063fc5297cb7517032e23c9878b1a4c1ad779e6b`, `9353cf016ed924e917f2bfa0ef8296afcb8d1c4c76c0e7e2bf018e20dd1f0082`, `8d0a3022c75a01ae4e8f86c79c3d60732b490555f7340b907c3dcaccc419a0f9`), and the full suite at the same tip is `Ran 3660 tests in 861.683s`, `OK (skipped=46)` (log SHA-256 `b274d360caa2b026ea8446073c549976b77fd2b2a5dd1c08427be72987345b94`). This is a local offscreen compile/run against a Python-generated fixture: **SYNTHETIC**, not Mint, visual or release acceptance. An exact-tip full GUI binary build and real desktop launch remain **NOT_RUN**.
+- `COMPILED (historical, offscreen, local scaffolding, not at the original PR head)` — before the
 - `SYNTHETIC` — Python contract tests and the offscreen g++/Qt6 model probe;
   no desktop, Mint guest or real user session.
 - `COMPILED (offscreen, local scaffolding, not at PR head)` — before the
@@ -366,6 +360,4 @@ for a minor gain. Screen-reader behaviour is unchanged in approved mode; in
 opt-in mode the existing `Accessible.name`/`description` bindings derive from
 the same validated titles, and no new announcement is emitted.
 
-Remaining blocker: **BLOCKED** — serialised integration of the patch above
-after the owner icon work lands, plus owner visual review before any opt-in
-catalogue becomes a default.
+Remaining blockers: **NOT_RUN** — owner visual review before any opt-in catalogue becomes a default, real Mint desktop acceptance and real desktop launch. The wiring itself is **APPLIED** at `af97e116b59620b7e9c0e51b7b042dc40e5cb77d` (#637); no further source integration is pending.

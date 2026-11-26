@@ -28,7 +28,7 @@ Button {
     onClicked: tile.activated(tile.iconName)
     Accessible.name: iconName + " preview"
     Accessible.description: "Original demonstration artwork, not a working app launcher"
-    ToolTip.visible: hovered
+    ToolTip.visible: tile.hovered || tile.activeFocus
     ToolTip.text: iconName === "Files" ? "Toggle Files preview" : iconName + " — preview only"
     background: Item {
         Rectangle {

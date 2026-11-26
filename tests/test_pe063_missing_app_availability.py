@@ -219,5 +219,42 @@ class BoundedRefreshTests(unittest.TestCase):
             bounded.observe("org.example.Overflow.desktop", **facts())
 
 
+class PartialProbeFactTests(unittest.TestCase):
+    """NC-05: an omitted TryExec/read fact can never grant launch permission."""
+
+    def test_nc05_partial_probe_mapping_fails_closed(self):
+        tracker = MissingAppTracker()
+        states = [
+            tracker.refresh(MISSING, lambda _: {"in_catalog": True})
+            for _ in range(2)
+        ]
+        for state in states:
+            self.assertEqual(state.status, STATUS_UNAVAILABLE)
+            # Exact pinned reason: a missing fact is a failed probe, never ok.
+            self.assertEqual(state.reason, REASON_PROBE_FAILED)
+            self.assertEqual(state.confirmations, 0)
+            self.assertFalse(state.launch_permitted)
+        self.assertEqual(states[-1].refresh_count, 2)
+        self.assertEqual(states[-1].probe_calls, MAX_REFRESH_ATTEMPTS)
+
+    def test_nc05_one_missing_fact_among_present_ones_also_fails_closed(self):
+        partial = {"in_catalog": True, "tryexec_ok": True}
+        state = MissingAppTracker().refresh(MISSING, lambda _: partial)
+        self.assertEqual(state.reason, REASON_PROBE_FAILED)
+        self.assertEqual(state.confirmations, 0)
+        self.assertFalse(state.launch_permitted)
+
+    def test_complete_facts_still_preserve_pr684_behavior(self):
+        complete = facts(in_catalog=True, tryexec_ok=True, entry_readable=True)
+        state = MissingAppTracker().refresh(MISSING, lambda _: complete)
+        self.assertEqual(state.status, STATUS_AVAILABLE)
+        self.assertEqual(state.reason, REASON_OK)
+        self.assertTrue(state.launch_permitted)
+        # The historical bool shorthand remains a complete positive fact set.
+        shorthand = MissingAppTracker().refresh(MISSING, lambda _: True)
+        self.assertEqual(shorthand.reason, REASON_OK)
+        self.assertTrue(shorthand.launch_permitted)
+
+
 if __name__ == "__main__":
     unittest.main()

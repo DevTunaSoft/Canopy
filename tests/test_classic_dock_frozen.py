@@ -13,7 +13,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 CLASSIC = ROOT / "prototype" / "classic"
 APPROVED_DOCK_FNV64 = 0x4ac162b6d0fd5d40
-DOCK_TILE_GIT_BLOB_SHA1 = "07dbf4f447eb0a67f8df5e15948d40559539cc6e"
+DOCK_TILE_GIT_BLOB_SHA1 = "67ce71fbdf671eff86aa455b0d4b6f4471b8a3e9"
 APPROVED_MANIFEST_GIT_BLOB_SHA1 = "b120dc891a614ddbc5ef863514424112c02efee6"
 
 

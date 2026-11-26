@@ -25,7 +25,56 @@ Button {
     implicitHeight: 70
     padding: 0
     hoverEnabled: true
+    activeFocusOnTab: true
     onClicked: tile.activated(tile.iconName)
+
+    // PE-035: the keyboard gate's dock_arrow_next step claims that Right
+    // moves focus to the next dock tile. Move real Qt active focus between
+    // the Repeater siblings; no geometry, colour or visual state is changed.
+    // BEGIN PE-035 PURE FOCUS INDEX LOGIC
+    function dockFocusIndex(currentIndex, count, direction, absolute) {
+        if (count <= 0) return -1
+        if (absolute !== undefined) {
+            return Math.max(0, Math.min(count - 1, absolute))
+        }
+        if (currentIndex < 0) return direction > 0 ? 0 : count - 1
+        let target = currentIndex + direction
+        if (target < 0) target = count - 1
+        else if (target >= count) target = 0
+        return target
+    }
+    // END PE-035 PURE FOCUS INDEX LOGIC
+    function dockSiblings() {
+        const siblings = []
+        const row = tile.parent
+        if (!row) return siblings
+        const children = row.children
+        for (let i = 0; i < children.length; ++i) {
+            if (children[i].objectName === "canopyDockTile") siblings.push(children[i])
+        }
+        return siblings
+    }
+    function dockMoveFocus(direction, absolute) {
+        const tiles = tile.dockSiblings()
+        if (tiles.length === 0) return
+        const index = tiles.indexOf(tile)
+        const target = tile.dockFocusIndex(index, tiles.length, direction, absolute)
+        if (target >= 0 && target < tiles.length) tiles[target].forceActiveFocus()
+    }
+    Keys.onRightPressed: function(event) { event.accepted = true; tile.dockMoveFocus(1) }
+    Keys.onLeftPressed: function(event) { event.accepted = true; tile.dockMoveFocus(-1) }
+    // Qt Quick Keys has no dedicated Home/End signals: use the generic
+    // pressed handler so Home/End are real key events too.
+    Keys.onPressed: function(event) {
+        if (event.key === Qt.Key_Home) {
+            event.accepted = true
+            tile.dockMoveFocus(0, 0)
+        } else if (event.key === Qt.Key_End) {
+            event.accepted = true
+            tile.dockMoveFocus(0, tile.dockSiblings().length - 1)
+        }
+    }
+
     Accessible.name: iconName + " preview"
     Accessible.description: "Original demonstration artwork, not a working app launcher"
     ToolTip.visible: hovered

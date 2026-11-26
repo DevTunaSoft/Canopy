@@ -28,11 +28,11 @@ STARTUP_PHASES = ("launch_request", "process_spawn", "first_frame", "ready")
 _KIB_LINE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*):[ \t]+([0-9]+)[ \t]+kB[ \t]*$")
 
 # Real smaps_rollup output mixes "N kB" memory counters with fields that carry
-# no unit: THPEligible is unitless on some kernels, and ProtectionKey/VmFlags
+# no unit: THPeligible is unitless on some kernels, and ProtectionKey/VmFlags
 # are never kB values. These names are known non-memory fields; skip them so a
 # genuine modern rollup parses, while every other line still has to be a
 # strict, bounded "name: N kB" record.
-_NON_KIB_FIELDS = frozenset(("THPEligible", "ProtectionKey", "VmFlags"))
+_NON_KIB_FIELDS = frozenset(("THPeligible", "ProtectionKey", "VmFlags"))
 
 
 class MeasurementError(ValueError):

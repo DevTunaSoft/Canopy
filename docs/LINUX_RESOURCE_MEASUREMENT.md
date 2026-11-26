@@ -46,7 +46,7 @@ with `MeasurementError`.
 ## Rollup parsing and read safety
 
 Real `smaps_rollup` files mix memory counters with descriptive fields that
-have no unit. `THPEligible` is exposed without a unit on some kernels, and
+have no unit. `THPeligible` is exposed without a unit on some kernels, and
 `ProtectionKey` and `VmFlags` are never `kB` values. The parser skips exactly
 those three known non-memory fields; every other line must still be a strict
 `name: N kB` record within the 1 MiB bound. An unknown unitless line or a

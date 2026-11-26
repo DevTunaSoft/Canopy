@@ -356,7 +356,7 @@ class LinuxResourceProbeTests(unittest.TestCase):
 
 
     # Regression: a modern smaps_rollup carries unitless non-memory fields
-    # (THPEligible on some kernels, ProtectionKey and VmFlags on all of them).
+    # (THPeligible on some kernels, ProtectionKey and VmFlags on all of them).
     # These are not "N kB" lines and must not make --source proc fail closed.
     _REALISTIC_ROLLUP = (
         "Rss:                8192 kB\n"
@@ -380,7 +380,7 @@ class LinuxResourceProbeTests(unittest.TestCase):
         "Swap:                  0 kB\n"
         "SwapPss:               0 kB\n"
         "Locked:                0 kB\n"
-        "THPEligible:          12\n"
+        "THPeligible:          12\n"
         "ProtectionKey:         0\n"
         "VmFlags: rd ex wr mr mp\n"
     )
@@ -430,7 +430,7 @@ class LinuxResourceProbeTests(unittest.TestCase):
     def test_read_memory_rejects_out_of_range_kib_value(self):
         pid_dir = self._pid_dir(4303)
         (pid_dir / "smaps_rollup").write_text(
-            f"Rss: {1 << 21} kB\nPss: 5 kB\nTHPEligible: 12\n",
+            f"Rss: {1 << 21} kB\nPss: 5 kB\nTHPeligible: 12\n",
             encoding="utf-8", newline="\n",
         )
         with self.assertRaises(MeasurementError):

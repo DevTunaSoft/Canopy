@@ -2,21 +2,59 @@
 
 **The Familiar Feel. The Freedom of Linux.**
 
-Canopy is a planned lightweight Linux desktop shell with a macOS-inspired Classic experience and a future Windows-inspired Modern experience. Project specification and engineering foundation will be proposed through a draft pull request.
+Canopy is a lightweight, premium Linux desktop shell under active development. Its mission is to make the transition to Linux feel natural for people accustomed to macOS or Windows, without sacrificing the freedom, flexibility, security and efficiency of Linux.
 
-Status: a compilable Classic Qt prototype exists in the draft PR stack (see #151), but no release candidate has passed owner visual acceptance and Linux Mint guest acceptance; see release blocker #132. Modern is planned.
+Canopy starts on Linux Mint as a separately usable desktop shell. It is not itself a new operating system. Our longer-term ambition is **LacOS**, a distinct Linux Mint-based distribution built around the Canopy experience.
 
-## LacOS and expandable Canopy Shell Packs — future goals
+## One foundation. More than one desktop experience.
 
-Canopy Classic is our first macOS-familiar experience; Canopy Modern will be
-a Windows-familiar option. The design must support **additional Shell Packs**
-without rebuilding the operating system, duplicating the compositor or
-starting separate desktop background-service stacks.
+| Experience | Vision | Development status |
+| --- | --- | --- |
+| **Canopy Classic** | A macOS-familiar menu bar, dock, launcher and desktop workflow, with original visual design. | Active development; compiled Qt preview and integration work exist. |
+| **Canopy Modern** | A Windows-familiar taskbar, application menu, system tray, window workflows and shortcuts. | Planned after Classic. |
+| **Canopy Shell Packs** | A framework for additional original desktop presentations, using a shared host rather than separate desktop service stacks. | Metadata validation, local developer tooling and an in-memory lifecycle prototype exist; runtime loading and switching are future work. |
+| **LacOS** | A future Linux Mint-derived distribution offering Canopy experiences with integrated installation, updates and recovery. | Long-term vision; no released operating system. |
 
-The long-term [LacOS vision](docs/LACOS_VISION.md) is a separately validated
-Linux Mint-based distribution, **not an available OS release**. See the
-[versioned Shell Pack architecture](docs/SHELL_PACK_ARCHITECTURE.md) and
-[developer starter](examples/shell-pack-starter/README.md).
+## What we are building toward
+
+- **Familiar, refined design:** intuitive navigation, coherent original artwork, accessible controls and a polished desktop.
+- **Lightweight by design:** event-driven components, lazy initialization, bounded memory and caches, and no unnecessary background services or mandatory visual effects.
+- **One shared core:** app launching, window and workspace integration, settings, notifications and session services shared across presentations where technically practical.
+- **Choice without duplication:** five planned performance profiles plus Auto Mode and per-feature overrides; a future extensible Shell Pack system for choosing additional desktop experiences.
+- **Trust and reliability:** secure defaults, least privilege, reversible installation, reproducible builds, accessibility and measured performance on real Linux hardware.
+
+These are design goals, not claims of completed functionality or measured performance.
+
+## LacOS: the next chapter
+
+LacOS is envisioned as a separate Linux Mint-based distribution that combines familiar desktop experiences with the established Linux package ecosystem, hardware compatibility, security updates and recovery foundations. Its aim is to deliver a leaner, more refined and more adaptable experience, validated against stock Mint on the same hardware and workloads.
+
+The long-term goal is to let users choose Classic, Modern or additional compatible Shell Packs, and switch between them without reinstalling or rebooting when the underlying session supports it. Preserving running applications and user work, recovering safely from failed switches, and unloading inactive presentations are essential design requirements. Where a compositor or session change is required, a clearly explained logout/login transition is the safe fallback.
+
+LacOS distribution development follows successful Canopy shell, session, performance and switching acceptance. Neither LacOS nor seamless live Shell Pack switching is available today.
+
+## Development roadmap
+
+1. Complete and validate Canopy Classic on Linux Mint.
+2. Build Canopy Modern using the shared core.
+3. Implement and validate secure Shell Pack loading, switching and rollback, including an additional independent presentation.
+4. Develop LacOS distribution packaging, installation, upgrades and recovery.
+5. Release only after real-world functional, security, accessibility, visual and resource acceptance.
+
+## Current project status
+
+**Active development — pre-alpha.** A compiled Canopy Classic Qt preview and shared-core building blocks exist. Ongoing engineering is integrated on the [development branch](https://github.com/DevTunaSoft/Canopy/tree/integration/canopy-classic-20261123). Real Linux Mint session acceptance, final visual approval, native functionality, release packaging and real-desktop resource benchmarks remain outstanding. There is no production-ready Canopy or LacOS download at this stage.
+
+- [Current development and evidence matrix](https://github.com/DevTunaSoft/Canopy/blob/integration/canopy-classic-20261123/docs/PRODUCT_COMPLETION_MATRIX.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [LacOS vision](docs/LACOS_VISION.md)
+- [Shell Pack architecture](docs/SHELL_PACK_ARCHITECTURE.md)
+- [Quality and performance requirements](docs/QUALITY.md)
+- [Classic release integration blocker](https://github.com/DevTunaSoft/Canopy/issues/132)
+
+## Developer resources
+
+The following tools are early engineering building blocks. They do not constitute a released desktop, installer, trusted plugin runtime or completed Linux Mint session.
 
 A safe metadata validator and non-executable starter are present. No Shell
 Host runtime loader, community package installer, live-switch implementation
@@ -99,5 +137,4 @@ After the [read-only Mint preflight](docs/MINT_GUEST_PREFLIGHT.md), the
 [guest-only Qt smoke runner](docs/MINT_CLASSIC_QT_SMOKE.md) can execute
 the compiled Qt Classic prototype at three sizes and save screenshot
 SHA-256 evidence without modifying Cinnamon or installing packages.
-It is **not yet proven on a real Mint guest**. Its local synthetic test
-harness is not a substitute for in-guest functional acceptance.
+The integration branch records scoped Mint/Xvfb smoke evidence, but full native desktop/session acceptance remains unestablished. Synthetic harnesses and scoped smoke tests are not a substitute for end-to-end Mint acceptance.

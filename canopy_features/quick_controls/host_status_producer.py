@@ -14,7 +14,11 @@ Safety boundary:
   process spawn or privileged operation. The returned bytes are for a trusted
   host to place at an explicit path; this module never opens a file.
 - No live host probing and no invented value: a missing fact is omitted, never
-  turned into ``False``, ``0``, ``"unknown"`` or a previous reading.
+  turned into ``False``, ``0``, ``"unknown"`` or a previous reading. When a
+  trusted host has no status facts at all, ``unavailable()`` emits the same
+  bounded topic with provenance only. The compiled controller treats that
+  event as a full revocation, so an earlier reading cannot linger in the UI.
+  Accidental empty ``compose()`` calls stay refused.
 - ``source`` must be an explicit, allowlisted provenance token. Everything
   else (wrong types, out-of-range percentages, unlisted topics, contradictory
   provenance, oversized output) raises ``ProducerError`` before any bytes are
@@ -27,7 +31,7 @@ accessibility or owner-visual acceptance.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import json
 from types import MappingProxyType
 from typing import Optional
@@ -46,6 +50,7 @@ __all__ = [
     "ProducerError",
     "HostStatusProducerError",
     "compose",
+    "unavailable",
     "from_payload",
 ]
 
@@ -93,16 +98,21 @@ class HostStatusSnapshot:
 
     ``None`` means "this fact was not supplied". It is never serialized and
     never interpreted as a negative observation. All fields are revalidated
-    here so direct construction is as fail-closed as ``compose``.
+    here so direct construction is as fail-closed as ``compose``. ``_absent``
+    is an internal marker for the explicit ``unavailable()`` revocation event;
+    it never appears on the wire and can never coexist with a fact.
     """
 
     source: str
     network_connected: Optional[bool] = None
     battery_charging: Optional[bool] = None
     volume_percent: Optional[int] = None
+    _absent: bool = field(default=False, repr=False, compare=False)
 
     def __post_init__(self):
         _source(self.source)
+        if type(self._absent) is not bool:
+            raise ProducerError("absence marker must be an exact bool")
         for name in BOOLEAN_FIELDS:
             value = getattr(self, name)
             if value is not None and type(value) is not bool:
@@ -111,8 +121,16 @@ class HostStatusSnapshot:
         if value is not None and (
                 type(value) is not int or not 0 <= value <= 100):
             raise ProducerError("volume_percent must be an int in 0..100 or None")
-        if all(getattr(self, name) is None for name in STATUS_FIELDS):
+        facts = tuple(getattr(self, name) for name in STATUS_FIELDS)
+        if self._absent and any(fact is not None for fact in facts):
+            raise ProducerError("an absence event cannot carry status facts")
+        if not self._absent and all(fact is None for fact in facts):
             raise ProducerError("no trusted status fact was supplied")
+
+    @property
+    def is_unavailable(self) -> bool:
+        """True only for an explicit revocation of all native status facts."""
+        return self._absent
 
     def to_dict(self):
         """Fresh read-only wire mapping; omitted facts are absent, not null."""
@@ -152,6 +170,19 @@ def compose(*, source, network_connected=None, battery_charging=None,
     )
 
 
+def unavailable(*, source):
+    """Explicitly revoke all native status facts on the existing topic.
+
+    A trusted host that has no network/audio/power status to report calls this
+    instead of inventing a value or leaving an old reading on screen. The wire
+    object carries only the allowlisted topic and provenance; the compiled
+    controller's per-event commit clears every previously supplied observation
+    and detail. Provenance is required, so a hostile caller cannot silently
+    turn an untrusted empty payload into a host status revocation.
+    """
+    return HostStatusSnapshot(source=source, _absent=True)
+
+
 def from_payload(payload, *, source):
     """Project a trusted mapping of facts without inventing or echoing data.
 
@@ -180,4 +211,8 @@ def from_payload(payload, *, source):
                 values[name] = payload[name]
             except (KeyError, TypeError):
                 raise ProducerError("unreadable status field") from None
-    return compose(source=source, **values)
+    if values:
+        return compose(source=source, **values)
+    # A trusted host with no facts publishes an explicit revocation rather
+    # than leaving an earlier reading visible. All validation above still ran.
+    return unavailable(source=source)

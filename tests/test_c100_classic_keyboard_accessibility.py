@@ -61,6 +61,34 @@ if mode == "exit1":
 '''
 
 
+def _positive_report_with_mocked_driver(driver, binary, timeout_seconds=10):
+    """Build the inert positive report without launching a child process.
+
+    The eleven protocol lines are derived from the pinned ``gate.STEPS``
+    contract and delivered through a mocked ``CompletedProcess`` to the real
+    ``run_driver`` parser. This keeps the report schema and all step/claim
+    assertions intact while removing host-scheduling dependence from the
+    positive fixture. Negative controls in the tests below keep using real
+    subprocess launches.
+    """
+    import unittest.mock as mock
+
+    lines = [
+        "\t".join((gate.STEP_PREFIX, step_id, "PASS",
+                   ";".join("{}={}".format(name, value)
+                            for name, value in detail.items())))
+        for step_id, _key, detail in gate.STEPS
+    ]
+    payload = ("\n".join(lines) + "\n").encode("utf-8")
+    completed = subprocess.CompletedProcess([], 0, payload, b"")
+    with mock.patch.object(gate.subprocess, "run", return_value=completed) as run:
+        report = gate.run_driver(
+            driver=driver, binary=binary, source_sha=SHA,
+            timeout_seconds=timeout_seconds)
+        calls = list(run.call_args_list)
+    return report, calls
+
+
 class KeyboardAccessibilityGateTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
@@ -72,9 +100,8 @@ class KeyboardAccessibilityGateTests(unittest.TestCase):
         self.binary = self.root / "fake-classic.bin"
         self.binary.write_bytes(b"inert compiled-binary stand-in")
         self.binary.chmod(0o700)
-        self.report = gate.run_driver(
-            driver=self.driver, binary=self.binary, source_sha=SHA,
-            timeout_seconds=10)
+        self.report, _ = _positive_report_with_mocked_driver(
+            self.driver, self.binary, timeout_seconds=10)
 
     def test_source_contract_passes_and_is_read_only(self):
         before = gate.inspect_source(REPO_ROOT)
@@ -169,6 +196,65 @@ class KeyboardAccessibilityGateTests(unittest.TestCase):
         case["screen_reader_passed"] = True
         with self.assertRaisesRegex(gate.GateError, "unexpected evidence schema"):
             gate.assess(case, expected_source_sha=SHA)
+
+    def test_positive_fixture_has_no_real_subprocess_launch(self):
+        report, calls = _positive_report_with_mocked_driver(
+            self.driver, self.binary)
+        self.assertEqual(report, self.report)
+        self.assertEqual(len(calls), 1)
+        args, kwargs = calls[0]
+        self.assertEqual(args[0], [sys.executable, str(self.driver)])
+        self.assertEqual(kwargs["timeout"], 10)
+        self.assertFalse(kwargs["shell"])
+        self.assertEqual(kwargs["stdout"], subprocess.PIPE)
+        self.assertEqual(kwargs["stderr"], subprocess.PIPE)
+        self.assertEqual(len(self.report["steps"]), len(gate.STEPS))
+
+    def test_negative_controls_still_launch_a_real_subprocess(self):
+        import unittest.mock as mock
+
+        real_run = gate.subprocess.run
+        calls = []
+
+        def recording_run(command, **kwargs):
+            calls.append((list(command), dict(kwargs)))
+            return real_run(command, **kwargs)
+
+        with mock.patch.object(gate.subprocess, "run", side_effect=recording_run):
+            with mock.patch.dict(os.environ, {"CANOPY_FAKE_MODE": "sleep"}):
+                with self.assertRaisesRegex(gate.GateError, "timed out"):
+                    gate.run_driver(driver=self.driver, binary=self.binary,
+                                    source_sha=SHA,
+                                    timeout_seconds=gate.MIN_TIMEOUT)
+        self.assertEqual(len(calls), gate.MAX_DRIVER_ATTEMPTS)
+        for command, kwargs in calls:
+            self.assertEqual(command, [sys.executable, str(self.driver)])
+            self.assertEqual(kwargs["timeout"], gate.MIN_TIMEOUT)
+            self.assertFalse(kwargs["shell"])
+
+        calls.clear()
+        with mock.patch.object(gate.subprocess, "run", side_effect=recording_run):
+            with mock.patch.dict(os.environ, {"CANOPY_FAKE_MODE": "exit1"}):
+                with self.assertRaisesRegex(gate.GateError, "nonzero"):
+                    gate.run_driver(driver=self.driver, binary=self.binary,
+                                    source_sha=SHA, timeout_seconds=10)
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(calls[0][0], [sys.executable, str(self.driver)])
+        self.assertFalse(calls[0][1]["shell"])
+
+    def test_gate_bounds_and_defaults_are_unchanged(self):
+        import inspect
+
+        self.assertEqual(gate.MIN_TIMEOUT, 2)
+        self.assertEqual(gate.MAX_TIMEOUT, 90)
+        self.assertEqual(gate.MAX_DRIVER_ATTEMPTS, 2)
+        self.assertEqual(inspect.signature(gate.run_driver).parameters[
+            "timeout_seconds"].default, 25)
+        self.assertEqual(inspect.signature(gate.run_compiled_self_test).parameters[
+            "timeout_seconds"].default, 30)
+        source = Path(gate.__file__).read_text(encoding="utf-8")
+        self.assertIn('parser.add_argument("--timeout", type=int, default=30)',
+                      source)
 
     def test_driver_negative_controls_never_become_pass(self):
         for mode, expected in (

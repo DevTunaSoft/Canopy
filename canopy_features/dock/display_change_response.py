@@ -8,10 +8,14 @@ decision logic only and never claims a compiled-Qt or Mint runtime result.
 from collections import deque
 from collections.abc import Mapping
 from dataclasses import dataclass
-import math
 import re
 
 from canopy_features.dock.display_geometry_contract import validate_dock_bounds
+from canopy_features.dock.display_scaling_contract import (
+    EVENT_DPI_CHANGED, MAX_SCALE, REASON_LOGICAL_DPI_CHANGED,
+    REASON_LOGICAL_SIZE_UNCHANGED, DisplayScalingError, validate_scale,
+    logical_size_from_physical,
+)
 from canopy_features.reliability.screen_topology_change import (
     EVENT_CONNECT, EVENT_DISCONNECT, EVENT_PRIMARY_CHANGED,
     EVENT_RESOLUTION_CHANGED,
@@ -31,30 +35,34 @@ KIND_NO_OP = "no_op"
 
 ALLOWED_KINDS = frozenset({
     EVENT_RESOLUTION_CHANGED, EVENT_CONNECT, EVENT_DISCONNECT,
-    EVENT_PRIMARY_CHANGED,
+    EVENT_PRIMARY_CHANGED, EVENT_DPI_CHANGED,
 })
 CONNECTOR = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}\Z")
-MAX_SCALE = 4.0
 MAX_SUBSCRIBERS = 16
 MAX_HISTORY = 64
 
 __all__ = [
     "ROOT_WIDTH", "ROOT_HEIGHT", "MIN_WIDTH", "MIN_HEIGHT",
-    "MAX_SUBSCRIBERS", "MAX_HISTORY",
-    "EVENT_RESOLUTION_CHANGED", "KIND_RELAYOUT", "KIND_HOLD",
+    "MAX_SCALE", "MAX_SUBSCRIBERS", "MAX_HISTORY",
+    "EVENT_RESOLUTION_CHANGED", "EVENT_DPI_CHANGED",
+    "KIND_RELAYOUT", "KIND_HOLD",
     "KIND_SUSPEND", "KIND_NO_OP", "DisplayChangeError",
-    "DisplayEvent", "RelayoutPlan", "DisplayChangeResponse",
+    "DisplayScalingError", "DisplayEvent", "RelayoutPlan",
+    "DisplayChangeResponse",
 ]
 
 
-class DisplayChangeError(ValueError):
+class DisplayChangeError(DisplayScalingError):
     """Invalid API argument; never raised for an observed display change."""
 
 
 @dataclass(frozen=True)
 class DisplayEvent:
-    """One host-supplied display change, in logical pixels.
+    """One host-supplied display change.
 
+    For resolution/connect/primary events ``width``/``height`` are logical
+    pixels. For ``EVENT_DPI_CHANGED`` they are physical monitor pixels and
+    ``scale`` is the device scale used to derive the logical layout.
     Fields are intentionally typed loosely: a hostile event arrives as data
     and must be refused by :meth:`DisplayChangeResponse.handle`, not by the
     constructor. Trusted producers may construct this value directly.
@@ -112,11 +120,7 @@ def _coerce_event(value):
             continue
         if type(size) is not int or not 1 <= size <= limit:
             raise DisplayChangeError("invalid display " + name)
-    scale = event.scale
-    if (isinstance(scale, bool) or not isinstance(scale, (int, float))
-            or not math.isfinite(scale)
-            or not 0 < scale <= MAX_SCALE):
-        raise DisplayChangeError("invalid display scale")
+    validate_scale(event.scale)
     if event.previous is not None and (
             type(event.previous) is not tuple or len(event.previous) != 2
             or any(type(v) is not int or v <= 0 for v in event.previous)):
@@ -188,6 +192,13 @@ class DisplayChangeResponse:
             plan = self._plan(event)
             signature = (event.kind, event.connector, event.width,
                          event.height, event.scale)
+            if (event.kind == EVENT_DPI_CHANGED
+                    and plan.kind == KIND_RELAYOUT
+                    and plan.size == self._last_safe_size):
+                # A DPI signal that resolves to the same logical layout must
+                # not trigger another bounded relayout cycle.
+                plan = RelayoutPlan(self._sequence, KIND_NO_OP,
+                                    plan.size, REASON_LOGICAL_SIZE_UNCHANGED)
             if signature == self._last_signature:
                 plan = RelayoutPlan(self._sequence, KIND_NO_OP,
                                     plan.size, "unchanged")
@@ -207,6 +218,18 @@ class DisplayChangeResponse:
         if event.kind == EVENT_DISCONNECT:
             return RelayoutPlan(self._sequence, KIND_SUSPEND,
                                 self._last_safe_size, "no_display")
+        if event.kind == EVENT_DPI_CHANGED:
+            logical = logical_size_from_physical(
+                event.width, event.height, event.scale)
+            if logical[0] < MIN_WIDTH or logical[1] < MIN_HEIGHT:
+                return RelayoutPlan(self._sequence, KIND_HOLD,
+                                    self._last_safe_size, "below_minimum")
+            size = (min(ROOT_WIDTH, logical[0]), min(ROOT_HEIGHT, logical[1]))
+            if not validate_dock_bounds(*size, scale=event.scale).ok:
+                return RelayoutPlan(self._sequence, KIND_HOLD,
+                                    self._last_safe_size, "unsafe_geometry")
+            return RelayoutPlan(self._sequence, KIND_RELAYOUT, size,
+                                REASON_LOGICAL_DPI_CHANGED)
         if event.width < MIN_WIDTH or event.height < MIN_HEIGHT:
             return RelayoutPlan(self._sequence, KIND_HOLD,
                                 self._last_safe_size, "below_minimum")
@@ -217,6 +240,17 @@ class DisplayChangeResponse:
         reason = ("resolution_changed" if event.kind == EVENT_RESOLUTION_CHANGED
                   else event.kind)
         return RelayoutPlan(self._sequence, KIND_RELAYOUT, size, reason)
+
+    def handle_logical_dpi_change(self, physical_width, physical_height,
+                                  scale, connector=None):
+        """Host seam for one logical-DPI change; hostile inputs are held.
+
+        The trusted producer calls this only on a real DPI signal. Nothing
+        here polls, samples hardware, resizes a window or changes a binding.
+        """
+        return self.handle(DisplayEvent(
+            EVENT_DPI_CHANGED, connector=connector, width=physical_width,
+            height=physical_height, scale=scale))
 
     def handle_recovery_result(self, result):
         """Adapt one frozen ``RecoveryResult`` from the topology model.

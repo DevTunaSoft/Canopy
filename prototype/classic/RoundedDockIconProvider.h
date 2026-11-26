@@ -34,3 +34,21 @@ private:
     QString m_productionPackRoot;
     bool m_productionPackValid = false;
 };
+
+// Strictly opt-in preview provider for the eight owner-supplied Tux PNGs.
+// It returns the decoded bytes of the exact verified files: no painter,
+// crop, recolor, regeneration or compositing is performed here. Startup
+// verification in main.cpp fails closed before this object is constructed;
+// this provider re-hashes each file as a second independent gate.
+class OwnerIconsPreviewProvider final : public QQuickImageProvider {
+public:
+    explicit OwnerIconsPreviewProvider(const QString &previewRoot,
+                                       QString *error);
+
+    bool isValid() const { return m_images.size() == 8; }
+    QImage requestImage(const QString &id, QSize *size,
+                        const QSize &requestedSize) override;
+
+private:
+    QHash<QString, QImage> m_images;
+};

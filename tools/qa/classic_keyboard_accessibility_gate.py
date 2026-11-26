@@ -44,6 +44,7 @@ import stat
 import subprocess
 import sys
 import tempfile
+import threading
 
 SCHEMA = 1
 KIND = "compiled-qt-offscreen-keyboard-accessibility"
@@ -55,6 +56,14 @@ MAX_DETAIL_FIELDS = 12
 MAX_TEXT = 128
 MIN_TIMEOUT = 2
 MAX_TIMEOUT = 90
+# A driver launch can be delayed by host scheduling before it executes any
+# keyboard step. Retry an *identical* launch a bounded number of times so a
+# transient delay does not become a gate FAIL; the per-attempt timeout is
+# unchanged and a driver that keeps hanging still fails closed. The lock
+# serialises launches made by threads in this process; cross-process load is
+# absorbed by the bounded retry, not by widening the timeout.
+MAX_DRIVER_ATTEMPTS = 2
+_DRIVER_LAUNCH_LOCK = threading.Lock()
 SHA40 = re.compile(r"[0-9a-f]{40}\Z")
 SHA64 = re.compile(r"[0-9a-f]{64}\Z")
 SAFE_NAME = re.compile(r"[A-Za-z0-9._-]{1,64}\Z")
@@ -413,16 +422,30 @@ def run_driver(*, driver, binary, source_sha, timeout_seconds=25):
         # current interpreter so the protocol is portable off Linux CI too.
         command = ([sys.executable, str(driver_path)]
                    if driver_path.suffix == ".py" else [str(driver_path)])
-        try:
-            completed = subprocess.run(
-                command, env=env, cwd=folder, shell=False,
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                timeout=timeout_seconds,
-            )
-        except subprocess.TimeoutExpired as exc:
-            raise GateError("keyboard driver timed out") from exc
-        except OSError as exc:
-            raise GateError("keyboard driver could not be started") from exc
+        # Retry ONLY a TimeoutExpired (a host-scheduled start that missed the
+        # per-attempt budget). Deterministic failures -- OSError, nonzero exit,
+        # malformed or oversized output -- are never retried or softened.
+        timed_out = None
+        completed = None
+        for _attempt in range(MAX_DRIVER_ATTEMPTS):
+            with _DRIVER_LAUNCH_LOCK:
+                try:
+                    completed = subprocess.run(
+                        command, env=env, cwd=folder, shell=False,
+                        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                        timeout=timeout_seconds,
+                    )
+                    timed_out = None
+                    break
+                except subprocess.TimeoutExpired as exc:
+                    timed_out = exc
+                except OSError as exc:
+                    raise GateError("keyboard driver could not be started") from exc
+        if timed_out is not None:
+            raise GateError(
+                "keyboard driver timed out after "
+                + str(MAX_DRIVER_ATTEMPTS) + " bounded attempts"
+            ) from timed_out
         if completed.returncode != 0:
             raise GateError("keyboard driver exited nonzero")
         if len(completed.stdout) > MAX_OUTPUT_BYTES:

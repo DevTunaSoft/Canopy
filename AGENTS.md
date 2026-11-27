@@ -10,9 +10,12 @@ The governing objective is one coherent, functional, secure, stable, resource-ef
 
 The owner authorizes Hermes to perform routine engineering, GUI and visual refinement, testing, legitimate dependency installation, GitHub operations, independent agent review, PR promotion and integration into `integration/canopy-classic-20261123` without repeated permission. Preserve `main` branch protection, specific PR holds, security requirements and release acceptance gates. Do not merge to `main` without explicit owner authorization and all release gates.
 
-Hermes must maintain at least four concurrently active engineering subagents
-in addition to itself (five agents total) with isolated worktrees, explicit
-file ownership, bounded assignments and non-overlapping responsibilities.
+The owner authorizes up to 8 concurrent engineering subagents plus Hermes as
+lead orchestrator (9 total) under the 2026-11-26 master directive amendment
+(SHA-256 `f240bcdf635a498a7476c8104cbf3dc4e6cda492abba318254d80fce7566a197`). Fill productive slots when eligible work and resources
+permit without interrupting healthy workers; never spawn above 8. Each worker
+has an isolated worktree, explicit file ownership, bounded assignments and
+non-overlapping responsibilities.
 When an agent completes or is blocked, immediately assign another eligible
 independent task. Verify the five-minute watchdog is operational and restore
 the workforce or recover interrupted work when it is not.
@@ -85,4 +88,4 @@ security or visual correctness. Keep tests honest (all-skipped is not green),
 use negative controls and fail-closed cleanup in every shell lifecycle.
 
 ## Autonomous integration and durable checkpoints
-Commit and push each coherent verified change to its owned branch; verify the remote SHA. Preserve unfinished work on its isolated branch with explicit test status, never present it as verified. Routine independently reviewed engineering, bounded visual-refinement and integration changes may integrate into the designated integration branch after applicable exact-SHA checks, dependency review and post-integration regression tests. Final release requirements apply to final release integration, not independent development. Named PR holds, branch protections, owner visual approval and high-risk security approval remain binding. Do not merge #151 or #278 into main or override their specific holds. Keep at least four active isolated engineering subagents plus Hermes when eligible work exists; prioritize wiring existing modules into real runtime behavior over new offline-only helpers. A blocked task is not complete; continue unrelated tasks. Do not create duplicate supervisors or redundant PRs.
+Commit and push each coherent verified change to its owned branch; verify the remote SHA. Preserve unfinished work on its isolated branch with explicit test status, never present it as verified. Routine independently reviewed engineering, bounded visual-refinement and integration changes may integrate into the designated integration branch after applicable exact-SHA checks, dependency review and post-integration regression tests. Final release requirements apply to final release integration, not independent development. Named PR holds, branch protections, owner visual approval and high-risk security approval remain binding. Do not merge #151 or #278 into main or override their specific holds. Keep up to the authorized 8 isolated engineering subagents plus Hermes (9 total) when eligible work exists; prioritize wiring existing modules into real runtime behavior over new offline-only helpers. A blocked task is not complete; continue unrelated tasks. Do not create duplicate supervisors or redundant PRs.

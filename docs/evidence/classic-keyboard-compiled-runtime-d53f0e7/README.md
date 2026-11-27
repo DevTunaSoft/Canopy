@@ -107,20 +107,20 @@ source SHA above: 18 tests, `OK`.
 
 - Pristine worktree at live base `4e504db`: 3394 tests,
   `OK (skipped=45)`, 282.859 s. Log `suite-newbase.txt`,
-  SHA-256 `05698d488a0a8ee9126dcbbd4cf9e94afc28f3994496e40392210226ca0b9251`
-  (`sha256(CRLF-normalized worktree bytes)`; authoritative raw git-blob SHA-256 `05039e1dec0dc1b3d33c2a9ae199b666737792263bc3c8b3b40ab483592961ad`).
+  SHA-256 `fd9a93a45b2480a41bb5df15154130741c6c1ed27b7318581b187649e0a542d6`
+  (`sha256(CRLF-normalized worktree bytes)`; authoritative raw git-blob SHA-256 `fd9a93a45b2480a41bb5df15154130741c6c1ed27b7318581b187649e0a542d6`).
 - Same worktree with this change (source SHA `f800e576816cb2395cf2c66c4d3be3353d305a49`): 3399 tests,
   `OK (skipped=45)`, 283.482 s. Log `suite-head.txt`,
-  SHA-256 `8517a2e1b5e491a95cf09935c97292c271f5c40b98ed98950fbe4a46cbd7f183`
-  (`sha256(CRLF-normalized worktree bytes)`; authoritative raw git-blob SHA-256 `1a9d8417d9e7a4fee4a7b8c95c644b1111433923348f9d4b585fca24ddde23e5`).
+  SHA-256 `e3a3d9cc2246c5ad9ebb59de61d13c4e948fe35809d248227c76334d0ce5a664`
+  (`sha256(CRLF-normalized worktree bytes)`; authoritative raw git-blob SHA-256 `e3a3d9cc2246c5ad9ebb59de61d13c4e948fe35809d248227c76334d0ce5a664`).
 - Delta: +5 tests, zero new failures/errors;
   FAIL/ERROR name sets are both empty.
 - Earlier comparison at the task-pinned tip `d53f0e7`: 3361 tests base versus
   3366 tests candidate, both `OK (skipped=45)`; logs `suite-base.txt`
-  (SHA-256 `e174b13cb24acc76c1d33716f70b0803f964ca44cc32f0a262b45c53b942c944`,
-  `sha256(CRLF-normalized worktree bytes)`; authoritative raw git-blob SHA-256 `b66ac64de8d7feb25edc0409b81459f5809e79739092a65b681e05995cb5da8b`) and `suite-candidate.txt`
-  (SHA-256 `a1492798348cd7d813e11bbd1b4325f7f322181775044ced4aefcc45e87366c9`,
-  `sha256(CRLF-normalized worktree bytes)`; authoritative raw git-blob SHA-256 `fa500d890e5dd3116b1d5d29a3a69cf8bd979a32a477bee73ef1f40b388becd5`).
+  (SHA-256 `bc96c8a994c4e023457e74bdb41cd360147c292daf7066486210b1c46a103ab1`,
+  `sha256(CRLF-normalized worktree bytes)`; authoritative raw git-blob SHA-256 `bc96c8a994c4e023457e74bdb41cd360147c292daf7066486210b1c46a103ab1`) and `suite-candidate.txt`
+  (SHA-256 `76e6e13d6d0d0db4f846c722e2d8af0b24fd7e02562124785c4007b89e600fb3`,
+  `sha256(CRLF-normalized worktree bytes)`; authoritative raw git-blob SHA-256 `76e6e13d6d0d0db4f846c722e2d8af0b24fd7e02562124785c4007b89e600fb3`).
 
 ## Artifact SHA-256 index
 
@@ -152,10 +152,10 @@ label only: it does not turn an offscreen run into Mint or visual acceptance.
 
 | citation site | target | cited `sha256(CRLF-normalized worktree bytes)` | authoritative raw git-blob SHA-256 |
 |---|---|---|---|
-| `README.md:110` | `docs/evidence/classic-keyboard-compiled-runtime-d53f0e7/suite-newbase.txt` | `05698d488a0a8ee9126dcbbd4cf9e94afc28f3994496e40392210226ca0b9251` | `05039e1dec0dc1b3d33c2a9ae199b666737792263bc3c8b3b40ab483592961ad` |
-| `README.md:113` | `docs/evidence/classic-keyboard-compiled-runtime-d53f0e7/suite-head.txt` | `8517a2e1b5e491a95cf09935c97292c271f5c40b98ed98950fbe4a46cbd7f183` | `1a9d8417d9e7a4fee4a7b8c95c644b1111433923348f9d4b585fca24ddde23e5` |
-| `README.md:118` | `docs/evidence/classic-keyboard-compiled-runtime-d53f0e7/suite-base.txt` | `e174b13cb24acc76c1d33716f70b0803f964ca44cc32f0a262b45c53b942c944` | `b66ac64de8d7feb25edc0409b81459f5809e79739092a65b681e05995cb5da8b` |
-| `README.md:118` | `docs/evidence/classic-keyboard-compiled-runtime-d53f0e7/suite-candidate.txt` | `a1492798348cd7d813e11bbd1b4325f7f322181775044ced4aefcc45e87366c9` | `fa500d890e5dd3116b1d5d29a3a69cf8bd979a32a477bee73ef1f40b388becd5` |
+| `README.md:110` | `docs/evidence/classic-keyboard-compiled-runtime-d53f0e7/suite-newbase.txt` | `fd9a93a45b2480a41bb5df15154130741c6c1ed27b7318581b187649e0a542d6` | `fd9a93a45b2480a41bb5df15154130741c6c1ed27b7318581b187649e0a542d6` |
+| `README.md:113` | `docs/evidence/classic-keyboard-compiled-runtime-d53f0e7/suite-head.txt` | `e3a3d9cc2246c5ad9ebb59de61d13c4e948fe35809d248227c76334d0ce5a664` | `e3a3d9cc2246c5ad9ebb59de61d13c4e948fe35809d248227c76334d0ce5a664` |
+| `README.md:118` | `docs/evidence/classic-keyboard-compiled-runtime-d53f0e7/suite-base.txt` | `bc96c8a994c4e023457e74bdb41cd360147c292daf7066486210b1c46a103ab1` | `bc96c8a994c4e023457e74bdb41cd360147c292daf7066486210b1c46a103ab1` |
+| `README.md:118` | `docs/evidence/classic-keyboard-compiled-runtime-d53f0e7/suite-candidate.txt` | `76e6e13d6d0d0db4f846c722e2d8af0b24fd7e02562124785c4007b89e600fb3` | `76e6e13d6d0d0db4f846c722e2d8af0b24fd7e02562124785c4007b89e600fb3` |
 | `README.md:122` | `docs/evidence/classic-keyboard-compiled-runtime-d53f0e7/gate-outcome.json` | `a74c72a9b33fbdd0658d3fcef32978f70184306c44b0a403c156d0ef5c212aef` | `52070a2aa1d1fa8772afdd6318622fab4bef9c52131333f2f57ba2601669d951` |
 | `README.md:123` | `docs/evidence/classic-keyboard-compiled-runtime-d53f0e7/gate-stdout.txt` | `06e78cf06db1b87d7dcd86029e9c125c6f5c304857e25f54e50cd0f8b0872245` | `94cb6325e55e1582203d27e0e5d0fcfeb7cc3e7584d016a7e00c2f47f3d3116f` |
 | `README.md:125` | `docs/evidence/classic-keyboard-compiled-runtime-d53f0e7/raw-launcher-stderr.txt` | `d827aa67f2078dbbfe5005655233be4988a749e03e64efbad1a634ed7dff9d97` | `fb670c570c58092c7d48e4284351f05c5b1f3cd0a8610510e0301bc399899272` |

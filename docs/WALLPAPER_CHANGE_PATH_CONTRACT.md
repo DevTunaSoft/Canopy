@@ -83,7 +83,7 @@ exactly the 25 new tests with an empty FAIL/ERROR set on both sides.
 `AWAITING_CHATGPT_VISUAL_APPROVAL problems=0`, unchanged from base.
 `tools/check_wallpaper.py verify --root .` reports `WALLPAPER_CHECK PASS problems=0`.
 Raw logs and an evidence ledger with SHA-256 sidecars live in
-`C:/Users/X1/Projects/Canopy/scratch/master_directive_20261126/evidence/wallpaper_change_validation/`.
+`scratch/master_directive_20261126/evidence/wallpaper_change_validation`.
 
 Resource / evidence note:
 

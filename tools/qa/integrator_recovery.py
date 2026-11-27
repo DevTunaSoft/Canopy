@@ -22,12 +22,11 @@ from tools.qa.integrator_lock import (  # type: ignore[import-not-found]
     process_alive,
 )
 
-DEFAULT_LOCK = pathlib.Path(
-    "C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy_integrator.lock")
-DEFAULT_DAEMON = pathlib.Path(
-    "C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy_integrator.py")
-DEFAULT_LOG = pathlib.Path(
-    "C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy_integrator_restart.log")
+_PRIVATE_SCRATCH = pathlib.Path(
+    os.environ.get("CANOPY_PRIVATE_SCRATCH", "private-evidence/scratch"))
+DEFAULT_LOCK = _PRIVATE_SCRATCH / "canopy_integrator.lock"
+DEFAULT_DAEMON = _PRIVATE_SCRATCH / "canopy_integrator.py"
+DEFAULT_LOG = _PRIVATE_SCRATCH / "canopy_integrator_restart.log"
 MAX_ATTEMPTS_PER_WINDOW = 2
 
 

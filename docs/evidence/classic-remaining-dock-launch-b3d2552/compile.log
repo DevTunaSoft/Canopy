@@ -3,7 +3,7 @@
 [3/52] Running qmlimportscanner for canopy-classic-spike
 [4/52] Generating qt.conf part for canopy-classic-spike
 [5/52] Generating qt.conf file
-[6/52] Populating .qmlls.build.ini file at C:/Users/X1/AppData/Local/Temp/docklaunch-build/.qt/.qmlls.build.ini
+[6/52] Populating .qmlls.build.ini file at private-evidence/temp/docklaunch-build/.qt/.qmlls.build.ini
 [7/52] Automatic MOC and UIC for target canopy-classic-spike
 [8/52] Running AUTOMOC file extraction for target canopy-classic-spike
 [9/52] Running rcc for resource qmake_Canopy_Classic

@@ -17,11 +17,15 @@ already-reviewed trusted source:
   acknowledgement.
 
 Nothing is inferred, invented or echoed. A missing, hostile, oversized or
-unrecognised observation, an exhausted probe budget, a lost source or an
-explicit close all fail closed to the ``unavailable`` state with a fixed reason
-and a fixed refusal token. Recovery requires an explicit host-only
-``reattach()`` followed by a fresh capability probe. No host-event topic,
-payload field or protocol version is added or changed by this module.
+unrecognised observation, an exhausted probe budget within the current source
+attachment, a lost source or an explicit close all fail closed to the
+``unavailable`` state with a fixed reason and a fixed refusal token. Recovery
+requires an explicit host-only ``reattach()`` followed by a fresh capability
+probe; reattach validates the new trusted source *before* rebasing the probe
+budget, so a hostile or dead source cannot refresh the budget. The budget stays
+bounded per attachment — no timer, poll, queue or daemon is created. No
+host-event topic, payload field or protocol version is added or changed by this
+module.
 """
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -127,9 +131,11 @@ class NotificationDaemonInterop:
     """Host-owned, bounded interop view over one trusted source.
 
     ``probe_source`` and ``probe_capability`` each spend one unit of a fixed
-    probe budget, expose only fixed tokens, and never retain caller data.
-    ``state`` is a pure read of the last probes; it performs no I/O and starts
-    unprobed. A lost source stays lost until explicit host ``reattach``.
+    probe budget per source attachment, expose only fixed tokens, and never
+    retain caller data. ``state`` is a pure read of the last probes; it
+    performs no I/O and starts unprobed. A lost source stays lost until
+    explicit host ``reattach``, which validates the replacement first and then
+    rebases the budget once.
     """
 
     def __init__(self, source=None, *, max_probes=MAX_PROBES):
@@ -283,13 +289,21 @@ class NotificationDaemonInterop:
                             probe_count, loss_count)
 
     def reattach(self, source):
-        """Explicit host-only recovery from a recorded source loss."""
+        """Explicit host-only recovery from a recorded source loss.
+
+        The replacement is validated before any state mutation. Only after it
+        is confirmed connected does the per-attachment probe budget rebase to
+        zero; cumulative loss diagnostics are kept. The following source probe
+        spends one unit of the fresh budget, so a healthy reattached daemon is
+        not reported ``probe_limit`` forever.
+        """
         self._ready()
         self._check_source(source)
         if self._owns_source:
             self._source.close()
             self._owns_source = False
         self._source = source
+        self._probe_count = 0
         self._lost = False
         self._source_probe = NOT_PROBED
         self._capability_probe = NOT_PROBED

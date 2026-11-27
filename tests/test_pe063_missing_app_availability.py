@@ -192,6 +192,54 @@ class BoundedRefreshTests(unittest.TestCase):
         self.assertEqual(fenced.probe_calls, 0)
         self.assertFalse(fenced.launch_permitted)
 
+    def test_reconcile_reopens_cycle_epochs_beyond_exhaustion(self):
+        tracker = MissingAppTracker()
+        calls = []
+
+        def always_missing(app_id):
+            calls.append(app_id)
+            return facts(in_catalog=False)
+
+        state = tracker.refresh(MISSING, always_missing)
+        for _ in range(MAX_REFRESH_CYCLES * 2):
+            state = tracker.refresh(MISSING, always_missing)
+        self.assertEqual(state.reason, REASON_EXHAUSTED)
+        frozen_calls = len(calls)
+        self.assertEqual(
+            tracker.refresh(MISSING, always_missing).reason,
+            REASON_EXHAUSTED)
+        self.assertEqual(len(calls), frozen_calls)
+
+        for epoch in range(3):
+            fresh = tracker.reconcile(MISSING, in_catalog=False)
+            self.assertEqual(fresh.reason, REASON_NOT_IN_CATALOG)
+            self.assertEqual(fresh.refresh_count, 0)
+            self.assertEqual(fresh.probe_calls, 0)
+            after = tracker.refresh(MISSING, always_missing)
+            self.assertEqual(after.refresh_count, 1)
+            self.assertEqual(after.reason, REASON_NOT_IN_CATALOG)
+            self.assertFalse(after.launch_permitted)
+        self.assertGreater(len(calls), frozen_calls)
+        self.assertEqual(len(tracker.snapshot()), 1)
+
+    def test_reconcile_never_invents_positive_authority(self):
+        tracker = MissingAppTracker()
+        state = tracker.refresh(MISSING, lambda _: facts(in_catalog=False))
+        self.assertEqual(state.reason, REASON_NOT_IN_CATALOG)
+        def hostile_call(**kwargs):
+            return tracker.reconcile(MISSING, **kwargs)
+
+        hostile = (
+            lambda: hostile_call(in_catalog="yes"),
+            lambda: hostile_call(in_catalog=True, tryexec_ok=None),
+        )
+        for build in hostile:
+            with self.subTest(build=build):
+                with self.assertRaises(MissingAppError):
+                    build()
+        self.assertEqual(tracker.state(MISSING), state)
+        self.assertFalse(tracker.state(MISSING).launch_permitted)
+
     def test_bad_probe_or_bounds_fail_closed_with_domain_error(self):
         tracker = MissingAppTracker()
         with self.assertRaises(MissingAppError):

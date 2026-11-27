@@ -19,21 +19,33 @@ visual geometry, QML, asset or protected-file change.
   catalog re-production remains in the already-merged Python host bridge.
 
 The dispatcher records fixed outcome tokens only (`rejected`,
-`window-rejected`, `refresh-limit`, `quick-controls-applied`,
+`window-rejected`, `rate-limited`, `quick-controls-applied`,
 `session-observed`, `window-applied`, `catalog-refresh-requested`); no caller
-text is echoed into an outcome or a log. Hard ceilings: 64 events per process
-lifetime and 16 deterministic history entries. There is no caller-configurable
-bound, no retry loop and no background wakeup.
+text is echoed into an outcome or a log. The former 64-event process-lifetime
+freeze is removed. Overload is now a lazy token bucket: 16 tokens, one refill
+per second from a monotonic clock sampled only inside `dispatch()`, so valid
+events continue indefinitely when spaced and a same-tick burst is refused with
+the fixed `rate-limited` token. Outcome history is a fixed 16-entry ring and
+catalog refresh coalescing keeps four integer fingerprints. There is no caller
+configurable bound, no retry loop and no background wakeup.
 
 ## Verification
 
 - Source contract: `tests/test_nd039_host_event_bridge.py` (topic set equals
-  `canopy_core.host_events.TOPICS`, routing targets, fail-closed order, caps,
-  no transport/poll/visual constructs, scope isolation).
+  `canopy_core.host_events.TOPICS`, routing targets, fail-closed order, fixed
+  size bounds, no transport/poll/visual constructs, scope isolation).
+- Bounded-lifetime regression: `tests/test_host_event_bounded_lifetime.py`
+  (source asserts no lifetime gate, executable model with injected clock:
+  200 spaced valid dispatches all accepted past 64, same-tick burst bounded at
+  16 with fixed `rate-limited` tokens, history/fingerprint rings stay at 16/4,
+  negative controls for allowlist, payload and credential denylist).
 - Compiled flag: `--self-test-host-event-bridge` exercises all four tokens,
   rejects an unlisted topic, an oversized value and a partial window snapshot,
-  then asserts 6 dispatches / 3 accepted / 3 rejected / history 6 of 16 and
-  prints `HOST_EVENT_BRIDGE_SELF_TEST_PASS`.
+  then asserts 6 dispatches / 3 accepted / 3 rejected / history 6 of 16; it
+  also drives 200 valid dispatches past the old 64 ceiling with an injected
+  clock, a 200-event same-tick burst and a ten-tick refresh coalescing run,
+  and prints `HOST_EVENT_BRIDGE_SELF_TEST_PASS`. The compiled flag itself is
+  `NOT_RUN` locally when no serialized Qt toolchain slot is available.
 - Foundation: `python tools/check_foundation.py` and the targeted unittest
   modules above. Offscreen compile is `COMPILE_NOT_RUN` unless the dedicated
   Qt toolchain is available and no sibling suite is loading the host.
@@ -45,13 +57,16 @@ bound, no retry loop and no background wakeup.
 
 ## Resource impact
 
-- Measured (`SYNTHETIC`): Python source-contract test counts and durations on
-  the Windows host; static allocation accounting (two bridge pointer members,
-  four int counters, one QString and one bounded QStringList of at most 16
-  fixed tokens).
+- Measured (`SYNTHETIC`): Python source-contract and bounded-lifetime test
+  counts and durations on the Windows host; static allocation accounting (two
+  bridge pointer members, one `QElapsedTimer`, one injectable clock handle,
+  four small integer counters, one `QString`, one bounded `QStringList` of at
+  most 16 fixed tokens and one four-entry fingerprint vector). Work per
+  accepted event is O(1); no per-event allocation or queue growth is added.
 - Deliberately not measured (`NOT_RUN`): real shell-owned PSS/CPU, Mint guest
   behavior, compiled Qt frame timings, monitor/DPI signal rate and full-suite
-  deltas. The dispatcher adds no timer, thread, cache, service, animation or
+  deltas. The replacement removes a dead lifetime branch, samples one monotonic
+  clock inside `dispatch()` and adds no timer, thread, service, animation or
   repeat rendering work, so it trades no stability, security, accessibility or
   approved visual quality for a minor gain.
 - Screen-reader behavior is `NOT_RUN`: screen-reader announcements register no

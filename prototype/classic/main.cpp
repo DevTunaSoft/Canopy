@@ -11,6 +11,7 @@
 #include <QtMath>
 #include <QDebug>
 #include <QTimer>
+#include <QElapsedTimer>
 #include <QDateTime>
 #include <QCursor>
 #include <QCoreApplication>
@@ -39,6 +40,8 @@
 #include <QAction>
 #include <QSettings>
 #include <QAccessible>
+#include <functional>
+#include <utility>
 
 static void showActivationStatus(QObject *status, const QString &message);
 static QString activationRefusal(const WindowActivationState &state,
@@ -1618,22 +1621,35 @@ private:
 // socket, process, service, timer or poll loop. It adds no topic, payload field
 // or protocol version; the topic set is the frozen one in HOST_EVENT_CONTRACT.
 // Each destination bridge keeps its own fail-closed payload validation, so the
-// dispatcher only guards the trust boundary (topic + whole-lifetime event cap),
-// routes the payload to the matching already-merged bridge and records a fixed
-// outcome token. No caller text is ever echoed into an outcome or a log.
+// dispatcher only guards the trust boundary (topic, non-empty payload and a
+// bounded overload gate), routes the payload to the matching already-merged
+// bridge and records a fixed outcome token. No caller text is ever echoed into
+// an outcome or a log. There is no process-lifetime event freeze: a lazy token
+// bucket is refilled from a monotonic clock sampled only inside dispatch(), so
+// sustained valid events keep routing while a burst of overload is refused
+// with the fixed token `rate-limited`. No timer object, thread, sleep, poll
+// loop or background wakeup is created.
 class ClassicHostEventBridge final : public QObject {
     Q_OBJECT
 public:
-    // Hard ceilings, never caller-configurable: a repeated or hostile producer
-    // cannot keep the shell busy, and the read-only history stays deterministic.
-    static constexpr int kMaxEvents = 64;
+    using ClockFn = std::function<qint64()>;
+    // Hard bounds, never caller-configurable: 16 tokens refill one per second,
+    // history stays at 16 entries and catalog refresh coalescing keeps at most
+    // four fingerprints. All are fixed-size; none grow with the event count.
+    static constexpr int kBucketCapacity = 16;
+    static constexpr qint64 kRefillMs = 1000;
     static constexpr int kMaxHistory = 16;
+    static constexpr int kDuplicateWindow = 4;
 
     explicit ClassicHostEventBridge(
         QuickControlsHostStateController &quickControls,
-        WindowActivationState &activation, QObject *parent = nullptr)
+        WindowActivationState &activation, ClockFn clock = ClockFn(),
+        QObject *parent = nullptr)
         : QObject(parent), m_quickControls(&quickControls),
-          m_activation(&activation) {}
+          m_activation(&activation), m_clock(std::move(clock)) {
+        m_timer.start();
+        m_lastRefillMs = now();
+    }
 
     // The exact four topics of canopy_core.host_events protocol v2. Exact
     // spelling is required; there is no dynamic registration or fifth topic.
@@ -1647,10 +1663,6 @@ public:
     }
 
     Q_INVOKABLE bool dispatch(const QString &topic, const QVariantMap &payload) {
-        if (m_total >= kMaxEvents) {
-            record(QStringLiteral("refresh-limit"));
-            return false;
-        }
         ++m_total;
         if (!allowedTopics().contains(topic) || payload.isEmpty()) {
             record(QStringLiteral("rejected"));
@@ -1666,6 +1678,8 @@ public:
                 record(QStringLiteral("rejected"));
                 return false;
             }
+            if (!takeToken())
+                return false;
             record(topic == QStringLiteral("capabilities.report")
                    ? QStringLiteral("quick-controls-applied")
                    : QStringLiteral("session-observed"));
@@ -1685,6 +1699,8 @@ public:
                 record(QStringLiteral("window-rejected"));
                 return false;
             }
+            if (!takeToken())
+                return false;
             record(QStringLiteral("window-applied"));
             return true;
         }
@@ -1692,7 +1708,20 @@ public:
         // already-merged host bridge, not to the compiled shell. Publish a
         // bounded refresh token only: no path discovery, process, poll or
         // visual/asset edit is introduced here.
-        emit catalogRefreshRequested();
+        if (!takeToken())
+            return false;
+        // Bounded duplicate suppression: within one refill tick, identical
+        // catalog refresh payload shapes coalesce to one signal. The stored
+        // state is a four-slot ring of integer fingerprints, never caller text.
+        const quint64 fingerprint = refreshFingerprint(
+            m_lastRefillMs / kRefillMs, payload);
+        if (!m_recentRefreshKeys.contains(fingerprint)) {
+            if (m_recentRefreshKeys.size() == kDuplicateWindow)
+                m_recentRefreshKeys.removeFirst();
+            m_recentRefreshKeys.append(fingerprint);
+            ++m_refreshSignals;
+            emit catalogRefreshRequested();
+        }
         record(QStringLiteral("catalog-refresh-requested"));
         return true;
     }
@@ -1702,7 +1731,12 @@ public:
     Q_INVOKABLE int rejectedCount() const { return m_rejected; }
     Q_INVOKABLE QString lastOutcome() const { return m_lastOutcome; }
     Q_INVOKABLE QStringList outcomeHistory() const { return m_history; }
-    Q_INVOKABLE bool frozen() const { return m_total >= kMaxEvents; }
+    // Observability for the compiled self-test only: no new transport or
+    // protocol surface. Both values are bounded by fixed-size state.
+    Q_INVOKABLE int refreshSignalCount() const { return m_refreshSignals; }
+    Q_INVOKABLE int recentRefreshKeys() const {
+        return m_recentRefreshKeys.size();
+    }
 
 signals:
     void catalogRefreshRequested();
@@ -1718,10 +1752,54 @@ private:
         return keys;
     }
 
+    // Monotonic clock sampled only from dispatch(): there is no timer object,
+    // thread, sleep, poll loop or background wakeup anywhere in this seam.
+    qint64 now() const {
+        return m_clock ? m_clock() : m_timer.elapsed();
+    }
+
+    void refill() {
+        const qint64 current = now();
+        if (current <= m_lastRefillMs)
+            return;
+        const qint64 elapsed = current - m_lastRefillMs;
+        const qint64 steps = elapsed / kRefillMs;
+        if (steps <= 0)
+            return;
+        m_tokens = qMin<int>(
+            kBucketCapacity,
+            m_tokens + static_cast<int>(qMin<qint64>(steps, kBucketCapacity)));
+        m_lastRefillMs = current - (elapsed % kRefillMs);
+    }
+
+    bool takeToken() {
+        refill();
+        if (m_tokens == 0) {
+            record(QStringLiteral("rate-limited"));
+            return false;
+        }
+        --m_tokens;
+        return true;
+    }
+
+    static quint64 refreshFingerprint(qint64 tick, const QVariantMap &payload) {
+        // QVariantMap iterates in sorted key order; only a bounded integer
+        // fingerprint is retained, never caller text.
+        QString canonical = QString::number(tick);
+        const QStringList keys = payload.keys();
+        for (const QString &key : keys) {
+            const QVariant value = payload.value(key);
+            canonical += QLatin1Char('|') + key + QLatin1Char(':');
+            canonical += QString::number(value.metaType().id());
+            canonical += QLatin1Char('=') + value.toString();
+        }
+        return static_cast<quint64>(qHash(canonical));
+    }
+
     void record(const QString &outcome) {
         const bool rejected = outcome == QStringLiteral("rejected")
             || outcome == QStringLiteral("window-rejected")
-            || outcome == QStringLiteral("refresh-limit");
+            || outcome == QStringLiteral("rate-limited");
         if (rejected)
             ++m_rejected;
         else
@@ -1734,6 +1812,12 @@ private:
 
     QuickControlsHostStateController *m_quickControls;
     WindowActivationState *m_activation;
+    QElapsedTimer m_timer;
+    ClockFn m_clock;
+    qint64 m_lastRefillMs = 0;
+    int m_tokens = kBucketCapacity;
+    int m_refreshSignals = 0;
+    QVector<quint64> m_recentRefreshKeys;
     int m_total = 0;
     int m_accepted = 0;
     int m_rejected = 0;
@@ -2800,12 +2884,92 @@ int main(int argc, char *argv[]) {
                 || hostEventBridge.rejectedCount() != 3
                 || hostEventBridge.outcomeHistory().size() != 6
                 || hostEventBridge.lastOutcome() != QStringLiteral("rejected")
-                || hostEventBridge.frozen()) {
+                || hostEventBridge.refreshSignalCount() != 1) {
             qCritical() << "HOST_EVENT_BRIDGE_FIXTURE_FAIL: bounded counters wrong";
             return 1;
         }
+
+        // Regression for the removed 64-event lifetime freeze: an injectable
+        // monotonic clock advances exactly one bucket tick per dispatch, so
+        // 200 valid events must all route with no sleep, poll or timer thread.
+        qint64 sustainedNow = 0;
+        ClassicHostEventBridge sustained(
+            hostStateController, activationState,
+            [&sustainedNow]() { return sustainedNow; });
+        int sustainedAccepted = 0;
+        for (int index = 0; index < 200; ++index) {
+            sustainedNow += 1000;
+            QVariantMap sustainedFacts;
+            sustainedFacts.insert(QStringLiteral("network_connected"), true);
+            sustainedFacts.insert(QStringLiteral("volume_percent"), 33);
+            if (!sustained.dispatch(QStringLiteral("capabilities.report"),
+                                    sustainedFacts))
+                break;
+            ++sustainedAccepted;
+        }
+        if (sustainedAccepted != 200
+                || sustained.dispatchCount() != 200
+                || sustained.acceptedCount() != 200
+                || sustained.rejectedCount() != 0
+                || sustained.outcomeHistory().size() != 16) {
+            qCritical() << "HOST_EVENT_BRIDGE_FIXTURE_FAIL: sustained 200 dispatch froze";
+            return 1;
+        }
+
+        // Load control: a same-tick burst stops at bucket capacity and every
+        // later valid event is refused with the fixed rate-limited token.
+        qint64 burstNow = 0;
+        ClassicHostEventBridge burst(
+            hostStateController, activationState,
+            [&burstNow]() { return burstNow; });
+        int burstAccepted = 0;
+        for (int index = 0; index < 200; ++index) {
+            QVariantMap burstFacts;
+            burstFacts.insert(QStringLiteral("network_connected"), true);
+            burstFacts.insert(QStringLiteral("volume_percent"), 33);
+            if (burst.dispatch(QStringLiteral("capabilities.report"), burstFacts))
+                ++burstAccepted;
+        }
+        if (burstAccepted != 16
+                || burst.rejectedCount() != 184
+                || burst.outcomeHistory().size() != 16
+                || burst.lastOutcome() != QStringLiteral("rate-limited")
+                || burst.recentRefreshKeys() != 0) {
+            qCritical() << "HOST_EVENT_BRIDGE_FIXTURE_FAIL: burst not bounded";
+            return 1;
+        }
+
+        // Catalog coalescing is bounded: identical tokens in one tick emit one
+        // signal and the fingerprint ring never exceeds four entries.
+        qint64 refreshNow = 0;
+        ClassicHostEventBridge coalescing(
+            hostStateController, activationState,
+            [&refreshNow]() { return refreshNow; });
+        QVariantMap catalogToken;
+        catalogToken.insert(QStringLiteral("source"), QStringLiteral("host-events"));
+        for (int index = 0; index < 10; ++index)
+            coalescing.dispatch(QStringLiteral("app.catalog.changed"), catalogToken);
+        if (coalescing.refreshSignalCount() != 1
+                || coalescing.recentRefreshKeys() != 1) {
+            qCritical() << "HOST_EVENT_BRIDGE_FIXTURE_FAIL: refresh not coalesced";
+            return 1;
+        }
+        for (int tick = 1; tick <= 10; ++tick) {
+            refreshNow += 1000;
+            coalescing.dispatch(QStringLiteral("app.catalog.changed"), catalogToken);
+            if (coalescing.recentRefreshKeys() > 4) {
+                qCritical() << "HOST_EVENT_BRIDGE_FIXTURE_FAIL: refresh ring unbounded";
+                return 1;
+            }
+        }
+        if (coalescing.refreshSignalCount() != 11
+                || coalescing.recentRefreshKeys() != 4) {
+            qCritical() << "HOST_EVENT_BRIDGE_FIXTURE_FAIL: refresh ring wrong";
+            return 1;
+        }
         qInfo() << "HOST_EVENT_BRIDGE_SELF_TEST_PASS: topics=4 routed=4 "
-                   "fail_closed=ok bounded=6/64 history=6/16 visuals=unchanged";
+                   "fail_closed=ok sustained=200/200 burst=16/200 "
+                   "bucket=16/1s history=16/16 dedup=4 visuals=unchanged";
         QTimer::singleShot(0, &app, &QCoreApplication::quit);
     }
     if (args.contains(QStringLiteral("--self-test-notification-center"))) {

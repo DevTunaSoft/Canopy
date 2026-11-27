@@ -11,7 +11,7 @@
 - Test cold/warm launch and memory growth after repeated app opening, theme switching, and monitor changes.
 
 ## Required matrix
-- Linux Mint release and desktop/session compatibility, Wayland and X11 where applicable.
+- Native Plasma 6 reference guest and selected supported base, Wayland and X11 where applicable; Linux Mint remains the legacy comparison baseline.
 - Low-end integrated graphics and a representative modern system.
 - 1080p and HiDPI, single and multi-monitor, light and dark.
 - Keyboard-only navigation, screen reader where supported, high contrast, reduced motion.
@@ -25,12 +25,12 @@ Unit and integration tests green, no unexplained performance regression, origina
 
 ## Draft PR lifecycle and integration authority (issue #132)
 - A draft PR is a temporary working state, not a permanent holding area. Once its exact head SHA has passed every applicable check and its dependencies/conflicts are verified, promote it to ready-for-review.
-- Green CI alone is never authorization to merge. Before any integration, verify: exact SHA tested equals SHA merged; all required checks passed; no unresolved dependencies or conflicts; regression/integration/security/performance checks completed; no protected visual change without owner approval; correct target branch and sequence; all requirements applicable to the target and scope satisfied. Final release requirements apply to final release integration, not routine independently verified integration into `integration/canopy-classic-20261123`.
-- Independently verified engineering changes and authorized bounded GUI refinements may be integrated incrementally through `integration/canopy-classic-20261123` with regression tests after each step. Preserve history; never force-push shared branches or bypass protections.
+- Green CI alone is never authorization to merge. Before any integration, verify: exact SHA tested equals SHA merged; all required checks passed; no unresolved dependencies or conflicts; regression/integration/security/performance checks completed; no protected visual change without owner approval; correct target branch and sequence; all requirements applicable to the target and scope satisfied. Final release requirements apply to public releases, not routine independently verified development integration. Follow the owner-approved trunk transition gates in [PLASMA6_PIVOT.md](PLASMA6_PIVOT.md).
+- Independently verified engineering changes and authorized bounded GUI refinements may be integrated incrementally through the respective integration branch during migration and protected main after the Plasma baseline gates pass, with regression tests after each step. Preserve history; never force-push shared branches or bypass protections.
 - Post-merge regression is mandatory **after** the merge; it is not a pre-merge gate. Keep pre-merge verification intact and do not create a circular rule requiring a post-merge result before an eligible merge.
-- The authorized workforce is up to 12 concurrent engineering subagents plus Hermes as lead orchestrator (a ceiling, not a quota), with isolated worktrees, explicit ownership and independent review. The newer owner directive (2026-11-26) supersedes only the 10-agent ceiling in the external directive cited in [workforce policy](AGENTS_WORKFORCE.md); all other requirements there remain in force.
+- Honor the latest owner-authorized host-safe workforce ceiling (not a quota); do not increase it based on historical limits. Use isolated worktrees, explicit ownership and independent review; serialize expensive VM/build jobs as needed.
 - Named owner holds on #279, #151 and #278 remain binding; general integration authorization does not waive them.
-- Classic Qt final desktop integration remains release-blocked until actual Linux Mint acceptance and owner visual approval are recorded. Keep those PRs in draft regardless of CI status.
+- Legacy standalone Qt release holds remain binding. Native Plasma baseline transition requires actual guest acceptance and applicable owner visual approval under the ADR. Main is a development trunk after transition; public releases require separate explicit owner authorization and all release gates.
 - Do not stop independent engineering work because another task is awaiting approval.
 
 ## Additional Shell Pack release checks (planned)

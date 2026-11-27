@@ -152,14 +152,15 @@ class ClassicWindowActivationHostTests(unittest.TestCase):
     def test_dock_stays_byte_frozen_and_state_is_applied_by_host(self):
         import hashlib
 
-        # The frozen DockTile.qml blob is deliberately untouched. State is
-        # applied to the QObjects from main.cpp, not by editing visual QML.
+        # PE-037 / PR #671 approved one accessibility-only binding change in
+        # DockTile.qml; this full-byte pin locks the reviewed blob so state is
+        # still applied from main.cpp and no visual line may drift.
         # Read universal-newline text so both LF CI and CRLF Windows checkouts
         # normalize back to the same committed blob bytes.
         tile_blob = DOCK.read_text(encoding="utf-8").encode("utf-8")
         blob_sha = hashlib.sha1(b"blob " + str(len(tile_blob)).encode() +
                                 b"\0" + tile_blob).hexdigest()
-        self.assertEqual(blob_sha, "07dbf4f447eb0a67f8df5e15948d40559539cc6e")
+        self.assertEqual(blob_sha, "856d5da7f1ae6c18fd9884b17b716d4faf80ad32")
         cpp = self.cpp
         for marker in (
                 "static void updateDockActivationProperties(",

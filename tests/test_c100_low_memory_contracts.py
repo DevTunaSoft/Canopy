@@ -99,7 +99,7 @@ class BoundedRecoveryTests(unittest.TestCase):
         self.assertEqual(controller.snapshot().recovery_round,
                          lm.MAX_RECOVERY_ROUNDS)
 
-    def test_lifetime_rebuilt_total_is_bounded(self):
+    def test_rebuilt_total_is_bounded_per_recovery_episode(self):
         controller = self._small(budget=3, max_rebuilt=5)
         controller.observe(lm.CONDITION_NORMAL)
         self.assertEqual(controller.populate("a", (1, 2, 3)), 3)
@@ -108,7 +108,38 @@ class BoundedRecoveryTests(unittest.TestCase):
         controller.advance_recovery()
         self.assertEqual(controller.populate("a", (7,)), 0)
         self.assertEqual(controller.snapshot().rebuilt_entries, 5)
-        self.assertTrue(controller.advance_recovery().done)
+        step = controller.advance_recovery()
+        self.assertTrue(step.done)
+        self.assertEqual(step.reason, lm.STEP_REBUILT_CAP)
+        self.assertEqual(controller.populate("b", (8,)), 0)
+
+        controller.observe(lm.CONDITION_LOW)
+        self.assertTrue(all(b.retained == 0
+                            for b in controller.snapshot().boundaries))
+        controller.observe(lm.CONDITION_NORMAL)
+        self.assertEqual(controller.snapshot().rebuilt_entries, 0)
+        self.assertEqual(controller.populate("a", (9,)), 1)
+        self.assertEqual(controller.snapshot().rebuilt_entries, 1)
+
+    def test_rebuild_across_many_episodes_beyond_former_lifetime_total(self):
+        controller = self._small(budget=2, max_rebuilt=2)
+        for episode in range(3):
+            controller.observe(lm.CONDITION_NORMAL)
+            self.assertEqual(controller.populate("a", (episode, episode + 1)),
+                             2)
+            snapshot = controller.snapshot()
+            self.assertEqual(snapshot.rebuilt_entries, 2)
+            self.assertEqual(snapshot.recovery_count, episode + 1)
+            # The per-episode cap still refuses extra work in this episode.
+            self.assertEqual(controller.populate("b", (99,)), 0)
+            self.assertEqual(sum(b.retained for b in snapshot.boundaries),
+                             2)
+            controller.observe(lm.CONDITION_LOW)
+            self.assertTrue(all(b.retained == 0
+                                for b in controller.snapshot().boundaries))
+        self.assertLessEqual(
+            sum(b.retained for b in controller.snapshot().boundaries),
+            lm.MAX_TOTAL_ENTRIES)
 
     def test_reshedding_clears_credits_and_entries(self):
         controller = self._small()
@@ -119,7 +150,8 @@ class BoundedRecoveryTests(unittest.TestCase):
         snap = controller.snapshot()
         self.assertEqual(snap.recovery_count, 2)
         self.assertTrue(all(b.retained == 0 for b in snap.boundaries))
-        self.assertEqual(snap.rebuilt_entries, 2)
+        # A new recovery episode starts with a zeroed rebuilt counter.
+        self.assertEqual(snap.rebuilt_entries, 0)
 
 
 class FailClosedInputTests(unittest.TestCase):

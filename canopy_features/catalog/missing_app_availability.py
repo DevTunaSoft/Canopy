@@ -10,8 +10,11 @@ its diagnostic mapping.
 A missing application stays UNAVAILABLE and never grants launch permission.
 Re-checking is explicit and bounded: one refresh call probes at most
 ``MAX_REFRESH_ATTEMPTS`` times, a transient single positive probe cannot flip
-the state, and a tracker allows at most ``MAX_REFRESH_CYCLES`` refreshes before
-freezing on ``refresh_exhausted``. Probe exceptions and malformed or partial probe shapes
+the state, and a tracker allows at most ``MAX_REFRESH_CYCLES`` refreshes per
+authoritative catalog epoch before freezing on ``refresh_exhausted``. A new
+authoritative ``observe()`` or explicit ``reconcile()`` starts a new epoch and
+clears the exhaustion; no timer, poll or background retry ever does. Probe
+exceptions and malformed or partial probe shapes
 become a fixed reason instead of leaking a raw exception to the host. A probe
 mapping must carry explicit ``tryexec_ok`` and ``entry_readable`` booleans:
 omitted facts are a failed probe, never an assumed positive, so catalog
@@ -249,13 +252,29 @@ class MissingAppTracker:
         self._states[app_id] = state
         return state
 
+    def reconcile(self, app_id, *, in_catalog, tryexec_ok=True,
+                  entry_readable=True):
+        """Apply authoritative facts and open a new refresh epoch.
+
+        This is the explicit recovery path for an ``refresh_exhausted`` app.
+        It reuses the same bounded state cache and strict fact validation as
+        ``observe``: no probe is called here, no fact is inferred from an
+        exhausted counter, and no launch permission is granted without real
+        positive facts.
+        """
+        return self.observe(
+            app_id, in_catalog=in_catalog, tryexec_ok=tryexec_ok,
+            entry_readable=entry_readable)
+
     def refresh(self, app_id, probe):
         """Re-check a state with at most ``max_refresh_attempts`` probe calls.
 
         The probe may return a bool or a mapping of source facts. Any raised
         exception, malformed shape or non-boolean fact becomes
         ``probe_failed``. Two consecutive positive probes are required before
-        an unavailable application may become launchable.
+        an unavailable application may become launchable. The cycle cap is
+        per authoritative epoch: ``observe()`` or ``reconcile()`` opens a new
+        epoch, while this method never probes past the cap.
         """
         _check_app_id(app_id)
         if not callable(probe):

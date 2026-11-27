@@ -6,6 +6,10 @@ applications into the standard menu categories from the Desktop Menu
 Specification. Reads no files, launches nothing, polls nothing, and imports
 no Qt/GIO/OS-specific code. Wiring it into the compiled Classic Qt launcher
 is separate integration work; this module alone is not a working desktop.
+
+Every caller-supplied type or lookup error fails closed with ``CategoryError``:
+raw ``TypeError``/``AttributeError`` from iteration, sorting or mapping lookup
+must never reach callers of this pure data contract.
 """
 from dataclasses import dataclass
 import re
@@ -172,8 +176,24 @@ def parse_categories(value):
 
 
 def order_categories(categories):
-    """Return categories sorted by (rank, id); ids break rank ties."""
-    return tuple(sorted(categories, key=lambda category: (category.rank, category.id)))
+    """Return categories sorted by (rank, id); ids break rank ties.
+
+    Gate the caller's iterable and each entry before sorting: a wrong
+    container or a non-Category entry must fail closed with ``CategoryError``
+    instead of leaking ``TypeError``/``AttributeError`` from ``sorted``.
+    Valid ordering is unchanged.
+    """
+    try:
+        iterator = iter(categories)
+    except TypeError:
+        raise CategoryError(
+            "categories must be an iterable of Category objects") from None
+    entries = []
+    for category in iterator:
+        if not isinstance(category, Category):
+            raise CategoryError("categories must contain only Category objects")
+        entries.append(category)
+    return tuple(sorted(entries, key=lambda category: (category.rank, category.id)))
 
 
 class CategoryCatalog:
@@ -204,6 +224,16 @@ class CategoryCatalog:
         return order_categories(self._by_id.values())
 
     def get(self, category_id):
+        """Return the entry for ``category_id`` or None if it is not known.
+
+        Check hashability before the lookup so an unhashable caller key fails
+        closed with ``CategoryError`` instead of a raw ``TypeError``. Hashable
+        non-id keys stay misses, as before.
+        """
+        try:
+            hash(category_id)
+        except TypeError:
+            raise CategoryError("category id must be hashable") from None
         return self._by_id.get(category_id)
 
     def resolve(self, category_ids):

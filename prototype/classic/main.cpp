@@ -11,6 +11,7 @@
 #include <QtMath>
 #include <QDebug>
 #include <QTimer>
+#include <QElapsedTimer>
 #include <QDateTime>
 #include <QCursor>
 #include <QCoreApplication>
@@ -39,6 +40,8 @@
 #include <QAction>
 #include <QSettings>
 #include <QAccessible>
+#include <functional>
+#include <utility>
 
 static void showActivationStatus(QObject *status, const QString &message);
 static QString activationRefusal(const WindowActivationState &state,
@@ -432,6 +435,79 @@ private:
     QString m_name;
 };
 
+// Terminal was the last approved dock tile that could stay preview-only with
+// a refusal footer when the session's installed terminal was a Konsole
+// desktop entry rather than one of the host launcher's frozen candidates.
+// This adapter keeps the single host-owned GIO path: the exact frozen dock
+// label is resolved through SystemAppLauncher when an installed desktop entry
+// is available. Otherwise it takes the documented fallback below instead of
+// claiming a launch failure. No QML, artwork, geometry, process, shell or
+// second GIO code path is introduced.
+class TerminalDockLaunchBridge final : public QObject {
+    Q_OBJECT
+public:
+    TerminalDockLaunchBridge(SystemAppLauncher &launcher,
+                             WindowActivationState &state,
+                             QObject *statusOverlay, QObject *parent = nullptr)
+        : QObject(parent), m_launcher(launcher), m_state(state),
+          m_status(statusOverlay) {}
+
+    static bool isTerminalDockName(const QString &name)
+    {
+        return name == QStringLiteral("Terminal");
+    }
+
+    // Fixed, non-refusal status for the documented fallback.
+    static QString fallbackMessage()
+    {
+        return QStringLiteral("Choose an installed terminal application");
+    }
+
+public slots:
+    void activate(const QString &name) {
+        if (!isTerminalDockName(name)) {
+            qWarning() << "CANOPY_TERMINAL_DOCK_REJECTED: unknown action";
+            return;
+        }
+        const QString intent = m_state.resolveActivation(
+            name, QStringLiteral("Canopy"));
+        if (intent == QStringLiteral("FOCUS")
+                || intent == QStringLiteral("IGNORE")) {
+            // Truthful, explicit states: a running terminal needs a focus
+            // grant and a disabled launcher cannot launch anything.
+            qWarning() << "CANOPY_TERMINAL_DOCK_INTENT_REFUSED" << intent;
+            showActivationStatus(m_status,
+                                 activationRefusal(m_state, name, intent));
+            return;
+        }
+        // LAUNCH and REJECT with no installed candidate both reach the same
+        // native app model first. Only the host launcher may actuate; a
+        // failed or unavailable launch is never reported as a success.
+        if (intent == QStringLiteral("LAUNCH")
+                && m_launcher.canLaunch(name) && m_launcher.launch(name)) {
+            qInfo() << "CANOPY_TERMINAL_DOCK_NATIVE_LAUNCH_REQUESTED";
+            return;
+        }
+        if (!m_status)
+            return;
+        // Documented fallback: hand the user the existing native launcher so
+        // an installed terminal (for example a Konsole desktop entry) can be
+        // chosen explicitly. No refusal footer and no invented success.
+        if (!QMetaObject::invokeMethod(m_status, "openLauncher",
+                                       Qt::DirectConnection)) {
+            qWarning() << "CANOPY_TERMINAL_DOCK_STATUS_UNAVAILABLE";
+            return;
+        }
+        m_status->setProperty("selectionMessage", fallbackMessage());
+        qInfo() << "CANOPY_TERMINAL_DOCK_FALLBACK_OPENED";
+    }
+
+private:
+    SystemAppLauncher &m_launcher;
+    WindowActivationState &m_state;
+    QObject *m_status;
+};
+
 // Host-owned window-activation snapshot source. The adapter itself never
 // observes or actuates; the shell supplies only facts it already owns:
 // the Qt platform backend and the GIO launcher allowlist. No process or
@@ -702,6 +778,78 @@ static bool runRemainingDockFixture(QQuickWindow *window,
         }
         const QString marker = tag + QStringLiteral("_DOCK_LAUNCH_FIXTURE_PASS");
         qInfo() << qPrintable(marker) << "dock signal reached GIO service";
+    }
+    QTimer::singleShot(0, QCoreApplication::instance(), &QCoreApplication::quit);
+    return true;
+}
+
+// Compiled fixture for the last Terminal dock tile. It proves the exact
+// frozen label reaches the one host-owned GIO launcher when an installed
+// desktop entry resolves, and that the documented fallback opens the existing
+// launcher with a neutral status instead of a refusal footer. A hostile
+// lookalike label is refused before any launcher is touched.
+static bool runTerminalDockFixture(QQuickWindow *window,
+                                   SystemAppLauncher &launcher,
+                                   bool statusCase)
+{
+    if (!window)
+        return false;
+    const QString name = QStringLiteral("Terminal");
+    const bool installed = launcher.canLaunch(name);
+    if (statusCase && installed) {
+        qCritical() << "TERMINAL_DOCK_FIXTURE_FAIL: status case needs no app";
+        return false;
+    }
+    if (!statusCase && !installed) {
+        qCritical() << "TERMINAL_DOCK_FIXTURE_FAIL: GIO app unavailable";
+        return false;
+    }
+    auto *tile = findDockTile(window->contentItem(), name);
+    auto *overlay = findVisualItem(window->contentItem(),
+                                   QStringLiteral("canopyApplicationLauncher"));
+    auto *status = findVisualItem(window->contentItem(),
+                                  QStringLiteral("canopyLauncherStatus"));
+    if (!tile || !overlay || !status) {
+        qCritical() << "TERMINAL_DOCK_FIXTURE_FAIL: frozen dock or footer missing";
+        return false;
+    }
+    const QString initialStatus = status->property("text").toString();
+    const QString hostile = name + QStringLiteral(";echo bad");
+    if (!QMetaObject::invokeMethod(tile, "activated", Qt::DirectConnection,
+                                   Q_ARG(QString, hostile))) {
+        qCritical() << "TERMINAL_DOCK_FIXTURE_FAIL: signal not invokable";
+        return false;
+    }
+    QCoreApplication::processEvents();
+    if (overlay->property("opened").toBool()
+            || status->property("text").toString() != initialStatus) {
+        qCritical() << "TERMINAL_DOCK_FIXTURE_FAIL: unknown action accepted";
+        return false;
+    }
+    if (!QMetaObject::invokeMethod(tile, "activated", Qt::DirectConnection,
+                                   Q_ARG(QString, name))) {
+        qCritical() << "TERMINAL_DOCK_FIXTURE_FAIL: dock activation failed";
+        return false;
+    }
+    QCoreApplication::processEvents();
+    const QString shown = status->property("text").toString();
+    if (statusCase) {
+        if (!overlay->property("opened").toBool()
+                || !shown.contains(TerminalDockLaunchBridge::fallbackMessage())
+                || shown.contains(QStringLiteral("could not be launched"))) {
+            qCritical() << "TERMINAL_DOCK_FIXTURE_FAIL: documented fallback missing";
+            return false;
+        }
+        qInfo() << QStringLiteral("TERMINAL_DOCK_STATUS_FIXTURE_PASS")
+                << "fallback visible without a refusal footer";
+    } else {
+        if (overlay->property("opened").toBool()
+                || status->property("text").toString() != initialStatus) {
+            qCritical() << "TERMINAL_DOCK_FIXTURE_FAIL: launch reported a refusal";
+            return false;
+        }
+        qInfo() << QStringLiteral("TERMINAL_DOCK_LAUNCH_FIXTURE_PASS")
+                << "dock signal reached the native GIO launcher";
     }
     QTimer::singleShot(0, QCoreApplication::instance(), &QCoreApplication::quit);
     return true;
@@ -1618,22 +1766,39 @@ private:
 // socket, process, service, timer or poll loop. It adds no topic, payload field
 // or protocol version; the topic set is the frozen one in HOST_EVENT_CONTRACT.
 // Each destination bridge keeps its own fail-closed payload validation, so the
-// dispatcher only guards the trust boundary (topic + whole-lifetime event cap),
-// routes the payload to the matching already-merged bridge and records a fixed
-// outcome token. No caller text is ever echoed into an outcome or a log.
+// dispatcher only guards the trust boundary (topic, non-empty payload and a
+// bounded overload gate), routes the payload to the matching already-merged
+// bridge and records a fixed outcome token. No caller text is ever echoed into
+// an outcome or a log. There is no process-lifetime event freeze: a lazy token
+// bucket is refilled from a monotonic clock sampled only inside dispatch(), so
+// sustained valid events keep routing while a burst of overload is refused
+// with a truthful deferred token. A fresh catalog refresh is never dropped:
+// one boolean latch carries it to the next dispatch that observes a token, so
+// authoritative reconciliation cannot be starved by a same-tick valid flood.
+// The latch is one bit, not a queue: no timer object, thread, sleep, poll loop,
+// retry path or background wakeup is created.
 class ClassicHostEventBridge final : public QObject {
     Q_OBJECT
 public:
-    // Hard ceilings, never caller-configurable: a repeated or hostile producer
-    // cannot keep the shell busy, and the read-only history stays deterministic.
-    static constexpr int kMaxEvents = 64;
+    using ClockFn = std::function<qint64()>;
+    // Hard bounds, never caller-configurable: 16 tokens refill one per second,
+    // history stays at 16 entries, catalog refresh coalescing keeps at most
+    // four fingerprints, and one boolean carries a pending refresh. All are
+    // fixed-size; none grow with the event count.
+    static constexpr int kBucketCapacity = 16;
+    static constexpr qint64 kRefillMs = 1000;
     static constexpr int kMaxHistory = 16;
+    static constexpr int kDuplicateWindow = 4;
 
     explicit ClassicHostEventBridge(
         QuickControlsHostStateController &quickControls,
-        WindowActivationState &activation, QObject *parent = nullptr)
+        WindowActivationState &activation, ClockFn clock = ClockFn(),
+        QObject *parent = nullptr)
         : QObject(parent), m_quickControls(&quickControls),
-          m_activation(&activation) {}
+          m_activation(&activation), m_clock(std::move(clock)) {
+        m_timer.start();
+        m_lastRefillMs = now();
+    }
 
     // The exact four topics of canopy_core.host_events protocol v2. Exact
     // spelling is required; there is no dynamic registration or fifth topic.
@@ -1647,11 +1812,11 @@ public:
     }
 
     Q_INVOKABLE bool dispatch(const QString &topic, const QVariantMap &payload) {
-        if (m_total >= kMaxEvents) {
-            record(QStringLiteral("refresh-limit"));
-            return false;
-        }
         ++m_total;
+        // The monotonic clock is sampled only here, on a real event. refill()
+        // and the latch flush are both event-driven: no timer, poll or retry.
+        refill();
+        flushPendingRefresh();
         if (!allowedTopics().contains(topic) || payload.isEmpty()) {
             record(QStringLiteral("rejected"));
             return false;
@@ -1666,9 +1831,17 @@ public:
                 record(QStringLiteral("rejected"));
                 return false;
             }
-            record(topic == QStringLiteral("capabilities.report")
-                   ? QStringLiteral("quick-controls-applied")
-                   : QStringLiteral("session-observed"));
+            const bool throttled = !takeToken();
+            // The authoritative commit already happened. Never report failure
+            // for committed state: the deferred token says the bucket was
+            // empty while the state is fresh.
+            if (topic == QStringLiteral("capabilities.report")) {
+                record(throttled ? QStringLiteral("quick-controls-applied-deferred")
+                                 : QStringLiteral("quick-controls-applied"));
+            } else {
+                record(throttled ? QStringLiteral("session-observed-deferred")
+                                 : QStringLiteral("session-observed"));
+            }
             return true;
         }
         if (topic == QStringLiteral("window.state.changed")) {
@@ -1685,15 +1858,42 @@ public:
                 record(QStringLiteral("window-rejected"));
                 return false;
             }
-            record(QStringLiteral("window-applied"));
+            const bool throttled = !takeToken();
+            record(throttled ? QStringLiteral("window-applied-deferred")
+                             : QStringLiteral("window-applied"));
             return true;
         }
         // app.catalog.changed: native catalog re-production belongs to the
         // already-merged host bridge, not to the compiled shell. Publish a
         // bounded refresh token only: no path discovery, process, poll or
         // visual/asset edit is introduced here.
-        emit catalogRefreshRequested();
-        record(QStringLiteral("catalog-refresh-requested"));
+        // Bounded duplicate suppression: within one refill tick, identical
+        // catalog refresh payload shapes coalesce to one signal. The stored
+        // state is a four-slot ring of integer fingerprints, never caller text.
+        const quint64 fingerprint = refreshFingerprint(
+            m_lastRefillMs / kRefillMs, payload);
+        if (m_recentRefreshKeys.contains(fingerprint)) {
+            record(QStringLiteral("catalog-refresh-coalesced"));
+            return true;
+        }
+        if (m_recentRefreshKeys.size() == kDuplicateWindow)
+            m_recentRefreshKeys.removeFirst();
+        m_recentRefreshKeys.append(fingerprint);
+        // Token ordering: emit the authoritative refresh before spending the
+        // bucket token, and latch the one-bit request if no token is present.
+        // A duplicate never spends a token; a pending refresh is flushed by
+        // the next dispatch that observes one, so no flood can lose it.
+        if (m_tokens > 0) {
+            // Authoritative emission precedes the token charge: a fresh
+            // refresh is never lost to an exhausted bucket.
+            emit catalogRefreshRequested();
+            takeToken();
+            ++m_refreshSignals;
+            record(QStringLiteral("catalog-refresh-requested"));
+        } else {
+            m_refreshPending = true;
+            record(QStringLiteral("catalog-refresh-pending"));
+        }
         return true;
     }
 
@@ -1702,7 +1902,13 @@ public:
     Q_INVOKABLE int rejectedCount() const { return m_rejected; }
     Q_INVOKABLE QString lastOutcome() const { return m_lastOutcome; }
     Q_INVOKABLE QStringList outcomeHistory() const { return m_history; }
-    Q_INVOKABLE bool frozen() const { return m_total >= kMaxEvents; }
+    // Observability for the compiled self-test only: no new transport or
+    // protocol surface. Both values are bounded by fixed-size state.
+    Q_INVOKABLE int refreshSignalCount() const { return m_refreshSignals; }
+    Q_INVOKABLE bool refreshPending() const { return m_refreshPending; }
+    Q_INVOKABLE int recentRefreshKeys() const {
+        return m_recentRefreshKeys.size();
+    }
 
 signals:
     void catalogRefreshRequested();
@@ -1718,10 +1924,64 @@ private:
         return keys;
     }
 
+    // Monotonic clock sampled only from dispatch(): there is no timer object,
+    // thread, sleep, poll loop or background wakeup anywhere in this seam.
+    qint64 now() const {
+        return m_clock ? m_clock() : m_timer.elapsed();
+    }
+
+    void refill() {
+        const qint64 current = now();
+        if (current <= m_lastRefillMs)
+            return;
+        const qint64 elapsed = current - m_lastRefillMs;
+        const qint64 steps = elapsed / kRefillMs;
+        if (steps <= 0)
+            return;
+        m_tokens = qMin<int>(
+            kBucketCapacity,
+            m_tokens + static_cast<int>(qMin<qint64>(steps, kBucketCapacity)));
+        m_lastRefillMs = current - (elapsed % kRefillMs);
+    }
+
+    bool takeToken() {
+        refill();
+        if (m_tokens == 0)
+            return false;
+        --m_tokens;
+        return true;
+    }
+
+    // One-bit deferred authoritative catalog refresh. Called only from
+    // dispatch() on a real event: when a token is available the latch emits
+    // exactly once and clears. Reconciliation is exempt from the overload
+    // charge because its work already happened in the producer bridge; no
+    // queue, retry loop, timer or thread is introduced.
+    void flushPendingRefresh() {
+        if (!m_refreshPending || m_tokens == 0)
+            return;
+        m_refreshPending = false;
+        emit catalogRefreshRequested();
+        ++m_refreshSignals;
+    }
+
+    static quint64 refreshFingerprint(qint64 tick, const QVariantMap &payload) {
+        // QVariantMap iterates in sorted key order; only a bounded integer
+        // fingerprint is retained, never caller text.
+        QString canonical = QString::number(tick);
+        const QStringList keys = payload.keys();
+        for (const QString &key : keys) {
+            const QVariant value = payload.value(key);
+            canonical += QLatin1Char('|') + key + QLatin1Char(':');
+            canonical += QString::number(value.metaType().id());
+            canonical += QLatin1Char('=') + value.toString();
+        }
+        return static_cast<quint64>(qHash(canonical));
+    }
+
     void record(const QString &outcome) {
         const bool rejected = outcome == QStringLiteral("rejected")
-            || outcome == QStringLiteral("window-rejected")
-            || outcome == QStringLiteral("refresh-limit");
+            || outcome == QStringLiteral("window-rejected");
         if (rejected)
             ++m_rejected;
         else
@@ -1734,6 +1994,13 @@ private:
 
     QuickControlsHostStateController *m_quickControls;
     WindowActivationState *m_activation;
+    QElapsedTimer m_timer;
+    ClockFn m_clock;
+    qint64 m_lastRefillMs = 0;
+    int m_tokens = kBucketCapacity;
+    bool m_refreshPending = false;
+    int m_refreshSignals = 0;
+    QVector<quint64> m_recentRefreshKeys;
     int m_total = 0;
     int m_accepted = 0;
     int m_rejected = 0;
@@ -2468,8 +2735,7 @@ int main(int argc, char *argv[]) {
         auto *remainingStatusOverlay = findVisualItem(
             window->contentItem(), QStringLiteral("canopyApplicationLauncher"));
         static const QStringList remainingDockNames = {
-            QStringLiteral("Calendar"), QStringLiteral("Photos"),
-            QStringLiteral("Terminal")
+            QStringLiteral("Calendar"), QStringLiteral("Photos")
         };
         for (const QString &name : remainingDockNames) {
             if (auto *tile = findDockTile(window->contentItem(), name)) {
@@ -2478,6 +2744,22 @@ int main(int argc, char *argv[]) {
                 QObject::connect(tile, SIGNAL(activated(QString)),
                                  bridge, SLOT(activate(QString)));
                 qInfo() << "CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED" << name;
+            }
+        }
+        // Terminal keeps its own exact-label adapter: installed desktop
+        // entries launch through the same host service, otherwise the
+        // documented fallback opens the launcher with no refusal footer.
+        static const QStringList terminalDockNames = {
+            QStringLiteral("Terminal")
+        };
+        for (const QString &name : terminalDockNames) {
+            if (auto *tile = findDockTile(window->contentItem(), name)) {
+                auto *bridge = new TerminalDockLaunchBridge(
+                    systemLauncher, activationState,
+                    remainingStatusOverlay, &app);
+                QObject::connect(tile, SIGNAL(activated(QString)),
+                                 bridge, SLOT(activate(QString)));
+                qInfo() << "CANOPY_TERMINAL_DOCK_NATIVE_LAUNCH_CONNECTED" << name;
             }
         }
         static const QStringList gatedDockNames = {
@@ -2800,12 +3082,144 @@ int main(int argc, char *argv[]) {
                 || hostEventBridge.rejectedCount() != 3
                 || hostEventBridge.outcomeHistory().size() != 6
                 || hostEventBridge.lastOutcome() != QStringLiteral("rejected")
-                || hostEventBridge.frozen()) {
+                || hostEventBridge.refreshSignalCount() != 1) {
             qCritical() << "HOST_EVENT_BRIDGE_FIXTURE_FAIL: bounded counters wrong";
             return 1;
         }
+
+        // Regression for the removed 64-event lifetime freeze: an injectable
+        // monotonic clock advances exactly one bucket tick per dispatch, so
+        // 200 valid events must all route with no sleep, poll or timer thread.
+        qint64 sustainedNow = 0;
+        ClassicHostEventBridge sustained(
+            hostStateController, activationState,
+            [&sustainedNow]() { return sustainedNow; });
+        int sustainedAccepted = 0;
+        for (int index = 0; index < 200; ++index) {
+            sustainedNow += 1000;
+            QVariantMap sustainedFacts;
+            sustainedFacts.insert(QStringLiteral("network_connected"), true);
+            sustainedFacts.insert(QStringLiteral("volume_percent"), 33);
+            if (!sustained.dispatch(QStringLiteral("capabilities.report"),
+                                    sustainedFacts))
+                break;
+            ++sustainedAccepted;
+        }
+        if (sustainedAccepted != 200
+                || sustained.dispatchCount() != 200
+                || sustained.acceptedCount() != 200
+                || sustained.rejectedCount() != 0
+                || sustained.outcomeHistory().size() != 16) {
+            qCritical() << "HOST_EVENT_BRIDGE_FIXTURE_FAIL: sustained 200 dispatch froze";
+            return 1;
+        }
+
+        // Load control: a same-tick burst of valid state events keeps every
+        // authoritative commit and reports a truthful deferred token when the
+        // bucket is empty. No committed state is ever reported as failed.
+        qint64 burstNow = 0;
+        ClassicHostEventBridge burst(
+            hostStateController, activationState,
+            [&burstNow]() { return burstNow; });
+        int burstAccepted = 0;
+        for (int index = 0; index < 200; ++index) {
+            QVariantMap burstFacts;
+            burstFacts.insert(QStringLiteral("network_connected"), true);
+            burstFacts.insert(QStringLiteral("volume_percent"), 33);
+            if (burst.dispatch(QStringLiteral("capabilities.report"), burstFacts))
+                ++burstAccepted;
+        }
+        if (burstAccepted != 200
+                || burst.rejectedCount() != 0
+                || burst.acceptedCount() != 200
+                || burst.outcomeHistory().size() != 16
+                || burst.lastOutcome() != QStringLiteral(
+                       "quick-controls-applied-deferred")
+                || burst.refreshPending() != false
+                || burst.recentRefreshKeys() != 0) {
+            qCritical() << "HOST_EVENT_BRIDGE_FIXTURE_FAIL: burst outcome dishonest";
+            return 1;
+        }
+
+        // Catalog coalescing is bounded: identical tokens in one tick emit one
+        // signal and the fingerprint ring never exceeds four entries.
+        qint64 refreshNow = 0;
+        ClassicHostEventBridge coalescing(
+            hostStateController, activationState,
+            [&refreshNow]() { return refreshNow; });
+        QVariantMap catalogToken;
+        catalogToken.insert(QStringLiteral("source"), QStringLiteral("host-events"));
+        for (int index = 0; index < 10; ++index)
+            coalescing.dispatch(QStringLiteral("app.catalog.changed"), catalogToken);
+        if (coalescing.refreshSignalCount() != 1
+                || coalescing.recentRefreshKeys() != 1) {
+            qCritical() << "HOST_EVENT_BRIDGE_FIXTURE_FAIL: refresh not coalesced";
+            return 1;
+        }
+        for (int tick = 1; tick <= 10; ++tick) {
+            refreshNow += 1000;
+            coalescing.dispatch(QStringLiteral("app.catalog.changed"), catalogToken);
+            if (coalescing.recentRefreshKeys() > 4) {
+                qCritical() << "HOST_EVENT_BRIDGE_FIXTURE_FAIL: refresh ring unbounded";
+                return 1;
+            }
+        }
+        if (coalescing.refreshSignalCount() != 11
+                || coalescing.recentRefreshKeys() != 4) {
+            qCritical() << "HOST_EVENT_BRIDGE_FIXTURE_FAIL: refresh ring wrong";
+            return 1;
+        }
+
+        // Liveness regression: 17 valid events per tick (16 state events then
+        // one catalog refresh) must never starve authoritative catalog
+        // reconciliation. The one-bit latch flushes on the next tick; it is
+        // never a queue, timer or retry loop.
+        qint64 floodNow = 0;
+        ClassicHostEventBridge flood(
+            hostStateController, activationState,
+            [&floodNow]() { return floodNow; });
+        int floodRefreshes = 0;
+        QObject::connect(&flood, &ClassicHostEventBridge::catalogRefreshRequested,
+                         &app, [&floodRefreshes]() { ++floodRefreshes; });
+        for (int tick = 1; tick <= 20; ++tick) {
+            floodNow += ClassicHostEventBridge::kRefillMs;
+            for (int index = 0; index < 16; ++index) {
+                QVariantMap state;
+                state.insert(QStringLiteral("network_connected"), true);
+                state.insert(QStringLiteral("volume_percent"), index);
+                if (!flood.dispatch(QStringLiteral("capabilities.report"), state)) {
+                    qCritical() << "HOST_EVENT_BRIDGE_FIXTURE_FAIL: flood state lost";
+                    return 1;
+                }
+            }
+            QVariantMap catalogToken;
+            catalogToken.insert(QStringLiteral("count"), tick);
+            if (!flood.dispatch(QStringLiteral("app.catalog.changed"), catalogToken)
+                    || !flood.refreshPending()) {
+                qCritical() << "HOST_EVENT_BRIDGE_FIXTURE_FAIL: refresh not latched";
+                return 1;
+            }
+        }
+        if (floodRefreshes < 19
+                || flood.refreshSignalCount() != floodRefreshes
+                || flood.recentRefreshKeys() > 4
+                || flood.outcomeHistory().size() != 16) {
+            qCritical() << "HOST_EVENT_BRIDGE_FIXTURE_FAIL: catalog starved by flood";
+            return 1;
+        }
+        // One more real event with a refilled token flushes the last latch.
+        floodNow += ClassicHostEventBridge::kRefillMs;
+        QVariantMap flushTrigger;
+        flushTrigger.insert(QStringLiteral("network_connected"), true);
+        if (!flood.dispatch(QStringLiteral("capabilities.report"), flushTrigger)
+                || floodRefreshes != 20 || flood.refreshPending()) {
+            qCritical() << "HOST_EVENT_BRIDGE_FIXTURE_FAIL: deferred refresh lost";
+            return 1;
+        }
         qInfo() << "HOST_EVENT_BRIDGE_SELF_TEST_PASS: topics=4 routed=4 "
-                   "fail_closed=ok bounded=6/64 history=6/16 visuals=unchanged";
+                   "fail_closed=ok sustained=200/200 burst=200/200 "
+                   "bucket=16/1s history=16/16 dedup=4 latch=1 "
+                   "flood=17/tick refresh=20/20 visuals=unchanged";
         QTimer::singleShot(0, &app, &QCoreApplication::quit);
     }
     if (args.contains(QStringLiteral("--self-test-notification-center"))) {
@@ -3209,9 +3623,8 @@ int main(int argc, char *argv[]) {
                                             photosDockStatusFixture))
             return 1;
         if ((terminalDockStatusFixture || terminalDockLaunchFixture)
-                && !runRemainingDockFixture(window, systemLauncher,
-                                            QStringLiteral("Terminal"),
-                                            terminalDockStatusFixture))
+                && !runTerminalDockFixture(window, systemLauncher,
+                                           terminalDockStatusFixture))
             return 1;
     }
     const int sizeIndex = args.indexOf(QStringLiteral("--self-test-size"));

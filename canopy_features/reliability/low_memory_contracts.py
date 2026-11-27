@@ -168,9 +168,12 @@ class LowMemoryCacheController:
 
     The controller stores only immutable tuple snapshots. When the simulated
     condition is anything but ``NORMAL`` every cache is empty and population
-    is refused. Recovery grants credits in bounded rounds; the lifetime count
-    of rebuilt entries is capped so repeated shed/recover cycles cannot grow
-    retained state without bound.
+    is refused. Recovery grants credits in bounded rounds; the rebuilt-entry
+    count is capped per shedding/recovery episode, so each episode performs
+    bounded work while retained state stays within the declared per-boundary
+    and total caps. Returning to ``NORMAL`` is the explicit host condition
+    transition that opens a new episode; no clock, poll or background service
+    resets the counter.
     """
 
     __slots__ = ("_condition", "_caps", "_caches", "_budget", "_max_rebuilt",
@@ -235,6 +238,10 @@ class LowMemoryCacheController:
             self._condition = condition
             self._credits = self._budget
             self._round = 1
+            # A new recovery episode may rebuild up to the bounded total
+            # again. Shedding cleared every cache, so retained entries remain
+            # within the declared cap; no timer or background reset exists.
+            self._rebuilt = 0
             self._recovery_count += 1
         else:
             if previous == CONDITION_NORMAL:

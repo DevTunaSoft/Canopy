@@ -204,8 +204,14 @@ class AlphaPackageContractTests(unittest.TestCase):
         self.assertEqual(alphactl.apply_install(staged, self.home)["verdict"],
                          "PASS")
         lines = self.owned["desktop"].read_text(encoding="utf-8").splitlines()
-        self.assertIn('Exec="' + str(staged / "payload/canopy-classic") + '"',
-                      lines)
+        # Desktop Entry Spec: a quoted Exec field backslash-escapes \, ", $
+        # and `. On Windows a temp path contains backslashes, so the raw
+        # path is not the literal field; assert the escaped form instead.
+        field = str(staged / "payload/canopy-classic")
+        expected = ('Exec="' + field.replace("\\", "\\\\")
+                    .replace('"', '\\"').replace("$", "\\$")
+                    .replace("`", "\\`") + '"')
+        self.assertIn(expected, lines)
 
     def _resign_payload(self, evil):
         """Make a swapped payload fully self-consistent inside the package."""

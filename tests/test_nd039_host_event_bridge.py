@@ -3,8 +3,12 @@
 The production wiring lives entirely in ``prototype/classic/main.cpp``: one
 bounded, event-driven dispatcher routes the four reviewed protocol-v2 host
 event tokens to the already-merged compiled bridges. These checks lock that
-wiring in the repository (topic set, routing targets, fail-closed order, hard
-caps and the absence of polling/transport/visual edits). They are source
+wiring in the repository (topic set, routing targets, fail-closed order, fixed
+size bounds and the absence of polling/transport/visual edits). The 64-event
+process-lifetime freeze was replaced by a lazy token bucket with bounded
+history and duplicate suppression; those contracts are locked here too. The
+one-bit pending-refresh latch, deferred authoritative catalog refresh and
+truthful deferred outcome tokens are also locked here. These checks are source
 contracts only: no Qt instance, desktop, Mint guest or visual acceptance is
 claimed by them. The compiled self-test flag is recorded separately in the
 build-local doc next to the source.
@@ -107,23 +111,99 @@ class CompiledBridgeContractTests(unittest.TestCase):
         idx_route = self.bridge.index(
             'm_quickControls->applyHostEvent(topic, payload)')
         self.assertLess(idx_unknown, idx_route)
-        self.assertIn('if (m_total >= kMaxEvents)', self.bridge)
-        for token in ("rejected", "window-rejected", "refresh-limit",
-                      "quick-controls-applied", "session-observed",
-                      "window-applied", "catalog-refresh-requested"):
+        self.assertIn('const bool throttled = !takeToken();', self.bridge)
+        self.assertIn('bool takeToken()', self.bridge)
+        for token in ("rejected", "window-rejected",
+                      "quick-controls-applied", "quick-controls-applied-deferred",
+                      "session-observed", "session-observed-deferred",
+                      "window-applied", "window-applied-deferred",
+                      "catalog-refresh-requested", "catalog-refresh-pending",
+                      "catalog-refresh-coalesced"):
             with self.subTest(token=token):
                 self.assertIn('QStringLiteral("%s")' % token, self.bridge)
+        # A committed state event is never reported as a failed dispatch.
+        self.assertNotIn('QStringLiteral("rate-limited")', self.bridge)
+        self.assertNotIn('QStringLiteral("refresh-limit")', self.bridge)
+        for committed in ("quick-controls-applied-deferred",
+                          "session-observed-deferred",
+                          "window-applied-deferred"):
+            with self.subTest(committed=committed):
+                self.assertLess(self.bridge.index('QStringLiteral("%s")' % committed),
+                                self.bridge.index('return true;',
+                                                  self.bridge.index(
+                                                      'QStringLiteral("%s")' % committed)))
         # A session observation must not manufacture a privileged status.
         self.assertNotIn('QStringLiteral("Active")', self.bridge)
         self.assertNotIn('QStringLiteral("Locked")', self.bridge)
 
-    def test_bounds_are_hard_ceiling_constants(self):
-        self.assertIn("static constexpr int kMaxEvents = 64;", self.bridge)
+    def test_bounds_are_fixed_size_not_lifetime_caps(self):
+        self.assertIn("static constexpr int kBucketCapacity = 16;", self.bridge)
+        self.assertIn("static constexpr qint64 kRefillMs = 1000;", self.bridge)
         self.assertIn("static constexpr int kMaxHistory = 16;", self.bridge)
+        self.assertIn("static constexpr int kDuplicateWindow = 4;", self.bridge)
         self.assertIn("if (m_history.size() == kMaxHistory)", self.bridge)
         self.assertIn("m_history.removeFirst();", self.bridge)
         self.assertIn("Q_INVOKABLE QStringList outcomeHistory() const", self.bridge)
-        self.assertIn("Q_INVOKABLE bool frozen() const", self.bridge)
+        for removed in ("kMaxEvents", "frozen()", "refresh-limit", "QTimer("):
+            with self.subTest(removed=removed):
+                self.assertNotIn(removed, self.bridge)
+
+    def test_pending_refresh_is_one_bool_not_a_queue(self):
+        self.assertIn("bool m_refreshPending = false;", self.bridge)
+        self.assertIn("void flushPendingRefresh()", self.bridge)
+        self.assertIn("Q_INVOKABLE bool refreshPending() const", self.bridge)
+        self.assertIn("m_refreshPending = true;", self.bridge)
+        self.assertIn("m_refreshPending = false;", self.bridge)
+        for queue in ("QQueue", "std::deque", "std::list", "std::vector",
+                      "QVector<QVariantMap>", "QList<QVariantMap>", "std::map"):
+            with self.subTest(queue=queue):
+                self.assertNotIn(queue, self.bridge)
+        # The deferred request never stores caller payload text or a new topic.
+        self.assertEqual(len(self.literals & set(TOPICS)), 4)
+        self.assertNotIn("registerTopic", self.bridge)
+
+    def test_lazy_refresh_has_no_wakeup_and_clock_is_sampled_in_dispatch(self):
+        for marker in (
+                "QElapsedTimer m_timer;", "qint64 now() const",
+                "m_clock ? m_clock() : m_timer.elapsed()",
+                "bool takeToken()", "void refill()",
+                "m_lastRefillMs = current - (elapsed % kRefillMs);",
+                "ClockFn clock = ClockFn()",
+                "static quint64 refreshFingerprint(qint64 tick,",
+                "if (m_recentRefreshKeys.contains(fingerprint))",
+                "m_recentRefreshKeys.removeFirst();",
+                "Q_INVOKABLE int refreshSignalCount() const",
+                "Q_INVOKABLE int recentRefreshKeys() const",
+                "flushPendingRefresh();",
+                "if (!m_refreshPending || m_tokens == 0)",
+                "emit catalogRefreshRequested();\n            takeToken();"):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, self.bridge)
+        for forbidden in ("sleep(", "msleep", "while (", "for (;;)",
+                          "QThread", "QProcess", "QTcpSocket", "QUdpSocket",
+                          "QTimer", "poll(", "QQueue", "std::deque"):
+            with self.subTest(forbidden=forbidden):
+                self.assertNotIn(forbidden, self.bridge)
+        # Catalog emits the authoritative refresh before charging the token;
+        # the latch flush happens on the next real dispatch that has a token.
+        catalog_at = self.bridge.index('app.catalog.changed',
+                                       self.bridge.index('Q_INVOKABLE bool dispatch'))
+        emit_at = self.bridge.index('emit catalogRefreshRequested();', catalog_at)
+        take_at = self.bridge.index('takeToken();', emit_at)
+        self.assertLess(emit_at, take_at)
+
+    def test_compiled_self_test_proves_sustained_200_and_bounded_overload(self):
+        self.assertIn("for (int index = 0; index < 200; ++index)", self.cpp)
+        for marker in ("sustainedNow += 1000;", "sustainedAccepted != 200",
+                       "burstAccepted != 200", "burst.rejectedCount() != 0",
+                       "quick-controls-applied-deferred",
+                       "coalescing.recentRefreshKeys() > 4",
+                       "flood=17/tick refresh=20/20",
+                       "catalog starved by flood", "refresh not latched",
+                       "deferred refresh lost",
+                       "HOST_EVENT_BRIDGE_SELF_TEST_PASS: topics=4 routed=4"):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, self.cpp)
 
     def test_main_wiring_has_no_new_source_or_visual_change(self):
         self.assertIn(

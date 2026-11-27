@@ -3,7 +3,7 @@
 **The Familiar Feel. The Freedom of Linux.**
 
 Canopy is a lightweight Linux desktop shell engineering candidate with a
-macOS-inspired Classic experience and a future Windows-inspired Modern
+macOS-inspired Classic experience and a future Windows/Zorin-inspired Modern
 experience. Shared-core, Qt prototype and nonvisual module work exists;
 this is **not** a production release.
 
@@ -11,6 +11,12 @@ Status: extensive nonvisual modules are integrated and tested on the
 integration branch, and a compilable Classic Qt prototype exists in the draft
 stack (see #151). No release candidate has passed owner visual acceptance and
 Linux Mint guest acceptance; see release blocker #132. Modern is planned.
+
+## Current architecture direction (2026-11-27)
+
+Owner-approved pivot to native KDE Plasma 6/KWin, Qt 6 and KF6. Finish current legacy tasks, preserve their history, then port reusable components. Kubuntu LTS is the reference guest; KDE neon is an upstream compatibility lane. See [Plasma pivot](docs/PLASMA6_PIVOT.md). The legacy Qt preview is not native Plasma acceptance.
+
+LacOS is a planned immutable OS with verified atomic updates and rollback, a read-only system core, and separate APT, Pacman, Flatpak and rootless Podman application options. The production base and deployment backend remain evidence-gated. See [immutable architecture](docs/LACOS_IMMUTABLE_ARCHITECTURE.md). These are requirements, not implemented features.
 
 ## Resource targets and evidence labels (read before citing a number)
 
@@ -37,31 +43,19 @@ Linux Mint guest acceptance; see release blocker #132. Modern is planned.
 
 ## Continuous engineering contract
 
-Hermes leads up to **12 concurrent engineering subagents plus Hermes as lead
-orchestrator**, each in an isolated worktree with explicit file ownership. The
-newer owner directive (2026-11-26) supersedes only the 10-agent ceiling in the
-external directive cited in [workforce policy](docs/AGENTS_WORKFORCE.md); all
-other requirements and acceptance gates there remain in force. This is a
-ceiling, not a quota, and supersedes the earlier 15/9/7/4-agent configurations. Routine independently
-verified engineering follows DEVELOP → TEST → INDEPENDENT REVIEW → READY →
-INTEGRATE → VERIFY on `integration/canopy-classic-20261123`. Draft PRs are
-temporary; post-merge regression runs **after** a merge, never as a
-pre-merge gate. The approved Classic visual identity is frozen; bounded GUI
-refinement may proceed without waiting on acceptance, but final visual
-acceptance and any merge to `main` are owner-gated. Named holds on #279, #151
-and #278 are preserved. See [workforce policy](docs/AGENTS_WORKFORCE.md),
+Hermes operates within the latest owner-authorized host-safe workforce ceiling, not a quota. Current legacy assignments finish before reassignment; no new Cinnamon-specific assignments. Review and integrate verified work into the respective integration branches during migration. After the native Plasma baseline gates pass, protected `main` becomes the development trunk under the owner-approved independent-review and CI policy. Draft PRs are temporary; post-merge regression runs after merging. Final public releases and protected visual changes remain owner-gated. Named holds #279, #151 and #278 remain binding. See [workforce policy](docs/AGENTS_WORKFORCE.md),
 [AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUTING.md) and
 [quality gates](docs/QUALITY.md).
 
 ## LacOS and expandable Canopy Shell Packs — future goals
 
 Canopy Classic is our first macOS-familiar experience; Canopy Modern will be
-a Windows-familiar option. The design must support **additional Shell Packs**
+a Windows-familiar option informed by Zorin OS. The design must support **additional Shell Packs**
 without rebuilding the operating system, duplicating the compositor or
 starting separate desktop background-service stacks.
 
 The long-term [LacOS vision](docs/LACOS_VISION.md) is a separately validated
-Linux Mint-based distribution, **not an available OS release**. See the
+immutable Linux distribution with an evidence-gated base, **not an available OS release**. See the
 [versioned Shell Pack architecture](docs/SHELL_PACK_ARCHITECTURE.md) and
 [developer starter](examples/shell-pack-starter/README.md).
 

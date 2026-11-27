@@ -1,7 +1,7 @@
 # Canopy engineering and review policy
 
 Canopy is experimental. Passing automated checks alone does not establish
-production readiness, visual acceptance, security or Linux Mint compatibility.
+production readiness, visual acceptance, security or native Plasma compatibility. Follow [MASTER_OWNER_DIRECTIVE.md](docs/MASTER_OWNER_DIRECTIVE.md); all first-party features are FOSS.
 
 ## Code review
 
@@ -21,7 +21,7 @@ Review perspectives worth covering:
   keyboard navigation, scaling and accessible focus.
 - **Architecture:** shared shell services, extensible versioned Shell Pack
   contracts, no duplicate compositors or background daemons.
-- **Linux Mint acceptance:** actual Mint VM or hardware tests with safe
+- **Desktop acceptance:** actual native Plasma VM or hardware tests (Mint only for legacy comparison) with safe
   session selection, rollback, failure recovery and evidence.
 
 A review packet should include the exact commit SHA, linked issue and
@@ -33,20 +33,20 @@ a report artifact is **not** a human reviewer signoff.
 ## PR lifecycle: DEVELOP → TEST → REVIEW → READY → INTEGRATE → VERIFY
 Use a draft PR while implementation or required evidence is incomplete; draft status is temporary, not a permanent hold. Pre-merge gates are exact-head verification, dependency/ancestry and conflict review, independent review, applicable checks, and any required owner approval for visual, high-risk security or release decisions. Promote verified drafts to ready and integrate eligible work; post-merge regression testing is required **after** the merge, not before it. There is no circular rule demanding a post-merge result to authorize that merge.
 
-Routine, independently verified engineering changes and authorized bounded GUI refinements may use an autonomous review and integration process into `integration/canopy-classic-20261123`. That automation is engineering review (**AGENT REVIEWED**), **not human approval**. Human approval remains mandatory for final visual acceptance, substantial identity changes, high-risk security decisions, final release acceptance and any merge to `main`. Named owner holds on #279, #151 and #278 are never overridden by general development authorization. The workforce ceiling is up to 12 concurrent engineering subagents plus Hermes as lead orchestrator under the newer owner directive (2026-11-26), which supersedes only the 10-agent ceiling in the external directive cited in [workforce policy](docs/AGENTS_WORKFORCE.md); all other requirements there remain in force.
+Routine independently verified engineering and authorized bounded GUI refinements integrate into the appropriate legacy or Plasma integration branch during migration; after the baseline gates pass, protected main becomes the development trunk under the master directive. Autonomous engineering review is **AGENT REVIEWED**, not human approval. Owner approval remains mandatory for final visual acceptance, substantial identity changes, high-risk security decisions and public releases; named holds #279/#151/#278 remain binding. Maximum eight engineering subagents plus Hermes, lower when host capacity requires.
 
 ## Branch and merge gates
 
 The historical Canopy PRs are **stacked**, and several ancestors were
 visually rejected. Do not merge a green descendant if it imports
-unapproved ancestors. For main-targeted changes, rebase or independently backport bounded verified changes onto current `main`. For routine Classic development (engineering work and bounded non-substantive visual refinements), use `integration/canopy-classic-20261123` as the base. In either case inspect the entire proposed diff and test that exact code.
+unapproved ancestors. For main-targeted changes, rebase or independently backport bounded verified changes onto current `main`. For legacy assignments use `integration/canopy-classic-20261123`; for native development use `integration/canopy-plasma6-20261127` until the baseline transition, then protected `main`. In either case inspect the entire proposed diff and test that exact code.
 
 Keep UI/artwork, shared core, VM integration, and QA in separate branches.
 Do not substitute the eight SHA-locked original icon masters or silently
 enable optional visual candidates. Owner-approved screenshot appearance
 remains a distinct gate from Qt compilation or pixel-bound geometry tests.
 
-Run regression and integration checks, verify real Qt and Mint evidence as applicable, and require independent review for routine verified work. Human approval remains mandatory for owner visual decisions, high-risk security decisions and final release acceptance; never authorize a merge based on a green badge alone.
+Run regression and integration checks, verify real native Plasma and applicable legacy evidence as applicable, and require independent review for routine verified work. Human approval remains mandatory for owner visual decisions, high-risk security decisions and final release acceptance; never authorize a merge based on a green badge alone.
 
 ## Shell Pack development
 

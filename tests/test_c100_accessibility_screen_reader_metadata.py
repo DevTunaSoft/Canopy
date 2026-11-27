@@ -53,11 +53,13 @@ class ScreenReaderMetadataTests(unittest.TestCase):
         elements = [{"role": "button", "label": "Canopy penguin launcher"}]
         self.assertEqual(self.codes(elements), [])
 
-    def test_non_interactive_elements_do_not_require_a_name(self):
+    def test_plain_decorative_roles_do_not_require_a_name(self):
+        # Informative non-interactive roles (image/staticText/alert) do require
+        # a name now; these structural roles still do not. See PE-082.
         elements = [
             {"role": "menuSeparator"},
             {"role": "label", "name": "Files"},
-            {"role": "image"},
+            {"role": "container"},
         ]
         self.assertEqual(self.codes(elements), [])
 

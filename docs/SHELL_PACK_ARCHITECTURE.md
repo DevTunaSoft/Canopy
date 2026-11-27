@@ -5,12 +5,15 @@ runtime plugin loader, cross-shell hot swap nor a plugin marketplace is
 implemented. This design does not replace the existing Classic prototype,
 and does not authorize a LacOS release claim.
 
+## Current direction (2026-11-27)
+The [master owner directive](MASTER_OWNER_DIRECTIVE.md) governs. Eight initial planned packs (Classic, Modern, Heritage, Flow, Lite, Studio, Cloud, Touch), multiple variations and unlimited future packs, all first-party free and open source. Native Plasma 6/KWin owns desktop services; the shared Canopy host coordinates presentation and recovery, not a second service stack. Legacy metadata and lifecycle evidence remains scoped to its original environment; no native runtime acceptance is implied.
+
 ## Product promise: more than two desktops
 
 Classic and Modern are the first two **Shell Packs**, not hardcoded limits.
 Future contributors should be able to build a wholly new desktop experience
 (e.g. minimal, accessibility-focused, creator-focused) without forking Canopy,
-rewriting the app launcher, replacing Mint, or starting a second compositor.
+rewriting the app launcher, replacing the supported upstream base, or starting a second compositor.
 Let Linux newcomers select a familiar interface and later explore others.
 
 A Shell Pack is a **presentation adapter** for the Canopy host. It is *not*
@@ -31,7 +34,7 @@ new Linux desktop session unless explicitly categorized otherwise.
    app launcher      windows      notifications / settings
           \             |            /
      shared system services and compositor/session integration
-                  Linux Mint / LacOS
+                  Supported Plasma base / LacOS
 ```
 
 The **host** alone owns the compositor/window-management integration, session

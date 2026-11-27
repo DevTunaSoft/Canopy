@@ -1,9 +1,10 @@
 import QtQuick
 import QtQuick.Controls
 
-// Files visual-only sample tile: reuse the SAME authored Canopy folder artwork
+// Files folder tile: reuse the SAME authored Canopy folder artwork
 // for each folder, as a normal file manager does. Avoid the
-// rejected random pastel folder treatment. No actual filesystem access.
+// rejected random pastel folder treatment. Activation is delegated to the
+// Files window's native, home-scoped browser; the tile only renders artwork.
 Button {
     id: folder
     objectName: "canopyFolderTile"
@@ -20,7 +21,7 @@ Button {
     hoverEnabled: true
     padding: 0
     Accessible.name: folderName + " sample folder"
-    Accessible.description: "Selects a sample item, no disk access"
+    Accessible.description: "Opens this folder in the Files browser when available"
     background: Rectangle {
         radius: 9
         color: folder.selected ? "#dcecfb"

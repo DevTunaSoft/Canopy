@@ -1,5 +1,9 @@
 # Canopy agent engineering contract
 
+## Governing architecture decision — 2026-11-27 (Plasma 6 track)
+
+The owner has authorized the pivot to native KDE Plasma 6/KWin. Read [docs/PLASMA6_PIVOT.md](docs/PLASMA6_PIVOT.md) first. On the new Plasma track, that decision supersedes incompatible implementation and branch-target instructions below: use integration/canopy-plasma6-20261127 for new reviewed work, treat the old Cinnamon/standalone Qt integration as a preserved reference and source of portable work, and prioritize a genuinely functional Plasma session. Kubuntu 26.04 LTS is the reference development guest; the final LacOS distro base remains open pending evidence. Retain all applicable engineering, security, visual, resource and release gates, named PR holds and main protection. Do not change original artwork, force-push, merge main, duplicate desktop services, or increase the owner's current host-safe workforce cap. Safely checkpoint and classify in-flight legacy work before reallocating it. Existing workforce minimums below apply only when compatible with the current authorized cap and measured host capacity. Do not declare the pivot complete until actual runtime evidence exists.
+
 Read README.md and docs/ARCHITECTURE.md and docs/QUALITY.md completely before making changes. Preserve existing project instructions; this file supplements rather than replaces them.
 
 ## Governing product-completion priority

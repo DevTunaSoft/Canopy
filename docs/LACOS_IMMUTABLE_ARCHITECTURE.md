@@ -17,6 +17,9 @@ Kubuntu LTS is a mutable reference guest only. Add KDE neon as a latest-upstream
 - Host-only drivers, kernel modules and system services: curated new signed deployment through selected backend, not arbitrary container export into /usr.
 Provide a unified graphical app center and explicit source-aware CLI; reuse Discover/Flatpak and mature container tooling where practical. Distinguish app identities by source, integrate launchers/icons/file associations safely, show install/update/uninstall state, disk usage, permissions and supported architectures. Do not silently substitute sources, execute arbitrary scripts on host, promise universal GUI compatibility, or merge package databases. Test ordinary user install/update/remove for each supported method, GUI launch, isolation, no host mutation, interrupted operations, storage cleanup and low-end performance. No always-running container service merely to offer package options.
 
+## Optional application formats and research priorities
+Evaluate Kinoite and Vanilla OS first as existing atomic desktop and multi-package models, then Kalpa, blendOS, Ubuntu image-based alternatives and KDE neon compatibility. No predetermined winner; compare actual supported versions, patch latency, maintainer capacity, licensing, hardware, Secure Boot, recovery, storage and measured resources. Consider RPM/Fedora container stacks, AppImage, opt-in AUR, Wine/Proton and other formats as optional, not mandatory core dependencies. Validate permissions, provenance, updates and launch integration independently; never imply AppImage or Wine alone provides a sandbox. Do not require these optional formats for native Canopy Classic or the initial LacOS minimum scope.
+
 ## Canopy Modern — Zorin OS inspiration
 Research Zorin Appearance, Windows-familiar application menu/search, taskbar layouts, window snapping, tray, quick settings, onboarding, app alternatives and accessibility. Retain native Plasma/KWin and one shared Canopy host; do not port a second GNOME desktop. Create original Canopy artwork, branding and implementations; respect upstream licenses and proprietary assets; do not imply affiliation. Owner-approved Classic unchanged. Produce real compiled native Modern screenshots and functional keyboard/mouse/HiDPI evidence. Shell Pack switcher must preserve apps and recover prior presentation; no promise before tests.
 
@@ -30,6 +33,12 @@ Native Classic remains primary deliverable; independent research can proceed und
 - https://fedoraproject.org/atomic-desktops/kinoite/
 - https://kalpadesktop.org/
 - https://vanillaos.org/
+- https://docs.vanillaos.org/handbook/en/install-and-manage-applications
+- https://docs.vanillaos.org/docs/en/abroot-porting
+- https://blendos.co/install/post-install/intro/
+- https://documentation.ubuntu.com/core/
+- https://distrobox.it/
+- https://blog.zorin.com/2026/04/15/zorin-os-18.1-is-released/
 - https://blendos.co/
 - https://zorin.com/os/
 - https://docs.podman.io/

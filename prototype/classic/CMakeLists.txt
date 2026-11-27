@@ -19,6 +19,7 @@ qt_add_qml_module(canopy-classic-spike
 qt_add_resources(canopy-classic-spike "canopy-original-art"
     PREFIX "/Canopy/Classic"
     FILES assets/approved/manifest.json
+          assets/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png
           assets/owner_icons_20261126/manifest.json
           assets/wallpapers/blue-current.svg
           assets/ui/folder-blue.svg

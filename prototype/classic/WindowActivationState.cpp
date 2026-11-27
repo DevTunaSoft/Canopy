@@ -38,6 +38,15 @@ QString grantKey(const QString &origin, const QString &target)
     return origin + QStringLiteral("\x1f") + target;
 }
 
+QStringList referenceStatuses()
+{
+    // The four PR #688 classifications plus two fail-closed results that this
+    // compiled adapter emits when it has no validated registry at all.
+    return {QStringLiteral("LIVE"), QStringLiteral("STALE"),
+            QStringLiteral("UNKNOWN"), QStringLiteral("UNAUTHORIZED"),
+            QStringLiteral("INVALID"), QStringLiteral("UNVALIDATED")};
+}
+
 }  // namespace
 
 WindowActivationState::WindowActivationState(QObject *parent) : QObject(parent)
@@ -228,6 +237,73 @@ bool WindowActivationState::parseGrants(const QVariantList &values,
     return true;
 }
 
+bool WindowActivationState::parseWindowRefs(const QVariantList &values,
+                                            QHash<int, WindowRef> &live,
+                                            QHash<int, int> &seenSerial) const
+{
+    if (values.size() > kMaxLiveWindows) {
+        return false;
+    }
+    static const QStringList keys = {
+        QStringLiteral("window_id"), QStringLiteral("serial"),
+        QStringLiteral("owner")};
+    for (const QVariant &value : values) {
+        if (value.typeId() != QMetaType::QVariantMap) {
+            return false;
+        }
+        const QVariantMap item = value.toMap();
+        if (item.size() != keys.size()) {
+            return false;  // no undocumented extra fact is reinterpreted
+        }
+        for (const QString &key : keys) {
+            if (!item.contains(key)) {
+                return false;
+            }
+        }
+        int windowId = 0;
+        int serial = 0;
+        QString owner;
+        if (!asInt(item.value(QStringLiteral("window_id")), windowId)
+                || windowId < 1 || windowId > kMaxPid
+                || !asInt(item.value(QStringLiteral("serial")), serial)
+                || serial < 1 || serial > kMaxSerial
+                || !asString(item.value(QStringLiteral("owner")), owner)
+                || !isApprovedDockName(owner) || live.contains(windowId)) {
+            return false;
+        }
+        if (seenSerial.value(windowId, 0) > serial) {
+            return false;  // a recycled id must never move back a generation
+        }
+        live.insert(windowId, WindowRef{windowId, serial, owner});
+        seenSerial.insert(windowId, serial);
+    }
+    return true;
+}
+
+QString WindowActivationState::classifyReference(
+        const QHash<int, WindowRef> &live, const QHash<int, int> &seenSerial,
+        int windowId, int serial, const QString &owner)
+{
+    if (windowId < 1 || windowId > kMaxPid || serial < 1
+            || serial > kMaxSerial || !isApprovedDockName(owner)) {
+        return QStringLiteral("INVALID");
+    }
+    const auto it = live.constFind(windowId);
+    if (it == live.constEnd()) {
+        return seenSerial.value(windowId, 0) > serial
+                ? QStringLiteral("STALE") : QStringLiteral("UNKNOWN");
+    }
+    if (it->serial != serial) {
+        return QStringLiteral("STALE");
+    }
+    if (it->owner != owner) {
+        return QStringLiteral("UNAUTHORIZED");
+    }
+    const QString status = QStringLiteral("LIVE");
+    Q_ASSERT(referenceStatuses().contains(status));
+    return status;
+}
+
 void WindowActivationState::clear()
 {
     m_trusted = false;
@@ -237,6 +313,10 @@ void WindowActivationState::clear()
     m_grants.clear();
     m_focusApp.clear();
     m_focusGranted = false;
+    m_liveWindows.clear();
+    m_hasRegistry = false;
+    // m_seenSerial is a bounded monotonic generation history, not trust; it
+    // survives a clear so an old serial cannot be re-presented as current.
     emit stateChanged();
 }
 
@@ -307,6 +387,23 @@ bool WindowActivationState::applySnapshot(const QVariantMap &snapshot)
         return false;
     }
 
+    // Optional, host-owned live window registry (PR #688). It is read from the
+    // same trusted snapshot boundary; no service, socket, timer or poll is
+    // introduced. Legacy snapshots without this key keep their exact prior
+    // meaning, so the existing compiled self-test is unchanged.
+    QHash<int, WindowRef> live;
+    QHash<int, int> seenSerial = m_seenSerial;
+    bool hasRegistry = false;
+    if (snapshot.contains(QStringLiteral("windowRefs"))) {
+        const QVariant refsVar = snapshot.value(QStringLiteral("windowRefs"));
+        if (refsVar.typeId() != QMetaType::QVariantList
+                || !parseWindowRefs(refsVar.toList(), live, seenSerial)) {
+            clear();
+            return false;
+        }
+        hasRegistry = true;
+    }
+
     QString focusApp;
     bool focusGranted = false;
     if (snapshot.contains(QStringLiteral("focus"))) {
@@ -339,6 +436,12 @@ bool WindowActivationState::applySnapshot(const QVariantMap &snapshot)
             clear();
             return false;
         }
+        if (hasRegistry
+                && classifyReference(live, seenSerial, windowId, serial,
+                                     focusApp) != QStringLiteral("LIVE")) {
+            clear();  // stale, unknown or forged refs clear every indicator
+            return false;
+        }
         focusGranted = statusValue == QStringLiteral("GRANTED");
     }
 
@@ -348,6 +451,9 @@ bool WindowActivationState::applySnapshot(const QVariantMap &snapshot)
     m_installed = installed;
     m_owners = owners;
     m_grants = grants;
+    m_liveWindows = live;
+    m_seenSerial = seenSerial;
+    m_hasRegistry = hasRegistry;
     m_focusApp = focusGranted ? focusApp : QString();
     m_focusGranted = focusGranted;
     emit stateChanged();
@@ -414,4 +520,31 @@ QString WindowActivationState::resolveActivation(const QString &appId,
         return QStringLiteral("LAUNCH");
     }
     return QStringLiteral("REJECT");
+}
+
+QString WindowActivationState::resolveActivationWithReference(
+        const QString &appId, const QString &originApp, int windowId,
+        int serial, const QString &owner) const
+{
+    if (!m_trusted || !m_hasRegistry || owner != appId
+            || classifyReference(m_liveWindows, m_seenSerial, windowId, serial,
+                                 owner) != QStringLiteral("LIVE")) {
+        return QStringLiteral("REJECT");
+    }
+    return resolveActivation(appId, originApp);
+}
+
+QString WindowActivationState::referenceStatus(int windowId, int serial,
+                                               const QString &owner) const
+{
+    if (!m_trusted || !m_hasRegistry) {
+        return QStringLiteral("UNVALIDATED");
+    }
+    return classifyReference(m_liveWindows, m_seenSerial, windowId, serial,
+                             owner);
+}
+
+int WindowActivationState::liveWindowCount() const
+{
+    return m_hasRegistry ? m_liveWindows.size() : 0;
 }

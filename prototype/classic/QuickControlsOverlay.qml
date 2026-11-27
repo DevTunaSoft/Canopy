@@ -32,6 +32,86 @@ FocusScope {
     signal controlRequested(string domain, string action)
     signal settingsLaunchFailed(string domain)
 
+    // ND-041 state binding only. The compiled shell registers the read-only
+    // host controller as `canopyHostState` and injects the same object as
+    // `hostState`. Prefer the explicit injection, then the registered context
+    // source, then the older fail-closed controller. Every candidate must pass
+    // the same bounded view gate below; no timer, socket, file, process or
+    // second status service is introduced.
+    function trustedAdapter(candidate) {
+        return candidate !== null
+                && typeof candidate === "object"
+                && typeof candidate.view === "function"
+                ? candidate : null
+    }
+
+    function labelForStatus(status) {
+        switch (status) {
+        case "connected": return "Connected"
+        case "disconnected": return "Not connected"
+        case "muted": return "Muted"
+        case "unmuted": return "Sound on"
+        case "charging": return "Charging"
+        case "discharging": return "On battery"
+        case "active": return "Active"
+        case "locked": return "Locked"
+        case "suspended": return "Suspended"
+        default: return "Unknown — no host status"
+        }
+    }
+
+    function knownStatus(domain, status) {
+        if (typeof status !== "string")
+            return false
+        if (status === "unknown")
+            return true
+        if (labelForStatus(status) === "Unknown — no host status")
+            return false
+        switch (domain) {
+        case "network":
+            return status === "connected" || status === "disconnected"
+        case "audio":
+            return status === "muted" || status === "unmuted"
+        case "power":
+            return status === "charging" || status === "discharging"
+        case "session":
+            return status === "active" || status === "locked"
+                    || status === "suspended"
+        default:
+            return false
+        }
+    }
+
+    function disclosureForReason(reason) {
+        switch (reason) {
+        case "ok": return "Available"
+        case "no-host-observation":
+            return "Unavailable — no host status observation"
+        case "no-host-interface":
+            return "Unavailable — no host control interface"
+        case "bridge-disabled":
+            return "Unavailable — host control bridge disabled"
+        case "privileged-host-change":
+            return "Unavailable — privileged host changes are not performed"
+        case "invalid-domain":
+            return "Unavailable — unknown control domain"
+        case "invalid-action":
+            return "Unavailable — unknown control action"
+        case "invalid-grant":
+            return "Unavailable — invalid capability grant"
+        default: return ""
+        }
+    }
+
+    function trustedDecision(decision) {
+        return !!decision && typeof decision === "object"
+                && typeof decision.allowed === "boolean"
+                && typeof decision.reason === "string"
+                && typeof decision.disclosure === "string"
+                && decision.allowed === (decision.reason === "ok")
+                && disclosureForReason(decision.reason) === decision.disclosure
+    }
+
     function defaultControlDisclosure(domain) {
         if (domain === "power" || domain === "session")
             return "Unavailable — privileged host changes are not performed"
@@ -73,9 +153,11 @@ FocusScope {
     }
 
     // Accept only bounded, enumerated host observations. A broken adapter can
-    // never inject unbounded text or an unenumerated detail kind into the UI.
+    // never inject unbounded text, an unenumerated status/decision or an
+    // untrusted provenance into the UI. Every fixed label/disclosure mirrors
+    // canopy_features/system/quick_controls_state.py.
     function trustedView(domain, adapter) {
-        if (!adapter || typeof adapter.view !== "function")
+        if (!trustedAdapter(adapter))
             return null
         var supplied
         try {
@@ -84,10 +166,19 @@ FocusScope {
             return null
         }
         if (!supplied || typeof supplied !== "object"
+                || supplied.domain !== domain
+                || !knownStatus(domain, supplied.status)
                 || typeof supplied.status_label !== "string"
                 || supplied.status_label.length > 64
-                || !supplied.control || typeof supplied.control !== "object"
-                || !supplied.settings || typeof supplied.settings !== "object")
+                || supplied.status_label !== labelForStatus(supplied.status)
+                || typeof supplied.source !== "string"
+                || supplied.source.length > 64
+                || !/^[a-z0-9_.:-]*$/.test(supplied.source)
+                || typeof supplied.observed !== "boolean"
+                || (supplied.availability !== "AVAILABLE"
+                    && supplied.availability !== "UNAVAILABLE")
+                || !trustedDecision(supplied.control)
+                || !trustedDecision(supplied.settings))
             return null
         var kind = supplied.detail_kind
         if (kind !== undefined && kind !== "" && kind !== "volume"
@@ -104,6 +195,8 @@ FocusScope {
 
     function viewFor(domain) {
         var supplied = trustedView(domain, hostState)
+        if (!supplied && typeof canopyHostState !== "undefined")
+            supplied = trustedView(domain, canopyHostState)
         if (!supplied)
             supplied = trustedView(domain, controller)
         if (supplied)

@@ -80,7 +80,11 @@ Combined read-only neighbors at the same head: 64 tests, all OK. An untouched
 base worktree at the same tip ran the 39 neighbor tests, all OK: the delta is
 exactly the 25 new tests with an empty FAIL/ERROR set on both sides.
 `tools/check_visual_lock.py --root .` reports
-`AWAITING_CHATGPT_VISUAL_APPROVAL problems=0`, unchanged from base.
+`AWAITING_CHATGPT_VISUAL_APPROVAL problems=0`, unchanged from base. That literal
+checker token is retained in scoped historical run evidence and is
+`SUPERSEDED_POINT_IN_TIME` language from the ChatGPT-exclusive visual lock; the
+current owner-controlled status is `AWAITING_OWNER_VISUAL_APPROVAL`. No visual
+asset, workflow or enforcing test was changed by this documentation reconciliation.
 `tools/check_wallpaper.py verify --root .` reports `WALLPAPER_CHECK PASS problems=0`.
 Raw logs and an evidence ledger with SHA-256 sidecars live in
 `C:/Users/X1/Projects/Canopy/scratch/master_directive_20261126/evidence/wallpaper_change_validation/`.

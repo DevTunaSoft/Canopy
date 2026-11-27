@@ -37,12 +37,14 @@ Linux Mint guest acceptance; see release blocker #132. Modern is planned.
 
 ## Continuous engineering contract
 
-Hermes leads up to **12 concurrent engineering subagents plus Hermes as lead
-orchestrator**, each in an isolated worktree with explicit file ownership. The
-newer owner directive (2026-11-26) supersedes only the 10-agent ceiling in the
-external directive cited in [workforce policy](docs/AGENTS_WORKFORCE.md); all
-other requirements and acceptance gates there remain in force. This is a
-ceiling, not a quota, and supersedes the earlier 15/9/7/4-agent configurations. Routine independently
+Hermes leads up to **8 concurrent engineering subagents plus Hermes as lead
+orchestrator (9 total)**, each in an isolated worktree with explicit file
+ownership. This is the owner-controlled ceiling under the 2026-11-26 directive
+SHA-256 `f240bcdf635a498a7476c8104cbf3dc4e6cda492abba318254d80fce7566a197`;
+it is a ceiling, not a quota. The 15-, 11-, 12- and 10-agent configurations and
+the old four-worker floor are `SUPERSEDED_POINT_IN_TIME` (retained, not erased);
+see [workforce policy](docs/AGENTS_WORKFORCE.md) and the
+[ND-076 reconciliation](docs/ND076_RESTRICTION_RECONCILIATION.md). Routine independently
 verified engineering follows DEVELOP → TEST → INDEPENDENT REVIEW → READY →
 INTEGRATE → VERIFY on `integration/canopy-classic-20261123`. Draft PRs are
 temporary; post-merge regression runs **after** a merge, never as a

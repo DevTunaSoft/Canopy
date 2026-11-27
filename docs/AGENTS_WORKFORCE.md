@@ -14,26 +14,28 @@ no repository blob backs this citation. This file is a concise repository-facing
 summary; where wording elsewhere conflicts, the external directive governs. It
 does not grant a merge or visual approval.
 
-Newer owner directive (received after the external source above, 2026-11-26):
-the authorized ceiling is **up to 12 concurrent engineering subagents plus
-Hermes as lead orchestrator** when productive, independent, non-overlapping
-work exists. This owner directive is newer than the external directive cited
-above and supersedes only its 10-agent ceiling; all other requirements and
-acceptance gates in that external directive remain in force. It grants no
-merge, visual or release approval.
+Governing owner directive (latest, received after the external source above, 2026-11-26):
+`C:/Users/X1/Downloads/CANOPY_MASTER_DIRECTIVE.md`, SHA-256
+`f240bcdf635a498a7476c8104cbf3dc4e6cda492abba318254d80fce7566a197`. It amends
+the owner-authorized ceiling to **8 concurrent engineering subagents plus Hermes
+as lead orchestrator (9 total)**. The 15-, 11-, 12- and 10-agent configurations
+and the old four-worker floor are `SUPERSEDED_POINT_IN_TIME`: byte backups are
+preserved and nothing here erases them. The external f3ec49f… directive's
+non-workforce security, architectural, visual and acceptance requirements remain
+in force. This directive grants no merge, release or final visual approval.
 
 ## Workforce
 
-- Authorized ceiling: **up to 12 concurrent engineering subagents plus Hermes as
-  lead orchestrator** under the newer owner directive (superseding the earlier
-  10-agent ceiling in the external directive above, and all earlier 15-, nine-,
-  seven- and four-agent configurations). This is a ceiling, not a quota: assign
-  work only when independent, productive, non-overlapping and
-  resource-permitting, and do not manufacture assignments to fill slots.
-- Indicative initial allocation: 3 core/runtime integration, 2 GUI/usability, 2
-  Mint/session/installation, 1 performance/clean code, 1 independent QA,
-  1 GitHub/release (10 initially allocated within the 12-agent ceiling);
-  redistribute by actual need.
+- Authorized ceiling: **8 concurrent engineering subagents plus Hermes as
+  lead orchestrator (9 total)** under the governing owner directive
+  `f240bcdf…` (superseding the earlier 15-, 11-, 12- and 10-agent
+  configurations and the four-worker floor, all `SUPERSEDED_POINT_IN_TIME`).
+  This is a ceiling, not a quota: assign work only when independent, productive,
+  non-overlapping and resource-permitting, and do not manufacture assignments
+  to fill slots.
+- Starting allocation: 4 product engineering, 2 independent QA, 2
+  integration/release; redistribute by actual need. The earlier 3/2/2/1/1/1
+  ten-agent allocation is `SUPERSEDED_POINT_IN_TIME`.
 - Isolated worktrees, exact backticked file ownership, disjoint branches and
   dependency-aware assignment remain mandatory. No agent approves its own
   implementation; independent review is required. Throttle heavy builds,
@@ -54,22 +56,31 @@ merge, visual or release approval.
   gate requiring post-merge results before the merge that produces them.
 - Final visual acceptance, substantial identity changes, high-risk security
   decisions, final release acceptance and any merge to `main` are owner-gated.
-  Classic Qt final integration stays draft until real Linux Mint acceptance and
-  owner visual approval are recorded. Pending visual acceptance never blocks
-  unrelated engineering.
+  Current visual status is `AWAITING_OWNER_VISUAL_APPROVAL`. Hermes has owner
+  authority for GUI/visual engineering under the 2026-11-25 and 2026-11-26
+  directives; the ChatGPT-exclusive visual ownership rule is
+  `SUPERSEDED_POINT_IN_TIME`. Compiled QML/C++/host work is not categorically
+  forbidden, but approved artwork, wallpaper, dock geometry, colours,
+  typography and frozen pin paths remain byte-frozen and owner-gated. A
+  compiled-path deny-list hit or CI capture is a safety/evidence state, never
+  owner consent. Classic Qt final integration stays draft until real Linux Mint
+  acceptance and owner visual approval are recorded. Pending visual acceptance
+  never blocks unrelated engineering.
 - Named owner holds on **#279**, **#151** and **#278** are preserved. This
   policy reconciliation does not promote, approve, close or merge them.
 
 ## Reconciliation scope and residuals
 
-- This change edits only `README.md`, `CONTRIBUTING.md`, `docs/QUALITY.md`,
-  `docs/ARCHITECTURE.md`, `.github/PULL_REQUEST_TEMPLATE.md` and this file.
-  `AGENTS.md`, `docs/ROADMAP.md`, workflow, test, visual-asset and source paths
-  are outside its ownership and were not edited here.
-- Known residual wording outside this scope: `AGENTS.md` and `docs/ROADMAP.md`
-  still contain a "at least four active subagents" floor alongside the 12-agent
-  ceiling in `docs/ROADMAP.md`. Their owners must reconcile that text; this
-  file (including the newer owner ceiling) and the cited external directive
-  remain authoritative until then.
-- No new visual, security or release approval is claimed by this documentation
-  change.
+- This reconciliation edits `README.md`, `CONTRIBUTING.md`, `docs/QUALITY.md`,
+  `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`,
+  `.github/PULL_REQUEST_TEMPLATE.md`, two scoped evidence docs, adds the ND-076
+  reconciliation doc and this file. Workflow, test, visual-asset, source,
+  `AGENTS.md` and protected-PR paths were not edited.
+- `AGENTS.md` retains its two "at least four active subagents" sentences: the
+  guarded write to that protected instruction file was refused
+  (`RETRACTED=false`, `ERASED=false`, `FILE_MODIFIED_BY_THIS_PASS=false`). Both
+  sentences are `SUPERSEDED_POINT_IN_TIME` against directive `f240bcdc…` and are
+  catalogued in [ND-076 reconciliation](ND076_RESTRICTION_RECONCILIATION.md);
+  no attempt to route around the guard was made.
+- No new visual, security, release or merge approval is claimed by this
+  documentation change; protected PR #279 is untouched.

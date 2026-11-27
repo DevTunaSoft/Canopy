@@ -283,6 +283,57 @@ class TestNotificationDaemonInterop(unittest.TestCase):
         finally:
             interop.close()
 
+    def test_reattach_rebases_probe_budget_and_reaches_available(self):
+        source = TrustedHostEventSource()
+        interop = NotificationDaemonInterop(source=source, max_probes=2)
+        fresh = TrustedHostEventSource()
+        try:
+            self.assertEqual(interop.probe(CAPABILITY).status, AVAILABLE)
+            self.assertEqual(interop.state().probe_count, 2)
+            self.assertEqual(interop.probe_source(), SOURCE_LOST)
+            state = interop.state()
+            self.assertEqual(state.reason, PROBE_LIMIT)
+            self.assertEqual(state.probe_count, 2)
+            reattached = interop.reattach(fresh)
+            self.assertEqual(reattached.probe_count, 1)
+            self.assertEqual(interop.probe_capability(CAPABILITY),
+                             CAPABILITY_PRESENT)
+            state = interop.state()
+            self.assertEqual(state.status, AVAILABLE)
+            self.assertEqual(state.reason, NONE)
+            self.assertEqual(state.probe_count, 2)
+            self.assertEqual(state.loss_count, 0)
+            # The new attachment has its own bounded budget, not an unbounded
+            # probe stream.
+            self.assertEqual(interop.probe_source(), SOURCE_LOST)
+            self.assertEqual(interop.state().reason, PROBE_LIMIT)
+            self.assertEqual(interop.state().probe_count, 2)
+        finally:
+            interop.close()
+            self._close(source, fresh)
+
+    def test_failed_reattach_does_not_rebase_probe_budget(self):
+        source = TrustedHostEventSource()
+        interop = NotificationDaemonInterop(source=source, max_probes=1)
+        dead = TrustedHostEventSource()
+        dead.close()
+        try:
+            self.assertEqual(interop.probe_source(), SOURCE_LIVE)
+            self.assertEqual(interop.probe_source(), SOURCE_LOST)
+            before = interop.state()
+            self.assertEqual(before.reason, PROBE_LIMIT)
+            for bad in (object(), "source", dead):
+                with self.subTest(bad=type(bad).__name__):
+                    with self.assertRaises(DaemonInteropError):
+                        interop.reattach(bad)
+            after = interop.state()
+            self.assertEqual(after.reason, PROBE_LIMIT)
+            self.assertEqual(after.probe_count, before.probe_count)
+            self.assertEqual(after.refusal, PROBE_LIMIT)
+        finally:
+            interop.close()
+            self._close(source, dead)
+
     def test_reattach_requires_a_trusted_live_source(self):
         source = TrustedHostEventSource()
         interop = NotificationDaemonInterop(source=source)

@@ -184,33 +184,77 @@ class RecoveryAndFeedbackTests(unittest.TestCase):
         self.assertEqual(controller.feedback(APP).code, "READY")
         self.assertEqual(self.source.snapshot().recovery_count, 1)
 
-    def test_recovery_count_is_bounded(self):
+    def test_recovery_grants_are_bounded_per_episode(self):
+        from canopy_features.reliability.app_crash_contracts import (
+            ALLOWED_TOPICS, MAX_RECOVERIES, AppCrashController)
+
+        def hostile_bound(bound):
+            return AppCrashController(max_recoveries=bound)
+
+        for bad in (0, MAX_RECOVERIES + 1, True, "1", None, 1.0):
+            with self.subTest(bad=bad):
+                with self.assertRaises(CrashContractError):
+                    hostile_bound(bad)
+
+        controller = AppCrashController(max_recoveries=2)
+        callback = controller.observe
+        bus = HostEvents({topic: [callback] for topic in ALLOWED_TOPICS})
+        subscriptions = tuple(bus.subscribe(topic, callback)
+                              for topic in ALLOWED_TOPICS)
+        self.assertEqual(len(subscriptions), 2)
+        resources = tuple(CLEANABLE_RESOURCES)
+        for index in range(2):
+            app = "org.example.Episode%03d.desktop" % index
+            bus.emit("window.state.changed", {
+                "state": "crashed", "app_id": app, "pid": index + 1,
+                "exit_code": 3})
+            controller.cleanup(app, resources)
+            controller.cleanup(app, resources)
+            bus.emit("session.state.changed", {
+                "state": "active", "phase": "recovery_granted", "app_id": app})
+            self.assertEqual(controller.feedback(app).code, "APP_RECOVERABLE")
+        self.assertEqual(controller.episode_recoveries, 2)
+
+        app = "org.example.Capacity.desktop"
+        bus.emit("window.state.changed", {
+            "state": "crashed", "app_id": app, "pid": 9000, "exit_code": 3})
+        controller.cleanup(app, resources)
+        controller.cleanup(app, resources)
+        bus.emit("session.state.changed", {
+            "state": "active", "phase": "recovery_granted", "app_id": app})
+        self.assertEqual(controller.feedback(app).code, "APP_ISOLATED")
+        self.assertEqual(controller.episode_recoveries, 2)
+        # The cumulative diagnostic advances only on acknowledgement.
+        self.assertEqual(controller.snapshot().recovery_count, 0)
+
+    def test_recovery_beyond_former_lifetime_ceiling(self):
         from canopy_features.reliability.app_crash_contracts import (
             MAX_RECOVERIES)
 
-        resources = ("window", "notification", "cache", "subscription",
-                     "shortcut", "badge", "focus", "timer")
-        for index in range(MAX_RECOVERIES):
-            app = "org.example.Rec%03d.desktop" % index
-            self.source.emit("window.state.changed", {
-                "state": "crashed", "app_id": app, "pid": index + 1,
-                "exit_code": 3})
-            self.source.controller.cleanup(app, resources)
-            self.source.controller.cleanup(app, resources)
-            self.source.emit("session.state.changed", {
-                "state": "active", "phase": "recovery_granted", "app_id": app})
-            self.assertTrue(self.source.controller.acknowledge(app))
-        app = "org.example.Overflow.desktop"
-        self.source.emit("window.state.changed", {
-            "state": "crashed", "app_id": app, "pid": 9000, "exit_code": 3})
-        self.source.controller.cleanup(app, resources)
-        self.source.controller.cleanup(app, resources)
-        self.source.emit("session.state.changed", {
-            "state": "active", "phase": "recovery_granted", "app_id": app})
-        self.assertEqual(self.source.controller.feedback(app).code,
-                         "APP_ISOLATED")
-        self.assertEqual(self.source.snapshot().recovery_count,
-                         MAX_RECOVERIES)
+        resources = tuple(CLEANABLE_RESOURCES)
+        source = TrustedCrashEventSource()
+        controller = source.controller
+        try:
+            for index in range(MAX_RECOVERIES + 1):
+                app = "org.example.Long%03d.desktop" % index
+                source.emit("window.state.changed", {
+                    "state": "crashed", "app_id": app, "pid": index + 1,
+                    "exit_code": 3})
+                controller.cleanup(app, resources)
+                controller.cleanup(app, resources)
+                source.emit("session.state.changed", {
+                    "state": "active", "phase": "recovery_granted",
+                    "app_id": app})
+                self.assertEqual(controller.feedback(app).code,
+                                 "APP_RECOVERABLE")
+                self.assertTrue(controller.acknowledge(app))
+            snapshot = source.snapshot()
+            self.assertEqual(snapshot.recovery_count, MAX_RECOVERIES + 1)
+            self.assertEqual(controller.episode_recoveries, 1)
+            self.assertEqual(snapshot.status, "RECOVERED")
+            self.assertEqual(snapshot.process_action, "NOT_PERFORMED")
+        finally:
+            source.close()
 
     def test_feedback_after_close_is_unavailable(self):
         controller = self.source.controller

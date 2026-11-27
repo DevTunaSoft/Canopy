@@ -28,7 +28,7 @@ from canopy_features.launcher.native_catalog_producer import (
 
 from canopy_features.catalog.native_catalog_refresh import (
     CLAIM_BOUNDED_REFRESH, CLAIM_NO_PROCESS_LAUNCH, CLAIM_NO_TIMER,
-    CLAIM_NO_VALUE_ECHO, FIXED_CLAIMS, MAX_REFRESH_EVENTS, OUTCOME_FROZEN,
+    CLAIM_NO_VALUE_ECHO, FIXED_CLAIMS, MAX_REFRESH_EVENTS,
     OUTCOME_OK, OUTCOME_REFUSED, OUTCOME_REJECTED, OUTCOME_UNCHANGED,
     REFRESH_TOPIC, CatalogRefreshError, NativeCatalogRefreshBridge,
     RefreshReport,
@@ -38,6 +38,7 @@ SOURCE = object()
 OTHER_SOURCE = object()
 ONE = "org.example.One.desktop"
 BROWSER = "org.example.Browser.desktop"
+BETA = "org.example.Beta.desktop"
 
 
 def write_entry(folder, name, title):
@@ -292,8 +293,8 @@ class RejectionTests(unittest.TestCase):
             self.assertIsNone(bridge.snapshot())
             self.assertEqual(bridge.producer_calls, 0)
 
-    def test_event_budget_is_bounded_and_freezes(self):
-        with tempfile.TemporaryDirectory(prefix="pe076-budget-") as tmp:
+    def test_event_budget_reconciles_at_epoch_boundary(self):
+        with tempfile.TemporaryDirectory(prefix="pe076-epoch-") as tmp:
             apps = Path(tmp) / "applications"
             apps.mkdir()
             write_entry(apps, ONE, "One")
@@ -302,11 +303,95 @@ class RejectionTests(unittest.TestCase):
                              OUTCOME_OK)
             self.assertEqual(bridge.ingest(SOURCE, REFRESH_TOPIC, {}).outcome,
                              OUTCOME_UNCHANGED)
-            frozen = bridge.ingest(SOURCE, REFRESH_TOPIC, {})
-            self.assertEqual(frozen.outcome, OUTCOME_FROZEN)
-            self.assertEqual(frozen.producer_calls, 0)
-            self.assertEqual(bridge.producer_calls, 2)
-            self.assertFalse(bridge.connected())
+            third = bridge.ingest(SOURCE, REFRESH_TOPIC, {})
+            self.assertEqual(third.outcome, OUTCOME_UNCHANGED)
+            self.assertEqual(third.producer_calls, 1)
+            self.assertEqual(bridge.producer_calls, 3)
+            self.assertEqual(bridge.epoch_events, 1)
+            self.assertEqual(bridge.reconciliations, 1)
+            self.assertTrue(bridge.connected())
+            self.assertIsNone(bridge.last_rejection)
+
+    def test_new_authoritative_catalog_is_reconciled_after_max_events(self):
+        with tempfile.TemporaryDirectory(prefix="pe076-past-limit-") as tmp:
+            apps = Path(tmp) / "applications"
+            apps.mkdir()
+            write_entry(apps, ONE, "One")
+            bridge = make_bridge(apps)
+            for index in range(MAX_REFRESH_EVENTS):
+                expected = OUTCOME_OK if index == 0 else OUTCOME_UNCHANGED
+                self.assertEqual(
+                    bridge.ingest(SOURCE, REFRESH_TOPIC, {}).outcome,
+                    expected)
+            self.assertEqual(bridge.event_count, MAX_REFRESH_EVENTS)
+            self.assertEqual(bridge.epoch_events, MAX_REFRESH_EVENTS)
+            self.assertEqual(bridge.reconciliations, 0)
+            write_entry(apps, BETA, "Beta")
+            after = bridge.ingest(SOURCE, REFRESH_TOPIC, {})
+            self.assertEqual(after.outcome, OUTCOME_OK)
+            self.assertEqual(after.installed_count, 1)
+            self.assertEqual(after.producer_calls, 1)
+            self.assertEqual(bridge.producer_calls, MAX_REFRESH_EVENTS + 1)
+            self.assertEqual(bridge.event_count, MAX_REFRESH_EVENTS + 1)
+            self.assertEqual(bridge.epoch_events, 1)
+            self.assertEqual(bridge.reconciliations, 1)
+            self.assertTrue(bridge.connected())
+            self.assertTrue(bridge.state(BETA).launch_permitted)
+            wire = bridge.snapshot()
+            self.assertIsNotNone(wire)
+            self.assertIn(BETA.encode("utf-8"), wire)
+            self.assertEqual(wire, produce_catalog_bytes(apps))
+            self.assertEqual(bridge.reports()[-1].outcome, OUTCOME_OK)
+            self.assertLessEqual(len(bridge.reports()),
+                                 bridge_module.MAX_REPORT_HISTORY)
+
+    def test_bad_events_after_boundary_do_not_spend_a_producer_call(self):
+        with tempfile.TemporaryDirectory(prefix="pe076-limit-negative-") as tmp:
+            apps = Path(tmp) / "applications"
+            apps.mkdir()
+            write_entry(apps, ONE, "One")
+            bridge = make_bridge(apps)
+            for _ in range(MAX_REFRESH_EVENTS):
+                bridge.ingest(SOURCE, REFRESH_TOPIC, {})
+            calls = bridge.producer_calls
+            with self.assertRaises(EventTrustError):
+                bridge.ingest(OTHER_SOURCE, REFRESH_TOPIC, {})
+            replay = HostEvent(PROTOCOL_VERSION, REFRESH_TOPIC, 1, ())
+            self.assertEqual(bridge.apply(replay).outcome, OUTCOME_REJECTED)
+            with self.assertRaises(EventTrustError):
+                bridge.ingest(SOURCE, "window.state.changed", {"state": "x"})
+            self.assertEqual(bridge.producer_calls, calls)
+            self.assertEqual(bridge.epoch_events, MAX_REFRESH_EVENTS)
+            self.assertEqual(bridge.reconciliations, 0)
+            self.assertEqual(bridge.event_count, MAX_REFRESH_EVENTS)
+            self.assertEqual(bridge.snapshot(), produce_catalog_bytes(apps))
+
+    def test_refused_snapshot_at_boundary_still_reconciles(self):
+        with tempfile.TemporaryDirectory(prefix="pe076-refusal-epoch-") as tmp:
+            apps = Path(tmp) / "applications"
+            apps.mkdir()
+            write_entry(apps, ONE, "One")
+            calls = []
+
+            def sometimes_broken(path):
+                calls.append(path)
+                if len(calls) == 3:
+                    return b"not-a-catalog-line\n"
+                return produce_catalog_bytes(path)
+
+            bridge = make_bridge(apps, max_events=2,
+                                 producer=sometimes_broken)
+            bridge.ingest(SOURCE, REFRESH_TOPIC, {})
+            bridge.ingest(SOURCE, REFRESH_TOPIC, {})
+            refused = bridge.ingest(SOURCE, REFRESH_TOPIC, {})
+            self.assertEqual(refused.outcome, OUTCOME_REFUSED)
+            self.assertEqual(bridge.epoch_events, 1)
+            self.assertEqual(bridge.reconciliations, 1)
+            self.assertEqual(bridge.snapshot(), produce_catalog_bytes(apps))
+            self.assertEqual(
+                bridge.ingest(SOURCE, REFRESH_TOPIC, {}).outcome,
+                OUTCOME_UNCHANGED)
+            self.assertEqual(bridge.producer_calls, 4)
 
     def test_close_rejects_later_events(self):
         with tempfile.TemporaryDirectory(prefix="pe076-close-") as tmp:

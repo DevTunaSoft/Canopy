@@ -6,6 +6,11 @@ I/O. It records caller-declared crash signals, isolates the named application
 and exposes deterministic user-facing feedback codes. It never launches,
 signals or kills a process and never echoes application identifiers, exit
 codes or raw event text into a snapshot.
+
+``MAX_RECOVERIES`` bounds grant attempts within a crash episode, not over the
+process lifetime: a new host crash after all earlier isolations were
+acknowledged opens a new episode and rebases the bounded counter. The separate
+cumulative ``recovery_count`` is diagnostics only and never gates a grant.
 """
 from dataclasses import dataclass
 import re
@@ -159,16 +164,27 @@ class AppCrashController:
     """Consume real host events and isolate named crashed applications."""
 
     __slots__ = ("_crashes", "_cleanups", "_cleanup_count", "_recoverable",
-                 "_recovery_count", "_last_sequence", "_closed")
+                 "_recovery_count", "_max_recoveries", "_episode_recoveries",
+                 "_last_sequence", "_closed")
 
-    def __init__(self):
+    def __init__(self, max_recoveries=MAX_RECOVERIES):
+        if (type(max_recoveries) is not int
+                or not 1 <= max_recoveries <= MAX_RECOVERIES):
+            raise CrashContractError("invalid recovery grant bound")
+        self._max_recoveries = max_recoveries
         self._crashes = {}
         self._cleanups = {}
         self._cleanup_count = 0
         self._recoverable = set()
         self._recovery_count = 0
+        self._episode_recoveries = 0
         self._last_sequence = 0
         self._closed = False
+
+    @property
+    def episode_recoveries(self):
+        """Grants in the current crash episode (0..max_recoveries)."""
+        return self._episode_recoveries
 
     def _ready(self):
         if self._closed:
@@ -198,12 +214,13 @@ class AppCrashController:
                 return "UNKNOWN"
             if app_id not in self._crashes:
                 return "IGNORED"
-            if self._recovery_count >= MAX_RECOVERIES:
+            if self._episode_recoveries >= self._max_recoveries:
                 return "CAPACITY"
             done = self._cleanups.get(app_id, frozenset())
             if not set(CLEANABLE_RESOURCES).issubset(done):
                 return "CLEANUP_PENDING"
             self._recoverable.add(app_id)
+            self._episode_recoveries += 1
             return "RECOVERY_GRANTED"
         payload = event.payload
         state = payload.get("state")
@@ -221,6 +238,11 @@ class AppCrashController:
             return "DUPLICATE"
         if len(self._crashes) >= MAX_TRACKED_APPS:
             return "CAPACITY"
+        if not self._crashes and not self._recoverable:
+            # A new host crash after every earlier isolation was acknowledged
+            # starts a new episode and rebases the bounded grant budget. No
+            # timer, poll or automatic retry is involved.
+            self._episode_recoveries = 0
         self._crashes[app_id] = (event.sequence, pid, code)
         return "CRASH"
 
@@ -305,6 +327,7 @@ class AppCrashController:
         self._cleanup_count = 0
         self._recoverable.clear()
         self._recovery_count = 0
+        self._episode_recoveries = 0
         self._last_sequence = 0
         self._closed = True
 

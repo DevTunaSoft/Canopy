@@ -14,6 +14,13 @@ Every refusal is fail closed and atomic: the previous wire snapshot and the
 previous availability states stay byte-identical, and diagnostics carry only
 counts and fixed reason/claim tokens (never an application id, title, TryExec
 path or URL).
+
+``MAX_REFRESH_EVENTS`` is an *epoch* bound, not a process-lifetime budget. At
+an epoch boundary the next trusted event performs the same one bounded producer
+call and reconciles the bridge with the current authoritative catalog, then
+starts a new epoch. Nothing is deferred to a timer, poll, queue or daemon, and
+a rate-limited host signal is never permanently lost: the producer always reads
+the latest source state, so the newest catalog wins.
 """
 from __future__ import annotations
 
@@ -56,8 +63,7 @@ OUTCOME_OK = "refreshed"
 OUTCOME_UNCHANGED = "unchanged"
 OUTCOME_REFUSED = "snapshot_refused"
 OUTCOME_REJECTED = "event_rejected"
-OUTCOME_FROZEN = "refresh_limit"
-FIXED_OUTCOMES = (OUTCOME_FROZEN, OUTCOME_OK, OUTCOME_REFUSED,
+FIXED_OUTCOMES = (OUTCOME_OK, OUTCOME_REFUSED,
                   OUTCOME_REJECTED, OUTCOME_UNCHANGED)
 
 CLAIM_BOUNDED_REFRESH = "bounded_refresh"
@@ -79,7 +85,6 @@ __all__ = [
     "FIXED_OUTCOMES",
     "MAX_REFRESH_EVENTS",
     "MAX_REPORT_HISTORY",
-    "OUTCOME_FROZEN",
     "OUTCOME_OK",
     "OUTCOME_REFUSED",
     "OUTCOME_REJECTED",
@@ -171,6 +176,8 @@ class NativeCatalogRefreshBridge:
         self._catalog = None
         self._last_sequence = 0
         self._events_applied = 0
+        self._epoch_events = 0
+        self._reconciliations = 0
         self._producer_calls = 0
         self._rejection_count = 0
         self._last_rejection = None
@@ -196,6 +203,16 @@ class NativeCatalogRefreshBridge:
         return self._events_applied
 
     @property
+    def epoch_events(self):
+        """Accepted events in the current bounded epoch (0..max_events)."""
+        return self._epoch_events
+
+    @property
+    def reconciliations(self):
+        """Count of event-driven epoch reconciliations already performed."""
+        return self._reconciliations
+
+    @property
     def producer_calls(self):
         return self._producer_calls
 
@@ -208,9 +225,8 @@ class NativeCatalogRefreshBridge:
         return self._last_rejection
 
     def connected(self):
-        """True while the trust gate is open and the event budget remains."""
-        return (not self._trust.closed and
-                self._events_applied < self._max_events)
+        """True while the trust gate is open; the epoch bound never closes it."""
+        return not self._trust.closed
 
     def close(self):
         self._trust.close()
@@ -231,12 +247,13 @@ class NativeCatalogRefreshBridge:
     def reports(self):
         return tuple(self._reports)
 
-    def _frozen(self, sequence):
-        self._rejection_count += 1
-        self._last_rejection = "REFRESH_LIMIT"
-        return RefreshReport(
-            OUTCOME_FROZEN, sequence, 0, 0, 0,
-            len(self._wire) if self._wire is not None else 0)
+    def _advance_epoch(self, reconciling):
+        """Keep the epoch counter in 0..max_events without any deferred work."""
+        if reconciling:
+            self._epoch_events = 1
+            self._reconciliations += 1
+        else:
+            self._epoch_events += 1
 
     def _note_rejection(self, reason, sequence=0):
         self._rejection_count += 1
@@ -288,10 +305,11 @@ class NativeCatalogRefreshBridge:
             return unknown
         return {"tryexec_ok": tryexec_ok, "entry_readable": entry_readable}
 
-    def _refusal(self, sequence, producer_calls=1):
+    def _refusal(self, sequence, reconciling, producer_calls=1):
         self._last_rejection = "SNAPSHOT_REFUSED"
         self._last_sequence = sequence
         self._events_applied += 1
+        self._advance_epoch(reconciling)
         report = RefreshReport(
             OUTCOME_REFUSED, sequence, producer_calls, 0, 0,
             len(self._wire) if self._wire is not None else 0)
@@ -322,10 +340,15 @@ class NativeCatalogRefreshBridge:
 
     def _process(self, event, producer_kwargs):
         sequence = event.sequence
-        if not self.connected():
-            return self._frozen(sequence)
+        if self._trust.closed:
+            # Direct apply() after close must fail closed like ingest().
+            return self._note_rejection("CLOSED", sequence)
         if sequence <= self._last_sequence:
             return self._note_rejection("REPLAYED_SEQUENCE", sequence)
+        # An epoch boundary is a normal event-driven reconciliation: the one
+        # bounded producer call below re-reads the authoritative source, so
+        # the newest catalog always wins and no signal is deferred or lost.
+        reconciling = self._epoch_events >= self._max_events
 
         self._producer_calls += 1
         try:
@@ -338,13 +361,13 @@ class NativeCatalogRefreshBridge:
                 ValueError, UnicodeError):
             # Atomic refusal: no wire, catalog or availability state is
             # committed, and no source text is echoed into the report.
-            return self._refusal(sequence, 1)
+            return self._refusal(sequence, reconciling, 1)
 
         installed = ids - self._ids
         removed = self._ids - ids
         tracked = len(self._tracker.snapshot()) + len(installed)
         if tracked > MAX_TRACKED_APPS:
-            return self._refusal(sequence, 1)
+            return self._refusal(sequence, reconciling, 1)
 
         try:
             for app_id in sorted(installed):
@@ -357,13 +380,14 @@ class NativeCatalogRefreshBridge:
                     app_id, in_catalog=False,
                     tryexec_ok=False, entry_readable=False)
         except Exception:
-            return self._refusal(sequence, 1)
+            return self._refusal(sequence, reconciling, 1)
 
         self._wire = wire
         self._ids = ids
         self._catalog = catalog
         self._last_sequence = sequence
         self._events_applied += 1
+        self._advance_epoch(reconciling)
         outcome = OUTCOME_OK if installed or removed else OUTCOME_UNCHANGED
         report = RefreshReport(outcome, sequence, 1, len(installed),
                                len(removed), len(wire))

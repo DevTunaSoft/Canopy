@@ -4,6 +4,10 @@ The input is a plain list of metadata records, normally produced by a
 UI-framework adapter. This module does not parse QML, start Qt, call AT-SPI or
 touch the network. Clean metadata means the records are internally consistent;
 it is not proof that a screen reader can navigate a running application.
+
+Caller-supplied ``objectName`` and ``role`` are untrusted display text. They are
+projected through :func:`_bounded_projection` before entering an :class:`Issue`,
+so reports stay bounded and printable without changing validation semantics.
 """
 
 from collections.abc import Mapping
@@ -17,6 +21,15 @@ INVALID_ROLE = "invalid-role"
 INVALID_ELEMENT = "invalid-element"
 INVALID_IGNORED = "invalid-ignored"
 IGNORED_INTERACTIVE = "ignored-interactive"
+
+# PE-119: caller-controlled objectName/role are untrusted report text. Keep a
+# bounded printable prefix and replace every nonprintable scalar (Cc/Cf/Cs/
+# Co/Cn/Zl/Zp, i.e. anything for which str.isprintable() is false) with a fixed
+# token. Printable Unicode is retained so ordinary accessible metadata keeps
+# its exact meaning; only hostile length/control characters are projected.
+MAX_PROJECTION_CHARS = 120
+UNPRINTABLE_TOKEN = "?"
+PROJECTION_TRUNCATION_MARKER = "...[truncated]"
 
 # Role vocabulary follows the names used by the Classic Qt/QML source: buttons,
 # menu items, text fields and the non-interactive decorations around them.
@@ -57,11 +70,28 @@ class Issue:
     message: str
 
 
+def _bounded_projection(value):
+    """Return a bounded printable projection of caller-controlled text.
+
+    ``value`` must be a ``str``; both call sites gate the type first. Only the
+    first ``MAX_PROJECTION_CHARS`` characters are retained, each nonprintable
+    character becomes ``UNPRINTABLE_TOKEN``, and truncation is marked. The
+    result is capped at ``MAX_PROJECTION_CHARS + len(marker)`` characters.
+    """
+    projected = "".join(
+        char if char.isprintable() else UNPRINTABLE_TOKEN
+        for char in value[:MAX_PROJECTION_CHARS]
+    )
+    if len(value) > MAX_PROJECTION_CHARS:
+        projected += PROJECTION_TRUNCATION_MARKER
+    return projected
+
+
 def _identifier(element, index):
     if isinstance(element, Mapping):
         name = element.get("objectName")
         if isinstance(name, str) and name.strip():
-            return name
+            return _bounded_projection(name)
     return "elements[{}]".format(index)
 
 
@@ -104,7 +134,8 @@ def validate_metadata(elements, *, known_roles=KNOWN_ROLES,
             requires_name = False
         elif role not in known_roles:
             issues.append(Issue(where, INVALID_ROLE,
-                                "unsupported role: " + role))
+                                "unsupported role: "
+                                + _bounded_projection(role)))
             requires_name = False
         else:
             requires_name = role in interactive_roles or role in informative_roles

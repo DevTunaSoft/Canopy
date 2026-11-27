@@ -3,9 +3,13 @@
 #include <QString>
 #include <QStringList>
 #include <QVariantList>
+#include <QVariantMap>
+#include <QSet>
 #include <QVector>
 
 #include <algorithm>
+#include <functional>
+#include <utility>
 
 // Bounded, fail-closed application-name search for the Classic launcher.
 //
@@ -198,6 +202,7 @@ public:
     int rawCount() const { return m_rawCount; }
     int duplicateIdCount() const { return m_duplicateIdCount; }
     QStringList titles() const;
+    QStringList appIds() const;
     // QML-facing shape: [{"title": name}, ...], in snapshot order.
     QVariantList applications() const;
     LauncherModel::View browse() const;
@@ -222,4 +227,110 @@ private:
     int m_rawCount = 0;
     int m_duplicateIdCount = 0;
     bool m_active = false;
+};
+
+// Compiled mirror of canopy_features.launcher.launcher_enumeration_sources:
+// a finite, ordered description of admissible enumeration inputs. It never
+// touches the filesystem; it only validates and normalises caller descriptors
+// so a host cannot widen the producer's ceilings. Ordering is deterministic
+// (role, then path) and independent of caller order.
+class LauncherEnumerationSources final {
+public:
+    static constexpr int MaxSources = 8;
+    static constexpr int MaxPathChars = 512;
+    static constexpr int MaxEntriesPerSource = 512;
+    static constexpr int MaxTotalEntries = 1024;
+
+    enum class Role { Explicit, XdgDataDirs, XdgDataHome };
+
+    struct Source {
+        Role role = Role::Explicit;
+        QString path;
+        int maxEntries = MaxEntriesPerSource;
+    };
+
+    struct Snapshot {
+        QVector<Source> sources;
+        int totalEntries = 0;
+
+        QStringList claims() const
+        {
+            return {
+                QStringLiteral("no_implicit_discovery"),
+                QStringLiteral("no_symlink_follow"),
+                QStringLiteral("no_recursive_walk"),
+                QStringLiteral("no_duplicate_sources"),
+                QStringLiteral("no_unbounded_growth"),
+                QStringLiteral("no_filesystem_io"),
+                QStringLiteral("no_process_launch"),
+                QStringLiteral("no_visual_change"),
+            };
+        }
+    };
+
+    static bool describe(const QVector<Source> &input, Snapshot *out);
+
+private:
+    static bool validPath(const QString &path);
+    static QString roleToken(Role role);
+};
+
+// Compiled, event-driven refresh adapter for the existing trusted
+// ``app.catalog.changed`` host boundary. It mirrors the pure-Python
+// native_catalog_refresh contract: one exact trusted source identity, one
+// bounded producer call per accepted event, strict sequence monotonicity,
+// atomic fail-closed refusals and fixed-token reports. The adapter owns no
+// thread, timer, socket, daemon or filesystem discovery; a trusted host calls
+// applyHostEvent() synchronously and supplies the producer once at setup.
+//
+// The model is only mutated after the complete wire has passed validation, so
+// a refused event preserves the installed application list already displayed.
+class LauncherCatalogRefresh final {
+public:
+    static constexpr int MaxRefreshEvents = 64;
+    static constexpr int MaxSourceChars = 64;
+
+    using Producer = std::function<bool(QString *)>;
+
+    enum class Outcome { Rejected, Refused, Frozen, Unchanged, Refreshed };
+
+    struct Report {
+        Outcome outcome = Outcome::Rejected;
+        int sequence = 0;
+        int producerCalls = 0;
+        int installedCount = 0;
+        int removedCount = 0;
+        int snapshotBytes = 0;
+    };
+
+    LauncherCatalogRefresh(LauncherCatalogModel &model, QString trustedSource,
+                           Producer producer);
+
+    bool applyHostEvent(const QString &topic, const QVariantMap &payload);
+    void close() { m_closed = true; }
+
+    const Report &lastReport() const { return m_lastReport; }
+    int eventCount() const { return m_eventsApplied; }
+    int producerCalls() const { return m_producerCalls; }
+    int rejectionCount() const { return m_rejections; }
+    bool connected() const
+    {
+        return !m_closed && m_eventsApplied < MaxRefreshEvents;
+    }
+    static QString outcomeToken(Outcome outcome);
+    static bool validSourceIdentity(const QString &source);
+
+private:
+    static bool wireIds(const QString &text, QSet<QString> *ids);
+
+    LauncherCatalogModel &m_model;
+    QString m_trustedSource;
+    Producer m_producer;
+    QSet<QString> m_ids;
+    int m_lastSequence = 0;
+    int m_eventsApplied = 0;
+    int m_producerCalls = 0;
+    int m_rejections = 0;
+    bool m_closed = false;
+    Report m_lastReport;
 };

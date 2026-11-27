@@ -10,8 +10,9 @@
 #include <QtQml>
 
 // Bounded, home-scoped directory listing for the Classic Files window.
-// Listing happens synchronously only when navigate()/goBack()/goUp()/setSearch()
-// change state. No timers, polling, workers, network or process execution.
+// Listing happens synchronously only when navigate()/goBack()/goForward()/
+// goUp()/setSearch() change state. No timers, polling, workers, network or
+// process execution.
 class FileModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -23,6 +24,7 @@ class FileModel : public QAbstractListModel
     Q_PROPERTY(QString searchQuery READ searchQuery WRITE setSearch NOTIFY searchQueryChanged)
     Q_PROPERTY(bool canGoBack READ canGoBack NOTIFY navigationChanged)
     Q_PROPERTY(bool canGoUp READ canGoUp NOTIFY navigationChanged)
+    Q_PROPERTY(bool canGoForward READ canGoForward NOTIFY navigationChanged)
     Q_PROPERTY(int maxEntries READ maxEntries CONSTANT)
     Q_PROPERTY(int entryCount READ entryCount NOTIFY entriesChanged)
     // Fixed dock label used by the Files window's native launch action.
@@ -50,6 +52,7 @@ public:
     QString searchQuery() const { return m_searchQuery; }
     bool canGoBack() const { return !m_backStack.isEmpty(); }
     bool canGoUp() const;
+    bool canGoForward() const { return !m_forwardStack.isEmpty(); }
     int maxEntries() const { return kMaxEntries; }
     int entryCount() const { return m_visible.size(); }
     // Exact, case-sensitive dock-label validation. Only the fixed "Files"
@@ -62,6 +65,7 @@ public:
 
     Q_INVOKABLE bool navigate(const QString &path);
     Q_INVOKABLE bool goBack();
+    Q_INVOKABLE bool goForward();
     Q_INVOKABLE bool goUp();
     Q_INVOKABLE void setSearch(const QString &text);
 
@@ -81,7 +85,9 @@ private:
     };
 
     static constexpr int kMaxEntries = 500;
+    static constexpr int kMaxHistory = 64;
 
+    static void pushBounded(QStringList &stack, const QString &path);
     QString resolveUnderHome(const QString &path) const;
     void reload();
     void applySearch();
@@ -91,6 +97,7 @@ private:
     QString m_currentPath;
     QString m_searchQuery;
     QStringList m_backStack;
+    QStringList m_forwardStack;
     QVector<Entry> m_all;
     QVector<Entry> m_visible;
 };

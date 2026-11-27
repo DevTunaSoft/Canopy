@@ -70,6 +70,15 @@ QStringList LauncherCatalogModel::titles() const
     return result;
 }
 
+QStringList LauncherCatalogModel::appIds() const
+{
+    QStringList result;
+    result.reserve(m_rows.size());
+    for (const LauncherCatalogRow &row : m_rows)
+        result.append(row.appId);
+    return result;
+}
+
 QVariantList LauncherCatalogModel::applications() const
 {
     QVariantList result;
@@ -180,6 +189,231 @@ bool LauncherCatalogModel::loadFromFile(const QString &path)
     if (decoder.hasError() || text.isEmpty())
         return false;
     return loadFromText(text);
+}
+
+// Compiled mirror of the merged enumeration-source contract. This function
+// never resolves, stats or opens a path: a bad descriptor is refused before
+// any snapshot is returned, and ordering is fixed by role then path.
+QString LauncherEnumerationSources::roleToken(Role role)
+{
+    switch (role) {
+    case Role::Explicit:     return QStringLiteral("explicit");
+    case Role::XdgDataDirs:  return QStringLiteral("xdg_data_dirs");
+    case Role::XdgDataHome:  return QStringLiteral("xdg_data_home");
+    }
+    return QString();
+}
+
+bool LauncherEnumerationSources::validPath(const QString &path)
+{
+    if (path.isEmpty() || path.size() > MaxPathChars)
+        return false;
+    const bool posix = path.startsWith(QLatin1Char('/'));
+    const QChar drive = path.at(0);
+    const bool windows = path.size() >= 3
+        && ((drive >= QLatin1Char('a') && drive <= QLatin1Char('z'))
+            || (drive >= QLatin1Char('A') && drive <= QLatin1Char('Z')))
+        && path.at(1) == QLatin1Char(':')
+        && (path.at(2) == QLatin1Char('/') || path.at(2) == QLatin1Char('\\'));
+    if (!posix && !windows)
+        return false;
+
+    QString component;
+    for (int i = 0; i <= path.size(); ++i) {
+        const bool separator = i == path.size()
+            || path.at(i) == QLatin1Char('/') || path.at(i) == QLatin1Char('\\');
+        if (!separator) {
+            const QChar c = path.at(i);
+            const ushort code = c.unicode();
+            if (c.isSurrogate() || code < 0x20 || code == 0x7f)
+                return false;
+            switch (c.category()) {
+            case QChar::Other_Control:
+            case QChar::Other_Format:
+            case QChar::Other_Surrogate:
+            case QChar::Other_PrivateUse:
+            case QChar::Other_NotAssigned:
+            case QChar::Separator_Line:
+            case QChar::Separator_Paragraph:
+                return false;
+            default:
+                break;
+            }
+            component.append(c);
+            continue;
+        }
+        if (component == QLatin1String(".."))
+            return false;
+        component.clear();
+    }
+    return true;
+}
+
+bool LauncherEnumerationSources::describe(const QVector<Source> &input,
+                                          Snapshot *out)
+{
+    if (!out || input.size() > MaxSources)
+        return false;
+    Snapshot snapshot;
+    QSet<QString> seen;
+    int total = 0;
+    for (const Source &source : input) {
+        const QString token = roleToken(source.role);
+        if (token.isEmpty() || source.maxEntries < 1
+            || source.maxEntries > MaxEntriesPerSource
+            || !validPath(source.path))
+            return false;
+        const QString key = token + QLatin1Char('\x1f') + source.path;
+        if (seen.contains(key))
+            return false;
+        seen.insert(key);
+        total += source.maxEntries;
+        if (total > MaxTotalEntries)
+            return false;
+        snapshot.sources.append(source);
+    }
+    std::stable_sort(snapshot.sources.begin(), snapshot.sources.end(),
+                     [](const Source &a, const Source &b) {
+                         const int role = roleToken(a.role)
+                                              .compare(roleToken(b.role));
+                         return role != 0 ? role < 0 : a.path < b.path;
+                     });
+    snapshot.totalEntries = total;
+    *out = snapshot;
+    return true;
+}
+
+bool LauncherCatalogRefresh::validSourceIdentity(const QString &source)
+{
+    if (source.isEmpty() || source.size() > MaxSourceChars)
+        return false;
+    for (const QChar c : source) {
+        const ushort code = c.unicode();
+        const bool legal = (code >= 'a' && code <= 'z')
+            || (code >= '0' && code <= '9') || code == '_' || code == '.'
+            || code == ':' || code == '-';
+        if (!legal)
+            return false;
+    }
+    return true;
+}
+
+QString LauncherCatalogRefresh::outcomeToken(Outcome outcome)
+{
+    switch (outcome) {
+    case Outcome::Rejected:  return QStringLiteral("event_rejected");
+    case Outcome::Refused:   return QStringLiteral("snapshot_refused");
+    case Outcome::Frozen:    return QStringLiteral("refresh_limit");
+    case Outcome::Unchanged: return QStringLiteral("unchanged");
+    case Outcome::Refreshed: return QStringLiteral("refreshed");
+    }
+    return QStringLiteral("event_rejected");
+}
+
+bool LauncherCatalogRefresh::wireIds(const QString &text, QSet<QString> *ids)
+{
+    if (!ids || text.isEmpty()
+        || text.toUtf8().size() > LauncherCatalogModel::MaxSnapshotBytes)
+        return false;
+    const QStringList lines = text.split(QLatin1Char('\n'));
+    int rows = 0;
+    for (int i = 0; i < lines.size(); ++i) {
+        QString line = lines.at(i);
+        if (line.endsWith(QLatin1Char('\r')))
+            line.chop(1);
+        if (line.isEmpty() && i == lines.size() - 1)
+            continue;
+        const int tab = line.indexOf(QLatin1Char('\t'));
+        if (tab <= 0 || tab != line.lastIndexOf(QLatin1Char('\t'))
+            || tab + 1 >= line.size())
+            return false;
+        const QString appId = line.left(tab);
+        if (!LauncherCatalogModel::validAppId(appId)
+            || !LauncherCatalogModel::validTitle(line.mid(tab + 1))
+            || ids->contains(appId) || ++rows > LauncherCatalogModel::MaxRows)
+            return false;
+        ids->insert(appId);
+    }
+    return rows > 0;
+}
+
+LauncherCatalogRefresh::LauncherCatalogRefresh(LauncherCatalogModel &model,
+                                               QString trustedSource,
+                                               Producer producer)
+    : m_model(model),
+      m_trustedSource(std::move(trustedSource)),
+      m_producer(std::move(producer))
+{
+    // An invalid source identity or missing producer fails the gate closed at
+    // construction; no event can ever open it.
+    if (!validSourceIdentity(m_trustedSource) || !m_producer)
+        m_closed = true;
+    // An already-displayed opt-in snapshot is the baseline: its installed
+    // ids are authoritative until a trusted event replaces the wire.
+    for (const QString &appId : model.appIds())
+        m_ids.insert(appId);
+}
+
+bool LauncherCatalogRefresh::applyHostEvent(const QString &topic,
+                                            const QVariantMap &payload)
+{
+    Report report;
+    const QVariant source = payload.value(QStringLiteral("source"));
+    const QVariant sequence = payload.value(QStringLiteral("sequence"));
+    const int sequenceValue = sequence.metaType() == QMetaType(QMetaType::Int)
+                                  ? sequence.toInt() : 0;
+
+    const auto reject = [this, &report]() {
+        ++m_rejections;
+        m_lastReport = report;
+        return false;
+    };
+    if (m_closed || topic != QStringLiteral("app.catalog.changed")
+        || source.metaType() != QMetaType(QMetaType::QString)
+        || source.toString() != m_trustedSource
+        || sequenceValue < 1 || sequenceValue <= m_lastSequence)
+        return reject();
+
+    if (m_eventsApplied >= MaxRefreshEvents) {
+        report.outcome = Outcome::Frozen;
+        report.sequence = sequenceValue;
+        report.producerCalls = 0;
+        report.snapshotBytes = static_cast<int>(m_model.titles().size());
+        ++m_rejections;
+        m_lastReport = report;
+        return false;
+    }
+
+    ++m_producerCalls;
+    report.sequence = sequenceValue;
+    report.producerCalls = 1;
+    QString wire;
+    QSet<QString> ids;
+    bool produced = false;
+    try {
+        produced = m_producer(&wire);
+    } catch (...) {
+        produced = false;
+    }
+    if (!produced || !wireIds(wire, &ids) || !m_model.loadFromText(wire)) {
+        report.outcome = Outcome::Refused;
+        report.snapshotBytes = 0;
+        ++m_eventsApplied;
+        ++m_rejections;
+        m_lastReport = report;
+        return false;
+    }
+
+    report.installedCount = (ids - m_ids).size();
+    report.removedCount = (m_ids - ids).size();
+    report.snapshotBytes = static_cast<int>(wire.toUtf8().size());
+    report.outcome = (report.installedCount || report.removedCount)
+                         ? Outcome::Refreshed : Outcome::Unchanged;
+    m_ids = ids;
+    m_lastSequence = sequenceValue;
+    ++m_eventsApplied;
+    m_lastReport = report;
+    return true;
 }
 
 static bool catalogCheck(bool ok, const char *name)

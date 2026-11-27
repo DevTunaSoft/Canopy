@@ -16,6 +16,18 @@ never deletes, never mounts, and never escalates privilege; it only computes
 a plan for a separate executor to review and carry out. The install root and
 manifest path must be real paths: a symlink in any existing path component is
 unsafe and fails closed, not just a symlink at the final component.
+
+Diagnostics (exceptions, blockers and preserved reasons) use fixed tokens plus
+a component-capped, printable-safe projection of a path. They are never a
+verbatim copy of manifest input, so a hostile path cannot inflate a message or
+inject control characters. Only the reporting is projected; every planning
+decision uses the original validated path.
+
+Filesystem probes are fail-closed as well: an ``OSError`` from a symlink,
+existence, type or directory probe (for example ``ENAMETOOLONG`` from a hostile
+long path component on Linux) becomes a bounded blocker rather than a raw OS
+error. The exception's text is never echoed because it can contain the full
+caller-controlled path; only its bounded class name is reported.
 """
 from __future__ import annotations
 
@@ -23,6 +35,7 @@ import hashlib
 import json
 import os
 import stat
+import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -32,6 +45,15 @@ SCHEMA = 1
 MAX_MANIFEST_BYTES = 1 << 20  # Keep manifest parsing bounded (1 MiB).
 _CHUNK = 64 * 1024  # Stream file digests; never read a whole file into RAM.
 _HEX = frozenset("0123456789abcdef")
+
+# Diagnostics are fixed tokens plus a bounded projection of a path. A hostile
+# manifest must not be able to grow an exception or a blocker to arbitrary
+# size, or inject control characters into a log through a reflected path.
+_MAX_DIAGNOSTIC_COMPONENTS = 4
+_MAX_DIAGNOSTIC_COMPONENT_CHARS = 64
+_NON_STRING_TOKEN = "<non-string>"
+_TRUNCATION_TOKEN = "..."
+_UNPRINTABLE_CATEGORIES = frozenset(("Cc", "Cf", "Cs", "Co", "Cn", "Zl", "Zp"))
 
 
 class UninstallIntegrityError(ValueError):
@@ -75,18 +97,54 @@ def _sha256_file(path):
     return digest.hexdigest()
 
 
+def _display_component(part):
+    """Render one path component as bounded, printable diagnostic text."""
+    chars = []
+    for char in part[:_MAX_DIAGNOSTIC_COMPONENT_CHARS]:
+        # Replace controls, formats, surrogates, private-use and separators
+        # before they can reach a log or an exception string.
+        if unicodedata.category(char) in _UNPRINTABLE_CATEGORIES:
+            chars.append("?")
+        else:
+            chars.append(char)
+    return "".join(chars)
+
+
+def _display_path(rel):
+    """Bounded, safe projection of a path used only in diagnostics.
+
+    The projection is deliberately one-way: planning decisions still use the
+    original validated path, so install/uninstall semantics are unchanged.
+    Non-string values get a fixed token and are never ``repr``-ed, and both
+    component count and component length are capped.
+    """
+    if not isinstance(rel, str):
+        return _NON_STRING_TOKEN
+    parts = rel.split("/")
+    shown = [_display_component(part)
+             for part in parts[:_MAX_DIAGNOSTIC_COMPONENTS]]
+    text = "/".join(shown)
+    if len(parts) > _MAX_DIAGNOSTIC_COMPONENTS:
+        text += "/" + _TRUNCATION_TOKEN
+    return text
+
+
 def _safe_parts(rel):
     """Validate an owned path and return its components as a tuple."""
     if not isinstance(rel, str) or not rel or "\x00" in rel or "\\" in rel:
-        raise UninstallIntegrityError("invalid owned path: " + repr(rel))
+        raise UninstallIntegrityError(
+            "invalid owned path: " + _display_path(rel))
     if rel.startswith("/"):
-        raise UninstallIntegrityError("absolute owned path refused: " + rel)
+        raise UninstallIntegrityError(
+            "absolute owned path refused: " + _display_path(rel))
     parts = tuple(rel.split("/"))
     for part in parts:
         if part in ("", ".", ".."):
-            raise UninstallIntegrityError("unsafe component in owned path: " + rel)
+            raise UninstallIntegrityError(
+                "unsafe component in owned path: " + _display_path(rel))
         if len(part) >= 2 and part[1] == ":" and part[0].isalpha():
-            raise UninstallIntegrityError("drive-qualified owned path refused: " + rel)
+            raise UninstallIntegrityError(
+                "drive-qualified owned path refused: " + _display_path(rel))
     return parts
 
 
@@ -121,7 +179,8 @@ def normalize_manifest(data):
         _safe_parts(rel)
         if (not isinstance(digest, str) or len(digest) != 64
                 or any(char not in _HEX for char in digest)):
-            raise UninstallIntegrityError("invalid digest for " + str(rel))
+            raise UninstallIntegrityError(
+                "invalid digest for " + _display_path(rel))
         normalized[rel] = digest
     return {"schema": SCHEMA, "files": normalized}
 
@@ -255,8 +314,15 @@ def plan_uninstall(root, manifest):
     blockers = []
     verified = []
 
-    if root.is_symlink():
-        blockers.append("install root is a symlink")
+    try:
+        if root.is_symlink():
+            blockers.append("install root is a symlink")
+            return UninstallPlan(False, (), (), (), tuple(blockers))
+    except OSError as exc:
+        # A hostile root path can make lstat raise ENAMETOOLONG (Linux errno
+        # 36). Fail closed with a bounded, fixed-token diagnostic; never echo
+        # str(exc), which contains the caller-controlled path.
+        blockers.append("install root unprobeable (" + type(exc).__name__ + ")")
         return UninstallPlan(False, (), (), (), tuple(blockers))
     try:
         _require_real_path_components(
@@ -268,25 +334,36 @@ def plan_uninstall(root, manifest):
     for rel in sorted(owned):
         parts = _safe_parts(rel)
         candidate = root.joinpath(*parts)
-        if _symlinked_ancestor(root, parts):
-            blockers.append("symlinked parent directory for " + rel)
-            continue
-        if candidate.is_symlink():
-            blockers.append("owned path is a symlink: " + rel)
-            continue
-        if not candidate.exists():
-            blockers.append("MISSING owned file: " + rel)
-            continue
-        if not candidate.is_file():
-            blockers.append("owned path is not a regular file: " + rel)
+        try:
+            if _symlinked_ancestor(root, parts):
+                blockers.append("symlinked parent directory for " + _display_path(rel))
+                continue
+            if candidate.is_symlink():
+                blockers.append("owned path is a symlink: " + _display_path(rel))
+                continue
+            if not candidate.exists():
+                blockers.append("MISSING owned file: " + _display_path(rel))
+                continue
+            if not candidate.is_file():
+                blockers.append("owned path is not a regular file: " + _display_path(rel))
+                continue
+        except OSError as exc:
+            # Hostile long components make lstat/stat raise ENAMETOOLONG.
+            # Fail closed: a bounded blocker, no removal, no raw OS error and
+            # no caller path echoed through str(exc).
+            blockers.append("unprobeable owned file: " + _display_path(rel)
+                            + " (" + type(exc).__name__ + ")")
             continue
         try:
             actual = _sha256_file(candidate)
         except OSError as exc:
-            blockers.append("unreadable owned file: " + rel + " (" + str(exc) + ")")
+            # str(exc) can echo the full caller-controlled path; keep only the
+            # bounded exception class name.
+            blockers.append("unreadable owned file: " + _display_path(rel)
+                            + " (" + type(exc).__name__ + ")")
             continue
         if actual != owned[rel]:
-            blockers.append("OWNERSHIP MISMATCH: " + rel)
+            blockers.append("OWNERSHIP MISMATCH: " + _display_path(rel))
             continue
         verified.append(rel)
 
@@ -297,7 +374,12 @@ def plan_uninstall(root, manifest):
     removable = set()
     for directory in _owned_directories(owned):
         path = root.joinpath(*directory.split("/"))
-        if path.is_symlink() or not path.is_dir():
+        try:
+            if path.is_symlink() or not path.is_dir():
+                continue
+        except OSError as exc:
+            preserved.append("directory unprobeable: " + _display_path(directory)
+                             + " (" + type(exc).__name__ + ")")
             continue
         can_remove = True
         try:
@@ -306,21 +388,26 @@ def plan_uninstall(root, manifest):
             continue
         for entry in entries:
             rel_entry = directory + "/" + entry.name
-            if entry.is_symlink():
-                preserved.append("unrelated symlink preserved: " + rel_entry)
-                can_remove = False
-            elif entry.is_file():
-                if rel_entry in owned and rel_entry in verified:
-                    continue
-                preserved.append("unrelated file preserved: " + rel_entry)
-                can_remove = False
-            elif entry.is_dir():
-                if rel_entry in removable:
-                    continue
-                preserved.append("directory kept: " + rel_entry)
-                can_remove = False
-            else:
-                preserved.append("non-regular entry preserved: " + rel_entry)
+            try:
+                if entry.is_symlink():
+                    preserved.append("unrelated symlink preserved: " + _display_path(rel_entry))
+                    can_remove = False
+                elif entry.is_file():
+                    if rel_entry in owned and rel_entry in verified:
+                        continue
+                    preserved.append("unrelated file preserved: " + _display_path(rel_entry))
+                    can_remove = False
+                elif entry.is_dir():
+                    if rel_entry in removable:
+                        continue
+                    preserved.append("directory kept: " + _display_path(rel_entry))
+                    can_remove = False
+                else:
+                    preserved.append("non-regular entry preserved: " + _display_path(rel_entry))
+                    can_remove = False
+            except OSError as exc:
+                preserved.append("entry unprobeable: " + _display_path(rel_entry)
+                                 + " (" + type(exc).__name__ + ")")
                 can_remove = False
         if can_remove:
             removable.add(directory)

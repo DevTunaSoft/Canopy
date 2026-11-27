@@ -31,16 +31,19 @@ STATUS_LABELS = (
 )
 
 # SHA-256 of the visual projection (every Accessible.* line and the
-# A11Y-ANNOUNCE block removed) of the pristine b8735dc base blobs.
+# A11Y-ANNOUNCE block removed) of the current blobs. ND-041 added only
+# state-binding logic above `visible: opened` in the two owned panels; the
+# rendered visual half is still byte-frozen and separately pinned by
+# tests/test_nd041_native_settings_controls_wiring.py.
 BASE_VISUAL_PROJECTION_SHA256 = {
     "PreviewWindow.qml":
         "741091d6324db4193b2c4300c438a502631ed550604c271405e9d2e56d2eaeec",
     "LauncherOverlay.qml":
         "e5e1f3169fe9abca57744e8a5dc45f2a8d338fa05d0d719ea731f5633c43b6ce",
     "QuickControlsOverlay.qml":
-        "079d6fc6df67e38c755aab1a33064ec72d66e097d94bd53739be62c16fddc2a6",
+        "ff384289b67c4bdb235258d8294ef28d668d42064c8a753bfebbef885d99c6d1",
     "SettingsPanel.qml":
-        "2ad6a538b3e5194aa2a47ff986fc2d08c925897632c7e9bc1149b626915196cd",
+        "1cf64ea493b1a291a8d2049bc7575c3938922ac9a13727dc7728ec433617c2d7",
     "NotificationCenter.qml":
         "d686ed2654ea0a7a1139253da533976a7264451c26f2da9bd9b6f8bc650b1189",
 }

@@ -12,11 +12,14 @@ integration branch, and a compilable Classic Qt prototype exists in the draft
 stack (see #151). No release candidate has passed owner visual acceptance and
 Linux Mint guest acceptance; see release blocker #132. Modern is planned.
 
+## Free and open source
+All first-party Canopy and LacOS features, Shell Packs and layouts are free and open source. No paid tiers, subscriptions, activation, ads or mandatory telemetry/accounts. See the [master owner directive](docs/MASTER_OWNER_DIRECTIVE.md). Initial planned experiences: Classic, Modern, Heritage, Flow, Lite, Studio, Cloud and Touch, with unlimited future packs. Zorin's full layout catalog is a research reference, not copied artwork.
+
 ## Current architecture direction (2026-11-27)
 
 Owner-approved pivot to native KDE Plasma 6/KWin, Qt 6 and KF6. Finish current legacy tasks, preserve their history, then port reusable components. Kubuntu LTS is the reference guest; KDE neon is an upstream compatibility lane. See [Plasma pivot](docs/PLASMA6_PIVOT.md). The legacy Qt preview is not native Plasma acceptance.
 
-LacOS is a planned immutable OS with verified atomic updates and rollback, a read-only system core, and separate APT, Pacman, Flatpak and rootless Podman application options. The production base and deployment backend remain evidence-gated. See [immutable architecture](docs/LACOS_IMMUTABLE_ARCHITECTURE.md). These are requirements, not implemented features.
+LacOS is a planned immutable OS with verified atomic updates and rollback, a read-only system core, and separate APT, Pacman, DNF/RPM, Flatpak and rootless Podman application options. Fedora Kinoite is the leading candidate; prefer official upstream updates independent of LacOS infrastructure. The production base and deployment backend remain evidence-gated. See [immutable architecture](docs/LACOS_IMMUTABLE_ARCHITECTURE.md). These are requirements, not implemented features.
 
 ## Resource targets and evidence labels (read before citing a number)
 
@@ -43,7 +46,7 @@ LacOS is a planned immutable OS with verified atomic updates and rollback, a rea
 
 ## Continuous engineering contract
 
-Hermes operates within the latest owner-authorized host-safe workforce ceiling, not a quota. Current legacy assignments finish before reassignment; no new Cinnamon-specific assignments. Review and integrate verified work into the respective integration branches during migration. After the native Plasma baseline gates pass, protected `main` becomes the development trunk under the owner-approved independent-review and CI policy. Draft PRs are temporary; post-merge regression runs after merging. Final public releases and protected visual changes remain owner-gated. Named holds #279, #151 and #278 remain binding. See [workforce policy](docs/AGENTS_WORKFORCE.md),
+Hermes operates within the owner-authorized ceiling of eight concurrent engineering subagents plus Hermes, not a quota. Current legacy assignments finish before reassignment; no new Cinnamon-specific assignments. Review and integrate verified work into the respective integration branches during migration. After the native Plasma baseline gates pass, protected `main` becomes the development trunk under the owner-approved independent-review and CI policy. Draft PRs are temporary; post-merge regression runs after merging. Final public releases and protected visual changes remain owner-gated. Named holds #279, #151 and #278 remain binding. See [workforce policy](docs/AGENTS_WORKFORCE.md),
 [AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUTING.md) and
 [quality gates](docs/QUALITY.md).
 

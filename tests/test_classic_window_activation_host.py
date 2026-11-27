@@ -19,9 +19,11 @@ HEADER = CLASSIC / "WindowActivationState.h"
 SOURCE = CLASSIC / "WindowActivationState.cpp"
 ADAPTER = CLASSIC / "WindowActivationIndicators.qml"
 
-# PR #573 head 5e1ee70bb79b731a61f6ace118c61a2fd75a0d3e, verified on disk.
-PR573_HEADER_SHA = "823053457861c4a47384610a17822c5c06cfa42e3ce32b1a1f0b369abd8ab13f"
-PR573_SOURCE_SHA = "f3ad4325cc072f7a750cbe0a07d7d38bf421a7db6d69d57b9a55274d5cbaf4e4"
+# PR #573 state component, byte-resynced for the ND-037 compiled wiring at
+# integration tip 7535c0e9 (test-only pin sync; no visual source edit).
+# Digests are over LF-normalized whole-file bytes.
+PR573_HEADER_SHA = "082ae9933f60bfeb43b784e29c437cbb0ff2d6616709f34c60f7484bb79bf2eb"
+PR573_SOURCE_SHA = "834fd09e6308ab819ae1c4e041ada7962543dab644a2d0068b7cf9004b21e0a9"
 
 
 class ClassicWindowActivationHostTests(unittest.TestCase):

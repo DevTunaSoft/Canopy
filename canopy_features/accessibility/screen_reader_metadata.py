@@ -15,6 +15,8 @@ INVALID_NAME = "invalid-name"
 INVALID_DESCRIPTION = "invalid-description"
 INVALID_ROLE = "invalid-role"
 INVALID_ELEMENT = "invalid-element"
+INVALID_IGNORED = "invalid-ignored"
+IGNORED_INTERACTIVE = "ignored-interactive"
 
 # Role vocabulary follows the names used by the Classic Qt/QML source: buttons,
 # menu items, text fields and the non-interactive decorations around them.
@@ -33,6 +35,17 @@ INTERACTIVE_ROLES = frozenset({
     "radioButton", "slider", "spinBox", "switch", "tab", "tabItem",
     "textField", "toolButton",
 })
+
+# Non-interactive roles that still convey information a screen reader must be
+# able to announce (QA-005-005). They need an accessible name too. Purely
+# decorative artwork is excluded explicitly with ``ignored: true``, the
+# metadata equivalent of Accessible.ignored; it is never exempted by inference.
+INFORMATIVE_ROLES = frozenset({
+    "alert", "image", "staticText",
+})
+
+# Every role whose metadata is incomplete without a non-empty accessible name.
+NAMED_ROLES = INTERACTIVE_ROLES | INFORMATIVE_ROLES
 
 
 @dataclass(frozen=True)
@@ -60,12 +73,21 @@ def _name_field(element):
 
 
 def validate_metadata(elements, *, known_roles=KNOWN_ROLES,
-                      interactive_roles=INTERACTIVE_ROLES):
+                      interactive_roles=INTERACTIVE_ROLES,
+                      informative_roles=INFORMATIVE_ROLES):
     """Return a list of :class:`Issue` for invalid accessible metadata.
 
     ``label`` is accepted as an alias for ``name``. A record needs a non-empty
-    string name only when its role is interactive. Validation is pure: no
-    global state, no I/O and no allocation beyond the returned issue list.
+    string name when its role is interactive *or* informative. Decorative art
+    is excluded only by an explicit boolean ``ignored: true`` (Accessible.ignored);
+    a non-boolean value fails closed and never grants the exemption. An
+    interactive element marked ignored is reported as contradictory, so the
+    gate cannot be cleared by blanket ignoring. Validation is pure: no global
+    state, no I/O and no allocation beyond the returned issue list.
+
+    This checks record consistency only. It does not read QML, start Qt, query
+    AT-SPI or observe a screen reader, and a clean result is not an announcement
+    or Linux Mint acceptance claim.
     """
     issues = []
     for index, element in enumerate(elements):
@@ -85,13 +107,23 @@ def validate_metadata(elements, *, known_roles=KNOWN_ROLES,
                                 "unsupported role: " + role))
             requires_name = False
         else:
-            requires_name = role in interactive_roles
+            requires_name = role in interactive_roles or role in informative_roles
+
+        ignored = element.get("ignored", False)
+        if "ignored" in element and not isinstance(ignored, bool):
+            issues.append(Issue(where, INVALID_IGNORED,
+                                "ignored must be an explicit boolean"))
+        elif ignored:
+            requires_name = False
+            if role in interactive_roles:
+                issues.append(Issue(where, IGNORED_INTERACTIVE,
+                                    "interactive element must not be ignored"))
 
         key, name = _name_field(element)
         if key is None or name is None:
             if requires_name:
                 issues.append(Issue(where, MISSING_LABEL,
-                                    "interactive element has no accessible name"))
+                                    "element requires an accessible name"))
         elif not isinstance(name, str):
             issues.append(Issue(where, INVALID_NAME,
                                 "accessible name must be a string"))

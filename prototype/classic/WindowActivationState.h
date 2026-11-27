@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QHash>
 #include <QList>
 #include <QMetaType>
 #include <QObject>
@@ -20,11 +21,15 @@
 //   canopy_features/dock/dock_running_indicators.py  (bounded owner fold)
 //   canopy_features/dock/click_intents.py            (FOCUS/LAUNCH/REJECT/IGNORE)
 //   canopy_features/windows/focus_intents.py         (deny-by-default authorization)
-//   canopy_features/windows/window_state_capabilities.py (known backend ids)
+//   canopy_features/windows/window_state_capabilities.py (known backend ids
+//   and the merged PR #688 bounded, generation-checked window references)
 //
-// Wiring dependency: prototype/classic/CMakeLists.txt and main.cpp are owned
-// by other workstreams; this file is deliberately NOT registered there. The
-// standalone compiled self-test in window_activation/ builds it directly.
+// The compiled shell already constructs this QObject and feeds it trusted host
+// snapshots through applySnapshot(); no timer, service, polling or new host
+// topic is added. A host may supply optional `windowRefs` facts in that same
+// snapshot; when it does, every focus reference is validated against the
+// bounded live generation before any indicator can be derived. The QML face is
+// WindowActivationIndicators.qml, an inert QtObject with no visual elements.
 class WindowActivationState final : public QObject {
     Q_OBJECT
 public:
@@ -36,6 +41,9 @@ public:
     static constexpr int kMaxIdLength = 128;
     static constexpr int kMaxGrants = 256;
     static constexpr int kMaxInstalled = 64;
+    // Mirrors window_state_capabilities.MAX_LIVE_WINDOWS / MAX_SERIAL (PR #688).
+    static constexpr int kMaxLiveWindows = 64;
+    static constexpr int kMaxSerial = 2147483647;
 
     explicit WindowActivationState(QObject *parent = nullptr);
 
@@ -65,6 +73,19 @@ public:
     Q_INVOKABLE QString resolveActivation(const QString &appId,
                                           const QString &originApp) const;
 
+    // Decision-only PR #688 gate: a dock activation is refused unless the
+    // supplied window reference is LIVE in the last host-supplied registry and
+    // owned by the target app. No window operation is performed here.
+    Q_INVOKABLE QString resolveActivationWithReference(
+        const QString &appId, const QString &originApp, int windowId,
+        int serial, const QString &owner) const;
+
+    // Classify one reference against the last host-supplied live generation:
+    // LIVE, STALE, UNKNOWN, UNAUTHORIZED, INVALID or UNVALIDATED (no registry).
+    Q_INVOKABLE QString referenceStatus(int windowId, int serial,
+                                        const QString &owner) const;
+    Q_INVOKABLE int liveWindowCount() const;
+
 signals:
     void stateChanged();
 
@@ -72,6 +93,13 @@ private:
     struct Owner {
         int pid = 0;
         QString appId;
+    };
+
+    // One host-owned live window instance; the serial is its generation.
+    struct WindowRef {
+        int windowId = 0;
+        int serial = 0;
+        QString owner;
     };
 
     static bool isApprovedDockName(const QString &name);
@@ -83,6 +111,13 @@ private:
     bool parseOwners(const QVariantList &values, QList<Owner> &out) const;
     bool parseInstalled(const QVariantList &values, QSet<QString> &out) const;
     bool parseGrants(const QVariantList &values, QSet<QString> &out) const;
+    bool parseWindowRefs(const QVariantList &values,
+                         QHash<int, WindowRef> &live,
+                         QHash<int, int> &seenSerial) const;
+    static QString classifyReference(const QHash<int, WindowRef> &live,
+                                     const QHash<int, int> &seenSerial,
+                                     int windowId, int serial,
+                                     const QString &owner);
     bool authorized(const QString &origin, const QString &target) const;
     void clear();
 
@@ -94,4 +129,7 @@ private:
     QSet<QString> m_grants;
     QString m_focusApp;
     bool m_focusGranted = false;
+    QHash<int, WindowRef> m_liveWindows;
+    QHash<int, int> m_seenSerial;  // high-water generation, kept across clears
+    bool m_hasRegistry = false;
 };

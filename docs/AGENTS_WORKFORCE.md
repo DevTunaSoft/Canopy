@@ -1,5 +1,13 @@
 # Agent workforce and integration policy
 
+Current controlling authority: [MASTER_OWNER_DIRECTIVE.md](MASTER_OWNER_DIRECTIVE.md), 2026-11-27. Maximum eight concurrent engineering subagents plus Hermes as orchestrator, not a quota; throttle lower to protect host responsiveness. Finish current assignments, do not start replacements above cap, no new Cinnamon-specific assignments. Preserve isolated worktrees, independent review, exact-SHA checks, dependency-aware scheduling, watchdog and recoverable checkpoints. No self-approval. Legacy verified work integrates into legacy branch, new work into Plasma integration until baseline gates pass; then protected main is development trunk under master directive. Post-merge regression after merge. Named holds #279/#151/#278 and visual/security/public release approvals remain binding. Routine upstream security updates do not wait for owner approval.
+
+## Historical policy (superseded where inconsistent)
+
+The following prior wording is retained for provenance only, not active instructions. The current master directive controls.
+
+# Agent workforce and integration policy
+
 Authoritative source (external to this repository): the composer-pasted master
 supplemental directive, preserved on disk at
 `C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy_master_supplemental_directive_20261126.md`

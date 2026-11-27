@@ -432,6 +432,79 @@ private:
     QString m_name;
 };
 
+// Terminal was the last approved dock tile that could stay preview-only with
+// a refusal footer when the session's installed terminal was a Konsole
+// desktop entry rather than one of the host launcher's frozen candidates.
+// This adapter keeps the single host-owned GIO path: the exact frozen dock
+// label is resolved through SystemAppLauncher when an installed desktop entry
+// is available. Otherwise it takes the documented fallback below instead of
+// claiming a launch failure. No QML, artwork, geometry, process, shell or
+// second GIO code path is introduced.
+class TerminalDockLaunchBridge final : public QObject {
+    Q_OBJECT
+public:
+    TerminalDockLaunchBridge(SystemAppLauncher &launcher,
+                             WindowActivationState &state,
+                             QObject *statusOverlay, QObject *parent = nullptr)
+        : QObject(parent), m_launcher(launcher), m_state(state),
+          m_status(statusOverlay) {}
+
+    static bool isTerminalDockName(const QString &name)
+    {
+        return name == QStringLiteral("Terminal");
+    }
+
+    // Fixed, non-refusal status for the documented fallback.
+    static QString fallbackMessage()
+    {
+        return QStringLiteral("Choose an installed terminal application");
+    }
+
+public slots:
+    void activate(const QString &name) {
+        if (!isTerminalDockName(name)) {
+            qWarning() << "CANOPY_TERMINAL_DOCK_REJECTED: unknown action";
+            return;
+        }
+        const QString intent = m_state.resolveActivation(
+            name, QStringLiteral("Canopy"));
+        if (intent == QStringLiteral("FOCUS")
+                || intent == QStringLiteral("IGNORE")) {
+            // Truthful, explicit states: a running terminal needs a focus
+            // grant and a disabled launcher cannot launch anything.
+            qWarning() << "CANOPY_TERMINAL_DOCK_INTENT_REFUSED" << intent;
+            showActivationStatus(m_status,
+                                 activationRefusal(m_state, name, intent));
+            return;
+        }
+        // LAUNCH and REJECT with no installed candidate both reach the same
+        // native app model first. Only the host launcher may actuate; a
+        // failed or unavailable launch is never reported as a success.
+        if (intent == QStringLiteral("LAUNCH")
+                && m_launcher.canLaunch(name) && m_launcher.launch(name)) {
+            qInfo() << "CANOPY_TERMINAL_DOCK_NATIVE_LAUNCH_REQUESTED";
+            return;
+        }
+        if (!m_status)
+            return;
+        // Documented fallback: hand the user the existing native launcher so
+        // an installed terminal (for example a Konsole desktop entry) can be
+        // chosen explicitly. No refusal footer and no invented success.
+        if (!QMetaObject::invokeMethod(m_status, "openLauncher",
+                                       Qt::DirectConnection)) {
+            qWarning() << "CANOPY_TERMINAL_DOCK_STATUS_UNAVAILABLE";
+            return;
+        }
+        m_status->setProperty("selectionMessage", fallbackMessage());
+        qInfo() << "CANOPY_TERMINAL_DOCK_FALLBACK_OPENED";
+    }
+
+private:
+    SystemAppLauncher &m_launcher;
+    WindowActivationState &m_state;
+    QObject *m_status;
+};
+
 // Host-owned window-activation snapshot source. The adapter itself never
 // observes or actuates; the shell supplies only facts it already owns:
 // the Qt platform backend and the GIO launcher allowlist. No process or
@@ -702,6 +775,78 @@ static bool runRemainingDockFixture(QQuickWindow *window,
         }
         const QString marker = tag + QStringLiteral("_DOCK_LAUNCH_FIXTURE_PASS");
         qInfo() << qPrintable(marker) << "dock signal reached GIO service";
+    }
+    QTimer::singleShot(0, QCoreApplication::instance(), &QCoreApplication::quit);
+    return true;
+}
+
+// Compiled fixture for the last Terminal dock tile. It proves the exact
+// frozen label reaches the one host-owned GIO launcher when an installed
+// desktop entry resolves, and that the documented fallback opens the existing
+// launcher with a neutral status instead of a refusal footer. A hostile
+// lookalike label is refused before any launcher is touched.
+static bool runTerminalDockFixture(QQuickWindow *window,
+                                   SystemAppLauncher &launcher,
+                                   bool statusCase)
+{
+    if (!window)
+        return false;
+    const QString name = QStringLiteral("Terminal");
+    const bool installed = launcher.canLaunch(name);
+    if (statusCase && installed) {
+        qCritical() << "TERMINAL_DOCK_FIXTURE_FAIL: status case needs no app";
+        return false;
+    }
+    if (!statusCase && !installed) {
+        qCritical() << "TERMINAL_DOCK_FIXTURE_FAIL: GIO app unavailable";
+        return false;
+    }
+    auto *tile = findDockTile(window->contentItem(), name);
+    auto *overlay = findVisualItem(window->contentItem(),
+                                   QStringLiteral("canopyApplicationLauncher"));
+    auto *status = findVisualItem(window->contentItem(),
+                                  QStringLiteral("canopyLauncherStatus"));
+    if (!tile || !overlay || !status) {
+        qCritical() << "TERMINAL_DOCK_FIXTURE_FAIL: frozen dock or footer missing";
+        return false;
+    }
+    const QString initialStatus = status->property("text").toString();
+    const QString hostile = name + QStringLiteral(";echo bad");
+    if (!QMetaObject::invokeMethod(tile, "activated", Qt::DirectConnection,
+                                   Q_ARG(QString, hostile))) {
+        qCritical() << "TERMINAL_DOCK_FIXTURE_FAIL: signal not invokable";
+        return false;
+    }
+    QCoreApplication::processEvents();
+    if (overlay->property("opened").toBool()
+            || status->property("text").toString() != initialStatus) {
+        qCritical() << "TERMINAL_DOCK_FIXTURE_FAIL: unknown action accepted";
+        return false;
+    }
+    if (!QMetaObject::invokeMethod(tile, "activated", Qt::DirectConnection,
+                                   Q_ARG(QString, name))) {
+        qCritical() << "TERMINAL_DOCK_FIXTURE_FAIL: dock activation failed";
+        return false;
+    }
+    QCoreApplication::processEvents();
+    const QString shown = status->property("text").toString();
+    if (statusCase) {
+        if (!overlay->property("opened").toBool()
+                || !shown.contains(TerminalDockLaunchBridge::fallbackMessage())
+                || shown.contains(QStringLiteral("could not be launched"))) {
+            qCritical() << "TERMINAL_DOCK_FIXTURE_FAIL: documented fallback missing";
+            return false;
+        }
+        qInfo() << QStringLiteral("TERMINAL_DOCK_STATUS_FIXTURE_PASS")
+                << "fallback visible without a refusal footer";
+    } else {
+        if (overlay->property("opened").toBool()
+                || status->property("text").toString() != initialStatus) {
+            qCritical() << "TERMINAL_DOCK_FIXTURE_FAIL: launch reported a refusal";
+            return false;
+        }
+        qInfo() << QStringLiteral("TERMINAL_DOCK_LAUNCH_FIXTURE_PASS")
+                << "dock signal reached the native GIO launcher";
     }
     QTimer::singleShot(0, QCoreApplication::instance(), &QCoreApplication::quit);
     return true;
@@ -2468,8 +2613,7 @@ int main(int argc, char *argv[]) {
         auto *remainingStatusOverlay = findVisualItem(
             window->contentItem(), QStringLiteral("canopyApplicationLauncher"));
         static const QStringList remainingDockNames = {
-            QStringLiteral("Calendar"), QStringLiteral("Photos"),
-            QStringLiteral("Terminal")
+            QStringLiteral("Calendar"), QStringLiteral("Photos")
         };
         for (const QString &name : remainingDockNames) {
             if (auto *tile = findDockTile(window->contentItem(), name)) {
@@ -2478,6 +2622,22 @@ int main(int argc, char *argv[]) {
                 QObject::connect(tile, SIGNAL(activated(QString)),
                                  bridge, SLOT(activate(QString)));
                 qInfo() << "CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED" << name;
+            }
+        }
+        // Terminal keeps its own exact-label adapter: installed desktop
+        // entries launch through the same host service, otherwise the
+        // documented fallback opens the launcher with no refusal footer.
+        static const QStringList terminalDockNames = {
+            QStringLiteral("Terminal")
+        };
+        for (const QString &name : terminalDockNames) {
+            if (auto *tile = findDockTile(window->contentItem(), name)) {
+                auto *bridge = new TerminalDockLaunchBridge(
+                    systemLauncher, activationState,
+                    remainingStatusOverlay, &app);
+                QObject::connect(tile, SIGNAL(activated(QString)),
+                                 bridge, SLOT(activate(QString)));
+                qInfo() << "CANOPY_TERMINAL_DOCK_NATIVE_LAUNCH_CONNECTED" << name;
             }
         }
         static const QStringList gatedDockNames = {
@@ -3209,9 +3369,8 @@ int main(int argc, char *argv[]) {
                                             photosDockStatusFixture))
             return 1;
         if ((terminalDockStatusFixture || terminalDockLaunchFixture)
-                && !runRemainingDockFixture(window, systemLauncher,
-                                            QStringLiteral("Terminal"),
-                                            terminalDockStatusFixture))
+                && !runTerminalDockFixture(window, systemLauncher,
+                                           terminalDockStatusFixture))
             return 1;
     }
     const int sizeIndex = args.indexOf(QStringLiteral("--self-test-size"));

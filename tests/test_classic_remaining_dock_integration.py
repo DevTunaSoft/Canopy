@@ -1,7 +1,9 @@
 """Source contracts for the remaining Classic dock app launches.
 
-Calendar, Photos and Terminal join Files, Browser and Mail on the single
-host-owned GIO bridge. These are source-level invariants; the compiled
+Calendar and Photos join Files, Browser and Mail on the single
+host-owned GIO bridge. Terminal now has its own exact-label adapter with a
+documented fallback; see ``test_classic_terminal_dock_native_launch``.
+These are source-level invariants; the compiled
 self-tests and isolated GIO fixtures are exercised by classic-qt CI. The
 bridge accepts only one exact frozen dock label per instance and leaves every
 approved QML/artwork byte untouched.
@@ -18,11 +20,10 @@ from test_classic_dock_frozen import (
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "prototype" / "classic"
-NAMES = ("Calendar", "Photos", "Terminal")
+NAMES = ("Calendar", "Photos")
 DESKTOP_IDS = {
     "Calendar": "org.gnome.Calendar.desktop",
     "Photos": "org.gnome.Loupe.desktop",
-    "Terminal": "gnome-terminal.desktop",
 }
 
 
@@ -40,7 +41,6 @@ class ClassicRemainingDockIntegrationTests(unittest.TestCase):
         self.assertIn("class RemainingDockLaunchBridge final : public QObject", cpp)
         self.assertIn('name == QStringLiteral("Calendar")', cpp)
         self.assertIn('name == QStringLiteral("Photos")', cpp)
-        self.assertIn('name == QStringLiteral("Terminal")', cpp)
         self.assertIn("name != m_name", cpp)
         self.assertIn("m_launcher.launch(name)", cpp)
         self.assertIn("CANOPY_REMAINING_DOCK_REJECTED", cpp)

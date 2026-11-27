@@ -70,3 +70,51 @@ compiled relayout consumer can be written. This task deliberately does not
 fabricate a compiled scaling bridge or edit approved visual source.
 
 Current head: to be recorded at commit in the PR body and evidence log.
+
+## Terminal dock tile — native launch resolution (ND follow-up)
+
+Native functional observation carried into this source change: the frozen
+Terminal dock tile stayed preview-only and reported a refusal footer, while a
+GIO `konsole.desktop` activation succeeded in the same session at
+1920x1080, 1200x750 and 760x500. That observation is runtime evidence scoped
+to the tested session; it is NOT visual acceptance and NOT a release gate.
+
+`prototype/classic/main.cpp` now gives Terminal its own exact-label adapter,
+`TerminalDockLaunchBridge`, instead of leaving it in the generic remaining-app
+bridge. The adapter:
+
+- accepts only the frozen dock label `Terminal` and refuses lookalikes before
+  any launcher call;
+- uses the one host-owned `SystemAppLauncher` (the validated GIO path) when the
+  trusted window-activation snapshot reports `LAUNCH` and that service can
+  resolve an installed desktop entry;
+- otherwise opens the existing native launcher with the fixed neutral status
+  `Choose an installed terminal application` — a **documented fallback**, not
+  a refusal footer and never a false success claim;
+- keeps truthful refusals only for the explicit `FOCUS` (needs a grant) and
+  `IGNORE` (launcher disabled) states.
+
+The closed desktop-entry allowlist in `SystemAppLauncher.cpp` is unchanged:
+no new desktop ID, argv, path, URL, shell, `QProcess`, second GIO path,
+compositor, QML, icon, wallpaper, dock geometry or colour was added. The
+fallback hands selection to the native launcher rather than widening a
+security boundary. The compiled fixture keeps both `--self-test-terminal-dock-fixture`
+and `--self-test-terminal-dock-status` with the same Pass markers; the status
+case now asserts the neutral fallback and the absence of refusal text.
+
+Verification: `tests/test_classic_terminal_dock_native_launch.py` (source
+contract plus frozen-dock byte pin), `tests/test_classic_remaining_dock_integration.py`,
+`tools/check_foundation.py` and a clean trial merge against the exact source
+pin `fef38c311736b7cdded3acedde4bae985237a6e3`. The terminal-specific compiled
+GIO fixture is run by CI, not by this source-contract change: compiled runtime
+and real Plasma/Mint acceptance remain `NOT_RUN` here.
+
+Resource impact: measured (`SYNTHETIC`) — Python source-contract test counts
+and static allocation accounting (three pointer members and two fixed QString
+constants on one QObject; no timer, thread, cache, service or polling).
+Deliberately not measured (`NOT_RUN`) — real shell-owned PSS/CPU, compiled Qt
+frame timings, desktop session behavior and full-suite deltas. Screen-reader
+behavior is `NOT_RUN`: no new accessibility label or announcement source is
+registered; the existing launcher status text is reused. No stability,
+security, accessibility or approved visual quality is traded for a minor gain.
+This change is source/functional only: no visual approval is claimed.

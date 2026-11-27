@@ -46,7 +46,8 @@ that as **AGENT REVIEWED**, never as human approval. Run post-merge regression
 approval for final visual acceptance, substantial identity changes, high-risk
 security decisions and final acceptance into `main`. Named holds on #279, #151
 and #278 are never overridden by general authorization. The workforce ceiling
-is 12 engineering subagents plus Hermes as lead orchestrator under the newer
-owner directive (2026-11-26), which supersedes only the 10-agent ceiling in the
+is 15 engineering subagents plus Hermes as lead orchestrator (16 total) under the
+2026-11-26 master autonomous engineering directive, which supersedes only earlier
+workforce ceilings, including the 10-agent ceiling in the
 external directive cited in [workforce policy](../docs/AGENTS_WORKFORCE.md); all
 other requirements there remain in force.

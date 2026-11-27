@@ -6,6 +6,10 @@ The owner has authorized native KDE Plasma 6/KWin and gated autonomous main inte
 
 Read README.md and docs/ARCHITECTURE.md and docs/QUALITY.md completely before making changes. Preserve existing project instructions; this file supplements rather than replaces them.
 
+## LacOS immutable core and application options (2026-11-27)
+
+Read [docs/LACOS_IMMUTABLE_ARCHITECTURE.md](docs/LACOS_IMMUTABLE_ARCHITECTURE.md) and updated [docs/LACOS_VISION.md](docs/LACOS_VISION.md). The production OS must use a read-only core with verified atomic updates/rollback and separate APT, Pacman, Flatpak and rootless Podman application paths. The exact backend/base remains evidence-gated. Include KDE neon in upstream compatibility research; use Zorin OS as a Modern usability reference without copying proprietary assets or adding a second desktop. Do not interrupt current assignments or delay native Classic with speculative distro work.
+
 ## Governing product-completion priority
 
 The governing objective is one coherent, functional, secure, stable, resource-efficient and premium Canopy Classic desktop product. Workstreams are: 1 product integration/functional engineering; 2 premium GUI/artwork engineering; 3 Plasma session/deployment (Mint remains legacy reference); 4 independent QA/performance/release evidence. Prioritize security/stability/data integrity, explicit owner decisions and approved visual identity, actual product functionality, clean architecture, continuous autonomous execution, and evidence-backed acceptance. Do not optimize for commit, PR, module or test counts. Use `docs/PRODUCT_COMPLETION_MATRIX.md` and `docs/GUI_ENGINEERING_DOSSIER.md` to select dependency-aware work and record verified maturity. Do not continue generating increasingly granular standalone validators while core desktop integration remains incomplete. The 2026-11-25 master product-completion/GUI-takeover directive supersedes earlier lower-priority queues and the prior ChatGPT-exclusive visual ownership rule, but does not weaken security, quality, accessibility, resource, release-gate or final-owner-acceptance requirements.

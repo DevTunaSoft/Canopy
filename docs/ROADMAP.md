@@ -1,48 +1,23 @@
 # Canopy roadmap
 
-Status legend: PLANNED / IN PROGRESS / VERIFIED / BLOCKED.
+Status: PLANNED / IN PROGRESS / VERIFIED / BLOCKED / NOT RUN. Direction is approved; implementation evidence must be independently verified.
 
-## ACTIVE GOAL — 2026-11-26 supplemental directive
+## Active goal — master owner directive, 2026-11-27
+Follow [MASTER_OWNER_DIRECTIVE.md](MASTER_OWNER_DIRECTIVE.md) and [PLASMA6_PIVOT.md](PLASMA6_PIVOT.md). Finish existing assignments, preserve and archive legacy work, then deliver a genuinely functional native Plasma 6 Classic desktop. Eight subagents maximum plus Hermes, lower when host resources require; no mandatory quota. Keep the watchdog and independent review. Do not start new Cinnamon-specific tasks. Preserve historical evidence in Git; do not relabel legacy tests as native Plasma acceptance.
 
-Finish one installable, functional, secure, stable, premium, resource-efficient Linux Mint Classic desktop. Workforce ceiling: up to 12 engineering subagents plus Hermes when productive non-overlapping work exists (newer owner directive, 2026-11-26; it supersedes the 10-agent ceiling in the external directive cited below, while all other wording and acceptance gates there remain in force); throttle heavy operations to protect orchestrator stability. Priorities: security/stability/data integrity; real Mint functionality; integration of existing components; installation/startup/recovery; premium GUI; low resources; independent verification; release documentation. No main merge or final release without explicit owner authorization. Authoritative directive (external, **NOT in the repository tree**): composer-pasted source at `C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy_master_supplemental_directive_20261126.md`, SHA-256 `f3ec49fba9317c01354dbd34cf1c5cfedb2625b604f25117c720ae0f44781eae` (recomputed from on-disk bytes); the bare filename is `MISSING` at exact tip `20fb694f2b4a0ea44e2f3032f316ac8c7e65a23a` (`git cat-file -e` fails in this isolated worktree) and was previously recorded `MISSING` at archived tip `84684a0f77c81cb0e84d9a679ec57a429dc5c1db` per `C:/Users/X1/AppData/Local/hermes/cache/scratch/final_git_tree_provenance_84684a0.json`.
+## Dependency-aware milestones
+1. Finish current legacy tasks, independently review, push, integrate eligible work, archive final SHA and inventory verified reusable changes.
+2. Establish native Plasma reference guest (Kubuntu LTS), early Kinoite acceptance and KDE neon compatibility testing; retain Mint comparison. Port useful code and approved original artwork.
+3. Deliver native Classic with real desktop/session, launch/dock/window/menu functionality, recovery, accessibility and measured resource/visual evidence.
+4. Verify coherent baseline and transition to protected main under master directive; optimize performance. Named holds and applicable owner acceptance remain.
+5. Build Modern with comprehensive Zorin research across all editions/layouts; prove transactional Shell Pack switching; progressively add Heritage, Flow, Lite, Studio, Cloud and Touch. All first-party layouts free and open source; unlimited future packs.
+6. Validate Kinoite as leading immutable foundation, upstream continuity and stock Plasma fallback; compare alternatives. Research in parallel without delaying Classic.
+7. Integrate immutable deployment, signed atomic updates, rollback, backup/restore, upstream-maintained application environments (Flatpak/APT/Pacman/DNF/Podman), unified software management and optional ecosystems on demand.
+8. Validate security, low resources, real hardware, installer/upgrade/recovery, compatibility and upstream independence; prepare public release for owner approval.
 
-1. **Foundation — VERIFIED for core contracts:** agent rules, architecture, quality budgets and repository CI are present and checked; continued maintenance remains in progress.
-2. **Technology spike — IN PROGRESS:** Qt/QML prototype compiled and smoke-tested; GTK/native comparison remains open.
-3. **Classic vertical slice — IN PROGRESS:** module-level launch, dock, keyboard and session work is integrated; launchable isolated session and end-to-end acceptance are not yet proven.
-4. **Desktop completeness — IN PROGRESS:** bounded workspaces, window interactions, notifications, search and accessibility modules exist; integrated desktop behavior remains to be proven.
-5. **Mint deployment — BLOCKED:** installer/recovery modules exist; real Linux Mint guest acceptance, packaging and rollback verification remain mandatory.
-6. **Modern presentation — PLANNED:** Windows-inspired adapter over shared services without duplicating core logic.
-7. **Distribution — PLANNED:** signed releases, reproducible builds, user guide, support matrix.
+No milestone is VERIFIED until exact-SHA implementation and evidence are recorded. This roadmap does not assert any new milestone has passed.
 
-No milestone is VERIFIED until implementation and evidence are recorded.
+## Workstreams and integration
+Real native runtime integration, premium visual quality, platform/deployment, resource optimization and independent QA take precedence over additional synthetic validators. Use isolated worktrees and task ownership. Integrate verified legacy work on legacy integration and native work on Plasma integration until protected-main transition gates pass. Then routine reviewed development may merge to protected main without repeated owner permission. Required checks, independent review, exact tested SHA/current base/merge result, security, visual and resource gates apply. Post-merge regression runs after integration. Named holds #279/#151/#278, final visual acceptance, high-risk security approval and public release approval remain binding. Routine supported upstream security updates need no owner approval.
 
-## Governing workstreams
-
-Work is selected from `docs/PRODUCT_COMPLETION_MATRIX.md` by dependency and product impact, not by module count:
-
-- **A — Real desktop functionality:** connect existing launchers, dock, window, workspace, files, settings, notification, session and accessibility contracts to the compiled Qt runtime.
-- **B — Linux Mint and system integration:** reversible session registration, compositor interoperability, install/uninstall, lifecycle, suspend/resume, display changes and recovery in isolated VMs.
-- **C — Performance and resource efficiency:** profile the actual desktop first; reduce shell-owned PSS, CPU, GPU proxy, wakeups, disk I/O, startup latency and leaks with measured evidence.
-- **D — Integration and quality assurance:** reproducible Classic builds, compiled-runtime tests, real Mint evidence, security/accessibility validation, independent review and regression prevention.
-
-Standalone security and reliability defects remain eligible, but increasingly granular synthetic validators do not displace core integration work.
-
-## Integration discipline (issue #132)
-Draft PRs are temporary working states. Promote verified PRs to ready-for-review only after their exact SHA passes all required checks and dependencies/conflicts are cleared. Green CI alone never authorizes a merge. Integrate eligible nonvisual work incrementally through the integration branch with regression tests; keep Classic Qt final integration draft until real Mint acceptance and owner visual approval are complete. Maintain at least four concurrently active, isolated engineering subagents plus Hermes; assign another eligible independent task whenever one completes or is blocked. Verify the five-minute watchdog is operational.
-
-## Expandable desktop experiences — FOUNDATION
-
-- **FOUNDATION:** versioned Shell Pack manifest, strict read-only checker,
-  developer starter and regression tests, isolated from unapproved Classic
-  visual history. Documentation and metadata checks do not implement loading.
-- **PLANNED:** implement stable host service contracts and an actual
-  secure/runtime-approved pack lifecycle.
-- **PLANNED:** complete and test Classic; build Modern using shared services;
-  prove app-preserving switching or clearly warn when logout is required.
-- **PLANNED:** support a **third entirely different presentation** without
-  changing the core; test accessibility, modes, rollback and memory cleanup.
-- **LATER:** validated separate LacOS Linux Mint-derived distribution with
-  measurable optimization, security/update and VM/hardware evidence.
-
-See [Shell Pack architecture](SHELL_PACK_ARCHITECTURE.md) and
-[LacOS product vision](LACOS_VISION.md).
+See [quality](QUALITY.md), [LacOS vision](LACOS_VISION.md), [immutable architecture](LACOS_IMMUTABLE_ARCHITECTURE.md) and [Shell Pack architecture](SHELL_PACK_ARCHITECTURE.md). Earlier Mint-centric roadmap remains in Git history and applies only to preserved legacy work where relevant.

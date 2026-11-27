@@ -33,6 +33,9 @@ Unit and integration tests green, no unexplained performance regression, origina
 - Legacy standalone Qt release holds remain binding. Native Plasma baseline transition requires actual guest acceptance and applicable owner visual approval under the ADR. Main is a development trunk after transition; public releases require separate explicit owner authorization and all release gates.
 - Do not stop independent engineering work because another task is awaiting approval.
 
+## LacOS immutable release gates (planned)
+Apply [LACOS_IMMUTABLE_ARCHITECTURE.md](LACOS_IMMUTABLE_ARCHITECTURE.md). Verify mount flags and core integrity before/after APT, Pacman, Flatpak and rootless Podman installation/update/remove, including malicious or malformed inputs and interrupted operations. Demonstrate signed atomic deployment, known-good boot rollback, persistence and compatibility of user/configuration state, power-loss/disk-full/failed-boot recovery, supported upstream security rebuilds, provenance and patch latency, and independent application/container updates. Test on actual hardware and isolated guests; do not confuse Distrobox integration with a sandbox or snapshots with backups. Benchmark full-system and per-app RAM, CPU, GPU, wakeups, startup, storage and image/container overhead; include inactive Shell Pack and stopped-container checks. Do not require production LacOS gates for ordinary Canopy development. Preserve existing resource budgets and owner approval requirements.
+
 ## Additional Shell Pack release checks (planned)
 
 Each new desktop experience needs version/capability compatibility,

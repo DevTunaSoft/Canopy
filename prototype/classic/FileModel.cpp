@@ -11,6 +11,15 @@ const Qt::CaseSensitivity kCase = Qt::CaseSensitive;
 #endif
 } // namespace
 
+void FileModel::pushBounded(QStringList &stack, const QString &path)
+{
+    // History is a bounded cache, not an unbounded travel log: the oldest
+    // entry is discarded before appending once the cap is reached.
+    if (stack.size() >= kMaxHistory)
+        stack.removeFirst();
+    stack.append(path);
+}
+
 FileModel::FileModel(QObject *parent)
     : QAbstractListModel(parent)
 {
@@ -78,7 +87,9 @@ bool FileModel::navigate(const QString &path)
     }
     if (target.compare(m_currentPath, kCase) == 0)
         return true;
-    m_backStack.append(m_currentPath);
+    pushBounded(m_backStack, m_currentPath);
+    // A new destination starts a new branch: stale redo targets are dropped.
+    m_forwardStack.clear();
     takePath(target);
     return true;
 }
@@ -87,7 +98,28 @@ bool FileModel::goBack()
 {
     if (m_backStack.isEmpty())
         return false;
+    pushBounded(m_forwardStack, m_currentPath);
     const QString target = m_backStack.takeLast();
+    takePath(target);
+    return true;
+}
+
+bool FileModel::goForward()
+{
+    if (m_forwardStack.isEmpty())
+        return false;
+    // Re-apply the same home/canonical gate as navigate(): a folder removed
+    // after the Back operation must never become a launch or listing target.
+    const QString target = resolveUnderHome(m_forwardStack.last());
+    if (target.isEmpty() || !QFileInfo(target).isDir()) {
+        m_forwardStack.clear();
+        // Refresh canGoForward() bindings after invalidating the stale redo.
+        emit navigationChanged();
+        emit navigationRejected(QStringLiteral("forward target unavailable"));
+        return false;
+    }
+    pushBounded(m_backStack, m_currentPath);
+    m_forwardStack.removeLast();
     takePath(target);
     return true;
 }
@@ -102,7 +134,8 @@ bool FileModel::goUp()
         emit navigationRejected(QStringLiteral("path outside home"));
         return false;
     }
-    m_backStack.append(m_currentPath);
+    pushBounded(m_backStack, m_currentPath);
+    m_forwardStack.clear();
     takePath(target);
     return true;
 }

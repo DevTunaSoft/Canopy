@@ -23,6 +23,11 @@ QtObject {
     readonly property var activeApps: indicatorsAvailable
         ? activationIndicators.state.activeApps : []
 
+    // Non-visual PR #688 projection: reference classifications come only from
+    // the compiled adapter's last trusted snapshot. No Item, timer or poll.
+    readonly property int liveWindowCount: indicatorsAvailable
+        ? activationIndicators.state.liveWindowCount() : 0
+
     function running(appId) {
         return indicatorsAvailable && activationIndicators.state.isRunning(appId)
     }
@@ -36,5 +41,20 @@ QtObject {
             return "REJECT"
         }
         return activationIndicators.state.resolveActivation(appId, originApp)
+    }
+
+    function referenceStatus(windowId, serial, owner) {
+        if (!indicatorsAvailable) {
+            return "UNVALIDATED"
+        }
+        return activationIndicators.state.referenceStatus(windowId, serial, owner)
+    }
+
+    function activationForWindow(appId, originApp, windowId, serial, owner) {
+        if (!indicatorsAvailable) {
+            return "REJECT"
+        }
+        return activationIndicators.state.resolveActivationWithReference(
+                    appId, originApp, windowId, serial, owner)
     }
 }

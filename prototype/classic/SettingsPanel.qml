@@ -28,6 +28,28 @@ FocusScope {
     signal preferenceChanged(string key, string value)
     signal settingsLaunchFailed(string key)
 
+    // ND-041 state binding only. The compiled shell registers the same
+    // read-only preference bridge as `canopySettingsPreferences` and injects it
+    // as `controller`. Prefer an explicitly injected controller; fall back to
+    // the registered context source only when it satisfies the trusted view
+    // shape. No timer, file, socket, process or second preference store.
+    function trustedController(candidate) {
+        return candidate !== null
+                && typeof candidate === "object"
+                && typeof candidate.view === "function"
+                && typeof candidate.setPreference === "function"
+                ? candidate : null
+    }
+
+    function preferencesController() {
+        var injected = trustedController(controller)
+        if (injected)
+            return injected
+        if (typeof canopySettingsPreferences !== "undefined")
+            return trustedController(canopySettingsPreferences)
+        return null
+    }
+
     function bridgeReady() {
         return typeof canopySystemLaunchEnabled !== "undefined"
                 && canopySystemLaunchEnabled === true
@@ -70,18 +92,33 @@ FocusScope {
     }
 
     function viewFor(key) {
-        if (controller && typeof controller.view === "function") {
-            var supplied = controller.view(key)
+        var adapter = preferencesController()
+        if (adapter) {
+            let supplied = null
+            try {
+                supplied = adapter.view(key)
+            } catch (error) {
+                supplied = null
+            }
             if (supplied && typeof supplied === "object"
                     && supplied.key === key
                     && typeof supplied.title === "string"
+                    && supplied.title.length <= 64
                     && typeof supplied.value === "string"
+                    && supplied.value.length <= 16
                     && typeof supplied.available === "boolean"
                     && typeof supplied.disclosure === "string"
-                    && typeof supplied.source === "string") {
-                var allowed = allowedValues(key)
-                var valueFits = allowed.length === 0
-                        || (supplied.available && allowed.indexOf(supplied.value) >= 0)
+                    && supplied.disclosure.length <= 128
+                    && typeof supplied.source === "string"
+                    && supplied.source.length <= 64
+                    && /^[\x20-\x7e]*$/.test(supplied.source)) {
+                const allowed = allowedValues(key)
+                // Unavailable rows must carry no value at all; a stored value
+                // is accepted only for the one contract-backed key.
+                const valueFits = allowed.length === 0
+                        ? supplied.value === ""
+                        : (supplied.available
+                           && allowed.indexOf(supplied.value) >= 0)
                 if (valueFits)
                     return supplied
             }
@@ -94,8 +131,8 @@ FocusScope {
         var view = viewFor(key)
         return allowed.length > 0 && allowed.indexOf(value) >= 0
                 && view.available === true
-                && controller !== null
-                && typeof controller.setPreference === "function"
+                && preferencesController() !== null
+                && typeof preferencesController().setPreference === "function"
     }
 
     function setValue(key, value) {
@@ -103,7 +140,7 @@ FocusScope {
             selectionMessage = titleFor(key) + " — " + viewFor(key).disclosure
             return false
         }
-        var accepted = controller.setPreference(key, value)
+        var accepted = preferencesController().setPreference(key, value)
         if (accepted === true) {
             selectionMessage = "Saved " + titleFor(key).toLowerCase()
                     + "; approved preview visuals do not change"

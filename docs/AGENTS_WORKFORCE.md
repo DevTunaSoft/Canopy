@@ -66,10 +66,13 @@ remain in force. It grants no merge, visual or release approval.
 
 ## Reconciliation scope and residuals
 
-- This change edits only `README.md`, `CONTRIBUTING.md`, `docs/QUALITY.md`,
-  `docs/ARCHITECTURE.md`, `.github/PULL_REQUEST_TEMPLATE.md` and this file.
-  `AGENTS.md`, `docs/ROADMAP.md`, workflow, test, visual-asset and source paths
-  are outside its ownership and were not edited here.
+- Historical scope of the earlier reconciliation (DOC-119 lineage): that change
+  edited only `README.md`, `CONTRIBUTING.md`, `docs/QUALITY.md`,
+  `docs/ARCHITECTURE.md`, `.github/PULL_REQUEST_TEMPLATE.md` and this file;
+  `AGENTS.md` and `docs/ROADMAP.md` were then outside its ownership. ND-050
+  supersedes that scope and does edit `AGENTS.md`, `docs/ROADMAP.md` and the
+  listed docs/config paths; no workflow, test, visual-asset or compiled source
+  path is edited by ND-050.
 - Workforce ceiling reconciliation: the earlier pre-amendment minimum-worker floor and agent ceiling in
   `AGENTS.md` and `docs/ROADMAP.md` were reconciled in this change to
   8 subagents plus Hermes (9 total). `docs/ARCHITECTURE.md` and

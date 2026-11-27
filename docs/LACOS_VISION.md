@@ -2,6 +2,9 @@
 
 **Status: PLANNED / NOT IMPLEMENTED.** LacOS is a working product name, not a released operating system. Canopy remains the separately usable Linux desktop shell. LacOS becomes a distinct immutable distribution project after native Plasma 6 Canopy is technically reliable, visually approved, benchmarked and accepted in real sessions. Kubuntu 26.04 LTS is the reference development guest, not the final distribution decision. Preserve Mint as a comparison baseline.
 
+## FOSS commitment and current direction
+All first-party software, experiences and functionality free/open source; no paid tiers, subscriptions, ads, activation, mandatory telemetry or accounts. See [master owner directive](MASTER_OWNER_DIRECTIVE.md). Fedora Kinoite leads the immutable foundation evaluation, prioritizing direct upstream updates and safe stock Plasma fallback. Initial eight packs: Classic, Modern, Heritage, Flow, Lite, Studio, Cloud and Touch; multiple variations, no hardcoded limit. Research all relevant Zorin layouts and editions with original implementations.
+
 ## Mission
 Build a premium, familiar Linux experience for people migrating from **macOS or Windows**, retaining proven upstream Linux compatibility, update and security foundations while making the result **leaner, more refined, more capable, and more adaptable**. The goal is measurable functional improvement with *lower total resource usage*, not a superficial theme or indiscriminate removal of components.
 
@@ -61,7 +64,7 @@ are future work, not implemented features. See
 
 ## Immutable system and multi-package application requirements (owner decision 2026-11-27)
 
-See [LACOS_IMMUTABLE_ARCHITECTURE.md](LACOS_IMMUTABLE_ARCHITECTURE.md) for the mandatory security, deployment, package compatibility, update and Modern design requirements. The running core is read-only; applications and user data are separate; supported upstream updates arrive through verified atomic deployments with rollback. APT, Pacman, Flatpak and rootless Podman are required application options, not competing host package managers. The actual deployment backend and final base remain evidence-gated. Research may run independently without interrupting current tasks or delaying native Classic.
+See [LACOS_IMMUTABLE_ARCHITECTURE.md](LACOS_IMMUTABLE_ARCHITECTURE.md) for the mandatory security, deployment, package compatibility, update and Modern design requirements. The running core is read-only; applications and user data are separate; supported upstream updates arrive through verified atomic deployments with rollback. APT, Pacman, DNF/RPM, Flatpak and rootless Podman are required application options, not competing host package managers. The actual deployment backend and final base remain evidence-gated. Research may run independently without interrupting current tasks or delaying native Classic.
 
 **Non-goals:** reimplement the Linux kernel/package manager unnecessarily; copy Apple/Microsoft trademarks or assets; replace Mint stability with unsafe "debloating"; claim a release, performance win or seamless shell swap before it is proven.
 

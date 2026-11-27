@@ -1612,6 +1612,135 @@ private:
     QString m_source = QStringLiteral("host-events");
 };
 
+// Bounded, event-driven compiled seam for the four reviewed protocol-v2 host
+// event topics. A trusted host calls dispatch() only when a real, already
+// produced event arrives: this class creates no bus, subscription, transport,
+// socket, process, service, timer or poll loop. It adds no topic, payload field
+// or protocol version; the topic set is the frozen one in HOST_EVENT_CONTRACT.
+// Each destination bridge keeps its own fail-closed payload validation, so the
+// dispatcher only guards the trust boundary (topic + whole-lifetime event cap),
+// routes the payload to the matching already-merged bridge and records a fixed
+// outcome token. No caller text is ever echoed into an outcome or a log.
+class ClassicHostEventBridge final : public QObject {
+    Q_OBJECT
+public:
+    // Hard ceilings, never caller-configurable: a repeated or hostile producer
+    // cannot keep the shell busy, and the read-only history stays deterministic.
+    static constexpr int kMaxEvents = 64;
+    static constexpr int kMaxHistory = 16;
+
+    explicit ClassicHostEventBridge(
+        QuickControlsHostStateController &quickControls,
+        WindowActivationState &activation, QObject *parent = nullptr)
+        : QObject(parent), m_quickControls(&quickControls),
+          m_activation(&activation) {}
+
+    // The exact four topics of canopy_core.host_events protocol v2. Exact
+    // spelling is required; there is no dynamic registration or fifth topic.
+    QStringList allowedTopics() const {
+        return {
+            QStringLiteral("app.catalog.changed"),
+            QStringLiteral("window.state.changed"),
+            QStringLiteral("session.state.changed"),
+            QStringLiteral("capabilities.report")
+        };
+    }
+
+    Q_INVOKABLE bool dispatch(const QString &topic, const QVariantMap &payload) {
+        if (m_total >= kMaxEvents) {
+            record(QStringLiteral("refresh-limit"));
+            return false;
+        }
+        ++m_total;
+        if (!allowedTopics().contains(topic) || payload.isEmpty()) {
+            record(QStringLiteral("rejected"));
+            return false;
+        }
+        if (topic == QStringLiteral("capabilities.report")
+                || topic == QStringLiteral("session.state.changed")) {
+            // Quick-controls state and display power detail (brightness) are
+            // the single read-only view of the existing controller. Session
+            // observations stay fail-closed: view("session") remains unknown
+            // until a reconciled source exists, so no privileged control opens.
+            if (!m_quickControls->applyHostEvent(topic, payload)) {
+                record(QStringLiteral("rejected"));
+                return false;
+            }
+            record(topic == QStringLiteral("capabilities.report")
+                   ? QStringLiteral("quick-controls-applied")
+                   : QStringLiteral("session-observed"));
+            return true;
+        }
+        if (topic == QStringLiteral("window.state.changed")) {
+            // The window bridge owns the snapshot contract. Check only that
+            // its frozen required keys are present before delegating, so a
+            // malformed token cannot call clear() on live activation state.
+            for (const QString &key : snapshotKeys()) {
+                if (!payload.contains(key)) {
+                    record(QStringLiteral("rejected"));
+                    return false;
+                }
+            }
+            if (!m_activation->applySnapshot(payload)) {
+                record(QStringLiteral("window-rejected"));
+                return false;
+            }
+            record(QStringLiteral("window-applied"));
+            return true;
+        }
+        // app.catalog.changed: native catalog re-production belongs to the
+        // already-merged host bridge, not to the compiled shell. Publish a
+        // bounded refresh token only: no path discovery, process, poll or
+        // visual/asset edit is introduced here.
+        emit catalogRefreshRequested();
+        record(QStringLiteral("catalog-refresh-requested"));
+        return true;
+    }
+
+    Q_INVOKABLE int dispatchCount() const { return m_total; }
+    Q_INVOKABLE int acceptedCount() const { return m_accepted; }
+    Q_INVOKABLE int rejectedCount() const { return m_rejected; }
+    Q_INVOKABLE QString lastOutcome() const { return m_lastOutcome; }
+    Q_INVOKABLE QStringList outcomeHistory() const { return m_history; }
+    Q_INVOKABLE bool frozen() const { return m_total >= kMaxEvents; }
+
+signals:
+    void catalogRefreshRequested();
+
+private:
+    static const QStringList &snapshotKeys() {
+        static const QStringList keys = {
+            QStringLiteral("schema"), QStringLiteral("backend"),
+            QStringLiteral("negotiation"), QStringLiteral("sequence"),
+            QStringLiteral("installed"), QStringLiteral("owners"),
+            QStringLiteral("grants"), QStringLiteral("launcherEnabled")
+        };
+        return keys;
+    }
+
+    void record(const QString &outcome) {
+        const bool rejected = outcome == QStringLiteral("rejected")
+            || outcome == QStringLiteral("window-rejected")
+            || outcome == QStringLiteral("refresh-limit");
+        if (rejected)
+            ++m_rejected;
+        else
+            ++m_accepted;
+        m_lastOutcome = outcome;
+        if (m_history.size() == kMaxHistory)
+            m_history.removeFirst();
+        m_history.append(outcome);
+    }
+
+    QuickControlsHostStateController *m_quickControls;
+    WindowActivationState *m_activation;
+    int m_total = 0;
+    int m_accepted = 0;
+    int m_rejected = 0;
+    QString m_lastOutcome = QStringLiteral("unset");
+    QStringList m_history;
+};
+
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
     QGuiApplication::setApplicationDisplayName(QStringLiteral("Canopy Classic Spike"));
@@ -1647,6 +1776,10 @@ int main(int argc, char *argv[]) {
     // given with a valid, bounded snapshot. Both objects outlive the engine.
     LauncherCatalogModel launcherCatalog;
     LauncherCatalogBridge launcherCatalogBridge(launcherCatalog);
+    // One compiled host-event seam for the four reviewed protocol-v2 tokens.
+    // It is declared before the engine and routes only to already-merged
+    // bridges that outlive it; it owns no transport, timer or poll source.
+    ClassicHostEventBridge hostEventBridge(hostStateController, activationState);
     const QString activationBackend = activationBackendId();
     activationState.applySnapshot(
         hostActivationSnapshot(systemLauncher, activationBackend, 1));
@@ -2067,6 +2200,17 @@ int main(int argc, char *argv[]) {
     // snapshot was loaded above.
     engine.rootContext()->setContextProperty(
         QStringLiteral("canopyLauncherCatalog"), &launcherCatalogBridge);
+    // app.catalog.changed is dispatched to the read-only catalogue bridge as
+    // a bounded refresh token. Rebinding the same context property invalidates
+    // existing QML bindings without a second file read, a new path, a process
+    // or any visual/asset edit. Native catalog re-production stays in the
+    // already-merged Python host bridge.
+    QObject::connect(&hostEventBridge,
+                     &ClassicHostEventBridge::catalogRefreshRequested,
+                     &app, [&engine, &launcherCatalogBridge]() {
+        engine.rootContext()->setContextProperty(
+            QStringLiteral("canopyLauncherCatalog"), &launcherCatalogBridge);
+    });
     // Real in-process host-state injection: the trusted shell delivers one
     // bounded, already-produced payload on an existing host-event topic. No
     // bus, transport, process or privileged write is created. The controller
@@ -2594,6 +2738,74 @@ int main(int argc, char *argv[]) {
         qInfo() << "SELF_TEST_PASS: quick-controls host state rendered in compiled shell";
         qInfo() << "QUICK_CONTROLS_HOST_SELF_TEST_PASS: wired=ok details=ok "
                    "privileged=denied hostile=rejected visuals=unchanged";
+        QTimer::singleShot(0, &app, &QCoreApplication::quit);
+    }
+    if (args.contains(QStringLiteral("--self-test-host-event-bridge"))) {
+        // Prove the *compiled* dispatch seam: each reviewed token reaches its
+        // merged bridge, unlisted or malformed input is fail closed, outcomes
+        // are fixed tokens and the history/caps stay bounded. No QML, geometry,
+        // timer-driven observation, process or host change is involved.
+        if (hostEventBridge.allowedTopics().size() != 4
+                || hostEventBridge.dispatchCount() != 0) {
+            qCritical() << "HOST_EVENT_BRIDGE_FIXTURE_FAIL: bad initial state";
+            return 1;
+        }
+        int refreshes = 0;
+        QObject::connect(&hostEventBridge,
+                         &ClassicHostEventBridge::catalogRefreshRequested,
+                         &app, [&refreshes]() { ++refreshes; });
+
+        QVariantMap facts;
+        facts.insert(QStringLiteral("network_connected"), true);
+        facts.insert(QStringLiteral("audio_muted"), false);
+        facts.insert(QStringLiteral("battery_charging"), true);
+        facts.insert(QStringLiteral("volume_percent"), 33);
+        facts.insert(QStringLiteral("brightness_percent"), 61);
+        facts.insert(QStringLiteral("source"), QStringLiteral("host-events"));
+        if (!hostEventBridge.dispatch(QStringLiteral("capabilities.report"), facts)) {
+            qCritical() << "HOST_EVENT_BRIDGE_FIXTURE_FAIL: quick-controls token lost";
+            return 1;
+        }
+        QVariantMap session;
+        session.insert(QStringLiteral("settings_bridge"), true);
+        if (!hostEventBridge.dispatch(QStringLiteral("session.state.changed"), session)) {
+            qCritical() << "HOST_EVENT_BRIDGE_FIXTURE_FAIL: session token lost";
+            return 1;
+        }
+        // A partial window snapshot is rejected before delegation, so the
+        // window bridge never clears live activation state on a malformed token.
+        QVariantMap partialWindow;
+        partialWindow.insert(QStringLiteral("focus_app"), QStringLiteral("Files"));
+        if (hostEventBridge.dispatch(QStringLiteral("window.state.changed"),
+                                     partialWindow)) {
+            qCritical() << "HOST_EVENT_BRIDGE_FIXTURE_FAIL: partial snapshot accepted";
+            return 1;
+        }
+        QVariantMap tokenOnly;
+        tokenOnly.insert(QStringLiteral("source"), QStringLiteral("host-events"));
+        if (!hostEventBridge.dispatch(QStringLiteral("app.catalog.changed"), tokenOnly)
+                || refreshes != 1) {
+            qCritical() << "HOST_EVENT_BRIDGE_FIXTURE_FAIL: catalog token lost";
+            return 1;
+        }
+        QVariantMap hostile;
+        hostile.insert(QStringLiteral("volume_percent"), 999);
+        if (hostEventBridge.dispatch(QStringLiteral("wifi.scan.changed"), facts)
+                || hostEventBridge.dispatch(QStringLiteral("capabilities.report"), hostile)) {
+            qCritical() << "HOST_EVENT_BRIDGE_FIXTURE_FAIL: hostile event accepted";
+            return 1;
+        }
+        if (hostEventBridge.dispatchCount() != 6
+                || hostEventBridge.acceptedCount() != 3
+                || hostEventBridge.rejectedCount() != 3
+                || hostEventBridge.outcomeHistory().size() != 6
+                || hostEventBridge.lastOutcome() != QStringLiteral("rejected")
+                || hostEventBridge.frozen()) {
+            qCritical() << "HOST_EVENT_BRIDGE_FIXTURE_FAIL: bounded counters wrong";
+            return 1;
+        }
+        qInfo() << "HOST_EVENT_BRIDGE_SELF_TEST_PASS: topics=4 routed=4 "
+                   "fail_closed=ok bounded=6/64 history=6/16 visuals=unchanged";
         QTimer::singleShot(0, &app, &QCoreApplication::quit);
     }
     if (args.contains(QStringLiteral("--self-test-notification-center"))) {

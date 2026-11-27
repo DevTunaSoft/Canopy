@@ -1,0 +1,117 @@
+{
+  "schema": "canopy.asset_bindings/1",
+  "mode": "HASH_ONLY_REFERENCES",
+  "note": "No asset bytes are copied, generated, decoded, recompressed or modified by this scaffold. Paths are source-tree locations at the pinned commit; hashes are content identities, not local files.",
+  "source_tag": "archive/canopy-classic-final-20261127-fef38c3",
+  "source_commit": "fef38c311736b7cdded3acedde4bae985237a6e3",
+  "source_tree": "0f128ea10dfe78e2286a7792b4b5d0557c21047b",
+  "runtime_owners": {
+    "wallpaper": "Plasma wallpaper containment plugin (R07, A16)",
+    "icons": "upstream icon theme fed by the approved Canopy originals (R10, R11, R14, A19)",
+    "tux": "penguin-launcher.svg as launcher mark (R14)",
+    "manifest": "approved-art byte gates tools/check_wallpaper.py and tests/test_approved_art.py (R10, R11)"
+  },
+  "bindings": [
+    {
+      "role": "approved-wallpaper-default",
+      "name": "Canopy_Classic_Master_Wallpaper_1920x1080.png",
+      "source_path": "prototype/classic/assets/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png",
+      "git_blob": "2802e690e1a7d0f16336b90a456dbaea9f5f014d",
+      "sha256": "8c6cab50a0977fc129c0d2a20523d9361646f36da66f2f3f2b2436a0d9001381",
+      "local_copy": null
+    },
+    {
+      "role": "tux-launcher-mark",
+      "name": "penguin-launcher.svg",
+      "source_path": "prototype/classic/assets/brand/penguin-launcher.svg",
+      "git_blob": "8fbf2cc6c87896e219afd5f0da13327a697c69d5",
+      "sha256": "f18a2123a8ed5b3895deee1595ba471c67780f3b724dd3de722796506fa9c9af",
+      "local_copy": null
+    },
+    {
+      "role": "approved-asset-manifest",
+      "name": "manifest.json",
+      "source_path": "prototype/classic/assets/approved/manifest.json",
+      "git_blob": "b120dc891a614ddbc5ef863514424112c02efee6",
+      "sha256": "5aa040ddbfeddbd38dcbd1808710676982efbc4146987c42e93eaa57ad0d4737",
+      "local_copy": null
+    },
+    {
+      "role": "dock-icon-browser",
+      "name": "Browser_Option_3.png",
+      "source_path": "prototype/classic/assets/approved/icons/Browser_Option_3.png",
+      "git_blob": "1f2739b56bae3374223f52a6c64a17b1388bbc87",
+      "sha256": "28283672dec0621172f3cf793dc6f00174fdce944d986ff144a1d2d1a881469a",
+      "local_copy": null
+    },
+    {
+      "role": "dock-icon-mail",
+      "name": "Mail_Option_5.png",
+      "source_path": "prototype/classic/assets/approved/icons/Mail_Option_5.png",
+      "git_blob": "37ac1e8b0301f782daa3b64079fdb867dc783046",
+      "sha256": "7baad00f0ddd507b1def24dc067e949e32991e3db06d246bf3a61ec9eaf98b79",
+      "local_copy": null
+    },
+    {
+      "role": "dock-icon-files",
+      "name": "Files_Option_2.png",
+      "source_path": "prototype/classic/assets/approved/icons/Files_Option_2.png",
+      "git_blob": "03a67d1515b15c7db7e2cf41b53a7b6de9164aae",
+      "sha256": "aa659307d1a5273fdaa61a9df6f8f70546882d6e89b1380b23ff0f9eb59bf57b",
+      "local_copy": null
+    },
+    {
+      "role": "dock-icon-calendar",
+      "name": "Calendar_Option_3.png",
+      "source_path": "prototype/classic/assets/approved/icons/Calendar_Option_3.png",
+      "git_blob": "484f16165fd49280a96a19ec7966d1624d801616",
+      "sha256": "c99c3356a178f8d0a28c809fada712c8df571c12db8d0f3472521f732fa559b2",
+      "local_copy": null
+    },
+    {
+      "role": "dock-icon-photos",
+      "name": "Photos_Option_2.png",
+      "source_path": "prototype/classic/assets/approved/icons/Photos_Option_2.png",
+      "git_blob": "158d30018b938ce46ea5849b442d07ed9f7b7e5d",
+      "sha256": "8ed643b8f67e676ae1ffddfd997cc1156fbc859acfd1e9c935c2b9085e11fc5f",
+      "local_copy": null
+    },
+    {
+      "role": "dock-icon-music",
+      "name": "Music_Option_3.png",
+      "source_path": "prototype/classic/assets/approved/icons/Music_Option_3.png",
+      "git_blob": "bba53550523a2588c208ab5aa753e7e78b020d3d",
+      "sha256": "57ca966467597ad0ea8485b51701d8856b2584dd3b28bd194010ffeed149c43f",
+      "local_copy": null
+    },
+    {
+      "role": "dock-icon-terminal",
+      "name": "Terminal_Option_4.png",
+      "source_path": "prototype/classic/assets/approved/icons/Terminal_Option_4.png",
+      "git_blob": "3ba31680bc21eee25cc5442baf9f984d4388ea29",
+      "sha256": "40473e715b42037d2619c87e37fa1757419b6a1cdf99cb9ce5236d6bbfd929a5",
+      "local_copy": null
+    },
+    {
+      "role": "dock-icon-settings",
+      "name": "Settings_Option_8.png",
+      "source_path": "prototype/classic/assets/approved/icons/Settings_Option_8.png",
+      "git_blob": "41c678a2d5a797a5c454ea9edc925de98859f1ec",
+      "sha256": "7ee4434d0acf34c676a3d3d908ee363b2553228debd5f7157b3693f7faee6a79",
+      "local_copy": null
+    }
+  ],
+  "denylist": [
+    {
+      "name": "canopy-wave-preview.png",
+      "sha256": "1efa6e83deee160ce9cf225db010025f4f162975f4dfc23e6da3f3ca0973528a",
+      "reason": "historical blue-wave visual reference (L09); never a native wallpaper default"
+    },
+    {
+      "name": "blue-current.svg",
+      "sha256": null,
+      "reason": "historical blue-wave candidate (L09); no native config may reference it"
+    }
+  ],
+  "verification": "Every git_blob and sha256 above was recomputed from `git cat-file blob <commit>:<path>` at fef38c311736b7cdded3acedde4bae985237a6e3; icon SHA-256 values match the approved manifest blob b120dc891a614ddbc5ef863514424112c02efee6. No local copy exists in this package."
+}

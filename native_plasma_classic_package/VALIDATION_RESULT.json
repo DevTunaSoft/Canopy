@@ -1,0 +1,90 @@
+{
+  "artifact": "canopy-classic-native-plasma6-kpackage-scaffold",
+  "checks": [
+    {
+      "check": "required_files_present",
+      "detail": "all present",
+      "status": "PASS"
+    },
+    {
+      "check": "metadata_json_valid",
+      "detail": "parsed object",
+      "status": "PASS"
+    },
+    {
+      "check": "kpackage_structure_present",
+      "detail": "KPackageStructure='Plasma/Applet'",
+      "status": "PASS"
+    },
+    {
+      "check": "plasma_api_minimum_6_0",
+      "detail": "X-Plasma-API-Minimum-Version='6.0'",
+      "status": "PASS"
+    },
+    {
+      "check": "no_legacy_metadata_keys",
+      "detail": "none",
+      "status": "PASS"
+    },
+    {
+      "check": "contents_ui_qml_present",
+      "detail": "4 QML files",
+      "status": "PASS"
+    },
+    {
+      "check": "main_qml_root_is_containment_or_plasmoid",
+      "detail": "main.qml root='ContainmentItem'",
+      "status": "PASS"
+    },
+    {
+      "check": "no_second_shell_or_process_tokens",
+      "detail": "none",
+      "status": "PASS"
+    },
+    {
+      "check": "qml_imports_unversioned",
+      "detail": "all unversioned",
+      "status": "PASS"
+    },
+    {
+      "check": "taskmanager_model_bound",
+      "detail": "TaskManager.TasksModel referenced",
+      "status": "PASS"
+    },
+    {
+      "check": "no_synthetic_task_rows",
+      "detail": "no ListModel",
+      "status": "PASS"
+    },
+    {
+      "check": "no_asset_bytes_or_runtime_in_package",
+      "detail": "none",
+      "status": "PASS"
+    },
+    {
+      "check": "asset_bindings_valid",
+      "detail": "mode='HASH_ONLY_REFERENCES', bindings=11, invalid=none",
+      "status": "PASS"
+    },
+    {
+      "check": "legacy_assets_denylisted",
+      "detail": "bindings_hits=none, denylist=['blue-current.svg', 'canopy-wave-preview.png']",
+      "status": "PASS"
+    },
+    {
+      "check": "design_maps_upstream_apis",
+      "detail": "all upstream/API tokens present",
+      "status": "PASS"
+    },
+    {
+      "check": "scope_labels_present",
+      "detail": "all scope labels present",
+      "status": "PASS"
+    }
+  ],
+  "failed": 0,
+  "passed": 16,
+  "root": "native_plasma_classic_package",
+  "scope": "STRUCTURAL_ONLY;NO_COMPILE;NO_RUNTIME;NO_VISUAL_APPROVAL;NO_REPO_MUTATION",
+  "verdict": "PASS"
+}

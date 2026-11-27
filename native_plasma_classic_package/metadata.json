@@ -1,0 +1,24 @@
+{
+    "KPlugin": {
+        "Id": "org.kde.plasma.canopyclassic",
+        "Name": "Canopy Classic",
+        "Description": "Native Plasma 6 Canopy Classic vertical slice scaffold (structural design only; no compiled runtime).",
+        "Icon": "canopy-classic",
+        "Category": "Desktop",
+        "Version": "0.1.0",
+        "License": "GPL-2.0-or-later",
+        "Authors": [
+            {
+                "Name": "Canopy Classic",
+                "Email": ""
+            }
+        ]
+    },
+    "KPackageStructure": "Plasma/Applet",
+    "X-Plasma-API-Minimum-Version": "6.0",
+    "X-Plasma-ContainmentType": "Desktop",
+    "X-Canopy-Scaffold-Version": "0.1.0",
+    "X-Canopy-Source-Tag": "archive/canopy-classic-final-20261127-fef38c3",
+    "X-Canopy-Source-Commit": "fef38c311736b7cdded3acedde4bae985237a6e3",
+    "X-Canopy-Scope": "DESIGN_AND_STRUCTURE_ONLY;NO_COMPILE;NO_RUNTIME;NO_VISUAL_APPROVAL;NO_REPO_MUTATION"
+}

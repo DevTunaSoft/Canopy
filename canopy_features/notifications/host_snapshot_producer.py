@@ -103,12 +103,21 @@ def _bounded_text(value, limit, label, *, nonempty=False):
         raise SnapshotProducerError("invalid %s" % label)
     if nonempty and not value:
         raise SnapshotProducerError("empty %s" % label)
-    encoded_len = len(value.encode("utf-8"))
-    if encoded_len < 1 or encoded_len > limit:
+    # Screen code points before encoding: str.encode() raises a raw
+    # UnicodeEncodeError on surrogates, which would escape the domain-error
+    # contract. The cheap character-count guard avoids copying an oversized
+    # caller string into a UTF-8 buffer before the byte bound is applied.
+    if len(value) > limit:
         raise SnapshotProducerError("unbounded %s" % label)
     for char in value:
         if unicodedata.category(char) in _UNSAFE_CATEGORIES:
             raise SnapshotProducerError("unsafe %s" % label)
+    try:
+        encoded_len = len(value.encode("utf-8"))
+    except UnicodeError:
+        raise SnapshotProducerError("unsafe %s" % label) from None
+    if encoded_len < 1 or encoded_len > limit:
+        raise SnapshotProducerError("unbounded %s" % label)
     return value
 
 
@@ -117,10 +126,11 @@ def _validate_record(record):
         raise SnapshotProducerError("record has an unexpected key set")
     try:
         keys = frozenset(record)
-    except TypeError as exc:
-        # A hostile Mapping can iterate an unhashable key. That is a rejected
-        # record, never a raw built-in exception from the public compose().
-        raise SnapshotProducerError("record has an unexpected key set") from exc
+    except TypeError:
+        # A hostile Mapping can iterate an unhashable key or raise a
+        # secret-bearing TypeError. That is a rejected record, never a raw
+        # built-in exception or a chained cause from the public compose().
+        raise SnapshotProducerError("record has an unexpected key set") from None
     if keys != RECORD_KEYS:
         raise SnapshotProducerError("record has an unexpected key set")
     topic = record["topic"]
@@ -153,7 +163,16 @@ def compose(records, *, max_records=MAX_RECORDS, max_bytes=MAX_JSON_BYTES):
     projected = []
     seen_ids = set()
     for record in records:
-        validated = _validate_record(record)
+        try:
+            validated = _validate_record(record)
+        except SnapshotProducerError:
+            raise
+        except Exception:
+            # A hostile Mapping or field object can raise an arbitrary
+            # built-in from key iteration, lookup or comparison. Fail closed
+            # with a fixed domain error; never echo the rejected object's
+            # exception text, which may carry caller-supplied secret material.
+            raise SnapshotProducerError("rejected snapshot record") from None
         if validated.id in seen_ids:
             raise SnapshotProducerError("duplicate snapshot record id")
         seen_ids.add(validated.id)
@@ -215,10 +234,10 @@ class HostSnapshotProducer:
             snapshot = compose(self._source.snapshot(),
                                max_records=self._max_records,
                                max_bytes=self._max_bytes)
-        except (SnapshotProducerError, ValueError, TypeError,
-                UnicodeError, AttributeError):
-            # A rejected whole input produces empty rows; a fixed token is
-            # recorded instead of echoing hostile record content.
+        except Exception:
+            # Any rejected whole input (including a hostile source that
+            # raises a built-in) produces empty rows and one fixed token.
+            # The exception text is never echoed to the snapshot surface.
             self._refusal = "INVALID_SNAPSHOT_RECORD"
             return HostSnapshot(SOURCE, ())
         self._refusal = None

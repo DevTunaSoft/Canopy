@@ -32,9 +32,11 @@ producer that such a bridge could consume later.
 - `compose(records)` projects the source's bounded records into one frozen
   wire-format snapshot; the whole input is validated before any row is
   returned, and any rejected record raises `SnapshotProducerError` rather
-  than a built-in exception;
+  than a built-in exception (including hostile mapping/built-in failures);
 - any rejected input fails closed: `snapshot()` returns empty rows and a fixed
-  `refusal` token, never a partial, plausible-looking list.
+  `refusal` token, never a partial, plausible-looking list. Rejection messages
+  are fixed strings: a hostile value or its exception text is never echoed or
+  chained into the snapshot surface.
 
 The four accepted topics are exactly the v2
 [host event contract](HOST_EVENT_CONTRACT.md) set, byte-identical as a set to
@@ -83,6 +85,10 @@ ever published.
 | Bidirectional override | `title="\u202ereport"` | whole input rejected | `test_bidirectional_override_in_title_is_rejected` |
 | Wrong field type | `body` is `7`, `True`, `None`, `[]` or `{}` | whole input rejected; no raw `TypeError` | `test_non_string_record_field_is_rejected` |
 | Unhashable mapping key | synthetic `Mapping` whose key iteration yields a `list` | `compose()` raises `SnapshotProducerError`, never a raw `TypeError`; `snapshot()` keeps zero rows and the fixed refusal token | `test_unhashable_mapping_key_is_rejected_with_domain_error`, `test_unhashable_mapping_key_snapshot_fails_closed` |
+| Hostile mapping lookup | synthetic `Mapping` whose `__getitem__` raises `RuntimeError("hostile lookup SECRET_MARKER")` | fixed `SnapshotProducerError`; no built-in error or secret text in the message | `test_hostile_mapping_lookup_leaks_no_builtin_or_secret` |
+| Hostile key-iteration TypeError | synthetic `Mapping` whose `__iter__` raises `TypeError("hostile key iteration SECRET_MARKER")` | fixed `SnapshotProducerError` with `from None`; `__cause__ is None`, `__suppress_context__` is true, and `traceback.format_exception()` shows no secret-bearing cause | `test_typeerror_cause_carries_no_secret_into_the_traceback` |
+| Surrogate code point | `title="\ud800hidden"` | rejected with `SnapshotProducerError`, never a raw `UnicodeEncodeError`; no echoed value | `test_surrogate_in_record_field_is_rejected_with_domain_error` |
+| Hostile source exception | source `snapshot()` patched to raise `RuntimeError("SECRET_MARKER")` | zero rows, fixed refusal token, recovery on next clean read; no secret text | `test_source_exception_snapshot_fails_closed_without_echo` |
 | Extra or missing key | added `extra`; deleted `topic` | whole input rejected | `test_extra_record_key_is_rejected`, `test_missing_record_key_is_rejected` |
 | Wrong container type | `str`, `bytes`, mapping, `frozenset`, `None`, `int`, `bool` | whole input rejected | `test_unexpected_record_collection_type_is_rejected` |
 | Wrong entry type | `None`, `str`, `int`, `list`, `bool` entry | whole input rejected | `test_non_mapping_record_entry_is_rejected` |
@@ -117,7 +123,7 @@ python -m unittest tests.test_c100_notification_host_snapshot -v
 python tools/check_foundation.py
 ```
 
-All 36 tests are **SYNTHETIC** contract tests: they use real in-process
+All 40 tests are **SYNTHETIC** contract tests: they use real in-process
 `HostEvent` deliveries for positive cases and synthetic record dictionaries
 for validator controls; they never fabricate a `HostEvent`. The targeted
 suite and any offscreen/compiled fixture are **SYNTHETIC** or **CI-SCOPED**

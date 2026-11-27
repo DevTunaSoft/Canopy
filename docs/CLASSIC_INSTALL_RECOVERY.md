@@ -94,6 +94,29 @@ unmanaged entry produces no deletion step: `auto_action_allowed=false` and
 Directory creation and removal are deliberately out of scope: directories may
 contain unrelated user files and are retained.
 
+## Bounded corrupt-config recovery (PE-061)
+
+`canopy_features/reliability/bounded_config_recovery.py` provides one shared,
+pure host-side primitive for installer and session config paths. It reads at
+most the configured cap plus one byte, rejects symlinked components, treats
+duplicate JSON keys as corruption, and reports a fixed status rather than
+echoing file content. Rejected bytes are copied into at most three bounded
+`.corrupt` snapshots before a caller replaces the active file; an oversized,
+unreadable or symlinked file is never overwritten.
+
+Two callers use that contract:
+
+- `uninstall_integrity.recover_manifest(path)` preserves corrupt ownership
+  manifest bytes and publishes a fail-closed empty manifest, so an uninstall
+  plan removes nothing until a trusted manifest is restored.
+- `StartupCheckpoints.reset()` preserves corrupt or tampered startup journal
+  bytes before publishing a fresh plan, and refuses to overwrite an
+  unreadable or oversized journal.
+
+`read_bounded_config` and `read_manifest` remain read-only; recovery is always
+an explicit call. No claim is made about a running desktop, compiled Qt, Mint
+session acceptance or visual behavior.
+
 ## Verdicts
 
 - `PASS` — observed state matches the plan's expected exact bytes and status.

@@ -13,9 +13,11 @@ running snapshot must agree with the decision kind (launch vs focus). Denials
 carry no target, action or source fields, so untrusted text cannot reach a log
 or a QML bridge through this record.
 """
+from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Optional
 
+from canopy_features.catalog.missing_app_availability import AppAvailability
 from canopy_features.dock.click_intents import (
     APPROVED_DOCK_NAMES,
     ClickIntent,
@@ -28,6 +30,7 @@ from canopy_features.dock.keyboard_navigation import DockFocusOrder
 __all__ = [
     "APPROVED",
     "DENIED",
+    "REASON_APP_UNAVAILABLE",
     "REASON_ALREADY_RUNNING",
     "REASON_FOCUS_MISMATCH",
     "REASON_INTENT_IGNORED",
@@ -50,6 +53,7 @@ APPROVED = "APPROVED"
 DENIED = "DENIED"
 
 REASON_OK = "ok"
+REASON_APP_UNAVAILABLE = "app_unavailable"
 REASON_INVALID_INPUT = "invalid_input"
 REASON_INVALID_TARGET = "invalid_target"
 REASON_TARGET_MISMATCH = "target_mismatch"
@@ -150,12 +154,39 @@ def _running_pid_count(indicators, target):
     return sum(1 for _, app_id in owners if app_id == target)
 
 
-def compose_dock_action_preview(intent, pinned, indicators, focus, target):
+def _launch_blocked_by_missing_app(availability, target):
+    """True when an explicit availability record forbids this dock launch.
+
+    ``availability`` is either one ``AppAvailability`` record or a mapping from
+    approved dock labels to those records. An absent entry supplies no negative
+    information and preserves the existing four-source decision. A malformed
+    entry is treated as unavailable: it must never authorize a phantom launch.
+    """
+    if availability is None:
+        return False
+    if isinstance(availability, AppAvailability):
+        return not availability.launch_permitted
+    if not isinstance(availability, Mapping):
+        raise PreviewInputError("expected an availability record or mapping")
+    try:
+        if target not in availability:
+            return False
+        state = availability[target]
+    except Exception:
+        return True
+    return not (isinstance(state, AppAvailability) and state.launch_permitted)
+
+
+def compose_dock_action_preview(
+    intent, pinned, indicators, focus, target, *, availability=None,
+):
     """Reconcile four immutable dock source records into one host decision.
 
     Wrong source-record types raise ``PreviewInputError``: that is a host
     programming error, not a user-facing dock rejection. Every other bad input
-    or disagreement returns a DENIED record with a stable reason code.
+    or disagreement returns a DENIED record with a stable reason code. An
+    optional availability record denies a launch of an application the catalog
+    has marked unavailable; focus actions are unaffected.
     """
     if not isinstance(intent, ClickIntent):
         raise PreviewInputError("expected a ClickIntent source record")
@@ -185,6 +216,9 @@ def compose_dock_action_preview(intent, pinned, indicators, focus, target):
         return _deny(REASON_TARGET_MISMATCH)
     if intent.reason != expected_reason:
         return _deny(REASON_INVALID_INPUT)
+    if intent.kind is IntentKind.LAUNCH and _launch_blocked_by_missing_app(
+            availability, target):
+        return _deny(REASON_APP_UNAVAILABLE)
 
     position = _pinned_position(pinned, target)
     if position is None:

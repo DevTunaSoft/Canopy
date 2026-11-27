@@ -2,6 +2,7 @@
 #include "SystemAppLauncher.h"
 #include "WindowActivationState.h"
 #include "LauncherModel.h"
+#include "ReducedMotionPolicy.h"
 
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
@@ -37,11 +38,44 @@
 #include <QUrl>
 #include <QAction>
 #include <QSettings>
+#include <QAccessible>
 
 static void showActivationStatus(QObject *status, const QString &message);
 static QString activationRefusal(const WindowActivationState &state,
                                  const QString &name,
                                  const QString &intent);
+
+// Non-visual status announcement bridge. QML keeps the exact rendered status
+// text; this class only forwards a new non-empty status to the platform
+// accessibility API. Qt 6.8+ exposes Accessible.announce to QML directly and
+// QML selects that path through nativeAnnounceAvailable. This repo pins Qt 6.4,
+// where the supported fallback is a QAccessible::Alert event (a C++ Event
+// enum, distinct from the QML Role enum). Empty text is always ignored.
+class StatusAnnounceBridge final : public QObject {
+    Q_OBJECT
+    Q_PROPERTY(bool nativeAnnounceAvailable READ nativeAnnounceAvailable CONSTANT)
+public:
+    explicit StatusAnnounceBridge(QObject *parent = nullptr) : QObject(parent) {}
+
+    bool nativeAnnounceAvailable() const {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
+        return true;
+#else
+        return false;
+#endif
+    }
+
+    Q_INVOKABLE void announce(QObject *item, const QString &text) {
+        const QString trimmed = text.trimmed();
+        if (trimmed.isEmpty() || item == nullptr)
+            return;
+        // Alert is a C++ Event enum, not the QML Role enum. Raising it on the
+        // status label makes the platform read that label's Accessible.name,
+        // which QML binds to the exact rendered status text.
+        QAccessibleEvent event(item, QAccessible::Alert);
+        QAccessible::updateAccessibility(&event);
+    }
+};
 
 // Classic settings bridge. In-process QSettings only: no daemon, no privileged
 // path, no host probing. The value domain mirrors
@@ -140,6 +174,61 @@ private:
 
     QSettings m_settings;
     QString m_reducedMotion;
+};
+
+// Read-only policy bridge for QML animation durations. Native accessibility
+// state is authoritative when it asks for reduced motion; the one persisted
+// Canopy preference is the only app-level input. No animation is created
+// here, no visual constant is touched, and QML keeps a single duration entry
+// point: duration: canopyReducedMotion.duration(nominalMs).
+class ReducedMotionBridge final : public QObject {
+    Q_OBJECT
+public:
+    explicit ReducedMotionBridge(const QString &user, QObject *parent = nullptr)
+        : QObject(parent),
+          m_native(canopyReducedMotion::nativePreference()),
+          m_user(canopyReducedMotion::normalize(user)) {}
+
+    Q_PROPERTY(bool reduced READ reduced NOTIFY reducedChanged)
+    Q_PROPERTY(QString nativePreference READ nativePreference NOTIFY reducedChanged)
+    Q_PROPERTY(QString userPreference READ userPreference NOTIFY reducedChanged)
+
+    bool reduced() const {
+        return canopyReducedMotion::reduced(m_native, m_user);
+    }
+    QString nativePreference() const { return m_native; }
+    QString userPreference() const { return m_user; }
+
+    // Bound by any QML animation that may be introduced later; zero duration
+    // means an instant state change, never a redesigned visual state.
+    Q_INVOKABLE int duration(int nominalMs) const {
+        return canopyReducedMotion::duration(nominalMs, reduced());
+    }
+    Q_INVOKABLE bool motionAllowed() const { return !reduced(); }
+
+public slots:
+    void setUserPreference(const QString &value) {
+        const QString normalized = canopyReducedMotion::normalize(value);
+        if (normalized == m_user)
+            return;
+        m_user = normalized;
+        emit reducedChanged();
+    }
+
+    void refreshNativePreference() {
+        const QString native = canopyReducedMotion::nativePreference();
+        if (native == m_native)
+            return;
+        m_native = native;
+        emit reducedChanged();
+    }
+
+signals:
+    void reducedChanged();
+
+private:
+    QString m_native;
+    QString m_user;
 };
 
 // Host-side adapter for the single frozen Files dock interaction. It owns
@@ -1533,6 +1622,24 @@ int main(int argc, char *argv[]) {
     SystemAppLauncher systemLauncher(enableSystemApps);
     WindowActivationState activationState;
     SettingsPreferencesBridge settingsPreferences;
+    // QML animation durations read this one policy object. It is declared
+    // before the engine so it outlives every binding that references it.
+    ReducedMotionBridge reducedMotion(settingsPreferences.reducedMotion());
+    // Declared before the engine so the QML status labels can reach the
+    // version-guarded announcement path for their whole lifetime.
+    StatusAnnounceBridge statusAnnouncer;
+    QObject::connect(&settingsPreferences,
+                     &SettingsPreferencesBridge::preferenceChanged,
+                     &reducedMotion,
+                     [&reducedMotion](const QString &key, const QString &value) {
+        if (key == QStringLiteral("reduced_motion"))
+            reducedMotion.setUserPreference(value);
+    });
+#if QT_VERSION >= QT_VERSION_CHECK(6, 12, 0)
+    QObject::connect(QGuiApplication::styleHints()->accessibility(),
+                     &QAccessibilityHints::motionPreferenceChanged, &reducedMotion,
+                     [&reducedMotion] { reducedMotion.refreshNativePreference(); });
+#endif
     // Declared before the QQmlApplicationEngine below so this trusted controller
     // outlives the engine, the context property and every QML object using it.
     QuickControlsHostStateController hostStateController;
@@ -1932,6 +2039,9 @@ int main(int argc, char *argv[]) {
         QStringLiteral("canopySystemLauncher"), &systemLauncher);
     engine.rootContext()->setContextProperty(
         QStringLiteral("canopySettingsPreferences"), &settingsPreferences);
+    // Non-visual policy for QML animation durations; no visual input changes.
+    engine.rootContext()->setContextProperty(
+        QStringLiteral("canopyReducedMotion"), &reducedMotion);
     engine.rootContext()->setContextProperty(
         QStringLiteral("canopyIconFramingReview"), framingReviewMode);
     engine.rootContext()->setContextProperty(
@@ -1975,6 +2085,9 @@ int main(int argc, char *argv[]) {
     engine.rootContext()->setContextProperty(
         QStringLiteral("canopyHostState"), &hostStateController);
     qInfo() << "CANOPY_QUICK_CONTROLS_HOST_INJECTED: in-process view() only";
+    // Non-visual: one guarded announcement bridge for the five status labels.
+    engine.rootContext()->setContextProperty(
+        QStringLiteral("canopyStatusAnnouncer"), &statusAnnouncer);
     engine.load(QUrl(QStringLiteral("qrc:/Canopy/Classic/Main.qml")));
     if (engine.rootObjects().isEmpty())
         return 1;

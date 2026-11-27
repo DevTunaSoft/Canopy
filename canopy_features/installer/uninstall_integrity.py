@@ -26,6 +26,8 @@ import stat
 from dataclasses import dataclass
 from pathlib import Path
 
+from canopy_features.reliability import bounded_config_recovery as _recovery
+
 SCHEMA = 1
 MAX_MANIFEST_BYTES = 1 << 20  # Keep manifest parsing bounded (1 MiB).
 _CHUNK = 64 * 1024  # Stream file digests; never read a whole file into RAM.
@@ -50,6 +52,15 @@ class UninstallPlan:
     remove_dirs: tuple[str, ...]
     preserved: tuple[str, ...]
     blockers: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class ManifestRecovery:
+    """Outcome of an explicit ownership-manifest recovery attempt."""
+
+    status: str
+    manifest: dict
+    snapshots: tuple[str, ...]
 
 
 def _digest_hex(data):
@@ -154,19 +165,60 @@ def _require_real_path_components(path, message):
 
 
 def read_manifest(path):
-    """Read and validate an ownership manifest from disk."""
+    """Read and validate an ownership manifest from disk; never writes.
+
+    The read is bounded even if the file changes size during the read, and a
+    duplicate JSON key is treated as corruption rather than silently taking
+    the last value.
+    """
     source = _path_from(path, "manifest path must be a real path")
-    if source.is_symlink() or not source.is_file():
-        raise UninstallIntegrityError("manifest must be a regular file")
     _require_real_path_components(
         source, "manifest path contains a symlinked or unsafe ancestor")
-    if source.stat().st_size > MAX_MANIFEST_BYTES:
+    loaded = _recovery.read_bounded_config(source, max_bytes=MAX_MANIFEST_BYTES)
+    if loaded.status == _recovery.MISSING:
+        raise UninstallIntegrityError("manifest does not exist")
+    if loaded.status == _recovery.UNSAFE_PATH:
+        raise UninstallIntegrityError("manifest path contains a symlink or unsafe component")
+    if loaded.status == _recovery.OVERSIZE:
         raise UninstallIntegrityError("manifest too large")
+    if loaded.status == _recovery.UNREADABLE:
+        raise UninstallIntegrityError("manifest is unreadable")
+    if loaded.status == _recovery.CORRUPT:
+        raise UninstallIntegrityError("manifest is not valid JSON")
+    return normalize_manifest(loaded.document)
+
+
+def recover_manifest(path):
+    """Recover a corrupt ownership manifest without losing its raw bytes.
+
+    A valid manifest is left byte-identical. A corrupt manifest is copied into
+    at most three bounded ``.corrupt`` snapshots before the active file is
+    replaced by a fail-closed empty manifest, which makes any uninstall plan
+    remove nothing. Oversized, unreadable and symlinked files are refused
+    without a write because their bytes cannot be preserved safely.
+    """
     try:
-        data = json.loads(source.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, ValueError) as exc:
-        raise UninstallIntegrityError("manifest is not valid JSON") from exc
-    return normalize_manifest(data)
+        manifest = read_manifest(path)
+    except UninstallIntegrityError:
+        source = _path_from(path, "manifest path must be a real path")
+        loaded = _recovery.read_bounded_config(
+            source, max_bytes=MAX_MANIFEST_BYTES)
+        if loaded.status not in (_recovery.CORRUPT, _recovery.OK):
+            raise UninstallIntegrityError(
+                "manifest cannot be recovered safely") from None
+        try:
+            snapshots = _recovery.quarantine_config(
+                source, loaded.raw, max_bytes=MAX_MANIFEST_BYTES)
+            defaults = {"schema": SCHEMA, "files": {}}
+            _recovery.write_bounded_config(
+                source, defaults, max_bytes=MAX_MANIFEST_BYTES)
+        except _recovery.ConfigRecoveryError as exc:
+            raise UninstallIntegrityError(
+                "manifest recovery could not preserve state") from exc
+        return ManifestRecovery(
+            "DEFAULTS_APPLIED", defaults,
+            tuple(str(snapshot) for snapshot in snapshots))
+    return ManifestRecovery("UNCHANGED", manifest, ())
 
 
 def _symlinked_ancestor(root, parts):

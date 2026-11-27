@@ -159,7 +159,11 @@ def parse_categories(value):
         return ()
     if type(value) is not str:
         raise CategoryError("Categories value must be a string")
-    tokens = tuple(part.strip() for part in value.split(";") if part.strip())
+    # Strip only the ordinary desktop-entry edge spacing. str.strip() also
+    # removes C0 separators (0x1c-0x1f) and some C1 scalars; silently eating
+    # those would launder a hidden scalar into a well-formed category id.
+    tokens = tuple(
+        part.strip(" \t") for part in value.split(";") if part.strip(" \t"))
     if len(tokens) > MAX_CATEGORY_TOKENS:
         raise CategoryError("too many category tokens")
     if any(not _CATEGORY_ID.fullmatch(token) for token in tokens):

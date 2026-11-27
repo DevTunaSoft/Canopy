@@ -352,6 +352,20 @@ FocusScope {
             wrapMode: Text.WordWrap
             horizontalAlignment: Text.AlignHCenter
             Accessible.name: text
+            Accessible.role: Accessible.AlertMessage
+            Accessible.ignored: message.text === ""
+            // A11Y-ANNOUNCE-BEGIN
+            property bool a11yAnnounceReady: false
+            Component.onCompleted: a11yAnnounceReady = true
+            onTextChanged: {
+                if (text === "" || !a11yAnnounceReady)
+                    return;
+                if (canopyStatusAnnouncer.nativeAnnounceAvailable)
+                    Accessible.announce(text, Accessible.Assertive);
+                else
+                    canopyStatusAnnouncer.announce(message, text);
+            }
+            // A11Y-ANNOUNCE-END
         }
 
         Button {

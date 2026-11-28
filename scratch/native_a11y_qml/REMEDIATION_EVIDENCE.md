@@ -44,7 +44,7 @@ source edit.
 | Accessibility patterns | `python -m unittest discover -s tests -p 'test_c100_accessibility_*.py'` | PASS, 132 tests |
 | Extended wiring/keyboard | `python -m unittest tests.test_c100_classic_keyboard_accessibility tests.test_classic_keyboard_accessibility_gate tests.test_classic_clock_accessibility_no_visual_change tests.test_nd041_native_settings_controls_wiring tests.test_classic_source` | PASS, 62 tests |
 | Foundation contract | `python tools/check_foundation.py` | PASS |
-| Foundation regression | `python -m unittest discover -s tests` | see `docs/NATIVE_A11Y_QML_FIX.md` |
+| Foundation regression | `python -m unittest discover -s tests` | PASS — `Ran 4671 tests in 1357.326s`, `OK (skipped=49)`, rc=0; raw log `C:/Users/X1/AppData/Local/hermes/cache/scratch/pr752_full_suite_fix.log` |
 
 No native AT-SPI, screen-reader, owner visual acceptance or release-ready claim
 is made here.

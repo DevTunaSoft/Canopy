@@ -45,7 +45,7 @@ Missing, non-integer, inflated or inconsistent counts fail closed, as do
 corrupted report fields even when the marker count is authentic.
 
 Re-verified 2026-11-25 against the authentic guest report at
-`C:/Users/X1/AppData/Local/hermes/cache/scratch/mint_acceptance_8269ec9/host-evidence/report.json`
+`private-evidence/scratch/mint_acceptance_8269ec9/host-evidence/report.json`
 (SHA-256 `a30aeb9ccc83f84bfe51ec5237cd0f5655a6119bfc4911f84012f5a3119752db`,
 21 markers at each resolution): gate verdict `status=PASS`, exit code 0. This
 is internal evidence consistency only; Mint provenance and owner visual
@@ -65,7 +65,7 @@ assets private; neither is required by this verification tool.
 ## Verified evidence scope (2026-11-24)
 
 These are scoped verdicts from pinned reports in the durable scratch evidence
-directory (`C:/Users/X1/AppData/Local/hermes/cache/scratch/mint-evidence/`),
+directory (`private-evidence/scratch/mint-evidence`),
 not release approval. Exact source revision
 `abb21ae92d500cbba6667c474d8a590add607a9e`; compiled binary SHA-256
 `48f5d98a7796a875dbe4cdb2f7a26dd812bd84dd8778974a1d8b793c3e92fd3f`.

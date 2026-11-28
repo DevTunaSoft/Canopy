@@ -16,12 +16,12 @@ engineering targets in README.md remain targets, not attained values.
 | Item | Value |
 |---|---|
 | Build source SHA (current integration tip at worktree creation) | `ce408f42dfb596e7c72efd907f9dcbad872b8c3b` (`integration/canopy-classic-20261123`) |
-| Source worktree | `C:/Users/X1/AppData/Local/hermes/cache/scratch/cperf-wt-ce408f4` (detached, clean) |
-| Build dir | `C:/Users/X1/AppData/Local/hermes/cache/scratch/cperf-build-ce408f4` |
+| Source worktree | `private-evidence/scratch/cperf-wt-ce408f4` (detached, clean) |
+| Build dir | `private-evidence/scratch/cperf-build-ce408f4` |
 | Binary | `canopy-classic-spike.exe` |
 | Binary SHA-256 | `8cbc17989d78a1ed16ee44fea4b350167613334c7b992d391fa4bbab694fa66c` |
 | Binary size | recorded in `cperf-results-ce408f4.json` |
-| Results JSON | `C:/Users/X1/AppData/Local/hermes/cache/scratch/cperf-results-ce408f4.json` |
+| Results JSON | `private-evidence/scratch/cperf-results-ce408f4.json` |
 | Results JSON SHA-256 | `317c47e996eabac037ccdb47c8400a52621831fd077016856d6a849eb6315cb9` |
 | Captured frame SHA-256 | `98986320fa2c199bb29a7e47156836f6eb7eb533b789925be3ee34557fb0a246` |
 | Sampler | `cperf_measure.py` (scratch), uv venv with psutil 7.2.2 |

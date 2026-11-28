@@ -4,7 +4,7 @@
 
 Base: `60809aef3dd2473ecd133ed8d3c5ef8316b19065` (integration tip of
 `integration/canopy-classic-20261123`, merge of PR #700). Worktree:
-`C:/Users/X1/AppData/Local/hermes/cache/scratch/pe099_wt_60809ae`, branch
+`private-evidence/scratch/pe099_wt_60809ae`, branch
 `feat/quick-controls-status-contracts-pe099-60809ae`.
 
 Exactly three owned paths change:
@@ -71,7 +71,7 @@ socket, D-Bus, device or VM, polls nothing and holds no state.
 
 Environment: Windows 11, Python 3.14.9, pure-Python contract tests. Artifacts
 live at the absolute cache-scratch directory
-`C:/Users/X1/AppData/Local/hermes/cache/scratch/master_directive_20261126/evidence/quick_controls_status`;
+`private-evidence/scratch/master_directive_20261126/evidence/quick_controls_status`;
 the repo-relative `scratch/master_directive_20261126/evidence/quick_controls_status`
 is `ABSENT` (`sha256=null`) and is not cited as an on-disk artifact.
 

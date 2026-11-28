@@ -55,7 +55,7 @@ source artifact, not a second decoded image.
 
 | Field | Exact value |
 |---|---|
-| Path (scratch) | `C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy-wallpaper-build/canopy-classic-spike.exe` |
+| Path (scratch) | `private-evidence/scratch/canopy-wallpaper-build/canopy-classic-spike.exe` |
 | SHA-256 | `39fd61d014945f8d041b66c4e4b34d754e6fce942cece7c4b61b14c3bcaa6b3a` |
 | Size | `2,123,247` bytes |
 

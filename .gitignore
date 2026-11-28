@@ -2,6 +2,11 @@
 __pycache__/
 *.py[cod]
 
+# Local orchestration scratch, post-merge captures and fetch mailbox (ND-050)
+scratch/
+postmerge-*/
+Fetched
+
 # Local Qt build output
 build/
 test-artifacts/

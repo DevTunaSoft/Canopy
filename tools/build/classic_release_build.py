@@ -7,9 +7,9 @@ self-contained evidence bundle with SHA-256 manifest, then runs the fail-closed
 gate from tools/qa/classic_build_gate.py.
 
     python tools/build/classic_release_build.py \
-        --source C:/Users/X1/Projects/Canopy \
+        --source <repo-root> \
         <full-source-sha> \
-        --out C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy-classic-release
+        --out private-evidence/scratch/canopy-classic-release
 
 --source-sha is mandatory and is never inferred from the worktree: the caller
 must state the exact commit it trusts. A different HEAD is rejected before any

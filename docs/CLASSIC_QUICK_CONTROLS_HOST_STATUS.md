@@ -4,7 +4,7 @@
 
 Base: `af97e116b59620b7e9c0e51b7b042dc40e5cb77d` (integration tip of
 `integration/canopy-classic-20261123`). Worktree:
-`C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy_quick_status_af97e11`,
+`private-evidence/scratch/canopy_quick_status_af97e11`,
 branch `feat/quick-controls-host-status-af97e11`.
 
 Exactly three owned paths change:

@@ -76,7 +76,7 @@ absent, so the compiled build used the existing disabled-native-launch fallback.
 The harness JSON is generated from `HostStateController` in the worktree, so
 the runtime assertion covers Python contract → QML view → instantiated label,
 not just source text. The scratch harness
-(`C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy-qc-harness`) is not part
+(`private-evidence/scratch/canopy-qc-harness`) is not part
 of the repository.
 
 ### Three screenshots (compiled binary, approved art, offscreen)

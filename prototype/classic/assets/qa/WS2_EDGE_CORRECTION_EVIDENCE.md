@@ -55,7 +55,7 @@ wallpaper passed the binary's embedded SHA check in all six runs.
 All six PNGs passed `tools/check_screenshot.py` at their exact dimensions. The full
 machine-readable manifest (per-icon crop hashes, per-run log hashes, 15 transparency
 checks, pack file hashes) is at
-`C:/Users/X1/AppData/Local/hermes/cache/scratch/ws2-evidence/ws2_evidence_manifest.json`
+`private-evidence/scratch/ws2-evidence/ws2_evidence_manifest.json`
 with the SHA above.
 
 ## Pixel-diff result (genuine Qt frames, same resolutions)

@@ -1,0 +1,104 @@
+{
+  "artifacts": {
+    "after.png": {
+      "label": "NATIVE RUNTIME",
+      "sha256": "592b23a55cd81e35e163786269a4672890a2da839b5d5c8b05a60aa886ac9514"
+    },
+    "after_observe.txt": {
+      "label": "NATIVE RUNTIME",
+      "sha256": "4a49514a26b185935c5f4e942103cb5f8ab9549365d2e183b2225088faced4b8"
+    },
+    "before.png": {
+      "label": "NATIVE RUNTIME",
+      "sha256": "592b23a55cd81e35e163786269a4672890a2da839b5d5c8b05a60aa886ac9514"
+    },
+    "before_observe.txt": {
+      "label": "NATIVE RUNTIME",
+      "sha256": "3d9aee8551de96892326e397b4f583e056fdf066111e6c67fbcfdac8c759126c"
+    },
+    "probe.jsonl": {
+      "label": "NATIVE RUNTIME",
+      "sha256": "81624c4ce88f1767211a0e5549e57723cb4cfb7e5ba830d61a62f9d65034f1c9"
+    },
+    "suspended.png": {
+      "label": "NATIVE RUNTIME",
+      "sha256": "592b23a55cd81e35e163786269a4672890a2da839b5d5c8b05a60aa886ac9514"
+    },
+    "visual_review.json": {
+      "label": "NATIVE RUNTIME",
+      "sha256": "e1f3f69f8a4a6e08dbd5595ae966dca9e033f0216840ed5045de8504155a4c90"
+    }
+  },
+  "directive_sha256": "79e30d79a580bd05cf9d6cb09a45cbbb7887c0c35c5116a34bb6a0ace6042083",
+  "evidence_labels": [
+    "NATIVE RUNTIME",
+    "SYNTHETIC",
+    "NOT RUN"
+  ],
+  "guest": "Canopy-Test-Plasma6",
+  "no_claim": [
+    "release readiness",
+    "merge authorization",
+    "self-approval",
+    "compiled-shell wiring"
+  ],
+  "not_run": [
+    "fresh post-resume dock/launcher/window X-client enumeration",
+    "screen-reader and AT-SPI behavior",
+    "multi-monitor and HiDPI suspend/resume",
+    "real PSS/CPU measurement across suspend/resume",
+    "owner final visual acceptance"
+  ],
+  "observation": {
+    "after": {
+      "dock_visible": null,
+      "launcher_visible": null,
+      "resume_confirmed": true,
+      "shell_active": true,
+      "window_visible": null
+    },
+    "before": {
+      "dock_visible": true,
+      "launcher_visible": true,
+      "shell_active": true,
+      "window_visible": true
+    },
+    "during": {
+      "shell_active": null,
+      "suspend_confirmed": true
+    },
+    "evidence_label": "NATIVE RUNTIME"
+  },
+  "observed": {
+    "after_uptime_seconds": 8212.32,
+    "before_uptime_seconds": 8127.59,
+    "kwin_pid": "5384",
+    "plasmashell_pid": "5422",
+    "resume_probe_attempt": 1,
+    "suspend_blocker": "Connection timed out during banner exchange",
+    "suspend_launch_rc": 0,
+    "suspend_unreachable_probes": 2,
+    "wake_method": "host VBoxManage controlvm acpipowerbutton",
+    "wake_rc": 0,
+    "wmctrl_rc_before_and_after": 124
+  },
+  "outcome": {
+    "evidence_label": "NATIVE RUNTIME",
+    "outcome": "NOT RUN",
+    "reason": "desktop-state-not-reobserved"
+  },
+  "session": "65 (x11, active, unlocked before and after)",
+  "sub_outcomes": {
+    "dock_launcher_window_fresh_render_after_resume": {
+      "label": "NATIVE RUNTIME",
+      "outcome": "NOT RUN",
+      "reason": "guest X clients fail before and after suspend (wmctrl/xdpyinfo rc=124); post-resume PNG is byte-identical to the pre-suspend frozen frame"
+    },
+    "guest_suspend_and_session_recovery": {
+      "label": "NATIVE RUNTIME",
+      "outcome": "PASS",
+      "reason": "guest stopped answering SSH, resumed on first ACPI wake with unchanged plasmashell/kwin PIDs, active unlocked session and continuous uptime"
+    }
+  },
+  "worktree_head_at_generation": "ec910d7a7275296ecbc8b5e5c459d356205165d1"
+}

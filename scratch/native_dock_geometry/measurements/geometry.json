@@ -1,0 +1,346 @@
+{
+  "1920x1080": {
+    "window": {
+      "X": 360,
+      "Y": 152,
+      "WIDTH": 1200,
+      "HEIGHT": 750
+    },
+    "crop": {
+      "x": 680,
+      "y": 769,
+      "width": 560,
+      "height": 126
+    },
+    "dock_surface": {
+      "crop_x": [
+        9,
+        549
+      ],
+      "crop_y": [
+        15,
+        110
+      ],
+      "absolute_x": [
+        689,
+        1229
+      ],
+      "absolute_y": [
+        784,
+        879
+      ],
+      "width": 541,
+      "height": 96
+    },
+    "art_runs": [
+      [
+        28,
+        75,
+        48
+      ],
+      [
+        93,
+        140,
+        48
+      ],
+      [
+        158,
+        205,
+        48
+      ],
+      [
+        223,
+        270,
+        48
+      ],
+      [
+        288,
+        335,
+        48
+      ],
+      [
+        353,
+        400,
+        48
+      ],
+      [
+        418,
+        465,
+        48
+      ],
+      [
+        483,
+        530,
+        48
+      ]
+    ],
+    "art_pitch": [
+      65
+    ],
+    "tile_spacing": [
+      7
+    ],
+    "padding_left": 14,
+    "padding_right": 14,
+    "closure_width": 541,
+    "top_bar": {
+      "title_strip_end": 151,
+      "border_row": 183,
+      "border_rgb": [
+        173,
+        189,
+        205
+      ],
+      "height": 32
+    },
+    "measured": {
+      "bar": 32,
+      "dock": 96,
+      "padding": 14,
+      "spacing": 7
+    },
+    "approved": {
+      "bar": 32,
+      "dock": 96,
+      "padding": 14,
+      "spacing": 7
+    },
+    "match": {
+      "bar": true,
+      "dock": true,
+      "padding": true,
+      "spacing": true
+    },
+    "tuple": "32/96/14/7"
+  },
+  "1200x750": {
+    "window": {
+      "X": 0,
+      "Y": 28,
+      "WIDTH": 1200,
+      "HEIGHT": 668
+    },
+    "crop": {
+      "x": 320,
+      "y": 563,
+      "width": 560,
+      "height": 126
+    },
+    "dock_surface": {
+      "crop_x": [
+        9,
+        549
+      ],
+      "crop_y": [
+        15,
+        110
+      ],
+      "absolute_x": [
+        329,
+        869
+      ],
+      "absolute_y": [
+        578,
+        673
+      ],
+      "width": 541,
+      "height": 96
+    },
+    "art_runs": [
+      [
+        28,
+        75,
+        48
+      ],
+      [
+        93,
+        140,
+        48
+      ],
+      [
+        158,
+        205,
+        48
+      ],
+      [
+        223,
+        270,
+        48
+      ],
+      [
+        288,
+        335,
+        48
+      ],
+      [
+        353,
+        400,
+        48
+      ],
+      [
+        418,
+        465,
+        48
+      ],
+      [
+        483,
+        530,
+        48
+      ]
+    ],
+    "art_pitch": [
+      65
+    ],
+    "tile_spacing": [
+      7
+    ],
+    "padding_left": 14,
+    "padding_right": 14,
+    "closure_width": 541,
+    "top_bar": {
+      "title_strip_end": 27,
+      "border_row": 59,
+      "border_rgb": [
+        173,
+        189,
+        205
+      ],
+      "height": 32
+    },
+    "measured": {
+      "bar": 32,
+      "dock": 96,
+      "padding": 14,
+      "spacing": 7
+    },
+    "approved": {
+      "bar": 32,
+      "dock": 96,
+      "padding": 14,
+      "spacing": 7
+    },
+    "match": {
+      "bar": true,
+      "dock": true,
+      "padding": true,
+      "spacing": true
+    },
+    "tuple": "32/96/14/7"
+  },
+  "760x500": {
+    "window": {
+      "X": 0,
+      "Y": 28,
+      "WIDTH": 760,
+      "HEIGHT": 418
+    },
+    "crop": {
+      "x": 100,
+      "y": 313,
+      "width": 560,
+      "height": 126
+    },
+    "dock_surface": {
+      "crop_x": [
+        9,
+        549
+      ],
+      "crop_y": [
+        15,
+        110
+      ],
+      "absolute_x": [
+        109,
+        649
+      ],
+      "absolute_y": [
+        328,
+        423
+      ],
+      "width": 541,
+      "height": 96
+    },
+    "art_runs": [
+      [
+        28,
+        75,
+        48
+      ],
+      [
+        93,
+        140,
+        48
+      ],
+      [
+        158,
+        205,
+        48
+      ],
+      [
+        223,
+        270,
+        48
+      ],
+      [
+        288,
+        335,
+        48
+      ],
+      [
+        353,
+        400,
+        48
+      ],
+      [
+        418,
+        465,
+        48
+      ],
+      [
+        483,
+        530,
+        48
+      ]
+    ],
+    "art_pitch": [
+      65
+    ],
+    "tile_spacing": [
+      7
+    ],
+    "padding_left": 14,
+    "padding_right": 14,
+    "closure_width": 541,
+    "top_bar": {
+      "title_strip_end": 27,
+      "border_row": 59,
+      "border_rgb": [
+        173,
+        189,
+        206
+      ],
+      "height": 32
+    },
+    "measured": {
+      "bar": 32,
+      "dock": 96,
+      "padding": 14,
+      "spacing": 7
+    },
+    "approved": {
+      "bar": 32,
+      "dock": 96,
+      "padding": 14,
+      "spacing": 7
+    },
+    "match": {
+      "bar": true,
+      "dock": true,
+      "padding": true,
+      "spacing": true
+    },
+    "tuple": "32/96/14/7"
+  },
+  "approved_tuple": "32/96/14/7",
+  "all_match": true
+}

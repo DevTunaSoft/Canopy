@@ -1,0 +1,52 @@
+[
+  {
+    "check": "display_1920x1080",
+    "status": "PASS",
+    "detail": "VGA-1 connected primary 1920x1080+0+0 (normal left inverted right x axis y axis) 0mm x 0mm"
+  },
+  {
+    "check": "launch_1920x1080",
+    "status": "FAIL",
+    "detail": "pid=20969 wid=NONE"
+  },
+  {
+    "check": "display_1200x750",
+    "status": "PASS",
+    "detail": "VGA-1 connected primary 1200x750+0+0 (normal left inverted right x axis y axis) 0mm x 0mm"
+  },
+  {
+    "check": "launch_1200x750",
+    "status": "PASS",
+    "detail": "pid=21101 wid=0x03600012"
+  },
+  {
+    "check": "foreign_windows_hidden",
+    "status": "PASS",
+    "detail": "0x02a00012"
+  },
+  {
+    "check": "shot_1200x750",
+    "status": "PASS",
+    "detail": "ccfcd96fa8b7841934ff947b2890fe301f83fef5e25831a2dd640948c78eae69"
+  },
+  {
+    "check": "display_760x500",
+    "status": "PASS",
+    "detail": "VGA-1 connected primary 760x500+0+0 (normal left inverted right x axis y axis) 0mm x 0mm"
+  },
+  {
+    "check": "launch_760x500",
+    "status": "PASS",
+    "detail": "pid=21273 wid=0x03600012"
+  },
+  {
+    "check": "foreign_windows_hidden",
+    "status": "PASS",
+    "detail": "0x02a00012"
+  },
+  {
+    "check": "shot_760x500",
+    "status": "PASS",
+    "detail": "64261840df02580f881d8f3703912ee6f8180a7cf90c95b69664e5b08fca447e"
+  }
+]

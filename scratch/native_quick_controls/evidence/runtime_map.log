@@ -1,0 +1,5 @@
+brightness NOT_RUN capability-absent
+network BLOCKED capability-denied
+power BLOCKED capability-denied
+power_suspend_transition NOT_RUN privileged-host-change
+wrote C:\Users\X1\AppData\Local\hermes\cache\scratch\wt-native-quick-controls-20261127\scratch\native_quick_controls\evidence\runtime_verdicts.json

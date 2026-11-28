@@ -1,0 +1,24 @@
+M3_PROBE_SECTION=brightness
+M3_PROBE_UTC=2026-11-28T04:06:18Z
+$ gdbus call --session --dest org.freedesktop.DBus --object-path /org/freedesktop/DBus --method org.freedesktop.DBus.NameHasOwner org.kde.Solid.PowerManagement
+(false,)
+[exit=0]
+$ gdbus call --session --dest org.kde.Solid.PowerManagement --object-path /org/kde/Solid/PowerManagement --method org.kde.Solid.PowerManagement.isActionSupported BrightnessControl
+Error: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.kde.Solid.PowerManagement was not provided by any .service files
+[exit=1]
+$ gdbus introspect --session --dest org.kde.Solid.PowerManagement --object-path /org/kde/Solid/PowerManagement/Actions/BrightnessControl
+Error: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.kde.Solid.PowerManagement was not provided by any .service files
+[exit=1]
+$ gdbus call --session --dest org.kde.Solid.PowerManagement --object-path /org/kde/Solid/PowerManagement --method org.freedesktop.DBus.Properties.GetAll org.kde.Solid.PowerManagement
+Error: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.kde.Solid.PowerManagement was not provided by any .service files
+[exit=1]
+$ gdbus call --session --dest org.kde.ScreenBrightness --object-path /org/kde/ScreenBrightness --method org.freedesktop.DBus.Properties.Get org.kde.ScreenBrightness DisplaysDBusNames
+Error: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.kde.ScreenBrightness was not provided by any .service files
+[exit=1]
+$ ls -la /sys/class/backlight/
+total 0
+drwxr-xr-x  2 root root 0 Nov 28 04:01 .
+drwxr-xr-x 72 root root 0 Nov 28 04:01 ..
+[exit=0]
+$ find /sys/class/backlight -maxdepth 4 ( -name brightness -o -name max_brightness -o -name actual_brightness ) -print
+[exit=0]

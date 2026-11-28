@@ -1,0 +1,32 @@
+{
+  "schema": "native_suspend_resume_runtime_verdict_v1",
+  "directive_rev3_sha256_prefix": "1fba4b1e",
+  "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+  "branch": "product/native-suspend-resume-20261128",
+  "native_runtime_verdict": "BLOCKED_NOT_RUN",
+  "real_suspend_resume": {
+    "evidence_label": "NATIVE RUNTIME",
+    "outcome": "NOT RUN",
+    "reason": "suspend-not-observed"
+  },
+  "native_runtime_pass_recorded": false,
+  "observed_evidence_labels": [
+    "STATIC SOURCE ONLY",
+    "SYNTHETIC"
+  ],
+  "not_run": [
+    "real suspend",
+    "real resume",
+    "real lock/unlock",
+    "logind/UPower runtime delivery",
+    "Plasma/KWin session behavior",
+    "Mint guest acceptance",
+    "compiled Qt behavior",
+    "screen-reader announcements",
+    "real PSS/CPU/scheduler-wakeup measurement",
+    "visual approval",
+    "release readiness"
+  ],
+  "merge_or_approval": "NONE",
+  "note": "No real suspend/resume cycle was executed. The synthetic PASS path in the pure contract is a logic result only and is not native runtime evidence."
+}

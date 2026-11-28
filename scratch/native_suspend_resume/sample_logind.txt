@@ -1,0 +1,4 @@
+Active=yes
+LockedHint=no
+State=active
+Type=x11

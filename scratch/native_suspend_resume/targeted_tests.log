@@ -1,0 +1,38 @@
+test_boundary_loss_downgrades_to_static_and_declares_fallback (test_contracts.ContractTests.test_boundary_loss_downgrades_to_static_and_declares_fallback) ... ok
+test_capture_is_read_only_and_json_serializable (test_contracts.ContractTests.test_capture_is_read_only_and_json_serializable) ... ok
+test_capture_rejects_hostile_facts (test_contracts.ContractTests.test_capture_rejects_hostile_facts) ... ok
+test_checkpoint_history_is_bounded (test_contracts.ContractTests.test_checkpoint_history_is_bounded) ... ok
+test_closed_integration_fails_closed (test_contracts.ContractTests.test_closed_integration_fails_closed) ... ok
+test_default_snapshot_is_blocked (test_contracts.ContractTests.test_default_snapshot_is_blocked) ... ok
+test_existing_host_event_path_is_reused (test_contracts.ContractTests.test_existing_host_event_path_is_reused) ... ok
+test_fallback_is_declaration_only (test_contracts.ContractTests.test_fallback_is_declaration_only) ... ok
+test_fallback_never_executes (test_contracts.ContractTests.test_fallback_never_executes) ... ok
+test_false_desktop_fact_fails (test_contracts.ContractTests.test_false_desktop_fact_fails) ... ok
+test_full_native_observation_passes (test_contracts.ContractTests.test_full_native_observation_passes) ... ok
+test_integration_type_guards (test_contracts.ContractTests.test_integration_type_guards) ... ok
+test_lost_work_is_fail (test_contracts.ContractTests.test_lost_work_is_fail) ... ok
+test_partial_facts_are_not_run_not_fail (test_contracts.ContractTests.test_partial_facts_are_not_run_not_fail) ... ok
+test_reobservation_owed_is_not_run (test_contracts.ContractTests.test_reobservation_owed_is_not_run) ... ok
+test_resume_unobserved_is_not_run (test_contracts.ContractTests.test_resume_unobserved_is_not_run) ... ok
+test_static_source_never_passes (test_contracts.ContractTests.test_static_source_never_passes) ... ok
+test_suspend_unobserved_is_not_run (test_contracts.ContractTests.test_suspend_unobserved_is_not_run) ... ok
+test_synthetic_full_evidence_never_passes (test_contracts.ContractTests.test_synthetic_full_evidence_never_passes) ... ok
+test_unknown_preservation_is_not_run (test_contracts.ContractTests.test_unknown_preservation_is_not_run) ... ok
+test_verdict_direct_construction_refuses_non_native_pass (test_contracts.ContractTests.test_verdict_direct_construction_refuses_non_native_pass) ... ok
+test_vocabularies_are_fixed (test_contracts.ContractTests.test_vocabularies_are_fixed) ... ok
+test_logind_bounds (test_contracts.ParserTests.test_logind_bounds) ... ok
+test_logind_duplicate_field_fails_closed (test_contracts.ParserTests.test_logind_duplicate_field_fails_closed) ... ok
+test_logind_read_only_view (test_contracts.ParserTests.test_logind_read_only_view) ... ok
+test_logind_unknown_value_is_not_guessed (test_contracts.ParserTests.test_logind_unknown_value_is_not_guessed) ... ok
+test_no_new_service_constants (test_contracts.ParserTests.test_no_new_service_constants) ... ok
+test_plasma_state_token_validation (test_contracts.ParserTests.test_plasma_state_token_validation) ... ok
+test_read_only_probe_stays_static_and_writes_nothing (test_contracts.ParserTests.test_read_only_probe_stays_static_and_writes_nothing) ... ok
+test_upower_hostile_values_are_unknown (test_contracts.ParserTests.test_upower_hostile_values_are_unknown) ... ok
+test_upower_view (test_contracts.ParserTests.test_upower_view) ... ok
+test_no_daemon_or_io_imports_in_production_modules (test_contracts.StaticTests.test_no_daemon_or_io_imports_in_production_modules) ... ok
+test_tests_are_outside_ci_discovery_scope (test_contracts.StaticTests.test_tests_are_outside_ci_discovery_scope) ... ok
+
+----------------------------------------------------------------------
+Ran 33 tests in 0.041s
+
+OK

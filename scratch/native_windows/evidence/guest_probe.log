@@ -1,0 +1,40 @@
+=== UTC ===
+Sat Nov 28 06:16:41 UTC 2026
+=== SESSION ===
+4656 /usr/bin/startplasma-x11
+4926 /usr/bin/ssh-agent /usr/bin/im-launch /usr/bin/startplasma-x11
+5384 /usr/bin/kwin_x11 --replace
+5422 /usr/bin/plasmashell --no-respawn
+=== COMPOSITOR COUNT ===
+kwin_x11=1 plasmashell=1
+=== KWIN BUS OWNER ===
+PID=5384
+PIDFD=yes
+PPID=4390
+TTY=n/a
+UID=1000
+EUID=1000
+SUID=1000
+FSUID=1000
+=== KWIN INTROSPECT ===
+.currentDesktop                     method    -         i            -
+.nextDesktop                        method    -         -            -
+.previousDesktop                    method    -         -            -
+.setCurrentDesktop                  method    i         b            -
+=== FREEDESKTOP BUS NAME ===
+org.kde.KWin                                  5384 kwin_x11        canopy :1.20         user@1000.service -       -
+=== CURRENT DESKTOP ===
+i 1
+=== SET SAME DESKTOP (1) ===
+b false
+=== CURRENT DESKTOP AFTER ===
+i 1
+=== EWMH ROOT READ (bounded) ===
+EWMH_RC=124
+=== X CLIENT LIVENESS (bounded) ===
+WMCTRL_RC=124
+=== X BLOCKER PROCESSES ===
+  54982       1 Ss         05:36 bash -c export DISPLAY=:0 XAUTHORITY=/tmp/xauth_zdKrsq; command -v xdotool; command -v scrot; xdotool key Escape; sleep 0.3; xdotool mousemove 1818 1046 click 1; sleep 1.2; scrot -o /home/canopy/m3_tray_open.png; xdotool mousemove 1700 880 click 1; sleep 1.2; scrot -o /home/canopy/m3_tray_interacted.png; xdotool key Escape; echo TRAY_SEQUENCE_DONE; ls -la /home/canopy/m3_tray*.png
+=== COMPOSITOR COUNT AFTER ===
+kwin_x11=1 plasmashell=1
+=== DONE ===

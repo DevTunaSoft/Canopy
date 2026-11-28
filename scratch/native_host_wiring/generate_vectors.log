@@ -1,0 +1,14 @@
+generated 13 cases / 18 steps
+recovery_initial               relayout 1200x750  connect
+recovery_secondary_connect     no_op    1200x750  unchanged
+recovery_resolution_changed    relayout 1200x720  resolution_changed
+recovery_primary_changed       relayout 1200x750  primary_changed
+recovery_unsupported_clamped   relayout 1200x750  connect
+recovery_last_monitor_removed  suspend  1200x750  no_display
+dpi_150_percent                relayout 1200x720  logical_dpi_changed
+dpi_200_percent                relayout  960x540  logical_dpi_changed
+dpi_logical_unchanged          no_op    1200x750  logical_size_unchanged
+dpi_below_minimum              hold     1200x750  below_minimum
+dpi_duplicate_signal           no_op    1200x720  unchanged
+dpi_hostile_scale              hold     1200x750  invalid_event
+dpi_hostile_connector          hold     1200x750  invalid_event

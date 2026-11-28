@@ -1,0 +1,7 @@
+/VirtualBox/HostGuest/SysprepArgs = ''       @ 2026-11-28T04:00:23.984Z TRANSIENT, RDONLYGUEST
+/VirtualBox/HostGuest/SysprepExec = ''       @ 2026-11-28T04:00:23.984Z TRANSIENT, RDONLYGUEST
+/VirtualBox/HostInfo/VBoxRev      = '175245' @ 2026-11-28T04:00:24.168Z TRANSIENT, RDONLYGUEST
+/VirtualBox/HostInfo/VBoxVer      = '7.2.22' @ 2026-11-28T04:00:24.168Z TRANSIENT, RDONLYGUEST
+/VirtualBox/HostInfo/VBoxVerExt   = '7.2.22' @ 2026-11-28T04:00:24.168Z TRANSIENT, RDONLYGUEST
+/VirtualBox/VMInfo/ResetCounter   = '0'      @ 2026-11-28T04:00:23.984Z TRANSIENT, RDONLYGUEST
+/VirtualBox/VMInfo/ResumeCounter  = '0'      @ 2026-11-28T04:00:23.984Z TRANSIENT, RDONLYGUEST

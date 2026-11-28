@@ -5,6 +5,8 @@
 #include "ReducedMotionPolicy.h"
 
 #include <QGuiApplication>
+#include <QScreen>
+#include <cmath>
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
 #include <QQuickItem>
@@ -1612,10 +1614,518 @@ private:
     QString m_source = QStringLiteral("host-events");
 };
 
+// Canonical fixture types and tables are declared before the class so the
+// compiled self-test can consume the same vectors generated on the Python side.
+struct NativeDisplayFixtureStep {
+    const char *call; const char *connectors; const char *primary;
+    int width; int height; double scale; const char *connector;
+};
+struct NativeDisplayFixtureCase {
+    const char *id; int start; int count;
+    const char *kind; const char *reason; int width; int height;
+};
+extern const NativeDisplayFixtureStep kNativeDisplaySteps[18];
+extern const NativeDisplayFixtureCase kNativeDisplayCases[13];
+
+// ---------------------------------------------------------------------------
+// Native display host bridge (M2/M3/M4 wired boundary).
+//
+// This is the compiled consumer of the contract implemented by
+// canopy_features/dock/display_change_response.py,
+// canopy_features/dock/display_scaling_contract.py and
+// canopy_features/quick_controls/native_display_contract.py. Observation comes
+// only from Qt platform screen signals supplied by the running compositor
+// (KWin/X11 or KWin/Wayland). There is no timer, poll, thread, socket, process,
+// second compositor or duplicate Plasma service. The bridge is inert unless
+// --native-display-host is passed, so every approved visual/screenshot fixture
+// is unchanged by default.
+class NativeDisplayHostBridge final : public QObject {
+    Q_OBJECT
+public:
+    explicit NativeDisplayHostBridge(QObject *parent = nullptr) : QObject(parent) {}
+
+    // Upstream-service reuse: one connection per Qt screen signal, no daemon.
+    void install(QGuiApplication *app) {
+        if (m_wired || app == nullptr)
+            return;
+        connect(app, &QGuiApplication::screenAdded,
+                this, &NativeDisplayHostBridge::onScreenAdded);
+        connect(app, &QGuiApplication::screenRemoved,
+                this, &NativeDisplayHostBridge::onScreenRemoved);
+        connect(app, &QGuiApplication::primaryScreenChanged,
+                this, &NativeDisplayHostBridge::onPrimaryScreenChanged);
+        for (QScreen *screen : QGuiApplication::screens())
+            connectScreen(screen);
+        m_wired = true;
+        qInfo() << "CANOPY_NATIVE_DISPLAY_WIRED: qt screen signals only";
+    }
+
+    bool isWired() const { return m_wired; }
+
+    Q_INVOKABLE QVariantMap snapshot() const {
+        QVariantMap out;
+        out.insert(QStringLiteral("wired"), m_wired);
+        out.insert(QStringLiteral("sequence"), m_sequence);
+        out.insert(QStringLiteral("kind"), m_last.kind);
+        out.insert(QStringLiteral("width"), m_last.width);
+        out.insert(QStringLiteral("height"), m_last.height);
+        out.insert(QStringLiteral("reason"), m_last.reason);
+        out.insert(QStringLiteral("source"), m_last.source);
+        out.insert(QStringLiteral("last_safe_width"), m_lastWidth);
+        out.insert(QStringLiteral("last_safe_height"), m_lastHeight);
+        return out;
+    }
+
+    Q_INVOKABLE QString json() const {
+        return QString::fromUtf8(QJsonDocument(
+            QJsonObject::fromVariantMap(snapshot())).toJson(QJsonDocument::Compact));
+    }
+
+    // One-shot, explicit refresh for the read-only adapter command. Not a loop.
+    Q_INVOKABLE bool refreshFromScreens() {
+        scanScreens(QStringLiteral("qt.manual-refresh"));
+        return true;
+    }
+
+    // Trusted entry point 1: adapt one frozen topology snapshot through the
+    // recovery decision contract (ScreenTopologyModel -> RecoveryResult ->
+    // DisplayChangeResponse.handle_recovery_result).
+    bool applyRecoverySnapshot(const QStringList &connectors,
+                               const QString &primary, int width, int height,
+                               const QString &source) {
+        ++m_sequence;
+        const Decision invalid = decision(
+            QStringLiteral("hold"), m_lastWidth, m_lastHeight,
+            QStringLiteral("invalid_event"), source);
+        if (!validConnectorList(connectors)) {
+            commit(invalid, QString(), false);
+            return false;
+        }
+        if (connectors.isEmpty()) {
+            if (!primary.isEmpty() || width != 0 || height != 0) {
+                commit(invalid, QString(), false);
+                return false;
+            }
+            m_connectors.clear();
+            m_primary.clear();
+            m_width = 0;
+            m_height = 0;
+            m_hasTopology = true;
+            commit(decision(QStringLiteral("suspend"), m_lastWidth, m_lastHeight,
+                            QStringLiteral("no_display"), source),
+                   signature(QStringLiteral("disconnect"), QString(), 0, 0, 1.0),
+                   true);
+            return true;
+        }
+        if (!legalConnector(primary) || !connectors.contains(primary)
+                || !validSize(width, 7680) || !validSize(height, 4320)) {
+            commit(invalid, QString(), false);
+            return false;
+        }
+        const QPair<int, int> safe = clampResolution(width, height);
+        QStringList sorted = connectors;
+        sorted.sort();
+        bool resolutionChanged = false;
+        bool primaryChanged = false;
+        bool connect = true;
+        if (m_hasTopology) {
+            primaryChanged = (m_primary != primary);
+            resolutionChanged = (m_width != safe.first || m_height != safe.second);
+            connect = false;
+            for (const QString &name : sorted) {
+                if (!m_connectors.contains(name))
+                    connect = true;
+            }
+        }
+        m_connectors = sorted;
+        m_primary = primary;
+        m_width = safe.first;
+        m_height = safe.second;
+        m_hasTopology = true;
+        // The Python recovery seam prioritises resolution, then primary, then
+        // connect; a disconnect with a surviving primary is still a connect
+        // signature at this base contract.
+        const QString kind = resolutionChanged ? QStringLiteral("resolution_changed")
+            : primaryChanged ? QStringLiteral("primary_changed")
+            : QStringLiteral("connect");
+        const int layoutWidth = qMin(1200, safe.first);
+        const int layoutHeight = qMin(750, safe.second);
+        const Decision plan = (safe.first < 720 || safe.second < 480)
+            ? decision(QStringLiteral("hold"), m_lastWidth, m_lastHeight,
+                       QStringLiteral("below_minimum"), source)
+            : !dockFits(layoutWidth, layoutHeight, 1.0)
+            ? decision(QStringLiteral("hold"), m_lastWidth, m_lastHeight,
+                       QStringLiteral("unsafe_geometry"), source)
+            : decision(QStringLiteral("relayout"), layoutWidth, layoutHeight,
+                       kind, source);
+        commit(plan, signature(kind, primary, safe.first, safe.second, 1.0), true);
+        return true;
+    }
+
+    // Trusted entry point 2: adapt one logical-DPI signal (physical pixels
+    // plus the device scale reported by the platform) through the scaling
+    // contract, including the half-up conversion and the 150% trap guard.
+    bool applyLogicalDpiChange(int physicalWidth, int physicalHeight,
+                               qreal scale, const QString &connector,
+                               const QString &source) {
+        ++m_sequence;
+        if (!legalConnector(connector) || !validSize(physicalWidth, 7680)
+                || !validSize(physicalHeight, 7680) || !validScale(scale)) {
+            commit(decision(QStringLiteral("hold"), m_lastWidth, m_lastHeight,
+                            QStringLiteral("invalid_event"), source),
+                   QString(), false);
+            return false;
+        }
+        const int logicalWidth = qRound(double(physicalWidth) / scale);
+        const int logicalHeight = qRound(double(physicalHeight) / scale);
+        if (logicalWidth < 720 || logicalHeight < 480) {
+            commit(decision(QStringLiteral("hold"), m_lastWidth, m_lastHeight,
+                            QStringLiteral("below_minimum"), source),
+                   signature(QStringLiteral("dpi_changed"), connector,
+                             physicalWidth, physicalHeight, scale),
+                   true);
+            return true;
+        }
+        const int width = qMin(1200, logicalWidth);
+        const int height = qMin(750, logicalHeight);
+        if (!dockFits(width, height, scale)) {
+            commit(decision(QStringLiteral("hold"), m_lastWidth, m_lastHeight,
+                            QStringLiteral("unsafe_geometry"), source),
+                   signature(QStringLiteral("dpi_changed"), connector,
+                             physicalWidth, physicalHeight, scale),
+                   true);
+            return true;
+        }
+        Decision plan;
+        if (width == m_lastWidth && height == m_lastHeight) {
+            plan = decision(QStringLiteral("no_op"), width, height,
+                            QStringLiteral("logical_size_unchanged"), source);
+        } else {
+            plan = decision(QStringLiteral("relayout"), width, height,
+                            QStringLiteral("logical_dpi_changed"), source);
+        }
+        commit(plan, signature(QStringLiteral("dpi_changed"), connector,
+                               physicalWidth, physicalHeight, scale),
+               true);
+        return true;
+    }
+
+    static int selfTest() {
+        int failures = 0;
+        for (const NativeDisplayFixtureCase &fixture : kNativeDisplayCases) {
+            NativeDisplayHostBridge bridge;
+            for (int i = 0; i < fixture.count; ++i) {
+                const NativeDisplayFixtureStep &step =
+                    kNativeDisplaySteps[fixture.start + i];
+                if (QString::fromUtf8(step.call) == QStringLiteral("recovery")) {
+                    const QStringList names = QString::fromUtf8(step.connectors)
+                        .split(QLatin1Char(','), Qt::SkipEmptyParts);
+                    bridge.applyRecoverySnapshot(
+                        names, QString::fromUtf8(step.primary),
+                        step.width, step.height, QStringLiteral("qt.screen"));
+                } else {
+                    bridge.applyLogicalDpiChange(
+                        step.width, step.height, step.scale,
+                        QString::fromUtf8(step.connector),
+                        QStringLiteral("qt.screen"));
+                }
+            }
+            const QVariantMap out = bridge.snapshot();
+            const QString kind = out.value(QStringLiteral("kind")).toString();
+            const QString reason = out.value(QStringLiteral("reason")).toString();
+            const int width = out.value(QStringLiteral("width")).toInt();
+            const int height = out.value(QStringLiteral("height")).toInt();
+            const bool ok = kind == QString::fromUtf8(fixture.kind)
+                && reason == QString::fromUtf8(fixture.reason)
+                && width == fixture.width && height == fixture.height;
+            qInfo().noquote() << "CANOPY_NATIVE_DISPLAY_VECTOR"
+                              << QString::fromUtf8(fixture.id) << kind
+                              << width << height << reason;
+            if (!ok) {
+                qCritical() << "CANOPY_NATIVE_DISPLAY_VECTOR_FAIL"
+                            << QString::fromUtf8(fixture.id);
+                ++failures;
+            }
+        }
+        if (failures == 0)
+            qInfo() << "CANOPY_NATIVE_DISPLAY_SELF_TEST_PASS: vectors="
+                    << int(sizeof(kNativeDisplayCases) / sizeof(kNativeDisplayCases[0]));
+        else
+            qCritical() << "CANOPY_NATIVE_DISPLAY_SELF_TEST_FAIL: vectors="
+                        << failures;
+        return failures == 0 ? 0 : 1;
+    }
+
+public slots:
+    void onScreenAdded(QScreen *screen) {
+        connectScreen(screen);
+        scanScreens(QStringLiteral("qt.screenAdded"));
+    }
+    void onScreenRemoved(QScreen *) {
+        scanScreens(QStringLiteral("qt.screenRemoved"));
+    }
+    void onPrimaryScreenChanged(QScreen *) {
+        scanScreens(QStringLiteral("qt.primaryScreenChanged"));
+    }
+    void onScreenGeometryChanged(const QRect &) {
+        scanScreens(QStringLiteral("qt.geometryChanged"));
+    }
+    void onLogicalDpiChanged(qreal) {
+        applyDpiFromPlatform(QStringLiteral("qt.logicalDpiChanged"));
+    }
+    void onPhysicalDpiChanged(qreal) {
+        applyDpiFromPlatform(QStringLiteral("qt.physicalDpiChanged"));
+    }
+
+signals:
+    void planReady(const QVariantMap &plan);
+
+private:
+    struct Decision {
+        int sequence;
+        QString kind;
+        int width;
+        int height;
+        QString reason;
+        QString source;
+    };
+
+    static bool legalConnector(const QString &name) {
+        if (name.isEmpty() || name.size() > 64)
+            return false;
+        const QChar first = name.at(0);
+        if (!first.isLetterOrNumber() || first.unicode() > 127)
+            return false;
+        for (const QChar ch : name) {
+            const ushort code = ch.unicode();
+            const bool ok = (code >= 'a' && code <= 'z') || (code >= 'A' && code <= 'Z')
+                || (code >= '0' && code <= '9') || code == '.' || code == '_'
+                || code == '-';
+            if (!ok)
+                return false;
+        }
+        return true;
+    }
+
+    static bool validConnectorList(const QStringList &list) {
+        if (list.size() > 16)
+            return false;
+        for (const QString &name : list) {
+            if (!legalConnector(name))
+                return false;
+        }
+        return QSet<QString>(list.cbegin(), list.cend()).size() == list.size();
+    }
+
+    static bool validSize(int value, int limit) {
+        return value >= 1 && value <= limit;
+    }
+
+    static bool validScale(qreal scale) {
+        return std::isfinite(scale) && scale > 0.0 && scale <= 4.0;
+    }
+
+    // Mirrors display_geometry_contract.validate_dock_bounds in logical pixels.
+    static bool dockFits(int width, int height, qreal scale) {
+        if (!validScale(scale) || width <= 0 || height <= 0)
+            return false;
+        const double rowWidth = 8 * 58 + 7 * 7;
+        const double dockWidth = qMin(double(width) - 32.0, rowWidth + 24.0);
+        const double x = (double(width) - dockWidth) / 2.0;
+        const double y = double(height) - 22.0 - 88.0;
+        return dockWidth > 0.0 && x >= -1.0 && x + dockWidth <= double(width) + 1.0
+            && y >= 32.0 && y + 88.0 <= double(height) + 1.0
+            && qAbs(x + dockWidth / 2.0 - double(width) / 2.0) <= 2.0;
+    }
+
+    // Mirrors screen_topology_change.SUPPORTED_RESOLUTIONS / nearest_supported_resolution.
+    static QPair<int, int> clampResolution(int width, int height) {
+        static const int sizes[][2] = {
+            {640, 480}, {800, 600}, {1024, 768}, {1280, 720},
+            {1366, 768}, {1440, 900}, {1600, 900}, {1920, 1080},
+            {2560, 1440}, {3840, 2160},
+        };
+        QPair<int, int> best = {sizes[0][0], sizes[0][1]};
+        int bestDistance = qAbs(width - sizes[0][0]) + qAbs(height - sizes[0][1]);
+        for (const auto &size : sizes) {
+            const int distance = qAbs(width - size[0]) + qAbs(height - size[1]);
+            if (distance < bestDistance
+                    || (distance == bestDistance
+                        && (size[0] < best.first
+                            || (size[0] == best.first && size[1] < best.second)))) {
+                best = {size[0], size[1]};
+                bestDistance = distance;
+            }
+        }
+        return best;
+    }
+
+    static QString signature(const QString &kind, const QString &connector,
+                             int width, int height, qreal scale) {
+        return QStringLiteral("%1|%2|%3|%4|%5").arg(kind, connector)
+            .arg(width).arg(height).arg(scale, 0, 'f', 3);
+    }
+
+    Decision decision(const QString &kind, int width, int height,
+                      const QString &reason, const QString &source) const {
+        return Decision{m_sequence, kind, width, height, reason, source};
+    }
+
+    void commit(const Decision &raw, const QString &sig, bool dedupe) {
+        Decision result = raw;
+        // Pure model: identical signals are suppressed once; hostile events
+        // bypass dedupe so repeated malformed data keeps reporting a hold.
+        if (dedupe && sig == m_signature) {
+            result = Decision{m_sequence, QStringLiteral("no_op"), raw.width,
+                              raw.height, QStringLiteral("unchanged"), raw.source};
+        } else if (dedupe) {
+            m_signature = sig;
+        }
+        m_history.append(result);
+        if (m_history.size() > 64)
+            m_history.removeFirst();
+        m_last = result;
+        if (result.kind == QStringLiteral("relayout")) {
+            m_lastWidth = result.width;
+            m_lastHeight = result.height;
+        }
+        if (result.kind != QStringLiteral("no_op"))
+            emit planReady(snapshot());
+    }
+
+    void connectScreen(QScreen *screen) {
+        if (screen == nullptr)
+            return;
+        connect(screen, &QScreen::geometryChanged,
+                this, &NativeDisplayHostBridge::onScreenGeometryChanged);
+        connect(screen, &QScreen::logicalDotsPerInchChanged,
+                this, &NativeDisplayHostBridge::onLogicalDpiChanged);
+        connect(screen, &QScreen::physicalDotsPerInchChanged,
+                this, &NativeDisplayHostBridge::onPhysicalDpiChanged);
+    }
+
+    void scanScreens(const QString &source) {
+        const QList<QScreen *> screens = QGuiApplication::screens();
+        QScreen *primaryScreen = QGuiApplication::primaryScreen();
+        QStringList names;
+        QString primary;
+        int width = 0;
+        int height = 0;
+        for (QScreen *screen : screens) {
+            if (screen == nullptr || !legalConnector(screen->name()))
+                continue;
+            names.append(screen->name());
+            if (screen == primaryScreen) {
+                primary = screen->name();
+                const QSize size = screen->size();
+                width = size.width();
+                height = size.height();
+            }
+        }
+        if (names.isEmpty()) {
+            applyRecoverySnapshot(QStringList(), QString(), 0, 0, source);
+            return;
+        }
+        applyRecoverySnapshot(names, primary, width, height, source);
+    }
+
+    void applyDpiFromPlatform(const QString &source) {
+        QScreen *screen = QGuiApplication::primaryScreen();
+        if (screen == nullptr || !legalConnector(screen->name())) {
+            ++m_sequence;
+            commit(decision(QStringLiteral("hold"), m_lastWidth, m_lastHeight,
+                            QStringLiteral("invalid_event"), source),
+                   QString(), false);
+            return;
+        }
+        const qreal scale = screen->devicePixelRatio();
+        if (!validScale(scale)) {
+            ++m_sequence;
+            commit(decision(QStringLiteral("hold"), m_lastWidth, m_lastHeight,
+                            QStringLiteral("invalid_event"), source),
+                   QString(), false);
+            return;
+        }
+        const QSize size = screen->size();
+        applyLogicalDpiChange(qRound(size.width() * scale),
+                              qRound(size.height() * scale), scale,
+                              screen->name(), source);
+    }
+
+    bool m_wired = false;
+    bool m_hasTopology = false;
+    int m_sequence = 0;
+    int m_width = 0;
+    int m_height = 0;
+    int m_lastWidth = 1200;
+    int m_lastHeight = 750;
+    QString m_primary;
+    QString m_signature;
+    QStringList m_connectors;
+    QVector<Decision> m_history;
+    Decision m_last{0, QStringLiteral("no_op"), 1200, 750,
+                    QStringLiteral("unchanged"), QStringLiteral("none")};
+};
+
+// Canonical vectors shared with the Python producer (see the generator in
+// scratch/native_host_wiring/). Kept in this compiled translation unit so the
+// binary self-test needs no external fixture file.
+// Generated by scratch/native_host_wiring/generate_vectors.py.
+const NativeDisplayFixtureStep kNativeDisplaySteps[] = {
+    {"recovery", "HDMI-1", "HDMI-1", 1920, 1080, 1.000, ""},
+    {"recovery", "HDMI-1", "HDMI-1", 1920, 1080, 1.000, ""},
+    {"recovery", "HDMI-1,DP-1", "HDMI-1", 1920, 1080, 1.000, ""},
+    {"recovery", "HDMI-1", "HDMI-1", 1920, 1080, 1.000, ""},
+    {"recovery", "HDMI-1", "HDMI-1", 1280, 720, 1.000, ""},
+    {"recovery", "HDMI-1,DP-1", "HDMI-1", 1920, 1080, 1.000, ""},
+    {"recovery", "HDMI-1,DP-1", "DP-1", 1920, 1080, 1.000, ""},
+    {"recovery", "HDMI-1", "HDMI-1", 1600, 1000, 1.000, ""},
+    {"recovery", "HDMI-1", "HDMI-1", 1920, 1080, 1.000, ""},
+    {"recovery", "", "", 0, 0, 1.000, ""},
+    {"dpi", "", "", 1920, 1080, 1.500, "HDMI-1"},
+    {"dpi", "", "", 1920, 1080, 2.000, "HDMI-1"},
+    {"dpi", "", "", 1200, 750, 1.000, "HDMI-1"},
+    {"dpi", "", "", 1000, 600, 2.000, "HDMI-1"},
+    {"dpi", "", "", 1920, 1080, 1.500, "HDMI-1"},
+    {"dpi", "", "", 1920, 1080, 1.500, "HDMI-1"},
+    {"dpi", "", "", 1920, 1080, 5.000, "HDMI-1"},
+    {"dpi", "", "", 1920, 1080, 1.500, "bad|connector"},
+};
+const NativeDisplayFixtureCase kNativeDisplayCases[] = {
+    {"recovery_initial", 0, 1, "relayout", "connect", 1200, 750},
+    {"recovery_secondary_connect", 1, 2, "no_op", "unchanged", 1200, 750},
+    {"recovery_resolution_changed", 3, 2, "relayout", "resolution_changed", 1200, 720},
+    {"recovery_primary_changed", 5, 2, "relayout", "primary_changed", 1200, 750},
+    {"recovery_unsupported_clamped", 7, 1, "relayout", "connect", 1200, 750},
+    {"recovery_last_monitor_removed", 8, 2, "suspend", "no_display", 1200, 750},
+    {"dpi_150_percent", 10, 1, "relayout", "logical_dpi_changed", 1200, 720},
+    {"dpi_200_percent", 11, 1, "relayout", "logical_dpi_changed", 960, 540},
+    {"dpi_logical_unchanged", 12, 1, "no_op", "logical_size_unchanged", 1200, 750},
+    {"dpi_below_minimum", 13, 1, "hold", "below_minimum", 1200, 750},
+    {"dpi_duplicate_signal", 14, 2, "no_op", "unchanged", 1200, 720},
+    {"dpi_hostile_scale", 16, 1, "hold", "invalid_event", 1200, 750},
+    {"dpi_hostile_connector", 17, 1, "hold", "invalid_event", 1200, 750},
+};
+
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
     QGuiApplication::setApplicationDisplayName(QStringLiteral("Canopy Classic Spike"));
     const QStringList args = QCoreApplication::arguments();
+    // The native display bridge is opt-in: no signal connection, window
+    // geometry change or new context property in any default/fixture run.
+    const bool enableNativeDisplayHost = args.contains(
+        QStringLiteral("--native-display-host"));
+    if (args.contains(QStringLiteral("--self-test-native-display-host")))
+        return NativeDisplayHostBridge::selfTest();
+    if (args.contains(QStringLiteral("--native-display-json"))) {
+        // One-shot adapter command for a trusted read-only Plasma probe.
+        // No loop: the process exits after one bounded snapshot.
+        NativeDisplayHostBridge adapter;
+        adapter.refreshFromScreens();
+        qInfo().noquote() << "CANOPY_NATIVE_DISPLAY_ADAPTER_JSON"
+                          << adapter.json();
+        return 0;
+    }
     // Native Linux app launching is opt-in. Default preview visuals, dock
     // geometry and screenshot contracts are unchanged when the flag is absent.
     const bool enableSystemApps = args.contains(QStringLiteral("--enable-system-apps"));
@@ -1643,6 +2153,7 @@ int main(int argc, char *argv[]) {
     // Declared before the QQmlApplicationEngine below so this trusted controller
     // outlives the engine, the context property and every QML object using it.
     QuickControlsHostStateController hostStateController;
+    NativeDisplayHostBridge nativeDisplay;
     // Opt-in desktop-entry catalogue: inactive unless --launcher-catalog is
     // given with a valid, bounded snapshot. Both objects outlive the engine.
     LauncherCatalogModel launcherCatalog;
@@ -2088,6 +2599,14 @@ int main(int argc, char *argv[]) {
     // Non-visual: one guarded announcement bridge for the five status labels.
     engine.rootContext()->setContextProperty(
         QStringLiteral("canopyStatusAnnouncer"), &statusAnnouncer);
+    if (enableNativeDisplayHost) {
+        // One install per process: Qt/KWin signals are the only observation
+        // source; one initial snapshot is a direct call, never a polling loop.
+        nativeDisplay.install(&app);
+        nativeDisplay.refreshFromScreens();
+        engine.rootContext()->setContextProperty(
+            QStringLiteral("canopyNativeDisplay"), &nativeDisplay);
+    }
     engine.load(QUrl(QStringLiteral("qrc:/Canopy/Classic/Main.qml")));
     if (engine.rootObjects().isEmpty())
         return 1;
@@ -2095,6 +2614,29 @@ int main(int argc, char *argv[]) {
     if (!window || !window->isVisible()) {
         qCritical() << "Canopy Classic: QML root did not create a visible window";
         return 1;
+    }
+    if (enableNativeDisplayHost) {
+        // Only a relayout plan touches the existing window; no window is
+        // created, no compositor is replaced and no QML binding is edited.
+        QObject::connect(&nativeDisplay, &NativeDisplayHostBridge::planReady,
+                         &app, [window](const QVariantMap &plan) {
+            if (plan.value(QStringLiteral("kind")).toString()
+                    != QStringLiteral("relayout"))
+                return;
+            QScreen *screen = QGuiApplication::primaryScreen();
+            if (screen == nullptr)
+                return;
+            const QSize size(plan.value(QStringLiteral("width")).toInt(),
+                             plan.value(QStringLiteral("height")).toInt());
+            const QRect area = screen->availableGeometry();
+            const QPoint origin = area.topLeft() + QPoint(
+                (area.width() - size.width()) / 2,
+                (area.height() - size.height()) / 2);
+            window->setGeometry(QRect(origin, size));
+            qInfo() << "CANOPY_NATIVE_DISPLAY_RELAYOUT_APPLIED"
+                    << size.width() << size.height()
+                    << plan.value(QStringLiteral("source")).toString();
+        });
     }
     qInfo() << "CANOPY_CLASSIC_WINDOW_READY";
     if (ownerIconsMode) {

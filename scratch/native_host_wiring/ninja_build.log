@@ -1,0 +1,36 @@
+ninja: Entering directory `C:/Users/X1/AppData/Local/hermes/cache/scratch/native_host_wiring_build_20261128'
+[1/36] Automatic MOC and UIC for target canopy-classic-spike
+[2/35] Running AUTOMOC file extraction for target canopy-classic-spike
+[3/35] Running moc --collect-json for target canopy-classic-spike
+[4/35] Automatic QML type registration for target canopy-classic-spike
+[5/35] Generating .rcc/qmlcache/canopy-classic-spike_LauncherOverlay_qml.cpp, .rcc/qmlcache/canopy-classic-spike_LauncherOverlay_qml.cpp.aotstats
+[6/35] Generating .rcc/qmlcache/canopy-classic-spike_ShellMenuPopupSet_qml.cpp, .rcc/qmlcache/canopy-classic-spike_ShellMenuPopupSet_qml.cpp.aotstats
+[7/35] Generating .rcc/qmlcache/canopy-classic-spike_Main_qml.cpp, .rcc/qmlcache/canopy-classic-spike_Main_qml.cpp.aotstats
+[8/35] Generating .rcc/qmlcache/canopy-classic-spike_ClockLabel_qml.cpp, .rcc/qmlcache/canopy-classic-spike_ClockLabel_qml.cpp.aotstats
+[9/35] Generating .rcc/qmlcache/canopy-classic-spike_DockTile_qml.cpp, .rcc/qmlcache/canopy-classic-spike_DockTile_qml.cpp.aotstats
+[10/35] Generating .rcc/qmlcache/canopy-classic-spike_Theme_qml.cpp, .rcc/qmlcache/canopy-classic-spike_Theme_qml.cpp.aotstats
+[11/35] Generating .rcc/qmlcache/canopy-classic-spike_FolderTile_qml.cpp, .rcc/qmlcache/canopy-classic-spike_FolderTile_qml.cpp.aotstats
+[12/35] Generating .rcc/qmlcache/canopy-classic-spike_PreviewWindow_qml.cpp, .rcc/qmlcache/canopy-classic-spike_PreviewWindow_qml.cpp.aotstats
+[13/35] Generating .rcc/qmlcache/canopy-classic-spike_NotificationCenter_qml.cpp, .rcc/qmlcache/canopy-classic-spike_NotificationCenter_qml.cpp.aotstats
+[14/35] Generating .rcc/qmlcache/canopy-classic-spike_ShellMenuBar_qml.cpp, .rcc/qmlcache/canopy-classic-spike_ShellMenuBar_qml.cpp.aotstats
+[15/35] Generating .rcc/qmlcache/canopy-classic-spike_Wallpaper_qml.cpp, .rcc/qmlcache/canopy-classic-spike_Wallpaper_qml.cpp.aotstats
+[16/35] Generating .rcc/qmlcache/canopy-classic-spike_WindowActivationIndicators_qml.cpp, .rcc/qmlcache/canopy-classic-spike_WindowActivationIndicators_qml.cpp.aotstats
+[17/35] Generating .rcc/qmlcache/canopy-classic-spike_QuickControlsOverlay_qml.cpp, .rcc/qmlcache/canopy-classic-spike_QuickControlsOverlay_qml.cpp.aotstats
+[18/35] Generating .rcc/qmlcache/canopy-classic-spike_SettingsPanel_qml.cpp, .rcc/qmlcache/canopy-classic-spike_SettingsPanel_qml.cpp.aotstats
+[19/35] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_Theme_qml.cpp.obj
+[20/35] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_FolderTile_qml.cpp.obj
+[21/35] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_Wallpaper_qml.cpp.obj
+[22/35] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_Main_qml.cpp.obj
+[23/35] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_LauncherOverlay_qml.cpp.obj
+[24/35] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_DockTile_qml.cpp.obj
+[25/35] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_ClockLabel_qml.cpp.obj
+[26/35] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_ShellMenuBar_qml.cpp.obj
+[27/35] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_WindowActivationIndicators_qml.cpp.obj
+[28/35] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_QuickControlsOverlay_qml.cpp.obj
+[29/35] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_PreviewWindow_qml.cpp.obj
+[30/35] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_NotificationCenter_qml.cpp.obj
+[31/35] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_ShellMenuPopupSet_qml.cpp.obj
+[32/35] Building CXX object CMakeFiles/canopy-classic-spike.dir/canopy-classic-spike_qmltyperegistrations.cpp.obj
+[33/35] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_SettingsPanel_qml.cpp.obj
+[34/35] Building CXX object CMakeFiles/canopy-classic-spike.dir/main.cpp.obj
+[35/35] Linking CXX executable canopy-classic-spike.exe

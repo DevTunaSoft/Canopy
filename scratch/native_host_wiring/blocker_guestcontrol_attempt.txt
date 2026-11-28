@@ -1,0 +1,3 @@
+VBoxManage.exe: error: Waiting for guest process failed: The guest execution service is not ready (yet)
+VBoxManage.exe: error: Details: code VBOX_E_IPRT_ERROR (0x80bb0005), component GuestSessionWrap, interface IGuestSession, callee IUnknown
+VBoxManage.exe: error: Context: "WaitForArray(ComSafeArrayAsInParam(aSessionWaitFlags), 30 * 1000, &enmWaitResult)" at line 772 of file VBoxManageGuestCtrl.cpp

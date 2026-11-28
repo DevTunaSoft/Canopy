@@ -1,0 +1,275 @@
+{
+  "checks": [
+    {
+      "id": "FIXTURE_HASHES",
+      "status": "PASS"
+    },
+    {
+      "id": "STATIC_FIVE_ECOSYSTEMS",
+      "status": "PASS"
+    },
+    {
+      "id": "STATIC_FORBIDDEN_CAPABILITIES",
+      "status": "PASS"
+    },
+    {
+      "id": "STATIC_NO_TOOL_EXEC",
+      "status": "PASS"
+    },
+    {
+      "id": "STATIC_NO_WRITE_IO",
+      "status": "PASS"
+    },
+    {
+      "id": "STATIC_READ_ONLY_IMPORTS",
+      "status": "PASS"
+    },
+    {
+      "id": "SNAPSHOT_VALID",
+      "status": "PASS"
+    },
+    {
+      "id": "SNAPSHOT_FIVE_ECOSYSTEMS",
+      "status": "PASS"
+    },
+    {
+      "id": "SNAPSHOT_CAPABILITY_COVERAGE",
+      "status": "PASS"
+    },
+    {
+      "id": "SNAPSHOT_READ_ONLY_FIRST",
+      "status": "PASS"
+    },
+    {
+      "id": "SNAPSHOT_NO_OPERATIONAL_GRANTS",
+      "status": "PASS"
+    },
+    {
+      "id": "SNAPSHOT_CONSUMES_P0_PINS",
+      "status": "PASS"
+    },
+    {
+      "id": "SNAPSHOT_CONTRACT_GATES",
+      "status": "PASS"
+    },
+    {
+      "id": "VIEW_IMMUTABLE",
+      "status": "PASS"
+    },
+    {
+      "id": "VIEW_DETERMINISTIC",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_COUNT_BOUND",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_ACCOUNTS",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_ATOMICGATEINCOMPLETE",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_BACKUPROLLBACKINFLIGHT",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_CAPABILITIESSTRING",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_COREMUTATIONCAPABILITY",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_DUPLICATEECOSYSTEM",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_DUPLICATESERVICES",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_FOREIGNREPOMIXING",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_HANDOFFEXECUTED",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_ISOLATIONDUPLICATESTACK",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_LAUNCHPERMITTED",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_MISSINGECOSYSTEM",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_PAIDTIERS",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_PARTIALUPGRADE",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_PRIVILEGEDCAPABILITY",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_PROMOTIONPERFORMED",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_RAWDUPLICATEKEY",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_RAWHUGEINTEGER",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_REALGUESTCLAIM",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_RUNTIMEBYDEFAULT",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_RUNTIMECONTRACTCLAIM",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_RUNTIMESCOPESOURCE",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_SOURCEHEADMISMATCH",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_SOURCEPINMISMATCH",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_TELEMETRY",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_TOPEXTRAFIELD",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_UNKNOWNECOSYSTEM",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_UNSIGNEDSOURCE",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_WRONGPROVENANCE",
+      "status": "PASS"
+    },
+    {
+      "id": "HARDEN_UNORDERED_REJECTED",
+      "status": "PASS"
+    },
+    {
+      "id": "HARDEN_STRING_NOT_SEQUENCE",
+      "status": "PASS"
+    },
+    {
+      "id": "HARDEN_TOP_NOT_MAPPING",
+      "status": "PASS"
+    },
+    {
+      "id": "HARDEN_TOP_FIELDS_INVALID",
+      "status": "PASS"
+    },
+    {
+      "id": "HARDEN_REAL_GUEST_CONTEXT_REJECTED",
+      "status": "PASS"
+    }
+  ],
+  "evidence_labels": [
+    "STATIC SOURCE ONLY",
+    "SYNTHETIC"
+  ],
+  "fixture_sha256": {
+    "accounts.json": "b32c12c388bc7ddf2656b4d9300c3c2e98ea1399efb097bce797ff149a3a76c8",
+    "atomic_gate_incomplete.json": "2394828429514521153f71a95574397c1e67fcbd08741c0a9d9b83b18f40e12d",
+    "backup_rollback_in_flight.json": "ebc68181dee31213bbe7f11635a35836783d4ead2efb299adcf8230a4ea3c47f",
+    "capabilities_string.json": "4e679ddac39f4af17c2b377014edd19359b86b768359573dadb140682c44b5f8",
+    "capability_snapshot.json": "f4f3ab30e8a0e346b6331b3335e1d56ce581d45a59d14c880f009d6cbd9b2bc9",
+    "core_mutation_capability.json": "09540be1c77df30e1300db406e0e586e8d78a775ad41adfa5c10f93ebba21519",
+    "duplicate_ecosystem.json": "083ef1d3c1f9a0ade7d827530e5ed3054158cb10d35679263e9d5ade4e2b1116",
+    "duplicate_services.json": "b5037acf46c297a158b3b4ba29f031a2444a7d5eb6344bf140d5b3dd94bd0f0f",
+    "foreign_repo_mixing.json": "1ac108a032612951421c0314826ae135aff140add2c32e401d07e1668c01f33c",
+    "handoff_executed.json": "51bdc52915bf2efa9085cb54849e2f182e786e5d61f09366a4250815cf0f3dd8",
+    "isolation_duplicate_stack.json": "97af476448c80415359b8d1667d48c3b7db0e270719f8aae514fc12e469fb745",
+    "launch_permitted.json": "6bd7fb86196ed7245bdd6216ac6394f6a79884c99dd4f851e5bf9a333292cab6",
+    "missing_ecosystem.json": "a2d29ec0721c7983335169173acf451c8a65f9922d6411ece40faebd89ce39ab",
+    "negative_cases.json": "79d6ee102a63282d65e0c66d53e3a3fe4b2aac2e65566ea056ec8aae5af0c40f",
+    "paid_tiers.json": "42a44ed47d0a75bcb4a6bc21c9551eb2648dfc272f34538db7bb7d09612a1652",
+    "partial_upgrade.json": "6bb722df5a61813282c089fc3e64bfc9230c7f1aa99a02f91024002b300eb43d",
+    "privileged_capability.json": "28490606aecca89852d5a1f47a41530c92520eafa6a5573624f22597b84a73db",
+    "promotion_performed.json": "e9c206b9cdb8514b6af80ade9b94a6c9ebade3681a67670f7c786c2658548364",
+    "raw_duplicate_key.json": "16a276ef687fee02c6258328dde8fb91f502bce3de35f95c67deed66da34f2be",
+    "raw_huge_integer.json": "2de19be2dd6b78869c8bc115a906f0343cf4d307d96baa8164c8884c573b9fd6",
+    "real_guest_claim.json": "fad10e6046a10756ce32140fe4a6b23c8b316b924447419882a22b6414ae5351",
+    "runtime_by_default.json": "fd4d45c0040bd352026e34fd30d97eb1800dcf11dc381bdce096ea2b92dae348",
+    "runtime_contract_claim.json": "4944c079acc734685ec145262bbc11cc494d1e8f9c9f306615bf7283f9cd49df",
+    "runtime_scope_source.json": "ec6215fb7cdbc9c4e062449ef0bc4010ad9555528f81f0fc28b3d3a72c34b93f",
+    "source_head_mismatch.json": "aab6dce4ad94e907aef952c231f8617baeb796eb917e43faa5aa88d7fc4da4ef",
+    "source_pin_mismatch.json": "d25f9593995afaf4f3e04a109097246ffc3613409d6e7e4e6800e98f703978cf",
+    "telemetry.json": "da10715d8035a58524ffeae0c93761137dd92eb2a73477426328ab7fe51f9a53",
+    "top_extra_field.json": "31e8b9f21ce07cb76019e929c9727f58080916bb9bf2a9bc21a95ffc8e961f50",
+    "unknown_ecosystem.json": "4528c96331d30b66fcc4caa619b8ab5384f11618397d6d91c4bc8fa23d922bb6",
+    "unsigned_source.json": "7b807f5e9d2aa57d52d70cb69418fb7ea53b470cbba94b1cee4da52cd8a8fc51",
+    "wrong_provenance.json": "9ab5c00cc15a6c0a90da0f773bced3c85aa21f72212d4f1f1ad740ae1a563428"
+  },
+  "guest_acceptance": "NOT_RUN",
+  "guest_execution": "NOT_RUN",
+  "note": "Read-only-first declaration map only. No capability grants, core mutation, paid tiers, accounts, telemetry or duplicate services. No real guest or runtime was executed.",
+  "production_sha256": {
+    "__init__.py": "abaee8ead43613f745cb158ef8b2884925610f822540c24e08ef5245dbab201f",
+    "capability_map.py": "df113e1bd5400a2d7a18651650aa16bf9c888048440ba0886e6c0ac9879445f6",
+    "contract.py": "c496883b1296bf808858f8e549d7567337f8950ede47eb9907e23e303aac5f63"
+  },
+  "real_guest": {
+    "gate": "NOT_RUN",
+    "status": "BLOCKED"
+  },
+  "runtime": "BLOCKED_NOT_RUN",
+  "schema_version": 1,
+  "source_consumption": "read-only",
+  "source_heads": {
+    "lacos_app_isolation": "f4ee9975ce49943c4ee1adf47e9648c21beab5ab",
+    "lacos_atomic_updates": "d808c6e852a28063a45fa702a8463a65f3d28ae5",
+    "lacos_backup_recovery": "43792968d56945a637e27b790e9cefe3ebf7dabd",
+    "lacos_sources": "616ce171a7b71f69f19060122f53c97ada346662"
+  },
+  "source_sha256": {
+    "lacos_app_isolation:F001_valid_flatpak.json": "c2e48613911d140326cd4c566c28d6288031fcf2b3611da54616b19ad2b1738b",
+    "lacos_app_isolation:policy.py": "2c797e671fa8c305bae02c88ed005985914ea864da472aeec82d26cda9bc18d8",
+    "lacos_atomic_updates:F001-ready-handoff.json": "b5c82679ae5f990c8f0baf4717c50a08afbe8984c9a99c8fb12bd28c14da30a4",
+    "lacos_atomic_updates:contract.py": "65d4b2633e0387d6f87fc76f9087bb349011c2e3a8a2a9caa0c8a877f382ba6a",
+    "lacos_backup_recovery:contract.py": "2907afd1ce0183a4417fc4562cb3a875ac29c390f6a3e399995867fb54b1799b",
+    "lacos_backup_recovery:manifest.json": "56d9c543b0ff3662600d0645145c84a768f3d237c58b1131e2cddf02665885cc",
+    "lacos_sources:capability_manifest.py": "91ca6a8bd677c7a584b6c89ada7bb737b5c3a8bbe9da7b1c4cba21344df4d983",
+    "lacos_sources:manifest_valid.json": "f0d656acb162d278a22ad790401e886727e71487df91f0b584314098e1977971",
+    "lacos_sources:probe_guest_synthetic.json": "b10288558f997c4d729539c39e9993883758e2bdface7424ca254794fbf27524",
+    "lacos_sources:source_probe.py": "66685a317e745cddaf33f7c6d92b7d4fe195bc83716b43c55683ac292d981ade"
+  },
+  "verdict": "PASS"
+}

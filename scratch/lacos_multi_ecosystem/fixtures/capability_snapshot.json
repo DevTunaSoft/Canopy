@@ -1,0 +1,177 @@
+{
+  "schema_version": 1,
+  "evidence_labels": [
+    "STATIC SOURCE ONLY",
+    "SYNTHETIC"
+  ],
+  "policy": {
+    "no_core_mutation": true,
+    "foreign_host_repo_mixing": false,
+    "paid_tiers": false,
+    "telemetry": false,
+    "duplicate_always_on_services": false,
+    "accounts": false,
+    "on_demand_only": true,
+    "runtime_installed_by_default": false
+  },
+  "source_pins": {
+    "lacos_sources:capability_manifest.py": "91ca6a8bd677c7a584b6c89ada7bb737b5c3a8bbe9da7b1c4cba21344df4d983",
+    "lacos_sources:source_probe.py": "66685a317e745cddaf33f7c6d92b7d4fe195bc83716b43c55683ac292d981ade",
+    "lacos_sources:manifest_valid.json": "f0d656acb162d278a22ad790401e886727e71487df91f0b584314098e1977971",
+    "lacos_sources:probe_guest_synthetic.json": "b10288558f997c4d729539c39e9993883758e2bdface7424ca254794fbf27524",
+    "lacos_atomic_updates:contract.py": "65d4b2633e0387d6f87fc76f9087bb349011c2e3a8a2a9caa0c8a877f382ba6a",
+    "lacos_atomic_updates:F001-ready-handoff.json": "b5c82679ae5f990c8f0baf4717c50a08afbe8984c9a99c8fb12bd28c14da30a4",
+    "lacos_backup_recovery:contract.py": "2907afd1ce0183a4417fc4562cb3a875ac29c390f6a3e399995867fb54b1799b",
+    "lacos_backup_recovery:manifest.json": "56d9c543b0ff3662600d0645145c84a768f3d237c58b1131e2cddf02665885cc",
+    "lacos_app_isolation:policy.py": "2c797e671fa8c305bae02c88ed005985914ea864da472aeec82d26cda9bc18d8",
+    "lacos_app_isolation:F001_valid_flatpak.json": "c2e48613911d140326cd4c566c28d6288031fcf2b3611da54616b19ad2b1738b"
+  },
+  "source_heads": {
+    "lacos_sources": "616ce171a7b71f69f19060122f53c97ada346662",
+    "lacos_atomic_updates": "d808c6e852a28063a45fa702a8463a65f3d28ae5",
+    "lacos_backup_recovery": "43792968d56945a637e27b790e9cefe3ebf7dabd",
+    "lacos_app_isolation": "f4ee9975ce49943c4ee1adf47e9648c21beab5ab"
+  },
+  "contracts": {
+    "sources": {
+      "context": "synthetic-guest",
+      "declaration_status": "DECLARED",
+      "signature_status": "DECLARED_NOT_VERIFIED",
+      "guest_acceptance": "NOT_RUN",
+      "host_probe": "HOST_ONLY"
+    },
+    "atomic_updates": {
+      "signature_ok": true,
+      "digest_match": true,
+      "checkpoint_retained": true,
+      "pinned": true,
+      "core_immutable": true,
+      "no_layered_mutation": true,
+      "activation_deferred": true,
+      "stock_plasma_fallback": true,
+      "handoff_executed": false
+    },
+    "backup_recovery": {
+      "plan_sealed": true,
+      "checkpoint_present": true,
+      "rollback_clear": true,
+      "owner_data_scoped": true,
+      "restore_review_required": true,
+      "integrity_verified": true,
+      "promotion_performed": false
+    },
+    "app_isolation": {
+      "upstream_only": true,
+      "no_duplicate_stack": true,
+      "read_only_default": true,
+      "explicit_write_review": true,
+      "no_core_mutation": true,
+      "no_paid_tiers": true,
+      "no_telemetry": true,
+      "no_accounts": true,
+      "guest_acceptance": "NOT_RUN",
+      "launch_permitted": false
+    }
+  },
+  "ecosystems": [
+    {
+      "id": "flatpak_flathub",
+      "enabled": true,
+      "on_demand": true,
+      "runtime_installed_by_default": false,
+      "capabilities": ["search", "install", "update", "remove", "launch", "permissions"],
+      "sources": [
+        {
+          "id": "flathub-official",
+          "provenance": "official-flathub",
+          "signature": "gpg",
+          "verified": true,
+          "scope": "guest-only"
+        }
+      ],
+      "isolation": "Flatpak sandbox plus explicit portals; no host filesystem, device, socket, privileged service or core writes by default."
+    },
+    {
+      "id": "apt_deb",
+      "enabled": true,
+      "on_demand": true,
+      "runtime_installed_by_default": false,
+      "capabilities": ["search", "install", "update", "remove", "launch"],
+      "sources": [
+        {
+          "id": "ubuntu-archive-main",
+          "provenance": "ubuntu-archive",
+          "signature": "apt-signed-by",
+          "verified": true,
+          "scope": "guest-only"
+        },
+        {
+          "id": "debian-archive-main",
+          "provenance": "debian-archive",
+          "signature": "apt-signed-by",
+          "verified": true,
+          "scope": "guest-only"
+        }
+      ],
+      "isolation": "Ubuntu/Debian compatible environment with own database; no foreign host repo, host library overwrite or core writes."
+    },
+    {
+      "id": "pacman",
+      "enabled": true,
+      "on_demand": true,
+      "runtime_installed_by_default": false,
+      "capabilities": ["search", "install", "update", "remove", "launch"],
+      "sources": [
+        {
+          "id": "arch-official-repo",
+          "provenance": "arch-official",
+          "signature": "pacman-key",
+          "verified": true,
+          "scope": "guest-only"
+        }
+      ],
+      "isolation": "Isolated Arch compatible environment with separate database; no partial upgrades, foreign host repos or core writes."
+    },
+    {
+      "id": "dnf_rpm",
+      "enabled": true,
+      "on_demand": true,
+      "runtime_installed_by_default": false,
+      "capabilities": ["search", "install", "update", "remove", "launch"],
+      "sources": [
+        {
+          "id": "fedora-official-repo",
+          "provenance": "fedora-official",
+          "signature": "rpm-gpg",
+          "verified": true,
+          "scope": "guest-only"
+        }
+      ],
+      "isolation": "Fedora compatible environment with signed official sources; no foreign host repo, host library overwrite or core writes."
+    },
+    {
+      "id": "rootless_podman_oci",
+      "enabled": true,
+      "on_demand": true,
+      "runtime_installed_by_default": false,
+      "capabilities": ["search", "pull", "run", "update", "remove", "permissions"],
+      "sources": [
+        {
+          "id": "registry-official",
+          "provenance": "official-registry",
+          "signature": "cosign",
+          "verified": true,
+          "scope": "guest-only"
+        },
+        {
+          "id": "image-verified",
+          "provenance": "verified-image",
+          "signature": "sigstore",
+          "verified": true,
+          "scope": "guest-only"
+        }
+      ],
+      "isolation": "Rootless Podman is not a full sandbox; no host files, credentials, devices, sockets, privileged services or core writes."
+    }
+  ]
+}

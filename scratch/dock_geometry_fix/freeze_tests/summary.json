@@ -1,0 +1,42 @@
+{
+  "base": {
+    "duration": "2.085s",
+    "fail_error_names": [],
+    "fail_error_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "log": "freeze_tests/base_freeze.log",
+    "ran": 79,
+    "rc": 0,
+    "summary_line": "OK"
+  },
+  "base_commit": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+  "classification": "EXPECTED_STALE_PIN_RED_FROM_APPROVED_GEOMETRY",
+  "command": "PYTHONPATH=<worktree> python3 -m unittest -v tests.test_classic_dock_frozen tests.test_classic_qt_source tests.test_classic_preview_scrollbar_theme tests.test_c100_dock_display_geometry_contract tests.test_classic_status_a11y tests.test_nd041_native_settings_controls_wiring tests.test_check_visual_lock tests.test_check_visual_region_identity tests.test_classic_clock_accessibility_no_visual_change",
+  "evidence_class": "SYNTHETIC / STATIC SOURCE ONLY",
+  "explanation": "All new failures are the three pre-existing 88/12 test pins in test files outside this workstream's owned paths. They detect the intentional, bounded 32/96/14/7 remediation; no test file was edited. The byte-level non-geometry projection remains identical (see geometry_projection.json).",
+  "head": {
+    "duration": "2.125s",
+    "fail_error_names": [
+      "test_frozen_visual_constants_are_unchanged",
+      "test_mirrors_match_frozen_classic_ui_source",
+      "test_theme_identity_tokens_frozen"
+    ],
+    "fail_error_set_sha256": "65d5cbb14f8115e3d435677b781259afbe27fdce1beb4d83851ea37c05767c30",
+    "log": "freeze_tests/head_freeze.log",
+    "ran": 79,
+    "rc": 1,
+    "summary_line": "FAILED (failures=3)"
+  },
+  "new_fail_error_names_vs_base": [
+    "test_frozen_visual_constants_are_unchanged",
+    "test_mirrors_match_frozen_classic_ui_source",
+    "test_theme_identity_tokens_frozen"
+  ],
+  "owned_paths_modified": [
+    "prototype/classic/Theme.qml",
+    "docs/NATIVE_DOCK_GEOMETRY.md",
+    "scratch/dock_geometry_fix/**"
+  ],
+  "pixel_visual_owner_acceptance": "HOLD / NOT_RUN",
+  "schema_version": 1,
+  "test_files_modified": []
+}

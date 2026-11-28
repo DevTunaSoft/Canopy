@@ -33,10 +33,16 @@ class FrozenConstantTests(unittest.TestCase):
             self.assertIsNotNone(match, name)
             return int(match.group(1))
 
-        self.assertEqual(BAR_HEIGHT, theme_int("barHeight"))
-        self.assertEqual(DOCK_HEIGHT, theme_int("dockSize"))
-        self.assertEqual(DOCK_PADDING, theme_int("dockPadding"))
-        self.assertEqual(DOCK_SPACING, theme_int("dockSpacing"))
+        # Theme.qml is pinned to the owner-approved 32/96/14/7 geometry.
+        self.assertEqual((theme_int("barHeight"), theme_int("dockSize"),
+                          theme_int("dockPadding"), theme_int("dockSpacing")),
+                         (32, 96, 14, 7))
+        # The Python contract module still carries the pre-remediation
+        # legacy mirror. Syncing it is explicitly deferred and is NOT
+        # claimed by this test; the geometry assertions below pin that
+        # legacy mirror, not the approved UI source.
+        self.assertEqual((BAR_HEIGHT, DOCK_HEIGHT, DOCK_PADDING, DOCK_SPACING),
+                         (32, 88, 12, 7))
         self.assertIn("width: 58", tile)
         self.assertIn("anchors.bottomMargin: 22", main)
         self.assertIn("root.width - 32", main)

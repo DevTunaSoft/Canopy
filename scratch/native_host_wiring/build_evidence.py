@@ -57,11 +57,16 @@ def main():
     suite_log = HERE / "full_tests.log"
     suite_rc = HERE / "full_tests.rc"
     terminal = None
+    outcome = None
+    text = ""
     if suite_log.exists():
         text = suite_log.read_text(encoding="utf-8", errors="replace")
         found = re.search(r"^Ran \d+ tests.*$", text, re.MULTILINE)
-        if found and re.search(r"^(OK|FAILED)", text, re.MULTILINE):
+        if found and (re.search(r"^OK(?: \(skipped=\d+\))?$", text, re.MULTILINE)
+                      or re.search(r"^FAILED", text, re.MULTILINE)):
             terminal = found.group(0)
+            outcome = ("OK" if re.search(r"^OK", text, re.MULTILINE)
+                       else "FAILED")
     sums = {}
     for name in ARTIFACTS:
         sums[name] = digest(HERE / name)
@@ -88,9 +93,10 @@ def main():
         },
         "full_suite": {
             "terminal_summary": terminal,
+            "outcome": outcome,
             "rc": (suite_rc.read_text(encoding="utf-8").strip()
                    if suite_rc.exists() else None),
-            "verdict": ("PASS" if terminal and "OK" in terminal else
+            "verdict": ("PASS" if terminal and outcome == "OK" else
                         "FAIL" if terminal else "INCOMPLETE"),
         },
         "note": ("Compiled offscreen self-test and Python parity only. "

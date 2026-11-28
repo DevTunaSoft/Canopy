@@ -9,7 +9,7 @@
   "self_test_pass_marker": true,
   "sha256": {
     "canonical_vectors.json": "d3e2bf9cf66586d2bf68fc31fd936f1322d4943f37c92fc2e84c3f8572bd9085",
-    "compiled_self_test.log": "4e6a970e9f5963580a39b416dcb06fc2883e0c82a08ba386c8d222301764cd9d",
+    "compiled_self_test.log": "5004664423aea4fc6eb58c7699fee6287041bb17b6d74c9f0811c52c6be2089f",
     "main.cpp": "1167853b00820ebd74eb9d07f5bfba9f2d731a69b8ea0e1bf62f9205453300f4"
   },
   "vector_count": 13,

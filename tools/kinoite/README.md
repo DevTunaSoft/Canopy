@@ -19,3 +19,10 @@ runtime, scans tracked code for LacOS dependencies, and writes
 system file or claims a native Kinoite result. A `PASS` from this gate means the
 static/host evidence is intact; native runtime checks remain `NOT RUN` when no
 disposable Kinoite environment is available.
+
+`--exact-head SHA` stamps the single authoritative final-head field
+(`exact_head`) on the evidence; without it the gate defaults to `git HEAD`.
+`--reviewed-head SHA` retains the earlier reviewed head as `reviewed_head`
+provenance only and is never used as `exact_head`. Regenerate after any commit
+that changes the owned evidence paths, then verify `sha256sum -c SHA256SUMS.txt`
+(47 artifacts).

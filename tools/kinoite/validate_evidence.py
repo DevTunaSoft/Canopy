@@ -178,6 +178,16 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--worktree", required=True)
     ap.add_argument("--out", required=True, help="scratch/kinoite_validation directory")
+    ap.add_argument(
+        "--exact-head",
+        default=None,
+        help="Explicit final head SHA to label the evidence with. Defaults to git HEAD.",
+    )
+    ap.add_argument(
+        "--reviewed-head",
+        default=None,
+        help="Reviewed head SHA retained as provenance only; never used as exact_head.",
+    )
     args = ap.parse_args()
     root = pathlib.Path(args.worktree).resolve()
     out = pathlib.Path(args.out).resolve()
@@ -274,7 +284,9 @@ def main() -> int:
     rows.append(runtime_row)
 
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    head = subprocess.run(["git", "-C", str(root), "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()
+    head = args.exact_head or subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "HEAD"], capture_output=True, text=True, check=True
+    ).stdout.strip()
     report = {
         "generated_utc": timestamp,
         "exact_head": head,
@@ -285,6 +297,13 @@ def main() -> int:
         "overall_static_verdict": "PASS" if all(r["verdict"] == "PASS" for r in rows if r["id"] != "E13") else "FAIL",
         "native_runtime_verdict": "NOT_RUN",
     }
+    if args.reviewed_head:
+        ordered = {}
+        for key, value in report.items():
+            ordered[key] = value
+            if key == "exact_head":
+                ordered["reviewed_head"] = args.reviewed_head
+        report = ordered
     (out / "evidence_matrix.json").write_bytes(
         (json.dumps(report, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
     )
@@ -292,7 +311,9 @@ def main() -> int:
     md = [
         "# Kinoite validation evidence matrix",
         "",
-        f"Exact head: `{head}`. Generated: {timestamp}.",
+        f"Exact head: `{head}`."
+        + (f" Reviewed head (provenance only): `{args.reviewed_head}`." if args.reviewed_head else "")
+        + f" Generated: {timestamp}.",
         "",
         "| ID | Check | Evidence class | Verdict |",
         "|---|---|---|---|",

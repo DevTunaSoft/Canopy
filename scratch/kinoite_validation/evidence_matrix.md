@@ -1,6 +1,6 @@
 # Kinoite validation evidence matrix
 
-Exact head: `93c4dbc8c8d650034d387de69ea8955dacd74d57`. Generated: 2026-11-28T05:22:33Z.
+Exact head: `bca3ddf72785753fb499eb5287dffbb083750f1e`. Reviewed head (provenance only): `93c4dbc8c8d650034d387de69ea8955dacd74d57`. Generated: 2026-11-28T06:08:49Z.
 
 | ID | Check | Evidence class | Verdict |
 |---|---|---|---|

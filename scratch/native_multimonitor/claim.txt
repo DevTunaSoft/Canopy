@@ -1,0 +1,4 @@
+CLAIMED BY m4-multimonitor-worker (subagent)
+Task: product M4 multi-monitor / HiDPI, branch product/native-multimonitor-20261128 from ec910d7a7275296ecbc8b5e5c459d356205165d1.
+Exact owned paths: `canopy_features/dock/display_change_response.py`, `canopy_features/dock/geometry.py`, `docs/NATIVE_DISPLAY_RESPONSE.md`, `scratch/native_multimonitor/**`, `tools/display_response/**`.
+Constraints: cap 8, 3 slots; approved dock geometry 32/96/14/7 unchanged; no polling or duplicate service; real runtime BLOCKED/NOT_RUN; no merge, no self-approval; one DRAFT PR only.

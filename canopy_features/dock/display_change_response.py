@@ -33,9 +33,25 @@ KIND_HOLD = "hold"
 KIND_SUSPEND = "suspend"
 KIND_NO_OP = "no_op"
 
+EVENT_MONITOR_ATTACHED = "monitor_attached"
+EVENT_MONITOR_DETACHED = "monitor_detached"
+REASON_MONITOR_ATTACHED = "connect"
+REASON_MONITOR_DETACHED = "disconnect"
+
+SOURCE_KSCREEN_CONFIG_CHANGED = "kscreen.configChanged"
+SOURCE_KWIN_SCREENS_CHANGED = "kwin.screensChanged"
+SOURCE_QT_LOGICAL_DPI_CHANGED = "qt.logicalDpiChanged"
+NATIVE_SOURCES = frozenset({
+    SOURCE_KSCREEN_CONFIG_CHANGED, SOURCE_KWIN_SCREENS_CHANGED,
+    SOURCE_QT_LOGICAL_DPI_CHANGED,
+})
+MAX_NATIVE_SCREENS = 16
+MAX_NATIVE_FIELD = 80
+
 ALLOWED_KINDS = frozenset({
     EVENT_RESOLUTION_CHANGED, EVENT_CONNECT, EVENT_DISCONNECT,
     EVENT_PRIMARY_CHANGED, EVENT_DPI_CHANGED,
+    EVENT_MONITOR_ATTACHED, EVENT_MONITOR_DETACHED,
 })
 CONNECTOR = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}\Z")
 MAX_SUBSCRIBERS = 16
@@ -43,8 +59,11 @@ MAX_HISTORY = 64
 
 __all__ = [
     "ROOT_WIDTH", "ROOT_HEIGHT", "MIN_WIDTH", "MIN_HEIGHT",
-    "MAX_SCALE", "MAX_SUBSCRIBERS", "MAX_HISTORY",
+    "MAX_SCALE", "MAX_SUBSCRIBERS", "MAX_HISTORY", "MAX_NATIVE_SCREENS",
     "EVENT_RESOLUTION_CHANGED", "EVENT_DPI_CHANGED",
+    "EVENT_MONITOR_ATTACHED", "EVENT_MONITOR_DETACHED",
+    "SOURCE_KSCREEN_CONFIG_CHANGED", "SOURCE_KWIN_SCREENS_CHANGED",
+    "SOURCE_QT_LOGICAL_DPI_CHANGED", "NATIVE_SOURCES",
     "KIND_RELAYOUT", "KIND_HOLD",
     "KIND_SUSPEND", "KIND_NO_OP", "DisplayChangeError",
     "DisplayScalingError", "DisplayEvent", "RelayoutPlan",
@@ -116,7 +135,8 @@ def _coerce_event(value):
         raise DisplayChangeError("invalid display connector")
     for name, size, limit in (("width", event.width, MAX_WIDTH),
                               ("height", event.height, MAX_HEIGHT)):
-        if event.kind == EVENT_DISCONNECT and size is None:
+        if event.kind in (EVENT_DISCONNECT, EVENT_MONITOR_DETACHED) \
+                and size is None:
             continue
         if type(size) is not int or not 1 <= size <= limit:
             raise DisplayChangeError("invalid display " + name)
@@ -126,6 +146,105 @@ def _coerce_event(value):
             or any(type(v) is not int or v <= 0 for v in event.previous)):
         raise DisplayChangeError("invalid previous resolution")
     return event
+
+
+def _native_field_set(value, allowed):
+    """Read one bounded native payload without accepting unknown fields."""
+    if not isinstance(value, Mapping):
+        raise DisplayChangeError("native payload must be a mapping")
+    for name in value:
+        if type(name) is not str or name not in allowed:
+            raise DisplayChangeError("unexpected native payload field")
+    return value
+
+
+def _native_connector(value):
+    if type(value) is not str or not CONNECTOR.fullmatch(value):
+        raise DisplayChangeError("invalid native connector")
+    return value
+
+
+def _native_dimension(value, limit):
+    if type(value) is not int or not 1 <= value <= limit:
+        raise DisplayChangeError("invalid native dimension")
+    return value
+
+
+def _native_payload(payload):
+    """Normalize one trusted KWin/KScreen push payload, or fail closed.
+
+    ``payload`` is data from the host, never an observation performed here.
+    The returned footprint is a hashable, bounded topology signature used only
+    for duplicate suppression; it is never used to resize anything.
+    """
+    source = payload.get("source") if isinstance(payload, Mapping) else None
+    if type(source) is not str or source not in NATIVE_SOURCES:
+        raise DisplayChangeError("unsupported native display source")
+
+    if source == SOURCE_KSCREEN_CONFIG_CHANGED:
+        fields = _native_field_set(payload, {"source", "outputs"})
+        raw = fields.get("outputs")
+        if type(raw) not in (tuple, list) or len(raw) > MAX_NATIVE_SCREENS:
+            raise DisplayChangeError("invalid KScreen output list")
+        records = []
+        for item in raw:
+            output = _native_field_set(
+                item, {"connector", "width", "height", "scale", "primary"})
+            connector = _native_connector(output.get("connector"))
+            width = _native_dimension(output.get("width"), MAX_WIDTH)
+            height = _native_dimension(output.get("height"), MAX_HEIGHT)
+            scale = validate_scale(output.get("scale", 1.0))
+            primary = output.get("primary", False)
+            if type(primary) is not bool:
+                raise DisplayChangeError("invalid primary flag")
+            records.append((connector, width, height, scale, primary))
+        records.sort()
+        connectors = tuple(record[0] for record in records)
+        if len(set(connectors)) != len(connectors):
+            raise DisplayChangeError("duplicate KScreen connector")
+        primaries = tuple(record for record in records if record[4])
+        if bool(connectors) != bool(primaries) or len(primaries) > 1:
+            raise DisplayChangeError("invalid KScreen primary topology")
+        primary = primaries[0] if primaries else None
+        size = (primary[1], primary[2]) if primary else None
+        scale = primary[3] if primary else 1.0
+        footprint = tuple(record[:4] for record in records)
+        return source, connectors, size, scale, footprint
+
+    if source == SOURCE_KWIN_SCREENS_CHANGED:
+        fields = _native_field_set(
+            payload, {"source", "screens", "primary", "width", "height",
+                      "scale"})
+        raw = fields.get("screens")
+        if type(raw) not in (tuple, list) or len(raw) > MAX_NATIVE_SCREENS:
+            raise DisplayChangeError("invalid KWin screen list")
+        connectors = tuple(sorted(_native_connector(name) for name in raw))
+        if len(set(connectors)) != len(connectors):
+            raise DisplayChangeError("duplicate KWin connector")
+        primary = fields.get("primary")
+        scale = validate_scale(fields.get("scale", 1.0))
+        if connectors:
+            if type(primary) is not str or primary not in connectors:
+                raise DisplayChangeError("invalid KWin primary")
+            size = (_native_dimension(fields.get("width"), MAX_WIDTH),
+                    _native_dimension(fields.get("height"), MAX_HEIGHT))
+            footprint = tuple(
+                (name, size[0], size[1], scale) if name == primary
+                else (name, None, None, scale) for name in connectors)
+        else:
+            if primary is not None or "width" in fields or "height" in fields:
+                raise DisplayChangeError("empty KWin topology carries size")
+            size = None
+            footprint = ()
+        return source, connectors, size, scale, footprint
+
+    fields = _native_field_set(
+        payload, {"source", "connector", "width", "height", "scale"})
+    connector = _native_connector(fields.get("connector"))
+    size = (_native_dimension(fields.get("width"), MAX_WIDTH),
+            _native_dimension(fields.get("height"), MAX_HEIGHT))
+    scale = validate_scale(fields.get("scale", 1.0))
+    return source, (connector,), size, scale, ((connector,) + size + (scale,),)
 
 
 class DisplayChangeResponse:
@@ -139,6 +258,8 @@ class DisplayChangeResponse:
         self._next_token = 1
         self._failed_notifications = 0
         self._history = deque(maxlen=MAX_HISTORY)
+        self._last_native_screens = ()
+        self._last_native_scale = 1.0
 
     @property
     def last_safe_size(self):
@@ -178,6 +299,11 @@ class DisplayChangeResponse:
                 self._failed_notifications += 1
 
     def handle(self, event):
+        """Handle one trusted display event supplied by the host."""
+        return self._dispatch(event)
+
+    def _dispatch(self, event, extra_signature=None,
+                  logical_size_unchanged=False):
         self._sequence += 1
         try:
             event = _coerce_event(event)
@@ -192,7 +318,12 @@ class DisplayChangeResponse:
             plan = self._plan(event)
             signature = (event.kind, event.connector, event.width,
                          event.height, event.scale)
-            if (event.kind == EVENT_DPI_CHANGED
+            if extra_signature is not None:
+                # A native push owns one cross-kind signature: the same
+                # footprint must not relayout again just because the topology
+                # delta classification changed (attach -> steady -> detach).
+                signature = extra_signature
+            if ((event.kind == EVENT_DPI_CHANGED or logical_size_unchanged)
                     and plan.kind == KIND_RELAYOUT
                     and plan.size == self._last_safe_size):
                 # A DPI signal that resolves to the same logical layout must
@@ -214,10 +345,91 @@ class DisplayChangeResponse:
             self._notify(plan)
         return plan
 
+    def handle_native_change(self, payload):
+        """Consume ONE trusted KWin/KScreen push payload, or fail closed.
+
+        The trusted host calls this only from a real KScreen ``configChanged``,
+        KWin ``screensChanged`` or Qt logical-DPI signal. It never registers a
+        second listener, never polls and never opens a connection: the only
+        state updated is this instance's bounded last-snapshot footprint.
+        """
+        try:
+            source, connectors, size, scale, footprint = _native_payload(payload)
+            if source == SOURCE_QT_LOGICAL_DPI_CHANGED:
+                event = DisplayEvent(
+                    EVENT_DPI_CHANGED, connector=connectors[0] if connectors
+                    else None, width=size[0], height=size[1], scale=scale)
+                return self._dispatch(event, (source, footprint))
+
+            if source == SOURCE_KWIN_SCREENS_CHANGED:
+                logical = size
+            else:
+                logical = logical_size_from_physical(size[0], size[1], scale) \
+                    if size is not None else None
+            if connectors and logical is None:
+                raise DisplayChangeError("missing native primary geometry")
+
+            if not connectors:
+                event = DisplayEvent(EVENT_MONITOR_DETACHED)
+            elif not self._last_native_screens:
+                event = DisplayEvent(EVENT_RESOLUTION_CHANGED,
+                                     width=logical[0], height=logical[1])
+            elif any(name not in self._last_native_screens
+                     for name in connectors):
+                event = DisplayEvent(EVENT_MONITOR_ATTACHED,
+                                     width=logical[0], height=logical[1])
+            elif any(name not in connectors
+                     for name in self._last_native_screens):
+                event = DisplayEvent(EVENT_MONITOR_DETACHED,
+                                     width=logical[0], height=logical[1])
+            elif (source == SOURCE_KSCREEN_CONFIG_CHANGED
+                  and size is not None
+                  and scale != self._last_native_scale):
+                event = DisplayEvent(
+                    EVENT_DPI_CHANGED, width=size[0], height=size[1],
+                    scale=scale)
+            else:
+                event = DisplayEvent(EVENT_RESOLUTION_CHANGED,
+                                     width=logical[0], height=logical[1])
+
+            signature = (source, footprint, connectors)
+            steady = connectors == self._last_native_screens
+            scale_changed = scale != self._last_native_scale
+            plan = self._dispatch(
+                event, signature,
+                logical_size_unchanged=(
+                    source == SOURCE_KWIN_SCREENS_CHANGED
+                    and steady and scale_changed))
+            self._last_native_screens = connectors
+            self._last_native_scale = scale
+            return plan
+        except Exception:
+            # A malformed push never crashes the shell and never mutates the
+            # remembered topology snapshot.
+            return self.handle(None)
+
+    def _bounded_relayout(self, event, reason):
+        """Clamp one logical size and refuse any unsafe dock geometry."""
+        if event.width < MIN_WIDTH or event.height < MIN_HEIGHT:
+            return RelayoutPlan(self._sequence, KIND_HOLD,
+                                self._last_safe_size, "below_minimum")
+        size = (min(ROOT_WIDTH, event.width), min(ROOT_HEIGHT, event.height))
+        if not validate_dock_bounds(*size).ok:
+            return RelayoutPlan(self._sequence, KIND_HOLD,
+                                self._last_safe_size, "unsafe_geometry")
+        return RelayoutPlan(self._sequence, KIND_RELAYOUT, size, reason)
+
     def _plan(self, event):
         if event.kind == EVENT_DISCONNECT:
             return RelayoutPlan(self._sequence, KIND_SUSPEND,
                                 self._last_safe_size, "no_display")
+        if event.kind == EVENT_MONITOR_DETACHED:
+            if event.width is None or event.height is None:
+                return RelayoutPlan(self._sequence, KIND_SUSPEND,
+                                    self._last_safe_size, "no_display")
+            return self._bounded_relayout(event, REASON_MONITOR_DETACHED)
+        if event.kind == EVENT_MONITOR_ATTACHED:
+            return self._bounded_relayout(event, REASON_MONITOR_ATTACHED)
         if event.kind == EVENT_DPI_CHANGED:
             logical = logical_size_from_physical(
                 event.width, event.height, event.scale)

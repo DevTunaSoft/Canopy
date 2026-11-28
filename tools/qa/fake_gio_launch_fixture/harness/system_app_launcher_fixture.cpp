@@ -176,7 +176,7 @@ bool unavailableRefusal(const QString &logPath) {
     const bool launched = launcher.launch(QStringLiteral("Terminal"));
     const QStringList actual = readLog(logPath);
     const bool passed = !canLaunch && !launched
-        && countPrefix(actual, QStringLiteral("new ")) == 8
+        && countPrefix(actual, QStringLiteral("new ")) == 12
         && countPrefix(actual, QStringLiteral("should_show ")) == 0
         && countPrefix(actual, QStringLiteral("launch ")) == 0
         && hasMessage(QStringLiteral("CANOPY_APP_LAUNCH_UNAVAILABLE: \"Terminal\""));

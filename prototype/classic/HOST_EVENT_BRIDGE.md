@@ -70,3 +70,20 @@ compiled relayout consumer can be written. This task deliberately does not
 fabricate a compiled scaling bridge or edit approved visual source.
 
 Current head: to be recorded at commit in the PR body and evidence log.
+
+## Terminal desktop-entry allowlist (bounded source change)
+
+The closed desktop-entry allowlist in `SystemAppLauncher.cpp` now includes two
+additional fixed native IDs at the end of the Terminal list:
+`org.kde.konsole.desktop` (upstream KDE Konsole) and its legacy equivalent
+`konsole.desktop`. All four previously frozen IDs keep their first-match order;
+no wildcard, path, argv, URL, user input or runtime source was added. The
+existing neutral `documented fallback` for an unresolved Terminal tile is
+unchanged, and no daemon, second GIO path, setting or visual asset was added.
+
+Geometry and visual pins remain frozen: `1920x1080`, `1200x750` and `760x500`
+are unchanged reference resolutions in the pinned dock evidence, not part of
+this source change. Evidence is `SYNTHETIC` (source-contract and fake-GIO
+fixture only). Screen-reader behavior is `NOT_RUN`; no accessibility label was
+touched. Final visual acceptance is `no visual approval` in this task, and no
+merge or release is claimed.

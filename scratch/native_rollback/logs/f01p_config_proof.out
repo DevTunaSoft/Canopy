@@ -1,0 +1,8 @@
+ID: F01P
+STAGE: F01 direct before/after config proof
+LABEL: PASS
+COMMAND: host-side map comparison of F01B and F01U
+rc=0
+before={"plasma-org.kde.plasma.desktop-appletsrc": {"mode": "600", "sha256": "141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751", "size": "5738"}, "plasmashellrc": {"mode": "600", "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774", "size": "1811"}}
+after={"plasma-org.kde.plasma.desktop-appletsrc": {"mode": "600", "sha256": "141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751", "size": "5738"}, "plasmashellrc": {"mode": "600", "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774", "size": "1811"}}
+equal=True

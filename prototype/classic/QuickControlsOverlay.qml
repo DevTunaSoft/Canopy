@@ -89,6 +89,14 @@ FocusScope {
             return "Unavailable — no host status observation"
         case "no-host-interface":
             return "Unavailable — no host control interface"
+        case "capability-absent":
+            return "Unavailable — host capability is absent"
+        case "capability-denied":
+            return "Unavailable — host capability denied by policy"
+        case "no-capability-probe":
+            return "Unavailable — no trusted capability probe"
+        case "no-bounded-change":
+            return "Unavailable — adjustment is outside the bounded range"
         case "bridge-disabled":
             return "Unavailable — host control bridge disabled"
         case "privileged-host-change":

@@ -1,0 +1,25 @@
+{
+    "KPlugin": {
+        "Id": "org.kde.plasma.canopyclassic",
+        "Name": "Canopy Classic",
+        "Description": "Native Plasma 6 Canopy Classic development baseline (pinned source, compiled binary, approved assets). No release or visual acceptance claim.",
+        "Icon": "canopy-classic",
+        "Category": "Desktop",
+        "Version": "@PACKAGE_VERSION@",
+        "License": "GPL-2.0-or-later",
+        "Authors": [
+            {
+                "Name": "Canopy Classic",
+                "Email": ""
+            }
+        ]
+    },
+    "KPackageStructure": "Plasma/Applet",
+    "X-Plasma-API-Minimum-Version": "6.0",
+    "X-Plasma-ContainmentType": "Desktop",
+    "X-Canopy-Source-Commit": "@SOURCE_SHA@",
+    "X-Canopy-Source-Tree": "@TREE_SHA@",
+    "X-Canopy-Binary-SHA256": "@BINARY_SHA@",
+    "X-Canopy-Wallpaper-SHA256": "@WALLPAPER_SHA@",
+    "X-Canopy-Scope": "DEVELOPMENT_BASELINE_ONLY;NO_RELEASE;NO_VISUAL_APPROVAL"
+}

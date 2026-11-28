@@ -1,0 +1,4 @@
+$ ssh -i 'C:\Users\X1\AppData\Local\hermes\cache\scratch\g1_ubuntu_evidence\ssh\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'
+Successfully uninstalled /home/canopy/.local/share/plasma/plasmoids/org.kde.plasma.canopyclassic.nativetasks/
+REMOVE_RC=0
+[utc=2026-11-28T05:13:37Z] [rc=0]

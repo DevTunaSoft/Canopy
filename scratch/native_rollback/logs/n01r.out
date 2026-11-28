@@ -1,0 +1,6 @@
+ID: N01R
+STAGE: N01 restore snapshot bytes
+LABEL: PASS
+COMMAND: ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cp -p /home/canopy/native_rollback_rt/n01_appletsrc.bak /home/canopy/.local/share/canopy-classic/backup/$(basename /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc) && echo RESTORED_SHA=$(sha256sum /home/canopy/.local/share/canopy-classic/backup/$(basename /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc)|awk "{print \$1}")
+rc=0
+RESTORED_SHA=141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751

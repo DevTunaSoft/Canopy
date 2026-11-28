@@ -1,0 +1,5 @@
+$ ssh -i 'C:\Users\X1\AppData\Local\hermes\cache\scratch\g1_ubuntu_evidence\ssh\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'
+NATIVE_ENV_SOURCE_PID=5422
+NATIVE_ENV_IMPORTED DISPLAY=:0 XDG_CURRENT_DESKTOP=KDE XDG_SESSION_TYPE=x11
+HARNESS_PID=51197
+[utc=2026-11-28T05:12:42Z] [rc=0]

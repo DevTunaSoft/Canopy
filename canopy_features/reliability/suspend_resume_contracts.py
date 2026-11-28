@@ -41,6 +41,7 @@ __all__ = [
     "REASON_OK", "REASON_SUSPENDED", "REASON_LOCKED",
     "REASON_RESUME_PENDING", "REASON_UNKNOWN", "REASON_INVALID_OPERATION",
     "DISCLOSURES", "DEFAULT_SOURCE", "MAX_HISTORY",
+    "EVIDENCE_LABELS", "OUTCOMES",
     "SuspendResumeError", "Decision", "SuspendResumeContracts", "empty",
 ]
 
@@ -85,6 +86,14 @@ DISCLOSURES = MappingProxyType({
 
 DEFAULT_SOURCE = "host-events"
 MAX_HISTORY = 64
+
+# Directive 79e30d79 section 11 vocabulary. A decision layer never assigns
+# these itself; the host-boundary adapter maps *observed* facts to them and a
+# non-native observation can never earn a NATIVE RUNTIME PASS.
+EVIDENCE_LABELS = frozenset({
+    "STATIC SOURCE ONLY", "SYNTHETIC", "CI-SCOPED", "NATIVE RUNTIME",
+})
+OUTCOMES = frozenset({"PASS", "FAIL", "BLOCKED", "NOT RUN"})
 
 
 class SuspendResumeError(HostEventError):

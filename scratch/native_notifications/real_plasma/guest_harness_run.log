@@ -1,0 +1,29 @@
+=== 00_preflight.sh ===
+PREFLIGHT_START pkg=/home/canopy/nnh evidence=/home/canopy/nnh_m3_evidence
+PREFLIGHT_PASS /home/canopy/nnh_m3_evidence/preflight/verdict.txt
+=== rc=0 ===
+=== 10_owner_guard.sh ===
+OWNER_GUARD_FAIL Canopy-owned notification/daemon/fixture process present
+=== rc=1 ===
+=== 20_notification_roundtrip.sh ===
+NOTIFICATION_NOT_RUN prerequisite not PASS: /home/canopy/nnh_m3_evidence/owner_guard/verdict.txt
+=== rc=0 ===
+=== verdict files ===
+/home/canopy/nnh_m3_evidence/notification/verdict.txt
+NOTIFICATION_NOT_RUN prerequisite not PASS: /home/canopy/nnh_m3_evidence/owner_guard/verdict.txt
+/home/canopy/nnh_m3_evidence/preflight/verdict.txt
+PREFLIGHT_PASS session=x11 desktop=KDE baseline_pids=/home/canopy/nnh_m3_evidence/preflight/baseline_pids.txt
+/home/canopy/nnh_m3_evidence/owner_guard/verdict.txt
+OWNER_GUARD_FAIL Canopy-owned notification/daemon/fixture process present
+=== ids ===
+=== owner guard detail ===
+org.freedesktop.Notifications bus=session owner=:1.22 pid=5422 comm=plasmashell allowed=plasmashell
+org.kde.Solid.PowerManagement bus=session owner=:1.30 pid=5453 comm=org_kde_powerde allowed=org_kde_powerdevil org_kde_powerde powerdevil plasma-powerdevil
+org.kde.kglobalaccel bus=session owner=:1.17 pid=5318 comm=kglobalacceld allowed=kglobalacceld kglobalaccel
+org.kde.plasmashell bus=session owner=:1.22 pid=5422 comm=plasmashell allowed=plasmashell
+org.freedesktop.NetworkManager bus=system owner=:1.9 pid=842 comm=NetworkManager allowed=NetworkManager
+org.PulseAudio.Core1 bus=session owner=ABSENT comm=UNKNOWN note=OPTIONAL
+plasmanotify_portal_owner=ABSENT_OPTIONAL
+FORBIDDEN_CANOPY_PATTERN=canopy.*(daemon|notif|bridge|fixture)|fake-gio|fake_gio
+53126 bash -c export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus; export DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE; unset QT_QPA_PLATFORM; export HARNESS_ROOT=/home/canopy/nnh EVIDENCE_DIR=/home/canopy/nnh_m3_evidence; rm -rf "$EVIDENCE_DIR"; for s in 00_preflight.sh 10_owner_guard.sh 20_notification_roundtrip.sh; do echo "=== $s ==="; sh "/home/canopy/nnh/$s" 2>&1; echo "=== rc=$? ==="; done; echo "=== verdict files ==="; find "$EVIDENCE_DIR" -name verdict.txt -print -exec cat {} \; 2>/dev/null; echo "=== ids ==="; cat "$EVIDENCE_DIR/notification/ids.txt" 2>/dev/null; echo "=== owner guard detail ==="; cat "$EVIDENCE_DIR/owner_guard/bus_owners.txt" 2>/dev/null; cat "$EVIDENCE_DIR/owner_guard/daemon_process_scan.txt" 2>/dev/null; cat "$EVIDENCE_DIR/owner_guard/dbus_service_files.txt" 2>/dev/null; echo "=== trace marker lines ==="; grep -F -n "canopy-native-notify" "$EVIDENCE_DIR/notification/bus_trace.txt" 2>/dev/null | head -12
+=== trace marker lines ===

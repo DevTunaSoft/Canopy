@@ -1,0 +1,9 @@
+$ ssh -i 'C:\Users\X1\AppData\Local\hermes\cache\scratch\g1_ubuntu_evidence\ssh\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'
+NATIVE_ENV_SOURCE_PID=5422
+NATIVE_ENV_IMPORTED DISPLAY=:0 XDG_CURRENT_DESKTOP=KDE XDG_SESSION_TYPE=x11
+--- before list
+Listing KPackageType: Plasma/Applet in /home/canopy/.local/share/plasma/plasmoids/
+--- config hashes
+141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751  /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc
+a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774  /home/canopy/.config/plasmashellrc
+[utc=2026-11-28T05:13:32Z] [rc=0]

@@ -1,0 +1,66 @@
+2026-11-28T05:03:38Z CHECK archive_sha256=PASS :: ec9e44cfaa3ba3059aef492b429a6e6c6b94da32a230d4acb6cb28a1ef3ece35
+2026-11-28T05:03:39Z CMD loginctl show-session 65 -p Type -p Class -p Display -p Active -p State -p Remote -p Name
+Name=canopy
+Display=:0
+Remote=no
+Type=x11
+Class=user
+Active=yes
+State=active
+2026-11-28T05:03:39Z RC[0]
+2026-11-28T05:03:39Z CHECK real_plasma_user_session=PASS :: session=65 type=x11 class=user active=yes
+2026-11-28T05:03:39Z CHECK single_compositor_and_shell=PASS :: kwin_x11=[5384 ] plasmashell=1
+2026-11-28T05:03:40Z CHECK no_second_compositor=PASS :: none
+2026-11-28T05:03:40Z ENV DISPLAY=:0 XAUTHORITY=/tmp/xauth_zdKrsq XDG_RUNTIME_DIR=/run/user/1000
+2026-11-28T05:03:40Z CMD tar -xzf /home/canopy/native_build_baseline/out/dist/org.kde.plasma.canopyclassic-0.1.0-dev-baseline.tar.gz -C /home/canopy/native_build_baseline/smoke-state/unpacked
+2026-11-28T05:03:40Z RC[0]
+2026-11-28T05:03:40Z CHECK package_layout=PASS :: /home/canopy/native_build_baseline/smoke-state/unpacked
+2026-11-28T05:03:40Z CHECK package_sha256sums=PASS :: 17 files
+2026-11-28T05:03:40Z CHECK binary_sha256=PASS :: 4950fd793d067aa722a64ea8b09f0c1c65a55263b7f96c8fd418bf579e9f4a32
+2026-11-28T05:03:40Z CHECK approved_wallpaper_sha256=PASS :: 8c6cab50a0977fc129c0d2a20523d9361646f36da66f2f3f2b2436a0d9001381
+2026-11-28T05:03:40Z SOURCE_COMMIT=ec910d7a7275296ecbc8b5e5c459d356205165d1
+2026-11-28T05:03:40Z CMD /home/canopy/native_build_baseline/smoke-state/unpacked/install.sh /home/canopy/native_build_baseline/out/dist/org.kde.plasma.canopyclassic-0.1.0-dev-baseline.tar.gz /home/canopy/native_build_baseline/smoke-state
+Successfully installed /home/canopy/.local/share/plasma/plasmoids/org.kde.plasma.canopyclassic/
+Successfully set the wallpaper for all desktops to the image /home/canopy/native_build_baseline/smoke-state/unpacked/contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png
+INSTALL_PASS: user-scope KPackage installed; approved wallpaper applied
+2026-11-28T05:03:42Z RC[0]
+2026-11-28T05:03:42Z CHECK install=PASS :: kpackagetool6 user scope; approved wallpaper applied
+2026-11-28T05:03:42Z CMD /home/canopy/native_build_baseline/smoke-state/unpacked/verify.sh /home/canopy/native_build_baseline/smoke-state
+contents/approved/icons/Browser_Option_3.png: OK
+contents/approved/icons/Calendar_Option_3.png: OK
+contents/approved/icons/Files_Option_2.png: OK
+contents/approved/icons/Mail_Option_5.png: OK
+contents/approved/icons/Music_Option_3.png: OK
+contents/approved/icons/Photos_Option_2.png: OK
+contents/approved/icons/Settings_Option_8.png: OK
+contents/approved/icons/Terminal_Option_4.png: OK
+contents/approved/manifest.json: OK
+contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png: OK
+contents/approved/wallpaper/canopy-wave-preview.png: OK
+contents/bin/canopy-classic-spike: OK
+contents/ui/main.qml: OK
+install.sh: OK
+metadata.json: OK
+uninstall.sh: OK
+verify.sh: OK
+METADATA_IDENTITY_OK
+VERIFY_PASS: package identity and approved wallpaper hash match
+2026-11-28T05:03:43Z RC[0]
+2026-11-28T05:03:43Z CHECK installed_package_verify=PASS :: KPackage metadata and wallpaper hash
+2026-11-28T05:03:43Z CHECK plasma_wallpaper_config=PASS :: Image=file:///home/canopy/native_build_baseline/smoke-state/unpacked/contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png
+2026-11-28T05:03:43Z CMD /home/canopy/native_build_baseline/smoke-state/unpacked/contents/bin/canopy-classic-spike --approved-art-dir /home/canopy/native_build_baseline/smoke-state/unpacked/contents/approved --landscape-wallpaper /home/canopy/native_build_baseline/smoke-state/unpacked/contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png
+2026-11-28T05:03:49Z CHECK classic_window_live=PASS :: pid=47741 xdotool_windows=[75497490 ] wmctrl=[0x00600013 -1 canopy-plasma6 Desktop @ QRect(0,0 1024x768) ]
+2026-11-28T05:03:49Z CHECK runtime_approved_art_and_wallpaper=PASS :: exact icons and landscape wallpaper verified at launch
+2026-11-28T05:03:49Z CMD scrot -o /home/canopy/native_build_baseline/smoke-results/plasma_session_with_classic.png
+2026-11-28T05:03:50Z RC[0]
+2026-11-28T05:03:50Z CHECK real_desktop_classic_screenshot=PASS :: sha256=815bd39e3c68736cee974bfc8ad196d27ea5cc45bde9b0a9dd6cb2c97ff730a6 dimensions=1920x1080
+2026-11-28T05:03:50Z CHECK classic_process_terminated=PASS :: pid=47741 stopped
+2026-11-28T05:03:50Z CMD scrot -o /home/canopy/native_build_baseline/smoke-results/plasma_session.png
+2026-11-28T05:03:51Z RC[0]
+2026-11-28T05:03:51Z CHECK plasma_session_screenshot=PASS :: sha256=815bd39e3c68736cee974bfc8ad196d27ea5cc45bde9b0a9dd6cb2c97ff730a6
+2026-11-28T05:03:51Z CMD /home/canopy/native_build_baseline/smoke-state/unpacked/uninstall.sh /home/canopy/native_build_baseline/smoke-state
+Successfully uninstalled /home/canopy/.local/share/plasma/plasmoids/org.kde.plasma.canopyclassic/
+UNINSTALL_PASS: stock Plasma config restored byte-for-byte
+2026-11-28T05:03:51Z RC[0]
+2026-11-28T05:03:52Z CHECK uninstall=PASS :: rc=0; config restored or user changes preserved
+2026-11-28T05:03:52Z CHECK baseline_absent_after_uninstall=PASS :: package not listed

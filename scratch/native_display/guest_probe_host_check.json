@@ -1,0 +1,18 @@
+{
+  "adapter": {
+    "status": "HOST_ADAPTER_ABSENT"
+  },
+  "artifact": "m4_plasma_guest_readiness_probe",
+  "classification": "NOT_RUN",
+  "environment": {
+    "desktop_token_present": false,
+    "display_present": false,
+    "plasma_token_present": false,
+    "session_type": "unset",
+    "wayland_present": false
+  },
+  "host": "win32:Windows-11-10.0.26300-SP0",
+  "note": "A readiness probe is not acceptance. Attach real screenshots and independent review before claiming PASS.",
+  "verdict": "NOT_RUN",
+  "xrandr_listmonitors": null
+}

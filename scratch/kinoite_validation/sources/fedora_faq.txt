@@ -1,0 +1,232 @@
+Frequently Asked Questions (FAQ) :: Fedora Docs
+In this section
+Fedora Atomic Desktops
+Installation
+Getting Started
+Updates, Upgrades & Rollbacks
+Toolbx
+Technical Information
+Reading and Resources
+Contributing
+Troubleshooting
+FAQ
+Tips and Tricks
+Configuration Guides
+Sway Configuration Guide
+Fedora Atomic Desktops
+A Beginner's Guide to Fedora
+ARM Single Board Computers
+Community Architecture (CommArch)
+Community Linux Engineering
+Defensive Coding Guide
+Engineering Teams
+EPEL
+Fedora Accessibility (a11y) WG
+Fedora Accounts
+Fedora AI/ML SIG
+Fedora Asahi Remix
+Fedora Atomic Desktops
+Fedora Badges
+Fedora CI
+Fedora Cloud
+Fedora Community Ops
+Fedora Container Docs
+Fedora CoreOS
+Fedora Council
+Fedora Data Working Group (FDWG)
+Fedora Design Team
+Fedora Discussion Forum (Self-)Moderation Guidelines and Rules
+Fedora Diversity, Equity, and Inclusion (DEI)
+Fedora Documentation
+Fedora Documentation Team
+Fedora ELN
+Fedora Forge Documentation
+Fedora Gaming
+Fedora Infrastructure & Release Engineering
+Fedora Internet Of Things
+Fedora IoT Working Group
+Fedora Join SIG
+Fedora KDE Plasma Desktop Edition
+Fedora Legal
+Fedora Linux Releases
+Fedora Localization Team
+Fedora Magazine
+Fedora Marketing Team
+Fedora Matrix WG
+Fedora Mentored Projects
+Fedora Mindshare Committee
+Fedora Minimal
+Fedora Program Operations
+Fedora Project
+Fedora Quality Docs
+Fedora Rawhide Gating
+Fedora Release Notes
+Fedora Robotics SIG
+Fedora Security SIG
+Fedora Server User Documentation
+Fedora Server Working Group
+Fedora Spins & Labs
+Fedora Tools
+Fedora Websites & Apps
+Fedora Workstation Documentation
+Fedora Workstation Working Group
+Fedora/CentOS bootc
+FESCo
+Flatpak
+i3 SIG
+Java Packaging HOWTO
+Localization help and stats
+Mindshare Teams
+NeuroFedora User Documentation
+Package Maintainers
+Packaging Guidelines
+Quick Docs
+Reproducible Builds
+Fedora Atomic Desktops
+FAQ
+en-US
+en-US
+ar
+ast
+az
+be
+bg
+bn
+ca
+cs
+de
+el
+es
+es_419
+fa
+fi
+fil
+fr
+fur
+ga
+gl
+he
+hi
+hr
+hu
+hy
+id
+it
+ja
+jp
+ka
+kab
+km
+ko
+lb
+lo
+lt
+mr
+ms
+my
+nb_NO
+ne
+nl
+nn
+or
+pl
+pt
+pt_BR
+pt_PT
+ro
+ru
+si
+sk
+sq
+sv
+sw
+szl
+te
+tr
+tzm
+uk
+ur
+ur_PK
+uz
+vi
+zh_CN
+zh_Hans
+zh_Hant
+zh_TW
+Frequently Asked Questions (FAQ)
+About the Fedora Atomic Desktops projects
+Is it Team Silverblue, Silverblue, or Fedora Silverblue?
+Team Silverblue was the name used to refer to the overall project.
+Fedora Silverblue will be used for the OS, but calling it Silverblue in its short version is fine as well.
+Why does the Silverblue logo look like a leaf?
+Our favorite choice for a project name was Silverleaf, but that sadly did not work out.
+We just couldn’t quite let go of the leaf.
+You could also say that Silverblue is a new leaf on Fedora’s OSTree.
+😀
+Is Silverblue another GNOME OS?
+GNOME OS was a codename that was used by the upstream GNOME project for a while to refer to the idea of designing the entire desktop user experience.
+By contrast, Silverblue is an effort inside the Fedora project, and will be built with existing Fedora technologies.
+However, the two efforts do share a desire to deliver a user experience that is polished and coherent.
+Why is the project named Fedora Kinoite?
+We chose the Kinoite name for the following reasons:
+KDE based projects traditionally start with a "K".
+Kinoite is a blue mineral (Wikipedia), thus referring to both the "silver" and "blue" part of Silverblue and the blue color of the KDE logo.
+"Kinoite" means "There is a tree" in Japanese (Google Translate), thus referring to the "tree" in "ostree".
+What is Fedora Atomic Desktops' relationship with Fedora IoT and Fedora CoreOS?
+Fedora Atomic Desktops use the same core technology as Fedora IoT and Fedora CoreOS.
+However, Fedora Atomic Desktops are specifically focused on workstation and desktop use cases with the GNOME, KDE Plasma, Sway, Budgie and COSMIC desktops.
+About using Fedora Atomic Desktops
+How can I play more videos in Firefox, like YouTube?
+Firefox is included in the OS image for now (see issue#3 for progress on moving to Flatpak by default).
+Until that changes, getting it to play videos works the same way as it does for the regular package mode Fedora: find a package with the needed codecs, and install it.
+The one difference is that you use rpm-ostree install instead of dnf install.
+An alternative solution is to install Firefox from Flathub.
+How do I create a VPN connection?
+/etc is not part of the read-only root filesystem, so you can just copy files into /etc/NetworkManager/system-connections (or let NetworkManager store them there when you recreate your connections).
+Certificates in /etc/pki need to be handled similarly.
+How can I install my preferred IDE on Fedora Atomic Desktops?
+You can install most IDE directly in a toolbox where you can also install all the developments tools from the Fedora repositories.
+To be able to launch them directly from menus, you can copy the .desktop file for the IDE from the toolbox to your home directory in ~/.local/share/applications/.
+You should then update the Exec line in the .desktop file to prepend toolbox run to start it from the toolbox.
+You can also use the IDEs packaged as Flatpaks from Flathub.
+How can I see what packages were updated between two commits?
+If you want to compare the booted deployment with the pending deployment (or rollback deployment), simply issue:
+$ rpm-ostree db diff
+You can also see the RPM changelog by adding the -c option like so: rpm-ostree db diff -c.
+If you want to see which packages were updated between two specific commits:
+Find out which two commits you want to compare by issuing:
+$ ostree log <ref>
+You can now compare the two commits by issuing:
+$ rpm-ostree db diff <commit x> <commit y>
+How can I check the version number of an installed package?
+You can simply use:
+$ rpm -q <package>
+How can I check if an rpm software package is available in the repository?
+To search for packages in your enabled repositories, use:
+$ rpm-ostree search <package>
+How can I downgrade my system’s kernel?
+If, for whatever reason, you need to downgrade the kernel, you can do so by following these steps:
+For the version you need to downgrade, download <kernel>, <kernel-core>, <kernel-modules>, <kernel-modules-core> and <kernel-modules-extra> from Koji.
+Install the packages downloaded on the previous step by issuing:
+$ rpm-ostree override replace <kernel> <kernel-core> <kernel-modules> <kernel-modules-core> <kernel-modules-extra>
+Reboot the system to apply the changes.
+How can I upgrade my system to the next major version (for instance: rawhide or an upcoming Fedora release branch), while keeping my current deployment?
+OSTree allows you to pin deployments (pinning ensures that your deployment of choice is kept and not discarded).
+Assuming that you want to keep your default deployment, issue the following command:
+$ sudo ostree admin pin 0
+0 here refers to the first deployment listed by rpm-ostree status
+Verify that you have pinned your deployment of choice by issuing:
+$ rpm-ostree status
+After the deployment is pinned, you can upgrade your system by using the instructions found here.
+When you have completed rebasing, reboot the system.
+The GRUB menu will now present you with both: the previous deployment major version entry (e.g.: "Fedora 44.YYYYMMDD.n") and the new deployment major version entry (e.g.: "Fedora 45.YYYYMMDD.n").
+At the moment it is not possible to name (pinned) deployments and their associated GRUB menu entries.
+Want to help? Learn how to contribute to Fedora Docs ›
+All Fedora Documentation content available under CC BY-SA 4.0 or, when specifically noted, under another accepted free and open content license.
+Privacy Statement
+Legal
+Code of Conduct
+Sponsors
+Last build: 2026-11-28 03:50:09 UTC | Last content update: 2026-01-09
+Fedora is sponsored by Red Hat.
+Learn more about the relationship between Red Hat and Fedora.

@@ -1,0 +1,15 @@
+ID: R01
+STAGE: cycle 1 install (exact pinned assets)
+LABEL: PASS
+COMMAND: ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash install.sh --binary /home/canopy/g2_source_bundle/build/classic/canopy-classic-spike --wallpaper /home/canopy/g2_source_bundle/source/prototype/classic/assets/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png
+rc=0
+[canopy-classic][install] snapshotted /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc (sha256=141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751 mode=600)
+[canopy-classic][install] snapshotted /home/canopy/.config/plasmashellrc (sha256=a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774 mode=600)
+[canopy-classic][install] installed binary: /home/canopy/.local/bin/canopy-classic
+[canopy-classic][install] staged approved wallpaper: /home/canopy/.local/share/canopy-classic/wallpapers/Canopy_Classic_Master_Wallpaper_1920x1080.png
+[canopy-classic][install] installed autostart entry: /home/canopy/.config/autostart/canopy-classic.desktop
+Successfully set the wallpaper for all desktops to the image /home/canopy/.local/share/canopy-classic/wallpapers/Canopy_Classic_Master_Wallpaper_1920x1080.png
+[canopy-classic][install] wallpaper applied via plasma-apply-wallpaperimage
+[canopy-classic][install] manifest written: /home/canopy/.local/share/canopy-classic/install-manifest.env
+[canopy-classic][install] restart NOT_RUN (pass --restart or log out/in)
+[canopy-classic][install] install complete; run verify.sh for an integrity check

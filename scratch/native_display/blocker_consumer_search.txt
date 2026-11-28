@@ -1,0 +1,2 @@
+C:/Users/X1/AppData/Local/hermes/cache/scratch/wt-native-display-20261127/canopy_features/dock/display_change_response.py:277:    def handle_logical_dpi_change(self, physical_width, physical_height,
+C:/Users/X1/AppData/Local/hermes/cache/scratch/wt-native-display-20261127/canopy_features/dock/display_change_response.py:288:    def handle_recovery_result(self, result):

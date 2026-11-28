@@ -1,0 +1,6 @@
+$ ssh -i 'C:\Users\X1\AppData\Local\hermes\cache\scratch\g1_ubuntu_evidence\ssh\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'
+HARNESS_STOPPED
+[stderr]
+pgrep: pattern that searches for process name longer than 15 characters will result in zero matches
+Try `pgrep -f' option to match against the complete command line.
+[utc=2026-11-28T05:13:30Z] [rc=0]

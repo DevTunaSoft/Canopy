@@ -1,0 +1,10 @@
+ID: C00
+STAGE: host pinned-package integrity + syntax
+LABEL: PASS
+COMMAND: cd "C:/Users/X1/AppData/Local/hermes/cache/scratch/native_classic_reversible_install" && sha256sum -c SHA256SUMS && for f in install.sh uninstall.sh verify.sh rollback.sh; do bash -n "$f" || exit 1; done
+rc=0
+install.sh: OK
+uninstall.sh: OK
+verify.sh: OK
+rollback.sh: OK
+README.md: OK

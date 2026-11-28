@@ -1,0 +1,18 @@
+CHECK|archive_sha256|PASS|ec9e44cfaa3ba3059aef492b429a6e6c6b94da32a230d4acb6cb28a1ef3ece35
+CHECK|real_plasma_user_session|PASS|session=65 type=x11 class=user active=yes
+CHECK|single_compositor_and_shell|PASS|kwin_x11=[5384 ] plasmashell=1
+CHECK|no_second_compositor|PASS|none
+CHECK|package_layout|PASS|/home/canopy/native_build_baseline/smoke-state/unpacked
+CHECK|package_sha256sums|PASS|17 files
+CHECK|binary_sha256|PASS|4950fd793d067aa722a64ea8b09f0c1c65a55263b7f96c8fd418bf579e9f4a32
+CHECK|approved_wallpaper_sha256|PASS|8c6cab50a0977fc129c0d2a20523d9361646f36da66f2f3f2b2436a0d9001381
+CHECK|install|PASS|kpackagetool6 user scope; approved wallpaper applied
+CHECK|installed_package_verify|PASS|KPackage metadata and wallpaper hash
+CHECK|plasma_wallpaper_config|PASS|Image=file:///home/canopy/native_build_baseline/smoke-state/unpacked/contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png
+CHECK|classic_window_live|PASS|pid=47741 xdotool_windows=[75497490 ] wmctrl=[0x00600013 -1 canopy-plasma6 Desktop @ QRect(0,0 1024x768) ]
+CHECK|runtime_approved_art_and_wallpaper|PASS|exact icons and landscape wallpaper verified at launch
+CHECK|real_desktop_classic_screenshot|PASS|sha256=815bd39e3c68736cee974bfc8ad196d27ea5cc45bde9b0a9dd6cb2c97ff730a6 dimensions=1920x1080
+CHECK|classic_process_terminated|PASS|pid=47741 stopped
+CHECK|plasma_session_screenshot|PASS|sha256=815bd39e3c68736cee974bfc8ad196d27ea5cc45bde9b0a9dd6cb2c97ff730a6
+CHECK|uninstall|PASS|rc=0; config restored or user changes preserved
+CHECK|baseline_absent_after_uninstall|PASS|package not listed

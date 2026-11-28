@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "purpose": "M3 bounded native quick controls \u2014 real Plasma probe to verdict mapping",
+  "session_context": {
+    "probe_user": "canopy (uid 1000)",
+    "bus": "unix:path=/run/user/1000/bus",
+    "note": "Guest had rebooted; SDDM greeter and SSH session were present, no graphical user shell during the fresh probe. Earlier logged-in-Plasma evidence is preserved in native_controls_readonly_addendum.md. Device/permission blockers were re-observed fresh here."
+  },
+  "probe_sha256": {
+    "env.txt": "5c5c9aa2a0e00702b990b67ffe70f9f82c9eba754ac12b5b215746ceec1439b7",
+    "brightness.txt": "a5df37cf31a0caaeb41080d922228b6dfe09f2c1b9312202b3d795b03dd5deb4",
+    "network.txt": "b14bec004788056dc6b1d337218a158a7509f2a700b3aec5c89f23a50ca23bfe",
+    "power.txt": "60aacaeabd22b9a1d7abdf859980ed66847b9dd9c2fb3e412df8de0ff10b3677"
+  },
+  "normalised_facts": {
+    "source": "plasma-probe",
+    "brightness_supported": false,
+    "backlight_device": false,
+    "brightness_value": null,
+    "brightness_max": null,
+    "connectivity_check_available": false,
+    "network_control_permission": "auth",
+    "network_state": 70,
+    "connectivity": 4,
+    "power_can_suspend": "challenge",
+    "power_list_jobs_allowed": false
+  },
+  "exact_observed_blockers": {
+    "brightness": [
+      "$ gdbus call --session --dest org.kde.Solid.PowerManagement --object-path /org/kde/Solid/PowerManagement --method org.kde.Solid.PowerManagement.isActionSupported BrightnessControl",
+      "$ gdbus introspect --session --dest org.kde.Solid.PowerManagement --object-path /org/kde/Solid/PowerManagement/Actions/BrightnessControl"
+    ],
+    "network": [
+      "Error: GDBus.Error:org.freedesktop.NetworkManager.PermissionDenied: Not authorized to recheck connectivity"
+    ],
+    "power": [
+      "Error: GDBus.Error:org.freedesktop.DBus.Error.AccessDenied: Rejected send message, 2 matched rules; type=\"method_call\", sender=\":1.121\" (uid=1000 pid=3386 comm=\"gdbus call --system --dest org.freedesktop.login1\" label=\"unconfined\") interface=\"org.freedesktop.login1.Manager\" member=\"ListJobs\" error name=\"(unset)\" requested_reply=\"0\" destination=\"org.freedesktop.login1\" (uid=0 pid=750 comm=\"/usr/lib/systemd/systemd-logind\" label=\"unconfined\")"
+    ]
+  },
+  "verdicts": {
+    "brightness": {
+      "domain": "brightness",
+      "action": "brightness-up",
+      "execution": "NOT_RUN",
+      "execution_label": "NOT_RUN \u2014 no host command was performed",
+      "label": "NOT_RUN \u2014 no host command was performed \u2014 Unavailable \u2014 host capability is absent",
+      "reason": "capability-absent",
+      "disclosure": "Unavailable \u2014 host capability is absent",
+      "availability": "UNAVAILABLE",
+      "plan": null,
+      "executed": false
+    },
+    "network": {
+      "domain": "network",
+      "action": "recheck-connectivity",
+      "execution": "BLOCKED",
+      "execution_label": "BLOCKED \u2014 host capability or policy refused the command",
+      "label": "BLOCKED \u2014 host capability or policy refused the command \u2014 Unavailable \u2014 host capability denied by policy",
+      "reason": "capability-denied",
+      "disclosure": "Unavailable \u2014 host capability denied by policy",
+      "availability": "UNAVAILABLE",
+      "plan": null,
+      "executed": false
+    },
+    "power": {
+      "domain": "power",
+      "action": "query-power-capability",
+      "execution": "BLOCKED",
+      "execution_label": "BLOCKED \u2014 host capability or policy refused the command",
+      "label": "BLOCKED \u2014 host capability or policy refused the command \u2014 Unavailable \u2014 host capability denied by policy",
+      "reason": "capability-denied",
+      "disclosure": "Unavailable \u2014 host capability denied by policy",
+      "availability": "UNAVAILABLE",
+      "plan": null,
+      "executed": false
+    },
+    "power_suspend_transition": {
+      "domain": "power",
+      "action": "suspend",
+      "execution": "NOT_RUN",
+      "execution_label": "NOT_RUN \u2014 no host command was performed",
+      "label": "NOT_RUN \u2014 no host command was performed \u2014 Unavailable \u2014 privileged host changes are not performed",
+      "reason": "privileged-host-change",
+      "disclosure": "Unavailable \u2014 privileged host changes are not performed",
+      "availability": "UNAVAILABLE",
+      "plan": null,
+      "executed": false
+    }
+  },
+  "mutation_performed": false,
+  "controls_executed_by_planner": false,
+  "release_ready": false,
+  "visual_acceptance": "AWAITING_OWNER"
+}

@@ -1,0 +1,13 @@
+Session Management Session Managementhttp://docs.kde.org/ Session ManagementJost Schenck (jost schenck.de)Natalie Clarius (natalie_clarius yahoo.de)Revision Plasma 5.27 (2023-01-30)Table of ContentsDesktop SessionGeneralOn login, launch apps that were openFirmwareDesktop SessionIn this System Settings module you can configure Plasma™'s session
+manager and logout settings.Session management refers to Plasma™'s ability to save the state
+of applications and windows when you log out of Plasma™ and restore them
+when you log back in.GeneralAsk for confirmation: on shutdown, restart, and logoutIf this setting is turned on, the logout confirmation screen will be shown when you log out, shut down, or restart. When the setting is turned off, your computer will log out, shut down, etc. immediately after clicking the respective button.On login, launch apps that were openYou may choose one of three options on what should happen when
+you log into Plasma™:On last logoutIf this option is checked, Plasma™ will save your current
+session's state when you logout. Plasma™ will restore your session on the
+next login, so you can continue to work with a desktop just like you
+left it.When session was manually savedInstead of restoring Plasma™ to the state it was when
+you logged out last, it will be restored to a specific state that you
+have saved manually.A Save Session button will appear in the Application Launcher menu and Plasma™ search. When you click it, Plasma™ will remember the apps that are open and restore them on the next login. Click it again to replace the set of remembered apps.Start with an empty sessionIf you choose this option, Plasma™ will never restore sessions that it has saved.Finally, you can enter a colon (:) or comma (,)
+separated list of applications that should be excluded from sessions,
+and therefore will not be started when restoring a session. For example
+xterm:konsole or xterm,konsole.FirmwareAfter next restart: Enter UEFI setup screenIf this option is enabled, the next time you restart your computer, it will enter the firmware setup mode (BIOS/UEFI). This may be easier than trying to enter the firmware setup by quickly pressing special keys during boot. http://docs.kde.org/

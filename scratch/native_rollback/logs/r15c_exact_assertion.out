@@ -1,0 +1,8 @@
+ID: R15C
+STAGE: R15 exact-restore assertion
+LABEL: PASS
+COMMAND: host-side comparison of R15X config map against S00 baseline
+rc=0
+R15={"plasma-org.kde.plasma.desktop-appletsrc": {"mode": "600", "sha256": "141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751", "size": "5738"}, "plasmashellrc": {"mode": "600", "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774", "size": "1811"}}
+BASE={"plasma-org.kde.plasma.desktop-appletsrc": {"mode": "600", "sha256": "141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751", "size": "5738"}, "plasmashellrc": {"mode": "600", "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774", "size": "1811"}}
+exact=True

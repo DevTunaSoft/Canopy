@@ -1,0 +1,8 @@
+ID: R22
+STAGE: VM state after proof
+LABEL: PASS
+COMMAND: "C:/Program Files/Oracle/VirtualBox/VBoxManage.exe" showvminfo Canopy-Test-Plasma6 --machinereadable | grep -E "^(VMState|Forwarding)"
+rc=0
+VMState="running"
+VMStateChangeTime="2026-11-28T04:00:24.168000000"
+Forwarding(0)="guestssh,tcp,127.0.0.1,2223,,22"

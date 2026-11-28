@@ -54,7 +54,8 @@ __all__ = [
     "REASON_INVALID_ACTION", "REASON_INVALID_GRANT", "REASON_UNCONFIRMED",
     "REASON_BRIDGE_DISABLED", "REASON_NO_HOST_INTERFACE",
     "REASON_RAW_COMMAND_REFUSED", "DISCLOSURES", "NO_COMMAND",
-    "AVAILABLE", "UNAVAILABLE", "PROTOCOL_VERSION", "SESSION_TOPIC",
+    "AVAILABLE", "UNAVAILABLE", "SESSION_EXECUTION_NOT_RUN",
+    "PROTOCOL_VERSION", "SESSION_TOPIC",
     "SessionControlsNativeError", "NativeDecision", "IntakeResult",
     "BatchResult", "DrainReport", "SessionControlsNativePath",
 ]
@@ -78,6 +79,8 @@ _PRIVILEGED_STATUSES = frozenset({"locked", "suspended"})
 
 AVAILABLE = _qcs.AVAILABLE
 UNAVAILABLE = _qcs.UNAVAILABLE
+# This path only decides; a privileged session change is never executed here.
+SESSION_EXECUTION_NOT_RUN = _qcs.EXECUTION_NOT_RUN
 NO_COMMAND = _controls.NO_COMMAND
 
 REASON_OK = _controls.REASON_OK
@@ -142,6 +145,11 @@ class NativeDecision:
     def disclosure(self):
         return DISCLOSURES[self.reason]
 
+    @property
+    def execution_label(self):
+        """Truthful label: every decision here stays NOT_RUN by this module."""
+        return SESSION_EXECUTION_NOT_RUN
+
     def to_dict(self):
         return {
             "allowed": self.allowed,
@@ -152,6 +160,7 @@ class NativeDecision:
             "path": self.path.to_dict() if self.path is not None else None,
             "execution": "host-only-not-performed" if self.allowed
                          else "not-performed",
+            "execution_label": self.execution_label,
             "executed": False,
         }
 

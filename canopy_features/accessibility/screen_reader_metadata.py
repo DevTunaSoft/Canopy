@@ -20,7 +20,7 @@ IGNORED_INTERACTIVE = "ignored-interactive"
 
 # Role vocabulary follows the names used by the Classic Qt/QML source: buttons,
 # menu items, text fields and the non-interactive decorations around them.
-KNOWN_ROLES = frozenset({
+_CLASSIC_ROLES = frozenset({
     "alert", "button", "checkBox", "comboBox", "container", "dialog",
     "group", "image", "label", "link", "list", "listItem", "menu",
     "menuItem", "menuSeparator", "progressBar", "radioButton", "row",
@@ -28,12 +28,22 @@ KNOWN_ROLES = frozenset({
     "tabItem", "table", "textField", "toolButton", "window",
 })
 
+# The native Qt/AT-SPI bridge in the Plasma session reports a different role
+# vocabulary (verified in the captured 1920x1080/1200x750/760x500 AT-SPI trees).
+# Rejecting those names as "unsupported" made this gate unable to validate real
+# native metadata and hid genuine empty-name defects behind an INVALID_ROLE.
+# Keep the Classic names intact and accept the native-only names as aliases.
+NATIVE_ATSPI_ROLES = frozenset({
+    "application", "check box", "filler", "frame", "label", "text",
+})
+KNOWN_ROLES = _CLASSIC_ROLES | NATIVE_ATSPI_ROLES
+
 # Roles that convey an action or accept input. A screen reader cannot announce
 # one of these without a usable accessible name.
 INTERACTIVE_ROLES = frozenset({
-    "button", "checkBox", "comboBox", "link", "listItem", "menuItem",
-    "radioButton", "slider", "spinBox", "switch", "tab", "tabItem",
-    "textField", "toolButton",
+    "button", "checkBox", "check box", "comboBox", "link", "listItem",
+    "menuItem", "radioButton", "slider", "spinBox", "switch", "tab",
+    "tabItem", "textField", "toolButton",
 })
 
 # Non-interactive roles that still convey information a screen reader must be
@@ -46,6 +56,14 @@ INFORMATIVE_ROLES = frozenset({
 
 # Every role whose metadata is incomplete without a non-empty accessible name.
 NAMED_ROLES = INTERACTIVE_ROLES | INFORMATIVE_ROLES
+
+# Native AT-SPI publishes ordinary informative text as ``label`` and editable
+# text as ``text``; both need names to be announced. They are kept out of
+# INFORMATIVE_ROLES (whose exact Classic-only contents are pinned by existing
+# tests) and added to the default name requirement here. ``named_roles=`` lets
+# a caller replace the whole requirement set explicitly.
+NATIVE_INFORMATIVE_ROLES = frozenset({"label", "text"})
+DEFAULT_NAMED_ROLES = NAMED_ROLES | NATIVE_INFORMATIVE_ROLES
 
 
 @dataclass(frozen=True)
@@ -74,22 +92,31 @@ def _name_field(element):
 
 def validate_metadata(elements, *, known_roles=KNOWN_ROLES,
                       interactive_roles=INTERACTIVE_ROLES,
-                      informative_roles=INFORMATIVE_ROLES):
+                      informative_roles=INFORMATIVE_ROLES,
+                      named_roles=None):
     """Return a list of :class:`Issue` for invalid accessible metadata.
 
     ``label`` is accepted as an alias for ``name``. A record needs a non-empty
-    string name when its role is interactive *or* informative. Decorative art
-    is excluded only by an explicit boolean ``ignored: true`` (Accessible.ignored);
-    a non-boolean value fails closed and never grants the exemption. An
-    interactive element marked ignored is reported as contradictory, so the
-    gate cannot be cleared by blanket ignoring. Validation is pure: no global
-    state, no I/O and no allocation beyond the returned issue list.
+    string name when its role is interactive or informative. Native AT-SPI
+    ``label``/``text`` roles are informative too unless ``named_roles`` replaces
+    the requirement set. Decorative art is excluded only by an explicit boolean
+    ``ignored: true`` (Accessible.ignored); a non-boolean value fails closed and
+    never grants the exemption. An interactive element marked ignored is
+    reported as contradictory, so the gate cannot be cleared by blanket
+    ignoring. Validation is pure: no global state, no I/O and no allocation
+    beyond the returned issue list.
 
     This checks record consistency only. It does not read QML, start Qt, query
     AT-SPI or observe a screen reader, and a clean result is not an announcement
     or Linux Mint acceptance claim.
     """
     issues = []
+    if named_roles is None:
+        effective_named = (frozenset(interactive_roles)
+                           | frozenset(informative_roles)
+                           | NATIVE_INFORMATIVE_ROLES)
+    else:
+        effective_named = frozenset(named_roles)
     for index, element in enumerate(elements):
         where = _identifier(element, index)
         if not isinstance(element, Mapping):
@@ -107,7 +134,7 @@ def validate_metadata(elements, *, known_roles=KNOWN_ROLES,
                                 "unsupported role: " + role))
             requires_name = False
         else:
-            requires_name = role in interactive_roles or role in informative_roles
+            requires_name = role in effective_named
 
         ignored = element.get("ignored", False)
         if "ignored" in element and not isinstance(ignored, bool):

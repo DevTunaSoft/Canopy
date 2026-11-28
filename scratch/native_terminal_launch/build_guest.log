@@ -1,0 +1,406 @@
+
+=== guest_stage_mkdir [2026-11-28T04:05:43Z] rc=1 ===
+$ mkdir -p /home/canopy/native_terminal_launch_20261127 && test ! -e /home/canopy/native_terminal_launch_20261127/src && cp -a /home/canopy/pr728_build_39a9fd/src /home/canopy/native_terminal_launch_20261127/src && echo STAGE_COPIED
+cp: cannot stat '/home/canopy/pr728_build_39a9fd/src': No such file or directory
+
+
+=== scp_patched_source [2026-11-28T04:06:12Z] rc=0 ===
+$ scp -i C:/Users/X1/AppData/Local/hermes/cache/scratch/g1_ubuntu_evidence/ssh/g1_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=yes -P 2223 C:/Users/X1/AppData/Local/hermes/cache/scratch/wt-native-terminal-launch-20261127/prototype/classic/SystemAppLauncher.cpp canopy@127.0.0.1:/home/canopy/native_terminal_launch_20261127/src/prototype/classic/SystemAppLauncher.cpp
+
+
+=== patched_source_sha [2026-11-28T04:06:12Z] rc=1 ===
+$ sha256sum /home/canopy/native_terminal_launch_20261127/src/prototype/classic/SystemAppLauncher.cpp
+sha256sum: /home/canopy/native_terminal_launch_20261127/src/prototype/classic/SystemAppLauncher.cpp: No such file or directory
+
+
+=== patched_source_sha [2026-11-28T04:08:04Z] rc=1 ===
+$ sha256sum /home/canopy/native_terminal_launch_20261127/src/prototype/classic/SystemAppLauncher.cpp
+sha256sum: /home/canopy/native_terminal_launch_20261127/src/prototype/classic/SystemAppLauncher.cpp: No such file or directory
+
+
+=== patched_source_sha [2026-11-28T04:09:25Z] rc=1 ===
+$ for i in 1 2 3 4 5; do out=$(sha256sum /home/canopy/native_terminal_launch_20261127/src/prototype/classic/SystemAppLauncher.cpp 2>&1); case "$out" in b397916b*) echo "$out"; exit 0;; esac; sleep 2; done; echo "$out"; exit 1
+sha256sum: /home/canopy/native_terminal_launch_20261127/src/prototype/classic/SystemAppLauncher.cpp: No such file or directory
+
+
+=== patched_source_sha [2026-11-28T04:09:50Z] rc=0 ===
+$ for i in 1 2 3 4 5; do out=$(sha256sum /home/canopy/native_terminal_launch_20261127/src/prototype/classic/SystemAppLauncher.cpp 2>&1); case "$out" in b397916b*) echo "$out"; exit 0;; esac; sleep 2; done; echo "$out"; exit 1
+b397916b6e2b2dc2664972722a7a77185d80be7f52bc28325d3fc62f816e6a03  /home/canopy/native_terminal_launch_20261127/src/prototype/classic/SystemAppLauncher.cpp
+
+
+=== patched_source_sha [2026-11-28T04:11:01Z] rc=0 ===
+$ for i in 1 2 3 4 5; do out=$(sha256sum /home/canopy/native_terminal_launch_20261127/src/prototype/classic/SystemAppLauncher.cpp 2>&1); case "$out" in b397916b*) echo "$out"; exit 0;; esac; sleep 2; done; echo "$out"; exit 1
+b397916b6e2b2dc2664972722a7a77185d80be7f52bc28325d3fc62f816e6a03  /home/canopy/native_terminal_launch_20261127/src/prototype/classic/SystemAppLauncher.cpp
+
+
+=== cmake_configure [2026-11-28T04:11:02Z] rc=1 ===
+$ cmake -S /home/canopy/native_terminal_launch_20261127/src -B /home/canopy/native_terminal_launch_20261127/build -G Ninja -DCMAKE_BUILD_TYPE=Release -Wno-dev
+CMake Error: The source directory "/home/canopy/native_terminal_launch_20261127/src" does not appear to contain CMakeLists.txt.
+Specify --help for usage, or press the help button on the CMake GUI.
+
+
+=== patched_source_sha [2026-11-28T04:11:48Z] rc=0 ===
+$ for i in 1 2 3 4 5; do out=$(sha256sum /home/canopy/native_terminal_launch_20261127/src/prototype/classic/SystemAppLauncher.cpp 2>&1); case "$out" in b397916b*) echo "$out"; exit 0;; esac; sleep 2; done; echo "$out"; exit 1
+b397916b6e2b2dc2664972722a7a77185d80be7f52bc28325d3fc62f816e6a03  /home/canopy/native_terminal_launch_20261127/src/prototype/classic/SystemAppLauncher.cpp
+
+
+=== cmake_configure [2026-11-28T04:11:56Z] rc=0 ===
+$ rm -rf /home/canopy/native_terminal_launch_20261127/build && cmake -S /home/canopy/native_terminal_launch_20261127/src/prototype/classic -B /home/canopy/native_terminal_launch_20261127/build -G Ninja -DCMAKE_BUILD_TYPE=Release -Wno-dev
+-- The CXX compiler identification is GNU 15.2.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Performing Test HAVE_STDATOMIC
+-- Performing Test HAVE_STDATOMIC - Success
+-- Found WrapAtomic: TRUE
+-- Found OpenGL: /usr/lib/x86_64-linux-gnu/libOpenGL.so
+-- Found WrapOpenGL: TRUE
+-- Found WrapVulkanHeaders: /usr/include
+-- Configuring done (6.9s)
+-- Generating done (0.2s)
+-- Build files have been written to: /home/canopy/native_terminal_launch_20261127/build
+CMake Warning at /usr/lib/x86_64-linux-gnu/cmake/Qt6Qml/Qt6QmlMacros.cmake:4669 (message):
+  The qml plugin 'qtquick2plugin' is a dependency of 'canopy-classic-spike',
+  but the link target it defines (Qt6::qtquick2plugin) does not exist in the
+  current scope.  The plugin will not be linked.
+Call Stack (most recent call first):
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (qt6_import_qml_plugins)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (cmake_language)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:879 (_qt_internal_finalize_executable)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:848:EVAL:1 (qt6_finalize_target)
+  CMakeLists.txt:DEFERRED
+
+
+CMake Warning at /usr/lib/x86_64-linux-gnu/cmake/Qt6Qml/Qt6QmlMacros.cmake:4669 (message):
+  The qml plugin 'qmlplugin' is a dependency of 'canopy-classic-spike', but
+  the link target it defines (Qt6::qmlplugin) does not exist in the current
+  scope.  The plugin will not be linked.
+Call Stack (most recent call first):
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (qt6_import_qml_plugins)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (cmake_language)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:879 (_qt_internal_finalize_executable)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:848:EVAL:1 (qt6_finalize_target)
+  CMakeLists.txt:DEFERRED
+
+
+CMake Warning at /usr/lib/x86_64-linux-gnu/cmake/Qt6Qml/Qt6QmlMacros.cmake:4669 (message):
+  The qml plugin 'modelsplugin' is a dependency of 'canopy-classic-spike',
+  but the link target it defines (Qt6::modelsplugin) does not exist in the
+  current scope.  The plugin will not be linked.
+Call Stack (most recent call first):
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (qt6_import_qml_plugins)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (cmake_language)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:879 (_qt_internal_finalize_executable)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:848:EVAL:1 (qt6_finalize_target)
+  CMakeLists.txt:DEFERRED
+
+
+CMake Warning at /usr/lib/x86_64-linux-gnu/cmake/Qt6Qml/Qt6QmlMacros.cmake:4669 (message):
+  The qml plugin 'workerscriptplugin' is a dependency of
+  'canopy-classic-spike', but the link target it defines
+  (Qt6::workerscriptplugin) does not exist in the current scope.  The plugin
+  will not be linked.
+Call Stack (most recent call first):
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (qt6_import_qml_plugins)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (cmake_language)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:879 (_qt_internal_finalize_executable)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:848:EVAL:1 (qt6_finalize_target)
+  CMakeLists.txt:DEFERRED
+
+
+CMake Warning at /usr/lib/x86_64-linux-gnu/cmake/Qt6Qml/Qt6QmlMacros.cmake:4669 (message):
+  The qml plugin 'qtquickcontrols2plugin' is a dependency of
+  'canopy-classic-spike', but the link target it defines
+  (Qt6::qtquickcontrols2plugin) does not exist in the current scope.  The
+  plugin will not be linked.
+Call Stack (most recent call first):
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (qt6_import_qml_plugins)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (cmake_language)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:879 (_qt_internal_finalize_executable)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:848:EVAL:1 (qt6_finalize_target)
+  CMakeLists.txt:DEFERRED
+
+
+CMake Warning at /usr/lib/x86_64-linux-gnu/cmake/Qt6Qml/Qt6QmlMacros.cmake:4669 (message):
+  The qml plugin 'qtquickcontrols2fusionstyleplugin' is a dependency of
+  'canopy-classic-spike', but the link target it defines
+  (Qt6::qtquickcontrols2fusionstyleplugin) does not exist in the current
+  scope.  The plugin will not be linked.
+Call Stack (most recent call first):
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (qt6_import_qml_plugins)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (cmake_language)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:879 (_qt_internal_finalize_executable)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:848:EVAL:1 (qt6_finalize_target)
+  CMakeLists.txt:DEFERRED
+
+
+CMake Warning at /usr/lib/x86_64-linux-gnu/cmake/Qt6Qml/Qt6QmlMacros.cmake:4669 (message):
+  The qml plugin 'qtquickcontrols2materialstyleplugin' is a dependency of
+  'canopy-classic-spike', but the link target it defines
+  (Qt6::qtquickcontrols2materialstyleplugin) does not exist in the current
+  scope.  The plugin will not be linked.
+Call Stack (most recent call first):
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (qt6_import_qml_plugins)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (cmake_language)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:879 (_qt_internal_finalize_executable)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:848:EVAL:1 (qt6_finalize_target)
+  CMakeLists.txt:DEFERRED
+
+
+CMake Warning at /usr/lib/x86_64-linux-gnu/cmake/Qt6Qml/Qt6QmlMacros.cmake:4669 (message):
+  The qml plugin 'qtquickcontrols2imaginestyleplugin' is a dependency of
+  'canopy-classic-spike', but the link target it defines
+  (Qt6::qtquickcontrols2imaginestyleplugin) does not exist in the current
+  scope.  The plugin will not be linked.
+Call Stack (most recent call first):
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (qt6_import_qml_plugins)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (cmake_language)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:879 (_qt_internal_finalize_executable)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:848:EVAL:1 (qt6_finalize_target)
+  CMakeLists.txt:DEFERRED
+
+
+CMake Warning at /usr/lib/x86_64-linux-gnu/cmake/Qt6Qml/Qt6QmlMacros.cmake:4669 (message):
+  The qml plugin 'qtquickcontrols2universalstyleplugin' is a dependency of
+  'canopy-classic-spike', but the link target it defines
+  (Qt6::qtquickcontrols2universalstyleplugin) does not exist in the current
+  scope.  The plugin will not be linked.
+Call Stack (most recent call first):
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (qt6_import_qml_plugins)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (cmake_language)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:879 (_qt_internal_finalize_executable)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:848:EVAL:1 (qt6_finalize_target)
+  CMakeLists.txt:DEFERRED
+
+
+CMake Warning at /usr/lib/x86_64-linux-gnu/cmake/Qt6Qml/Qt6QmlMacros.cmake:4669 (message):
+  The qml plugin 'qtquickcontrols2basicstyleplugin' is a dependency of
+  'canopy-classic-spike', but the link target it defines
+  (Qt6::qtquickcontrols2basicstyleplugin) does not exist in the current
+  scope.  The plugin will not be linked.
+Call Stack (most recent call first):
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (qt6_import_qml_plugins)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (cmake_language)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:879 (_qt_internal_finalize_executable)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:848:EVAL:1 (qt6_finalize_target)
+  CMakeLists.txt:DEFERRED
+
+
+CMake Warning at /usr/lib/x86_64-linux-gnu/cmake/Qt6Qml/Qt6QmlMacros.cmake:4669 (message):
+  The qml plugin 'qtquicktemplates2plugin' is a dependency of
+  'canopy-classic-spike', but the link target it defines
+  (Qt6::qtquicktemplates2plugin) does not exist in the current scope.  The
+  plugin will not be linked.
+Call Stack (most recent call first):
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (qt6_import_qml_plugins)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (cmake_language)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:879 (_qt_internal_finalize_executable)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:848:EVAL:1 (qt6_finalize_target)
+  CMakeLists.txt:DEFERRED
+
+
+CMake Warning at /usr/lib/x86_64-linux-gnu/cmake/Qt6Qml/Qt6QmlMacros.cmake:4669 (message):
+  The qml plugin 'qtquickcontrols2implplugin' is a dependency of
+  'canopy-classic-spike', but the link target it defines
+  (Qt6::qtquickcontrols2implplugin) does not exist in the current scope.  The
+  plugin will not be linked.
+Call Stack (most recent call first):
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (qt6_import_qml_plugins)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (cmake_language)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:879 (_qt_internal_finalize_executable)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:848:EVAL:1 (qt6_finalize_target)
+  CMakeLists.txt:DEFERRED
+
+
+CMake Warning at /usr/lib/x86_64-linux-gnu/cmake/Qt6Qml/Qt6QmlMacros.cmake:4669 (message):
+  The qml plugin 'qtquickcontrols2fusionstyleimplplugin' is a dependency of
+  'canopy-classic-spike', but the link target it defines
+  (Qt6::qtquickcontrols2fusionstyleimplplugin) does not exist in the current
+  scope.  The plugin will not be linked.
+Call Stack (most recent call first):
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (qt6_import_qml_plugins)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (cmake_language)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:879 (_qt_internal_finalize_executable)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:848:EVAL:1 (qt6_finalize_target)
+  CMakeLists.txt:DEFERRED
+
+
+CMake Warning at /usr/lib/x86_64-linux-gnu/cmake/Qt6Qml/Qt6QmlMacros.cmake:4669 (message):
+  The qml plugin 'quickwindowplugin' is a dependency of
+  'canopy-classic-spike', but the link target it defines (Qt6::quickwindow)
+  does not exist in the current scope.  The plugin will not be linked.
+Call Stack (most recent call first):
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (qt6_import_qml_plugins)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (cmake_language)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:879 (_qt_internal_finalize_executable)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:848:EVAL:1 (qt6_finalize_target)
+  CMakeLists.txt:DEFERRED
+
+
+CMake Warning at /usr/lib/x86_64-linux-gnu/cmake/Qt6Qml/Qt6QmlMacros.cmake:4669 (message):
+  The qml plugin 'qtquickcontrols2materialstyleimplplugin' is a dependency of
+  'canopy-classic-spike', but the link target it defines
+  (Qt6::qtquickcontrols2materialstyleimplplugin) does not exist in the
+  current scope.  The plugin will not be linked.
+Call Stack (most recent call first):
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (qt6_import_qml_plugins)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (cmake_language)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:879 (_qt_internal_finalize_executable)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:848:EVAL:1 (qt6_finalize_target)
+  CMakeLists.txt:DEFERRED
+
+
+CMake Warning at /usr/lib/x86_64-linux-gnu/cmake/Qt6Qml/Qt6QmlMacros.cmake:4669 (message):
+  The qml plugin 'qtquickcontrols2imaginestyleimplplugin' is a dependency of
+  'canopy-classic-spike', but the link target it defines
+  (Qt6::qtquickcontrols2imaginestyleimplplugin) does not exist in the current
+  scope.  The plugin will not be linked.
+Call Stack (most recent call first):
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (qt6_import_qml_plugins)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (cmake_language)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:879 (_qt_internal_finalize_executable)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:848:EVAL:1 (qt6_finalize_target)
+  CMakeLists.txt:DEFERRED
+
+
+CMake Warning at /usr/lib/x86_64-linux-gnu/cmake/Qt6Qml/Qt6QmlMacros.cmake:4669 (message):
+  The qml plugin 'qtquickcontrols2universalstyleimplplugin' is a dependency
+  of 'canopy-classic-spike', but the link target it defines
+  (Qt6::qtquickcontrols2universalstyleimplplugin) does not exist in the
+  current scope.  The plugin will not be linked.
+Call Stack (most recent call first):
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (qt6_import_qml_plugins)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (cmake_language)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:879 (_qt_internal_finalize_executable)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:848:EVAL:1 (qt6_finalize_target)
+  CMakeLists.txt:DEFERRED
+
+
+CMake Warning at /usr/lib/x86_64-linux-gnu/cmake/Qt6Qml/Qt6QmlMacros.cmake:4669 (message):
+  The qml plugin 'qtquickcontrols2basicstyleimplplugin' is a dependency of
+  'canopy-classic-spike', but the link target it defines
+  (Qt6::qtquickcontrols2basicstyleimplplugin) does not exist in the current
+  scope.  The plugin will not be linked.
+Call Stack (most recent call first):
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (qt6_import_qml_plugins)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (cmake_language)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:879 (_qt_internal_finalize_executable)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:848:EVAL:1 (qt6_finalize_target)
+  CMakeLists.txt:DEFERRED
+
+
+CMake Warning at /usr/lib/x86_64-linux-gnu/cmake/Qt6Qml/Qt6QmlMacros.cmake:4669 (message):
+  The qml plugin 'qmlshapesplugin' is a dependency of 'canopy-classic-spike',
+  but the link target it defines (Qt6::qmlshapesplugin) does not exist in the
+  current scope.  The plugin will not be linked.
+Call Stack (most recent call first):
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (qt6_import_qml_plugins)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (cmake_language)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:879 (_qt_internal_finalize_executable)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:848:EVAL:1 (qt6_finalize_target)
+  CMakeLists.txt:DEFERRED
+
+
+CMake Warning at /usr/lib/x86_64-linux-gnu/cmake/Qt6Qml/Qt6QmlMacros.cmake:4669 (message):
+  The qml plugin 'labsmodelsplugin' is a dependency of
+  'canopy-classic-spike', but the link target it defines
+  (Qt6::labsmodelsplugin) does not exist in the current scope.  The plugin
+  will not be linked.
+Call Stack (most recent call first):
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (qt6_import_qml_plugins)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (cmake_language)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:879 (_qt_internal_finalize_executable)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:848:EVAL:1 (qt6_finalize_target)
+  CMakeLists.txt:DEFERRED
+
+
+CMake Warning at /usr/lib/x86_64-linux-gnu/cmake/Qt6Qml/Qt6QmlMacros.cmake:4669 (message):
+  The qml plugin 'qquicklayoutsplugin' is a dependency of
+  'canopy-classic-spike', but the link target it defines
+  (Qt6::qquicklayoutsplugin) does not exist in the current scope.  The plugin
+  will not be linked.
+Call Stack (most recent call first):
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (qt6_import_qml_plugins)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:801 (cmake_language)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:879 (_qt_internal_finalize_executable)
+  /usr/lib/x86_64-linux-gnu/cmake/Qt6Core/Qt6CoreMacros.cmake:848:EVAL:1 (qt6_finalize_target)
+  CMakeLists.txt:DEFERRED
+
+
+
+
+=== cmake_build [2026-11-28T04:14:36Z] rc=0 ===
+$ cmake --build /home/canopy/native_terminal_launch_20261127/build --parallel 2
+[1/53] Copying canopy-classic-spike qml sources into build dir
+[2/53] Copying canopy-classic-spike qml resources into build dir
+[3/53] Populating .qmlls.ini file at /home/canopy/native_terminal_launch_20261127/build/.qt/.qmlls.build.ini
+[4/53] Running qmlimportscanner for canopy-classic-spike
+[5/53] Automatic MOC and UIC for target canopy-classic-spike
+[6/53] Running AUTOMOC file extraction for target canopy-classic-spike
+[7/53] Running rcc for resource qmake_Canopy_Classic
+[8/53] Running moc --collect-json for target canopy-classic-spike
+[9/53] Generating .rcc/qmlcache/canopy-classic-spike_qmlcache_loader.cpp
+[10/53] Running rcc for resource canopy-classic-spike_raw_qml_0
+[11/53] Automatic QML type registration for target canopy-classic-spike
+[12/53] Generating .rcc/qmlcache/canopy-classic-spike_Main_qml.cpp, .rcc/qmlcache/canopy-classic-spike_Main_qml.cpp.aotstats
+[13/53] Generating .rcc/qmlcache/canopy-classic-spike_Theme_qml.cpp, .rcc/qmlcache/canopy-classic-spike_Theme_qml.cpp.aotstats
+[14/53] Generating .rcc/qmlcache/canopy-classic-spike_ClockLabel_qml.cpp, .rcc/qmlcache/canopy-classic-spike_ClockLabel_qml.cpp.aotstats
+[15/53] Generating .rcc/qmlcache/canopy-classic-spike_LauncherOverlay_qml.cpp, .rcc/qmlcache/canopy-classic-spike_LauncherOverlay_qml.cpp.aotstats
+[16/53] Generating .rcc/qmlcache/canopy-classic-spike_DockTile_qml.cpp, .rcc/qmlcache/canopy-classic-spike_DockTile_qml.cpp.aotstats
+[17/53] Running rcc for resource canopy-original-art
+[18/53] Generating .rcc/qmlcache/canopy-classic-spike_Wallpaper_qml.cpp, .rcc/qmlcache/canopy-classic-spike_Wallpaper_qml.cpp.aotstats
+[19/53] Generating .rcc/qmlcache/canopy-classic-spike_PreviewWindow_qml.cpp, .rcc/qmlcache/canopy-classic-spike_PreviewWindow_qml.cpp.aotstats
+[20/53] Generating .rcc/qmlcache/canopy-classic-spike_FolderTile_qml.cpp, .rcc/qmlcache/canopy-classic-spike_FolderTile_qml.cpp.aotstats
+[21/53] Generating .rcc/qmlcache/canopy-classic-spike_ShellMenuBar_qml.cpp, .rcc/qmlcache/canopy-classic-spike_ShellMenuBar_qml.cpp.aotstats
+[22/53] Generating .rcc/qmlcache/canopy-classic-spike_ShellMenuPopupSet_qml.cpp, .rcc/qmlcache/canopy-classic-spike_ShellMenuPopupSet_qml.cpp.aotstats
+[23/53] Generating .rcc/qmlcache/canopy-classic-spike_WindowActivationIndicators_qml.cpp, .rcc/qmlcache/canopy-classic-spike_WindowActivationIndicators_qml.cpp.aotstats
+[24/53] Generating .rcc/qmlcache/canopy-classic-spike_QuickControlsOverlay_qml.cpp, .rcc/qmlcache/canopy-classic-spike_QuickControlsOverlay_qml.cpp.aotstats
+[25/53] Generating .rcc/qmlcache/canopy-classic-spike_NotificationCenter_qml.cpp, .rcc/qmlcache/canopy-classic-spike_NotificationCenter_qml.cpp.aotstats
+[26/53] Generating .rcc/qmlcache/canopy-classic-spike_SettingsPanel_qml.cpp, .rcc/qmlcache/canopy-classic-spike_SettingsPanel_qml.cpp.aotstats
+[27/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/canopy-classic-spike_autogen/mocs_compilation.cpp.o
+[28/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/LauncherModel.cpp.o
+[29/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/main.cpp.o
+[30/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/WindowActivationState.cpp.o
+[31/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/SystemAppLauncher.cpp.o
+[32/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/RoundedDockIconProvider.cpp.o
+[33/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/.qt/rcc/qrc_qmake_Canopy_Classic.cpp.o
+[34/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/canopy-classic-spike_qmltyperegistrations.cpp.o
+[35/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_qmlcache_loader.cpp.o
+[36/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/FileModel.cpp.o
+[37/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_Theme_qml.cpp.o
+[38/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_Main_qml.cpp.o
+[39/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_ClockLabel_qml.cpp.o
+[40/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_LauncherOverlay_qml.cpp.o
+[41/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_DockTile_qml.cpp.o
+[42/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_Wallpaper_qml.cpp.o
+[43/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_FolderTile_qml.cpp.o
+[44/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_PreviewWindow_qml.cpp.o
+[45/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_ShellMenuBar_qml.cpp.o
+[46/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_ShellMenuPopupSet_qml.cpp.o
+[47/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_WindowActivationIndicators_qml.cpp.o
+[48/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_QuickControlsOverlay_qml.cpp.o
+[49/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_SettingsPanel_qml.cpp.o
+[50/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/.qt/rcc/qrc_canopy-classic-spike_raw_qml_0.cpp.o
+[51/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/.rcc/qmlcache/canopy-classic-spike_NotificationCenter_qml.cpp.o
+[52/53] Building CXX object CMakeFiles/canopy-classic-spike.dir/.qt/rcc/qrc_canopy-original-art.cpp.o
+[53/53] Linking CXX executable canopy-classic-spike
+
+
+=== binary_and_capability [2026-11-28T04:14:38Z] rc=0 ===
+$ sha256sum /home/canopy/native_terminal_launch_20261127/build/canopy-classic-spike; /home/canopy/native_terminal_launch_20261127/build/canopy-classic-spike --self-test-system-apps-capability; echo CAPABILITY_RC=$?
+9bdcb7f525b0e8846b565484caf7e6e2211ef350dab77732b5d55b8536d84a8d  /home/canopy/native_terminal_launch_20261127/build/canopy-classic-spike
+CAPABILITY_RC=134
+qt.qpa.xcb: could not connect to display 
+qt.qpa.plugin: From 6.5.0, xcb-cursor0 or libxcb-cursor0 is needed to load the Qt xcb platform plugin.
+qt.qpa.plugin: Could not load the Qt platform plugin "xcb" in "" even though it was found.
+This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem.
+
+Available platform plugins are: xcb, offscreen, minimal, vkkhrdisplay, wayland-brcm, wayland-egl, wayland, eglfs, vnc, minimalegl, linuxfb.
+
+bash: line 1:  8776 Aborted                    (core dumped) /home/canopy/native_terminal_launch_20261127/build/canopy-classic-spike --self-test-system-apps-capability
+

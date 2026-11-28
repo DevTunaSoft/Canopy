@@ -1,0 +1,260 @@
+{
+  "artifact_sha256": "b1de4894f5cd8ac4c4e7e939146f822e139550bff8338be0be41c4a96f835c51",
+  "evidence_class": "REAL_GUEST_SCOPED",
+  "generated_utc": "2026-11-28T09:01:15Z",
+  "inner_sums_sha256": "3e3a48cecf45bc582b522491700c5f839db60f7868d0e4e3689a342b944d6837",
+  "ledger": [
+    {
+      "cid": "C00",
+      "command": "sha256 of exact shipped scripts/binary/archive",
+      "expected": {
+        "binary/org.kde.plasma.canopyclassic-0.1.0-dev-baseline.tar.gz": "ec9e44cfaa3ba3059aef492b429a6e6c6b94da32a230d4acb6cb28a1ef3ece35",
+        "contents/bin/canopy-classic-spike": "4950fd793d067aa722a64ea8b09f0c1c65a55263b7f96c8fd418bf579e9f4a32",
+        "install.sh": "a4f7ca9ca8fd6a2d4e0a68798b97bacc6a14806553f9829f591640f06c7ff5c2",
+        "metadata.json": "3f3207c50f87d3c68a0760676392b0e4825ea3512d531387e0ec86e03b278cbe",
+        "uninstall.sh": "94324c5eb7708fa884fc9f3c392ece6c0692b20d5246107ab922b5a61d03c9dc",
+        "verify.sh": "ffa210cd22807db08dfbb7faafd21ef129eb5cca4d928f86f67c496119b7bb61"
+      },
+      "expected_rc": 0,
+      "mismatch": {},
+      "output": "{\"binary/org.kde.plasma.canopyclassic-0.1.0-dev-baseline.tar.gz\": \"ec9e44cfaa3ba3059aef492b429a6e6c6b94da32a230d4acb6cb28a1ef3ece35\", \"contents/bin/canopy-classic-spike\": \"4950fd793d067aa722a64ea8b09f0c1c65a55263b7f96c8fd418bf579e9f4a32\", \"install.sh\": \"a4f7ca9ca8fd6a2d4e0a68798b97bacc6a14806553f9829f591640f06c7ff5c2\", \"metadata.json\": \"3f3207c50f87d3c68a0760676392b0e4825ea3512d531387e0ec86e03b278cbe\", \"uninstall.sh\": \"94324c5eb7708fa884fc9f3c392ece6c0692b20d5246107ab922b5a61d03c9dc\", \"verify.sh\": \"ffa210cd22807db08dfbb7faafd21ef129eb5cca4d928f86f67c496119b7bb61\"}",
+      "rc": 0,
+      "result": "PASS",
+      "stage": "host-identity"
+    },
+    {
+      "cid": "C01",
+      "command": "inner SHA256SUMS -c and bash -n on shipped root",
+      "expected_rc": 0,
+      "output": "contents/approved/icons/Browser_Option_3.png: OK\ncontents/approved/icons/Calendar_Option_3.png: OK\ncontents/approved/icons/Files_Option_2.png: OK\ncontents/approved/icons/Mail_Option_5.png: OK\ncontents/approved/icons/Music_Option_3.png: OK\ncontents/approved/icons/Photos_Option_2.png: OK\ncontents/approved/icons/Settings_Option_8.png: OK\ncontents/approved/icons/Terminal_Option_4.png: OK\ncontents/approved/manifest.json: OK\ncontents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png: OK\ncontents/approved/wallpaper/canopy-wave-preview.png: OK\ncontents/bin/canopy-classic-spike: OK\ncontents/ui/main.qml: OK\ninstall.sh: OK\nmetadata.json: OK\nuninstall.sh: OK\nverify.sh: OK\n\n\n",
+      "rc": 0,
+      "result": "PASS",
+      "stage": "host-verify"
+    },
+    {
+      "cid": "C02",
+      "command": "prepare staging directory",
+      "expected_rc": 0,
+      "output": "",
+      "rc": 0,
+      "result": "PASS",
+      "stage": "guest-stage"
+    },
+    {
+      "cid": "C03a",
+      "command": "scp exact shipped package root to guest",
+      "expected_rc": 0,
+      "output": "",
+      "rc": 0,
+      "result": "PASS",
+      "stage": "guest-stage"
+    },
+    {
+      "cid": "C03b",
+      "command": "scp exact shipped KPackage archive to guest",
+      "expected_rc": 0,
+      "output": "",
+      "rc": 0,
+      "result": "PASS",
+      "stage": "guest-stage"
+    },
+    {
+      "cid": "C04",
+      "command": "guest sha256sum -c, bash -n and exact shipped script/binary hashes",
+      "expected_rc": 0,
+      "output": "contents/approved/icons/Browser_Option_3.png: OK\ncontents/approved/icons/Calendar_Option_3.png: OK\ncontents/approved/icons/Files_Option_2.png: OK\ncontents/approved/icons/Mail_Option_5.png: OK\ncontents/approved/icons/Music_Option_3.png: OK\ncontents/approved/icons/Photos_Option_2.png: OK\ncontents/approved/icons/Settings_Option_8.png: OK\ncontents/approved/icons/Terminal_Option_4.png: OK\ncontents/approved/manifest.json: OK\ncontents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png: OK\ncontents/approved/wallpaper/canopy-wave-preview.png: OK\ncontents/bin/canopy-classic-spike: OK\ncontents/ui/main.qml: OK\ninstall.sh: OK\nmetadata.json: OK\nuninstall.sh: OK\nverify.sh: OK\na4f7ca9ca8fd6a2d4e0a68798b97bacc6a14806553f9829f591640f06c7ff5c2  install.sh\n94324c5eb7708fa884fc9f3c392ece6c0692b20d5246107ab922b5a61d03c9dc  uninstall.sh\nffa210cd22807db08dfbb7faafd21ef129eb5cca4d928f86f67c496119b7bb61  verify.sh\n3f3207c50f87d3c68a0760676392b0e4825ea3512d531387e0ec86e03b278cbe  metadata.json\n4950fd793d067aa722a64ea8b09f0c1c65a55263b7f96c8fd418bf579e9f4a32  contents/bin/canopy-classic-spike\nec9e44cfaa3ba3059aef492b429a6e6c6b94da32a230d4acb6cb28a1ef3ece35  org.kde.plasma.canopyclassic-0.1.0-dev-baseline.tar.gz",
+      "rc": 0,
+      "result": "PASS",
+      "stage": "guest-identity"
+    },
+    {
+      "cid": "C05",
+      "command": "package absent before proof",
+      "expected_rc": 0,
+      "output": "PACKAGE_ABSENT",
+      "rc": 0,
+      "result": "PASS",
+      "stage": "preflight"
+    },
+    {
+      "cid": "C06",
+      "command": "capture Plasma config baseline bytes/hash",
+      "expected_rc": 0,
+      "output": "141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751",
+      "rc": 0,
+      "result": "PASS",
+      "stage": "baseline"
+    },
+    {
+      "cid": "C07",
+      "command": "capture personal-file hashes",
+      "expected_rc": 0,
+      "output": "3ac08a9117c6da5a46ae751de32796137cc53a918d105c8dc593c0065f88cc25  /home/canopy/.config/kwinoutputconfig.json\n91f0551abbeb05c179a920bd06bea4a261f7059045afca83e5f518bcc3d34c07  /home/canopy/g2_g4_copy_hashes.txt\n9798e783184feb8149e6ad99a49ecc09a1e12577048180457bd23fde7003868e  /home/canopy/g2_g4_final_status.txt\n8f1689ac622dcc21b63dae27219171c34bced53def91be0385da436a61103db4  /home/canopy/g2_g4_manifest_check.txt\nedabd1fff759674eb037b9d8e5bfb67d8979a0337a0bbf17722ece1f47fd0e1e  /home/canopy/g2_g4_retry_status.txt\n541214d833ba936095c902db503073629ead7934fb3f277d0adba26e745a32ed  /home/canopy/g2_g4_status.txt",
+      "rc": 0,
+      "result": "PASS",
+      "stage": "baseline"
+    },
+    {
+      "cid": "I01",
+      "command": "exact shipped install.sh on fresh host",
+      "expected_rc": 0,
+      "output": "Successfully installed /home/canopy/.local/share/plasma/plasmoids/org.kde.plasma.canopyclassic/\nSuccessfully set the wallpaper for all desktops to the image /home/canopy/native_dev_shipped_proof/contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png\nINSTALL_PASS: user-scope KPackage installed; approved wallpaper applied",
+      "rc": 0,
+      "result": "PASS",
+      "stage": "install"
+    },
+    {
+      "cid": "I02",
+      "command": "exact shipped verify.sh after install",
+      "expected_rc": 0,
+      "output": "contents/approved/icons/Browser_Option_3.png: OK\ncontents/approved/icons/Calendar_Option_3.png: OK\ncontents/approved/icons/Files_Option_2.png: OK\ncontents/approved/icons/Mail_Option_5.png: OK\ncontents/approved/icons/Music_Option_3.png: OK\ncontents/approved/icons/Photos_Option_2.png: OK\ncontents/approved/icons/Settings_Option_8.png: OK\ncontents/approved/icons/Terminal_Option_4.png: OK\ncontents/approved/manifest.json: OK\ncontents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png: OK\ncontents/approved/wallpaper/canopy-wave-preview.png: OK\ncontents/bin/canopy-classic-spike: OK\ncontents/ui/main.qml: OK\ninstall.sh: OK\nmetadata.json: OK\nuninstall.sh: OK\nverify.sh: OK\nMETADATA_IDENTITY_OK\nVERIFY_PASS: package identity and approved wallpaper hash match",
+      "rc": 0,
+      "result": "PASS",
+      "stage": "install"
+    },
+    {
+      "cid": "I03",
+      "command": "package listed after install",
+      "expected_rc": 0,
+      "output": "PACKAGE_PRESENT",
+      "rc": 0,
+      "result": "PASS",
+      "stage": "install"
+    },
+    {
+      "after_install": "962064d2441acffe0210e59455129d1ad86f4d5bf00e2b1dea7123b9c5a0492e",
+      "baseline": "141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751",
+      "changed": true,
+      "cid": "I04",
+      "command": "install changes Plasma config (wallpaper key)",
+      "expected_rc": 0,
+      "output": "962064d2441acffe0210e59455129d1ad86f4d5bf00e2b1dea7123b9c5a0492e",
+      "rc": 0,
+      "result": "PASS",
+      "stage": "install"
+    },
+    {
+      "cid": "U01",
+      "command": "second install of same archive uses shipped --upgrade path",
+      "expected_rc": 0,
+      "output": "Upgrading package from file: /home/canopy/native_dev_shipped_proof/org.kde.plasma.canopyclassic-0.1.0-dev-baseline.tar.gz\nSuccessfully upgraded /home/canopy/.local/share/plasma/plasmoids/org.kde.plasma.canopyclassic/\nSuccessfully set the wallpaper for all desktops to the image /home/canopy/native_dev_shipped_proof/contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png\nINSTALL_PASS: user-scope KPackage installed; approved wallpaper applied",
+      "rc": 0,
+      "result": "PASS",
+      "stage": "upgrade"
+    },
+    {
+      "cid": "U02",
+      "command": "verify after in-place upgrade",
+      "expected_rc": 0,
+      "output": "contents/approved/icons/Browser_Option_3.png: OK\ncontents/approved/icons/Calendar_Option_3.png: OK\ncontents/approved/icons/Files_Option_2.png: OK\ncontents/approved/icons/Mail_Option_5.png: OK\ncontents/approved/icons/Music_Option_3.png: OK\ncontents/approved/icons/Photos_Option_2.png: OK\ncontents/approved/icons/Settings_Option_8.png: OK\ncontents/approved/icons/Terminal_Option_4.png: OK\ncontents/approved/manifest.json: OK\ncontents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png: OK\ncontents/approved/wallpaper/canopy-wave-preview.png: OK\ncontents/bin/canopy-classic-spike: OK\ncontents/ui/main.qml: OK\ninstall.sh: OK\nmetadata.json: OK\nuninstall.sh: OK\nverify.sh: OK\nMETADATA_IDENTITY_OK\nVERIFY_PASS: package identity and approved wallpaper hash match",
+      "rc": 0,
+      "result": "PASS",
+      "stage": "upgrade"
+    },
+    {
+      "cid": "R01",
+      "command": "exact shipped uninstall.sh restores install-time snapshot",
+      "expected_rc": 0,
+      "output": "Successfully uninstalled /home/canopy/.local/share/plasma/plasmoids/org.kde.plasma.canopyclassic/\nUNINSTALL_PASS: stock Plasma config restored byte-for-byte",
+      "rc": 0,
+      "result": "PASS",
+      "stage": "rollback"
+    },
+    {
+      "cid": "R02",
+      "command": "package absent after uninstall",
+      "expected_rc": 0,
+      "output": "PACKAGE_ABSENT",
+      "rc": 0,
+      "result": "PASS",
+      "stage": "rollback"
+    },
+    {
+      "after_rollback": "141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751",
+      "baseline": "141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751",
+      "cid": "R03",
+      "command": "config byte-for-byte restored to baseline",
+      "expected_rc": 0,
+      "output": "141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751\nbaseline=141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751",
+      "rc": 0,
+      "result": "PASS",
+      "stage": "rollback"
+    },
+    {
+      "cid": "R04",
+      "command": "personal files unchanged",
+      "equal": true,
+      "expected_rc": 0,
+      "output": "{\"after\": {\"/home/canopy/.config/kwinoutputconfig.json\": \"3ac08a9117c6da5a46ae751de32796137cc53a918d105c8dc593c0065f88cc25\", \"/home/canopy/g2_g4_copy_hashes.txt\": \"91f0551abbeb05c179a920bd06bea4a261f7059045afca83e5f518bcc3d34c07\", \"/home/canopy/g2_g4_final_status.txt\": \"9798e783184feb8149e6ad99a49ecc09a1e12577048180457bd23fde7003868e\", \"/home/canopy/g2_g4_manifest_check.txt\": \"8f1689ac622dcc21b63dae27219171c34bced53def91be0385da436a61103db4\", \"/home/canopy/g2_g4_retry_status.txt\": \"edabd1fff759674eb037b9d8e5bfb67d8979a0337a0bbf17722ece1f47fd0e1e\", \"/home/canopy/g2_g4_status.txt\": \"541214d833ba936095c902db503073629ead7934fb3f277d0adba26e745a32ed\"}, \"before\": {\"/home/canopy/.config/kwinoutputconfig.json\": \"3ac08a9117c6da5a46ae751de32796137cc53a918d105c8dc593c0065f88cc25\", \"/home/canopy/g2_g4_copy_hashes.txt\": \"91f0551abbeb05c179a920bd06bea4a261f7059045afca83e5f518bcc3d34c07\", \"/home/canopy/g2_g4_final_status.txt\": \"9798e783184feb8149e6ad99a49ecc09a1e12577048180457bd23fde7003868e\", \"/home/canopy/g2_g4_manifest_check.txt\": \"8f1689ac622dcc21b63dae27219171c34bced53def91be0385da436a61103db4\", \"/home/canopy/g2_g4_retry_status.txt\": \"edabd1fff759674eb037b9d8e5bfb67d8979a0337a0bbf17722ece1f47fd0e1e\", \"/home/canopy/g2_g4_status.txt\": \"541214d833ba936095c902db503073629ead7934fb3f277d0adba26e745a32ed\"}}",
+      "rc": 0,
+      "result": "PASS",
+      "stage": "rollback"
+    },
+    {
+      "cid": "I05",
+      "command": "reinstall exact pinned archive after rollback",
+      "expected_rc": 0,
+      "output": "Successfully installed /home/canopy/.local/share/plasma/plasmoids/org.kde.plasma.canopyclassic/\nSuccessfully set the wallpaper for all desktops to the image /home/canopy/native_dev_shipped_proof/contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png\nINSTALL_PASS: user-scope KPackage installed; approved wallpaper applied",
+      "rc": 0,
+      "result": "PASS",
+      "stage": "reinstall"
+    },
+    {
+      "cid": "I06",
+      "command": "verify after reinstall",
+      "expected_rc": 0,
+      "output": "contents/approved/icons/Browser_Option_3.png: OK\ncontents/approved/icons/Calendar_Option_3.png: OK\ncontents/approved/icons/Files_Option_2.png: OK\ncontents/approved/icons/Mail_Option_5.png: OK\ncontents/approved/icons/Music_Option_3.png: OK\ncontents/approved/icons/Photos_Option_2.png: OK\ncontents/approved/icons/Settings_Option_8.png: OK\ncontents/approved/icons/Terminal_Option_4.png: OK\ncontents/approved/manifest.json: OK\ncontents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png: OK\ncontents/approved/wallpaper/canopy-wave-preview.png: OK\ncontents/bin/canopy-classic-spike: OK\ncontents/ui/main.qml: OK\ninstall.sh: OK\nmetadata.json: OK\nuninstall.sh: OK\nverify.sh: OK\nMETADATA_IDENTITY_OK\nVERIFY_PASS: package identity and approved wallpaper hash match",
+      "rc": 0,
+      "result": "PASS",
+      "stage": "reinstall"
+    },
+    {
+      "cid": "R05",
+      "command": "final uninstall restores guest baseline",
+      "expected_rc": 0,
+      "output": "Successfully uninstalled /home/canopy/.local/share/plasma/plasmoids/org.kde.plasma.canopyclassic/\nUNINSTALL_PASS: stock Plasma config restored byte-for-byte",
+      "rc": 0,
+      "result": "PASS",
+      "stage": "cleanup"
+    },
+    {
+      "cid": "R06",
+      "command": "guest package absent at end",
+      "expected_rc": 0,
+      "output": "PACKAGE_ABSENT",
+      "rc": 0,
+      "result": "PASS",
+      "stage": "cleanup"
+    },
+    {
+      "cid": "R07",
+      "command": "guest config hash equals captured baseline",
+      "expected_rc": 0,
+      "output": "141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751\nbaseline=141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751",
+      "rc": 0,
+      "result": "PASS",
+      "stage": "cleanup"
+    }
+  ],
+  "ledger_steps": 24,
+  "notes": [
+    "Exact scripts/binary were extracted from the committed artifact, not rebuilt or substituted.",
+    "In-place --upgrade is exercised for the same package id; rollback still starts with uninstall.",
+    "Visual acceptance, CI-on-guest automation, approval, merge and release: NOT_RUN."
+  ],
+  "owner_directive_sha_prefix": "1fba4b1e",
+  "pass_steps": 24,
+  "prior_67_step_rollback_proof": "SUPERSEDED_POINT_IN_TIME: different script/binary identity; not proof of this bundle",
+  "schema": "canopy.native.dev_artifact.shipped_rollback_proof/1",
+  "scope": "DEVELOPMENT_ARTIFACT_ONLY;NO_RELEASE;NO_VISUAL_ACCEPTANCE;NO_CI_CLAIM",
+  "shipped_hashes": {
+    "binary/org.kde.plasma.canopyclassic-0.1.0-dev-baseline.tar.gz": "ec9e44cfaa3ba3059aef492b429a6e6c6b94da32a230d4acb6cb28a1ef3ece35",
+    "contents/bin/canopy-classic-spike": "4950fd793d067aa722a64ea8b09f0c1c65a55263b7f96c8fd418bf579e9f4a32",
+    "install.sh": "a4f7ca9ca8fd6a2d4e0a68798b97bacc6a14806553f9829f591640f06c7ff5c2",
+    "metadata.json": "3f3207c50f87d3c68a0760676392b0e4825ea3512d531387e0ec86e03b278cbe",
+    "uninstall.sh": "94324c5eb7708fa884fc9f3c392ece6c0692b20d5246107ab922b5a61d03c9dc",
+    "verify.sh": "ffa210cd22807db08dfbb7faafd21ef129eb5cca4d928f86f67c496119b7bb61"
+  },
+  "verdict": "PASS",
+  "vm": "Canopy-Test-Plasma6"
+}

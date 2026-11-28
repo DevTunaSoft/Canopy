@@ -1,0 +1,1 @@
+find "$HOME/.local/share/plasma/plasmoids/org.kde.plasma.canopyclassic.nativetasks" -type f -printf '%P\n' 2>&1 | sort

@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Troubleshooting :: Fedora Docs</title>
+    <link rel="canonical" href="https://docs.fedoraproject.org/en-US/atomic-desktops/troubleshooting/">
+    <meta name="generator" content="Antora 3.1.15">
+    <link rel="stylesheet" href="../../_/css/site.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+<link rel="stylesheet" href="../../_/css/vendor/tabs.css">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Fedora Docs">
+<meta property="og:title" content="Troubleshooting">
+
+<meta property="og:description" content="Learn more about Fedora Linux, the Fedora Project & the Fedora Community.">
+<meta property="og:image" content="https://docs.fedoraproject.org/en-US/_/img/docs_logo.png">
+
+    <script>if (localStorage.darkmode === 'true' || (!('darkmode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) { document.documentElement.classList.add('dark');} else {document.documentElement.classList.remove('dark');}</script>
+  </head>
+  <body class="article dark:bg-fp-blue-darkest text-black dark:text-white">
+<!-- Add any HTML code to show at the top of each page — like a banner to a survey, some announcement, etc. Leave this file empty to not show anything-->
+<header class="header" role="banner">
+  <nav class="fixed z-50 top-0 w-full bg-gradient-to-l from-fp-blue to-fp-blue-light dark:bg-none dark:bg-fp-blue-dark" style="">
+    <div class="mx-auto px-2 sm:px-6 lg:px-8">
+      <div class="relative flex h-14 items-center justify-between">
+        <div
+          class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start"
+        >
+          <div class="flex flex-shrink-0 items-center">
+            <a href="https://docs.fedoraproject.org/en-US">
+              <img class="h-6 z-10 w-auto" src="../../_/img/docs_logo_white.svg">
+            </a>
+          </div>
+
+
+	  <div class="hidden sm:ml-auto sm:block">
+            <div class="flex space-x-4">
+
+
+              <div id="search-field" class="relative inline-flex cursor-pointer items-center rounded px-4 text-xs text-gray-500 dark:text-gray-200">
+                <svg class="absolute left-6 fill-gray-400 dark:fill-gray-400 h-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg>
+                <input id="search-input" class="pl-6 pr-28 h-8 w-64 rounded-xl dark:bg-black" type="text" placeholder="Search Docs">
+                <label class="ml-2 absolute right-6 filter checkbox border-l border-gray-500 pl-2">
+		 <input type="checkbox" class="appearance-none h-3 w-3 border border-gray-500 rounded bg-white dark:bg-black checked:bg-fp-blue-light checked:border-fp-blue-light dark:checked:bg-fp-blue dark:checked:border-fp-blue focus:outline-none transition duration-200 cursor-pointer my-0.5 mr-1 float-left" data-facet-filter="component:atomic-desktops"> In this section
+                </label>
+              </div>
+            </div>
+          </div>
+	  <button type="button" id="themeSwitch" class="hidden sm:block stroke-white fill-white ">
+	    <span class="dark:hidden">
+	      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+	        <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"></path>
+		<path d="M12 4v1M17.66 6.344l-.828.828M20.005 12.004h-1M17.66 17.664l-.828-.828M12 20.01V19M6.34 17.664l.835-.836M3.995 12.004h1.01M6 6l.835.836"></path>
+	      </svg>
+	    </span>
+	    <span class="hidden dark:inline">
+	      <svg viewBox="0 0 512 512" class="w-4 h-4">
+	        <path d="M421.6 379.9c-.6641 0-1.35 .0625-2.049 .1953c-11.24 2.143-22.37 3.17-33.32 3.17c-94.81 0-174.1-77.14-174.1-175.5c0-63.19 33.79-121.3 88.73-152.6c8.467-4.812 6.339-17.66-3.279-19.44c-11.2-2.078-29.53-3.746-40.9-3.746C132.3 31.1 32 132.2 32 256c0 123.6 100.1 224 223.8 224c69.04 0 132.1-31.45 173.8-82.93C435.3 389.1 429.1 379.9 421.6 379.9zM255.8 432C158.9 432 80 353 80 256c0-76.32 48.77-141.4 116.7-165.8C175.2 125 163.2 165.6 163.2 207.8c0 99.44 65.13 183.9 154.9 212.8C298.5 428.1 277.4 432 255.8 432z"/>
+              </svg>
+	    </span>
+	  </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container dark:text-gray-300 bg-fp-gray-lightest dark:bg-fp-blue-darker dark:border-r dark:border-gray-800" data-component="atomic-desktops" data-version="">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title text-fp-blue-dark dark:text-fp-blue font-bold"><a href="../">Fedora Atomic Desktops</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../installation/">Installation</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../getting-started/">Getting Started</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../updates-upgrades-rollbacks/">Updates, Upgrades &amp; Rollbacks</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../toolbox/">Toolbx</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../technical-information/">Technical Information</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../reading-and-resources/">Reading and Resources</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../contributing/">Contributing</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="./">Troubleshooting</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../faq/">FAQ</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../tips-and-tricks/">Tips and Tricks</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Configuration Guides</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../sway-configuration-guide/">Sway Configuration Guide</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore bg-gray-50 dark:bg-fp-blue-darkest" data-panel="explore">
+  <div class="context dark:border-t dark:border-gray-800">
+    <span class="title">Fedora Atomic Desktops</span>
+    <span class="version"></span>
+  </div>
+  <ul class="components bg-gray-100 dark:bg-fp-blue-darkest">
+    <li class="component">
+      <a class="title" href="../../beginners-guide/">A Beginner's Guide to Fedora</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../arm-sbc/">ARM Single Board Computers</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../community/">Community Architecture (CommArch)</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../cle/">Community Linux Engineering</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../defensive-coding/">Defensive Coding Guide</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../engineering/">Engineering Teams</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../epel/">EPEL</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../a11y/">Fedora Accessibility (a11y) WG</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fedora-accounts/">Fedora Accounts</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../ai-ml/">Fedora AI/ML SIG</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fedora-asahi-remix/">Fedora Asahi Remix</a>
+    </li>
+    <li class="component is-current">
+      <a class="title" href="../">Fedora Atomic Desktops</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../badges/">Fedora Badges</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../ci/">Fedora CI</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../cloud/">Fedora Cloud</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../commops/">Fedora Community Ops</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../containers/">Fedora Container Docs</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fedora-coreos/">Fedora CoreOS</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../council/">Fedora Council</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fdwg/">Fedora Data Working Group (FDWG)</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../design/">Fedora Design Team</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../discussion-forum-guidelines-and-rules/">Fedora Discussion Forum (Self-)Moderation Guidelines and Rules</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../dei/">Fedora Diversity, Equity, and Inclusion (DEI)</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../docs/">Fedora Documentation</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fedora-docs/team-info/">Fedora Documentation Team</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../eln/">Fedora ELN</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../forge-documentation/">Fedora Forge Documentation</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../gaming/">Fedora Gaming</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../infra/">Fedora Infrastructure & Release Engineering</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../iot/">Fedora Internet Of Things</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../iot-wg/">Fedora IoT Working Group</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fedora-join/">Fedora Join SIG</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../kde/">Fedora KDE Plasma Desktop Edition</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../legal/">Fedora Legal</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../releases/">Fedora Linux Releases</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../localization/">Fedora Localization Team</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fedora-magazine/">Fedora Magazine</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../marketing/">Fedora Marketing Team</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../matrix/">Fedora Matrix WG</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../mentored-projects/">Fedora Mentored Projects</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../mindshare-committee/">Fedora Mindshare Committee</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../minimal/">Fedora Minimal</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../operations/">Fedora Program Operations</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../project/">Fedora Project</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../qa-docs/">Fedora Quality Docs</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../rawhide-gating/">Fedora Rawhide Gating</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../release-notes/">Fedora Release Notes</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../robotics-sig/">Fedora Robotics SIG</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fedora/">Fedora Security SIG</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fedora-server/">Fedora Server User Documentation</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../server-working-group/">Fedora Server Working Group</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../spins-labs/">Fedora Spins & Labs</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../tools/">Fedora Tools</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../websites/">Fedora Websites & Apps</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../workstation-docs/">Fedora Workstation Documentation</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../workstation-working-group/">Fedora Workstation Working Group</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../bootc/">Fedora/CentOS bootc</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fesco/">FESCo</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../flatpak/">Flatpak</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../i3/">i3 SIG</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../java-packaging-howto/">Java Packaging HOWTO</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../docs-l10n/">Localization help and stats</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../mindshare/">Mindshare Teams</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../neurofedora/overview/">NeuroFedora User Documentation</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../package-maintainers/">Package Maintainers</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../packaging-guidelines/">Packaging Guidelines</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../quick-docs/">Quick Docs</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../reproducible-builds/">Reproducible Builds</a>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar bg-fp-gray-lightest dark:bg-fp-blue-darkest dark:text-gray-300 dark:border-b dark:border-gray-800" role="navigation">
+<button class="toolbar-icon nav-toggle"></button>
+  <a href="../../docs/" class="toolbar-icon home-link"></a>
+<nav class="crumbs" role="navigation" aria-label="breadcrumbs">
+  <ul>
+    <li class="after:text-gray-800 dark:after:text-gray-400"><a href="../">Fedora Atomic Desktops</a></li>
+    <li class="after:text-gray-800 dark:after:text-gray-400"><a href="./">Troubleshooting</a></li>
+  </ul>
+</nav>
+
+        <div class="page-languages">
+            <button class="languages-menu-toggle" title="Show other languages of the site">
+                en-US
+            </button>
+            <div class="languages-menu">
+    
+<a class="language" href="../../../en-US/atomic-desktops/troubleshooting/">en-US</a>
+<a class="language" href="../../../ar/atomic-desktops/troubleshooting/">ar</a>
+<a class="language" href="../../../ast/atomic-desktops/troubleshooting/">ast</a>
+<a class="language" href="../../../az/atomic-desktops/troubleshooting/">az</a>
+<a class="language" href="../../../be/atomic-desktops/troubleshooting/">be</a>
+<a class="language" href="../../../bg/atomic-desktops/troubleshooting/">bg</a>
+<a class="language" href="../../../bn/atomic-desktops/troubleshooting/">bn</a>
+<a class="language" href="../../../ca/atomic-desktops/troubleshooting/">ca</a>
+<a class="language" href="../../../cs/atomic-desktops/troubleshooting/">cs</a>
+<a class="language" href="../../../de/atomic-desktops/troubleshooting/">de</a>
+<a class="language" href="../../../el/atomic-desktops/troubleshooting/">el</a>
+<a class="language" href="../../../es/atomic-desktops/troubleshooting/">es</a>
+<a class="language" href="../../../es_419/atomic-desktops/troubleshooting/">es_419</a>
+<a class="language" href="../../../fa/atomic-desktops/troubleshooting/">fa</a>
+<a class="language" href="../../../fi/atomic-desktops/troubleshooting/">fi</a>
+<a class="language" href="../../../fil/atomic-desktops/troubleshooting/">fil</a>
+<a class="language" href="../../../fr/atomic-desktops/troubleshooting/">fr</a>
+<a class="language" href="../../../fur/atomic-desktops/troubleshooting/">fur</a>
+<a class="language" href="../../../ga/atomic-desktops/troubleshooting/">ga</a>
+<a class="language" href="../../../gl/atomic-desktops/troubleshooting/">gl</a>
+<a class="language" href="../../../he/atomic-desktops/troubleshooting/">he</a>
+<a class="language" href="../../../hi/atomic-desktops/troubleshooting/">hi</a>
+<a class="language" href="../../../hr/atomic-desktops/troubleshooting/">hr</a>
+<a class="language" href="../../../hu/atomic-desktops/troubleshooting/">hu</a>
+<a class="language" href="../../../hy/atomic-desktops/troubleshooting/">hy</a>
+<a class="language" href="../../../id/atomic-desktops/troubleshooting/">id</a>
+<a class="language" href="../../../it/atomic-desktops/troubleshooting/">it</a>
+<a class="language" href="../../../ja/atomic-desktops/troubleshooting/">ja</a>
+<a class="language" href="../../../jp/atomic-desktops/troubleshooting/">jp</a>
+<a class="language" href="../../../ka/atomic-desktops/troubleshooting/">ka</a>
+<a class="language" href="../../../kab/atomic-desktops/troubleshooting/">kab</a>
+<a class="language" href="../../../km/atomic-desktops/troubleshooting/">km</a>
+<a class="language" href="../../../ko/atomic-desktops/troubleshooting/">ko</a>
+<a class="language" href="../../../lb/atomic-desktops/troubleshooting/">lb</a>
+<a class="language" href="../../../lo/atomic-desktops/troubleshooting/">lo</a>
+<a class="language" href="../../../lt/atomic-desktops/troubleshooting/">lt</a>
+<a class="language" href="../../../mr/atomic-desktops/troubleshooting/">mr</a>
+<a class="language" href="../../../ms/atomic-desktops/troubleshooting/">ms</a>
+<a class="language" href="../../../my/atomic-desktops/troubleshooting/">my</a>
+<a class="language" href="../../../nb_NO/atomic-desktops/troubleshooting/">nb_NO</a>
+<a class="language" href="../../../ne/atomic-desktops/troubleshooting/">ne</a>
+<a class="language" href="../../../nl/atomic-desktops/troubleshooting/">nl</a>
+<a class="language" href="../../../nn/atomic-desktops/troubleshooting/">nn</a>
+<a class="language" href="../../../or/atomic-desktops/troubleshooting/">or</a>
+<a class="language" href="../../../pl/atomic-desktops/troubleshooting/">pl</a>
+<a class="language" href="../../../pt/atomic-desktops/troubleshooting/">pt</a>
+<a class="language" href="../../../pt_BR/atomic-desktops/troubleshooting/">pt_BR</a>
+<a class="language" href="../../../pt_PT/atomic-desktops/troubleshooting/">pt_PT</a>
+<a class="language" href="../../../ro/atomic-desktops/troubleshooting/">ro</a>
+<a class="language" href="../../../ru/atomic-desktops/troubleshooting/">ru</a>
+<a class="language" href="../../../si/atomic-desktops/troubleshooting/">si</a>
+<a class="language" href="../../../sk/atomic-desktops/troubleshooting/">sk</a>
+<a class="language" href="../../../sq/atomic-desktops/troubleshooting/">sq</a>
+<a class="language" href="../../../sv/atomic-desktops/troubleshooting/">sv</a>
+<a class="language" href="../../../sw/atomic-desktops/troubleshooting/">sw</a>
+<a class="language" href="../../../szl/atomic-desktops/troubleshooting/">szl</a>
+<a class="language" href="../../../te/atomic-desktops/troubleshooting/">te</a>
+<a class="language" href="../../../tr/atomic-desktops/troubleshooting/">tr</a>
+<a class="language" href="../../../tzm/atomic-desktops/troubleshooting/">tzm</a>
+<a class="language" href="../../../uk/atomic-desktops/troubleshooting/">uk</a>
+<a class="language" href="../../../ur/atomic-desktops/troubleshooting/">ur</a>
+<a class="language" href="../../../ur_PK/atomic-desktops/troubleshooting/">ur_PK</a>
+<a class="language" href="../../../uz/atomic-desktops/troubleshooting/">uz</a>
+<a class="language" href="../../../vi/atomic-desktops/troubleshooting/">vi</a>
+<a class="language" href="../../../zh_CN/atomic-desktops/troubleshooting/">zh_CN</a>
+<a class="language" href="../../../zh_Hans/atomic-desktops/troubleshooting/">zh_Hans</a>
+<a class="language" href="../../../zh_Hant/atomic-desktops/troubleshooting/">zh_Hant</a>
+<a class="language" href="../../../zh_TW/atomic-desktops/troubleshooting/">zh_TW</a>
+
+            </div>
+        </div>
+      <div class="edit-this-page"><a href="https://forge.fedoraproject.org/atomic-desktops/docs/commits/branch/main/modules/ROOT/pages/troubleshooting.adoc" title="Page history"><i class="fas fa-history"></i></a></div>
+  <div class="edit-this-page"><a href="https://forge.fedoraproject.org/atomic-desktops/docs/src/branch/main/modules/ROOT/pages/troubleshooting.adoc" title="Edit this Page"><i class="fas fa-edit"></i></a></div>
+  <div class="edit-this-page"><a href="https://forge.fedoraproject.org/atomic-desktops/docs/issues/new?title=[main] Doc issue in file modules/ROOT/pages/troubleshooting.adoc" title="Report an issue"><i class="fas fa-bug"></i></a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar dark:text-fp-gray-light" data-title="Contents" data-levels="2">
+  <div class="toc-content">
+    <div class="toc-menu"></div>
+    <div class="pt-6">
+        </div>
+  </div>
+
+</aside>
+<article class="doc dark:text-gray-100">
+<h1 class="page mt-8 mb-1">Troubleshooting</h1>
+<div class="is-before-toc text-xs text-gray-400 border-b border-gray-300 mb-6 pb-1">
+</div>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Fedora Atomic Desktops use a new way of deploying and managing your desktop operating system, so you may occasionally run into problems while going through your day to day.
+Below are some of the more common problems reported and any workarounds for those problems.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_forbidden_base_package_replacements"><a class="anchor" href="#_forbidden_base_package_replacements"></a>"Forbidden base package replacements"</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This can happen when a package that is being layered has a dependency on a package that is in the base OS.
+In the problematic case, the layered package requires a newer version of the dependent package which is not available in the base OS.</p>
+</div>
+<div class="paragraph">
+<p>In most cases, waiting for a newer OSTree compose will resolve this problem.
+The dependent package will be updated in the compose and the package that was going to be layered will be successful.</p>
+</div>
+<div class="paragraph">
+<p>However, if you continue to encounter this problem with a newer compose, you can try to cleanup the metadata with <code>rpm-ostree cleanup -m</code> and then retrying the <code>rpm-ostree install</code>.</p>
+</div>
+<div class="paragraph">
+<p>Alternatively, you can try rebasing to any <code>updates</code> ref, like <code>fedora/45/updates/x86_64</code> after the <code>cleanup</code> operation.</p>
+</div>
+<div class="paragraph">
+<p>For more information, see <a href="https://github.com/coreos/rpm-ostree/issues/415">rpm-ostree#415</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_installing_packages_to_opt_or_usrlocal"><a class="anchor" href="#_installing_packages_to_opt_or_usrlocal"></a>Installing packages to <code>/opt</code> or <code>/usr/local</code></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Installing into <code>/opt</code> was commonly raised as a problem when users where trying to install Google Chrome.
+A <a href="https://github.com/projectatomic/rpm-ostree/pull/1795">partial solution</a> has been implemented that allows users to layer Google Chrome, however it is not a complete solution for applications that write mutable data to <code>/opt</code>.</p>
+</div>
+<div class="paragraph">
+<p>This issue is tracked in <a href="https://github.com/coreos/rpm-ostree/issues/233">rpm-ostree#233</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_using_nvidia_drivers"><a class="anchor" href="#_using_nvidia_drivers"></a>Using NVIDIA drivers</h2>
+<div class="sectionbody">
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The <a href="https://universal-blue.org/">Universal Blue</a> project creates operating system images with the NVIDIA drivers included.
+The Universal Blue images are based on the Fedora Atomic Desktop images with additional changes at their discretion.
+The Universal Blue images are not officially endorsed by the Fedora Project.
+Use them at your own discretion.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>You can install the official NVIDIA binary drivers from the RPM Fusion repositories.</p>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-caution" title="Caution"></i>
+</td>
+<td class="content">
+The NVIDIA binary drivers are not maintained by the Fedora Project and may sometimes not be available for the kernel version included in Fedora Atomic Desktops.
+</td>
+</tr>
+</table>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>First, ensure that your system is fully updated by running <code>sudo rpm-ostree upgrade</code> and rebooting.</p>
+</li>
+<li>
+<p>Then setup the RPM Fusion repositories following the <a href="https://docs.fedoraproject.org/en-US/quick-docs/rpmfusion-setup/#_enabling_the_rpm_fusion_repositories_for_ostree_based_systems">documentation</a>, including the two reboots.</p>
+</li>
+<li>
+<p>Finally, install the drivers:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs"># rpm-ostree install kmod-nvidia xorg-x11-drv-nvidia
+# rpm-ostree kargs --append=rd.driver.blacklist=nouveau,nova-core \
+    --append=modprobe.blacklist=nouveau,nova-core \
+    --append=nvidia-drm.modeset=1 \
+    --append=initcall_blacklist=simpledrm_platform_driver_init
+# systemctl reboot</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>When using Secure Boot, the locally installed NVIDIA drivers have to be signed with a local key that is enrolled using <code>mokutil</code>.
+See the <a href="https://github.com/fedora-silverblue/issue-tracker/issues/499">fedora-silverblue#499</a> issue for more details.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>You may also encounter the following issues during installation: <a href="https://github.com/fedora-silverblue/issue-tracker/issues/286">#286</a>, <a href="https://github.com/fedora-silverblue/issue-tracker/issues/331">#331</a></p>
+</div>
+<div class="paragraph">
+<p>Thanks to <a href="https://blogs.gnome.org/alexl/">Alex Larsson</a> who made the required changes to the <code>akmods</code> and <code>kmodtools</code> packages.
+You can read more about the work that Alex did on his <a href="https://blogs.gnome.org/alexl/2019/03/06/nvidia-drivers-in-fedora-silverblue/">blog</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_out_of_tree_kernel_modules_and_drivers_using_dkms"><a class="anchor" href="#_out_of_tree_kernel_modules_and_drivers_using_dkms"></a>Out of tree kernel modules and drivers using DKMS</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Fedora Atomic Desktops currently do not have support for DKMS.
+See the upstream issue <a href="https://github.com/coreos/rpm-ostree/issues/1091">rpm-ostree#1091</a>.</p>
+</div>
+<div class="paragraph">
+<p>Instead, we recommend that you make <a href="https://rpmfusion.org/Packaging/KernelModules/Kmods2">kmods</a> packages for out of tree kernel modules and submit them to the <a href="https://rpmfusion.org/">RPM Fusion</a> repos.
+The kmods packages will then be used by <a href="https://rpmfusion.org/Packaging/KernelModules/Akmods">akmods</a> which is supported on Fedora Atomic Desktops.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_adding_external_package_repositories"><a class="anchor" href="#_adding_external_package_repositories"></a>Adding external package repositories</h2>
+<div class="sectionbody">
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-caution" title="Caution"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>This section discusses third-party software sources not officially affiliated with or endorsed by the Fedora Project.
+Use them at your own discretion.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+If you want to use RPM Fusion repositories, please follow the <a href="../tips-and-tricks/#_enabling_rpm_fusion_repos" class="xref page">Enabling RPM Fusion repos</a> section.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Some sofware may only be available from a third-party repository.
+You can add an external repository manually on Fedora Atomic Desktops by placing the <code>.repo</code> file into <code>/etc/yum.repos.d/</code> and the GPG key into <code>/etc/pki/rpm-gpg/</code>.
+The following is a full example for setting up the Taiscale repo:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Fetch and install the repo config:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">$ curl -O https://pkgs.tailscale.com/stable/fedora/tailscale.repo
+[tailscale-stable]
+name=Tailscale stable
+baseurl=https://pkgs.tailscale.com/stable/fedora/$basearch
+enabled=1
+type=rpm
+repo_gpgcheck=1
+gpgcheck=0
+gpgkey=https://pkgs.tailscale.com/stable/fedora/repo.gpg
+$ sudo install -o 0 -g 0 -m644 tailscale.repo /etc/yum.repos.d/tailscale.repo</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Fetch and install the GPG keys:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl -O https://pkgs.tailscale.com/stable/fedora/repo.gpg
+$ sudo install -o 0 -g 0 -m644 repo.gpg /etc/pki/rpm-gpg/tailscale.gpg</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Replace the <code>gpgkey=</code> URL in the repo config by the path the GPG keys:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">$ sudoedit /etc/yum.repos.d/tailscale.repo
+$ cat /etc/yum.repos.d/tailscale.repo
+[tailscale-stable]
+name=Tailscale stable
+baseurl=https://pkgs.tailscale.com/stable/fedora/$basearch
+enabled=1
+type=rpm
+repo_gpgcheck=1
+gpgcheck=0
+### Update this line
+gpgkey=file:///etc/pki/rpm-gpg/tailscale.gpg
+###    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Install the new packages with:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">$ rpm-ostree install tailscale</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Better support in <code>rpm-ostree</code> for this use case is tracked in <a href="https://github.com/coreos/rpm-ostree/issues/4014">rpm-ostree#4014</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_selinux_problems"><a class="anchor" href="#_selinux_problems"></a>SELinux problems</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As users work with Fedora Atomic Desktops day-to-day, it is possible that they have modified the default SELinux policy in an effort to workaround one or more problems related to SELinux.
+This is usually done when a user sees a SELinux denial in the journal.
+If this is the case and one wishes to revert back to the default SELinux policy, you can try these set of actions.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Check the state of the SELinux policy</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ sudo ostree admin config-diff | grep policy
+M    selinux/targeted/active/policy.linked
+M    selinux/targeted/active/policy.kern
+M    selinux/targeted/policy/policy.31
+A    selinux/targeted/policy/policy.30</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If anything is returned by this command, then your SELinux policy has been modified from the default.</p>
+</div>
+</li>
+<li>
+<p>Copy the default SELinux policy shipped in the OSTree compose</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ sudo cp -al /etc/selinux{,.bak}
+$ sudo rsync -rlv /usr/etc/selinux/ /etc/selinux/</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After doing this, the output from <code>ostree admin config-diff | grep policy</code> should no longer indicate the policy is modified.</p>
+</div>
+<div class="paragraph">
+<p>If your policy still appears to be modified, you can try the following approach.</p>
+</div>
+</li>
+<li>
+<p>Remove the SELinux policy; copy in the default policy</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ sudo rm -rf /etc/selinux
+$ sudo cp -aT /usr/etc/selinux /etc/selinux</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After this, the <code>ostree admin config-diff | grep policy</code> command should return no modifications.</p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_unable_to_add_user_to_group"><a class="anchor" href="#_unable_to_add_user_to_group"></a>Unable to add user to group</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Due to how <code>rpm-ostree</code> handles user + group entries, it may not be possible to use <code>usermod -a -G</code> to add a user to a group successfully.
+Until <code>rpm-ostree</code> moves to using <code>systemd sysusers</code>, users will have to populate the <code>/etc/group</code> file from the <code>/usr/lib/group</code> file before they can add themselves to the group.</p>
+</div>
+<div class="paragraph">
+<p>For example, if you wanted to add a user to the <code>libvirt</code> group:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ grep -E '^libvirt:' /usr/lib/group | sudo tee -a /etc/group
+$ sudo usermod -aG libvirt $USER</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+You will need to log off and log back in to apply these changes.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>This issue is tracked in <a href="https://github.com/coreos/rpm-ostree/issues/29">rpm-ostree#29</a> and <a href="https://github.com/coreos/rpm-ostree/issues/49">rpm-ostree#49</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ostree_fsck_reports_file_corruption"><a class="anchor" href="#_ostree_fsck_reports_file_corruption"></a><code>ostree fsck</code> reports file corruption</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It is possible to end up in a situation where one or more files on the disk have become corrupted or missing.
+In this case, <code>ostree fsck</code> will report errors in certain commits.
+The <a href="https://github.com/ostreedev/ostree/pull/345#issuecomment-262263824">workaround</a> in this case is to mark the entire OSTree commit as partially retrieved and then re-pull the commit.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_read_only_bootefi_prevents_any_upgrades"><a class="anchor" href="#_read_only_bootefi_prevents_any_upgrades"></a>Read-only <code>/boot/efi</code> prevents any upgrades</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This issue is most commonly seen when users have installed Fedora Atomic Desktops on Apple hardware.
+The <code>/boot/efi</code> partition on Apple hardware is formatted as HFS+ and is not always resilient to power failures or other kinds of hard power events.</p>
+</div>
+<div class="paragraph">
+<p>Since Fedora Atomic Desktops now includes the <code>hfsplus-tools</code> package in the base compose, it has become relatively easy for users to workaround this kind of error.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs"># umount /boot/efi
+# fsck.hfsplus /dev/sda1
+# mount -o rw /boot/efi</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>See the <a href="https://github.com/coreos/rpm-ostree/issues/1380">rpm-ostree#1380</a> GitHub issue for additional details.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_unable_to_install_a_fedora_atomic_desktop_on_efi_systems"><a class="anchor" href="#_unable_to_install_a_fedora_atomic_desktop_on_efi_systems"></a>Unable to install a Fedora Atomic Desktop on EFI systems</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Users have reported that they cannot install a Fedora Atomic Desktop on an EFI based system where they previously had another OS installed.
+The error that is often observed looks like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">ostree ['admin', '--sysroot=/mnt/sysimage', 'deploy', '--os=fedora-workstation', 'fedora-workstation:fedora/28/x86_64/workstation'] exited with code -6`</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A couple of possible workarounds exist:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>During the install process, select "Custom Partitioning" and create an additional EFI partition.
+Assign the newly created EFI partition to <code>/boot/efi</code>.
+You will then be able to boot the previous OS(s) alongside your Fedora Atomic Desktop.
+If this workaround is not successful follow the below step.</p>
+</li>
+<li>
+<p>Reformat the EFI partition on the host during the install process.
+This can be done by selecting "Custom Partitioning" and checking the <code>Reformat</code> box when creating the <code>/boot/efi</code> partition.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Choosing to reformat <code>/boot/efi</code> will likely result in the inability to boot any other operating systems that were previously installed.
+Be sure that you have backed up any important data before using this workaround.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>This issue is tracked in <a href="https://bugzilla.redhat.com/show_bug.cgi?id=1575957">Bugzilla#1575957</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_toolbox_failed_to_list_images_with_com_redhat_componentfedora_toolbox"><a class="anchor" href="#_toolbox_failed_to_list_images_with_com_redhat_componentfedora_toolbox"></a>toolbox: failed to list images with com.redhat.component=fedora-toolbox</h2>
+<div class="sectionbody">
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>As of <code>podman</code> version <code>1.4.0</code> this workaround is not necessary.
+Ensure <code>podman</code> is up to date by issuing <code>rpm-ostree upgrade</code> before attempting this workaround.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>When issuing the <code>toolbox list</code> command, systems using <code>podman</code> versions newer than <code>1.2.0</code>, will generate the following error:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">toolbox: failed to list images with com.redhat.component=fedora-toolbox</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The following workaround might be useful for other <code>toolbox</code> errors caused by <code>podman</code> versions greater than <code>1.2.0</code>.
+See <a href="https://github.com/containers/toolbox/issues/169#issuecomment-495193902">toolbox#169</a>.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>As a workaround, it is possible to override <code>podman</code> packages newer than version <code>1.2.0</code> by issuing:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ rpm-ostree override --remove=podman-manpages \
+    replace https://kojipkgs.fedoraproject.org//packages/podman/1.2.0/2.git3bd528e.fc30/x86_64/podman-1.2.0-2.git3bd528e.fc30.x86_64.rpm</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Reboot the system to apply the changes.</p>
+</div>
+<div class="paragraph">
+<p>For reference, it is also possible to override the package by following these steps:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Download <code>podman-1.2.0-2.git3bd528e.fc30.x86_64.rpm</code> from <a href="https://kojipkgs.fedoraproject.org//packages/podman/1.2.0/2.git3bd528e.fc30/x86_64/podman-1.2.0-2.git3bd528e.fc30.x86_64.rpm">Koji</a>.</p>
+</li>
+<li>
+<p>Remove <code>podman-manpages</code> issuing: <code>rpm-ostree override remove podman-manpages</code>.</p>
+</li>
+<li>
+<p>Override the currently installed <code>podman</code> package (using the package you have downloaded on the first step) by:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ rpm-ostree override replace podman-1.2.0-2.git3bd528e.fc30.x86_64.rpm</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>You can now reboot the system for the change to take effect.</p>
+</div>
+<div class="paragraph">
+<p>To revert this workaround issue the following commands:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ rpm-ostree override reset podman
+$ rpm-ostree override reset podman-manpages</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_unable_to_enter_a_toolbox_due_to_permissions_errors"><a class="anchor" href="#_unable_to_enter_a_toolbox_due_to_permissions_errors"></a>Unable to enter a toolbox due to permissions errors</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>With certain versions of <code>podman</code>, trying to enter a toolbox will result in errors.
+You can fix this by resetting the permissions on the overlay-containers with the following command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ sudo chown -R $USER ~/.local/share/containers/storage/overlay-containers</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will reset the permissions on your containers and allow you to enter them again.</p>
+</div>
+<div class="paragraph">
+<p>See the upstream podman issue: <a href="https://github.com/containers/podman/issues/3187">podman#3187</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_running_restorecon"><a class="anchor" href="#_running_restorecon"></a>Running <code>restorecon</code></h2>
+<div class="sectionbody">
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>You should never run <code>restorecon</code> on a Fedora Atomic Desktop system.
+See the following bug for details - <a href="https://bugzilla.redhat.com/show_bug.cgi?id=1259018">Bugzilla#1259018</a></p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>However, if you happened to do this, it is possible to recover.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Boot with <code>enforcing=0</code> on the kernel command line</p>
+</li>
+<li>
+<p>Create a new, "fixed" commit locally</p>
+</li>
+<li>
+<p>Deploy the new "fixed" commit</p>
+</li>
+<li>
+<p>Run <code>restorecon</code></p>
+</li>
+<li>
+<p>Reboot</p>
+</li>
+<li>
+<p>Cleanup</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ rpm-ostree status -b | grep BaseCommit
+              BaseCommit: 696991d589980aeaef5eda352dd7ad3d33c444c789c209f793a84bc6e7269aee
+### If the above command does not display any output, try:
+$ rpm-ostree status -b | grep Commit
+              Commit: 696991d589980aeaef5eda352dd7ad3d33c444c789c209f793a84bc6e7269aee
+$ sudo ostree checkout \
+    -H 696991d589980aeaef5eda352dd7ad3d33c444c789c209f793a84bc6e7269aee \
+    /ostree/repo/tmp/selinux-fix
+$ sudo ostree fsck --delete
+$ sudo ostree commit --consume \
+    --link-checkout-speedup --orphan --selinux-policy=/ /ostree/repo/tmp/selinux-fix
+$ sudo restorecon -Rv /var
+$ sudo restorecon -Rv /etc
+### In the command below, substitute:
+### - x86_64 with your actual CPU architecture
+### - silverblue with the name for your Fedora Atomic Desktop variant
+$ sudo ostree admin deploy fedora:fedora/45/x86_64/silverblue
+$ sudo reboot</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The caveat to this recovery is that your layered packages will be removed; you&#8217;ll need to relayer them after the recovery.</p>
+</div>
+<div class="paragraph">
+<p>See this upstream comment for additional details: <a href="https://github.com/ostreedev/ostree/issues/1265#issuecomment-484557615">ostree#1265</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_resetting_passwords_in_rescue_mode"><a class="anchor" href="#_resetting_passwords_in_rescue_mode"></a>Resetting passwords in Rescue Mode</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In the case where you are unable to remember your user password or root password, you can reset the password using the following steps:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>While the system is booting, interrupt the boot sequence at the <a href="https://docs.fedoraproject.org/en-US/quick-docs/grub2-bootloader/">GRUB2</a> menu by using the <kbd>Esc</kbd> key.</p>
+</li>
+<li>
+<p>Select the boot entry that you wish to edit using the arrow keys.</p>
+</li>
+<li>
+<p>Edit the selected entry with the <kbd>e</kbd> key.</p>
+</li>
+<li>
+<p>Use the arrow keys to select the line beginning with <code>linux</code>, <code>linux16</code>, or <code>linuxefi</code>.</p>
+</li>
+<li>
+<p>Go to the end of that line (by pressing <kbd>Ctrl</kbd> + <kbd>e</kbd>) and append <code>init=/bin/bash</code>.</p>
+</li>
+<li>
+<p>Press <kbd>Ctrl</kbd> + <kbd>x</kbd> or <kbd>F10</kbd> to boot the entry.</p>
+</li>
+<li>
+<p>At the resulting <code>bash</code> prompt, run the following commands:</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs"># mount -t selinuxfs selinuxfs /sys/fs/selinux
+# /sbin/load_policy
+# passwd
+# sync
+# /sbin/reboot -ff</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you want to change the password for a user account, replace the <code>passwd</code> command with <code>passwd &lt;username&gt;</code>.</p>
+</div>
+<div class="paragraph">
+<p>After the system finishes rebooting, you should be able to login with the username and new password.</p>
+</div>
+</div>
+</div>
+<div id="" class="mt-16">
+    <p class="contribute px-6 py-3 w-fit bg-gray-100 dark:bg-fp-blue-darker rounded-full">Want to help? <a class="" href="https://docs.fedoraproject.org/en-US/fedora-docs/contributing/">Learn how to contribute to Fedora Docs <span class="ml-2 inline-block text-3xl leading-4 h-max align-top text-black dark:text-white">›</span></a></p>
+</div>
+</article>
+
+  </div>
+</main>
+</div>
+<footer class="flex flex-col bg-fp-gray-lightest dark:bg-fp-blue-darkest dark:text-fp-gray-light text-sm dark:border-t dark:border-gray-800">
+  <section class="pt-2 pb-6 px-2">
+
+    <p class="text-center">All Fedora Documentation content available under <a href="http://creativecommons.org/licenses/by-sa/4.0/legalcode">CC BY-SA 4.0</a> or, when specifically noted, under another <a href="https://fedoraproject.org/wiki/Licensing:Main">accepted</a> free and open content license.</p>
+
+    <div class="container mx-auto flex flex-col lg:flex-row my-4">
+      <div class="mx-auto lg:mx-0 lg:basis-3/12">
+        <img
+          src="../../_/img/fedora-blue.svg"
+          alt="Fedora Logo"
+          class="w-36 mb-4 lg:mb-0"
+        />
+      </div>
+      <ul
+        class="mx-4 flex items-center grow justify-center gap-4 lg:mx-0 lg:gap-12 xl:gap-20 2xl:gap-28 lg:justify-start"
+      >
+        <li class="list-none">
+          <a
+            href="/en-US/legal/privacy/"
+            class="text-fp-gray-darkest dark:text-fp-gray transition duration-300 ease-in-out hover:text-fp-gray dark:hover:text-fp-gray-light"
+            >Privacy Statement</a
+          >
+        </li>
+        <li class="list-none">
+          <a
+            href="/en-US/legal/"
+            class="text-fp-gray-darkest transition duration-300 ease-in-out hover:text-fp-gray dark:text-fp-gray dark:hover:text-fp-gray-light"
+            >Legal</a
+          >
+        </li>
+        <li class="list-none">
+          <a
+            href="/en-US/project/code-of-conduct/"
+            class="text-fp-gray-darkest transition duration-300 ease-in-out hover:text-fp-gray dark:text-fp-gray dark:hover:text-fp-gray-light"
+            >Code of Conduct</a
+          >
+        </li>
+        <li class="list-none">
+          <a
+            href="https://getfedora.org/en/sponsors/"
+            class="text-fp-gray-darkest transition duration-300 ease-in-out hover:text-fp-gray dark:text-fp-gray dark:hover:text-fp-gray-light"
+            >Sponsors</a
+          >
+        </li>
+      </ul>
+    </div>
+    <p class="text-center text-xs text-fp-gray-dark">Last build: 2026-11-28 03:50:09 UTC  | Last content update: 2025-10-02 </p>
+  </section>
+  <!-- Red Hat Sponsorship Section -->
+  <section class="bg-black py-6 text-center md:text-left px-2">
+    <div class="container mx-auto flex flex-col lg:flex-row">
+      <div class="mx-auto items-center lg:mx-0 lg:basis-3/12">
+        <img
+          src="../../_/img/logo-sponsored-by-red-hat.svg"
+          alt="Sponsored by Red Hat Logo"
+          class="mb-4 xl:mb-0"
+        />
+      </div>
+
+      <div class="flex items-center justify-center text-center lg:text-left lg:ml-8 xl:-ml-8 2xl:ml-5">
+        <p class="text-white">
+          Fedora is sponsored by Red Hat.
+          <a class="block text-fp-gray xl:ml-2 xl:inline" href="https://www.redhat.com/en/technologies/linux-platforms/articles/relationship-between-fedora-and-rhel">
+            Learn more about the relationship between Red Hat and Fedora.
+          </a>
+        </p>
+      </div>
+    </div>
+  </section>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+<script async src="../../_/js/vendor/datatables.js"></script>
+<script async src="../../_/js/vendor/tabs.js"></script>
+<script src="../../_/js/vendor/lunr.js"></script>
+<script src="../../_/js/search-ui.js" id="search-ui-script" data-site-root-path="../.." data-snippet-length="100" data-stylesheet="../../_/css/search.css"></script>
+<script async src="../../search-index.js"></script>
+  </body>
+</html>

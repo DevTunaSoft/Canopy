@@ -1,0 +1,1 @@
+cd /home/canopy/canopy_native_tasksmodel_m2 && kill $(cat harness.pid) 2>/dev/null || true; sleep 1; pgrep -a native-task-harness || echo HARNESS_STOPPED

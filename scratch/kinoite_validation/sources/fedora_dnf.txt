@@ -1,0 +1,367 @@
+Using the DNF software package manager :: Fedora Docs
+In this section
+Quick Docs
+Contribute to Quick Docs
+Getting started with Fedora
+Bugs
+How to file a bug
+Bugzilla queries
+Finding duplicate bugs
+Finding the correct component
+Reporting Bugzilla spam
+Managing email notifications
+Providing a Stack Trace
+Installation
+Creating and using a live installation image
+Fedora on Raspberry Pi
+Anaconda: the Fedora installer
+Anaconda Logging
+Accessibility
+Why choose Fedora Linux?
+Installing Fedora using Orca
+Post installation configuration
+AI
+Run local LLMs on Fedora
+Play with tensors in pytorch
+Adding and managing software
+Package management system
+Using the DNF software package manager
+APT command equivalents on Fedora with DNF
+Fedora DNF repositories
+Adding or removing software repositories in Fedora
+Creating a DNF repository mirror
+Automatic DNF Updates
+Securing the system by keeping it up-to-date
+Finding and installing Linux applications
+Third Party Software
+Enabling the RPM Fusion repositories
+Flathub
+Snap Store
+AppImage
+Installing Software from Source
+Language package managers
+Installing popular applications
+Adding New Fonts in Fedora
+Installing Java
+Installing plugins for playing movies and music
+Installing Chromium or Google Chrome browsers
+Installing and switching desktop environments
+Installing Spotify on Fedora
+Installing and running the VLC player
+Usage and customisation
+Adding a user to sudoers
+Automatic power management using powertop2tuned
+Changing Hostname
+Checking file integrity with AIDE
+Configuring IP networking with nmcli
+Configuring X Window System using the xorg.conf file
+Control of System Accessibility by firewalld
+Creating Disk Partitions
+Creating GPG Keys
+Disabling the GNOME automatic screen locking
+Displaying a user prompt on the GNOME login screen
+Persistent Identifiers for Storage Devices
+Encrypting drives using LUKS
+Getting started with Apache HTTP Server
+The GRUB2 Bootloader
+How to create a Samba share
+How to join an Active Directory or FreeIPA domain
+How to Set NVIDIA as Primary GPU on Optimus-based Laptops
+How to debug systemd problems
+How to enable touchpad click
+Installing Docker and Docker-Compose on Fedora
+Jitsi Meet Self-Hosting Guide
+Machine Owner Key Enrollment
+Managing keyboard shortcuts for running an application in GNOME
+Performing administration tasks using sudo
+Resetting a root password
+Root Account Locked
+Running Windows applications with Wine
+Setting a key shortcut to run an application in GNOME
+Screen Recorder – Comparison of Applications in Fedora and How to Use them
+Understanding and administering systemd
+Using GNOME Shell extensions
+Using Kubernetes on Fedora
+Kubernetes Basics
+Versioned Kubernetes rpms (F41 and newer)
+Configuring kubelet
+Creating a Kubernetes cluster
+CRI-O and CRI-Tools
+Using shared system certificates
+Using Yubikeys with Fedora
+Viewing logs in Fedora
+SELinux
+Changing SELinux states and modes
+Troubleshooting SELinux
+Upgrading to a new release
+Upgrading Fedora using the DNF system upgrade
+Upgrading Fedora using package manager
+Kernel and booting
+Booting
+Troubleshooting
+Building a Custom Kernel
+Guide for Kernel Test Days
+How to debug Dracut problems
+Installing a kernel from Koji
+Testing kernel patches
+Virtualization – an Overview
+Virtualization – Getting Started (libvirt)
+Installing virtual operating systems with GNOME Boxes
+Using virtualization emulation in QEMU
+Using nested virtualization in KVM
+Creating Windows virtual machines using virtIO drivers
+VMware – what is it and how use it?
+Using UEFI with QEMU
+Virtualization – how to debug issues
+Publishing your software on Copr
+Databases
+PostgreSQL
+MariaDB, MySQL
+How to Manage Various Database Servers from GUI
+Printing and scanning
+How to debug printing issues
+How to debug scanning issues
+Useful tricks
+Terminology
+Known issues
+Filing a CUPS Bug Report
+Troubleshooting
+Troubleshooting Bluetooth problems
+Troubleshooting Java Programs
+Troubleshooting Mozilla Products
+Troubleshooting Wayland Problems
+Troubleshooting Sound Problems
+FAQ
+Fedora and Red Hat Enterprise Linux
+Fedora and software patents
+Quick Docs
+A Beginner's Guide to Fedora
+ARM Single Board Computers
+Community Architecture (CommArch)
+Community Linux Engineering
+Defensive Coding Guide
+Engineering Teams
+EPEL
+Fedora Accessibility (a11y) WG
+Fedora Accounts
+Fedora AI/ML SIG
+Fedora Asahi Remix
+Fedora Atomic Desktops
+Fedora Badges
+Fedora CI
+Fedora Cloud
+Fedora Community Ops
+Fedora Container Docs
+Fedora CoreOS
+Fedora Council
+Fedora Data Working Group (FDWG)
+Fedora Design Team
+Fedora Discussion Forum (Self-)Moderation Guidelines and Rules
+Fedora Diversity, Equity, and Inclusion (DEI)
+Fedora Documentation
+Fedora Documentation Team
+Fedora ELN
+Fedora Forge Documentation
+Fedora Gaming
+Fedora Infrastructure & Release Engineering
+Fedora Internet Of Things
+Fedora IoT Working Group
+Fedora Join SIG
+Fedora KDE Plasma Desktop Edition
+Fedora Legal
+Fedora Linux Releases
+Fedora Localization Team
+Fedora Magazine
+Fedora Marketing Team
+Fedora Matrix WG
+Fedora Mentored Projects
+Fedora Mindshare Committee
+Fedora Minimal
+Fedora Program Operations
+Fedora Project
+Fedora Quality Docs
+Fedora Rawhide Gating
+Fedora Release Notes
+Fedora Robotics SIG
+Fedora Security SIG
+Fedora Server User Documentation
+Fedora Server Working Group
+Fedora Spins & Labs
+Fedora Tools
+Fedora Websites & Apps
+Fedora Workstation Documentation
+Fedora Workstation Working Group
+Fedora/CentOS bootc
+FESCo
+Flatpak
+i3 SIG
+Java Packaging HOWTO
+Localization help and stats
+Mindshare Teams
+NeuroFedora User Documentation
+Package Maintainers
+Packaging Guidelines
+Quick Docs
+Reproducible Builds
+Quick Docs
+Adding and managing software
+Using the DNF software package manager
+en-US
+en-US
+ar
+ast
+az
+be
+bg
+bn
+ca
+cs
+de
+el
+es
+es_419
+fa
+fi
+fil
+fr
+fur
+ga
+gl
+he
+hi
+hr
+hu
+hy
+id
+it
+ja
+jp
+ka
+kab
+km
+ko
+lb
+lo
+lt
+mr
+ms
+my
+nb_NO
+ne
+nl
+nn
+or
+pl
+pt
+pt_BR
+pt_PT
+ro
+ru
+si
+sk
+sq
+sv
+sw
+szl
+te
+tr
+tzm
+uk
+ur
+ur_PK
+uz
+vi
+zh_CN
+zh_Hans
+zh_Hant
+zh_TW
+Categories
+administration
+how-to
+dnf
+Using the DNF software package manager
+Weverton do Couto Timoteo, JetStream, The Fedora Docs team
+Version F37
+Last review: 2022-10-05
+DNF is a software package manager that installs, updates, and removes packages on Fedora and is the successor to YUM (Yellow-Dog Updater Modified).
+DNF makes it easy to maintain packages by automatically checking for dependencies and determines the actions required to install packages.
+This method eliminates the need to manually install or update the package, and its dependencies, using the rpm command.
+DNF is now the default software package management tool in Fedora.
+DNF applies to standard Fedora editions. On image-based variants such as the Fedora Atomic Desktops and Fedora CoreOS, package management works differently. See the Fedora Atomic Desktops User Guide for details.
+Usage
+dnf can be used exactly as yum to search, install or remove packages.
+To search the repositories for a package type:
+$ dnf search packagename
+To install the package:
+$ sudo dnf install packagename
+To remove a package:
+$ sudo dnf remove packagename
+Other common DNF commands include:
+autoremove - removes packages installed as dependencies that are no longer required by currently installed programs.
+check-update - checks for updates, but does not download or install the packages.
+downgrade - reverts to the previous version of a package.
+info - provides basic information about the package including name, version, release, and description.
+reinstall - reinstalls the currently installed package.
+upgrade - checks the repositories for newer packages and updates them.
+exclude - exclude a package from the transaction.
+For more DNF commands refer to the man pages by typing man dnf at the command-line, or DNF Read The Docs
+Automatic Updates
+The dnf-automatic package is a component that allows automatic download and installation of updates.
+It can automatically monitor and report, via email, the availability of updates or send a log about downloaded packages and installed updates.
+For more information, refer to the Read the Docs: DNF-Automatic page.
+System Upgrades
+The Fedora system can be upgraded directly with DNF, or with the DNF system upgrade plugin.
+Refer to the DNF System Upgrade document for more details.
+Language Support Using DNF
+DNF can be used to install or remove Language Support.
+A detailed description with a list of available languages can be found on Language Support Using Dnf page.
+Plugins
+The core DNF functionality can be extended with plugins.
+There are officially supported Core DNF plugins
+and also third-party Extras DNF Plugins.
+To install them, run
+$ sudo dnf install dnf-plugins-core-PLUGIN_NAME
+or
+$ sudo dnf install dnf-plugins-extras-PLUGIN_NAME
+Excluding Packages From Transactions
+Sometimes it is useful to ignore specific packages from transactions, such as updates.
+One such case, for example, could be when an update includes a regression or a bug.
+DNF allows you to exclude a package from the transaction:
+using the command line
+$ sudo dnf upgrade --exclude=packagename
+using its configuration files
+You can add a line to /etc/dnf/dnf.conf to exclude packages:
+excludepkgs=packagename
+This can also be added to the specific repository configuration files in /etc/yum.repos.d/.
+Globs may be used here to list multiple packages, and each specification must be separated by a comma.
+If you have used this configuration, you can disable it in individual DNF commands using the --disableexcludes command line switch.
+If you use a GUI update application which does not allow you to specify packages to exclude when they run, this method can be used.
+Using the DNF Versionlock plugin
+You can also use the DNF versionlock plugin to limit the packages that are included in a transaction.
+It allows you to list what versions of particular packages should be considered in a transaction.
+All other versions of the specified packages will be ignored.
+The plugin is part of dnf-plugins-core package and can be installed using the command below:
+$ sudo dnf install 'dnf-command(versionlock)'
+To lock the currently installed version of a package, use:
+$ sudo dnf versionlock add package
+To remove the version lock, use:
+$ sudo dnf versionlock delete package
+The list command can be used to list all locked packages, while the clear command will delete all locked entries.
+References
+DNF Command Reference
+DNF wiki
+DNF VersionLock
+Current Fedora releases (since 41) use DNF5 by default,
+its documentation is in a different repository to that linked above:
+DNF5 Documentation (Main page)
+DNF5 Command Reference
+DNF5 GitHub Repository
+Want to help? Learn how to contribute to Fedora Docs ›
+All Fedora Documentation content available under CC BY-SA 4.0 or, when specifically noted, under another accepted free and open content license.
+Privacy Statement
+Legal
+Code of Conduct
+Sponsors
+Last build: 2026-11-28 03:50:09 UTC | Last content update: 2026-08-20
+Fedora is sponsored by Red Hat.
+Learn more about the relationship between Red Hat and Fedora.

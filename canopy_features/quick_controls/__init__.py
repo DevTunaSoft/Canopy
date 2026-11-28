@@ -12,6 +12,20 @@ from .host_state import (
     HostStateSnapshot,
     empty_snapshot,
 )
+from .native_controls import (
+    ACTIONS as NATIVE_ACTIONS,
+    EXECUTION_BLOCKED,
+    EXECUTION_LABELS,
+    EXECUTION_NOT_RUN,
+    EXECUTION_PASS,
+    NATIVE_DOMAINS,
+    PRIVILEGED_TRANSITIONS,
+    CommandPlan,
+    ControlVerdict,
+    NativeControls,
+    NativeControlsError,
+    ProbeFacts,
+)
 
 __all__ = [
     "ALLOWED_FIELDS",
@@ -20,4 +34,16 @@ __all__ = [
     "HostStateError",
     "HostStateSnapshot",
     "empty_snapshot",
+    "NATIVE_ACTIONS",
+    "NATIVE_DOMAINS",
+    "PRIVILEGED_TRANSITIONS",
+    "EXECUTION_PASS",
+    "EXECUTION_NOT_RUN",
+    "EXECUTION_BLOCKED",
+    "EXECUTION_LABELS",
+    "CommandPlan",
+    "ControlVerdict",
+    "NativeControls",
+    "NativeControlsError",
+    "ProbeFacts",
 ]

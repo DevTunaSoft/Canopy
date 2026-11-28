@@ -1,0 +1,13 @@
+$ ssh -i <existing scratch key> -p 2223 canopy@127.0.0.1 bash -s
+kill 51420 2>/dev/null || true; sleep 1
+rm -rf /home/canopy/canopy_native_tasksmodel_m2
+test -e /home/canopy/canopy_native_tasksmodel_m2 && echo STILL_PRESENT || echo GUEST_CLEAN
+ps -eo pid,cmd | grep -E 'native-task-harness|/usr/bin/konsole' | grep -v grep | head -5 || true
+
+GUEST_CLEAN
+(no harness or Konsole process lines)
+[utc=2026-11-28T05:18:00Z] [rc=0]
+
+KPackage state (read after package_06_remove):
+$ kpackagetool6 --type Plasma/Applet --list | grep -i nativetasks || echo PACKAGE_ABSENT
+PACKAGE_ABSENT

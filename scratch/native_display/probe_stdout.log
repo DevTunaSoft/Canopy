@@ -1,0 +1,428 @@
+{
+  "artifact": "m4_display_response_probe",
+  "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+  "classification": "SYNTHETIC",
+  "host_platform": "Windows-11-10.0.26300-SP0",
+  "module_sha256": {
+    "canopy_features/dock/display_change_response.py": "99f8dcd2f8ea25cf829dd153fdbce02fe9e611960c42c13ad86d479b4f297856",
+    "canopy_features/dock/display_geometry_contract.py": "1114a532f7b2173d7482ab7e3b8adf8f815ea8980fb84cae5d3fcc9c749016b2",
+    "canopy_features/dock/display_scaling_contract.py": "a1b67e2865142b009f760a1243f3d4d1306f10a3d98fa5fa255e0a981ef6010f"
+  },
+  "native_runtime": "NOT_RUN",
+  "scenarios": [
+    {
+      "records": [
+        {
+          "invariants": [
+            "bounded",
+            "dock_safe",
+            "frozen_root"
+          ],
+          "kind": "relayout",
+          "label": "secondary_monitor_connected",
+          "ok": true,
+          "reason": "connect",
+          "scale": 1.0,
+          "sequence": 2,
+          "size": [
+            1200,
+            750
+          ]
+        }
+      ],
+      "scenario": "secondary_connect",
+      "status": "PASS"
+    },
+    {
+      "records": [
+        {
+          "invariants": [
+            "bounded",
+            "dock_safe",
+            "frozen_root"
+          ],
+          "kind": "relayout",
+          "label": "secondary_monitor_disconnected",
+          "ok": true,
+          "reason": "disconnect",
+          "scale": 1.0,
+          "sequence": 2,
+          "size": [
+            1200,
+            750
+          ]
+        }
+      ],
+      "scenario": "secondary_disconnect",
+      "status": "PASS"
+    },
+    {
+      "records": [
+        {
+          "invariants": [
+            "bounded",
+            "dock_safe",
+            "frozen_root"
+          ],
+          "kind": "relayout",
+          "label": "primary_disconnected_survivor_reanchors",
+          "ok": true,
+          "reason": "disconnect",
+          "scale": 1.0,
+          "sequence": 1,
+          "size": [
+            1200,
+            750
+          ]
+        }
+      ],
+      "scenario": "primary_disconnect_survivor",
+      "status": "PASS"
+    },
+    {
+      "records": [
+        {
+          "invariants": [
+            "bounded",
+            "dock_safe",
+            "frozen_root"
+          ],
+          "kind": "suspend",
+          "label": "all_displays_disconnected",
+          "ok": true,
+          "reason": "no_display",
+          "scale": 1.0,
+          "sequence": 1,
+          "size": [
+            1200,
+            750
+          ]
+        }
+      ],
+      "scenario": "all_disconnected",
+      "status": "PASS"
+    },
+    {
+      "records": [
+        {
+          "invariants": [
+            "bounded",
+            "dock_safe",
+            "frozen_root"
+          ],
+          "kind": "relayout",
+          "label": "hidpi_150pct",
+          "ok": true,
+          "reason": "logical_dpi_changed",
+          "scale": 1.5,
+          "sequence": 1,
+          "size": [
+            1200,
+            720
+          ]
+        }
+      ],
+      "scenario": "hidpi_150pct",
+      "status": "PASS"
+    },
+    {
+      "records": [
+        {
+          "invariants": [
+            "bounded",
+            "dock_safe",
+            "frozen_root"
+          ],
+          "kind": "relayout",
+          "label": "hidpi_200pct",
+          "ok": true,
+          "reason": "logical_dpi_changed",
+          "scale": 2.0,
+          "sequence": 1,
+          "size": [
+            1200,
+            720
+          ]
+        }
+      ],
+      "scenario": "hidpi_200pct",
+      "status": "PASS"
+    },
+    {
+      "records": [
+        {
+          "invariants": [
+            "bounded",
+            "dock_safe",
+            "frozen_root"
+          ],
+          "kind": "relayout",
+          "label": "hidpi_first",
+          "ok": true,
+          "reason": "logical_dpi_changed",
+          "scale": 2.0,
+          "sequence": 1,
+          "size": [
+            960,
+            540
+          ]
+        },
+        {
+          "invariants": [
+            "bounded",
+            "dock_safe",
+            "frozen_root"
+          ],
+          "kind": "no_op",
+          "label": "hidpi_same_logical_size",
+          "ok": true,
+          "reason": "logical_size_unchanged",
+          "scale": 3.0,
+          "sequence": 2,
+          "size": [
+            960,
+            540
+          ]
+        }
+      ],
+      "scenario": "hidpi_same_logical",
+      "status": "PASS"
+    },
+    {
+      "records": [
+        {
+          "invariants": [
+            "bounded",
+            "dock_safe",
+            "frozen_root"
+          ],
+          "kind": "hold",
+          "label": "hostile_event_00",
+          "ok": true,
+          "reason": "invalid_event",
+          "scale": 1.0,
+          "sequence": 1,
+          "size": [
+            1200,
+            750
+          ]
+        },
+        {
+          "invariants": [
+            "bounded",
+            "dock_safe",
+            "frozen_root"
+          ],
+          "kind": "hold",
+          "label": "hostile_event_01",
+          "ok": true,
+          "reason": "invalid_event",
+          "scale": 1.0,
+          "sequence": 2,
+          "size": [
+            1200,
+            750
+          ]
+        },
+        {
+          "invariants": [
+            "bounded",
+            "dock_safe",
+            "frozen_root"
+          ],
+          "kind": "hold",
+          "label": "hostile_event_02",
+          "ok": true,
+          "reason": "invalid_event",
+          "scale": 1.0,
+          "sequence": 3,
+          "size": [
+            1200,
+            750
+          ]
+        },
+        {
+          "invariants": [
+            "bounded",
+            "dock_safe",
+            "frozen_root"
+          ],
+          "kind": "hold",
+          "label": "hostile_event_03",
+          "ok": true,
+          "reason": "invalid_event",
+          "scale": 1.0,
+          "sequence": 4,
+          "size": [
+            1200,
+            750
+          ]
+        },
+        {
+          "invariants": [
+            "bounded",
+            "dock_safe",
+            "frozen_root"
+          ],
+          "kind": "hold",
+          "label": "hostile_event_04",
+          "ok": true,
+          "reason": "invalid_event",
+          "scale": 1.0,
+          "sequence": 5,
+          "size": [
+            1200,
+            750
+          ]
+        },
+        {
+          "invariants": [
+            "bounded",
+            "dock_safe",
+            "frozen_root"
+          ],
+          "kind": "hold",
+          "label": "hostile_event_05",
+          "ok": true,
+          "reason": "invalid_event",
+          "scale": 1.0,
+          "sequence": 6,
+          "size": [
+            1200,
+            750
+          ]
+        }
+      ],
+      "scenario": "hostile_events",
+      "status": "PASS"
+    },
+    {
+      "records": [
+        {
+          "invariants": [
+            "bounded",
+            "dock_safe",
+            "frozen_root"
+          ],
+          "kind": "hold",
+          "label": "hostile_changes_00",
+          "ok": true,
+          "reason": "invalid_event",
+          "scale": 1.0,
+          "sequence": 1,
+          "size": [
+            1200,
+            750
+          ]
+        },
+        {
+          "invariants": [
+            "bounded",
+            "dock_safe",
+            "frozen_root"
+          ],
+          "kind": "hold",
+          "label": "hostile_changes_01",
+          "ok": true,
+          "reason": "invalid_event",
+          "scale": 1.0,
+          "sequence": 2,
+          "size": [
+            1200,
+            750
+          ]
+        },
+        {
+          "invariants": [
+            "bounded",
+            "dock_safe",
+            "frozen_root"
+          ],
+          "kind": "hold",
+          "label": "hostile_changes_02",
+          "ok": true,
+          "reason": "invalid_event",
+          "scale": 1.0,
+          "sequence": 3,
+          "size": [
+            1200,
+            750
+          ]
+        },
+        {
+          "invariants": [
+            "bounded",
+            "dock_safe",
+            "frozen_root"
+          ],
+          "kind": "hold",
+          "label": "hostile_changes_03",
+          "ok": true,
+          "reason": "invalid_event",
+          "scale": 1.0,
+          "sequence": 4,
+          "size": [
+            1200,
+            750
+          ]
+        }
+      ],
+      "scenario": "hostile_changes",
+      "status": "PASS"
+    },
+    {
+      "records": [
+        {
+          "invariants": [
+            "bounded",
+            "dock_safe",
+            "frozen_root"
+          ],
+          "kind": "relayout",
+          "label": "topology_first",
+          "ok": true,
+          "reason": "connect",
+          "scale": 1.0,
+          "sequence": 1,
+          "size": [
+            1200,
+            750
+          ]
+        },
+        {
+          "invariants": [
+            "bounded",
+            "dock_safe",
+            "frozen_root"
+          ],
+          "kind": "no_op",
+          "label": "topology_duplicate",
+          "ok": true,
+          "reason": "unchanged",
+          "scale": 1.0,
+          "sequence": 2,
+          "size": [
+            1200,
+            750
+          ]
+        }
+      ],
+      "scenario": "duplicate_topology_noop",
+      "status": "PASS"
+    },
+    {
+      "records": [
+        {
+          "label": "history_bound",
+          "limit": 64,
+          "observed": 64,
+          "ok": true
+        }
+      ],
+      "scenario": "history_bound",
+      "status": "PASS"
+    }
+  ],
+  "schema_version": 1,
+  "verdict": "PASS"
+}

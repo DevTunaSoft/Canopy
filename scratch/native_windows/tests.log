@@ -1,0 +1,21 @@
+test_activation_uses_ewmh_and_readback (__main__.PlanTests.test_activation_uses_ewmh_and_readback) ... ok
+test_command_allowlists_fail_closed (__main__.PlanTests.test_command_allowlists_fail_closed) ... ok
+test_focus_recovery_excludes_lost_window_and_other_workspace (__main__.PlanTests.test_focus_recovery_excludes_lost_window_and_other_workspace) ... ok
+test_focus_recovery_without_eligible_fallback_is_empty (__main__.PlanTests.test_focus_recovery_without_eligible_fallback_is_empty) ... ok
+test_workspace_switch_noop_and_unknown (__main__.PlanTests.test_workspace_switch_noop_and_unknown) ... ok
+test_workspace_switch_uses_allowlisted_kwin_dbus_call (__main__.PlanTests.test_workspace_switch_uses_allowlisted_kwin_dbus_call) ... ok
+test_lookup_is_type_safe (__main__.SnapshotTests.test_lookup_is_type_safe) ... ok
+test_rejects_cross_field_contradictions (__main__.SnapshotTests.test_rejects_cross_field_contradictions) ... ok
+test_rejects_duplicate_workspace_and_window_ids (__main__.SnapshotTests.test_rejects_duplicate_workspace_and_window_ids) ... ok
+test_rejects_unordered_and_scalar_collections (__main__.SnapshotTests.test_rejects_unordered_and_scalar_collections) ... ok
+test_rejects_unsafe_control_and_bool_ordinal (__main__.SnapshotTests.test_rejects_unsafe_control_and_bool_ordinal) ... ok
+test_valid_snapshot_and_inventory_order (__main__.SnapshotTests.test_valid_snapshot_and_inventory_order) ... ok
+test_history_is_bounded_and_immutable (__main__.StateTests.test_history_is_bounded_and_immutable) ... ok
+test_no_snapshot_and_close_fail_closed (__main__.StateTests.test_no_snapshot_and_close_fail_closed) ... ok
+test_observe_rejects_hostile_readback_without_mutation (__main__.StateTests.test_observe_rejects_hostile_readback_without_mutation) ... ok
+test_observe_updates_one_authoritative_state (__main__.StateTests.test_observe_updates_one_authoritative_state) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.006s
+
+OK

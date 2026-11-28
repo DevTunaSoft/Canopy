@@ -1,0 +1,3 @@
+PID=23795
+EXE=/home/canopy/native_dock_geometry_20261127/build/canopy-classic-spike
+WID=0x03800012

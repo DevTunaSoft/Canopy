@@ -1,0 +1,23 @@
+M3_PROBE_SECTION=power
+M3_PROBE_UTC=2026-11-28T04:06:22Z
+$ gdbus call --system --dest org.freedesktop.login1 --object-path /org/freedesktop/login1 --method org.freedesktop.login1.Manager.CanSuspend
+('challenge',)
+[exit=0]
+$ gdbus call --system --dest org.freedesktop.login1 --object-path /org/freedesktop/login1 --method org.freedesktop.login1.Manager.CanHibernate
+('na',)
+[exit=0]
+$ gdbus call --system --dest org.freedesktop.login1 --object-path /org/freedesktop/login1 --method org.freedesktop.login1.Manager.CanPowerOff
+('challenge',)
+[exit=0]
+$ gdbus call --system --dest org.freedesktop.login1 --object-path /org/freedesktop/login1 --method org.freedesktop.login1.Manager.ListJobs
+Error: GDBus.Error:org.freedesktop.DBus.Error.AccessDenied: Rejected send message, 2 matched rules; type="method_call", sender=":1.121" (uid=1000 pid=3386 comm="gdbus call --system --dest org.freedesktop.login1" label="unconfined") interface="org.freedesktop.login1.Manager" member="ListJobs" error name="(unset)" requested_reply="0" destination="org.freedesktop.login1" (uid=0 pid=750 comm="/usr/lib/systemd/systemd-logind" label="unconfined")
+[exit=1]
+$ gdbus call --session --dest org.freedesktop.UPower --object-path /org/freedesktop/UPower --method org.freedesktop.DBus.Properties.Get org.freedesktop.UPower OnBattery
+Error: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.UPower was not provided by any .service files
+[exit=1]
+$ loginctl show-session 42 -p Type -p Service -p Remote -p Active
+Remote=yes
+Service=sshd
+Type=tty
+Active=yes
+[exit=0]

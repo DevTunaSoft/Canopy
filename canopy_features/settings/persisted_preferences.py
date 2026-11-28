@@ -30,6 +30,14 @@ closed), mirroring ``canopy_features.launcher.launcher_favorites``. The raw
 bytes of a rejected state file are kept in a bounded quarantine sidecar before
 any successful write replaces them; no file content is logged, and an
 unreadable or oversized state file is never overwritten.
+
+A bounded legacy flat document (schema 0 in
+``config_schema_migration.SOURCE_CONTRACTS``) is migrated in memory by that
+module's registered step instead of being treated as corrupt. Its exact raw
+bytes enter the same quarantine rotation before the first successful write
+replaces them, so a restart before or after that write never loses the
+original settings. Migration is a read decision only: an unreadable, oversized
+or otherwise rejected file is still never overwritten.
 """
 from __future__ import annotations
 
@@ -436,6 +444,24 @@ def _validate_document(document):
     return checked
 
 
+def _migrated_values(raw):
+    """Return values from a bounded legacy flat document, or None.
+
+    The migration module owns the version-0 shape and its single registered
+    step. It is imported lazily because it imports this module to pin its key
+    and byte contracts. The caller's exact raw bytes are the only input; no
+    path is opened here. A refused migration keeps the existing corrupt-state
+    behaviour (discard to empty, quarantine the raw bytes on the next save).
+    """
+    from canopy_features.settings import config_schema_migration as migration
+
+    try:
+        document = migration.migrate_document(raw)
+    except migration.ConfigSchemaMigrationError:
+        return None
+    return _validate_document(document)
+
+
 class PersistedPreferences:
     """Bounded, atomic preference store at a caller-supplied path.
 
@@ -514,6 +540,16 @@ class PersistedPreferences:
         except (UnicodeError, ValueError, TypeError):
             self._corrupt_raw = raw
             return {}
+        # A non-empty document with neither wrapper field is the registered
+        # version-0 flat source. Read it through the migration decision gate
+        # so a legacy preference survives a logout/restart instead of being
+        # discarded. Keep its exact bytes for the same quarantine rotation a
+        # rejected document uses, before the first write replaces them.
+        if (isinstance(document, dict) and document
+                and "version" not in document and "values" not in document):
+            migrated = _migrated_values(raw)
+            self._corrupt_raw = raw
+            return {} if migrated is None else migrated
         checked = _validate_document(document)
         if checked is None:
             self._corrupt_raw = raw

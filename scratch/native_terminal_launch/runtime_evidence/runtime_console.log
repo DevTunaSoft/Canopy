@@ -1,0 +1,79 @@
+=== UTC ===
+Sat Nov 28 04:26:41 UTC 2026
+=== PLASMA SESSION ===
+4656 /usr/bin/startplasma-x11
+4926 /usr/bin/ssh-agent /usr/bin/im-launch /usr/bin/startplasma-x11
+5384 /usr/bin/kwin_x11 --replace
+5422 /usr/bin/plasmashell --no-respawn
+=== ENV ===
+DISPLAY=:0 XAUTHORITY=/tmp/xauth_zdKrsq XDG_DATA_DIRS=
+=== GIO LOOKUP (stock XDG data dirs) ===
+gnome-terminal.desktop ABSENT TypeError
+org.gnome.Terminal.desktop ABSENT TypeError
+mate-terminal.desktop ABSENT TypeError
+xfce4-terminal.desktop ABSENT TypeError
+org.kde.konsole.desktop RESOLVED True konsole
+konsole.desktop ABSENT TypeError
+=== KONSOLE BEFORE ===
+NONE
+=== DBUS BEFORE ===
+NO_TERMINAL_BUS_NAME
+=== X WINDOWS BEFORE ===
+NONE
+=== TERMINAL DOCK LAUNCH FIXTURE ===
+CANOPY_APPROVED_ART_VERIFIED: eight exact PNG icons and legacy blue wave
+FIVE_PRODUCTION_PACK_FALLBACK: exact original-derived Qt renderer
+DOCK_CLEAN_EDGES_ACTIVE: exact approved source cleanup selected for normal startup; frozen PNGs and QML geometry unchanged
+DOCK_FIVE_CENTER_ACTIVE: Browser, Mail, Files, Terminal, Settings v3 composition inside unchanged mask; Calendar/Photos/Music exact pixel lock retained
+CANOPY_ROUNDED_DOCK_VERIFIED: eight original icons, padded, alpha-clipped
+WINDOW_ACTIVATION_ADAPTER_LOADED
+CANOPY_QUICK_CONTROLS_HOST_INJECTED: in-process view() only
+qt.qml.context: qrc:/Canopy/Classic/NotificationCenter.qml:255:13 Parameter "text" is not declared. Injection of parameters into signal handlers is deprecated. Use JavaScript functions with formal parameters instead.
+qt.qml.context: qrc:/Canopy/Classic/LauncherOverlay.qml:362:13 Parameter "text" is not declared. Injection of parameters into signal handlers is deprecated. Use JavaScript functions with formal parameters instead.
+qt.qml.context: qrc:/Canopy/Classic/PreviewWindow.qml:677:17 Parameter "text" is not declared. Injection of parameters into signal handlers is deprecated. Use JavaScript functions with formal parameters instead.
+CANOPY_CLASSIC_WINDOW_READY
+CANOPY_QUICK_CONTROLS_REGISTERED: hidden until requested, no host control bridge, no visual asset changes
+CANOPY_SETTINGS_PANEL_REGISTERED: hidden until requested, one contract-backed preference, no approved visual changes
+CANOPY_SYSTEM_APP_DOCK_CONNECTED: opt-in, fixed allowlist only
+CANOPY_FILES_DOCK_NATIVE_LAUNCH_CONNECTED
+CANOPY_BROWSER_DOCK_NATIVE_LAUNCH_CONNECTED
+CANOPY_MAIL_DOCK_NATIVE_LAUNCH_CONNECTED
+CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED "Calendar"
+CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED "Photos"
+CANOPY_TERMINAL_DOCK_NATIVE_LAUNCH_CONNECTED "Terminal"
+CANOPY_INTENT_DOCK_CONNECTED "Music"
+CANOPY_INTENT_DOCK_CONNECTED "Settings"
+CANOPY_TERMINAL_DOCK_REJECTED: unknown action
+CANOPY_APP_LAUNCH_REQUESTED: "Terminal"
+CANOPY_TERMINAL_DOCK_NATIVE_LAUNCH_REQUESTED
+"TERMINAL_DOCK_LAUNCH_FIXTURE_PASS" dock signal reached the native GIO launcher
+LAUNCH_RC=0
+=== KONSOLE AFTER ===
+19242 /usr/bin/konsole
+=== PROCESS TREE ===
+    PID    PPID    PGID     SID STAT     ELAPSED COMMAND
+  19242       1   19162   19162 Sl         00:04 /usr/bin/konsole
+systemd,1 splash
+  `-konsole,19242
+      |-bash,19285
+      |-{konsole},19253
+      |-{konsole},19258
+      |-{konsole},19269
+      `-{konsole},19270
+=== DBUS AFTER ===
+:1.100                                       19242 konsole         canopy :1.100        user@1000.service -       -
+org.kde.konsole-19242                        19242 konsole         canopy :1.100        user@1000.service -       -
+=== X WINDOWS AFTER ===
+0x02a00012  0 canopy-plasma6 Canopy Classic — Technology Spike — Canopy Classic Spike
+0x03600008  0 canopy-plasma6 ~ : bash — Konsole
+Window 56623112
+  Position: 268,187 (screen: 0)
+  Geometry: 223x100
+=== ROOT SCREENSHOT ===
+-rw-rw-r-- 1 canopy canopy 180906 Nov 28 04:26 /home/canopy/native_terminal_launch_20261127/runtime/root_after.png
+=== RESTORE ===
+KILLED 19242
+NO_KONSOLE
+=== GUEST STOCK ENTRY UNCHANGED ===
+cd15f8c829a7ae0edfb27d67920fcd2cafb252209c950ce2e5791b9d24d15d38  /usr/share/applications/org.kde.konsole.desktop
+=== DONE ===

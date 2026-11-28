@@ -50,7 +50,7 @@ class ClassicPreviewScrollbarTests(unittest.TestCase):
         text = read("Theme.qml")
         for token in ('backgroundTop: "#cbdff2"', 'foreground: "#273345"',
                       'accent: "#537da4"', 'indicator: "#d8b87a"',
-                      "barHeight: 32", "dockSize: 88", "dockPadding: 12",
+                      "barHeight: 32", "dockSize: 96", "dockPadding: 14",
                       "dockSpacing: 7", "tileSize: 52", "cornerRadius: 24"):
             self.assertIn(token, text)
 

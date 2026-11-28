@@ -1,0 +1,44 @@
+$ ssh -i 'C:\Users\X1\AppData\Local\hermes\cache\scratch\g1_ubuntu_evidence\ssh\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'
+NATIVE_ENV_SOURCE_PID=5422
+NATIVE_ENV_IMPORTED DISPLAY=:0 XDG_CURRENT_DESKTOP=KDE XDG_SESSION_TYPE=x11
+--- windows
+0x00600013 -1 5422   canopy-plasma6 Desktop @ QRect(0,0 1024x768) 
+0x0060002e -1 5422   canopy-plasma6 plasmashell
+0x02a00012  0 5667   canopy-plasma6 Canopy Classic — Technology Spike — Canopy Classic Spike
+0x03600014  0 51197  canopy-plasma6 Canopy Classic native task dock
+0x0380000d  0 51420  canopy-plasma6 ~ : bash — Konsole
+HARNESS_WID=0x03600014
+--- konsole
+51420 /usr/bin/konsole
+--- active before activation
+Canopy Classic native task dock
+--- log tail
+qml: CANOPY_NATIVE_TASK_MODEL_INFO count=1 launcherCount=0
+CANOPY_NATIVE_TASK_SNAPSHOT {"active":["canopy-classic"],"attached":true,"model_source":"injected_upstream_only","row_count":1,"running":["canopy-classic"],"schema":1,"sequence":1}
+qml: CANOPY_NATIVE_TASK_ATTACH PASS
+CANOPY_NATIVE_TASK_HARNESS_READY ./harness/NativeTaskHarness.qml auto=1
+CANOPY_NATIVE_TASK_SNAPSHOT {"active":["canopy-classic"],"attached":true,"model_source":"injected_upstream_only","row_count":2,"running":["canopy-classic","native-task-harness"],"schema":1,"sequence":2}
+CANOPY_NATIVE_TASK_SNAPSHOT {"active":["canopy-classic"],"attached":true,"model_source":"injected_upstream_only","row_count":2,"running":["canopy-classic","native-task-harness"],"schema":1,"sequence":3}
+CANOPY_NATIVE_TASK_SNAPSHOT {"active":["canopy-classic"],"attached":true,"model_source":"injected_upstream_only","row_count":2,"running":["canopy-classic","native-task-harness"],"schema":1,"sequence":4}
+CANOPY_NATIVE_TASK_SNAPSHOT {"active":["native-task-harness"],"attached":true,"model_source":"injected_upstream_only","row_count":2,"running":["canopy-classic","native-task-harness"],"schema":1,"sequence":5}
+CANOPY_NATIVE_TASK_SNAPSHOT {"active":["native-task-harness"],"attached":true,"model_source":"injected_upstream_only","row_count":2,"running":["canopy-classic","native-task-harness"],"schema":1,"sequence":6}
+CANOPY_NATIVE_TASK_SNAPSHOT {"active":["native-task-harness"],"attached":true,"model_source":"injected_upstream_only","row_count":2,"running":["canopy-classic","native-task-harness"],"schema":1,"sequence":7}
+CANOPY_NATIVE_TASK_SNAPSHOT {"active":["native-task-harness"],"attached":true,"model_source":"injected_upstream_only","row_count":2,"running":["canopy-classic","native-task-harness"],"schema":1,"sequence":8}
+CANOPY_NATIVE_TASK_EVENT PHASE 3 native app launch observed upstream
+CANOPY_NATIVE_TASK_SNAPSHOT {"active":["native-task-harness"],"attached":true,"model_source":"injected_upstream_only","row_count":3,"running":["canopy-classic","konsole","native-task-harness"],"schema":1,"sequence":9}
+CANOPY_NATIVE_TASK_SNAPSHOT {"active":["native-task-harness"],"attached":true,"model_source":"injected_upstream_only","row_count":3,"running":["canopy-classic","konsole","native-task-harness"],"schema":1,"sequence":10}
+CANOPY_NATIVE_TASK_SNAPSHOT {"active":["native-task-harness"],"attached":true,"model_source":"injected_upstream_only","row_count":3,"running":["canopy-classic","konsole","native-task-harness"],"schema":1,"sequence":11}
+CANOPY_NATIVE_TASK_SNAPSHOT {"active":["native-task-harness"],"attached":true,"model_source":"injected_upstream_only","row_count":3,"running":["canopy-classic","konsole","native-task-harness"],"schema":1,"sequence":12}
+CANOPY_NATIVE_TASK_SNAPSHOT {"active":["konsole"],"attached":true,"model_source":"injected_upstream_only","row_count":3,"running":["canopy-classic","konsole","native-task-harness"],"schema":1,"sequence":13}
+CANOPY_NATIVE_TASK_SNAPSHOT {"active":["konsole"],"attached":true,"model_source":"injected_upstream_only","row_count":3,"running":["canopy-classic","konsole","native-task-harness"],"schema":1,"sequence":14}
+CANOPY_NATIVE_TASK_SNAPSHOT {"active":["konsole"],"attached":true,"model_source":"injected_upstream_only","row_count":3,"running":["canopy-classic","konsole","native-task-harness"],"schema":1,"sequence":15}
+CANOPY_NATIVE_TASK_SNAPSHOT {"active":["konsole"],"attached":true,"model_source":"injected_upstream_only","row_count":3,"running":["canopy-classic","konsole","native-task-harness"],"schema":1,"sequence":16}
+CANOPY_NATIVE_TASK_SNAPSHOT {"active":["konsole"],"attached":true,"model_source":"injected_upstream_only","row_count":3,"running":["canopy-classic","konsole","native-task-harness"],"schema":1,"sequence":17}
+CANOPY_NATIVE_TASK_SNAPSHOT {"active":["konsole"],"attached":true,"model_source":"injected_upstream_only","row_count":3,"running":["canopy-classic","konsole","native-task-harness"],"schema":1,"sequence":18}
+CANOPY_NATIVE_TASK_SNAPSHOT {"active":["konsole"],"attached":true,"model_source":"injected_upstream_only","row_count":3,"running":["canopy-classic","konsole","native-task-harness"],"schema":1,"sequence":19}
+CANOPY_NATIVE_TASK_SNAPSHOT {"active":["konsole"],"attached":true,"model_source":"injected_upstream_only","row_count":3,"running":["canopy-classic","konsole","native-task-harness"],"schema":1,"sequence":20}
+CANOPY_NATIVE_TASK_SNAPSHOT {"active":["native-task-harness"],"attached":true,"model_source":"injected_upstream_only","row_count":3,"running":["canopy-classic","konsole","native-task-harness"],"schema":1,"sequence":21}
+CANOPY_NATIVE_TASK_SNAPSHOT {"active":["native-task-harness"],"attached":true,"model_source":"injected_upstream_only","row_count":3,"running":["canopy-classic","konsole","native-task-harness"],"schema":1,"sequence":22}
+CANOPY_NATIVE_TASK_SNAPSHOT {"active":["native-task-harness"],"attached":true,"model_source":"injected_upstream_only","row_count":3,"running":["canopy-classic","konsole","native-task-harness"],"schema":1,"sequence":23}
+CANOPY_NATIVE_TASK_SNAPSHOT {"active":["native-task-harness"],"attached":true,"model_source":"injected_upstream_only","row_count":3,"running":["canopy-classic","konsole","native-task-harness"],"schema":1,"sequence":24}
+[utc=2026-11-28T05:13:02Z] [rc=0]

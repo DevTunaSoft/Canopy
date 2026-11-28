@@ -33,6 +33,6 @@ test_no_daemon_or_io_imports_in_production_modules (test_contracts.StaticTests.t
 test_tests_are_outside_ci_discovery_scope (test_contracts.StaticTests.test_tests_are_outside_ci_discovery_scope) ... ok
 
 ----------------------------------------------------------------------
-Ran 33 tests in 0.041s
+Ran 33 tests in 0.039s
 
 OK

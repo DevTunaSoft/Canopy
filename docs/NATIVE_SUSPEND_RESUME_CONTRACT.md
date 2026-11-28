@@ -14,7 +14,11 @@ runtime PASS in this change.
   `tools/session_recovery/**`, `scratch/native_suspend_resume/**`, this file.
   No reliability, event, QML, C++, asset, test-discovery or workflow path is
   modified. The sibling suspend/resume verdict work owns
-  `canopy_features/reliability/**`; this change does not touch it.
+  `canopy_features/reliability/**`; this change does not touch it. This contract
+  document deliberately lives at `docs/NATIVE_SUSPEND_RESUME_CONTRACT.md`:
+  PR #748 owns `docs/NATIVE_SUSPEND_RESUME.md` (different blob, same base), so
+  this branch does not claim that shared path and the two PRs have no
+  overlapping file paths.
 - Draft PR only: no merge, no approval, no self-approval, no base or main
   change.
 

@@ -134,7 +134,7 @@ The next action is owner-gated host wiring plus a real Plasma guest run.
 
 ## Overlap boundary and integrator choice
 
-PR #746 (`product/native-display-response-20261127`, OPEN, DRAFT) touches two
+PR #746 (`product/native-display-response-20261127`, OPEN, non-draft (live)) touches two
 of the same owned paths from the same base:
 `canopy_features/dock/display_change_response.py` (modification) and
 `docs/NATIVE_DISPLAY_RESPONSE.md` (added in that PR). This branch is an
@@ -145,15 +145,15 @@ The integrator choice is explicitly deferred: after exact-SHA review the
 integrator decides whether to (a) take this branch's bounded push seam,
 (b) take PR #746's implementation, or (c) combine both by resolving the two
 shared paths deliberately. This workstream does not merge, approve, re-pin,
-close or otherwise act on PR #746. The reviewed head of this branch remains
-`6ed3638c7316212a9d4a8d730c6b66bff5fad472`, and the runtime verdict remains
+close or otherwise act on PR #746. The reviewed evidence head of this branch
+is pinned in `scratch/native_multimonitor/head.txt`; the final pushed head is
+cited in the PR body. The runtime verdict remains
 `NATIVE_RUNTIME = BLOCKED / NOT_RUN` under either choice until a real Plasma
 guest exercises the selected compiled adapter.
 
 ## Bounded evidence remediation (PR #758 gaps)
 
-The sealed evidence pins the exact reviewed final head
-`6ed3638c7316212a9d4a8d730c6b66bff5fad472` in
+The sealed evidence pins the exact reviewed head in
 `scratch/native_multimonitor/head.txt`, with base
 `ec910d7a7275296ecbc8b5e5c459d356205165d1`. `git_diff_names.txt` now lists
 the 15 live paths of `git diff --name-only <base>..<reviewed head>`. Re-run at

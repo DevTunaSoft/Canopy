@@ -1,0 +1,6 @@
+name="Canopy-Test-Plasma6"
+memory=4096
+cpus=2
+VMState="running"
+VMStateChangeTime="2026-11-28T04:00:24.168000000"
+nic1="nat"

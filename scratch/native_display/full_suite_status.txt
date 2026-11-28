@@ -1,0 +1,7 @@
+Full-suite status for M4 display-response PR
+============================================
+Command: PYTHONPATH=<worktree> python -m unittest discover -s tests
+Attempt 1: bounded timeout 480 s -> process rc=124 (TIMEOUT), log full_suite.log. INCOMPLETE.
+Attempt 2: background run with 1800 s cap -> no terminal summary after ~10 min under host contention; stopped by owning agent (process_manage kill), log full_suite_final.log, rc marker full_suite_final.rc = killed. INCOMPLETE.
+Authoritative verification for this change: targeted display suites (79 tests OK at base and at head) and the 11-scenario M4 probe (PASS at head, RED at base). These are SYNTHETIC.
+No full-suite FAIL/ERROR attribution is claimed. Screen-reader behavior: NOT_RUN.

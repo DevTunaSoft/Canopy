@@ -5,7 +5,8 @@ No merge, approval, PR promotion, VM state change, guest package/service/config
 change or destructive action was performed. All guest/VBox access was read-only.
 
 - Directive Rev3 SHA `1fba4b1e` (cap 8).
-- Subject: `product/native-stability-smoke-20261127` at `449e39e7` (PR #749).
+- Subject: `product/native-stability-smoke-20261127` (PR #749); smoke commit
+  `449e39e7`, remediation head `f8cbe123`, doc-fix head pushed on this branch.
 - Diagnosis source: `39ad2835` (`diagnosis/pr749-soak-20261128`),
   `docs/NATIVE_STABILITY_INCIDENT.md`, `scratch/pr749_incident/diagnosis.json`.
 - Remediation worktree:
@@ -13,7 +14,12 @@ change or destructive action was performed. All guest/VBox access was read-only.
 - Owned paths only: `tools/stability/**`, `docs/NATIVE_STABILITY_SMOKE.md`,
   `docs/NATIVE_STABILITY_REMEDIATION.md`, `scratch/native_stability/**`,
   `scratch/pr749_incident/**`, `tests/test_native_soak_remediation.py`,
-  `tests/fixtures/native_soak/**`.
+  `tests/fixtures/native_soak/**`. The documentation-residual pass that
+  follows owns only `docs/NATIVE_STABILITY_SMOKE.md`, this document and
+  `scratch/native_stability/**`; the full branch delta vs `ec910d7a` remains
+  **32 files** across those seven path groups (3 tools, 2 docs, 18
+  `scratch/native_stability`, 5 `scratch/pr749_incident`, 3 test fixtures,
+  1 test module). The PR body's shorter owned-path list is corrected in §5.
 
 ## 1. Defects fixed
 
@@ -83,3 +89,14 @@ edited: `sha256sum -c SHA256SUMS.txt` still passes for all 13 entries.
    scratch/pr749_incident/vm --rerun-note ...` — RC 0, both gaps
    `GUEST_STALL_PROVEN`, VERDICT `SOAK_WARN_...`, rerun `NOT_RUN`.
 5. Read-only VM state + guest preflight (above) — no VM action.
+6. Documentation-residual re-check at the pushed doc-fix head: §4 of
+   `docs/NATIVE_STABILITY_SMOKE.md` now marks the 132 total
+   `JOURNAL_ERROR_COUNT_UNRELIABLE_LEGACY_HOSTNAME_MATCH` and both gaps
+   `GUEST_STALL_PROVEN` (matching §7); the monotonic PSS wording is replaced by
+   the measured net −3,782 KiB with 5 upward steps in 51 raw samples; the CPU
+   gap-coverage caveat (0.3 %–89.0 % bucket coverage, `NA` excluded, no rows
+   synthesised) is stated; and the changed-path list is corrected to 32 files.
+7. Re-verified at that head: `sha256sum -c SHA256SUMS.txt` 13/13 OK,
+   `sha256sum -c TOOLS_SHA256SUMS.txt` 3/3 OK,
+   `sha256sum -c SOAK_REMEDIATED_SHA256SUMS.txt` 1/1 OK, unit suite 13/13 OK.
+   WARN verdict and `not_run` list unchanged; no raw byte was edited.

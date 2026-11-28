@@ -1,0 +1,40 @@
+test_bad_bounds_are_refused (scratch.native_notifications.tests.test_m3_contracts.CenterBadgeTests.test_bad_bounds_are_refused) ... ok
+test_closed_badge_is_unavailable (scratch.native_notifications.tests.test_m3_contracts.CenterBadgeTests.test_closed_badge_is_unavailable) ... ok
+test_injected_producer_is_not_closed_by_badge (scratch.native_notifications.tests.test_m3_contracts.CenterBadgeTests.test_injected_producer_is_not_closed_by_badge) ... ok
+test_real_host_events_raise_bounded_badge (scratch.native_notifications.tests.test_m3_contracts.CenterBadgeTests.test_real_host_events_raise_bounded_badge) ... ok
+test_source_loss_gives_unavailable_zero_badge (scratch.native_notifications.tests.test_m3_contracts.CenterBadgeTests.test_source_loss_gives_unavailable_zero_badge) ... ok
+test_state_is_frozen_and_copy_is_fresh (scratch.native_notifications.tests.test_m3_contracts.CenterBadgeTests.test_state_is_frozen_and_copy_is_fresh) ... ok
+test_untrusted_producer_is_refused (scratch.native_notifications.tests.test_m3_contracts.CenterBadgeTests.test_untrusted_producer_is_refused) ... ok
+test_canopy_daemon_or_service_file_is_refused (scratch.native_notifications.tests.test_m3_contracts.DaemonOwnerProofTests.test_canopy_daemon_or_service_file_is_refused) ... ok
+test_foreign_daemon_count_is_refused (scratch.native_notifications.tests.test_m3_contracts.DaemonOwnerProofTests.test_foreign_daemon_count_is_refused) ... ok
+test_hostile_mapping_and_close (scratch.native_notifications.tests.test_m3_contracts.DaemonOwnerProofTests.test_hostile_mapping_and_close) ... ok
+test_owner_change_and_budget_are_refused (scratch.native_notifications.tests.test_m3_contracts.DaemonOwnerProofTests.test_owner_change_and_budget_are_refused) ... ok
+test_real_guest_shape_is_single_upstream_owner (scratch.native_notifications.tests.test_m3_contracts.DaemonOwnerProofTests.test_real_guest_shape_is_single_upstream_owner) ... ok
+test_wrong_name_pid_and_missing_fields_are_refused (scratch.native_notifications.tests.test_m3_contracts.DaemonOwnerProofTests.test_wrong_name_pid_and_missing_fields_are_refused) ... ok
+test_wrong_owner_comm_is_refused (scratch.native_notifications.tests.test_m3_contracts.DaemonOwnerProofTests.test_wrong_owner_comm_is_refused) ... ok
+test_capability_only_observation_never_claims_delivery (scratch.native_notifications.tests.test_m3_contracts.FreedesktopContractTests.test_capability_only_observation_never_claims_delivery) ... ok
+test_close_is_explicit_unavailable_and_idempotent (scratch.native_notifications.tests.test_m3_contracts.FreedesktopContractTests.test_close_is_explicit_unavailable_and_idempotent) ... ok
+test_complete_roundtrip_is_available (scratch.native_notifications.tests.test_m3_contracts.FreedesktopContractTests.test_complete_roundtrip_is_available) ... ok
+test_event_budget_is_bounded (scratch.native_notifications.tests.test_m3_contracts.FreedesktopContractTests.test_event_budget_is_bounded) ... ok
+test_extra_or_missing_fields_are_refused (scratch.native_notifications.tests.test_m3_contracts.FreedesktopContractTests.test_extra_or_missing_fields_are_refused) ... ok
+test_hostile_mapping_never_echoes_marker (scratch.native_notifications.tests.test_m3_contracts.FreedesktopContractTests.test_hostile_mapping_never_echoes_marker) ... ok
+test_incomplete_roundtrip_stays_unavailable (scratch.native_notifications.tests.test_m3_contracts.FreedesktopContractTests.test_incomplete_roundtrip_stays_unavailable) ... ok
+test_notification_id_rules_are_exact (scratch.native_notifications.tests.test_m3_contracts.FreedesktopContractTests.test_notification_id_rules_are_exact) ... ok
+test_owner_change_is_refused_and_sticky (scratch.native_notifications.tests.test_m3_contracts.FreedesktopContractTests.test_owner_change_is_refused_and_sticky) ... ok
+test_owner_must_be_an_exact_unique_name (scratch.native_notifications.tests.test_m3_contracts.FreedesktopContractTests.test_owner_must_be_an_exact_unique_name) ... ok
+test_state_is_frozen_and_snapshot_is_a_copy (scratch.native_notifications.tests.test_m3_contracts.FreedesktopContractTests.test_state_is_frozen_and_snapshot_is_a_copy) ... ok
+test_unknown_member_is_refused (scratch.native_notifications.tests.test_m3_contracts.FreedesktopContractTests.test_unknown_member_is_refused) ... ok
+test_wrong_containers_are_refused (scratch.native_notifications.tests.test_m3_contracts.FreedesktopContractTests.test_wrong_containers_are_refused) ... ok
+test_wrong_service_identity_is_refused (scratch.native_notifications.tests.test_m3_contracts.FreedesktopContractTests.test_wrong_service_identity_is_refused) ... ok
+test_new_modules_have_no_transport_execution_or_new_topics (scratch.native_notifications.tests.test_m3_contracts.SourceIntegrityTests.test_new_modules_have_no_transport_execution_or_new_topics) ... ok
+test_acknowledgement_must_be_exact_true (scratch.native_notifications.tests.test_m3_contracts.TrayInteractionTests.test_acknowledgement_must_be_exact_true) ... ok
+test_allowlisted_action_is_accepted (scratch.native_notifications.tests.test_m3_contracts.TrayInteractionTests.test_allowlisted_action_is_accepted) ... ok
+test_budget_and_close (scratch.native_notifications.tests.test_m3_contracts.TrayInteractionTests.test_budget_and_close) ... ok
+test_hostile_mapping_never_echoes_marker (scratch.native_notifications.tests.test_m3_contracts.TrayInteractionTests.test_hostile_mapping_never_echoes_marker) ... ok
+test_unknown_action_is_refused (scratch.native_notifications.tests.test_m3_contracts.TrayInteractionTests.test_unknown_action_is_refused) ... ok
+test_wrong_facility_and_owner_are_refused (scratch.native_notifications.tests.test_m3_contracts.TrayInteractionTests.test_wrong_facility_and_owner_are_refused) ... ok
+
+----------------------------------------------------------------------
+Ran 35 tests in 0.042s
+
+OK

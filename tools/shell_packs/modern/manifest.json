@@ -1,0 +1,20 @@
+{
+  "manifest_version": 1,
+  "id": "io.canopy.modern",
+  "name": "Modern Shell Pack",
+  "description": "Free first-party Windows-familiar presentation on the shared Canopy host; one shared core and no duplicate compositor or services.",
+  "shell_api": 1,
+  "kind": "presentation",
+  "ui_engine": "qt-qml",
+  "entrypoint": "ui/Main.qml",
+  "capabilities": [
+    "app-launcher",
+    "taskbar",
+    "workspace-list",
+    "window-list",
+    "system-status",
+    "settings-panel"
+  ],
+  "switch_strategy": "same-session",
+  "permissions": []
+}

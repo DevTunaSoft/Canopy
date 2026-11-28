@@ -1,0 +1,20 @@
+{
+  "manifest_version": 1,
+  "id": "io.canopy.flow",
+  "name": "Flow Shell Pack",
+  "description": "Free first-party activity and workspace presentation on the shared Canopy host; host APIs only, one shared core and no duplicate compositor or services.",
+  "shell_api": 1,
+  "kind": "presentation",
+  "ui_engine": "qt-qml",
+  "entrypoint": "ui/Main.qml",
+  "capabilities": [
+    "app-launcher",
+    "top-bar",
+    "workspace-list",
+    "window-list",
+    "system-status",
+    "settings-panel"
+  ],
+  "switch_strategy": "same-session",
+  "permissions": []
+}

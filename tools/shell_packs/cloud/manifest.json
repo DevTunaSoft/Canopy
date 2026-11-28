@@ -1,0 +1,19 @@
+{
+  "manifest_version": 1,
+  "id": "io.canopy.cloud",
+  "name": "Cloud Shell Pack",
+  "description": "Free first-party web and remote work presentation on the shared Canopy host; account-neutral host APIs only, one shared core and no duplicate compositor or services.",
+  "shell_api": 1,
+  "kind": "presentation",
+  "ui_engine": "qt-qml",
+  "entrypoint": "ui/Main.qml",
+  "capabilities": [
+    "app-launcher",
+    "top-bar",
+    "window-list",
+    "system-status",
+    "settings-panel"
+  ],
+  "switch_strategy": "same-session",
+  "permissions": []
+}

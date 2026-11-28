@@ -1,0 +1,331 @@
+{
+  "label": "SYNTHETIC",
+  "task": "M3 Shell Pack initial eight library",
+  "base_sha": "ec910d7a",
+  "head_sha": "40e063534437f4c7d84bb405e414e1528de17403",
+  "initial_pack_ids": [
+    "org.canopy.classic",
+    "org.canopy.modern",
+    "org.canopy.heritage",
+    "org.canopy.flow",
+    "org.canopy.lite",
+    "org.canopy.studio",
+    "org.canopy.cloud",
+    "org.canopy.touch"
+  ],
+  "checks": {
+    "catalog_manifests_pass_offline_checker": {
+      "status": "PASS",
+      "detail": {
+        "manifest_ids": [
+          "io.canopy.cloud",
+          "io.canopy.flow",
+          "io.canopy.heritage",
+          "io.canopy.lite",
+          "io.canopy.modern",
+          "io.canopy.studio",
+          "io.canopy.touch"
+        ],
+        "cli": "SHELL_PACK_CATALOG_PASS: 7 first-party manifests (metadata only; no runtime loading or trust verification)"
+      }
+    },
+    "first_party_inventory_all_eight": {
+      "status": "PASS",
+      "detail": {
+        "initial_pack_ids": [
+          "org.canopy.classic",
+          "org.canopy.modern",
+          "org.canopy.heritage",
+          "org.canopy.flow",
+          "org.canopy.lite",
+          "org.canopy.studio",
+          "org.canopy.cloud",
+          "org.canopy.touch"
+        ],
+        "definitions": [
+          {
+            "builtin_id": "org.canopy.classic",
+            "manifest_id": "org.canopy.classic",
+            "name": "Classic",
+            "capabilities": [],
+            "entrypoint": "host-owned",
+            "source": "built-in:approved-classic",
+            "tier": "included",
+            "owned_services": []
+          },
+          {
+            "builtin_id": "org.canopy.modern",
+            "manifest_id": "io.canopy.modern",
+            "name": "Modern Shell Pack",
+            "capabilities": [
+              "app-launcher",
+              "settings-panel",
+              "system-status",
+              "taskbar",
+              "window-list",
+              "workspace-list"
+            ],
+            "entrypoint": "ui/Main.qml",
+            "source": "tools/shell_packs/modern",
+            "tier": "included",
+            "owned_services": []
+          },
+          {
+            "builtin_id": "org.canopy.heritage",
+            "manifest_id": "io.canopy.heritage",
+            "name": "Heritage Shell Pack",
+            "capabilities": [
+              "app-launcher",
+              "settings-panel",
+              "system-status",
+              "taskbar",
+              "window-list"
+            ],
+            "entrypoint": "ui/Main.qml",
+            "source": "tools/shell_packs/heritage",
+            "tier": "included",
+            "owned_services": []
+          },
+          {
+            "builtin_id": "org.canopy.flow",
+            "manifest_id": "io.canopy.flow",
+            "name": "Flow Shell Pack",
+            "capabilities": [
+              "app-launcher",
+              "settings-panel",
+              "system-status",
+              "top-bar",
+              "window-list",
+              "workspace-list"
+            ],
+            "entrypoint": "ui/Main.qml",
+            "source": "tools/shell_packs/flow",
+            "tier": "included",
+            "owned_services": []
+          },
+          {
+            "builtin_id": "org.canopy.lite",
+            "manifest_id": "io.canopy.lite",
+            "name": "Lite Shell Pack",
+            "capabilities": [
+              "app-launcher",
+              "system-status",
+              "top-bar"
+            ],
+            "entrypoint": "ui/Main.qml",
+            "source": "tools/shell_packs/lite",
+            "tier": "included",
+            "owned_services": []
+          },
+          {
+            "builtin_id": "org.canopy.studio",
+            "manifest_id": "io.canopy.studio",
+            "name": "Studio Shell Pack",
+            "capabilities": [
+              "app-launcher",
+              "dock",
+              "settings-panel",
+              "system-status",
+              "window-list",
+              "workspace-list"
+            ],
+            "entrypoint": "ui/Main.qml",
+            "source": "tools/shell_packs/studio",
+            "tier": "included",
+            "owned_services": []
+          },
+          {
+            "builtin_id": "org.canopy.cloud",
+            "manifest_id": "io.canopy.cloud",
+            "name": "Cloud Shell Pack",
+            "capabilities": [
+              "app-launcher",
+              "settings-panel",
+              "system-status",
+              "top-bar",
+              "window-list"
+            ],
+            "entrypoint": "ui/Main.qml",
+            "source": "tools/shell_packs/cloud",
+            "tier": "included",
+            "owned_services": []
+          },
+          {
+            "builtin_id": "org.canopy.touch",
+            "manifest_id": "io.canopy.touch",
+            "name": "Touch Shell Pack",
+            "capabilities": [
+              "app-launcher",
+              "dock",
+              "settings-panel",
+              "system-status",
+              "taskbar",
+              "window-list"
+            ],
+            "entrypoint": "ui/Main.qml",
+            "source": "tools/shell_packs/touch",
+            "tier": "included",
+            "owned_services": []
+          }
+        ],
+        "problems": [],
+        "checked_manifests": 7,
+        "paid_tiers": [],
+        "activation_required": false,
+        "telemetry_endpoints": []
+      }
+    },
+    "prepare_apply_verify_release": {
+      "status": "PASS",
+      "detail": {
+        "from_id": "org.canopy.classic",
+        "target_id": "org.canopy.heritage",
+        "active_id": "org.canopy.heritage",
+        "committed_id": "org.canopy.heritage",
+        "phase": "RELEASED",
+        "steps": [
+          {
+            "name": "PREPARE",
+            "status": "OK",
+            "note": "metadata-only candidate; host must verify compatibility offscreen"
+          },
+          {
+            "name": "APPLY",
+            "status": "APPLIED_PENDING_VERIFY",
+            "note": "bookkeeping only"
+          },
+          {
+            "name": "VERIFY",
+            "status": "OK",
+            "note": "synthetic verdict only"
+          },
+          {
+            "name": "RELEASE_INACTIVE",
+            "status": "OK",
+            "note": "host unsubscribes old UI; shared core services unchanged"
+          }
+        ],
+        "rolled_back": false,
+        "real_runtime_verified": false
+      }
+    },
+    "failed_verify_rollback": {
+      "status": "PASS",
+      "detail": {
+        "verified_failure": {
+          "from_id": "org.canopy.classic",
+          "target_id": "org.canopy.modern",
+          "active_id": "org.canopy.classic",
+          "committed_id": "org.canopy.classic",
+          "phase": "ROLLED_BACK",
+          "steps": [
+            {
+              "name": "PREPARE",
+              "status": "OK",
+              "note": "metadata-only candidate; host must verify compatibility offscreen"
+            },
+            {
+              "name": "APPLY",
+              "status": "APPLIED_PENDING_VERIFY",
+              "note": "bookkeeping only"
+            },
+            {
+              "name": "VERIFY",
+              "status": "FAILED",
+              "note": "synthetic verdict only"
+            },
+            {
+              "name": "ROLLBACK",
+              "status": "OK",
+              "note": "committed pack restored"
+            }
+          ],
+          "rolled_back": true,
+          "real_runtime_verified": false
+        },
+        "explicit_rollback": {
+          "from_id": "org.canopy.classic",
+          "target_id": "org.canopy.modern",
+          "active_id": "org.canopy.classic",
+          "committed_id": "org.canopy.classic",
+          "phase": "ROLLED_BACK",
+          "steps": [
+            {
+              "name": "PREPARE",
+              "status": "OK",
+              "note": "metadata-only candidate; host must verify compatibility offscreen"
+            },
+            {
+              "name": "APPLY",
+              "status": "APPLIED_PENDING_VERIFY",
+              "note": "bookkeeping only"
+            },
+            {
+              "name": "ROLLBACK",
+              "status": "OK",
+              "note": "synthetic rollback: candidate unhealthy"
+            }
+          ],
+          "rolled_back": true,
+          "real_runtime_verified": false
+        }
+      }
+    },
+    "illegal_transition_negative_controls": {
+      "status": "PASS",
+      "detail": {
+        "illegal_transitions_rejected": 5
+      }
+    },
+    "one_hundred_synthetic_round_trips": {
+      "status": "PASS",
+      "detail": {
+        "round_trips": 100,
+        "transitions": 300,
+        "pack_ids": [
+          "org.canopy.classic",
+          "org.canopy.modern",
+          "org.canopy.heritage",
+          "org.canopy.flow",
+          "org.canopy.lite",
+          "org.canopy.studio",
+          "org.canopy.cloud",
+          "org.canopy.touch"
+        ],
+        "final_committed_id": "org.canopy.flow",
+        "sequence_sha256": "98c711b1c60ccaf66755c60881a3b7a0e060a232b0df8c8b1786be1a8da750c5",
+        "real_runtime_verified": false
+      }
+    },
+    "owned_paths_and_classic_preserved": {
+      "status": "PASS",
+      "detail": {
+        "changed_paths": [],
+        "classic_paths_changed": 0,
+        "classic_diff": "EMPTY"
+      }
+    },
+    "no_paid_tiers_activation_telemetry_or_runtime_hooks": {
+      "status": "PASS",
+      "detail": {
+        "catalog_manifests_checked": 7,
+        "paid_tiers": [],
+        "qml_runtime_hooks": []
+      }
+    }
+  },
+  "verdict": "PASS",
+  "not_run": [
+    "native Plasma/KWin session switch",
+    "live Classic-to-any-pack switch preserving running applications",
+    "compiled Qt/QML rendering and owner visual acceptance",
+    "real PSS/CPU/GPU measurement",
+    "screen-reader and real desktop keyboard verification",
+    "install, rollback and upgrade on a disposable guest"
+  ],
+  "resource_impact": {
+    "measured": "SYNTHETIC: bounded metadata validation, seven manifest checks, one eight-definition inventory and 300 immutable ledger transitions",
+    "not_measured": "NOT_RUN: native runtime PSS, CPU, GPU, wakeups and frame times",
+    "rationale": "No process, service, timer, compositor change or UI code is added or executed."
+  }
+}

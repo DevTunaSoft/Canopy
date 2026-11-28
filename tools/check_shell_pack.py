@@ -27,6 +27,18 @@ CAPABILITIES = frozenset({
     "app-launcher", "dock", "top-bar", "taskbar", "workspace-list",
     "window-list", "system-status", "settings-panel",
 })
+# Bounded first-party catalog: directory name -> expected non-reserved id.
+# Classic is absent by design: approved identity/assets are never cataloged
+# or rewritten here.
+INITIAL_CATALOG = {
+    "modern": "io.canopy.modern",
+    "heritage": "io.canopy.heritage",
+    "flow": "io.canopy.flow",
+    "lite": "io.canopy.lite",
+    "studio": "io.canopy.studio",
+    "cloud": "io.canopy.cloud",
+    "touch": "io.canopy.touch",
+}
 PACK_ID = re.compile(r"[a-z][a-z0-9]*(?:\.[a-z][a-z0-9-]*){2,}", re.ASCII)
 NAME_CONTROL = re.compile(r"[\x00-\x1f\x7f]")
 ENTRY_COMPONENT = re.compile(r"[A-Za-z][A-Za-z0-9_-]*", re.ASCII)
@@ -180,15 +192,58 @@ def validate_pack(pack_root: Path) -> dict:
     return manifest
 
 
+def validate_catalog(catalog_root: Path) -> list:
+    """Validate the bounded first-party catalog without executing any pack."""
+    root = Path(catalog_root)
+    require_real_path_components(root, "catalog root must be a real directory")
+    if not root.is_dir():
+        raise PackValidationError("catalog root must be a real directory")
+    children = sorted(
+        entry.name for entry in root.iterdir()
+        if entry.is_dir() and not entry.is_symlink()
+    )
+    if children != sorted(INITIAL_CATALOG):
+        raise PackValidationError(
+            f"unexpected catalog contents: found={children}, "
+            f"expected={sorted(INITIAL_CATALOG)}"
+        )
+    descriptors = []
+    for directory in children:
+        descriptor = validate_pack(root / directory)
+        if descriptor["id"] != INITIAL_CATALOG[directory]:
+            raise PackValidationError(f"catalog id binding mismatch: {directory}")
+        descriptors.append(descriptor)
+    if len(descriptors) != len(INITIAL_CATALOG):
+        raise PackValidationError("catalog definition count is unbounded")
+    if len({item["id"] for item in descriptors}) != len(descriptors):
+        raise PackValidationError("catalog has duplicate identities")
+    return descriptors
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("pack", type=Path, help="local Shell Pack directory")
+    parser.add_argument("pack", nargs="?", type=Path,
+                        help="local Shell Pack directory")
+    parser.add_argument("--catalog", type=Path,
+                        help="validate the bounded first-party catalog root")
     args = parser.parse_args(argv)
+    if args.catalog is not None and args.pack is not None:
+        parser.error("provide either a pack directory or --catalog, not both")
+    if args.catalog is None and args.pack is None:
+        parser.error("provide a pack directory or --catalog")
     try:
-        descriptor = validate_pack(args.pack)
+        if args.catalog is not None:
+            descriptors = validate_catalog(args.catalog)
+        else:
+            descriptors = [validate_pack(args.pack)]
     except (PackValidationError, OSError) as exc:
         print(f"SHELL_PACK_FAIL: {exc}", file=sys.stderr)
         return 1
+    if args.catalog is not None:
+        print(f"SHELL_PACK_CATALOG_PASS: {len(descriptors)} first-party "
+              "manifests (metadata only; no runtime loading or trust verification)")
+        return 0
+    descriptor = descriptors[0]
     print(f"SHELL_PACK_MANIFEST_PASS: {descriptor['id']} "
           "(metadata only; no runtime loading or trust verification)")
     return 0

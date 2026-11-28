@@ -1,0 +1,462 @@
+{
+  "canopy_cpu_5min_windows": [
+    {
+      "caveat": "CPU% is over observed samples only (240/300 s); not a full-window utilisation. No rows were synthesised to fill the bucket.",
+      "coverage_pct": 80.0,
+      "cpu_pct_of_one_core": 0.0,
+      "end_s": 240,
+      "nominal_window_s": 300,
+      "observed_span_s": 240,
+      "samples": 5,
+      "start_s": 0,
+      "window_index": 0
+    },
+    {
+      "caveat": "CPU% is over observed samples only (240/300 s); not a full-window utilisation. No rows were synthesised to fill the bucket.",
+      "coverage_pct": 80.0,
+      "cpu_pct_of_one_core": 0.0,
+      "end_s": 540,
+      "nominal_window_s": 300,
+      "observed_span_s": 240,
+      "samples": 5,
+      "start_s": 300,
+      "window_index": 1
+    },
+    {
+      "caveat": "CPU% is over observed samples only (240/300 s); not a full-window utilisation. No rows were synthesised to fill the bucket.",
+      "coverage_pct": 80.0,
+      "cpu_pct_of_one_core": 0.0,
+      "end_s": 840,
+      "nominal_window_s": 300,
+      "observed_span_s": 240,
+      "samples": 5,
+      "start_s": 600,
+      "window_index": 2
+    },
+    {
+      "caveat": "CPU% is over observed samples only (240/300 s); not a full-window utilisation. No rows were synthesised to fill the bucket.",
+      "coverage_pct": 80.0,
+      "cpu_pct_of_one_core": 0.0,
+      "end_s": 1140,
+      "nominal_window_s": 300,
+      "observed_span_s": 240,
+      "samples": 5,
+      "start_s": 900,
+      "window_index": 3
+    },
+    {
+      "caveat": "CPU% is over observed samples only (267/300 s); not a full-window utilisation. No rows were synthesised to fill the bucket.",
+      "coverage_pct": 89.0,
+      "cpu_pct_of_one_core": 0.0,
+      "end_s": 1467,
+      "nominal_window_s": 300,
+      "observed_span_s": 267,
+      "samples": 5,
+      "start_s": 1200,
+      "window_index": 4
+    },
+    {
+      "caveat": "CPU% is over observed samples only (127/300 s); not a full-window utilisation. No rows were synthesised to fill the bucket.",
+      "coverage_pct": 42.3,
+      "cpu_pct_of_one_core": 0.0,
+      "end_s": 1654,
+      "nominal_window_s": 300,
+      "observed_span_s": 127,
+      "samples": 3,
+      "start_s": 1527,
+      "window_index": 5
+    },
+    {
+      "caveat": "CPU% is over observed samples only (265/300 s); not a full-window utilisation. No rows were synthesised to fill the bucket.",
+      "coverage_pct": 88.3,
+      "cpu_pct_of_one_core": 0.0,
+      "end_s": 2098,
+      "nominal_window_s": 300,
+      "observed_span_s": 265,
+      "samples": 5,
+      "start_s": 1833,
+      "window_index": 6
+    },
+    {
+      "caveat": "CPU% is over observed samples only (120/300 s); not a full-window utilisation. No rows were synthesised to fill the bucket.",
+      "coverage_pct": 40.0,
+      "cpu_pct_of_one_core": 0.0,
+      "end_s": 2278,
+      "nominal_window_s": 300,
+      "observed_span_s": 120,
+      "samples": 3,
+      "start_s": 2158,
+      "window_index": 7
+    },
+    {
+      "caveat": "CPU% is over observed samples only (180/300 s); not a full-window utilisation. No rows were synthesised to fill the bucket.",
+      "coverage_pct": 60.0,
+      "cpu_pct_of_one_core": 0.0,
+      "end_s": 2999,
+      "nominal_window_s": 300,
+      "observed_span_s": 180,
+      "samples": 4,
+      "start_s": 2819,
+      "window_index": 9
+    },
+    {
+      "caveat": "CPU% is over observed samples only (240/300 s); not a full-window utilisation. No rows were synthesised to fill the bucket.",
+      "coverage_pct": 80.0,
+      "cpu_pct_of_one_core": 0.0,
+      "end_s": 3299,
+      "nominal_window_s": 300,
+      "observed_span_s": 240,
+      "samples": 5,
+      "start_s": 3059,
+      "window_index": 10
+    },
+    {
+      "caveat": "CPU% is over observed samples only (240/300 s); not a full-window utilisation. No rows were synthesised to fill the bucket.",
+      "coverage_pct": 80.0,
+      "cpu_pct_of_one_core": 0.0,
+      "end_s": 3599,
+      "nominal_window_s": 300,
+      "observed_span_s": 240,
+      "samples": 5,
+      "start_s": 3359,
+      "window_index": 11
+    },
+    {
+      "caveat": "CPU% is over observed samples only (1/300 s); not a full-window utilisation. No rows were synthesised to fill the bucket.",
+      "coverage_pct": 0.3,
+      "cpu_pct_of_one_core": 0.0,
+      "end_s": 3659,
+      "nominal_window_s": 300,
+      "observed_span_s": 1,
+      "samples": 1,
+      "start_s": 3659,
+      "window_index": 12
+    }
+  ],
+  "clk_tck": 100,
+  "cpu_bucket_caveats": [
+    "Buckets are fixed 300 s relative-time bins, not guest wall-clock aligned.",
+    "cpu_pct_of_one_core divides by observed_span_s (first..last sample in the bucket), not by 300 s; edge buckets, NA probes and sampling gaps reduce coverage_pct.",
+    "0.0000% means no CPU ticks were observed in that bucket's samples; it is not proof of zero CPU outside those samples.",
+    "NA tick reads are excluded, never converted to zero."
+  ],
+  "duration_s": 3659,
+  "end_utc": "2026-11-28T07:26:55Z",
+  "guest": "canopy-plasma6",
+  "journal_probe": {
+    "coredump_total": 8,
+    "coredumps": [
+      "Sat 2026-11-28 06:56:32 UTC   337    0    0 SIGABRT inaccessible /usr/lib/systemd/systemd-journald                                            -",
+      "Sat 2026-11-28 06:56:33 UTC   386    0    0 SIGABRT inaccessible /usr/bin/udevadm                                                             -",
+      "Sat 2026-11-28 06:56:33 UTC   750    0    0 SIGABRT inaccessible /usr/lib/systemd/systemd-logind                                              -",
+      "Sat 2026-11-28 06:56:33 UTC   385  989  989 SIGABRT inaccessible /usr/lib/systemd/systemd-resolved                                            -",
+      "Sat 2026-11-28 07:12:57 UTC 67719    0    0 SIGABRT inaccessible /usr/lib/systemd/systemd-journald                                            -",
+      "Sat 2026-11-28 07:12:57 UTC 67863    0    0 SIGABRT inaccessible /usr/bin/udevadm                                                             -",
+      "Sat 2026-11-28 07:12:58 UTC 68009  989  989 SIGABRT inaccessible /usr/lib/systemd/systemd-resolved                                            -",
+      "Sat 2026-11-28 07:12:58 UTC 66280    0    0 SIGABRT inaccessible /usr/lib/systemd/systemd-logind                                              -"
+    ],
+    "errors": [],
+    "event": "journal_probe",
+    "journal_system_errors": [
+      "2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: #5  0x00007f8ba462a601 __libc_start_call_main (libc.so.6 + 0x2a601)",
+      "2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: #6  0x00007f8ba462a718 __libc_start_main_impl (libc.so.6 + 0x2a718)",
+      "2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: #7  0x00006205d01e9735 n/a (/usr/lib/systemd/systemd-journald + 0xb735)",
+      "2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: ELF object binary architecture: AMD x86-64",
+      "2026-11-28T07:12:55+00:00 canopy-plasma6 systemd[1]: systemd-journald.service: Watchdog timeout (limit 3min)!",
+      "2026-11-28T07:12:55+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '1014' failed with [61]:No data available  [v8.2512.0]",
+      "2026-11-28T07:12:55+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '1012' failed with [61]:No data available  [v8.2512.0]",
+      "2026-11-28T07:12:55+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '62' failed with [61]:No data available  [v8.2512.0]",
+      "2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: Process 67719 (systemd-journal) of user 0 dumped core.",
+      "2026-11-28T07:12:57+00:00 canopy-plasma6 systemd-coredump[75407]: Process 67863 (systemd-udevd) of user 0 dumped core.",
+      "2026-11-28T07:12:58+00:00 canopy-plasma6 systemd-coredump[75408]: Process 68009 (systemd-resolve) of user 989 dumped core.",
+      "2026-11-28T07:12:58+00:00 canopy-plasma6 systemd-coredump[75406]: Process 66280 (systemd-logind) of user 0 dumped core."
+    ],
+    "journal_system_errors_total": 132,
+    "journal_user_errors": [],
+    "journal_user_errors_total": 0,
+    "since": "2026-11-28T06:25:56Z",
+    "t": 3659
+  },
+  "journal_probe_quality": {
+    "journal_match_scope": "whole_line_legacy",
+    "legacy_hostname_inflation": true,
+    "note": "Legacy probe matched keywords against the whole short-iso line, including hostname canopy-plasma6; error totals are not trustworthy. Coredump totals are independent and remain valid."
+  },
+  "kernel": "7.0.0-14-generic",
+  "label": "NATIVE_SOAK_60M",
+  "not_run": [
+    "24H_SOAK",
+    "TRUE_LOW_END_HARDWARE",
+    "RELEASE_ACCEPTANCE",
+    "SOAK_RERUN_EXCLUSIVE_QUIESCED_GUEST",
+    "MERGE",
+    "APPROVAL"
+  ],
+  "process_exit_events": [],
+  "process_start_events": [],
+  "processes": [
+    {
+      "comm": "startplasma-x11",
+      "cpu_pct_of_one_core": 0.0,
+      "cpu_ticks_delta": 0,
+      "ctx_per_s": 0.0,
+      "ctx_total_delta": 0,
+      "first_t_s": 0,
+      "last_t_s": 3659,
+      "pid": 4656,
+      "pss_growth_kib": 0,
+      "pss_growth_pct": 0.0,
+      "pss_kib": {
+        "first": 5377,
+        "last": 5377,
+        "max": 5377,
+        "mean": 5377.0,
+        "min": 5377
+      },
+      "role": "shell:startplasma-x11",
+      "rss_kib": {
+        "first": 5520,
+        "last": 5520,
+        "max": 5520,
+        "mean": 5520.0,
+        "min": 5520
+      },
+      "samples": 51,
+      "starttime_ticks": 48637,
+      "wakeups_delta": null,
+      "wakeups_exported": false
+    },
+    {
+      "comm": "kwin_x11",
+      "cpu_pct_of_one_core": 0.7467,
+      "cpu_ticks_delta": 2732,
+      "ctx_per_s": 29.139,
+      "ctx_total_delta": 106619,
+      "first_t_s": 0,
+      "last_t_s": 3659,
+      "pid": 5384,
+      "pss_growth_kib": -28180,
+      "pss_growth_pct": -20.36,
+      "pss_kib": {
+        "first": 138401,
+        "last": 110221,
+        "max": 138401,
+        "mean": 127194.294,
+        "min": 110208
+      },
+      "role": "shell:kwin_x11",
+      "rss_kib": {
+        "first": 166344,
+        "last": 165308,
+        "max": 166344,
+        "mean": 166013.961,
+        "min": 165308
+      },
+      "samples": 51,
+      "starttime_ticks": 50056,
+      "wakeups_delta": null,
+      "wakeups_exported": false
+    },
+    {
+      "comm": "plasmashell",
+      "cpu_pct_of_one_core": 0.0014,
+      "cpu_ticks_delta": 5,
+      "ctx_per_s": 0.0,
+      "ctx_total_delta": 0,
+      "first_t_s": 0,
+      "last_t_s": 3659,
+      "pid": 5422,
+      "pss_growth_kib": -11157,
+      "pss_growth_pct": -2.44,
+      "pss_kib": {
+        "first": 457361,
+        "last": 446204,
+        "max": 457361,
+        "mean": 453016.882,
+        "min": 446161
+      },
+      "role": "shell:plasmashell",
+      "rss_kib": {
+        "first": 484004,
+        "last": 484004,
+        "max": 484004,
+        "mean": 484004.0,
+        "min": 484004
+      },
+      "samples": 51,
+      "starttime_ticks": 50251,
+      "wakeups_delta": null,
+      "wakeups_exported": false
+    },
+    {
+      "comm": "canopy-classic",
+      "cpu_pct_of_one_core": 0.0,
+      "cpu_ticks_delta": 0,
+      "ctx_per_s": 0.0,
+      "ctx_total_delta": 0,
+      "first_t_s": 0,
+      "last_t_s": 3659,
+      "pid": 5667,
+      "pss_growth_kib": -3782,
+      "pss_growth_pct": -2.95,
+      "pss_kib": {
+        "first": 128124,
+        "last": 124342,
+        "max": 128124,
+        "mean": 126679.569,
+        "min": 124342
+      },
+      "role": "canopy",
+      "rss_kib": {
+        "first": 147108,
+        "last": 147108,
+        "max": 147108,
+        "mean": 147108.0,
+        "min": 147108
+      },
+      "samples": 51,
+      "starttime_ticks": 51252,
+      "wakeups_delta": null,
+      "wakeups_exported": false
+    }
+  ],
+  "sample_count": 51,
+  "sample_gap_classification": [
+    {
+      "basis": "guest soft lockup + VirtualBox heartbeat/catch-up lag",
+      "classification": "GUEST_STALL_PROVEN",
+      "delta_s": 179,
+      "from_s": 1654,
+      "guest_soft_lockup_lines": [
+        "2026-11-28T06:53:01+00:00 canopy-plasma6 kernel: watchdog: BUG: soft lockup - CPU#0 stuck for 28s! [swapper/0:0]",
+        "2026-11-28T06:53:31+00:00 canopy-plasma6 kernel: watchdog: BUG: soft lockup - CPU#0 stuck for 26s! [swapper/0:0]",
+        "2026-11-28T06:53:31+00:00 canopy-plasma6 kernel: watchdog: BUG: soft lockup - CPU#1 stuck for 26s! [unattended-upgr:66146]"
+      ],
+      "method": "read-only-file-scan",
+      "no_rows_synthesised": true,
+      "sources": {
+        "guest_journal": {
+          "path": "journal_window.txt",
+          "sha256": "d31594472e5144cc41bea8d5f99ba4ada03baed45147214c1d176f9144fafcd6"
+        },
+        "vbox_log": {
+          "log_open_utc": "2026-11-28T04:00:20.281695700Z",
+          "path": "vbox_correlation.txt",
+          "sha256": "b33854a8e6e83c358b663af8c77747853d476df3dd462d58a75fdb6f246325d5"
+        }
+      },
+      "to_s": 1833,
+      "vbox_stall_lines": [
+        "02:56:10.732968 TM: Giving up catch-up attempt at a 208 734 612 628 ns lag; new total: 2 788 332 154 080 ns",
+        "02:56:10.733005 VMMDev: vmmDevHeartbeatFlatlinedTimer: Guest seems to be unresponsive. Last heartbeat received 178 seconds ago",
+        "02:56:10.736249 VMMDev: GuestHeartBeat: Guest is alive (gone 178 495 770 464 ns)"
+      ],
+      "window_utc": [
+        "2026-11-28T06:53:00Z",
+        "2026-11-28T06:56:59Z"
+      ]
+    },
+    {
+      "basis": "guest soft lockup + VirtualBox heartbeat/catch-up lag",
+      "classification": "GUEST_STALL_PROVEN",
+      "delta_s": 541,
+      "from_s": 2278,
+      "guest_soft_lockup_lines": [
+        "2026-11-28T07:12:56+00:00 canopy-plasma6 kernel: watchdog: BUG: soft lockup - CPU#0 stuck for 453s! [swapper/0:0]"
+      ],
+      "method": "read-only-file-scan",
+      "no_rows_synthesised": true,
+      "sources": {
+        "guest_journal": {
+          "path": "journal_window.txt",
+          "sha256": "d31594472e5144cc41bea8d5f99ba4ada03baed45147214c1d176f9144fafcd6"
+        },
+        "vbox_log": {
+          "log_open_utc": "2026-11-28T04:00:20.281695700Z",
+          "path": "vbox_correlation.txt",
+          "sha256": "b33854a8e6e83c358b663af8c77747853d476df3dd462d58a75fdb6f246325d5"
+        }
+      },
+      "to_s": 2819,
+      "vbox_stall_lines": [
+        "03:12:36.327812 TM: Giving up catch-up attempt at a 500 505 599 408 ns lag; new total: 3 378 790 772 065 ns",
+        "03:12:36.327865 VMMDev: vmmDevHeartbeatFlatlinedTimer: Guest seems to be unresponsive. Last heartbeat received 483 seconds ago",
+        "03:12:36.328643 VMMDev: GuestHeartBeat: Guest is alive (gone 483 319 390 834 ns)"
+      ],
+      "window_utc": [
+        "2026-11-28T07:03:24Z",
+        "2026-11-28T07:13:25Z"
+      ]
+    }
+  ],
+  "sample_gaps_gt_120s": [
+    {
+      "delta_s": 179,
+      "from_s": 1654,
+      "to_s": 1833
+    },
+    {
+      "delta_s": 541,
+      "from_s": 2278,
+      "to_s": 2819
+    }
+  ],
+  "schema": "native-soak-report/2",
+  "soak_rerun": {
+    "reason": "NOT_RUN: read-only preflight 2026-11-28T08:03:19Z found active unattended-upgrade/apt.systemd.daily (PID 66146 = prior lockup culprit), load 3.29/2.41/2.40 and 10 soft lockups in last 1000 kernel lines; guest is NOT exclusively owned/quiesced. No fresh 1h soak executed; no VM state change.",
+    "status": "NOT_RUN",
+    "vm_actions": "read-only only; no VM state change"
+  },
+  "source": "scratch/native_stability/raw/soak.tsv",
+  "start_utc": "2026-11-28T06:25:56Z",
+  "system_idle_pct": {
+    "first": 86.75694834798556,
+    "last": 86.48200754860663,
+    "max": 89.14181911166003,
+    "mean": 88.01,
+    "min": 86.48200754860663
+  },
+  "system_running_units": {
+    "first": 48,
+    "last": 52,
+    "max": 54,
+    "mean": 50.06,
+    "min": 48
+  },
+  "system_service_coredumps": [
+    "Sat 2026-11-28 06:56:32 UTC   337    0    0 SIGABRT inaccessible /usr/lib/systemd/systemd-journald                                            -",
+    "Sat 2026-11-28 06:56:33 UTC   386    0    0 SIGABRT inaccessible /usr/bin/udevadm                                                             -",
+    "Sat 2026-11-28 06:56:33 UTC   750    0    0 SIGABRT inaccessible /usr/lib/systemd/systemd-logind                                              -",
+    "Sat 2026-11-28 06:56:33 UTC   385  989  989 SIGABRT inaccessible /usr/lib/systemd/systemd-resolved                                            -",
+    "Sat 2026-11-28 07:12:57 UTC 67719    0    0 SIGABRT inaccessible /usr/lib/systemd/systemd-journald                                            -",
+    "Sat 2026-11-28 07:12:57 UTC 67863    0    0 SIGABRT inaccessible /usr/bin/udevadm                                                             -",
+    "Sat 2026-11-28 07:12:58 UTC 68009  989  989 SIGABRT inaccessible /usr/lib/systemd/systemd-resolved                                            -",
+    "Sat 2026-11-28 07:12:58 UTC 66280    0    0 SIGABRT inaccessible /usr/lib/systemd/systemd-logind                                              -"
+  ],
+  "target_process_coredumps": [],
+  "target_rules": "argv0 basename in {startplasma-x11,kwin_x11,plasmashell} or startswith('canopy-classic'); exact argv0, no substring guessing",
+  "unit_membership": {
+    "system": {
+      "reason": "no unit_sample events in raw TSV (legacy raw)",
+      "status": "NOT_RUN"
+    },
+    "user": {
+      "reason": "no unit_sample events in raw TSV (legacy raw)",
+      "status": "NOT_RUN"
+    }
+  },
+  "user_running_units": {
+    "first": 53,
+    "last": 53,
+    "max": 53,
+    "mean": 53.0,
+    "min": 53
+  },
+  "verdict": "SOAK_WARN_CRASH_OR_ERROR_EVENT+SAMPLING_GAP+SERVICE_COUNT_DRIFT+JOURNAL_ERROR_COUNT_UNRELIABLE_LEGACY_HOSTNAME_MATCH",
+  "warnings": [
+    "CRASH_OR_ERROR_EVENT",
+    "SAMPLING_GAP",
+    "SERVICE_COUNT_DRIFT",
+    "JOURNAL_ERROR_COUNT_UNRELIABLE_LEGACY_HOSTNAME_MATCH"
+  ]
+}

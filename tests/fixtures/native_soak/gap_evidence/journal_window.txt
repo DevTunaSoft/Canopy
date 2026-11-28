@@ -1,0 +1,2 @@
+2026-11-28T06:53:31+00:00 canopy-plasma6 kernel: watchdog: BUG: soft lockup - CPU#0 stuck for 26s! [swapper/0:0]
+2026-11-28T06:55:00+00:00 canopy-plasma6 systemd[1]: benign fixture line, no lockup

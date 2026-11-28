@@ -1,0 +1,304 @@
+{
+  "canopy_cpu_5min_windows": [
+    {
+      "cpu_pct_of_one_core": 0.0,
+      "end_s": 240,
+      "start_s": 0,
+      "window_index": 0
+    },
+    {
+      "cpu_pct_of_one_core": 0.0,
+      "end_s": 540,
+      "start_s": 300,
+      "window_index": 1
+    },
+    {
+      "cpu_pct_of_one_core": 0.0,
+      "end_s": 840,
+      "start_s": 600,
+      "window_index": 2
+    },
+    {
+      "cpu_pct_of_one_core": 0.0,
+      "end_s": 1140,
+      "start_s": 900,
+      "window_index": 3
+    },
+    {
+      "cpu_pct_of_one_core": 0.0,
+      "end_s": 1467,
+      "start_s": 1200,
+      "window_index": 4
+    },
+    {
+      "cpu_pct_of_one_core": 0.0,
+      "end_s": 1654,
+      "start_s": 1527,
+      "window_index": 5
+    },
+    {
+      "cpu_pct_of_one_core": 0.0,
+      "end_s": 2098,
+      "start_s": 1833,
+      "window_index": 6
+    },
+    {
+      "cpu_pct_of_one_core": 0.0,
+      "end_s": 2278,
+      "start_s": 2158,
+      "window_index": 7
+    },
+    {
+      "cpu_pct_of_one_core": 0.0,
+      "end_s": 2999,
+      "start_s": 2819,
+      "window_index": 9
+    },
+    {
+      "cpu_pct_of_one_core": 0.0,
+      "end_s": 3299,
+      "start_s": 3059,
+      "window_index": 10
+    },
+    {
+      "cpu_pct_of_one_core": 0.0,
+      "end_s": 3599,
+      "start_s": 3359,
+      "window_index": 11
+    },
+    {
+      "cpu_pct_of_one_core": 0.0,
+      "end_s": 3659,
+      "start_s": 3659,
+      "window_index": 12
+    }
+  ],
+  "clk_tck": 100,
+  "duration_s": 3659,
+  "end_utc": "2026-11-28T07:26:55Z",
+  "guest": null,
+  "journal_probe": {
+    "coredump_total": 8,
+    "coredumps": [
+      "Sat 2026-11-28 06:56:32 UTC   337    0    0 SIGABRT inaccessible /usr/lib/systemd/systemd-journald                                            -",
+      "Sat 2026-11-28 06:56:33 UTC   386    0    0 SIGABRT inaccessible /usr/bin/udevadm                                                             -",
+      "Sat 2026-11-28 06:56:33 UTC   750    0    0 SIGABRT inaccessible /usr/lib/systemd/systemd-logind                                              -",
+      "Sat 2026-11-28 06:56:33 UTC   385  989  989 SIGABRT inaccessible /usr/lib/systemd/systemd-resolved                                            -",
+      "Sat 2026-11-28 07:12:57 UTC 67719    0    0 SIGABRT inaccessible /usr/lib/systemd/systemd-journald                                            -",
+      "Sat 2026-11-28 07:12:57 UTC 67863    0    0 SIGABRT inaccessible /usr/bin/udevadm                                                             -",
+      "Sat 2026-11-28 07:12:58 UTC 68009  989  989 SIGABRT inaccessible /usr/lib/systemd/systemd-resolved                                            -",
+      "Sat 2026-11-28 07:12:58 UTC 66280    0    0 SIGABRT inaccessible /usr/lib/systemd/systemd-logind                                              -"
+    ],
+    "errors": [],
+    "event": "journal_probe",
+    "journal_system_errors": [
+      "2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: #5  0x00007f8ba462a601 __libc_start_call_main (libc.so.6 + 0x2a601)",
+      "2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: #6  0x00007f8ba462a718 __libc_start_main_impl (libc.so.6 + 0x2a718)",
+      "2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: #7  0x00006205d01e9735 n/a (/usr/lib/systemd/systemd-journald + 0xb735)",
+      "2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: ELF object binary architecture: AMD x86-64",
+      "2026-11-28T07:12:55+00:00 canopy-plasma6 systemd[1]: systemd-journald.service: Watchdog timeout (limit 3min)!",
+      "2026-11-28T07:12:55+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '1014' failed with [61]:No data available  [v8.2512.0]",
+      "2026-11-28T07:12:55+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '1012' failed with [61]:No data available  [v8.2512.0]",
+      "2026-11-28T07:12:55+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '62' failed with [61]:No data available  [v8.2512.0]",
+      "2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: Process 67719 (systemd-journal) of user 0 dumped core.",
+      "2026-11-28T07:12:57+00:00 canopy-plasma6 systemd-coredump[75407]: Process 67863 (systemd-udevd) of user 0 dumped core.",
+      "2026-11-28T07:12:58+00:00 canopy-plasma6 systemd-coredump[75408]: Process 68009 (systemd-resolve) of user 989 dumped core.",
+      "2026-11-28T07:12:58+00:00 canopy-plasma6 systemd-coredump[75406]: Process 66280 (systemd-logind) of user 0 dumped core."
+    ],
+    "journal_system_errors_total": 132,
+    "journal_user_errors": [],
+    "journal_user_errors_total": 0,
+    "since": "2026-11-28T06:25:56Z",
+    "t": 3659
+  },
+  "kernel": "7.0.0-14-generic",
+  "label": "NATIVE_SOAK_60M",
+  "not_run": [
+    "24H_SOAK",
+    "TRUE_LOW_END_HARDWARE",
+    "RELEASE_ACCEPTANCE"
+  ],
+  "process_exit_events": [],
+  "process_start_events": [],
+  "processes": [
+    {
+      "comm": "startplasma-x11",
+      "cpu_pct_of_one_core": 0.0,
+      "cpu_ticks_delta": 0,
+      "ctx_per_s": 0.0,
+      "ctx_total_delta": 0,
+      "first_t_s": 0,
+      "last_t_s": 3659,
+      "pid": 4656,
+      "pss_growth_kib": 0,
+      "pss_growth_pct": 0.0,
+      "pss_kib": {
+        "first": 5377,
+        "last": 5377,
+        "max": 5377,
+        "mean": 5377.0,
+        "min": 5377
+      },
+      "role": "shell:startplasma-x11",
+      "rss_kib": {
+        "first": 5520,
+        "last": 5520,
+        "max": 5520,
+        "mean": 5520.0,
+        "min": 5520
+      },
+      "samples": 51,
+      "starttime_ticks": 48637,
+      "wakeups_delta": null,
+      "wakeups_exported": false
+    },
+    {
+      "comm": "kwin_x11",
+      "cpu_pct_of_one_core": 0.7467,
+      "cpu_ticks_delta": 2732,
+      "ctx_per_s": 29.139,
+      "ctx_total_delta": 106619,
+      "first_t_s": 0,
+      "last_t_s": 3659,
+      "pid": 5384,
+      "pss_growth_kib": -28180,
+      "pss_growth_pct": -20.36,
+      "pss_kib": {
+        "first": 138401,
+        "last": 110221,
+        "max": 138401,
+        "mean": 127194.294,
+        "min": 110208
+      },
+      "role": "shell:kwin_x11",
+      "rss_kib": {
+        "first": 166344,
+        "last": 165308,
+        "max": 166344,
+        "mean": 166013.961,
+        "min": 165308
+      },
+      "samples": 51,
+      "starttime_ticks": 50056,
+      "wakeups_delta": null,
+      "wakeups_exported": false
+    },
+    {
+      "comm": "plasmashell",
+      "cpu_pct_of_one_core": 0.0014,
+      "cpu_ticks_delta": 5,
+      "ctx_per_s": 0.0,
+      "ctx_total_delta": 0,
+      "first_t_s": 0,
+      "last_t_s": 3659,
+      "pid": 5422,
+      "pss_growth_kib": -11157,
+      "pss_growth_pct": -2.44,
+      "pss_kib": {
+        "first": 457361,
+        "last": 446204,
+        "max": 457361,
+        "mean": 453016.882,
+        "min": 446161
+      },
+      "role": "shell:plasmashell",
+      "rss_kib": {
+        "first": 484004,
+        "last": 484004,
+        "max": 484004,
+        "mean": 484004.0,
+        "min": 484004
+      },
+      "samples": 51,
+      "starttime_ticks": 50251,
+      "wakeups_delta": null,
+      "wakeups_exported": false
+    },
+    {
+      "comm": "canopy-classic",
+      "cpu_pct_of_one_core": 0.0,
+      "cpu_ticks_delta": 0,
+      "ctx_per_s": 0.0,
+      "ctx_total_delta": 0,
+      "first_t_s": 0,
+      "last_t_s": 3659,
+      "pid": 5667,
+      "pss_growth_kib": -3782,
+      "pss_growth_pct": -2.95,
+      "pss_kib": {
+        "first": 128124,
+        "last": 124342,
+        "max": 128124,
+        "mean": 126679.569,
+        "min": 124342
+      },
+      "role": "canopy",
+      "rss_kib": {
+        "first": 147108,
+        "last": 147108,
+        "max": 147108,
+        "mean": 147108.0,
+        "min": 147108
+      },
+      "samples": 51,
+      "starttime_ticks": 51252,
+      "wakeups_delta": null,
+      "wakeups_exported": false
+    }
+  ],
+  "sample_count": "51",
+  "sample_gaps_gt_120s": [
+    {
+      "delta_s": 179,
+      "from_s": 1654,
+      "to_s": 1833
+    },
+    {
+      "delta_s": 541,
+      "from_s": 2278,
+      "to_s": 2819
+    }
+  ],
+  "schema": "native-soak-report/1",
+  "source": "scratch/native_stability/raw/soak.tsv",
+  "start_utc": "2026-11-28T06:25:56Z",
+  "system_idle_pct": {
+    "first": 86.75694834798556,
+    "last": 86.48200754860663,
+    "max": 89.14181911166003,
+    "mean": 88.01,
+    "min": 86.48200754860663
+  },
+  "system_running_units": {
+    "first": 48,
+    "last": 52,
+    "max": 54,
+    "mean": 50.06,
+    "min": 48
+  },
+  "system_service_coredumps": [
+    "Sat 2026-11-28 06:56:32 UTC   337    0    0 SIGABRT inaccessible /usr/lib/systemd/systemd-journald                                            -",
+    "Sat 2026-11-28 06:56:33 UTC   386    0    0 SIGABRT inaccessible /usr/bin/udevadm                                                             -",
+    "Sat 2026-11-28 06:56:33 UTC   750    0    0 SIGABRT inaccessible /usr/lib/systemd/systemd-logind                                              -",
+    "Sat 2026-11-28 06:56:33 UTC   385  989  989 SIGABRT inaccessible /usr/lib/systemd/systemd-resolved                                            -",
+    "Sat 2026-11-28 07:12:57 UTC 67719    0    0 SIGABRT inaccessible /usr/lib/systemd/systemd-journald                                            -",
+    "Sat 2026-11-28 07:12:57 UTC 67863    0    0 SIGABRT inaccessible /usr/bin/udevadm                                                             -",
+    "Sat 2026-11-28 07:12:58 UTC 68009  989  989 SIGABRT inaccessible /usr/lib/systemd/systemd-resolved                                            -",
+    "Sat 2026-11-28 07:12:58 UTC 66280    0    0 SIGABRT inaccessible /usr/lib/systemd/systemd-logind                                              -"
+  ],
+  "target_process_coredumps": [],
+  "target_rules": "argv0 basename in {startplasma-x11,kwin_x11,plasmashell} or startswith('canopy-classic'); exact argv0, no substring guessing",
+  "user_running_units": {
+    "first": 53,
+    "last": 53,
+    "max": 53,
+    "mean": 53.0,
+    "min": 53
+  },
+  "verdict": "SOAK_WARN_CRASH_OR_ERROR_EVENT+SAMPLING_GAP+SERVICE_COUNT_DRIFT",
+  "warnings": [
+    "CRASH_OR_ERROR_EVENT",
+    "SAMPLING_GAP",
+    "SERVICE_COUNT_DRIFT"
+  ]
+}

@@ -1,0 +1,31 @@
+=== VBoxManage showvminfo (filtered) ===
+ostype="Ubuntu (64-bit)"
+memory=4096
+cpus=2
+VMState="running"
+VMStateChangeTime="2026-11-28T04:00:24.168000000"
+GuestAdditionsVersion="6.0.0 r127566"
+=== guest preflight ===
+2026-11-28T06:25:54Z
+canopy-plasma6
+ 06:25:54 up  2:24,  3 users,  load average: 0.15, 0.41, 0.34
+               total        used        free      shared  buff/cache   available
+Mem:            3910        1681        1254         112        1314        2229
+Swap:              0           0           0
+4648 /usr/lib/x86_64-linux-gnu/sddm/sddm-helper --socket /tmp/sddm-auth-9388f21c-1d29-46ca-a364-e7257f36f502 --id 1 --start /usr/bin/startplasma-x11 --user canopy --autologin
+4656 /usr/bin/startplasma-x11
+4926 /usr/bin/ssh-agent /usr/bin/im-launch /usr/bin/startplasma-x11
+5384 /usr/bin/kwin_x11 --replace
+5422 /usr/bin/plasmashell --no-respawn
+5667 /home/canopy/.local/bin/canopy-classic
+65986 bash -c date -u +%Y-%m-%dT%H:%M:%SZ; hostname; uptime; free -m | head -3; pgrep -af "canopy-classic|kwin_x11|plasmashell|startplasma-x11|native-task-harness" | head -12; echo "---coredump baseline---"; coredumpctl list --no-pager 2>&1 | tail -8
+---coredump baseline---
+Sat 2026-11-28 04:24:20 UTC 16203 1000 1000 SIGABRT present      /usr/bin/kglobalaccel5                                                  404.5K
+Sat 2026-11-28 04:24:21 UTC 16260 1000 1000 SIGABRT present      /usr/bin/kglobalaccel5                                                  404.1K
+Sat 2026-11-28 04:24:23 UTC 16277 1000 1000 SIGABRT present      /usr/bin/kglobalaccel5                                                  405.4K
+Sat 2026-11-28 04:24:24 UTC 16332 1000 1000 SIGABRT present      /usr/bin/kglobalaccel5                                                  404.5K
+Sat 2026-11-28 04:24:25 UTC 16380 1000 1000 SIGABRT present      /usr/bin/kglobalaccel5                                                    405K
+Sat 2026-11-28 04:37:06 UTC 25656 1000 1000 SIGABRT present      /usr/bin/plasmashell                                                      1.1M
+Sat 2026-11-28 04:37:14 UTC 25709 1000 1000 SIGABRT present      /usr/bin/kwin_x11                                                         1.2M
+Sat 2026-11-28 06:15:17 UTC 56414 1000 1000 SIGABRT present      /usr/bin/konsole                                                          1.2M
+=== host snapshot ===

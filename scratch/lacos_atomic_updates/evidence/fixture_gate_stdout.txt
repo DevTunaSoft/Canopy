@@ -1,0 +1,8 @@
+PASS: 7/7 synthetic fixtures matched; guest=BLOCKED/NOT_RUN
+  PASS F001-ready-handoff.json: expected=READY_FOR_HANDOFF actual=READY_FOR_HANDOFF
+  PASS F002-unsigned-candidate.json: expected=BLOCKED actual=BLOCKED
+  PASS F003-core-mutation-claim.json: expected=BLOCKED actual=BLOCKED
+  PASS F004-missing-rollback-checkpoint.json: expected=BLOCKED actual=BLOCKED
+  PASS F005-unbounded-candidate.json: expected=BLOCKED actual=BLOCKED
+  PASS F006-confirm-failed-rollback.json: expected=ROLLBACK_HANDOFF actual=ROLLBACK_HANDOFF
+  PASS F007-immediate-activation.json: expected=BLOCKED actual=BLOCKED

@@ -1,0 +1,9 @@
+=== activate user session 65 ===
+Failed to issue method call: Access denied as the requested operation requires interactive authentication. However, interactive authentication has not been enabled by the calling program.
+activate_rc=1
+=== states ===
+S=65 no online 
+S=1015 yes active 
+=== X probe :0 ===
+rc=124
+rc=124

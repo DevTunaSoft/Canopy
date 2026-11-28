@@ -1,0 +1,7 @@
+=== sessions ===
+S=65 canopy :0 no online 
+S=1013 sddm :1 no online 
+S=1015 sddm :2 yes active 
+=== X probe :0 ===
+rc=124
+wmrc=124

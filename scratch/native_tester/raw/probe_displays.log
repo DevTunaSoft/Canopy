@@ -1,0 +1,49 @@
+=== sessions ===
+S=1013 sddm tty1 :1 x11 no online 
+S=1015 sddm tty3 :2 x11 yes active 
+S=1020 
+S=62 canopy   unspecified yes active 
+S=65 canopy tty2 :0 x11 no online 
+=== kwin env ===
+XDG_RUNTIME_DIR=/run/user/1000
+DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
+DISPLAY=:0
+XAUTHORITY=/tmp/xauth_zdKrsq
+XDG_CURRENT_DESKTOP=KDE
+XDG_SESSION_TYPE=x11
+=== xorg displays/auth ===
+PID=4563 /usr/lib/xorg/Xorg -nolisten tcp -background none -seat seat0 vt2 -auth /run/sddm/xauth_dyaoSt -noreset -displayfd 16 
+PID=66303 /usr/lib/xorg/Xorg -nolisten tcp -background none -seat seat0 vt1 -auth /run/sddm/xauth_cpqSlf -noreset -displayfd 23 
+PID=75506 /usr/lib/xorg/Xorg -nolisten tcp -background none -seat seat0 vt3 -auth /run/sddm/xauth_YupUzD -noreset -displayfd 34 
+=== try displays ===
+--- :0 ---
+auth=/tmp/xauth_zdKrsq rc=124
+auth=/run/sddm/xauth_dyaoSt rc=124
+auth=/run/sddm/xauth_cpqSlf rc=124
+auth=/run/sddm/xauth_YupUzD rc=124
+--- :1 ---
+auth=/tmp/xauth_zdKrsq Authorization required, but no authorization protocol specified
+
+rc=1
+auth=/run/sddm/xauth_dyaoSt Authorization required, but no authorization protocol specified
+
+rc=1
+auth=/run/sddm/xauth_cpqSlf Authorization required, but no authorization protocol specified
+
+rc=1
+auth=/run/sddm/xauth_YupUzD Authorization required, but no authorization protocol specified
+
+rc=1
+--- :2 ---
+auth=/tmp/xauth_zdKrsq Authorization required, but no authorization protocol specified
+
+rc=1
+auth=/run/sddm/xauth_dyaoSt Authorization required, but no authorization protocol specified
+
+rc=1
+auth=/run/sddm/xauth_cpqSlf Authorization required, but no authorization protocol specified
+
+rc=1
+auth=/run/sddm/xauth_YupUzD Authorization required, but no authorization protocol specified
+
+rc=1

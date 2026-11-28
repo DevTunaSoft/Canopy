@@ -1,0 +1,24 @@
+CANOPY_LANDSCAPE_WALLPAPER_VERIFIED: local PNG/JPEG
+CANOPY_APPROVED_ART_VERIFIED: eight exact PNG icons; landscape wallpaper separately checked
+FIVE_PRODUCTION_PACK_FALLBACK: exact original-derived Qt renderer
+DOCK_CLEAN_EDGES_ACTIVE: exact approved source cleanup selected for normal startup; frozen PNGs and QML geometry unchanged
+DOCK_FIVE_CENTER_ACTIVE: Browser, Mail, Files, Terminal, Settings v3 composition inside unchanged mask; Calendar/Photos/Music exact pixel lock retained
+CANOPY_ROUNDED_DOCK_VERIFIED: eight original icons, padded, alpha-clipped
+WINDOW_ACTIVATION_ADAPTER_LOADED
+CANOPY_QUICK_CONTROLS_HOST_INJECTED: in-process view() only
+qt.qml.context: qrc:/Canopy/Classic/NotificationCenter.qml:255:13 Parameter "text" is not declared. Injection of parameters into signal handlers is deprecated. Use JavaScript functions with formal parameters instead.
+qt.qml.context: qrc:/Canopy/Classic/LauncherOverlay.qml:362:13 Parameter "text" is not declared. Injection of parameters into signal handlers is deprecated. Use JavaScript functions with formal parameters instead.
+qt.qml.context: qrc:/Canopy/Classic/PreviewWindow.qml:677:17 Parameter "text" is not declared. Injection of parameters into signal handlers is deprecated. Use JavaScript functions with formal parameters instead.
+CANOPY_CLASSIC_WINDOW_READY
+CANOPY_QUICK_CONTROLS_REGISTERED: hidden until requested, no host control bridge, no visual asset changes
+CANOPY_SETTINGS_PANEL_REGISTERED: hidden until requested, one contract-backed preference, no approved visual changes
+CANOPY_FILES_DOCK_NATIVE_LAUNCH_CONNECTED
+CANOPY_BROWSER_DOCK_NATIVE_LAUNCH_CONNECTED
+CANOPY_MAIL_DOCK_NATIVE_LAUNCH_CONNECTED
+CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED "Calendar"
+CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED "Photos"
+CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED "Terminal"
+CANOPY_INTENT_DOCK_CONNECTED "Music"
+CANOPY_INTENT_DOCK_CONNECTED "Settings"
+SELF_TEST_PASS: notification centre registered in compiled shell
+NOTIFICATION_CENTER_FIXTURE_PASS: opener wired, zero host rows, disclosure visible, refresh disabled, close works

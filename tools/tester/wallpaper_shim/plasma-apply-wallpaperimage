@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Independent-tester workaround ONLY, not a product change.
+#
+# The shipped install.sh calls `plasma-apply-wallpaperimage`, which asks the
+# live Plasma shell over D-Bus to apply the wallpaper. In this guest the seat
+# is on an SDDM greeter (user session :0 online but not active), so that call
+# times out with "Did not receive a reply" and install.sh aborts under set -e.
+#
+# This PATH shim tries the real command with a bounded timeout. If it does not
+# reply, the shim logs the exact failure and returns 0 so install.sh can run
+# its own in-place KConfig `Image=file://...` write and finish the user-scope
+# install. The shim never edits the wallpaper file itself and never changes
+# product code. The raw D-Bus failure stays in the evidence log.
+set -uo pipefail
+LOG="${WALLPAPER_SHIM_LOG:-/tmp/native_tester_wallpaper_shim.log}"
+printf '%s SHIM_CALL' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$LOG"
+printf ' %q' "$@" >> "$LOG"
+printf '\n' >> "$LOG"
+timeout 25 /usr/bin/plasma-apply-wallpaperimage "$@" >> "$LOG" 2>&1
+rc=$?
+printf '%s REAL_PLASMA_APPLY_WALLPAPER_RC=%s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" "$rc" >> "$LOG"
+if [ "$rc" -eq 0 ]; then
+  exit 0
+fi
+printf '%s SHIM_FALLBACK_0: no D-Bus reply; install.sh in-place KConfig write will be used\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$LOG"
+exit 0

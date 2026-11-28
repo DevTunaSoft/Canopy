@@ -1,0 +1,6 @@
+ec9e44cfaa3ba3059aef492b429a6e6c6b94da32a230d4acb6cb28a1ef3ece35  incoming/org.kde.plasma.canopyclassic-0.1.0-dev-baseline.tar.gz
+metadata.json: OK
+uninstall.sh: OK
+verify.sh: OK
+-rwxr-xr-x 1 canopy canopy 2442112 Jan  1  1970 unpacked/contents/bin/canopy-classic-spike
+COPY_UNPACK_OK

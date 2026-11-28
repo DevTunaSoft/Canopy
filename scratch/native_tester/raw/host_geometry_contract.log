@@ -1,0 +1,21 @@
+test_approved_theme_geometry_and_legacy_python_mirror_pinned (tests.test_c100_dock_display_geometry_contract.FrozenConstantTests.test_approved_theme_geometry_and_legacy_python_mirror_pinned) ... ok
+test_centering_tolerance_matches_compiled_check (tests.test_c100_dock_display_geometry_contract.OffscreenAndCenteringTests.test_centering_tolerance_matches_compiled_check) ... ok
+test_offscreen_custom_rect_is_rejected (tests.test_c100_dock_display_geometry_contract.OffscreenAndCenteringTests.test_offscreen_custom_rect_is_rejected) ... ok
+test_reference_1200x750_layout_is_valid (tests.test_c100_dock_display_geometry_contract.ReferenceLayoutTests.test_reference_1200x750_layout_is_valid) ... ok
+test_tile_count_changes_row_width (tests.test_c100_dock_display_geometry_contract.ReferenceLayoutTests.test_tile_count_changes_row_width) ... ok
+test_round_half_up_matches_qt_qround (tests.test_c100_dock_display_geometry_contract.RoundingTests.test_round_half_up_matches_qt_qround) ... ok
+test_fractional_125_percent_rounding (tests.test_c100_dock_display_geometry_contract.ScalingTests.test_fractional_125_percent_rounding) ... ok
+test_fractional_150_percent_trap_has_no_false_violation (tests.test_c100_dock_display_geometry_contract.ScalingTests.test_fractional_150_percent_trap_has_no_false_violation) ... ok
+test_hidpi_integer_scale_reports_physical_extents (tests.test_c100_dock_display_geometry_contract.ScalingTests.test_hidpi_integer_scale_reports_physical_extents) ... ok
+test_invalid_scale_is_reported (tests.test_c100_dock_display_geometry_contract.ScalingTests.test_invalid_scale_is_reported) ... ok
+test_logical_bounds_are_scale_invariant (tests.test_c100_dock_display_geometry_contract.ScalingTests.test_logical_bounds_are_scale_invariant) ... ok
+test_to_physical_scales_every_field (tests.test_c100_dock_display_geometry_contract.ScalingTests.test_to_physical_scales_every_field) ... ok
+test_screen_shorter_than_dock_is_above_screen (tests.test_c100_dock_display_geometry_contract.TinyScreenTests.test_screen_shorter_than_dock_is_above_screen) ... ok
+test_short_screen_dock_overlaps_top_bar (tests.test_c100_dock_display_geometry_contract.TinyScreenTests.test_short_screen_dock_overlaps_top_bar) ... ok
+test_tiny_screen_clamps_dock_width_and_still_fits (tests.test_c100_dock_display_geometry_contract.TinyScreenTests.test_tiny_screen_clamps_dock_width_and_still_fits) ... ok
+test_zero_screen_is_invalid (tests.test_c100_dock_display_geometry_contract.TinyScreenTests.test_zero_screen_is_invalid) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.088s
+
+OK

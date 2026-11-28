@@ -1,0 +1,21 @@
+{
+  "lease_id": "native-tester-walkthrough-20261128-0730Z",
+  "task": "INDEPENDENT_TESTER_WALKTHROUGH",
+  "worker": "native-tester-walkthrough-20261128",
+  "vm": "Canopy-Test-Plasma6",
+  "vm_uuid": "3aecd840-4dd6-4481-913f-64a289da406d",
+  "claimed_utc": "2026-11-28T07:30:41Z",
+  "expires_utc": "2026-11-28T08:30:41Z",
+  "serialization": {
+    "stability_agent": "product/native-stability-smoke-20261127",
+    "stability_claim_file": "C:/Users/X1/AppData/Local/hermes/cache/scratch/wt-native-stability-20261127/scratch/native_stability/CLAIM.md",
+    "stability_soak_end_utc": "2026-11-28T07:27:00Z",
+    "stability_sampler_rc": 0,
+    "host_preflight": "ps -ef | grep -iE 'VBoxHeadless|smoke_test|native_soak|unittest discover' returned no competing process at 2026-11-28T07:30Z",
+    "guest_preflight": "SSH_OK at 2026-11-28T07:30:41Z; 2 users; no other tester harness process"
+  },
+  "scope": "user-scope KPackage install/verify/uninstall, wallpaper config, compiled-binary self-tests, D-Bus owner probe, VBox framebuffer captures. No VM start/stop/save/revert/snapshot, no sudo, no system files, no approval, no merge.",
+  "status": "RELEASED",
+  "released_utc": "2026-11-28T07:56:00Z",
+  "release_note": "21/21 guest checks PASS at 07:55:52Z; package uninstalled, stock wallpaper config restored, guest left as found (no VM state change)."
+}

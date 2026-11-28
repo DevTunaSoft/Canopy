@@ -1,0 +1,91 @@
+CHECK|artifact_sha256|PASS|ec9e44cfaa3ba3059aef492b429a6e6c6b94da32a230d4acb6cb28a1ef3ece35
+CHECK|package_sha256sums|PASS|17 files
+CHECK|compiled_binary_sha256|PASS|4950fd793d067aa722a64ea8b09f0c1c65a55263b7f96c8fd418bf579e9f4a32
+CHECK|approved_wallpaper_sha256|PASS|8c6cab50a0977fc129c0d2a20523d9361646f36da66f2f3f2b2436a0d9001381
+CHECK|install_user_scope|FAIL|install.sh rc nonzero (see commands.log)
+CHECK|package_listed|PASS|org.kde.plasma.canopyclassic
+CHECK|installed_package_verify|FAIL|verify.sh rc nonzero
+CHECK|plasma_wallpaper_config|FAIL|approved wallpaper path absent
+CHECK|launcher_search|PASS|actual Qt launcher opens, searches and closes; 21 SELF_TEST_PASS, 0 FAIL
+CHECK|compiled_geometry_screenshot|PASS|sha256=dfce15c9565289b12af10271c63e35c7dd8b59248aaffcb9996fe237b9550be6 geometry=1200x750
+CHECK|compiled_geometry_1920|PASS|desktop chrome geometry 1920x1080; 0 SELF_TEST_FAIL
+CHECK|running_indicator_activation|PASS|running=ok active=ok closed=ok fail_closed=ok
+CHECK|notification_center_wiring|PASS|opener wired, zero host rows, refresh disabled, close works
+CHECK|settings_persistence_write|PASS|QSettings=a18dced7cdd8003ff9e2607a48e6310eac9644abc7f5856ff0068fee22ba9747 key=reduced_motion=unset
+CHECK|settings_restart_readback|PASS|stored reduce accepted by fresh process and preserved
+CHECK|terminal_launch|PASS|Terminal dock tile reached GIO; marker=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+CHECK|notifications_single_owner|FAIL|owner guard did not pass (see owner_guard.log)
+CHECK|uninstall|PASS|kpackagetool6 --remove; no system change
+CHECK|package_absent_after_uninstall|PASS|not listed
+CHECK|stock_config_restored|PASS|config byte-identical to pre-install snapshot sha=141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751
+CHECK|stock_wallpaper_fallback|PASS|Plasma wallpaper path=Image=file:///usr/share/wallpapers/Kubuntu#day-night
+=== owner guard ===
+UTC=2026-11-28T07:48:20Z
+GET_NAME_OWNER_RAW=(':1.22',)
+NOTIFICATION_OWNER=:1.22
+OWNER_PID=325422 OWNER_COMM=UNKNOWN
+OWNER_PID_VALID=yes
+OWNER_GUARD_FAIL owner_comm got=[UNKNOWN] want=[plasmashell]
+FOREIGN_NOTIFICATION_DAEMONS=[]
+OWNER_GUARD_OK foreign_daemon_count=0
+CANOPY_NOTIFICATION_DAEMONS=[]
+OWNER_GUARD_OK canopy_daemon_count=0
+SERVICE_FILES_WITH_NAME=1
+OWNER_GUARD_FAIL activatable_duplicate_service_files got=[1] want=[0]
+NAMES_LIST_OCCURRENCES=1
+OWNER_GUARD_OK bus_name_occurrences=1
+OWNER_GUARD_FAIL
+=== settings conf ===
+[accessibility]
+reduced_motion=unset
+=== tail commands ===
+contents/approved/wallpaper/canopy-wave-preview.png: OK
+contents/bin/canopy-classic-spike: OK
+contents/ui/main.qml: OK
+install.sh: OK
+metadata.json: OK
+uninstall.sh: OK
+verify.sh: OK
+METADATA_IDENTITY_OK
+2026-11-28T07:48:01Z RC[1]
+2026-11-28T07:48:01Z CHECK installed_package_verify=FAIL :: verify.sh rc nonzero
+2026-11-28T07:48:01Z CHECK plasma_wallpaper_config=FAIL :: approved wallpaper path absent
+2026-11-28T07:48:01Z CMD timeout 60 /home/canopy/native_tester/state/unpacked/contents/bin/canopy-classic-spike --approved-art-dir /home/canopy/native_tester/state/unpacked/contents/approved --landscape-wallpaper /home/canopy/native_tester/state/unpacked/contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png --self-test-approved --self-test-size 1200x750 --self-test-screenshot /home/canopy/native_tester/results/offscreen_1200x750.png
+2026-11-28T07:48:07Z RC[0] selftest_full_1200x750
+2026-11-28T07:48:07Z CHECK launcher_search=PASS :: actual Qt launcher opens, searches and closes; 21 SELF_TEST_PASS, 0 FAIL
+2026-11-28T07:48:07Z CHECK compiled_geometry_screenshot=PASS :: sha256=dfce15c9565289b12af10271c63e35c7dd8b59248aaffcb9996fe237b9550be6 geometry=1200x750
+2026-11-28T07:48:07Z CMD timeout 60 /home/canopy/native_tester/state/unpacked/contents/bin/canopy-classic-spike --approved-art-dir /home/canopy/native_tester/state/unpacked/contents/approved --landscape-wallpaper /home/canopy/native_tester/state/unpacked/contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png --self-test-approved --self-test-size 1920x1080 --self-test-screenshot /home/canopy/native_tester/results/offscreen_1920x1080.png
+2026-11-28T07:48:11Z RC[0] selftest_full_1920x1080
+2026-11-28T07:48:11Z CHECK compiled_geometry_1920=PASS :: desktop chrome geometry 1920x1080; 0 SELF_TEST_FAIL
+2026-11-28T07:48:11Z CMD timeout 40 /home/canopy/native_tester/state/unpacked/contents/bin/canopy-classic-spike --approved-art-dir /home/canopy/native_tester/state/unpacked/contents/approved --landscape-wallpaper /home/canopy/native_tester/state/unpacked/contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png --self-test-approved --self-test-window-activation-fixture
+2026-11-28T07:48:13Z RC[0] selftest_activation
+2026-11-28T07:48:13Z CHECK running_indicator_activation=PASS :: running=ok active=ok closed=ok fail_closed=ok
+2026-11-28T07:48:13Z CMD timeout 40 /home/canopy/native_tester/state/unpacked/contents/bin/canopy-classic-spike --approved-art-dir /home/canopy/native_tester/state/unpacked/contents/approved --landscape-wallpaper /home/canopy/native_tester/state/unpacked/contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png --self-test-approved --self-test-notification-center
+2026-11-28T07:48:15Z RC[0] selftest_notification_center
+2026-11-28T07:48:15Z CHECK notification_center_wiring=PASS :: opener wired, zero host rows, refresh disabled, close works
+2026-11-28T07:48:15Z CMD timeout 40 /home/canopy/native_tester/state/unpacked/contents/bin/canopy-classic-spike --approved-art-dir /home/canopy/native_tester/state/unpacked/contents/approved --landscape-wallpaper /home/canopy/native_tester/state/unpacked/contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png --self-test-approved --self-test-settings
+2026-11-28T07:48:16Z RC[0] selftest_settings
+2026-11-28T07:48:17Z CHECK settings_persistence_write=PASS :: QSettings=a18dced7cdd8003ff9e2607a48e6310eac9644abc7f5856ff0068fee22ba9747 key=reduced_motion=unset
+2026-11-28T07:48:17Z CMD timeout 40 /home/canopy/native_tester/state/unpacked/contents/bin/canopy-classic-spike --approved-art-dir /home/canopy/native_tester/state/unpacked/contents/approved --landscape-wallpaper /home/canopy/native_tester/state/unpacked/contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png --self-test-approved --self-test-settings
+2026-11-28T07:48:18Z RC[0] selftest_settings_restart
+2026-11-28T07:48:18Z CHECK settings_restart_readback=PASS :: stored reduce accepted by fresh process and preserved
+2026-11-28T07:48:18Z CMD terminal launch fixture marker=/home/canopy/native_tester/state/terminal_launch_marker
+2026-11-28T07:48:20Z RC[0] terminal launch fixture
+2026-11-28T07:48:20Z CHECK terminal_launch=PASS :: Terminal dock tile reached GIO; marker=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+2026-11-28T07:48:20Z CMD bash /home/canopy/native_tester/owner_guard.sh /home/canopy/native_tester/results/owner_guard.log
+2026-11-28T07:48:22Z RC[1]
+2026-11-28T07:48:22Z CHECK notifications_single_owner=FAIL :: owner guard did not pass (see owner_guard.log)
+2026-11-28T07:48:22Z CMD cp -p /home/canopy/native_tester/state/settings-before.conf /home/canopy/.config/DevTunaSoft/Canopy Classic.conf
+2026-11-28T07:48:22Z RC[0]
+2026-11-28T07:48:22Z CMD /home/canopy/native_tester/state/unpacked/uninstall.sh /home/canopy/native_tester/state
+Successfully uninstalled /home/canopy/.local/share/plasma/plasmoids/org.kde.plasma.canopyclassic/
+UNINSTALL_PASS_USER_CONFIG_PRESERVED: config differs from install snapshot; not overwritten
+2026-11-28T07:48:22Z RC[0]
+2026-11-28T07:48:22Z CHECK uninstall=PASS :: kpackagetool6 --remove; no system change
+2026-11-28T07:48:22Z CMD kpackagetool6 --type Plasma/Applet --list
+Listing KPackageType: Plasma/Applet in /home/canopy/.local/share/plasma/plasmoids/
+2026-11-28T07:48:22Z RC[0]
+2026-11-28T07:48:22Z CHECK package_absent_after_uninstall=PASS :: not listed
+2026-11-28T07:48:22Z CHECK stock_config_restored=PASS :: config byte-identical to pre-install snapshot sha=141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751
+2026-11-28T07:48:22Z CHECK stock_wallpaper_fallback=PASS :: Plasma wallpaper path=Image=file:///usr/share/wallpapers/Kubuntu#day-night
+2026-11-28T07:48:22Z WALKTHROUGH_END fail=4 checks=21

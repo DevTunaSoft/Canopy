@@ -1,0 +1,46 @@
+CANOPY_LANDSCAPE_WALLPAPER_VERIFIED: local PNG/JPEG
+CANOPY_APPROVED_ART_VERIFIED: eight exact PNG icons; landscape wallpaper separately checked
+FIVE_PRODUCTION_PACK_FALLBACK: exact original-derived Qt renderer
+DOCK_CLEAN_EDGES_ACTIVE: exact approved source cleanup selected for normal startup; frozen PNGs and QML geometry unchanged
+DOCK_FIVE_CENTER_ACTIVE: Browser, Mail, Files, Terminal, Settings v3 composition inside unchanged mask; Calendar/Photos/Music exact pixel lock retained
+CANOPY_ROUNDED_DOCK_VERIFIED: eight original icons, padded, alpha-clipped
+WINDOW_ACTIVATION_ADAPTER_LOADED
+CANOPY_QUICK_CONTROLS_HOST_INJECTED: in-process view() only
+qt.qml.context: qrc:/Canopy/Classic/NotificationCenter.qml:255:13 Parameter "text" is not declared. Injection of parameters into signal handlers is deprecated. Use JavaScript functions with formal parameters instead.
+qt.qml.context: qrc:/Canopy/Classic/LauncherOverlay.qml:362:13 Parameter "text" is not declared. Injection of parameters into signal handlers is deprecated. Use JavaScript functions with formal parameters instead.
+qt.qml.context: qrc:/Canopy/Classic/PreviewWindow.qml:677:17 Parameter "text" is not declared. Injection of parameters into signal handlers is deprecated. Use JavaScript functions with formal parameters instead.
+CANOPY_CLASSIC_WINDOW_READY
+CANOPY_QUICK_CONTROLS_REGISTERED: hidden until requested, no host control bridge, no visual asset changes
+CANOPY_SETTINGS_PANEL_REGISTERED: hidden until requested, one contract-backed preference, no approved visual changes
+CANOPY_FILES_DOCK_NATIVE_LAUNCH_CONNECTED
+CANOPY_BROWSER_DOCK_NATIVE_LAUNCH_CONNECTED
+CANOPY_MAIL_DOCK_NATIVE_LAUNCH_CONNECTED
+CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED "Calendar"
+CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED "Photos"
+CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED "Terminal"
+CANOPY_INTENT_DOCK_CONNECTED "Music"
+CANOPY_INTENT_DOCK_CONNECTED "Settings"
+SELF_TEST_PASS: local top bar clock updates and fits
+SELF_TEST_PASS: quick controls registered and fail closed
+SELF_TEST_PASS: notification centre registered and fail closed
+SELF_TEST_PASS: actual launcher image component count 8
+SELF_TEST_PASS: actual launcher button image geometry centered 8
+SELF_TEST_PASS: actual Qt launcher opens, searches and closes
+SELF_TEST_PASS: original Canopy penguin launcher loaded
+SELF_TEST_PASS: validated custom landscape wallpaper loaded
+SELF_TEST_PASS: all eight exact approved dock PNGs loaded
+SELF_TEST_PASS: dock icons horizontally/vertically centred count 8 with equal 54px art slots and 7px minimum dock insets
+SELF_TEST_PASS: compact folder grid fits and four-column cap verified
+SELF_TEST_PASS: all eight original sample folder images loaded
+SELF_TEST_PASS: eight demo folders and one search control present
+SELF_TEST_PASS: eight SHA-locked icon PNGs and separate landscape wallpaper present
+SELF_TEST_PASS: preview window fits above dock QPointF(210,127) QSizeF(780, 420)
+SELF_TEST_PASS: desktop chrome geometry QSize(1200, 750)
+CANOPY_FILES_DOCK_INTENT_REFUSED "REJECT"
+CANOPY_FILES_DOCK_INTENT_REFUSED "REJECT"
+SELF_TEST_PASS: Files dock hide/restore and activity indicator
+CANOPY_FILES_DOCK_INTENT_REFUSED "REJECT"
+SELF_TEST_PASS: Files close control and dock reopen
+SELF_TEST_PASS: Files keyboard close and reopen bindings
+SELF_TEST_PASS: wallpaper regions visually distinct
+SELF_TEST_PASS: nonuniform window screenshot captured QSize(1200, 750) sampled colors 100

@@ -1,0 +1,9 @@
+XAUTH=/tmp/xauth_zdKrsq
+=== X probe ===
+xdotool_rc=124
+xdpyinfo_rc=124
+=== windows ===
+wmctrl_rc=124
+=== dbus owner ===
+(':1.22',)
+gdbus_rc=0

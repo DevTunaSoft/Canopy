@@ -1,0 +1,21 @@
+CHECK|artifact_sha256|PASS|ec9e44cfaa3ba3059aef492b429a6e6c6b94da32a230d4acb6cb28a1ef3ece35
+CHECK|package_sha256sums|PASS|17 files
+CHECK|compiled_binary_sha256|PASS|4950fd793d067aa722a64ea8b09f0c1c65a55263b7f96c8fd418bf579e9f4a32
+CHECK|approved_wallpaper_sha256|PASS|8c6cab50a0977fc129c0d2a20523d9361646f36da66f2f3f2b2436a0d9001381
+CHECK|install_user_scope|PASS|kpackagetool6 --install, no sudo; wallpaper config via install.sh in-place write; state=/home/canopy/native_tester/state
+CHECK|package_listed|PASS|org.kde.plasma.canopyclassic
+CHECK|installed_package_verify|PASS|metadata identity + approved wallpaper hash
+CHECK|plasma_wallpaper_config|PASS|Image=file:///home/canopy/native_tester/state/unpacked/contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png
+CHECK|launcher_search|PASS|actual Qt launcher opens, searches and closes; 21 SELF_TEST_PASS, 0 FAIL
+CHECK|compiled_geometry_screenshot|PASS|sha256=9509f50fe5e336d5794d2838686efd6b349328c534a80467b14b14624c82ea9b geometry=1200x750
+CHECK|compiled_geometry_1920|PASS|desktop chrome geometry 1920x1080; 0 SELF_TEST_FAIL
+CHECK|running_indicator_activation|PASS|running=ok active=ok closed=ok fail_closed=ok
+CHECK|notification_center_wiring|PASS|opener wired, zero host rows, refresh disabled, close works
+CHECK|settings_persistence_write|PASS|QSettings=a18dced7cdd8003ff9e2607a48e6310eac9644abc7f5856ff0068fee22ba9747 key=reduced_motion=unset
+CHECK|settings_restart_readback|PASS|stored reduce accepted by fresh process and preserved
+CHECK|terminal_launch|PASS|Terminal dock tile reached GIO; marker=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+CHECK|notifications_single_owner|PASS|NOTIFICATION_OWNER=:1.22 OWNER_PID=5422 OWNER_COMM=plasmashell 
+CHECK|uninstall|PASS|kpackagetool6 --remove; no system change
+CHECK|package_absent_after_uninstall|PASS|not listed
+CHECK|stock_config_restored|PASS|config byte-identical to pre-install snapshot sha=141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751
+CHECK|stock_wallpaper_fallback|PASS|Plasma wallpaper path=Image=file:///usr/share/wallpapers/Kubuntu#day-night

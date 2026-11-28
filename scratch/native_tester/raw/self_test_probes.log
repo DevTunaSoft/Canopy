@@ -1,0 +1,84 @@
+=== launcher_model ===
+rc=0
+CATALOG_PASS  bounded text ingest
+CATALOG_PASS  snapshot order
+CATALOG_PASS  QML bridge shape
+CATALOG_PASS  host-side filter parity
+CATALOG_PASS  invalid id fails closed
+CATALOG_PASS  path-like id fails closed
+CATALOG_PASS  control title fails closed
+CATALOG_PASS  empty title fails closed
+CATALOG_PASS  rejected snapshot leaves model empty
+CATALOG_PASS  recovery after refusal
+CATALOG_PASS  missing file fails closed
+CATALOG_ALL_PASS
+=== activation ===
+rc=0
+CANOPY_MAIL_DOCK_NATIVE_LAUNCH_CONNECTED
+CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED "Calendar"
+CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED "Photos"
+CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED "Terminal"
+CANOPY_INTENT_DOCK_CONNECTED "Music"
+CANOPY_INTENT_DOCK_CONNECTED "Settings"
+SELF_TEST_PASS: dock running and active indicators reflect trusted snapshot
+CANOPY_FILES_DOCK_INTENT_REFUSED "FOCUS"
+SELF_TEST_PASS: dock activation intent reaches host gate without false focus
+SELF_TEST_PASS: closed snapshot clears running and active indicators
+SELF_TEST_PASS: untrusted snapshot clears all indicators
+WINDOW_ACTIVATION_HOST_SELF_TEST_PASS running=ok active=ok closed=ok fail_closed=ok
+=== notification ===
+rc=0
+CANOPY_QUICK_CONTROLS_REGISTERED: hidden until requested, no host control bridge, no visual asset changes
+CANOPY_SETTINGS_PANEL_REGISTERED: hidden until requested, one contract-backed preference, no approved visual changes
+CANOPY_FILES_DOCK_NATIVE_LAUNCH_CONNECTED
+CANOPY_BROWSER_DOCK_NATIVE_LAUNCH_CONNECTED
+CANOPY_MAIL_DOCK_NATIVE_LAUNCH_CONNECTED
+CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED "Calendar"
+CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED "Photos"
+CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED "Terminal"
+CANOPY_INTENT_DOCK_CONNECTED "Music"
+CANOPY_INTENT_DOCK_CONNECTED "Settings"
+SELF_TEST_PASS: notification centre registered in compiled shell
+NOTIFICATION_CENTER_FIXTURE_PASS: opener wired, zero host rows, disclosure visible, refresh disabled, close works
+=== settings ===
+rc=0
+CANOPY_QUICK_CONTROLS_REGISTERED: hidden until requested, no host control bridge, no visual asset changes
+CANOPY_SETTINGS_PANEL_REGISTERED: hidden until requested, one contract-backed preference, no approved visual changes
+CANOPY_FILES_DOCK_NATIVE_LAUNCH_CONNECTED
+CANOPY_BROWSER_DOCK_NATIVE_LAUNCH_CONNECTED
+CANOPY_MAIL_DOCK_NATIVE_LAUNCH_CONNECTED
+CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED "Calendar"
+CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED "Photos"
+CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED "Terminal"
+CANOPY_INTENT_DOCK_CONNECTED "Music"
+CANOPY_INTENT_DOCK_CONNECTED "Settings"
+SELF_TEST_PASS: Classic settings panel fail closed in compiled shell
+SETTINGS_FIXTURE_PASS: one persisted preference, seven disclosed, approved visuals unchanged
+=== terminal_status ===
+rc=0
+CANOPY_FILES_DOCK_NATIVE_LAUNCH_CONNECTED
+CANOPY_BROWSER_DOCK_NATIVE_LAUNCH_CONNECTED
+CANOPY_MAIL_DOCK_NATIVE_LAUNCH_CONNECTED
+CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED "Calendar"
+CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED "Photos"
+CANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED "Terminal"
+CANOPY_INTENT_DOCK_CONNECTED "Music"
+CANOPY_INTENT_DOCK_CONNECTED "Settings"
+CANOPY_REMAINING_DOCK_REJECTED: unknown action
+CANOPY_APP_LAUNCH_UNAVAILABLE: "Terminal"
+CANOPY_REMAINING_DOCK_LAUNCH_REFUSED "Terminal"
+TERMINAL_DOCK_STATUS_FIXTURE_PASS refusal visible in launcher footer
+=== full_1200 ===
+rc=0
+SELF_TEST_PASS: eight demo folders and one search control present
+SELF_TEST_PASS: eight SHA-locked icon PNGs and separate landscape wallpaper present
+SELF_TEST_PASS: preview window fits above dock QPointF(210,127) QSizeF(780, 420)
+SELF_TEST_PASS: desktop chrome geometry QSize(1200, 750)
+CANOPY_FILES_DOCK_INTENT_REFUSED "REJECT"
+CANOPY_FILES_DOCK_INTENT_REFUSED "REJECT"
+SELF_TEST_PASS: Files dock hide/restore and activity indicator
+CANOPY_FILES_DOCK_INTENT_REFUSED "REJECT"
+SELF_TEST_PASS: Files close control and dock reopen
+SELF_TEST_PASS: Files keyboard close and reopen bindings
+SELF_TEST_PASS: wallpaper regions visually distinct
+SELF_TEST_PASS: nonuniform window screenshot captured QSize(1200, 750) sampled colors 100

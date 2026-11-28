@@ -1,0 +1,93 @@
+2026-11-28T07:54:47Z WALKTHROUGH_START tip=21c32b61a29f61210fef38c6b9447b49dbfd10bf directive=79e30d79a580bd05cf9d6cb09a45cbbb7887c0c35c5116a34bb6a0ace6042083 key=pre-existing-scratch-ssh-key
+2026-11-28T07:54:47Z GUEST Linux canopy-plasma6 7.0.0-14-generic #14-Ubuntu SMP PREEMPT_DYNAMIC Mon Apr 13 11:09:53 UTC 2026 x86_64 GNU/Linux
+2026-11-28T07:54:47Z VM_STATE_CHANGE none (existing guest, SSH only)
+2026-11-28T07:54:47Z CHECK artifact_sha256=PASS :: ec9e44cfaa3ba3059aef492b429a6e6c6b94da32a230d4acb6cb28a1ef3ece35
+2026-11-28T07:54:47Z CMD rm -rf /home/canopy/native_tester/state/unpacked
+2026-11-28T07:54:47Z RC[0]
+2026-11-28T07:54:47Z CMD mkdir -p /home/canopy/native_tester/state/unpacked
+2026-11-28T07:54:47Z RC[0]
+2026-11-28T07:54:47Z CMD tar -xzf /home/canopy/native_tester/incoming/org.kde.plasma.canopyclassic-0.1.0-dev-baseline.tar.gz -C /home/canopy/native_tester/state/unpacked
+2026-11-28T07:54:48Z RC[0]
+2026-11-28T07:54:48Z CHECK package_sha256sums=PASS :: 17 files
+2026-11-28T07:54:48Z CHECK compiled_binary_sha256=PASS :: 4950fd793d067aa722a64ea8b09f0c1c65a55263b7f96c8fd418bf579e9f4a32
+2026-11-28T07:54:48Z CHECK approved_wallpaper_sha256=PASS :: 8c6cab50a0977fc129c0d2a20523d9361646f36da66f2f3f2b2436a0d9001381
+2026-11-28T07:54:51Z SESSION 1045 type=tty active=yes display=
+2026-11-28T07:54:51Z SESSION 62 type=unspecified active=yes display=
+2026-11-28T07:54:51Z SESSION 65 type=x11 active=no display=:0
+2026-11-28T07:54:51Z KWIN=5384  PLASMASHELL=5422 
+2026-11-28T07:54:52Z COMPOSITOR_OTHER=
+2026-11-28T07:54:58Z X_CLIENT_PROBE rc=124 output=
+2026-11-28T07:54:58Z X_CLIENT_INTERACTION=NOT_RUN (seat on SDDM greeter; polkit denied loginctl activate)
+2026-11-28T07:54:58Z WALLPAPER_SHIM=enabled source=/home/canopy/native_tester/plasma-apply-wallpaperimage-shim
+2026-11-28T07:54:58Z CMD /home/canopy/native_tester/state/unpacked/install.sh /home/canopy/native_tester/incoming/org.kde.plasma.canopyclassic-0.1.0-dev-baseline.tar.gz /home/canopy/native_tester/state
+Successfully installed /home/canopy/.local/share/plasma/plasmoids/org.kde.plasma.canopyclassic/
+INSTALL_PASS: user-scope KPackage installed; approved wallpaper applied
+2026-11-28T07:55:26Z RC[0]
+2026-11-28T07:55:26Z CHECK install_user_scope=PASS :: kpackagetool6 --install, no sudo; wallpaper config via install.sh in-place write; state=/home/canopy/native_tester/state
+2026-11-28T07:55:26Z CMD kpackagetool6 --type Plasma/Applet --list
+Listing KPackageType: Plasma/Applet in /home/canopy/.local/share/plasma/plasmoids/
+org.kde.plasma.canopyclassic
+2026-11-28T07:55:26Z RC[0]
+2026-11-28T07:55:26Z CHECK package_listed=PASS :: org.kde.plasma.canopyclassic
+2026-11-28T07:55:26Z CMD /home/canopy/native_tester/state/unpacked/verify.sh /home/canopy/native_tester/state
+contents/approved/icons/Browser_Option_3.png: OK
+contents/approved/icons/Calendar_Option_3.png: OK
+contents/approved/icons/Files_Option_2.png: OK
+contents/approved/icons/Mail_Option_5.png: OK
+contents/approved/icons/Music_Option_3.png: OK
+contents/approved/icons/Photos_Option_2.png: OK
+contents/approved/icons/Settings_Option_8.png: OK
+contents/approved/icons/Terminal_Option_4.png: OK
+contents/approved/manifest.json: OK
+contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png: OK
+contents/approved/wallpaper/canopy-wave-preview.png: OK
+contents/bin/canopy-classic-spike: OK
+contents/ui/main.qml: OK
+install.sh: OK
+metadata.json: OK
+uninstall.sh: OK
+verify.sh: OK
+METADATA_IDENTITY_OK
+VERIFY_PASS: package identity and approved wallpaper hash match
+2026-11-28T07:55:27Z RC[0]
+2026-11-28T07:55:27Z CHECK installed_package_verify=PASS :: metadata identity + approved wallpaper hash
+2026-11-28T07:55:27Z CHECK plasma_wallpaper_config=PASS :: Image=file:///home/canopy/native_tester/state/unpacked/contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png
+2026-11-28T07:55:27Z CMD timeout 60 /home/canopy/native_tester/state/unpacked/contents/bin/canopy-classic-spike --approved-art-dir /home/canopy/native_tester/state/unpacked/contents/approved --landscape-wallpaper /home/canopy/native_tester/state/unpacked/contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png --self-test-approved --self-test-size 1200x750 --self-test-screenshot /home/canopy/native_tester/results/offscreen_1200x750.png
+2026-11-28T07:55:30Z RC[0] selftest_full_1200x750
+2026-11-28T07:55:30Z CHECK launcher_search=PASS :: actual Qt launcher opens, searches and closes; 21 SELF_TEST_PASS, 0 FAIL
+2026-11-28T07:55:30Z CHECK compiled_geometry_screenshot=PASS :: sha256=9509f50fe5e336d5794d2838686efd6b349328c534a80467b14b14624c82ea9b geometry=1200x750
+2026-11-28T07:55:30Z CMD timeout 60 /home/canopy/native_tester/state/unpacked/contents/bin/canopy-classic-spike --approved-art-dir /home/canopy/native_tester/state/unpacked/contents/approved --landscape-wallpaper /home/canopy/native_tester/state/unpacked/contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png --self-test-approved --self-test-size 1920x1080 --self-test-screenshot /home/canopy/native_tester/results/offscreen_1920x1080.png
+2026-11-28T07:55:36Z RC[0] selftest_full_1920x1080
+2026-11-28T07:55:36Z CHECK compiled_geometry_1920=PASS :: desktop chrome geometry 1920x1080; 0 SELF_TEST_FAIL
+2026-11-28T07:55:36Z CMD timeout 40 /home/canopy/native_tester/state/unpacked/contents/bin/canopy-classic-spike --approved-art-dir /home/canopy/native_tester/state/unpacked/contents/approved --landscape-wallpaper /home/canopy/native_tester/state/unpacked/contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png --self-test-approved --self-test-window-activation-fixture
+2026-11-28T07:55:39Z RC[0] selftest_activation
+2026-11-28T07:55:39Z CHECK running_indicator_activation=PASS :: running=ok active=ok closed=ok fail_closed=ok
+2026-11-28T07:55:39Z CMD timeout 40 /home/canopy/native_tester/state/unpacked/contents/bin/canopy-classic-spike --approved-art-dir /home/canopy/native_tester/state/unpacked/contents/approved --landscape-wallpaper /home/canopy/native_tester/state/unpacked/contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png --self-test-approved --self-test-notification-center
+2026-11-28T07:55:41Z RC[0] selftest_notification_center
+2026-11-28T07:55:41Z CHECK notification_center_wiring=PASS :: opener wired, zero host rows, refresh disabled, close works
+2026-11-28T07:55:41Z CMD timeout 40 /home/canopy/native_tester/state/unpacked/contents/bin/canopy-classic-spike --approved-art-dir /home/canopy/native_tester/state/unpacked/contents/approved --landscape-wallpaper /home/canopy/native_tester/state/unpacked/contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png --self-test-approved --self-test-settings
+2026-11-28T07:55:43Z RC[0] selftest_settings
+2026-11-28T07:55:43Z CHECK settings_persistence_write=PASS :: QSettings=a18dced7cdd8003ff9e2607a48e6310eac9644abc7f5856ff0068fee22ba9747 key=reduced_motion=unset
+2026-11-28T07:55:43Z CMD timeout 40 /home/canopy/native_tester/state/unpacked/contents/bin/canopy-classic-spike --approved-art-dir /home/canopy/native_tester/state/unpacked/contents/approved --landscape-wallpaper /home/canopy/native_tester/state/unpacked/contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png --self-test-approved --self-test-settings
+2026-11-28T07:55:46Z RC[0] selftest_settings_restart
+2026-11-28T07:55:46Z CHECK settings_restart_readback=PASS :: stored reduce accepted by fresh process and preserved
+2026-11-28T07:55:46Z CMD terminal launch fixture marker=/home/canopy/native_tester/state/terminal_launch_marker
+2026-11-28T07:55:48Z RC[0] terminal launch fixture
+2026-11-28T07:55:48Z CHECK terminal_launch=PASS :: Terminal dock tile reached GIO; marker=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+2026-11-28T07:55:48Z CMD bash /home/canopy/native_tester/owner_guard.sh /home/canopy/native_tester/results/owner_guard.log
+2026-11-28T07:55:50Z RC[0]
+2026-11-28T07:55:50Z CHECK notifications_single_owner=PASS :: NOTIFICATION_OWNER=:1.22 OWNER_PID=5422 OWNER_COMM=plasmashell 
+2026-11-28T07:55:50Z CMD cp -p /home/canopy/native_tester/state/settings-before.conf /home/canopy/.config/DevTunaSoft/Canopy Classic.conf
+2026-11-28T07:55:50Z RC[0]
+2026-11-28T07:55:50Z CMD /home/canopy/native_tester/state/unpacked/uninstall.sh /home/canopy/native_tester/state
+Successfully uninstalled /home/canopy/.local/share/plasma/plasmoids/org.kde.plasma.canopyclassic/
+UNINSTALL_PASS: stock Plasma config restored byte-for-byte
+2026-11-28T07:55:51Z RC[0]
+2026-11-28T07:55:51Z CHECK uninstall=PASS :: kpackagetool6 --remove; no system change
+2026-11-28T07:55:51Z CMD kpackagetool6 --type Plasma/Applet --list
+Listing KPackageType: Plasma/Applet in /home/canopy/.local/share/plasma/plasmoids/
+2026-11-28T07:55:51Z RC[0]
+2026-11-28T07:55:51Z CHECK package_absent_after_uninstall=PASS :: not listed
+2026-11-28T07:55:52Z CHECK stock_config_restored=PASS :: config byte-identical to pre-install snapshot sha=141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751
+2026-11-28T07:55:52Z CHECK stock_wallpaper_fallback=PASS :: Plasma wallpaper path=Image=file:///usr/share/wallpapers/Kubuntu#day-night
+2026-11-28T07:55:52Z WALKTHROUGH_END fail=0 checks=21

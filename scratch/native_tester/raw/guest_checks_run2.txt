@@ -1,0 +1,84 @@
+=== checks ===
+CHECK|artifact_sha256|PASS|ec9e44cfaa3ba3059aef492b429a6e6c6b94da32a230d4acb6cb28a1ef3ece35
+CHECK|package_sha256sums|PASS|17 files
+CHECK|compiled_binary_sha256|PASS|4950fd793d067aa722a64ea8b09f0c1c65a55263b7f96c8fd418bf579e9f4a32
+CHECK|approved_wallpaper_sha256|PASS|8c6cab50a0977fc129c0d2a20523d9361646f36da66f2f3f2b2436a0d9001381
+CHECK|install_user_scope|FAIL|install.sh rc nonzero (see commands.log)
+CHECK|package_listed|PASS|org.kde.plasma.canopyclassic
+CHECK|installed_package_verify|FAIL|verify.sh rc nonzero
+CHECK|plasma_wallpaper_config|FAIL|approved wallpaper path absent
+CHECK|launcher_search|PASS|actual Qt launcher opens, searches and closes; 21 SELF_TEST_PASS, 0 FAIL
+CHECK|compiled_geometry_screenshot|PASS|sha256=dbec1a2b63dbb39095729aa154c51df1cd6c1b4c1fddaba87a9989920cd3c20a geometry=1200x750
+CHECK|compiled_geometry_1920|PASS|desktop chrome geometry 1920x1080; 0 SELF_TEST_FAIL
+CHECK|running_indicator_activation|PASS|running=ok active=ok closed=ok fail_closed=ok
+CHECK|notification_center_wiring|PASS|opener wired, zero host rows, refresh disabled, close works
+CHECK|settings_persistence_write|PASS|QSettings=a18dced7cdd8003ff9e2607a48e6310eac9644abc7f5856ff0068fee22ba9747 key=reduced_motion=unset
+CHECK|settings_restart_readback|PASS|stored reduce accepted by fresh process and preserved
+CHECK|terminal_launch|PASS|Terminal dock tile reached GIO; marker=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+CHECK|notifications_single_owner|PASS|NOTIFICATION_OWNER=:1.22 OWNER_PID=5422 OWNER_COMM=plasmashell 
+CHECK|uninstall|PASS|kpackagetool6 --remove; no system change
+CHECK|package_absent_after_uninstall|PASS|not listed
+CHECK|stock_config_restored|PASS|config byte-identical to pre-install snapshot sha=141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751
+CHECK|stock_wallpaper_fallback|PASS|Plasma wallpaper path=Image=file:///usr/share/wallpapers/Kubuntu#day-night
+=== owner guard ===
+UTC=2026-11-28T07:54:20Z
+GET_NAME_OWNER_RAW=(':1.22',)
+NOTIFICATION_OWNER=:1.22
+OWNER_PID=5422 OWNER_COMM=plasmashell
+OWNER_PID_VALID=yes
+OWNER_GUARD_OK owner_comm=plasmashell
+FOREIGN_NOTIFICATION_DAEMONS=[]
+OWNER_GUARD_OK foreign_daemon_count=0
+CANOPY_NOTIFICATION_DAEMONS=[]
+OWNER_GUARD_OK canopy_daemon_count=0
+SERVICE_FILES_ALL=[/usr/share/dbus-1/services/org.kde.plasma.Notifications.service]
+UPSTREAM_SERVICE_FILE=/usr/share/dbus-1/services/org.kde.plasma.Notifications.service count=1
+FOREIGN_SERVICE_FILE_COUNT=0
+OWNER_GUARD_OK upstream_service_files=1
+OWNER_GUARD_OK foreign_activatable_duplicates=0
+NAMES_LIST_OCCURRENCES=1
+OWNER_GUARD_OK bus_name_occurrences=1
+OWNER_GUARD_PASS guarded_names=6 upstream_service_files=1 foreign_service_files=0
+=== wallpaper shim ===
+=== install region ===
+2026-11-28T07:52:22Z X_CLIENT_INTERACTION=NOT_RUN (seat on SDDM greeter; polkit denied loginctl activate)
+2026-11-28T07:52:22Z WALLPAPER_SHIM=absent source=/home/canopy/native_tester/plasma-apply-wallpaperimage-shim
+2026-11-28T07:52:22Z CMD /home/canopy/native_tester/state/unpacked/install.sh /home/canopy/native_tester/incoming/org.kde.plasma.canopyclassic-0.1.0-dev-baseline.tar.gz /home/canopy/native_tester/state
+Successfully installed /home/canopy/.local/share/plasma/plasmoids/org.kde.plasma.canopyclassic/
+An error occurred while attempting to set the Plasma wallpaper:
+Did not receive a reply. Possible causes include: the remote application did not send a reply, the message bus security policy blocked the reply, the reply timeout expired, or the network connection was broken.
+2026-11-28T07:53:30Z RC[1]
+2026-11-28T07:53:30Z CHECK install_user_scope=FAIL :: install.sh rc nonzero (see commands.log)
+2026-11-28T07:53:30Z CMD kpackagetool6 --type Plasma/Applet --list
+Listing KPackageType: Plasma/Applet in /home/canopy/.local/share/plasma/plasmoids/
+org.kde.plasma.canopyclassic
+2026-11-28T07:53:31Z RC[0]
+2026-11-28T07:53:31Z CHECK package_listed=PASS :: org.kde.plasma.canopyclassic
+2026-11-28T07:53:31Z CMD /home/canopy/native_tester/state/unpacked/verify.sh /home/canopy/native_tester/state
+contents/approved/icons/Browser_Option_3.png: OK
+contents/approved/icons/Calendar_Option_3.png: OK
+contents/approved/icons/Files_Option_2.png: OK
+contents/approved/icons/Mail_Option_5.png: OK
+contents/approved/icons/Music_Option_3.png: OK
+contents/approved/icons/Photos_Option_2.png: OK
+contents/approved/icons/Settings_Option_8.png: OK
+contents/approved/icons/Terminal_Option_4.png: OK
+contents/approved/manifest.json: OK
+contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png: OK
+contents/approved/wallpaper/canopy-wave-preview.png: OK
+contents/bin/canopy-classic-spike: OK
+contents/ui/main.qml: OK
+install.sh: OK
+metadata.json: OK
+uninstall.sh: OK
+verify.sh: OK
+METADATA_IDENTITY_OK
+2026-11-28T07:54:00Z RC[1]
+2026-11-28T07:54:00Z CHECK installed_package_verify=FAIL :: verify.sh rc nonzero
+2026-11-28T07:54:00Z CHECK plasma_wallpaper_config=FAIL :: approved wallpaper path absent
+2026-11-28T07:54:00Z CMD timeout 60 /home/canopy/native_tester/state/unpacked/contents/bin/canopy-classic-spike --approved-art-dir /home/canopy/native_tester/state/unpacked/contents/approved --landscape-wallpaper /home/canopy/native_tester/state/unpacked/contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png --self-test-approved --self-test-size 1200x750 --self-test-screenshot /home/canopy/native_tester/results/offscreen_1200x750.png
+2026-11-28T07:54:03Z RC[0] selftest_full_1200x750
+2026-11-28T07:54:03Z CHECK launcher_search=PASS :: actual Qt launcher opens, searches and closes; 21 SELF_TEST_PASS, 0 FAIL
+2026-11-28T07:54:04Z CHECK compiled_geometry_screenshot=PASS :: sha256=dbec1a2b63dbb39095729aa154c51df1cd6c1b4c1fddaba87a9989920cd3c20a geometry=1200x750
+2026-11-28T07:54:04Z CMD timeout 60 /home/canopy/native_tester/state/unpacked/contents/bin/canopy-classic-spike --approved-art-dir /home/canopy/native_tester/state/unpacked/contents/approved --landscape-wallpaper /home/canopy/native_tester/state/unpacked/contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png --self-test-approved --self-test-size 1920x1080 --self-test-screenshot /home/canopy/native_tester/results/offscreen_1920x1080.png
+2026-11-28T07:54:08Z RC[0] selftest_full_1920x1080

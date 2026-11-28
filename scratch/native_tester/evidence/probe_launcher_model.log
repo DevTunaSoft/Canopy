@@ -1,0 +1,13 @@
+CATALOG_PASS  default inactive fail closed
+CATALOG_PASS  bounded text ingest
+CATALOG_PASS  snapshot order
+CATALOG_PASS  QML bridge shape
+CATALOG_PASS  host-side filter parity
+CATALOG_PASS  invalid id fails closed
+CATALOG_PASS  path-like id fails closed
+CATALOG_PASS  control title fails closed
+CATALOG_PASS  empty title fails closed
+CATALOG_PASS  rejected snapshot leaves model empty
+CATALOG_PASS  recovery after refusal
+CATALOG_PASS  missing file fails closed
+CATALOG_ALL_PASS

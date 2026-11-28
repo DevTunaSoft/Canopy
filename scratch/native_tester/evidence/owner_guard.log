@@ -1,0 +1,18 @@
+UTC=2026-11-28T07:55:48Z
+GET_NAME_OWNER_RAW=(':1.22',)
+NOTIFICATION_OWNER=:1.22
+OWNER_PID=5422 OWNER_COMM=plasmashell
+OWNER_PID_VALID=yes
+OWNER_GUARD_OK owner_comm=plasmashell
+FOREIGN_NOTIFICATION_DAEMONS=[]
+OWNER_GUARD_OK foreign_daemon_count=0
+CANOPY_NOTIFICATION_DAEMONS=[]
+OWNER_GUARD_OK canopy_daemon_count=0
+SERVICE_FILES_ALL=[/usr/share/dbus-1/services/org.kde.plasma.Notifications.service]
+UPSTREAM_SERVICE_FILE=/usr/share/dbus-1/services/org.kde.plasma.Notifications.service count=1
+FOREIGN_SERVICE_FILE_COUNT=0
+OWNER_GUARD_OK upstream_service_files=1
+OWNER_GUARD_OK foreign_activatable_duplicates=0
+NAMES_LIST_OCCURRENCES=1
+OWNER_GUARD_OK bus_name_occurrences=1
+OWNER_GUARD_PASS guarded_names=6 upstream_service_files=1 foreign_service_files=0

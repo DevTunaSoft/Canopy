@@ -1,0 +1,3 @@
+2026-11-28T07:54:59Z SHIM_CALL /home/canopy/native_tester/state/unpacked/contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png
+2026-11-28T07:55:24Z REAL_PLASMA_APPLY_WALLPAPER_RC=124
+2026-11-28T07:55:24Z SHIM_FALLBACK_0: no D-Bus reply; install.sh in-place KConfig write will be used

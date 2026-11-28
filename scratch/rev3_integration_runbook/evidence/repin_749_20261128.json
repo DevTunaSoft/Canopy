@@ -1,0 +1,25 @@
+{
+  "artifact": "scratch/rev3_integration_runbook/evidence/repin_749_20261128.json",
+  "pr": 749,
+  "pinned_head": "f8cbe123ba2a88edbdc509c5dd8ebe9e20b85260",
+  "pinned_file_count": 32,
+  "pinned_paths_sha256": "aab4da5484cec499d1ffbddeb0fc8b200f6093285e9e26cfa834c3b28894f59b",
+  "live_observed_head_at_repin": "f8cbe123ba2a88edbdc509c5dd8ebe9e20b85260",
+  "live_base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+  "checks_at_pinned_head": {
+    "fake-gio-launch-fixture": "completed/success",
+    "foundation": "completed/success",
+    "qt-evidence": "completed/success"
+  },
+  "graphql_review_decision_at_recheck": "REVIEW_REQUIRED",
+  "reviews_at_recheck": [],
+  "body_hold_still_present": true,
+  "hold_markers": [
+    "no ready-for-merge promotion",
+    "SOAK_WARN"
+  ],
+  "later_live_head_observed": "bff56000740fb429e33ede3542f787ec46b15bc6",
+  "later_live_head_updated_at": "2026-11-28T09:28:52Z",
+  "effect": "SKIP remains authoritative. The later head would be HEAD_DRIFT if promotion were attempted; no PR edit, review, approval or merge was performed.",
+  "source": "gh api REST pulls/749, pulls/749/files, commits/<head>/check-runs, pulls/749/reviews; gh api graphql reviewDecision/headRefOid; git diff --name-only base..head"
+}

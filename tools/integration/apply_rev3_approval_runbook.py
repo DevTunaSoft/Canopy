@@ -12,15 +12,22 @@ Modes
                 is an ordinary GitHub merge API call subject to live branch protection.
                 No admin bypass, force-push, self-approval, review creation or PR edit.
 
-All product PRs are pinned to exact heads observed at runbook creation (2026-11-28).
-The script refuses to proceed on head/base/scope/check drift, absent protection,
-unverifiable distinct approval, conflicting trial merge, or post-merge regression.
+All product PRs are pinned to exact heads observed at runbook creation (2026-11-28);
+#749 was re-pinned to its remediated head on the same day with a live re-query.
+Live review authorization is read from GraphQL `reviewDecision` (the REST pull
+object does not carry that field), and each counted review must carry an exact,
+non-null `commit_id`. The script refuses to proceed on head/base/scope/check
+drift, absent or weakened protection (including disabled
+`dismiss_stale_reviews`), unverifiable distinct approval, conflicting trial
+merge (including changed sibling blobs in both plan and apply), or post-merge
+regression.
 """
 from __future__ import annotations
 
 import argparse
 import datetime as dt
 import hashlib
+import inspect
 import json
 import os
 import pathlib
@@ -98,8 +105,8 @@ PINS: dict[int, dict] = {
     748: dict(head="9f766d06225f4a7e7cfe9be010a3432a4109ea05", files=20,
               paths_sha256="73a98c383d1fb3a12d7229ae1bb64acb4349589e9c0f81ef23ccc7d82379f501",
               deps=[744], title="native suspend/resume fail-closed verdict contract"),
-    749: dict(head="449e39e7bd00af24aec50a05c70340c0b10a8120", files=20,
-              paths_sha256="e53bc053983382d6fb650b7608ea6e1f2e91f8e044bb8561ac3a17d291072403",
+    749: dict(head="f8cbe123ba2a88edbdc509c5dd8ebe9e20b85260", files=32,
+              paths_sha256="aab4da5484cec499d1ffbddeb0fc8b200f6093285e9e26cfa834c3b28894f59b",
               deps=[], title="60m stability soak (SKIPPED: no ready-for-merge promotion)"),
     750: dict(head="0439efa283bad00a92faccc3c62a99cb6a85b605", files=4,
               paths_sha256="b411d30ca22ad91ae6a417a41cc8f3bd0d4cfdc0785fae05e635c5e83633285c",
@@ -111,7 +118,7 @@ SKIP = {
     738: "FAILING_VERDICT: body says BASELINE_CAPTURED_NOT_ACCEPTED with EVIDENCE_GAP (executed-binary hash withdrawn); not an accepted increment.",
     739: "HOLD_INCOMPLETE: INCOMPLETE_600S_CAP (no terminal full-suite verdict) and NO_COMPILED_SWITCHER_WIRING; incomplete runtime wiring.",
     742: "REVIEW_HOLD_DOC_CORRECTION: independent review requires two documentation corrections before promotion; stage_06_verify.log and board_probe.log are ABSENT at the exact head and the '37 tests' claim has no artifact.",
-    749: "HOLD_NO_PROMOTION: body says 'No merge, no self-approval, no ready-for-merge promotion; independent review only'; machine verdict SOAK_WARN_CRASH_OR_ERROR_EVENT+SAMPLING_GAP+SERVICE_COUNT_DRIFT.",
+    749: "HOLD_NO_PROMOTION: re-pinned live head f8cbe123ba2a88edbdc509c5dd8ebe9e20b85260 (sampler/report remediated); body still says 'No merge, no self-approval, no ready-for-merge promotion; independent review only'; machine verdict SOAK_WARN_CRASH_OR_ERROR_EVENT+SAMPLING_GAP+SERVICE_COUNT_DRIFT.",
     750: "OVERLAP_HOLD: shares 4 instruction paths (.github/PULL_REQUEST_TEMPLATE.md, AGENTS.md, docs/AGENTS_WORKFORCE.md, docs/ROADMAP.md) with #722; exact-base trial merge conflicts on all four after #722 is promoted. Requires an authorized re-pin onto the post-#722 tip with a fresh independent review and 3/3 checks at the new head. No PR edit is performed by this runbook; the external Rev3 directive SHA remains controlling.",
 }
 
@@ -139,6 +146,29 @@ def gh_json(endpoint):
         return json.loads(out)
     except ValueError as exc:
         raise Refused(f"non-JSON gh api response for {endpoint}: {exc}") from exc
+
+
+def graphql_review_decision(number):
+    """Live GraphQL reviewDecision; REST pulls/<n> does not expose this field.
+
+    Fail closed: an unqueryable or malformed decision is a refusal, never a pass.
+    """
+    query = ('query($number:Int!){repository(owner:"DevTunaSoft",name:"Canopy")'
+             '{pullRequest(number:$number){reviewDecision headRefOid}}}')
+    rc, out, err = run(["gh", "api", "graphql", "-f", f"query={query}",
+                        "-F", f"number={number}"])
+    if rc != 0:
+        raise Refused(f"GRAPHQL_REVIEW_DECISION_UNVERIFIABLE #{number}: rc={rc} err={err.strip()[:300]}")
+    try:
+        data = json.loads(out)
+    except ValueError as exc:
+        raise Refused(f"GRAPHQL_REVIEW_DECISION_NON_JSON #{number}: {exc}") from exc
+    if data.get("errors"):
+        raise Refused(f"GRAPHQL_REVIEW_DECISION_ERROR #{number}: {str(data['errors'])[:300]}")
+    pr = (((data.get("data") or {}).get("repository") or {}).get("pullRequest"))
+    if not isinstance(pr, dict):
+        raise Refused(f"GRAPHQL_REVIEW_DECISION_MISSING_PR #{number}")
+    return {"review_decision": pr.get("reviewDecision"), "head_ref_oid": pr.get("headRefOid")}
 
 
 def sha256_text(text):
@@ -170,6 +200,8 @@ def check_protection(branch):
     problems = []
     if not result["required_approving_review_count"] or result["required_approving_review_count"] < 1:
         problems.append("no required approving review")
+    if not result["dismiss_stale_reviews"]:
+        problems.append("dismiss_stale_reviews disabled")
     if not result["enforce_admins"]:
         problems.append("enforce_admins disabled")
     if not result["strict"]:
@@ -208,10 +240,14 @@ def approvals(pr, reviews, approver):
     for r in reviews:
         user = r.get("user") or {}
         login = user.get("login")
-        at_head = r.get("commit_id") is None or r.get("commit_id") == (pr.get("head") or {}).get("sha")
+        # A review with commit_id=None is not evidence at any exact head. The
+        # old `is None or ...` fallback silently counted stale/unpinned reviews.
+        commit_id = r.get("commit_id")
+        at_head = bool(commit_id) and commit_id == (pr.get("head") or {}).get("sha")
         if (str(r.get("state", "")).upper() == "APPROVED" and user.get("type") == "User"
                 and login and login != author and login == approver and at_head):
-            out.append({"login": login, "submitted_at": r.get("submitted_at"), "at_exact_head": at_head})
+            out.append({"login": login, "submitted_at": r.get("submitted_at"),
+                        "commit_id": commit_id, "at_exact_head": at_head})
     return out
 
 
@@ -253,12 +289,14 @@ def evaluate(number, pin, expected_tip, approver=None):
     runs = gh_json(f"commits/{head}/check-runs?per_page=100") if head else {}
     check_verdict, check_rows = normalize_checks(runs, head)
     revs = gh_json(f"pulls/{number}/reviews?per_page=100")
+    gql = graphql_review_decision(number) if approver else None
     rec = {
         "number": number, "title": pin["title"], "head_sha": head, "pinned_head": pin["head"],
         "base_ref": base.get("ref"), "base_sha": base.get("sha"), "state": pr.get("state"),
         "merged": pr.get("merged"), "author": (pr.get("user") or {}).get("login"),
         "mergeable": pr.get("mergeable"), "mergeable_state": pr.get("mergeable_state"),
-        "review_decision": pr.get("review_decision"),
+        "review_decision": (gql or {}).get("review_decision"),
+        "review_decision_source": "graphql" if gql else "not_queried",
         "file_count": len(paths), "pinned_file_count": pin["files"],
         "paths_sha256": path_digest, "pinned_paths_sha256": pin["paths_sha256"],
         "checks": check_rows, "checks_verdict": check_verdict,
@@ -291,8 +329,10 @@ def evaluate(number, pin, expected_tip, approver=None):
     if approver:
         if not rec["approvals"]:
             problems.append("DISTINCT_APPROVAL_NOT_VERIFIED")
-        if str(pr.get("review_decision", "")).upper() != "APPROVED":
+        if str(rec["review_decision"] or "").upper() != "APPROVED":
             problems.append("REVIEW_DECISION_NOT_APPROVED")
+        if (gql or {}).get("head_ref_oid") != head:
+            problems.append("GRAPHQL_HEAD_DRIFT")
         if pr.get("mergeable_state") == "blocked":
             problems.append("STILL_BLOCKED_BY_PROTECTION")
     rec["problems"] = problems
@@ -463,6 +503,8 @@ def self_test():
     assert not approvals(pr, [bot], "action-bot"), "bot cannot approve"
     stale = dict(good, commit_id="c" * 40)
     assert not approvals(pr, [stale], "human-reviewer"), "stale-head review must not count"
+    unpinned = dict(good, commit_id=None)
+    assert not approvals(pr, [unpinned], "human-reviewer"), "commit_id=None must not count"
     for n, marker in [(734, "No merge is requested or authorized by this PR"),
                       (738, "BASELINE_CAPTURED_NOT_ACCEPTED"),
                       (749, "no ready-for-merge promotion")]:
@@ -475,7 +517,64 @@ def self_test():
             assert dep in ORDER and ORDER.index(dep) < ORDER.index(n), f"dependency order broken at #{n}"
     assert HEX40.match(BASE_SHA) and HEX40.match(REV3_SHA256) is None
     assert len(REV3_SHA256) == 64
-    print("SELF_TEST_PASS gates=checks+approval+order+skip-disjointness+pin-shape")
+    pin749 = PINS[749]
+    assert pin749["head"] == "f8cbe123ba2a88edbdc509c5dd8ebe9e20b85260"
+    assert pin749["files"] == 32
+    assert pin749["paths_sha256"] == "aab4da5484cec499d1ffbddeb0fc8b200f6093285e9e26cfa834c3b28894f59b"
+
+    # Offline protection gate: dismiss_stale_reviews must be explicitly true.
+    prot = {"required_pull_request_reviews": {
+                "required_approving_review_count": 1, "dismiss_stale_reviews": True},
+            "enforce_admins": {"enabled": True},
+            "required_status_checks": {"strict": True,
+                                       "checks": [{"context": c} for c in REQUIRED_CONTEXTS]}}
+    saved_gh, saved_gql = globals()["gh_json"], globals()["graphql_review_decision"]
+    try:
+        globals()["gh_json"] = lambda endpoint: prot
+        assert check_protection(INTEGRATION)["verdict"] == "PASS"
+        weak = json.loads(json.dumps(prot))
+        weak["required_pull_request_reviews"]["dismiss_stale_reviews"] = False
+        globals()["gh_json"] = lambda endpoint: weak
+        assert "dismiss_stale_reviews disabled" in check_protection(INTEGRATION)["problems"]
+
+        # Offline end-to-end decision gate: REST review_decision is ignored;
+        # GraphQL reviewDecision decides, and a null decision refuses.
+        live_pr = {"user": {"login": AUTHOR}, "head": {"sha": "a" * 40},
+                   "base": {"ref": INTEGRATION, "sha": "a" * 40},
+                   "state": "open", "merged": False, "mergeable": True,
+                   "mergeable_state": "clean", "review_decision": "APPROVED"}
+        file_row = {"filename": "docs/self_test.txt"}
+        check_payload = {"check_runs": [dict(rec, name=c) for c in REQUIRED_CONTEXTS]}
+        globals()["gh_json"] = lambda endpoint: (
+            live_pr if endpoint.endswith("/pulls/722") or endpoint == "pulls/722" else
+            [file_row] if endpoint.endswith("/files?per_page=100") else
+            check_payload if "check-runs" in endpoint else [good])
+        globals()["graphql_review_decision"] = lambda n: {
+            "review_decision": "APPROVED", "head_ref_oid": "a" * 40}
+        pin = dict(PINS[722], head="a" * 40, files=1,
+                   paths_sha256=sha256_text("docs/self_test.txt"))
+        approved, _, _ = evaluate(722, pin, "a" * 40, "human-reviewer")
+        assert approved["eligible"], approved["problems"]
+        assert approved["review_decision_source"] == "graphql"
+        globals()["graphql_review_decision"] = lambda n: {
+            "review_decision": "REVIEW_REQUIRED", "head_ref_oid": "a" * 40}
+        refused, _, _ = evaluate(722, pin, "a" * 40, "human-reviewer")
+        assert "REVIEW_DECISION_NOT_APPROVED" in refused["problems"], refused["problems"]
+        globals()["graphql_review_decision"] = lambda n: {
+            "review_decision": "APPROVED", "head_ref_oid": "b" * 40}
+        drift, _, _ = evaluate(722, pin, "a" * 40, "human-reviewer")
+        assert "GRAPHQL_HEAD_DRIFT" in drift["problems"], drift["problems"]
+    finally:
+        globals()["gh_json"], globals()["graphql_review_decision"] = saved_gh, saved_gql
+
+    apply_src = inspect.getsource(apply_runbook)
+    assert "prior_tip" in apply_src and "trial_merge(trial_tip" in apply_src, "apply sibling gate missing"
+    assert "verify_approval_and_protection" in apply_src, "apply pre-merge gate missing"
+    main_src = inspect.getsource(main)
+    assert 'ap.add_argument("--plan", action="store_true"' in main_src
+    assert 'ap.add_argument("--apply", action="store_true"' in main_src
+    assert "DISTINCT_APPROVAL_FLAG_REQUIRED" in inspect.getsource(apply_runbook)
+    print("SELF_TEST_PASS gates=checks+approval+graphql-decision+commit-id+dismiss-stale+order+skip-disjointness+pin-shape+apply-sibling")
 
 
 def plan(approver=None):
@@ -516,6 +615,35 @@ def plan(approver=None):
     return out
 
 
+def verify_approval_and_protection(number, head, approver):
+    """Last-moment, read-only re-check immediately before an ordinary merge.
+
+    Re-query the live review state (GraphQL decision + exact non-null commit_id)
+    and both branch protections. No gate may be cached from planning time.
+    """
+    problems = []
+    pr = gh_json(f"pulls/{number}")
+    if (pr.get("head") or {}).get("sha") != head:
+        problems.append("HEAD_DRIFT_BEFORE_MERGE")
+    revs = gh_json(f"pulls/{number}/reviews?per_page=100")
+    if not approvals(pr, revs, approver):
+        problems.append("APPROVAL_WITHDRAWN_OR_STALE")
+    gql = graphql_review_decision(number)
+    if str(gql.get("review_decision") or "").upper() != "APPROVED":
+        problems.append("REVIEW_DECISION_NOT_APPROVED")
+    if gql.get("head_ref_oid") != head:
+        problems.append("GRAPHQL_HEAD_DRIFT")
+    for branch in (INTEGRATION, MAIN):
+        p = check_protection(branch)
+        if p["verdict"] != "PASS":
+            problems.append(f"PROTECTION_CHANGED:{branch}:{','.join(p['problems'])}")
+        if not p["dismiss_stale_reviews"]:
+            problems.append(f"DISMISS_STALE_REVIEWS_DISABLED:{branch}")
+    return {"verdict": "PASS" if not problems else "FAIL", "problems": problems,
+            "review_decision": gql.get("review_decision"),
+            "review_decision_source": "graphql"}
+
+
 def apply_runbook(approver, attempts, interval, full_suite):
     if not approver:
         raise Refused("DISTINCT_APPROVAL_FLAG_REQUIRED: --apply needs --distinct-approval <human-login>")
@@ -539,6 +667,10 @@ def apply_runbook(approver, attempts, interval, full_suite):
         state["verdict"] = "REFUSED_BASE_DRIFT"
         write_evidence(stamp, state)
         raise Refused(f"LIVE_TIP_DRIFT expected {BASE_SHA} got {tip}")
+    # Mirror the plan's sequential trial chain. The sibling-blob comparison uses
+    # the previous trial tip (prior_tip); dropping it in --apply would let a
+    # merge silently overwrite a sibling's already-integrated bytes.
+    prior_tip, trial_tip = None, tip
     for n in ORDER:
         rec, paths, _ = evaluate(n, PINS[n], tip, approver)
         if not rec["eligible"]:
@@ -551,15 +683,29 @@ def apply_runbook(approver, attempts, interval, full_suite):
             state["verdict"] = f"STOPPED_PR_{n}_HEAD_DRIFT"
             write_evidence(stamp, state)
             raise Refused(f"PR {n} fetched head drift")
-        tm = trial_merge(tip, head, set(paths))
-        state.setdefault("trials", {})[str(n)] = tm
+        try:
+            tm = trial_merge(trial_tip, head, set(paths), prior_tip)
+        except Refused as exc:
+            state["verdict"] = f"STOPPED_PR_{n}_TRIAL_MERGE"
+            write_evidence(stamp, state)
+            raise Refused(f"PR {n} trial merge against {trial_tip[:12]} failed: {exc}") from exc
+        state.setdefault("trials", {})[str(n)] = {"pr": n, "against": trial_tip,
+                                                   "prior_tip": prior_tip, **tm}
         write_evidence(stamp, state)
+        prior_tip, trial_tip = trial_tip, tm["trial_commit"]
         # Re-check live tip immediately before the merge (serialized integration).
         now = live_tip()
         if now != tip:
             state["verdict"] = f"STOPPED_PR_{n}_TIP_ADVANCED"
             write_evidence(stamp, state)
             raise Refused(f"live tip advanced from {tip} to {now}")
+        gates = verify_approval_and_protection(n, head, approver)
+        state.setdefault("pre_merge_gates", {})[str(n)] = gates
+        write_evidence(stamp, state)
+        if gates["verdict"] != "PASS":
+            state["verdict"] = f"STOPPED_PR_{n}_PRE_MERGE_GATES"
+            write_evidence(stamp, state)
+            raise Refused(f"PR {n} pre-merge gate failure: {gates['problems']}")
         merged = merge_exact(n, head)
         state["merges"].append(merged)
         write_evidence(stamp, state)

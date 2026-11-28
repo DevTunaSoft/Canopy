@@ -29,8 +29,12 @@ The patched source was compiled **in guest scratch only** at
 `/home/canopy/native_terminal_launch_20261127` with the same CMake/Ninja/Qt6
 configuration as the prior build; binary SHA-256
 `9bdcb7f525b0e8846b565484caf7e6e2211ef350dab77732b5d55b8536d84a8d`.
-`--self-test-system-apps-capability` reported `CANOPY_GIO_ENABLED` (native GIO
-path, not the disabled fallback).
+`--self-test-system-apps-capability` did **not** report `CANOPY_GIO_ENABLED`:
+that probe aborted with `CAPABILITY_RC=134` because no Qt display was set
+(`qt.qpa.xcb: could not connect to display`). No capability-probe result is
+claimed. The native GIO launch path is instead evidenced by the real Konsole
+activation below (stock desktop entry, D-Bus name and X window); that evidence
+is `SCOPED_ON_GUEST_RUNTIME`, not CI acceptance.
 
 Runtime command (host-orchestrated, guest-side script):
 
@@ -97,15 +101,17 @@ with stock XDG data directories; no scratch desktop entry, renamed copy,
   compiled frame timings are `NOT_RUN`; no stability, security, accessibility
   or approved visual quality was traded away. No accessibility label was touched.
 
-## Known residual (outside this task's ownership)
+## Fake-GIO pin synchronization at this head
 
-At base `ec910d7a` the fake-GIO QA pins in `tools/qa/` still record the
-pre-port source digest `33f2ff87…` and an 8-call unavailable case. Those paths
-are owned by QA/PR #731 and are deliberately **not** modified here. The local
-targeted unit set (21 tests) and `tools/check_foundation.py` pass at this head,
-but the `classic-launch-fixture` CI job will need PR #731's synchronized pin
-updates before this production change can be promoted. No merge or self-approval
-is claimed in this draft.
+The dependent QA pins from PR #731 are now synchronized here against the
+production source blob `b397916b…`:
+`tools/qa/fake_gio_launch_fixture/expected-source-sha256.txt` (source digest),
+`tools/qa/fake_gio_evidence_gate.py` (source digest and the 12-call
+unavailable case) and
+`tools/qa/fake_gio_launch_fixture/harness/system_app_launcher_fixture.cpp`
+(12 `new` calls: six Terminal candidates walked by both `canLaunch()` and
+`launch()`). These are QA contract updates only; production C++ and QML are
+unchanged. No merge or self-approval is claimed in this draft.
 
 ## Local checks at head
 

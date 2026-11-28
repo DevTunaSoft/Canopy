@@ -1,0 +1,32 @@
+{
+  "asset_delta": [],
+  "base_tuple_reproduced": true,
+  "changed_lines": [
+    {
+      "base": "readonly property int dockSize: 88",
+      "head": "readonly property int dockSize: 96",
+      "line": 17
+    },
+    {
+      "base": "readonly property int dockPadding: 12",
+      "head": "readonly property int dockPadding: 14",
+      "line": 18
+    }
+  ],
+  "diff_paths": [
+    "M\tprototype/classic/Theme.qml",
+    "A\tscratch/dock_geometry_fix/project_geometry.py"
+  ],
+  "geometry_tuple_exact": true,
+  "head_commit": "672e46809751d96606b3f6986c5cfe0535ee6e38",
+  "head_tuple": {
+    "barHeight": 32,
+    "dockPadding": 14,
+    "dockSize": 96,
+    "dockSpacing": 7
+  },
+  "nonvisual_projection_identical": true,
+  "output": "C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\wt-dock-geometry-fix-20261128\\scratch\\dock_geometry_fix\\geometry_projection.json",
+  "projected_width_base": 537,
+  "projected_width_head": 541
+}

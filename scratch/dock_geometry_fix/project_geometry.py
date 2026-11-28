@@ -108,7 +108,10 @@ def asset_tree(repo, rev):
 
 def main():
     repo = Path(__file__).resolve().parents[2]
-    head = git(repo, "rev-parse", "HEAD").decode("ascii").strip()
+    # Pin to the commit that last changed Theme.qml so later evidence/docs-only
+    # commits cannot silently invalidate this projection.
+    head = git(repo, "log", "-1", "--format=%H", "--", THEME).decode(
+        "ascii").strip()
     base_exists = subprocess.run(
         ["git", "-C", str(repo), "cat-file", "-e", BASE + "^{commit}"],
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
@@ -132,7 +135,7 @@ def main():
     nonvisual_head = nonvisual_projection(head_blob)
 
     base_assets = asset_tree(repo, BASE)
-    head_assets = asset_tree(repo, "HEAD")
+    head_assets = asset_tree(repo, head)
     asset_delta = sorted(
         path for path in set(base_assets) | set(head_assets)
         if base_assets.get(path) != head_assets.get(path))

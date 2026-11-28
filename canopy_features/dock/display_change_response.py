@@ -40,6 +40,8 @@ ALLOWED_KINDS = frozenset({
 CONNECTOR = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}\Z")
 MAX_SUBSCRIBERS = 16
 MAX_HISTORY = 64
+MAX_CHANGES = 16
+MAX_CHANGE_LEN = 80
 
 __all__ = [
     "ROOT_WIDTH", "ROOT_HEIGHT", "MIN_WIDTH", "MIN_HEIGHT",
@@ -66,6 +68,10 @@ class DisplayEvent:
     Fields are intentionally typed loosely: a hostile event arrives as data
     and must be refused by :meth:`DisplayChangeResponse.handle`, not by the
     constructor. Trusted producers may construct this value directly.
+
+    ``changes`` is the optional bounded topology-change signature supplied by
+    the recovery adapter. Without it, a secondary monitor add/remove would be
+    indistinguishable from an unchanged primary and silently deduplicated.
     """
 
     kind: object
@@ -74,6 +80,7 @@ class DisplayEvent:
     height: object = None
     scale: object = 1.0
     previous: object = None
+    changes: object = None
 
 
 @dataclass(frozen=True)
@@ -100,6 +107,9 @@ def _coerce_event(value):
         if not all(hasattr(value, name) for name in
                    ("kind", "connector", "width", "height", "scale", "previous")):
             raise DisplayChangeError("unsupported display event")
+    changes = (value.changes if isinstance(value, DisplayEvent)
+               else value.get("changes") if isinstance(value, Mapping)
+               else getattr(value, "changes", None))
     event = value if isinstance(value, DisplayEvent) else DisplayEvent(
         kind=_field(value, "kind"),
         connector=_field(value, "connector"),
@@ -107,6 +117,7 @@ def _coerce_event(value):
         height=_field(value, "height"),
         scale=_field(value, "scale"),
         previous=_field(value, "previous"),
+        changes=changes,
     )
     if type(event.kind) is not str or event.kind not in ALLOWED_KINDS:
         raise DisplayChangeError("invalid display event kind")
@@ -125,6 +136,15 @@ def _coerce_event(value):
             type(event.previous) is not tuple or len(event.previous) != 2
             or any(type(v) is not int or v <= 0 for v in event.previous)):
         raise DisplayChangeError("invalid previous resolution")
+    if event.changes is not None and (
+            type(event.changes) is not tuple
+            or len(event.changes) > MAX_CHANGES
+            or any(type(item) is not tuple or len(item) != 2
+                   or any(type(part) is not str
+                          or not 0 < len(part) <= MAX_CHANGE_LEN
+                          for part in item)
+                   for item in event.changes)):
+        raise DisplayChangeError("invalid topology changes")
     return event
 
 
@@ -191,7 +211,7 @@ class DisplayChangeResponse:
         try:
             plan = self._plan(event)
             signature = (event.kind, event.connector, event.width,
-                         event.height, event.scale)
+                         event.height, event.scale, event.changes)
             if (event.kind == EVENT_DPI_CHANGED
                     and plan.kind == KIND_RELAYOUT
                     and plan.size == self._last_safe_size):
@@ -216,8 +236,21 @@ class DisplayChangeResponse:
 
     def _plan(self, event):
         if event.kind == EVENT_DISCONNECT:
-            return RelayoutPlan(self._sequence, KIND_SUSPEND,
-                                self._last_safe_size, "no_display")
+            if event.width is None or event.height is None:
+                return RelayoutPlan(self._sequence, KIND_SUSPEND,
+                                    self._last_safe_size, "no_display")
+            # A surviving primary was supplied: one monitor went away, but the
+            # desktop must keep a bounded layout instead of suspending.
+            if event.width < MIN_WIDTH or event.height < MIN_HEIGHT:
+                return RelayoutPlan(self._sequence, KIND_HOLD,
+                                    self._last_safe_size, "below_minimum")
+            size = (min(ROOT_WIDTH, event.width),
+                    min(ROOT_HEIGHT, event.height))
+            if not validate_dock_bounds(*size).ok:
+                return RelayoutPlan(self._sequence, KIND_HOLD,
+                                    self._last_safe_size, "unsafe_geometry")
+            return RelayoutPlan(self._sequence, KIND_RELAYOUT, size,
+                                EVENT_DISCONNECT)
         if event.kind == EVENT_DPI_CHANGED:
             logical = logical_size_from_physical(
                 event.width, event.height, event.scale)
@@ -261,18 +294,23 @@ class DisplayChangeResponse:
         """
         try:
             primary = result.safe_topology.primary
+            changes = tuple(sorted((change.kind, change.connector)
+                                   for change in result.changes))
             if primary is None:
-                return self.handle(DisplayEvent(EVENT_DISCONNECT))
+                return self.handle(DisplayEvent(
+                    EVENT_DISCONNECT, changes=changes))
             kinds = tuple(change.kind for change in result.changes)
             if EVENT_RESOLUTION_CHANGED in kinds:
                 kind = EVENT_RESOLUTION_CHANGED
             elif EVENT_PRIMARY_CHANGED in kinds:
                 kind = EVENT_PRIMARY_CHANGED
+            elif EVENT_DISCONNECT in kinds:
+                kind = EVENT_DISCONNECT
             else:
                 kind = EVENT_CONNECT
             return self.handle(DisplayEvent(
                 kind, connector=primary.connector,
                 width=primary.width, height=primary.height,
-                previous=None))
+                previous=None, changes=changes))
         except Exception:
             return self.handle(None)

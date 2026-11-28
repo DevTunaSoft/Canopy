@@ -1,0 +1,28 @@
+UTC=2026-11-28T08:34:36Z
+=== list runningvms ===
+"Canopy-Test-Plasma6" {3aecd840-4dd6-4481-913f-64a289da406d}
+=== showvminfo (filtered) ===
+VMState="running"
+nic1="nat"
+Forwarding(0)="guestssh,tcp,127.0.0.1,2223,,22"
+=== guestproperty enumerate ===
+/VirtualBox/HostGuest/SysprepArgs = ''       @ 2026-11-28T04:00:23.984Z TRANSIENT, RDONLYGUEST
+/VirtualBox/HostGuest/SysprepExec = ''       @ 2026-11-28T04:00:23.984Z TRANSIENT, RDONLYGUEST
+/VirtualBox/HostInfo/VBoxRev      = '175245' @ 2026-11-28T04:00:24.168Z TRANSIENT, RDONLYGUEST
+/VirtualBox/HostInfo/VBoxVer      = '7.2.22' @ 2026-11-28T04:00:24.168Z TRANSIENT, RDONLYGUEST
+/VirtualBox/HostInfo/VBoxVerExt   = '7.2.22' @ 2026-11-28T04:00:24.168Z TRANSIENT, RDONLYGUEST
+/VirtualBox/VMInfo/ResetCounter   = '0'      @ 2026-11-28T04:00:23.984Z TRANSIENT, RDONLYGUEST
+/VirtualBox/VMInfo/ResumeCounter  = '0'      @ 2026-11-28T04:00:23.984Z TRANSIENT, RDONLYGUEST
+=== guestcontrol run /bin/uname ===
+VBoxManage.exe: error: Waiting for guest process failed: The guest execution service is not ready (yet)
+VBoxManage.exe: error: Details: code VBOX_E_IPRT_ERROR (0x80bb0005), component GuestSessionWrap, interface IGuestSession, callee IUnknown
+VBoxManage.exe: error: Context: "WaitForArray(ComSafeArrayAsInParam(aSessionWaitFlags), 30 * 1000, &enmWaitResult)" at line 772 of file VBoxManageGuestCtrl.cpp
+=== ~/.ssh ===
+total 36
+drwxr-xr-x 1 X1 197121    0 Nov 27 09:20 .
+drwxr-xr-x 1 X1 197121    0 Nov 28 00:27 ..
+-rw-r--r-- 1 X1 197121 1692 Nov 27 09:20 known_hosts
+-rw-r--r-- 1 X1 197121  944 Nov 27 09:19 known_hosts.old
+=== pyatspi ===
+    import pyatspi
+ModuleNotFoundError: No module named 'pyatspi'

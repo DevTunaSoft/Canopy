@@ -120,6 +120,7 @@ Item {
                     font.pixelSize: premiumItem.font.pixelSize
                     font.weight: premiumItem.font.weight
                     elide: Text.ElideRight
+                    Accessible.name: text
                 }
             }
         }

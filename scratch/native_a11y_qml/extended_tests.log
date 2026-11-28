@@ -1,0 +1,33 @@
+..........................................FF...................
+======================================================================
+FAIL: test_rendered_halves_are_byte_identical_to_base_tip (tests.test_nd041_native_settings_controls_wiring.RenderedVisualLockTests.test_rendered_halves_are_byte_identical_to_base_tip) (file='SettingsPanel.qml')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\X1\AppData\Local\hermes\cache\scratch\wt-native-a11y-qml-20261128\tests\test_nd041_native_settings_controls_wiring.py", line 86, in test_rendered_halves_are_byte_identical_to_base_tip
+    self.assertEqual(digest, RENDERED_VISUAL_SHA256[name])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'e5520ba7705c453014148cc98d36f3a71e725f65f68150b644adca6d2dc2c1c5' != '38f1cf1512dff833dee7f8e1f844724682b2a1319bb3c798c501de0ebbbf192c'
+- e5520ba7705c453014148cc98d36f3a71e725f65f68150b644adca6d2dc2c1c5
++ 38f1cf1512dff833dee7f8e1f844724682b2a1319bb3c798c501de0ebbbf192c
+
+
+======================================================================
+FAIL: test_rendered_halves_are_byte_identical_to_base_tip (tests.test_nd041_native_settings_controls_wiring.RenderedVisualLockTests.test_rendered_halves_are_byte_identical_to_base_tip) (file='QuickControlsOverlay.qml')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\X1\AppData\Local\hermes\cache\scratch\wt-native-a11y-qml-20261128\tests\test_nd041_native_settings_controls_wiring.py", line 86, in test_rendered_halves_are_byte_identical_to_base_tip
+    self.assertEqual(digest, RENDERED_VISUAL_SHA256[name])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '19349a4fdd952bc9a83d24ea644e5ea84dbd512ad9f2be1f76074c67dddcda0c' != '257e00bb5f337495bcd46ba97c34cbdb33d68ac99566802e7bd92f0e4d4fd02b'
+- 19349a4fdd952bc9a83d24ea644e5ea84dbd512ad9f2be1f76074c67dddcda0c
++ 257e00bb5f337495bcd46ba97c34cbdb33d68ac99566802e7bd92f0e4d4fd02b
+
+
+----------------------------------------------------------------------
+Ran 62 tests in 51.552s
+
+FAILED (failures=2)
+VERDICT FAIL compiled mode requires a binary SHA-256 pin
+VERDICT FAIL
+VERDICT PASS
+VERDICT FAIL compiled mode cannot be combined with driver, binary or report

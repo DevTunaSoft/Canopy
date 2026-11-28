@@ -1,13 +1,16 @@
-# LacOS — future Linux Mint-based distribution goal
+# LacOS — immutable, multi-package desktop distribution
 
-**Status: PLANNED / NOT IMPLEMENTED.** LacOS is a working product name, not a released operating system. Canopy remains the separately usable Linux desktop shell. LacOS becomes a distinct Linux Mint-based distribution project only **after** the Canopy shell is technically reliable, visually approved, benchmarked, and accepted in real Linux Mint sessions.
+**Status: PLANNED / NOT IMPLEMENTED.** LacOS is a working product name, not a released operating system. Canopy remains the separately usable Linux desktop shell. LacOS becomes a distinct immutable distribution project after native Plasma 6 Canopy is technically reliable, visually approved, benchmarked and accepted in real sessions. Kubuntu 26.04 LTS is the reference development guest, not the final distribution decision. Preserve Mint as a comparison baseline.
+
+## FOSS commitment and current direction
+All first-party software, experiences and functionality free/open source; no paid tiers, subscriptions, ads, activation, mandatory telemetry or accounts. See [master owner directive](MASTER_OWNER_DIRECTIVE.md). Fedora Kinoite leads the immutable foundation evaluation, prioritizing direct upstream updates and safe stock Plasma fallback. Initial eight packs: Classic, Modern, Heritage, Flow, Lite, Studio, Cloud and Touch; multiple variations, no hardcoded limit. Research all relevant Zorin layouts and editions with original implementations.
 
 ## Mission
-Build a premium, familiar Linux experience for people migrating from **macOS or Windows**, retaining the proven Mint/Linux compatibility, update and security foundations while making the result **leaner, more refined, more capable, and more adaptable**. The goal is measurable functional improvement with *lower total resource usage*, not a superficial theme or indiscriminate removal of components.
+Build a premium, familiar Linux experience for people migrating from **macOS or Windows**, retaining proven upstream Linux compatibility, update and security foundations while making the result **leaner, more refined, more capable, and more adaptable**. The goal is measurable functional improvement with *lower total resource usage*, not a superficial theme or indiscriminate removal of components.
 
 ## One system, freely switchable desktop experiences
 - **Canopy Classic:** polished macOS-familiar navigation, menu bar, dock, and workflows using **original or properly licensed** assets.
-- **Canopy Modern:** equally polished Windows-familiar taskbar, application launcher, system tray, snapping, window workflows, and shortcuts; original or properly licensed assets.
+- **Canopy Modern:** equally polished Windows-familiar (with Zorin OS as a usability and design research reference) taskbar, application launcher, system tray, snapping, window workflows, and shortcuts; original or properly licensed assets.
 - Both are different presentation/shell modes on a **single shared set** of window/session services, application state, settings contracts and compositor integration where technically practical. **Never** run two complete competing desktops or duplicate background services simply to enable switching.
 - **A user can switch Classic ↔ Modern whenever desired**, from an accessible system-settings/desktop action, not only at installation. Switching back is always supported. Default installation choice is only an initial preference.
 - **Target:** live, in-session switching without a reboot or reinstall, preserving running apps, windows, and user work. Validate this with real application/session tests; don't claim it works until demonstrated. Preserve independent per-mode customization atop shared system settings.
@@ -47,17 +50,21 @@ are future work, not implemented features. See
 
 ## Resource efficiency and added functionality
 - Prioritize **measured idle RAM/CPU/GPU use, wakeups, startup, responsiveness, sustained memory growth, battery/power behavior**, and cold/warm transitions. Compare LacOS with stock Mint on the **same hardware and workload**, with methodology and exclusions recorded.
-- Preserve Mint's package ecosystem, security updates, accessibility, hardware support, recovery paths, and user data. Remove or replace a component only after dependency review, performance evidence, rollback planning, and regression testing.
+- Preserve supported upstream package/security updates, accessibility, hardware support, recovery paths, and user data. Remove or replace a component only after dependency review, performance evidence, rollback planning, and regression testing.
 - Extend Canopy's **five performance profiles plus Auto Mode**, with per-feature overrides and event-driven/lazy-loading behavior; do not force graphical effects or unused features to run in the background.
 - Add genuinely useful integrated functionality: cross-platform-familiar application discovery, keyboard shortcuts, file workflows, system controls, window management, migration assistance, and sensible defaults. Features must justify maintenance, security and resource cost.
 - Visual quality is a release gate: premium original light/dark designs, coherent icons and typography, HiDPI, keyboard/screen-reader accessibility, reduced motion, and actual user-reviewed screenshots. A green CI check is not visual acceptance.
 
 ## Sequencing and delivery gates
-1. **Finish Canopy Classic first:** working, high-quality, validated shell/session with approved visual assets, real Mint VM and hardware acceptance, performance/regression evidence.
+1. **Finish Canopy Classic first:** working, high-quality, validated shell/session with approved visual assets, real Plasma VM and hardware acceptance, performance/regression evidence.
 2. **Build Canopy Modern:** reuse the Classic core; validate Windows-familiar behavior, accessibility, performance and styling independently.
 3. **Implement and verify the Shell Pack switcher:** session-preserving Classic/Modern and later additional approved packs, safe fallback, rollback, persistent per-pack preferences, no duplicate services.
-4. **Branch LacOS as a separate distribution:** a maintained Mint-derived installer/image with both modes, appropriate installer onboarding, upgrade/recovery tooling and measured optimizations.
+4. **Branch LacOS as a separate distribution:** a maintained immutable installer/image on the selected supported base with both modes, appropriate installer onboarding, upgrade/recovery tooling and measured optimizations.
 5. **Release only after acceptance:** reproducible builds, security/update compatibility, real hardware coverage, low-end and modern systems, repeatable stock-Mint comparison, both modes and repeated switch/restore stress tests.
+
+## Immutable system and multi-package application requirements (owner decision 2026-11-27)
+
+See [LACOS_IMMUTABLE_ARCHITECTURE.md](LACOS_IMMUTABLE_ARCHITECTURE.md) for the mandatory security, deployment, package compatibility, update and Modern design requirements. The running core is read-only; applications and user data are separate; supported upstream updates arrive through verified atomic deployments with rollback. APT, Pacman, DNF/RPM, Flatpak and rootless Podman are required application options, not competing host package managers. The actual deployment backend and final base remain evidence-gated. Research may run independently without interrupting current tasks or delaying native Classic.
 
 **Non-goals:** reimplement the Linux kernel/package manager unnecessarily; copy Apple/Microsoft trademarks or assets; replace Mint stability with unsafe "debloating"; claim a release, performance win or seamless shell swap before it is proven.
 

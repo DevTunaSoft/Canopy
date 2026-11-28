@@ -2,7 +2,12 @@
 
 Status legend: PLANNED / IN PROGRESS / VERIFIED / BLOCKED.
 
+## ACTIVE GOAL — Rev3 controlling directive (2026-11-28)
+
+Sole controlling Canopy/LacOS goal: `C:/Users/X1/Downloads/Canopy_LacOS_Master_Execution_Directive_2026-11-28_Rev3.md`, SHA-256 `1fba4b1e7128b6bc33aba577c05fdccfa45fcac56ee714f02e9d8b43e32a0f2a` (short `1fba4b1e`). Workforce: project-scoped cap 8+Hermes (at most 8 Canopy/LacOS subagents plus Hermes, active project workers only); **no-global-change** — other projects and global Hermes settings are excluded and unchanged. **A0.1 finish-current-work protection:** let current assignments finish on their authorized branches/worktrees; never interrupt, cancel, restart, reassign or change branch merely to apply a directive, integration priority or cap; checkpoint, never mark complete. Integration authority: integration/main protection requires **1 distinct human approving review with `enforce_admins=true`** while only `DevTunaSoft` authors eligible PRs — a genuine external blocker; never self-approve or bypass protection; promote eligible PRs to ready, record the exact owner action and continue unrelated work. Guest ownership: **exclusive guest lease** with owner, heartbeat and recovery checkpoint for interactive VM/install/uninstall/display/suspend-resume/restart; serialize heavy builds, suites and VM work; timeouts are incomplete, not passes. This reconciliation PR is DRAFT: no merge, no self-approval.
+
 ## ACTIVE GOAL — 2026-11-26 supplemental directive
+> SUPERSEDED_POINT_IN_TIME: this 2026-11-26 goal, its 12/10-agent ceiling and its external-directive SHA are retained as point-in-time history for cap, draft-only and integration-authority wording; Rev3 (`1fba4b1e`) above governs. Not retracted, not erased; security, visual, hold and release gates still bind.
 
 Finish one installable, functional, secure, stable, premium, resource-efficient Linux Mint Classic desktop. Workforce ceiling: up to 12 engineering subagents plus Hermes when productive non-overlapping work exists (newer owner directive, 2026-11-26; it supersedes the 10-agent ceiling in the external directive cited below, while all other wording and acceptance gates there remain in force); throttle heavy operations to protect orchestrator stability. Priorities: security/stability/data integrity; real Mint functionality; integration of existing components; installation/startup/recovery; premium GUI; low resources; independent verification; release documentation. No main merge or final release without explicit owner authorization. Authoritative directive (external, **NOT in the repository tree**): composer-pasted source at `C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy_master_supplemental_directive_20261126.md`, SHA-256 `f3ec49fba9317c01354dbd34cf1c5cfedb2625b604f25117c720ae0f44781eae` (recomputed from on-disk bytes); the bare filename is `MISSING` at exact tip `20fb694f2b4a0ea44e2f3032f316ac8c7e65a23a` (`git cat-file -e` fails in this isolated worktree) and was previously recorded `MISSING` at archived tip `84684a0f77c81cb0e84d9a679ec57a429dc5c1db` per `C:/Users/X1/AppData/Local/hermes/cache/scratch/final_git_tree_provenance_84684a0.json`.
 
@@ -28,7 +33,7 @@ Work is selected from `docs/PRODUCT_COMPLETION_MATRIX.md` by dependency and prod
 Standalone security and reliability defects remain eligible, but increasingly granular synthetic validators do not displace core integration work.
 
 ## Integration discipline (issue #132)
-Draft PRs are temporary working states. Promote verified PRs to ready-for-review only after their exact SHA passes all required checks and dependencies/conflicts are cleared. Green CI alone never authorizes a merge. Integrate eligible nonvisual work incrementally through the integration branch with regression tests; keep Classic Qt final integration draft until real Mint acceptance and owner visual approval are complete. Maintain at least four concurrently active, isolated engineering subagents plus Hermes; assign another eligible independent task whenever one completes or is blocked. Verify the five-minute watchdog is operational.
+Draft PRs are temporary working states. Promote verified PRs to ready-for-review only after their exact SHA passes all required checks and dependencies/conflicts are cleared. Green CI alone never authorizes a merge. Integrate eligible nonvisual work incrementally through the integration branch with regression tests; keep Classic Qt final integration draft until real Mint acceptance and owner visual approval are complete. `SUPERSEDED_POINT_IN_TIME`: maintain at most eight project-scoped Canopy/LacOS subagents plus Hermes under Rev3 cap 8+Hermes; under A0.1 let current assignments finish on their authorized branches and do not reassign merely to fill a slot. Verify the five-minute watchdog is operational.
 
 ## Expandable desktop experiences — FOUNDATION
 
@@ -46,3 +51,14 @@ Draft PRs are temporary working states. Promote verified PRs to ready-for-review
 
 See [Shell Pack architecture](SHELL_PACK_ARCHITECTURE.md) and
 [LacOS product vision](LACOS_VISION.md).
+
+## Dependency-aware milestones (2026-11-27, from #722 — SUPERSEDED_POINT_IN_TIME where inconsistent with Rev3)
+
+1. Finish current legacy tasks, independently review, push, integrate eligible work, archive final SHA and inventory verified reusable changes.
+2. Establish native Plasma reference guest (Kubuntu LTS), early Kinoite acceptance and KDE neon compatibility testing; retain Mint comparison. Port useful code and approved original artwork.
+3. Deliver native Classic with real desktop/session, launch/dock/window/menu functionality, recovery, accessibility and measured resource/visual evidence.
+4. Verify coherent baseline and transition to protected main under master directive; optimize performance. Named holds and applicable owner acceptance remain.
+5. Build Modern with comprehensive Zorin research across all editions/layouts; prove transactional Shell Pack switching; progressively add Heritage, Flow, Lite, Studio, Cloud and Touch. All first-party layouts free and open source; unlimited future packs.
+6. Validate Kinoite as leading immutable foundation, upstream continuity and stock Plasma fallback; compare alternatives. Research in parallel without delaying Classic.
+7. Integrate immutable deployment, signed atomic updates, rollback, backup/restore, upstream-maintained application environments (Flatpak/APT/Pacman/DNF/Podman), unified software management and optional ecosystems on demand.
+8. Validate security, low resources, real hardware, installer/upgrade/recovery, compatibility and upstream independence; prepare public release for owner approval.

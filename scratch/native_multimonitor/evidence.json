@@ -1,0 +1,728 @@
+{
+  "counts": {
+    "failed_steps": 0,
+    "passed_steps": 27,
+    "scenarios": 15,
+    "steps": 27
+  },
+  "fixtures": {
+    "path": "scratch/native_multimonitor/fixtures.json",
+    "sha256": "403026548edd52f9c335cf207cefe85a138b28dae08e501f4872996fd11ca1bc"
+  },
+  "geometry": {
+    "approved": [
+      32,
+      96,
+      14,
+      7
+    ],
+    "approved_fingerprint": "0455749437139ff0c5a754a0e2913046142b47e8a10490445fe7ab9a9f258c33",
+    "matches_approved": false,
+    "note": "The approved tuple is read-only. A mismatching supplied QML text is reported, never rewritten by this tool.",
+    "observed_in_supplied_theme": [
+      32,
+      88,
+      12,
+      7
+    ]
+  },
+  "headless": true,
+  "label": "SYNTHETIC",
+  "native_runtime": "BLOCKED_NOT_RUN",
+  "scenarios": [
+    {
+      "id": "baseline_kscreen",
+      "passed": true,
+      "steps": [
+        {
+          "actual": {
+            "kind": "relayout",
+            "reason": "resolution_changed",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "expected": {
+            "kind": "relayout",
+            "reason": "resolution_changed",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "index": 0,
+          "passed": true,
+          "payload_sha256": "ce9455ee2815eaff39959c6ad3a31987ae04725b7506734cba9a21bd7372f715"
+        },
+        {
+          "actual": {
+            "kind": "no_op",
+            "reason": "unchanged",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "expected": {
+            "kind": "no_op",
+            "reason": "unchanged",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "index": 1,
+          "passed": true,
+          "payload_sha256": "ce9455ee2815eaff39959c6ad3a31987ae04725b7506734cba9a21bd7372f715"
+        }
+      ]
+    },
+    {
+      "id": "secondary_attach_detach",
+      "passed": true,
+      "steps": [
+        {
+          "actual": {
+            "kind": "relayout",
+            "reason": "resolution_changed",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "expected": {
+            "kind": "relayout",
+            "reason": "resolution_changed",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "index": 0,
+          "passed": true,
+          "payload_sha256": "ce9455ee2815eaff39959c6ad3a31987ae04725b7506734cba9a21bd7372f715"
+        },
+        {
+          "actual": {
+            "kind": "relayout",
+            "reason": "connect",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "expected": {
+            "kind": "relayout",
+            "reason": "connect",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "index": 1,
+          "passed": true,
+          "payload_sha256": "eef88a11938b2cbe2ce9ba2960ba1cd53825af384c3726e88864d4ac32f8a05b"
+        },
+        {
+          "actual": {
+            "kind": "no_op",
+            "reason": "unchanged",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "expected": {
+            "kind": "no_op",
+            "reason": "unchanged",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "index": 2,
+          "passed": true,
+          "payload_sha256": "eef88a11938b2cbe2ce9ba2960ba1cd53825af384c3726e88864d4ac32f8a05b"
+        },
+        {
+          "actual": {
+            "kind": "relayout",
+            "reason": "disconnect",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "expected": {
+            "kind": "relayout",
+            "reason": "disconnect",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "index": 3,
+          "passed": true,
+          "payload_sha256": "ce9455ee2815eaff39959c6ad3a31987ae04725b7506734cba9a21bd7372f715"
+        }
+      ]
+    },
+    {
+      "id": "primary_detach_survivor",
+      "passed": true,
+      "steps": [
+        {
+          "actual": {
+            "kind": "relayout",
+            "reason": "resolution_changed",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "expected": {
+            "kind": "relayout",
+            "reason": "resolution_changed",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "index": 0,
+          "passed": true,
+          "payload_sha256": "7d350c3940e7255441ded3eac86a7c9bcfbe5a267cf8facd1f0db4dedd31c29c"
+        },
+        {
+          "actual": {
+            "kind": "relayout",
+            "reason": "disconnect",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "expected": {
+            "kind": "relayout",
+            "reason": "disconnect",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "index": 1,
+          "passed": true,
+          "payload_sha256": "5e852b3629ab14743effa00dab4693dae424c0677c04771af4f5e835374e4373"
+        },
+        {
+          "actual": {
+            "kind": "suspend",
+            "reason": "no_display",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "expected": {
+            "kind": "suspend",
+            "reason": "no_display",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "index": 2,
+          "passed": true,
+          "payload_sha256": "c61ab042854bf62b496c53b0302e975953042780947499259d5b05df3e78574a"
+        }
+      ]
+    },
+    {
+      "id": "hidpi_150_signal",
+      "passed": true,
+      "steps": [
+        {
+          "actual": {
+            "kind": "relayout",
+            "reason": "logical_dpi_changed",
+            "size": [
+              1200,
+              720
+            ]
+          },
+          "expected": {
+            "kind": "relayout",
+            "reason": "logical_dpi_changed",
+            "size": [
+              1200,
+              720
+            ]
+          },
+          "index": 0,
+          "passed": true,
+          "payload_sha256": "7160d9ccfb363c7f9f00597c2d6ea882e8e975c2aa593550664ca91c30d3a855"
+        },
+        {
+          "actual": {
+            "kind": "no_op",
+            "reason": "unchanged",
+            "size": [
+              1200,
+              720
+            ]
+          },
+          "expected": {
+            "kind": "no_op",
+            "reason": "unchanged",
+            "size": [
+              1200,
+              720
+            ]
+          },
+          "index": 1,
+          "passed": true,
+          "payload_sha256": "7160d9ccfb363c7f9f00597c2d6ea882e8e975c2aa593550664ca91c30d3a855"
+        }
+      ]
+    },
+    {
+      "id": "hidpi_200_signal",
+      "passed": true,
+      "steps": [
+        {
+          "actual": {
+            "kind": "relayout",
+            "reason": "logical_dpi_changed",
+            "size": [
+              1200,
+              720
+            ]
+          },
+          "expected": {
+            "kind": "relayout",
+            "reason": "logical_dpi_changed",
+            "size": [
+              1200,
+              720
+            ]
+          },
+          "index": 0,
+          "passed": true,
+          "payload_sha256": "d83e6b5405827053a3c9821f5ada9a73daa1c9f7f4a73672768ffd6f935a89c5"
+        }
+      ]
+    },
+    {
+      "id": "kscreen_scale_same_logical",
+      "passed": true,
+      "steps": [
+        {
+          "actual": {
+            "kind": "relayout",
+            "reason": "resolution_changed",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "expected": {
+            "kind": "relayout",
+            "reason": "resolution_changed",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "index": 0,
+          "passed": true,
+          "payload_sha256": "ce9455ee2815eaff39959c6ad3a31987ae04725b7506734cba9a21bd7372f715"
+        },
+        {
+          "actual": {
+            "kind": "no_op",
+            "reason": "logical_size_unchanged",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "expected": {
+            "kind": "no_op",
+            "reason": "logical_size_unchanged",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "index": 1,
+          "passed": true,
+          "payload_sha256": "f247282b6560348d64f3ad5ee5255de466d81cee3a6355b94161ad18efb4ed3f"
+        }
+      ]
+    },
+    {
+      "id": "kscreen_scale_new_logical",
+      "passed": true,
+      "steps": [
+        {
+          "actual": {
+            "kind": "relayout",
+            "reason": "resolution_changed",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "expected": {
+            "kind": "relayout",
+            "reason": "resolution_changed",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "index": 0,
+          "passed": true,
+          "payload_sha256": "ce9455ee2815eaff39959c6ad3a31987ae04725b7506734cba9a21bd7372f715"
+        },
+        {
+          "actual": {
+            "kind": "relayout",
+            "reason": "logical_dpi_changed",
+            "size": [
+              1200,
+              720
+            ]
+          },
+          "expected": {
+            "kind": "relayout",
+            "reason": "logical_dpi_changed",
+            "size": [
+              1200,
+              720
+            ]
+          },
+          "index": 1,
+          "passed": true,
+          "payload_sha256": "066f45607d80e9886ace1984f70f63f1a983f2623a80fa6c2e6d65a4ddc98e33"
+        }
+      ]
+    },
+    {
+      "id": "kwin_screens_changed",
+      "passed": true,
+      "steps": [
+        {
+          "actual": {
+            "kind": "relayout",
+            "reason": "resolution_changed",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "expected": {
+            "kind": "relayout",
+            "reason": "resolution_changed",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "index": 0,
+          "passed": true,
+          "payload_sha256": "2f050cf891524ea7cf95aba44c70001eb151bc7163cbf8d56c104344f47058fa"
+        },
+        {
+          "actual": {
+            "kind": "relayout",
+            "reason": "connect",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "expected": {
+            "kind": "relayout",
+            "reason": "connect",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "index": 1,
+          "passed": true,
+          "payload_sha256": "16b029af142b2e16d5f4c97b0cd2fb714bf92a165a8ffc6d8f0cf906c0689298"
+        },
+        {
+          "actual": {
+            "kind": "relayout",
+            "reason": "disconnect",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "expected": {
+            "kind": "relayout",
+            "reason": "disconnect",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "index": 2,
+          "passed": true,
+          "payload_sha256": "2f050cf891524ea7cf95aba44c70001eb151bc7163cbf8d56c104344f47058fa"
+        }
+      ]
+    },
+    {
+      "id": "hostile_connector",
+      "passed": true,
+      "steps": [
+        {
+          "actual": {
+            "kind": "hold",
+            "reason": "invalid_event",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "expected": {
+            "kind": "hold",
+            "reason": "invalid_event",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "index": 0,
+          "passed": true,
+          "payload_sha256": "95678734aafc973b48afcf70567f146c530e27f295b6dc20f5c19c34c27bd3dc"
+        }
+      ]
+    },
+    {
+      "id": "hostile_scale",
+      "passed": true,
+      "steps": [
+        {
+          "actual": {
+            "kind": "hold",
+            "reason": "invalid_event",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "expected": {
+            "kind": "hold",
+            "reason": "invalid_event",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "index": 0,
+          "passed": true,
+          "payload_sha256": "94b6279c20c084926400d45558ddfec74acb93aba94010f58ebe635fb68d0e78"
+        }
+      ]
+    },
+    {
+      "id": "oversized_topology",
+      "passed": true,
+      "steps": [
+        {
+          "actual": {
+            "kind": "hold",
+            "reason": "invalid_event",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "expected": {
+            "kind": "hold",
+            "reason": "invalid_event",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "index": 0,
+          "passed": true,
+          "payload_sha256": "c615ec94352dcbf2ac315fd259d6c4b00faf8b8812c3a3331394be86fe895365"
+        }
+      ]
+    },
+    {
+      "id": "unknown_source",
+      "passed": true,
+      "steps": [
+        {
+          "actual": {
+            "kind": "hold",
+            "reason": "invalid_event",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "expected": {
+            "kind": "hold",
+            "reason": "invalid_event",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "index": 0,
+          "passed": true,
+          "payload_sha256": "906dd8473937116ae1fb049d2ff4166f0898a7c9ebd3ea9e3954eb0faa7bc4dc"
+        }
+      ]
+    },
+    {
+      "id": "below_minimum",
+      "passed": true,
+      "steps": [
+        {
+          "actual": {
+            "kind": "hold",
+            "reason": "below_minimum",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "expected": {
+            "kind": "hold",
+            "reason": "below_minimum",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "index": 0,
+          "passed": true,
+          "payload_sha256": "3b5da0618fc65fd653d679896441ee7433be80b8af5b2aa6e1c613fbdd3d1a02"
+        }
+      ]
+    },
+    {
+      "id": "duplicate_connectors",
+      "passed": true,
+      "steps": [
+        {
+          "actual": {
+            "kind": "hold",
+            "reason": "invalid_event",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "expected": {
+            "kind": "hold",
+            "reason": "invalid_event",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "index": 0,
+          "passed": true,
+          "payload_sha256": "94adf33964205248b6e0a8276b44c785c5e093452a4edb92f7a68569c6d35379"
+        }
+      ]
+    },
+    {
+      "id": "kwin_scale_same_logical",
+      "passed": true,
+      "steps": [
+        {
+          "actual": {
+            "kind": "relayout",
+            "reason": "resolution_changed",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "expected": {
+            "kind": "relayout",
+            "reason": "resolution_changed",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "index": 0,
+          "passed": true,
+          "payload_sha256": "2f050cf891524ea7cf95aba44c70001eb151bc7163cbf8d56c104344f47058fa"
+        },
+        {
+          "actual": {
+            "kind": "no_op",
+            "reason": "logical_size_unchanged",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "expected": {
+            "kind": "no_op",
+            "reason": "logical_size_unchanged",
+            "size": [
+              1200,
+              750
+            ]
+          },
+          "index": 1,
+          "passed": true,
+          "payload_sha256": "75aa3e717ae7b192f0dfc898b93ce8a944f4d7f822bbf91fd7fb2fe1fa9fb0f1"
+        }
+      ]
+    }
+  ],
+  "schema": 1,
+  "source_sha256": {
+    "canopy_features/dock/display_change_response.py": "f95d96d724ab107bd7048a5259a487b4d8adc777c4266b623d17608431c57f88",
+    "canopy_features/dock/geometry.py": "e1e338119afe3c7a2badb5e159f1115f3e607a9bcf761023d844bb1df66b93d2"
+  },
+  "static_checks": {
+    "banned_tokens_found": {
+      "canopy_features/dock/display_change_response.py": {
+        "QGuiApplication": false,
+        "QTimer": false,
+        "asyncio": false,
+        "import threading": false,
+        "import time": false,
+        "sleep(": false,
+        "socket.": false,
+        "subprocess": false,
+        "while True": false
+      },
+      "canopy_features/dock/geometry.py": {
+        "QGuiApplication": false,
+        "QTimer": false,
+        "asyncio": false,
+        "import threading": false,
+        "import time": false,
+        "sleep(": false,
+        "socket.": false,
+        "subprocess": false,
+        "while True": false
+      }
+    },
+    "no_polling_or_duplicate_service": true
+  },
+  "theme": {
+    "path": "prototype/classic/Theme.qml",
+    "sha256": "aff938cabd9065a0cb091f98f97a2af948a81fd549022463307ea0f11f8ec54d"
+  },
+  "verdict": "PASS_SYNTHETIC"
+}

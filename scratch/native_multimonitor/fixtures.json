@@ -1,0 +1,227 @@
+{
+  "schema": 1,
+  "label": "SYNTHETIC",
+  "purpose": "Bounded headless fixtures for M4 KWin/KScreen display-change response. No real monitor, compositor or runtime claim.",
+  "approved_dock_geometry": [32, 96, 14, 7],
+  "scenarios": [
+    {
+      "id": "baseline_kscreen",
+      "description": "First KScreen snapshot and exact duplicate suppression.",
+      "steps": [
+        {
+          "payload": {"source": "kscreen.configChanged", "outputs": [{"connector": "eDP-1", "width": 1920, "height": 1080, "scale": 1.0, "primary": true}]},
+          "expect": {"kind": "relayout", "size": [1200, 750], "reason": "resolution_changed"}
+        },
+        {
+          "payload": {"source": "kscreen.configChanged", "outputs": [{"connector": "eDP-1", "width": 1920, "height": 1080, "scale": 1.0, "primary": true}]},
+          "expect": {"kind": "no_op", "size": [1200, 750], "reason": "unchanged"}
+        }
+      ]
+    },
+    {
+      "id": "secondary_attach_detach",
+      "description": "Secondary monitor attach, duplicate snapshot, then detach with surviving primary.",
+      "steps": [
+        {
+          "payload": {"source": "kscreen.configChanged", "outputs": [{"connector": "eDP-1", "width": 1920, "height": 1080, "scale": 1.0, "primary": true}]},
+          "expect": {"kind": "relayout", "size": [1200, 750], "reason": "resolution_changed"}
+        },
+        {
+          "payload": {"source": "kscreen.configChanged", "outputs": [{"connector": "eDP-1", "width": 1920, "height": 1080, "scale": 1.0, "primary": true}, {"connector": "HDMI-1", "width": 1920, "height": 1080, "scale": 1.0, "primary": false}]},
+          "expect": {"kind": "relayout", "size": [1200, 750], "reason": "connect"}
+        },
+        {
+          "payload": {"source": "kscreen.configChanged", "outputs": [{"connector": "eDP-1", "width": 1920, "height": 1080, "scale": 1.0, "primary": true}, {"connector": "HDMI-1", "width": 1920, "height": 1080, "scale": 1.0, "primary": false}]},
+          "expect": {"kind": "no_op", "size": [1200, 750], "reason": "unchanged"}
+        },
+        {
+          "payload": {"source": "kscreen.configChanged", "outputs": [{"connector": "eDP-1", "width": 1920, "height": 1080, "scale": 1.0, "primary": true}]},
+          "expect": {"kind": "relayout", "size": [1200, 750], "reason": "disconnect"}
+        }
+      ]
+    },
+    {
+      "id": "primary_detach_survivor",
+      "description": "Primary disconnect reanchors to survivor; final disconnect suspends.",
+      "steps": [
+        {
+          "payload": {"source": "kscreen.configChanged", "outputs": [{"connector": "eDP-1", "width": 1920, "height": 1080, "scale": 1.0, "primary": true}, {"connector": "HDMI-1", "width": 2560, "height": 1440, "scale": 1.0, "primary": false}]},
+          "expect": {"kind": "relayout", "size": [1200, 750], "reason": "resolution_changed"}
+        },
+        {
+          "payload": {"source": "kscreen.configChanged", "outputs": [{"connector": "HDMI-1", "width": 2560, "height": 1440, "scale": 1.0, "primary": true}]},
+          "expect": {"kind": "relayout", "size": [1200, 750], "reason": "disconnect"}
+        },
+        {
+          "payload": {"source": "kscreen.configChanged", "outputs": []},
+          "expect": {"kind": "suspend", "size": [1200, 750], "reason": "no_display"}
+        }
+      ]
+    },
+    {
+      "id": "hidpi_150_signal",
+      "description": "1920x1080 physical pixels at 150 percent produce a bounded 1280x720 logical layout.",
+      "steps": [
+        {
+          "payload": {"source": "qt.logicalDpiChanged", "connector": "eDP-1", "width": 1920, "height": 1080, "scale": 1.5},
+          "expect": {"kind": "relayout", "size": [1200, 720], "reason": "logical_dpi_changed"}
+        },
+        {
+          "payload": {"source": "qt.logicalDpiChanged", "connector": "eDP-1", "width": 1920, "height": 1080, "scale": 1.5},
+          "expect": {"kind": "no_op", "size": [1200, 720], "reason": "unchanged"}
+        }
+      ]
+    },
+    {
+      "id": "hidpi_200_signal",
+      "description": "2560x1440 physical pixels at 200 percent never substitute physical for logical geometry.",
+      "steps": [
+        {
+          "payload": {"source": "qt.logicalDpiChanged", "connector": "DP-2", "width": 2560, "height": 1440, "scale": 2.0},
+          "expect": {"kind": "relayout", "size": [1200, 720], "reason": "logical_dpi_changed"}
+        }
+      ]
+    },
+    {
+      "id": "kscreen_scale_same_logical",
+      "description": "KScreen scale change with unchanged logical size is a no-op, not a relayout cycle.",
+      "steps": [
+        {
+          "payload": {"source": "kscreen.configChanged", "outputs": [{"connector": "eDP-1", "width": 1920, "height": 1080, "scale": 1.0, "primary": true}]},
+          "expect": {"kind": "relayout", "size": [1200, 750], "reason": "resolution_changed"}
+        },
+        {
+          "payload": {"source": "kscreen.configChanged", "outputs": [{"connector": "eDP-1", "width": 3840, "height": 2160, "scale": 2.0, "primary": true}]},
+          "expect": {"kind": "no_op", "size": [1200, 750], "reason": "logical_size_unchanged"}
+        }
+      ]
+    },
+    {
+      "id": "kscreen_scale_new_logical",
+      "description": "KScreen scale change that changes the logical layout gets one bounded relayout.",
+      "steps": [
+        {
+          "payload": {"source": "kscreen.configChanged", "outputs": [{"connector": "eDP-1", "width": 1920, "height": 1080, "scale": 1.0, "primary": true}]},
+          "expect": {"kind": "relayout", "size": [1200, 750], "reason": "resolution_changed"}
+        },
+        {
+          "payload": {"source": "kscreen.configChanged", "outputs": [{"connector": "eDP-1", "width": 1920, "height": 1080, "scale": 1.5, "primary": true}]},
+          "expect": {"kind": "relayout", "size": [1200, 720], "reason": "logical_dpi_changed"}
+        }
+      ]
+    },
+    {
+      "id": "kwin_screens_changed",
+      "description": "KWin screen list attach and detach with logical primary geometry.",
+      "steps": [
+        {
+          "payload": {"source": "kwin.screensChanged", "screens": ["eDP-1"], "primary": "eDP-1", "width": 1920, "height": 1080, "scale": 1.0},
+          "expect": {"kind": "relayout", "size": [1200, 750], "reason": "resolution_changed"}
+        },
+        {
+          "payload": {"source": "kwin.screensChanged", "screens": ["eDP-1", "HDMI-1"], "primary": "eDP-1", "width": 1920, "height": 1080, "scale": 1.0},
+          "expect": {"kind": "relayout", "size": [1200, 750], "reason": "connect"}
+        },
+        {
+          "payload": {"source": "kwin.screensChanged", "screens": ["eDP-1"], "primary": "eDP-1", "width": 1920, "height": 1080, "scale": 1.0},
+          "expect": {"kind": "relayout", "size": [1200, 750], "reason": "disconnect"}
+        }
+      ]
+    },
+    {
+      "id": "hostile_connector",
+      "description": "Malformed connector fails closed as an invalid-event hold.",
+      "steps": [
+        {
+          "payload": {"source": "kscreen.configChanged", "outputs": [{"connector": "../eDP-1", "width": 1920, "height": 1080, "scale": 1.0, "primary": true}]},
+          "expect": {"kind": "hold", "size": [1200, 750], "reason": "invalid_event"}
+        }
+      ]
+    },
+    {
+      "id": "hostile_scale",
+      "description": "Out-of-range device scale fails closed as an invalid-event hold.",
+      "steps": [
+        {
+          "payload": {"source": "qt.logicalDpiChanged", "connector": "eDP-1", "width": 1920, "height": 1080, "scale": 5.0},
+          "expect": {"kind": "hold", "size": [1200, 750], "reason": "invalid_event"}
+        }
+      ]
+    },
+    {
+      "id": "oversized_topology",
+      "description": "Seventeen outputs exceed the bounded KScreen topology cap.",
+      "steps": [
+        {
+          "payload": {"source": "kscreen.configChanged", "outputs": [
+            {"connector": "DP-1", "width": 1920, "height": 1080, "scale": 1.0, "primary": true},
+            {"connector": "DP-2", "width": 1920, "height": 1080, "scale": 1.0, "primary": false},
+            {"connector": "DP-3", "width": 1920, "height": 1080, "scale": 1.0, "primary": false},
+            {"connector": "DP-4", "width": 1920, "height": 1080, "scale": 1.0, "primary": false},
+            {"connector": "DP-5", "width": 1920, "height": 1080, "scale": 1.0, "primary": false},
+            {"connector": "DP-6", "width": 1920, "height": 1080, "scale": 1.0, "primary": false},
+            {"connector": "DP-7", "width": 1920, "height": 1080, "scale": 1.0, "primary": false},
+            {"connector": "DP-8", "width": 1920, "height": 1080, "scale": 1.0, "primary": false},
+            {"connector": "DP-9", "width": 1920, "height": 1080, "scale": 1.0, "primary": false},
+            {"connector": "DP-10", "width": 1920, "height": 1080, "scale": 1.0, "primary": false},
+            {"connector": "DP-11", "width": 1920, "height": 1080, "scale": 1.0, "primary": false},
+            {"connector": "DP-12", "width": 1920, "height": 1080, "scale": 1.0, "primary": false},
+            {"connector": "DP-13", "width": 1920, "height": 1080, "scale": 1.0, "primary": false},
+            {"connector": "DP-14", "width": 1920, "height": 1080, "scale": 1.0, "primary": false},
+            {"connector": "DP-15", "width": 1920, "height": 1080, "scale": 1.0, "primary": false},
+            {"connector": "DP-16", "width": 1920, "height": 1080, "scale": 1.0, "primary": false},
+            {"connector": "DP-17", "width": 1920, "height": 1080, "scale": 1.0, "primary": false}
+          ]},
+          "expect": {"kind": "hold", "size": [1200, 750], "reason": "invalid_event"}
+        }
+      ]
+    },
+    {
+      "id": "unknown_source",
+      "description": "An unapproved polling-style source token is refused.",
+      "steps": [
+        {
+          "payload": {"source": "xrandr.poll", "outputs": []},
+          "expect": {"kind": "hold", "size": [1200, 750], "reason": "invalid_event"}
+        }
+      ]
+    },
+    {
+      "id": "below_minimum",
+      "description": "A logical size below the frozen Classic minimum holds the last safe layout.",
+      "steps": [
+        {
+          "payload": {"source": "kwin.screensChanged", "screens": ["eDP-1"], "primary": "eDP-1", "width": 640, "height": 480, "scale": 1.0},
+          "expect": {"kind": "hold", "size": [1200, 750], "reason": "below_minimum"}
+        }
+      ]
+    },
+    {
+      "id": "duplicate_connectors",
+      "description": "A duplicated connector in one KScreen snapshot fails closed.",
+      "steps": [
+        {
+          "payload": {"source": "kscreen.configChanged", "outputs": [
+            {"connector": "eDP-1", "width": 1920, "height": 1080, "scale": 1.0, "primary": true},
+            {"connector": "eDP-1", "width": 1920, "height": 1080, "scale": 1.0, "primary": false}
+          ]},
+          "expect": {"kind": "hold", "size": [1200, 750], "reason": "invalid_event"}
+        }
+      ]
+    },
+    {
+      "id": "kwin_scale_same_logical",
+      "description": "KWin device-scale change with unchanged logical size must not relayout twice.",
+      "steps": [
+        {
+          "payload": {"source": "kwin.screensChanged", "screens": ["eDP-1"], "primary": "eDP-1", "width": 1920, "height": 1080, "scale": 1.0},
+          "expect": {"kind": "relayout", "size": [1200, 750], "reason": "resolution_changed"}
+        },
+        {
+          "payload": {"source": "kwin.screensChanged", "screens": ["eDP-1"], "primary": "eDP-1", "width": 1920, "height": 1080, "scale": 2.0},
+          "expect": {"kind": "no_op", "size": [1200, 750], "reason": "logical_size_unchanged"}
+        }
+      ]
+    }
+  ]
+}

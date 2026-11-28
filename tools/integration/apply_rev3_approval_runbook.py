@@ -141,7 +141,7 @@ PINS: dict[int, dict] = {
     757: dict(head="4e4471a5c3719041353c432653f1bf0986091815", files=17,
               paths_sha256="7938aee2c3e9ea96493d248bf1ec28d370eabbe566b6f32eab5695c369cbe777",
               deps=[748], title="read-only native suspend/resume recovery contract (add/add resolved at this head)"),
-    758: dict(head="6589656644eeecc0fde38166f02d1962510a658a", files=15,
+    758: dict(head="32cc8e0b6a90f644f150419c9a34e93aab278c16", files=15,
               paths_sha256="90a6d8a24bba5ea653c701c7fd2f7fe553c0e24342677679d40e6a026915477a",
               deps=[], title="KWin/KScreen multi-monitor/HiDPI response (HELD)"),
 }
@@ -153,7 +153,7 @@ SKIP = {
     742: "REVIEW_HOLD_DOC_CORRECTION: independent review requires two documentation corrections before promotion; stage_06_verify.log and board_probe.log are ABSENT at the exact head and the '37 tests' claim has no artifact.",
     749: "HOLD_NO_PROMOTION: re-pinned live head f8cbe123ba2a88edbdc509c5dd8ebe9e20b85260 (sampler/report remediated); body still says 'No merge, no self-approval, no ready-for-merge promotion; independent review only'; machine verdict SOAK_WARN_CRASH_OR_ERROR_EVENT+SAMPLING_GAP+SERVICE_COUNT_DRIFT.",
     750: "OVERLAP_HOLD: shares 4 instruction paths (.github/PULL_REQUEST_TEMPLATE.md, AGENTS.md, docs/AGENTS_WORKFORCE.md, docs/ROADMAP.md) with #722; exact-base trial merge conflicts on all four after #722 is promoted. Requires an authorized re-pin onto the post-#722 tip with a fresh independent review and 3/3 checks at the new head. No PR edit is performed by this runbook; the external Rev3 directive SHA remains controlling.",
-    758: "OVERLAP_HOLD: #758 changes canopy_features/dock/display_change_response.py and docs/NATIVE_DISPLAY_RESPONSE.md, both already owned and changed by ordered #746; exact-SHA trial merge conflicts with #746 even when sequenced after it (merge-tree rc=1). #746 stays in ORDER; #758 is held for an explicit integrator decision or an authorized combined implementation with a fresh independent review and 3/3 checks at the new head.",
+    758: "OVERLAP_HOLD: re-pinned to live head 32cc8e0b6a90f644f150419c9a34e93aab278c16 with unchanged 15-path scope; #758 changes canopy_features/dock/display_change_response.py and docs/NATIVE_DISPLAY_RESPONSE.md, both already owned and changed by ordered #746; exact-SHA trial merge conflicts with #746 even when sequenced after it (merge-tree rc=1 at the new head). #746 stays in ORDER; #758 is held for an explicit integrator decision or an authorized combined implementation with a fresh independent review and 3/3 checks at the new head.",
 }
 
 ORDER = [722, 741, 733, 737, 736, 732, 752, 755, 735, 745, 743, 744, 748, 740, 746, 747,
@@ -590,7 +590,7 @@ def self_test():
         assert HEX40.match(pin["head"]), f"bad new head pin #{n}"
         assert len(pin["paths_sha256"]) == 64 and pin["files"] > 0, f"bad new scope pin #{n}"
     assert PINS[757]["head"] == "4e4471a5c3719041353c432653f1bf0986091815"
-    assert PINS[758]["head"] == "6589656644eeecc0fde38166f02d1962510a658a"
+    assert PINS[758]["head"] == "32cc8e0b6a90f644f150419c9a34e93aab278c16"
     assert PINS[755]["head"] == "b5fd0b8337322d292e8f9c55bbedbb03fd9cab94"
     assert HEX40.match(BASE_SHA) and HEX40.match(REV3_SHA256) is None
     assert len(REV3_SHA256) == 64

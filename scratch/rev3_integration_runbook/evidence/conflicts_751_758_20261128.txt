@@ -29,3 +29,17 @@ CONFLICT (content): Merge conflict in canopy_features/dock/display_change_respon
 Auto-merging docs/NATIVE_DISPLAY_RESPONSE.md
 CONFLICT (add/add): Merge conflict in docs/NATIVE_DISPLAY_RESPONSE.md
 
+## #758 re-pinned live head vs #746 (post-drift fix, re-verified 2026-11-28T12:46Z)
+head 32cc8e0b6a90f644f150419c9a34e93aab278c16 rc=1
+e4179bb3ecdc75d42ca6d0483a5165f1a5889560
+100644 2d11782397bc53c855f38513cb9fc5a26fd03405 1	canopy_features/dock/display_change_response.py
+100644 d7ba806cfb9469c2905e896693c42b1592833c3b 2	canopy_features/dock/display_change_response.py
+100644 b9eb835683464cf62f1528eac29245d7c86369e5 3	canopy_features/dock/display_change_response.py
+100644 7d0c6fea2afdc31aa10bd3a76353cb2500b55d4c 2	docs/NATIVE_DISPLAY_RESPONSE.md
+100644 38df2dde4811ac446f1082722371912d8776cebe 3	docs/NATIVE_DISPLAY_RESPONSE.md
+
+Auto-merging canopy_features/dock/display_change_response.py
+CONFLICT (content): Merge conflict in canopy_features/dock/display_change_response.py
+Auto-merging docs/NATIVE_DISPLAY_RESPONSE.md
+CONFLICT (add/add): Merge conflict in docs/NATIVE_DISPLAY_RESPONSE.md
+

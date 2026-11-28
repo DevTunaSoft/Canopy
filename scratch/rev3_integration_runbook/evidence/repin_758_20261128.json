@@ -1,0 +1,107 @@
+{
+  "artifact": "repin_758_20261128",
+  "base_ref": "integration/canopy-plasma6-20261127",
+  "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+  "checks_at_new_head": {
+    "fake-gio-launch-fixture": "completed/success",
+    "foundation": "completed/success",
+    "qt-evidence": "completed/success"
+  },
+  "conflict_recheck": {
+    "against_head": "050853173419c7224ab8875233f5ef1d7aea622c",
+    "against_pr": 746,
+    "chain_tip_through_754": "cf3af8a2d6fa4a393e8ca320641f77eed1b3ffd1",
+    "command": "git merge-tree --write-tree --merge-base ec910d7a7275296ecbc8b5e5c459d356205165d1 cf3af8a2d6fa4a393e8ca320641f77eed1b3ffd1 refs/rev3-runbook/pr-758",
+    "conflict_paths": [
+      "canopy_features/dock/display_change_response.py",
+      "docs/NATIVE_DISPLAY_RESPONSE.md"
+    ],
+    "evidence_file": "conflicts_751_758_20261128.txt",
+    "merge_base": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+    "rc": 1,
+    "result_tree": "e4179bb3ecdc75d42ca6d0483a5165f1a5889560"
+  },
+  "file_count": 15,
+  "generated_utc": "2026-11-28T12:57:11+00:00",
+  "graphql": {
+    "headRefOid": "32cc8e0b6a90f644f150419c9a34e93aab278c16",
+    "reviewDecision": "REVIEW_REQUIRED"
+  },
+  "guard_gates_preserved": [
+    "21 ordered",
+    "7 skipped",
+    "28 pins",
+    "order/skip disjointness",
+    "topological deps",
+    "mutex pairs",
+    "conflict holds",
+    "resolved add/add",
+    "756 last",
+    "protection with dismiss_stale_reviews",
+    "GraphQL reviewDecision",
+    "exact non-null commit_id",
+    "prior_tip sibling blob comparison",
+    "trial merge unowned/workflow/conflict-marker gates",
+    "post-merge regression stop"
+  ],
+  "head_ref_name": "product/native-multimonitor-20261128",
+  "head_sha": "32cc8e0b6a90f644f150419c9a34e93aab278c16",
+  "head_sources": [
+    "gh pr view 758 --json headRefOid,headRefName",
+    "gh api repos/DevTunaSoft/Canopy/pulls/758"
+  ],
+  "hold_marker_in_body": "The integrator must choose or combine the implementations explicitly",
+  "mergeable": true,
+  "mergeable_state": "blocked",
+  "mutations": {
+    "approval": false,
+    "force_push": false,
+    "pr_edit": false,
+    "pr_merge": false,
+    "protection_change": false,
+    "remote_mutation": "push of runbook branch only",
+    "review_creation": false
+  },
+  "new_pin": "32cc8e0b6a90f644f150419c9a34e93aab278c16",
+  "paths_sha256": "90a6d8a24bba5ea653c701c7fd2f7fe553c0e24342677679d40e6a026915477a",
+  "plan": {
+    "all_candidate_heads_match_pins": true,
+    "candidate_count": 21,
+    "candidate_problem_count": 0,
+    "command": "python tools/integration/apply_rev3_approval_runbook.py --plan",
+    "dismiss_stale_reviews": {
+      "integration/canopy-plasma6-20261127": true,
+      "main": true
+    },
+    "generated_utc": "2026-11-28T12:46:48+00:00",
+    "live_tip": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+    "pr746_status": "TRIAL_CLEAN",
+    "pr758_in_sequence": false,
+    "pr758_skip_hold_rederived_live": true,
+    "protection": {
+      "integration/canopy-plasma6-20261127": "PASS",
+      "main": "PASS"
+    },
+    "rc": 0,
+    "rev3_sha256": "1fba4b1e7128b6bc33aba577c05fdccfa45fcac56ee714f02e9d8b43e32a0f2a",
+    "sequence_count": 21,
+    "sequence_statuses": {
+      "TRIAL_CLEAN": 21
+    },
+    "skip_count": 7,
+    "skip_holds_rederived_true": 7,
+    "trial_clean_count": 21,
+    "trial_count": 21,
+    "verdict": "PLAN_ONLY_DISTINCT_APPROVAL_PENDING"
+  },
+  "pr": 758,
+  "previous_pin": "6589656644eeecc0fde38166f02d1962510a658a",
+  "reason": "Rev3 #758 pin stale after drift fix; re-pin to current live PR head and re-verify all gates without merge or approval.",
+  "scope_unchanged_from_previous_pin": true,
+  "self_test": {
+    "command": "python tools/integration/apply_rev3_approval_runbook.py --self-test",
+    "output": "SELF_TEST_PASS gates=checks+approval+graphql-decision+commit-id+dismiss-stale+order+skip-disjointness+pin-shape+apply-sibling+mutex+conflict-holds+resolved-add-add+new-pins",
+    "rc": 0
+  },
+  "state": "open"
+}

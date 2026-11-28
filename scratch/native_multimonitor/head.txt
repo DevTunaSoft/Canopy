@@ -1,3 +1,6 @@
 branch=product/native-multimonitor-20261128
 base=ec910d7a7275296ecbc8b5e5c459d356205165d1
-head=6589656644eeecc0fde38166f02d1962510a658a
+verified_tree=62bf6e47e788a82c057f2abb712a690dee8d6fe8
+verified_commit=6589656644eeecc0fde38166f02d1962510a658a
+pin_kind=tree
+note=verified tree; commit cannot contain its own SHA

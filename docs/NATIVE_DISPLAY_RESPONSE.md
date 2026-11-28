@@ -145,19 +145,21 @@ The integrator choice is explicitly deferred: after exact-SHA review the
 integrator decides whether to (a) take this branch's bounded push seam,
 (b) take PR #746's implementation, or (c) combine both by resolving the two
 shared paths deliberately. This workstream does not merge, approve, re-pin,
-close or otherwise act on PR #746. The reviewed evidence head of this branch
-is pinned in `scratch/native_multimonitor/head.txt`; the final pushed head is
-cited in the PR body. The runtime verdict remains
+close or otherwise act on PR #746. The verified evidence tree of this branch
+is pinned in `scratch/native_multimonitor/head.txt`; the exact pushed head is
+cited in the PR body. That pin names the verified tree, not the PR head: a
+commit cannot contain its own SHA. The runtime verdict remains
 `NATIVE_RUNTIME = BLOCKED / NOT_RUN` under either choice until a real Plasma
 guest exercises the selected compiled adapter.
 
 ## Bounded evidence remediation (PR #758 gaps)
 
-The sealed evidence pins the exact reviewed head in
-`scratch/native_multimonitor/head.txt`, with base
-`ec910d7a7275296ecbc8b5e5c459d356205165d1`. `git_diff_names.txt` now lists
-the 15 live paths of `git diff --name-only <base>..<reviewed head>`. Re-run at
-that head: 15 scenarios / 27 steps with 27/27 passed (`PASS_SYNTHETIC`),
+The sealed evidence pins the exact verified tree in
+`scratch/native_multimonitor/head.txt` (verified tree; commit cannot contain
+its own SHA), with base `ec910d7a7275296ecbc8b5e5c459d356205165d1`.
+`git_diff_names.txt` now lists the 15 live paths of
+`git diff --name-only <base>..<verified tree>`. Re-run at
+that tree: 15 scenarios / 27 steps with 27/27 passed (`PASS_SYNTHETIC`),
 6 tool-side unittest checks `OK`, and the existing 79 display tests `OK` at
 both the pinned base and the head. No runtime verdict was upgraded.
 

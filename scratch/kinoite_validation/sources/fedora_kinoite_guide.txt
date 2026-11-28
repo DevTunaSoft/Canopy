@@ -1,0 +1,195 @@
+Fedora Atomic Desktops User Guide :: Fedora Docs
+In this section
+Fedora Atomic Desktops
+Installation
+Getting Started
+Updates, Upgrades & Rollbacks
+Toolbx
+Technical Information
+Reading and Resources
+Contributing
+Troubleshooting
+FAQ
+Tips and Tricks
+Configuration Guides
+Sway Configuration Guide
+Fedora Atomic Desktops
+A Beginner's Guide to Fedora
+ARM Single Board Computers
+Community Architecture (CommArch)
+Community Linux Engineering
+Defensive Coding Guide
+Engineering Teams
+EPEL
+Fedora Accessibility (a11y) WG
+Fedora Accounts
+Fedora AI/ML SIG
+Fedora Asahi Remix
+Fedora Atomic Desktops
+Fedora Badges
+Fedora CI
+Fedora Cloud
+Fedora Community Ops
+Fedora Container Docs
+Fedora CoreOS
+Fedora Council
+Fedora Data Working Group (FDWG)
+Fedora Design Team
+Fedora Discussion Forum (Self-)Moderation Guidelines and Rules
+Fedora Diversity, Equity, and Inclusion (DEI)
+Fedora Documentation
+Fedora Documentation Team
+Fedora ELN
+Fedora Forge Documentation
+Fedora Gaming
+Fedora Infrastructure & Release Engineering
+Fedora Internet Of Things
+Fedora IoT Working Group
+Fedora Join SIG
+Fedora KDE Plasma Desktop Edition
+Fedora Legal
+Fedora Linux Releases
+Fedora Localization Team
+Fedora Magazine
+Fedora Marketing Team
+Fedora Matrix WG
+Fedora Mentored Projects
+Fedora Mindshare Committee
+Fedora Minimal
+Fedora Program Operations
+Fedora Project
+Fedora Quality Docs
+Fedora Rawhide Gating
+Fedora Release Notes
+Fedora Robotics SIG
+Fedora Security SIG
+Fedora Server User Documentation
+Fedora Server Working Group
+Fedora Spins & Labs
+Fedora Tools
+Fedora Websites & Apps
+Fedora Workstation Documentation
+Fedora Workstation Working Group
+Fedora/CentOS bootc
+FESCo
+Flatpak
+i3 SIG
+Java Packaging HOWTO
+Localization help and stats
+Mindshare Teams
+NeuroFedora User Documentation
+Package Maintainers
+Packaging Guidelines
+Quick Docs
+Reproducible Builds
+Fedora Atomic Desktops
+Fedora Atomic Desktops User Guide
+en-US
+en-US
+ar
+ast
+az
+be
+bg
+bn
+ca
+cs
+de
+el
+es
+es_419
+fa
+fi
+fil
+fr
+fur
+ga
+gl
+he
+hi
+hr
+hu
+hy
+id
+it
+ja
+jp
+ka
+kab
+km
+ko
+lb
+lo
+lt
+mr
+ms
+my
+nb_NO
+ne
+nl
+nn
+or
+pl
+pt
+pt_BR
+pt_PT
+ro
+ru
+si
+sk
+sq
+sv
+sw
+szl
+te
+tr
+tzm
+uk
+ur
+ur_PK
+uz
+vi
+zh_CN
+zh_Hans
+zh_Hant
+zh_TW
+Fedora Atomic Desktops User Guide
+Welcome to the user guide for the Fedora Atomic Desktops!
+This guide covers all the Fedora Atomic Desktops: Silverblue, Kinoite, Sway Atomic (was Sericea), Budgie Atomic (was Onyx), and COSMIC Atomic.
+Fedora Atomic Desktops are image based desktop operating system.
+They aim to be extremely stable and reliable.
+They also aim to be an excellent platform for developers and for those using container-focused workflows.
+Introduction to Fedora Atomic Desktops
+In general, Fedora Atomic Destkops are image based variants of their (package mode) Fedora versions:
+Fedora Silverblue is a variant of Fedora Workstation
+Fedora Kinoite is a variant of Fedora KDE Plasma Desktop
+Fedora Sway Atomic is a variant of Fedora Sway Spin
+Fedora Budgie Atomic is a variant of Fedora Budgie Spin
+Fedora COSMIC Atomic is a variant of Fedora COSMIC Spin
+They look, feel and behave like a regular desktop operating system, and the experience is similar to what you find with using a standard (package mode) Fedora system.
+However, unlike other operating systems, Fedora Atomic Desktops are image based, using a read-only root filesystem (sometimes also called immutable).
+This means that every installation is identical to every other installation of the same version.
+The operating system root filesystem that is on disk is exactly the same from one machine to the next, and it never changes as it is used.
+Fedora Atomic Desktops' image based design is intended to make it more stable, less prone to bugs, and easier to test and develop.
+Finally, Fedora Atomic Desktops' design also makes it an excellent platform for containerized applications as well as container-based software development.
+In each case, applications (apps) and containers are kept separate from the host system, improving stability and reliability.
+Fedora Atomic Desktops' core technologies have some other helpful features.
+Operating system updates are fast and there’s no waiting around for them to install: just reboot as normal to start using the next version.
+With Fedora Atomic Desktops, it is also possible to roll back to the previous version of the operating system if something goes wrong.
+About this guide
+In most cases, Fedora Atomic Desktops behave like a standard (package mode) Fedora installation, and the general Fedora documentation can be used.
+This guide covers the areas where Fedora Atomic Desktops differ from a standard (package mode) Fedora system, including:
+OS installation
+Installing apps and software
+OS upgrades and rollbacks
+The primary audience for these docs are new users, who aren’t expected to have specialist knowledge or technical knowledge about Fedora Atomic Desktops' internals.
+However, some background technical information is provided, for those who are interested and want to learn more.
+Want to help? Learn how to contribute to Fedora Docs ›
+All Fedora Documentation content available under CC BY-SA 4.0 or, when specifically noted, under another accepted free and open content license.
+Privacy Statement
+Legal
+Code of Conduct
+Sponsors
+Last build: 2026-11-28 03:50:09 UTC | Last content update: 2026-01-13
+Fedora is sponsored by Red Hat.
+Learn more about the relationship between Red Hat and Fedora.

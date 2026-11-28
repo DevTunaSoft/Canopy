@@ -1,0 +1,255 @@
+Getting Started :: Fedora Docs
+In this section
+Fedora Atomic Desktops
+Installation
+Getting Started
+Updates, Upgrades & Rollbacks
+Toolbx
+Technical Information
+Reading and Resources
+Contributing
+Troubleshooting
+FAQ
+Tips and Tricks
+Configuration Guides
+Sway Configuration Guide
+Fedora Atomic Desktops
+A Beginner's Guide to Fedora
+ARM Single Board Computers
+Community Architecture (CommArch)
+Community Linux Engineering
+Defensive Coding Guide
+Engineering Teams
+EPEL
+Fedora Accessibility (a11y) WG
+Fedora Accounts
+Fedora AI/ML SIG
+Fedora Asahi Remix
+Fedora Atomic Desktops
+Fedora Badges
+Fedora CI
+Fedora Cloud
+Fedora Community Ops
+Fedora Container Docs
+Fedora CoreOS
+Fedora Council
+Fedora Data Working Group (FDWG)
+Fedora Design Team
+Fedora Discussion Forum (Self-)Moderation Guidelines and Rules
+Fedora Diversity, Equity, and Inclusion (DEI)
+Fedora Documentation
+Fedora Documentation Team
+Fedora ELN
+Fedora Forge Documentation
+Fedora Gaming
+Fedora Infrastructure & Release Engineering
+Fedora Internet Of Things
+Fedora IoT Working Group
+Fedora Join SIG
+Fedora KDE Plasma Desktop Edition
+Fedora Legal
+Fedora Linux Releases
+Fedora Localization Team
+Fedora Magazine
+Fedora Marketing Team
+Fedora Matrix WG
+Fedora Mentored Projects
+Fedora Mindshare Committee
+Fedora Minimal
+Fedora Program Operations
+Fedora Project
+Fedora Quality Docs
+Fedora Rawhide Gating
+Fedora Release Notes
+Fedora Robotics SIG
+Fedora Security SIG
+Fedora Server User Documentation
+Fedora Server Working Group
+Fedora Spins & Labs
+Fedora Tools
+Fedora Websites & Apps
+Fedora Workstation Documentation
+Fedora Workstation Working Group
+Fedora/CentOS bootc
+FESCo
+Flatpak
+i3 SIG
+Java Packaging HOWTO
+Localization help and stats
+Mindshare Teams
+NeuroFedora User Documentation
+Package Maintainers
+Packaging Guidelines
+Quick Docs
+Reproducible Builds
+Fedora Atomic Desktops
+Getting Started
+en-US
+en-US
+ar
+ast
+az
+be
+bg
+bn
+ca
+cs
+de
+el
+es
+es_419
+fa
+fi
+fil
+fr
+fur
+ga
+gl
+he
+hi
+hr
+hu
+hy
+id
+it
+ja
+jp
+ka
+kab
+km
+ko
+lb
+lo
+lt
+mr
+ms
+my
+nb_NO
+ne
+nl
+nn
+or
+pl
+pt
+pt_BR
+pt_PT
+ro
+ru
+si
+sk
+sq
+sv
+sw
+szl
+te
+tr
+tzm
+uk
+ur
+ur_PK
+uz
+vi
+zh_CN
+zh_Hans
+zh_Hant
+zh_TW
+Getting Started
+Fedora Atomic Desktops are designed to be easy and straightforward to use, and specialist knowledge should generally not be required.
+However, Fedora Atomic Desktops are built differently from other operating systems, and there are therefore some things that are useful to know.
+Fedora Atomic Desktops have different options for installing software, compared with a standard Fedora installation (or other package-based Linux distributions).
+These include:
+Flatpak apps: This is the primary way that (GUI) apps get installed on Fedora Atomic Desktops.
+Toolbx: Used primarily for CLI apps; development, debugging tools, etc., but also has support for graphical apps.
+Package layering: Most Fedora packages can be installed on the system with the help of package layering.
+By default the system operates in pure image mode, but package layering is useful for things like libvirt, drivers, etc.
+Although Flatpak is best suited for GUI apps, Toolbx for CLI apps and package layering for system-level packages, it’s ultimately up to you to choose the method that best suits your needs.
+There’s nothing wrong in installing CLI apps with Flatpak, or GUI apps with Toolbx, or using package layering only.
+Nevertheless, our examples stick to the aforementioned recommendations throughout this documentation.
+For information on Flatpak and package layering, see below.
+See the dedicated Toolbx page to get started with it.
+Flatpak
+Flatpak is the primary way that apps can be installed on Fedora Atomic Desktops.
+For more information, see Flatpak.
+Flatpak and Flathub work out of the box in Fedora Atomic Desktops therefore Flathub nor Flatpak does not to be setup. Fedora provides a collection of apps that can be installed through Flatpak.
+The other main source of Flatpak apps is Flathub, which provides a large repository of Flatpak apps that can be installed.
+Setting up Flathub
+The following figures depict Flathub setup for Fedora Silverblue.
+The steps may vary slightly depending on the Atomic Desktop variant, but the overall process should be similar.
+To setup Flathub on Fedora Atomic Desktops, open the Flathub setup page for Fedora and click the Flathub repository file button to download the Flathub configuration.
+Figure 1. Fedora quick setup page
+A popup window will show a download option for the file.
+The “Open with” option should show “Software Install (default)” or "Discover (default)".
+Click on the OK button to start the download.
+Figure 2. Flathub download options
+After the download is complete, a new window will open showing the Flathub repository.
+This window also shows the source location of the repository to be installed, under the "Details" heading (1).
+To start the installation of the Flathub repository, click on the Install button (2).
+Figure 3. Flathub install window
+After the repository installation process is complete, the window will be updated to show a Remove button in place of the Install button.
+Alternatively, you can use the following command from the terminal:
+$ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+Installing Flatpak apps from Flathub
+Once the Flathub repository has been setup, it can be used to install Flatpak apps.
+This can be done directly from the GNOME Software or the Plasma Discover applications, or apps can be browsed on the Flathub website.
+If you choose to install apps from the Flathub website, clicking Install will download a file which will be opened by the GNOME Software or Plasma Discover application, which can then be used to install the app.
+For example, to install LibreOffice, you first search for and open the LibreOffice page, and then press the Install button.
+After clicking the Install button, a download information window will be shown.
+Verify the correct Flatpak has been downloaded and then click on the OK button to begin installing the LibreOffice application.
+Figure 4. LibreOffice Flatpak download
+Once the Flatpak is downloaded, the GNOME Software or the Plasma Discover application will open a new window with an Install button (2).
+Click this button to begin installation.
+Alternatively, each application on Flathub can be installed through the terminal by running the installation command at the bottom of the page that should look something like this:
+$ flatpak install flathub <package-name>
+As an example, Firefox can be installed by running the following command which can be found on Firefox’s flathub page:
+$ flatpak install flathub org.mozilla.firefox
+Flatpak command line
+Additional details about the flatpak command line interface can be found in the official Flatpak documentation.
+Package layering
+Package layering works by modifying your Fedora Atomic Desktop installation.
+As the name implies, it works by extending the packages from which the Fedora Atomic Desktop is composed.
+Good examples of packages to be layered would be:
+fish: An alternative Unix shell
+i3: A X11 tiling compositor
+libvirt: The libvirt daemon
+Most (but not all) RPM packages provided by Fedora can be installed on Fedora Atomic Desktops using this method.
+Using package layering creates a new deployment, or bootable filesystem root.
+It does not affect your current root.
+This preserves rollback and the transactional model, but means that the system must be rebooted after a package has been layered or updated.
+You can alternatively use rpm-ostree install --apply-live <package-name> to also temporarily apply the change directly to your currently booted deployment.
+It’s generally expected that you use package layering sparingly, and use Flatpak and Toolbx whenever possible.
+Package layering is generally done from the command line.
+However, the GNOME Software or the Plasma Discover application does rely on it for installing a small number of apps that are currently difficult to install as Flatpaks.
+Installing packages
+Packages can be installed on Fedora Atomic Desktops using:
+$ rpm-ostree install <package-name>
+This will download the package and any required dependencies, and recompose your Fedora Atomic Desktop image with them.
+rpm-ostree uses standard Fedora package names, which can be searched with rpm-ostree search since Fedora Atomic Desktops 39, or using DNF inside a Toolbx for previous versions.
+Once a package has been installed in this manner, it will be kept up-to-date as new versions are released and as the base operating system is updated.
+By default, rpm-ostree will download both required and recommended dependencies of layered packages.
+If you want dependency resolver to stick to required dependencies only, then you have to append
+Recommends=false
+line to the /etc/rpm-ostreed.conf file.
+There’s no ad-hoc CLI flag to do so because of how rpm-ostree works internally.
+Replacing packages
+In some scenarios, you may want to test out a new version of podman or kernel or other packages that live on the host.
+The rpm-ostree override command can be used to replace a package with a different version.
+You can download the package locally and run:
+$ rpm-ostree override replace <path/to/package>
+Or you can override packages without downloading using links from Koji or Bodhi.
+For example:
+$ rpm-ostree override replace https://kojipkgs.fedoraproject.org//packages/podman/5.7.0/1.fc43/x86_64/podman-5.7.0-1.fc43.x86_64.rpm
+You may also use rpm-ostree override remove to effectively "hide" packages.
+They will still exist in the underlying base layer, but will not appear in the booted root.
+Removing and replacing packages using package layering is not generally recommended.
+For more information, see the rpm-ostree documentation.
+Adding packages from external repositories
+See Adding external package repositories.
+Want to help? Learn how to contribute to Fedora Docs ›
+All Fedora Documentation content available under CC BY-SA 4.0 or, when specifically noted, under another accepted free and open content license.
+Privacy Statement
+Legal
+Code of Conduct
+Sponsors
+Last build: 2026-11-28 03:50:09 UTC | Last content update: 2026-01-14
+Fedora is sponsored by Red Hat.
+Learn more about the relationship between Red Hat and Fedora.

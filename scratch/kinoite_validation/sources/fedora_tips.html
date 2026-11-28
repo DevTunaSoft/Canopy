@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tips and Tricks :: Fedora Docs</title>
+    <link rel="canonical" href="https://docs.fedoraproject.org/en-US/atomic-desktops/tips-and-tricks/">
+    <meta name="generator" content="Antora 3.1.15">
+    <link rel="stylesheet" href="../../_/css/site.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+<link rel="stylesheet" href="../../_/css/vendor/tabs.css">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Fedora Docs">
+<meta property="og:title" content="Tips and Tricks">
+
+<meta property="og:description" content="Learn more about Fedora Linux, the Fedora Project & the Fedora Community.">
+<meta property="og:image" content="https://docs.fedoraproject.org/en-US/_/img/docs_logo.png">
+
+    <script>if (localStorage.darkmode === 'true' || (!('darkmode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) { document.documentElement.classList.add('dark');} else {document.documentElement.classList.remove('dark');}</script>
+  </head>
+  <body class="article dark:bg-fp-blue-darkest text-black dark:text-white">
+<!-- Add any HTML code to show at the top of each page — like a banner to a survey, some announcement, etc. Leave this file empty to not show anything-->
+<header class="header" role="banner">
+  <nav class="fixed z-50 top-0 w-full bg-gradient-to-l from-fp-blue to-fp-blue-light dark:bg-none dark:bg-fp-blue-dark" style="">
+    <div class="mx-auto px-2 sm:px-6 lg:px-8">
+      <div class="relative flex h-14 items-center justify-between">
+        <div
+          class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start"
+        >
+          <div class="flex flex-shrink-0 items-center">
+            <a href="https://docs.fedoraproject.org/en-US">
+              <img class="h-6 z-10 w-auto" src="../../_/img/docs_logo_white.svg">
+            </a>
+          </div>
+
+
+	  <div class="hidden sm:ml-auto sm:block">
+            <div class="flex space-x-4">
+
+
+              <div id="search-field" class="relative inline-flex cursor-pointer items-center rounded px-4 text-xs text-gray-500 dark:text-gray-200">
+                <svg class="absolute left-6 fill-gray-400 dark:fill-gray-400 h-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg>
+                <input id="search-input" class="pl-6 pr-28 h-8 w-64 rounded-xl dark:bg-black" type="text" placeholder="Search Docs">
+                <label class="ml-2 absolute right-6 filter checkbox border-l border-gray-500 pl-2">
+		 <input type="checkbox" class="appearance-none h-3 w-3 border border-gray-500 rounded bg-white dark:bg-black checked:bg-fp-blue-light checked:border-fp-blue-light dark:checked:bg-fp-blue dark:checked:border-fp-blue focus:outline-none transition duration-200 cursor-pointer my-0.5 mr-1 float-left" data-facet-filter="component:atomic-desktops"> In this section
+                </label>
+              </div>
+            </div>
+          </div>
+	  <button type="button" id="themeSwitch" class="hidden sm:block stroke-white fill-white ">
+	    <span class="dark:hidden">
+	      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+	        <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"></path>
+		<path d="M12 4v1M17.66 6.344l-.828.828M20.005 12.004h-1M17.66 17.664l-.828-.828M12 20.01V19M6.34 17.664l.835-.836M3.995 12.004h1.01M6 6l.835.836"></path>
+	      </svg>
+	    </span>
+	    <span class="hidden dark:inline">
+	      <svg viewBox="0 0 512 512" class="w-4 h-4">
+	        <path d="M421.6 379.9c-.6641 0-1.35 .0625-2.049 .1953c-11.24 2.143-22.37 3.17-33.32 3.17c-94.81 0-174.1-77.14-174.1-175.5c0-63.19 33.79-121.3 88.73-152.6c8.467-4.812 6.339-17.66-3.279-19.44c-11.2-2.078-29.53-3.746-40.9-3.746C132.3 31.1 32 132.2 32 256c0 123.6 100.1 224 223.8 224c69.04 0 132.1-31.45 173.8-82.93C435.3 389.1 429.1 379.9 421.6 379.9zM255.8 432C158.9 432 80 353 80 256c0-76.32 48.77-141.4 116.7-165.8C175.2 125 163.2 165.6 163.2 207.8c0 99.44 65.13 183.9 154.9 212.8C298.5 428.1 277.4 432 255.8 432z"/>
+              </svg>
+	    </span>
+	  </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container dark:text-gray-300 bg-fp-gray-lightest dark:bg-fp-blue-darker dark:border-r dark:border-gray-800" data-component="atomic-desktops" data-version="">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title text-fp-blue-dark dark:text-fp-blue font-bold"><a href="../">Fedora Atomic Desktops</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../installation/">Installation</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../getting-started/">Getting Started</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../updates-upgrades-rollbacks/">Updates, Upgrades &amp; Rollbacks</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../toolbox/">Toolbx</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../technical-information/">Technical Information</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../reading-and-resources/">Reading and Resources</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../contributing/">Contributing</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../troubleshooting/">Troubleshooting</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../faq/">FAQ</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="./">Tips and Tricks</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Configuration Guides</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../sway-configuration-guide/">Sway Configuration Guide</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore bg-gray-50 dark:bg-fp-blue-darkest" data-panel="explore">
+  <div class="context dark:border-t dark:border-gray-800">
+    <span class="title">Fedora Atomic Desktops</span>
+    <span class="version"></span>
+  </div>
+  <ul class="components bg-gray-100 dark:bg-fp-blue-darkest">
+    <li class="component">
+      <a class="title" href="../../beginners-guide/">A Beginner's Guide to Fedora</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../arm-sbc/">ARM Single Board Computers</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../community/">Community Architecture (CommArch)</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../cle/">Community Linux Engineering</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../defensive-coding/">Defensive Coding Guide</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../engineering/">Engineering Teams</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../epel/">EPEL</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../a11y/">Fedora Accessibility (a11y) WG</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fedora-accounts/">Fedora Accounts</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../ai-ml/">Fedora AI/ML SIG</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fedora-asahi-remix/">Fedora Asahi Remix</a>
+    </li>
+    <li class="component is-current">
+      <a class="title" href="../">Fedora Atomic Desktops</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../badges/">Fedora Badges</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../ci/">Fedora CI</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../cloud/">Fedora Cloud</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../commops/">Fedora Community Ops</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../containers/">Fedora Container Docs</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fedora-coreos/">Fedora CoreOS</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../council/">Fedora Council</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fdwg/">Fedora Data Working Group (FDWG)</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../design/">Fedora Design Team</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../discussion-forum-guidelines-and-rules/">Fedora Discussion Forum (Self-)Moderation Guidelines and Rules</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../dei/">Fedora Diversity, Equity, and Inclusion (DEI)</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../docs/">Fedora Documentation</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fedora-docs/team-info/">Fedora Documentation Team</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../eln/">Fedora ELN</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../forge-documentation/">Fedora Forge Documentation</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../gaming/">Fedora Gaming</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../infra/">Fedora Infrastructure & Release Engineering</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../iot/">Fedora Internet Of Things</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../iot-wg/">Fedora IoT Working Group</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fedora-join/">Fedora Join SIG</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../kde/">Fedora KDE Plasma Desktop Edition</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../legal/">Fedora Legal</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../releases/">Fedora Linux Releases</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../localization/">Fedora Localization Team</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fedora-magazine/">Fedora Magazine</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../marketing/">Fedora Marketing Team</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../matrix/">Fedora Matrix WG</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../mentored-projects/">Fedora Mentored Projects</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../mindshare-committee/">Fedora Mindshare Committee</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../minimal/">Fedora Minimal</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../operations/">Fedora Program Operations</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../project/">Fedora Project</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../qa-docs/">Fedora Quality Docs</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../rawhide-gating/">Fedora Rawhide Gating</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../release-notes/">Fedora Release Notes</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../robotics-sig/">Fedora Robotics SIG</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fedora/">Fedora Security SIG</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fedora-server/">Fedora Server User Documentation</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../server-working-group/">Fedora Server Working Group</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../spins-labs/">Fedora Spins & Labs</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../tools/">Fedora Tools</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../websites/">Fedora Websites & Apps</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../workstation-docs/">Fedora Workstation Documentation</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../workstation-working-group/">Fedora Workstation Working Group</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../bootc/">Fedora/CentOS bootc</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fesco/">FESCo</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../flatpak/">Flatpak</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../i3/">i3 SIG</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../java-packaging-howto/">Java Packaging HOWTO</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../docs-l10n/">Localization help and stats</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../mindshare/">Mindshare Teams</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../neurofedora/overview/">NeuroFedora User Documentation</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../package-maintainers/">Package Maintainers</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../packaging-guidelines/">Packaging Guidelines</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../quick-docs/">Quick Docs</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../reproducible-builds/">Reproducible Builds</a>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar bg-fp-gray-lightest dark:bg-fp-blue-darkest dark:text-gray-300 dark:border-b dark:border-gray-800" role="navigation">
+<button class="toolbar-icon nav-toggle"></button>
+  <a href="../../docs/" class="toolbar-icon home-link"></a>
+<nav class="crumbs" role="navigation" aria-label="breadcrumbs">
+  <ul>
+    <li class="after:text-gray-800 dark:after:text-gray-400"><a href="../">Fedora Atomic Desktops</a></li>
+    <li class="after:text-gray-800 dark:after:text-gray-400"><a href="./">Tips and Tricks</a></li>
+  </ul>
+</nav>
+
+        <div class="page-languages">
+            <button class="languages-menu-toggle" title="Show other languages of the site">
+                en-US
+            </button>
+            <div class="languages-menu">
+    
+<a class="language" href="../../../en-US/atomic-desktops/tips-and-tricks/">en-US</a>
+<a class="language" href="../../../ar/atomic-desktops/tips-and-tricks/">ar</a>
+<a class="language" href="../../../ast/atomic-desktops/tips-and-tricks/">ast</a>
+<a class="language" href="../../../az/atomic-desktops/tips-and-tricks/">az</a>
+<a class="language" href="../../../be/atomic-desktops/tips-and-tricks/">be</a>
+<a class="language" href="../../../bg/atomic-desktops/tips-and-tricks/">bg</a>
+<a class="language" href="../../../bn/atomic-desktops/tips-and-tricks/">bn</a>
+<a class="language" href="../../../ca/atomic-desktops/tips-and-tricks/">ca</a>
+<a class="language" href="../../../cs/atomic-desktops/tips-and-tricks/">cs</a>
+<a class="language" href="../../../de/atomic-desktops/tips-and-tricks/">de</a>
+<a class="language" href="../../../el/atomic-desktops/tips-and-tricks/">el</a>
+<a class="language" href="../../../es/atomic-desktops/tips-and-tricks/">es</a>
+<a class="language" href="../../../es_419/atomic-desktops/tips-and-tricks/">es_419</a>
+<a class="language" href="../../../fa/atomic-desktops/tips-and-tricks/">fa</a>
+<a class="language" href="../../../fi/atomic-desktops/tips-and-tricks/">fi</a>
+<a class="language" href="../../../fil/atomic-desktops/tips-and-tricks/">fil</a>
+<a class="language" href="../../../fr/atomic-desktops/tips-and-tricks/">fr</a>
+<a class="language" href="../../../fur/atomic-desktops/tips-and-tricks/">fur</a>
+<a class="language" href="../../../ga/atomic-desktops/tips-and-tricks/">ga</a>
+<a class="language" href="../../../gl/atomic-desktops/tips-and-tricks/">gl</a>
+<a class="language" href="../../../he/atomic-desktops/tips-and-tricks/">he</a>
+<a class="language" href="../../../hi/atomic-desktops/tips-and-tricks/">hi</a>
+<a class="language" href="../../../hr/atomic-desktops/tips-and-tricks/">hr</a>
+<a class="language" href="../../../hu/atomic-desktops/tips-and-tricks/">hu</a>
+<a class="language" href="../../../hy/atomic-desktops/tips-and-tricks/">hy</a>
+<a class="language" href="../../../id/atomic-desktops/tips-and-tricks/">id</a>
+<a class="language" href="../../../it/atomic-desktops/tips-and-tricks/">it</a>
+<a class="language" href="../../../ja/atomic-desktops/tips-and-tricks/">ja</a>
+<a class="language" href="../../../jp/atomic-desktops/tips-and-tricks/">jp</a>
+<a class="language" href="../../../ka/atomic-desktops/tips-and-tricks/">ka</a>
+<a class="language" href="../../../kab/atomic-desktops/tips-and-tricks/">kab</a>
+<a class="language" href="../../../km/atomic-desktops/tips-and-tricks/">km</a>
+<a class="language" href="../../../ko/atomic-desktops/tips-and-tricks/">ko</a>
+<a class="language" href="../../../lb/atomic-desktops/tips-and-tricks/">lb</a>
+<a class="language" href="../../../lo/atomic-desktops/tips-and-tricks/">lo</a>
+<a class="language" href="../../../lt/atomic-desktops/tips-and-tricks/">lt</a>
+<a class="language" href="../../../mr/atomic-desktops/tips-and-tricks/">mr</a>
+<a class="language" href="../../../ms/atomic-desktops/tips-and-tricks/">ms</a>
+<a class="language" href="../../../my/atomic-desktops/tips-and-tricks/">my</a>
+<a class="language" href="../../../nb_NO/atomic-desktops/tips-and-tricks/">nb_NO</a>
+<a class="language" href="../../../ne/atomic-desktops/tips-and-tricks/">ne</a>
+<a class="language" href="../../../nl/atomic-desktops/tips-and-tricks/">nl</a>
+<a class="language" href="../../../nn/atomic-desktops/tips-and-tricks/">nn</a>
+<a class="language" href="../../../or/atomic-desktops/tips-and-tricks/">or</a>
+<a class="language" href="../../../pl/atomic-desktops/tips-and-tricks/">pl</a>
+<a class="language" href="../../../pt/atomic-desktops/tips-and-tricks/">pt</a>
+<a class="language" href="../../../pt_BR/atomic-desktops/tips-and-tricks/">pt_BR</a>
+<a class="language" href="../../../pt_PT/atomic-desktops/tips-and-tricks/">pt_PT</a>
+<a class="language" href="../../../ro/atomic-desktops/tips-and-tricks/">ro</a>
+<a class="language" href="../../../ru/atomic-desktops/tips-and-tricks/">ru</a>
+<a class="language" href="../../../si/atomic-desktops/tips-and-tricks/">si</a>
+<a class="language" href="../../../sk/atomic-desktops/tips-and-tricks/">sk</a>
+<a class="language" href="../../../sq/atomic-desktops/tips-and-tricks/">sq</a>
+<a class="language" href="../../../sv/atomic-desktops/tips-and-tricks/">sv</a>
+<a class="language" href="../../../sw/atomic-desktops/tips-and-tricks/">sw</a>
+<a class="language" href="../../../szl/atomic-desktops/tips-and-tricks/">szl</a>
+<a class="language" href="../../../te/atomic-desktops/tips-and-tricks/">te</a>
+<a class="language" href="../../../tr/atomic-desktops/tips-and-tricks/">tr</a>
+<a class="language" href="../../../tzm/atomic-desktops/tips-and-tricks/">tzm</a>
+<a class="language" href="../../../uk/atomic-desktops/tips-and-tricks/">uk</a>
+<a class="language" href="../../../ur/atomic-desktops/tips-and-tricks/">ur</a>
+<a class="language" href="../../../ur_PK/atomic-desktops/tips-and-tricks/">ur_PK</a>
+<a class="language" href="../../../uz/atomic-desktops/tips-and-tricks/">uz</a>
+<a class="language" href="../../../vi/atomic-desktops/tips-and-tricks/">vi</a>
+<a class="language" href="../../../zh_CN/atomic-desktops/tips-and-tricks/">zh_CN</a>
+<a class="language" href="../../../zh_Hans/atomic-desktops/tips-and-tricks/">zh_Hans</a>
+<a class="language" href="../../../zh_Hant/atomic-desktops/tips-and-tricks/">zh_Hant</a>
+<a class="language" href="../../../zh_TW/atomic-desktops/tips-and-tricks/">zh_TW</a>
+
+            </div>
+        </div>
+      <div class="edit-this-page"><a href="https://forge.fedoraproject.org/atomic-desktops/docs/commits/branch/main/modules/ROOT/pages/tips-and-tricks.adoc" title="Page history"><i class="fas fa-history"></i></a></div>
+  <div class="edit-this-page"><a href="https://forge.fedoraproject.org/atomic-desktops/docs/src/branch/main/modules/ROOT/pages/tips-and-tricks.adoc" title="Edit this Page"><i class="fas fa-edit"></i></a></div>
+  <div class="edit-this-page"><a href="https://forge.fedoraproject.org/atomic-desktops/docs/issues/new?title=[main] Doc issue in file modules/ROOT/pages/tips-and-tricks.adoc" title="Report an issue"><i class="fas fa-bug"></i></a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar dark:text-fp-gray-light" data-title="Contents" data-levels="2">
+  <div class="toc-content">
+    <div class="toc-menu"></div>
+    <div class="pt-6">
+        </div>
+  </div>
+
+</aside>
+<article class="doc dark:text-gray-100">
+<h1 class="page mt-8 mb-1">Tips and Tricks</h1>
+<div class="is-before-toc text-xs text-gray-400 border-b border-gray-300 mb-6 pb-1">
+</div>
+<div class="sect1">
+<h2 id="_hiding_the_default_browser_firefox"><a class="anchor" href="#_hiding_the_default_browser_firefox"></a>Hiding the default browser (Firefox)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If you&#8217;re using another browser than the one installed by default (Firefox) then you can hide the default one from the interface via the following commands:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ sudo mkdir -p /usr/local/share/applications
+$ sudo cp /usr/share/applications/org.mozilla.firefox.desktop /usr/local/share/applications/
+$ sudo sed -i "2a\\NotShowIn=GNOME;KDE" /usr/local/share/applications/org.mozilla.firefox.desktop
+$ sudo update-desktop-database /usr/local/share/applications/</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_reenabling_the_default_browser_firefox"><a class="anchor" href="#_reenabling_the_default_browser_firefox"></a>Reenabling the default browser (Firefox)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If you want to make the default browser (Firefox) visible again after hiding it, you can follow these steps:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ sudo rm -f /usr/local/share/applications/org.mozilla.firefox.desktop
+$ sudo update-desktop-database /usr/local/share/applications</code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_alternative_method"><a class="anchor" href="#_alternative_method"></a>Alternative method</h3>
+<div class="paragraph">
+<p>If you are using sway, or want to hide the default browser for only your user, you can do that with these commands:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ mkdir -p ~/.local/share/applications
+$ cp /usr/share/applications/org.mozilla.firefox.desktop ~/.local/share/applications/
+$ sed -i "2a\\NotShowIn=GNOME;KDE;sway" ~/.local/share/applications/org.mozilla.firefox.desktop
+$ update-desktop-database ~/.local/share/applications</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and to reenable:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ rm -f ~/.local/share/applications/org.mozilla.firefox.desktop
+$ update-desktop-database ~/.local/share/applications</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_enabling_rpm_fusion_repos"><a class="anchor" href="#_enabling_rpm_fusion_repos"></a>Enabling RPM Fusion repos</h2>
+<div class="sectionbody">
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-caution" title="Caution"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>This section discusses third-party software sources not officially affiliated with or endorsed by the Fedora Project.
+Use them at your own discretion.
+Fedora recommends the use of free and open source software and avoidance of software encumbered by patents.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Users may want to take advantage of the non-free software that is made available via the <a href="https://rpmfusion.org/">RPM Fusion</a> repos in order to use the proprietary NVIDIA drivers, multimedia codecs, or other software not distributed as part of Fedora.</p>
+</div>
+<div class="sect2">
+<h3 id="_first_installation"><a class="anchor" href="#_first_installation"></a>First installation</h3>
+<div class="paragraph">
+<p>The first time you install the RPM Fusion repos, you need to install the versioned RPMs:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ sudo rpm-ostree install \
+    https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+    https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+$ reboot</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then continue with the next section to prepare your system for major Fedora updates.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_major_fedora_updates"><a class="anchor" href="#_major_fedora_updates"></a>Major Fedora updates</h3>
+<div class="paragraph">
+<p>Once you have rebooted into the new deployment, you can run the following command to remove the “lock” on the versioned packages that were installed previously.
+This will enable the RPM Fusion repos to be automatically updated and versioned correctly across major Fedora version rebases:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ sudo rpm-ostree update \
+    --uninstall rpmfusion-free-release \
+    --uninstall rpmfusion-nonfree-release \
+    --install rpmfusion-free-release \
+    --install rpmfusion-nonfree-release
+$ reboot</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For more information, see <a href="https://discussion.fedoraproject.org/t/simplifying-updates-for-rpm-fusion-packages-and-other-packages-shipping-their-own-rpm-repos/30364">this thread</a> on Fedora Discussion.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_working_with_toolbx"><a class="anchor" href="#_working_with_toolbx"></a>Working with Toolbx</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_finding_out_if_you_are_currently_in_a_toolbx_container"><a class="anchor" href="#_finding_out_if_you_are_currently_in_a_toolbx_container"></a>Finding out if you are currently in a Toolbx container</h3>
+<div class="paragraph">
+<p>If you frequently make use of Toolbx to perform various tasks and use multiple Toolbx containers it can be hard to keep track of whether you are currently executing commands on the host or in a Toolbx container.
+Furthermore, there is currently no command to tell you in which Toolbx container you are working.</p>
+</div>
+<div class="paragraph">
+<p>To alleviate this, you can add the following shell alias at the end of your <code>~/.bashrc</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">alias istoolbx='[ -f "/run/.toolboxenv" ] &amp;&amp; grep -oP "(?&lt;=name=\")[^\";]+" /run/.containerenv'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When you open a new shell, you now have access to the new command <code>istoolbx</code>.
+This will behave as follows:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>When run from the host, returns an exit code of 1.</p>
+</li>
+<li>
+<p>When run from a Toolbx container, returns an exit code of 0 and prints the current Toolbx containers name to the console.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If a more automated solution is your preference the following added to your <code>~/.bashrc</code> will change your bash prompt to include "[toolbox &lt;name&gt;]":</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">function is_toolbox() {
+    if [ -f "/run/.toolboxenv" ]
+    then
+        TOOLBOX_NAME=$(cat /run/.containerenv | grep -oP "(?&lt;=name=\")[^\";]+")
+        echo "[${HOSTNAME} ${TOOLBOX_NAME}]"
+    fi
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now you can include <code>is_toolbox</code> in your <code>PS1</code> variable and not need to execute any extra commands in order to know whether or not your are in a toolbox or host shell.</p>
+</div>
+<div class="listingblock">
+<div class="title">Example:</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export PS1="\[\e[31m\]\`is_toolbox\`\]\e[m\]\[\e[32m\]\\$ \[\e[m\]\[\e[37m\]❱\[\e[m\] "</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This results in a prompt which appears as such when not in a toolbox: <code>$ ❱</code></p>
+</div>
+<div class="paragraph">
+<p>However, when running in a toolbox named "default" looks like: <code>[toolbox default]$ ❱</code></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_running_applications_from_inside_toolbx_on_the_host"><a class="anchor" href="#_running_applications_from_inside_toolbx_on_the_host"></a>Running applications from inside Toolbx on the host</h3>
+<div class="paragraph">
+<p>This can be necessary if you want to interact with tools available from the host, for example <code>podman</code>, <code>nmcli</code> or <code>rpm-ostree</code> without leaving the Toolbx container in between.
+You can use <code>flatpak-spawn</code>, included in the base installation for this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ flatpak-spawn --host podman --help</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If the application you want to call requires <code>sudo</code> access, the <code>-S</code> option must be supplied to <code>sudo</code> like below:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ flatpak-spawn --host sudo -S rpm-ostree status</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you find yourself using commands like these frequently to access e.g. the flatpak command from inside the Toolbx container, you can create yourself a short custom wrapper script (<strong>inside the Toolbx container</strong>).
+To do this, perform the following steps:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Define the <code>istoolbx</code> alias (for convenience) by executing the command mentioned above in your terminal.</p>
+</li>
+<li>
+<p>Make sure you are in a Toolbx container.
+If the following command doesn&#8217;t produce any output, you are likely still working on the host!</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">[toolbx]$ istoolbx
+&lt;Toolbx container name here&gt;</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Once you have made sure you&#8217;re in a Toolbx container, execute the following command:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">[toolbx]$ echo -e '#!/bin/sh\nexec /usr/bin/flatpak-spawn --host flatpak "$@"' | \
+  sudo tee /usr/local/bin/flatpak 1&gt;/dev/null &amp;&amp; sudo chmod +x /usr/local/bin/flatpak</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>You now have a <code>flatpak</code> command available that allows you to interact with <code>flatpak</code> as if you were running the command on the host.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_working_with_ostreerpm_ostree"><a class="anchor" href="#_working_with_ostreerpm_ostree"></a>Working with <code>ostree</code>/<code>rpm-ostree</code></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_tracking_changes_to_the_base_os"><a class="anchor" href="#_tracking_changes_to_the_base_os"></a>Tracking changes to the base OS</h3>
+<div class="paragraph">
+<p>Some directories in <code>ostree</code>-based operating systems are writable by the user, like <code>/etc</code>.
+You can get a quick overview of the files changed under <code>/etc</code> using the following command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ sudo ostree admin config-diff</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To get a more elaborate diff, you can use something like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ sudo diff -yrW200 --suppress-common-lines --color=always /usr/etc /etc 2&gt;/dev/null</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>This works because ostree keeps an unmodified copy of the <code>/etc</code> directory under <code>/usr/etc</code>.
+All of your changes go to <code>/etc</code> directly.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_working_with_flatpak_applications"><a class="anchor" href="#_working_with_flatpak_applications"></a>Working with Flatpak applications</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_directly_accessing_flatpak_applications_from_the_cli"><a class="anchor" href="#_directly_accessing_flatpak_applications_from_the_cli"></a>Directly accessing Flatpak applications from the CLI</h3>
+<div class="paragraph">
+<p>The most noticable change when using Flatpak applications instead of conventional installations is that the applications cannot be directly called from the CLI any more, like so:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ evince
+bash: command not found: evince</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Instead, one can call them like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ flatpak run org.gnome.Evince</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In addition, most Flatpak applications export their internal binaries under an installation-dependent location:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>For Flatpak applications installed from <code>system</code> remotes, these can be found under <code>/var/lib/flatpak/exports/bin/</code>.</p>
+</li>
+<li>
+<p>For Flatpak applications installed from <code>user</code> remotes, these can be found under <code>$HOME/.local/share/flatpak/exports/bin/</code>.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If you&#8217;re unsure to which installation a Flatpak application belongs, you can use this command to print it out:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ flatpak list --app --columns=name,installation</code></pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>You can then either add these directories to your <code>$PATH</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ org.gnome.Evince</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>or setup shell `alias`es as needed to make them available to the CLI like so:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ alias evince="flatpak run org.gnome.Evince"
+### or:
+alias evince="org.gnome.Evince"
+$ evince</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_modifying_the_grub_config"><a class="anchor" href="#_modifying_the_grub_config"></a>Modifying the GRUB config</h2>
+<div class="sectionbody">
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Do not use grubby or grub2-mkconfig to edit the GRUB configuration or kernel arguments on Fedora Atomic Desktops:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Use this section to add GRUB configuration options.</p>
+</li>
+<li>
+<p>Use <code>rpm-ostree kargs</code> to edit kernel arguments.</p>
+</li>
+</ul>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Fedora Atomic Desktops use a static GRUB configuration.
+You should not edit the GRUB configuration directly as it is managed by <code>bootupd</code> and may be overwritten or updated in the future.</p>
+</div>
+<div class="paragraph">
+<p>Additional configuration options can still be added to GRUB by writting them to a specific configuration file:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Systems installed before Fedora 42 should use <code>/boot/grub2/custom.cfg</code>.</p>
+</li>
+<li>
+<p>Systems installed from Fedora 42 and later should use <code>/boot/grub2/user.cfg</code>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Starting with systems installed from Fedora 45, the <code>/boot</code> partition is also mounted read-only.
+You thus you need to remount it read-write before editing the configuration file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console"># Enter a temporary mount namespace to keep /boot mounted as read only for the rest of the system
+$ sudo unshare -m
+
+# Remount as read-write
+$ mount -o remount,rw /boot
+
+# Edit configuration file
+$ nano /boot/grub2/user.cfg
+### or:
+$ nano /boot/grub2/custom.cfg</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For example, to increase the GRUB boot selection timer:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ sudo cat /boot/grub2/user.cfg
+set timeout=10</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div id="" class="mt-16">
+    <p class="contribute px-6 py-3 w-fit bg-gray-100 dark:bg-fp-blue-darker rounded-full">Want to help? <a class="" href="https://docs.fedoraproject.org/en-US/fedora-docs/contributing/">Learn how to contribute to Fedora Docs <span class="ml-2 inline-block text-3xl leading-4 h-max align-top text-black dark:text-white">›</span></a></p>
+</div>
+</article>
+
+  </div>
+</main>
+</div>
+<footer class="flex flex-col bg-fp-gray-lightest dark:bg-fp-blue-darkest dark:text-fp-gray-light text-sm dark:border-t dark:border-gray-800">
+  <section class="pt-2 pb-6 px-2">
+
+    <p class="text-center">All Fedora Documentation content available under <a href="http://creativecommons.org/licenses/by-sa/4.0/legalcode">CC BY-SA 4.0</a> or, when specifically noted, under another <a href="https://fedoraproject.org/wiki/Licensing:Main">accepted</a> free and open content license.</p>
+
+    <div class="container mx-auto flex flex-col lg:flex-row my-4">
+      <div class="mx-auto lg:mx-0 lg:basis-3/12">
+        <img
+          src="../../_/img/fedora-blue.svg"
+          alt="Fedora Logo"
+          class="w-36 mb-4 lg:mb-0"
+        />
+      </div>
+      <ul
+        class="mx-4 flex items-center grow justify-center gap-4 lg:mx-0 lg:gap-12 xl:gap-20 2xl:gap-28 lg:justify-start"
+      >
+        <li class="list-none">
+          <a
+            href="/en-US/legal/privacy/"
+            class="text-fp-gray-darkest dark:text-fp-gray transition duration-300 ease-in-out hover:text-fp-gray dark:hover:text-fp-gray-light"
+            >Privacy Statement</a
+          >
+        </li>
+        <li class="list-none">
+          <a
+            href="/en-US/legal/"
+            class="text-fp-gray-darkest transition duration-300 ease-in-out hover:text-fp-gray dark:text-fp-gray dark:hover:text-fp-gray-light"
+            >Legal</a
+          >
+        </li>
+        <li class="list-none">
+          <a
+            href="/en-US/project/code-of-conduct/"
+            class="text-fp-gray-darkest transition duration-300 ease-in-out hover:text-fp-gray dark:text-fp-gray dark:hover:text-fp-gray-light"
+            >Code of Conduct</a
+          >
+        </li>
+        <li class="list-none">
+          <a
+            href="https://getfedora.org/en/sponsors/"
+            class="text-fp-gray-darkest transition duration-300 ease-in-out hover:text-fp-gray dark:text-fp-gray dark:hover:text-fp-gray-light"
+            >Sponsors</a
+          >
+        </li>
+      </ul>
+    </div>
+    <p class="text-center text-xs text-fp-gray-dark">Last build: 2026-11-28 03:50:09 UTC  | Last content update: 2026-11-25 </p>
+  </section>
+  <!-- Red Hat Sponsorship Section -->
+  <section class="bg-black py-6 text-center md:text-left px-2">
+    <div class="container mx-auto flex flex-col lg:flex-row">
+      <div class="mx-auto items-center lg:mx-0 lg:basis-3/12">
+        <img
+          src="../../_/img/logo-sponsored-by-red-hat.svg"
+          alt="Sponsored by Red Hat Logo"
+          class="mb-4 xl:mb-0"
+        />
+      </div>
+
+      <div class="flex items-center justify-center text-center lg:text-left lg:ml-8 xl:-ml-8 2xl:ml-5">
+        <p class="text-white">
+          Fedora is sponsored by Red Hat.
+          <a class="block text-fp-gray xl:ml-2 xl:inline" href="https://www.redhat.com/en/technologies/linux-platforms/articles/relationship-between-fedora-and-rhel">
+            Learn more about the relationship between Red Hat and Fedora.
+          </a>
+        </p>
+      </div>
+    </div>
+  </section>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+<script async src="../../_/js/vendor/datatables.js"></script>
+<script async src="../../_/js/vendor/tabs.js"></script>
+<script src="../../_/js/vendor/lunr.js"></script>
+<script src="../../_/js/search-ui.js" id="search-ui-script" data-site-root-path="../.." data-snippet-length="100" data-stylesheet="../../_/css/search.css"></script>
+<script async src="../../search-index.js"></script>
+  </body>
+</html>

@@ -1,0 +1,4 @@
+$ ssh -i 'C:\Users\X1\AppData\Local\hermes\cache\scratch\g1_ubuntu_evidence\ssh\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'
+contents/ui/main.qml
+metadata.json
+[utc=2026-11-28T05:13:35Z] [rc=0]

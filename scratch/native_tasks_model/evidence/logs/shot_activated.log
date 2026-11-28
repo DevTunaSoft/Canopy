@@ -1,0 +1,6 @@
+$ ssh -i 'C:\Users\X1\AppData\Local\hermes\cache\scratch\g1_ubuntu_evidence\ssh\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'
+NATIVE_ENV_SOURCE_PID=5422
+NATIVE_ENV_IMPORTED DISPLAY=:0 XDG_CURRENT_DESKTOP=KDE XDG_SESSION_TYPE=x11
+PNG_DIMS (1920, 1080)
+be665350a31ea2c2ad3515af1c0dc3c433c051282d59ae57deb9cc6c9446aa4b  evidence_activated.png
+[utc=2026-11-28T05:13:17Z] [rc=0]

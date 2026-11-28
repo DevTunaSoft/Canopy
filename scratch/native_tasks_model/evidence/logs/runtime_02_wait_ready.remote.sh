@@ -1,0 +1,1 @@
+grep -a -m1 'CANOPY_NATIVE_TASK_HARNESS_READY' /home/canopy/canopy_native_tasksmodel_m2/harness.log || true

@@ -1,0 +1,2 @@
+$ scp -i 'C:\Users\X1\AppData\Local\hermes\cache\scratch\g1_ubuntu_evidence\ssh\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -P 2223 canopy@127.0.0.1:/home/canopy/canopy_native_tasksmodel_m2/evidence_focused.png 'C:\Users\X1\AppData\Local\hermes\cache\scratch\wt-native-tasksmodel-20261127\scratch\native_tasks_model\evidence\runtime_focused.png'
+[utc=2026-11-28T05:13:05Z] [rc=0]

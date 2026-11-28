@@ -12,7 +12,7 @@ VERDICT FAIL compiled mode requires a binary SHA-256 pin
 VERDICT FAIL
 VERDICT PASS
 VERDICT FAIL compiled mode cannot be combined with driver, binary or report
-CANOPY_PREVIEW_PLAN: C:\Users\X1\AppData\Local\Temp\tmpdjizd4f0\cli-plan.json
+CANOPY_PREVIEW_PLAN: private-evidence/temp/tmpdjizd4f0/cli-plan.json
 {"evidence_count": 4, "linux_mint_acceptance_proven": false, "measurement_performed": false, "owner_visual_approval": false, "real_hardware_measured": false, "release_approved": false, "schema": 1, "status": "VALID"}
 FIVE_PRODUCTION_PACK_VERIFIED=1
 {"cpu_percent_one_core_calculated": 0.5246, "cpu_target_percent_one_core": 1.0, "linux_mint_guest_proven": false, "measured_seconds": 305.0, "memory_target_kib": 204800, "observations": 62, "pss_kib_peak": 65000, "release_approved": false, "scope": "self-reported numeric idle targets only", "status": "PASS", "visual_approval": false}

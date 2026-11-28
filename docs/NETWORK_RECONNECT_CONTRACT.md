@@ -3,7 +3,7 @@
 ## Scope and ownership
 
 Base: `c6de24153eef0b58f921a8bffdaeaa8033288a75` (exact requested tip).
-Worktree: `C:/Users/X1/AppData/Local/Temp/pe053-network-c6de241`.
+Worktree: `private-evidence/temp/pe053-network-c6de241`.
 Branch: `fix/network-reconnect-c6de241`. Draft PR target:
 `integration/canopy-classic-20261123`. No merge is performed.
 

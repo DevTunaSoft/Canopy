@@ -45,8 +45,8 @@ that as **AGENT REVIEWED**, never as human approval. Run post-merge regression
 **after** integration; it is not a pre-merge gate. Obtain explicit owner
 approval for final visual acceptance, substantial identity changes, high-risk
 security decisions and final acceptance into `main`. Named holds on #279, #151
-and #278 are never overridden by general authorization. The workforce ceiling
-is 12 engineering subagents plus Hermes as lead orchestrator under the newer
-owner directive (2026-11-26), which supersedes only the 10-agent ceiling in the
-external directive cited in [workforce policy](../docs/AGENTS_WORKFORCE.md); all
-other requirements there remain in force.
+and #278 are never overridden by general authorization. The authorized workforce
+is up to 8 concurrent engineering subagents plus Hermes as lead orchestrator
+(9 total) under the 2026-11-26 master directive amendment (SHA-256 `f240bcdf635a498a7476c8104cbf3dc4e6cda492abba318254d80fce7566a197`).
+That amendment supersedes earlier workforce ceilings only; visual, security,
+protected-PR and release-owner gates remain in force.

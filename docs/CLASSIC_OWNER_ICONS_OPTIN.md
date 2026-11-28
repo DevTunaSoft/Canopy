@@ -22,7 +22,7 @@ before a Qt scene is created.
 
 ## Provenance and exact bytes
 
-- Source ZIP: `C:/Users/X1/Downloads/Canopy_Tux_Transparent_Icons.zip`
+- Source ZIP: `private-evidence/downloads/Canopy_Tux_Transparent_Icons.zip`
 - ZIP SHA-256: `d84916fbe66f05821167c73b3fa5bde1a039547fb6f5d7969c666b1f2457415d`
 - Normalization record: scratch `normalization_square.json` — crop alpha bbox
   at threshold 8, resize to an exact 1120x1120 square, center on a 1254x1254
@@ -80,14 +80,14 @@ No scratch HTML preview is cited as visual evidence.
 
 ### Captured from the compiled binary (not scratch HTML)
 
-Binary: `C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy_owner_icons_build/canopy-classic-spike.exe`
+Binary: `private-evidence/scratch/canopy_owner_icons_build/canopy-classic-spike.exe`
 SHA-256 `085a9ea0bfb795993b8e589701940c81bac745332c44870ea60ccbbceed95f28`.
 
 | Size | Screenshot (scratch artifact) | SHA-256 | `check_screenshot.py` |
 | --- | --- | --- | --- |
-| 1920x1080 | `C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy_owner_icons_evidence/final/owner-icons-1920x1080.png` | `2837b41d18e6dfc83f5965bbe6faaebae5e3ba272fdc2f3424a34c601352fd63` | PASS |
-| 1200x750 | `C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy_owner_icons_evidence/final/owner-icons-1200x750.png` | `f404ef3ff52cef7d31a344672a27ea503f481ef45343b2b4299b14c197b3b8c3` | PASS |
-| 760x500 | `C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy_owner_icons_evidence/final/owner-icons-760x500.png` | `2afbb80123d4070362e8401afda20aad4304f57be111a57a526f6aef2c1c8ba6` | PASS |
+| 1920x1080 | `private-evidence/scratch/canopy_owner_icons_evidence/final/owner-icons-1920x1080.png` | `2837b41d18e6dfc83f5965bbe6faaebae5e3ba272fdc2f3424a34c601352fd63` | PASS |
+| 1200x750 | `private-evidence/scratch/canopy_owner_icons_evidence/final/owner-icons-1200x750.png` | `f404ef3ff52cef7d31a344672a27ea503f481ef45343b2b4299b14c197b3b8c3` | PASS |
+| 760x500 | `private-evidence/scratch/canopy_owner_icons_evidence/final/owner-icons-760x500.png` | `2afbb80123d4070362e8401afda20aad4304f57be111a57a526f6aef2c1c8ba6` | PASS |
 
 Every run exited 0 and logged `CANOPY_OWNER_ICONS_VERIFIED`,
 `CANOPY_OWNER_DOCK_FROST_ACTIVE`, and

@@ -50,7 +50,7 @@ anomalies and silently recovers only the safe stale-lock case.
 
 ## Operations
 
-- Lock: `~/AppData/Local/hermes/cache/scratch/canopy_integrator.lock`
+- Lock: `private-evidence/scratch/canopy_integrator.lock`
 - Heartbeat: `.../canopy_integrator_heartbeat.jsonl`
 - Recovery ledger: `.../canopy_integrator.lock.recovery.json`
 - Daemon log: `.../canopy_integrator_restart.log`
@@ -59,7 +59,7 @@ anomalies and silently recovers only the safe stale-lock case.
 Manual check (does not alter state):
 
 ```shell
-python -c "from tools.qa.integrator_lock import lock_state; print(lock_state(r'C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy_integrator.lock'))"
+python -c "from tools.qa.integrator_lock import lock_state; print(lock_state(r'private-evidence/scratch/canopy_integrator.lock'))"
 ```
 
 ## Evidence note

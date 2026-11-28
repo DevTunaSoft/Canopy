@@ -77,7 +77,7 @@ CMake 4.5.1. Commands run at the branch root unless noted.
 | Compiled QML | scratch copy of `prototype/classic`, scratch-only `CMakeLists.txt` adds `QuickControlsOverlay.qml` to `QML_FILES`; `cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build --parallel 4` | **PASS** — 45 build steps; generated `...QuickControlsOverlay_qml.cpp` and compiled its `.obj` |
 | QML runtime harness | scratch `tst_quickcontrols.qml`; `qmltestrunner.exe -input tst_quickcontrols.qml -o result.txt,txt` with `QT_QPA_PLATFORM=offscreen` | **PASS** — `4 passed, 0 failed, 0 skipped`, 16ms; checks four disabled rows/buttons, disclosure strings, and that a supplied controller view is used |
 
-Scratch harness path: `C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy-qc-compile-a3327fb`
+Scratch harness path: `private-evidence/scratch/canopy-qc-compile-a3327fb`
 (temporary; may be pruned). It is not part of the repository. The source-level
 test file is not a substitute for the compiled harness above.
 

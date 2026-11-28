@@ -14,9 +14,9 @@
     "contract_tests.log": "404e3ede6372af82c4c59ae50e7e0200973613bf5443cee8bc04b33de393cdcc",
     "full_tests.log": "c86b6690797da0848815e3aaad9f29b057e21543a70fd0443dc82a9a918bdae0",
     "full_tests.rc": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
-    "git_diff_names.txt": "7b214abaf47a44478b1fcfcddda9256b8afa965464c26625a642047a04bcb78c",
+    "git_diff_names.txt": "8d2494eb0d83406a6437f0bbb2c9fcb022945b98287bee949422e51b937eebb6",
     "ninja_build.log": "89b59ce767c5c043e56e9de4b8e2840a2381790fa462421684ee16ffad21f2b3",
-    "parity_report.json": "b7ccd962a46b13b0c2e9dde962d8d6baf7f8da9625b876e4ab776238c5efad63",
+    "parity_report.json": "6e223b129e55602944f725157365a4d8093c1f227fed8061158d61d65e22d372",
     "plasma_runtime_blocker.md": "af41f14f1ee88eca92340a8d5bb6a121c2f3da85d9059667a4fc484f2b76bace",
     "targeted_tests.log": "7e04b35ceb6201e53817895ded2474fb676bfce08b21d121c3bb85f96c62e1f4"
   },
@@ -25,6 +25,33 @@
     "classification": "SYNTHETIC_WINDOWS_PE_OFFSCREEN",
     "path": "C:/Users/X1/AppData/Local/hermes/cache/scratch/native_host_wiring_build_20261128/canopy-classic-spike.exe",
     "sha256": "209f30012e5058aa5c12d706110df3d5d764ff3479d272afceac8564a760fc24"
+  },
+  "ci_checks_observed_at_pin": {
+    "checks": [
+      {
+        "completed_at": "2026-11-28T09:08:58Z",
+        "conclusion": "SUCCESS",
+        "details_url": "https://github.com/DevTunaSoft/Canopy/actions/runs/46128486358/job/140928263798",
+        "name": "qt-evidence",
+        "status": "COMPLETED"
+      },
+      {
+        "completed_at": "2026-11-28T09:02:00Z",
+        "conclusion": "SUCCESS",
+        "name": "fake-gio-launch-fixture",
+        "status": "COMPLETED"
+      },
+      {
+        "completed_at": "2026-11-28T09:03:26Z",
+        "conclusion": "SUCCESS",
+        "name": "foundation",
+        "status": "COMPLETED"
+      }
+    ],
+    "classification": "CI_QT_BUILD_SMOKE_NOT_NATIVE_RUNTIME",
+    "note": "qt-evidence was IN_PROGRESS during the independent review and was later terminal SUCCESS at this exact pin. These CI checks do not establish a real Plasma runtime result; on a later head they must be re-queried and are not claimed here.",
+    "observed_head": "dfbe27f1776b48a27ca2b9b4d60dafed6c2f8186",
+    "source": "gh pr view 754 --json statusCheckRollup"
   },
   "classification": {
     "compiled_self_test": "SYNTHETIC",
@@ -39,6 +66,30 @@
     "terminal_summary": "Ran 4671 tests in 680.816s",
     "verdict": "PASS"
   },
-  "head_sha": "d242fc95a60ec750051c801bd97fecdaa0f57ba4",
-  "note": "Compiled offscreen self-test and Python parity only. No real Plasma compositor, monitor change, screenshot or screen-reader result is claimed."
+  "head_scope": "head_sha is the exact production/artifact head whose compiled and Python sources were built and checked (dfbe27f at review). Evidence-only remediation commits after that head do not alter production sources, the binary or the compiled self-test log.",
+  "head_sha": "dfbe27f1776b48a27ca2b9b4d60dafed6c2f8186",
+  "note": "Compiled offscreen self-test and Python parity only. No real Plasma compositor, monitor change, screenshot or screen-reader result is claimed.",
+  "remediation": {
+    "gaps_closed": [
+      "git_diff_names.txt regenerated from base..HEAD, including evidence.json and SHA256SUMS.txt",
+      "head_sha pinned to the exact review head dfbe27f; production source head d242fc9 retained as source_head_sha",
+      "embedded compiled vectors explicitly labelled as synthetic generated fixtures with external mirrors and digests",
+      "qt-evidence terminal COMPLETED/SUCCESS at the pin recorded without upgrading NATIVE_RUNTIME from NOT_RUN",
+      "docs verification table cosmetic split removed"
+    ],
+    "native_runtime": "NOT_RUN (unchanged)",
+    "scope": "evidence index, evidence tooling and documentation only; no production or compiled source changed"
+  },
+  "source_head_scope": "Production/compiled source commit; the following dfbe27f commit added only evidence artifacts. head_sha is the exact artifact head used for the independent review checks.",
+  "source_head_sha": "d242fc95a60ec750051c801bd97fecdaa0f57ba4",
+  "vector_provenance": {
+    "classification": "EMBEDDED_SYNTHETIC_GENERATED_FIXTURES",
+    "compiled_location": "prototype/classic/main.cpp :: kNativeDisplaySteps / kNativeDisplayCases",
+    "embedded_rows_vs_mirror": "18 steps / 13 cases, zero row differences",
+    "external_mirrors": [
+      "scratch/native_host_wiring/canonical_vectors.json",
+      "scratch/native_host_wiring/canonical_vectors_cpp.txt"
+    ],
+    "generator": "scratch/native_host_wiring/generate_vectors.py"
+  }
 }

@@ -78,6 +78,76 @@ def main():
         "artifact": "native_host_wiring_evidence",
         "base_sha": base,
         "head_sha": head,
+        "source_head_sha": "d242fc95a60ec750051c801bd97fecdaa0f57ba4",
+        "source_head_scope": (
+            "Production/compiled source commit; the following dfbe27f commit "
+            "added only evidence artifacts. head_sha is the exact artifact "
+            "head used for the independent review checks."),
+        "head_scope": (
+            "head_sha is the exact production/artifact head whose compiled "
+            "and Python sources were built and checked (%s at review). "
+            "Evidence-only remediation commits after that head do not alter "
+            "production sources, the binary or the compiled self-test log."
+            % head[:7]),
+        "vector_provenance": {
+            "classification": "EMBEDDED_SYNTHETIC_GENERATED_FIXTURES",
+            "compiled_location": ("prototype/classic/main.cpp :: "
+                                  "kNativeDisplaySteps / kNativeDisplayCases"),
+            "generator": "scratch/native_host_wiring/generate_vectors.py",
+            "external_mirrors": (
+                "scratch/native_host_wiring/canonical_vectors.json",
+                "scratch/native_host_wiring/canonical_vectors_cpp.txt",
+            ),
+            "embedded_rows_vs_mirror": "18 steps / 13 cases, zero row differences",
+        },
+        "ci_checks_observed_at_pin": {
+            "source": "gh pr view 754 --json statusCheckRollup",
+            "observed_head": head,
+            "classification": "CI_QT_BUILD_SMOKE_NOT_NATIVE_RUNTIME",
+            "checks": [
+                {
+                    "name": "qt-evidence",
+                    "status": "COMPLETED",
+                    "conclusion": "SUCCESS",
+                    "completed_at": "2026-11-28T09:08:58Z",
+                    "details_url": ("https://github.com/DevTunaSoft/Canopy/"
+                                    "actions/runs/46128486358/job/140928263798"),
+                },
+                {
+                    "name": "fake-gio-launch-fixture",
+                    "status": "COMPLETED",
+                    "conclusion": "SUCCESS",
+                    "completed_at": "2026-11-28T09:02:00Z",
+                },
+                {
+                    "name": "foundation",
+                    "status": "COMPLETED",
+                    "conclusion": "SUCCESS",
+                    "completed_at": "2026-11-28T09:03:26Z",
+                },
+            ],
+            "note": ("qt-evidence was IN_PROGRESS during the independent "
+                     "review and was later terminal SUCCESS at this exact "
+                     "pin. These CI checks do not establish a real Plasma "
+                     "runtime result; on a later head they must be "
+                     "re-queried and are not claimed here."),
+        },
+        "remediation": {
+            "scope": ("evidence index, evidence tooling and documentation "
+                      "only; no production or compiled source changed"),
+            "gaps_closed": [
+                "git_diff_names.txt regenerated from base..HEAD, including "
+                "evidence.json and SHA256SUMS.txt",
+                "head_sha pinned to the exact review head dfbe27f; "
+                "production source head d242fc9 retained as source_head_sha",
+                "embedded compiled vectors explicitly labelled as synthetic "
+                "generated fixtures with external mirrors and digests",
+                "qt-evidence terminal COMPLETED/SUCCESS at the pin recorded "
+                "without upgrading NATIVE_RUNTIME from NOT_RUN",
+                "docs verification table cosmetic split removed",
+            ],
+            "native_runtime": "NOT_RUN (unchanged)",
+        },
         "classification": {
             "compiled_self_test": "SYNTHETIC",
             "python_parity": "SYNTHETIC",

@@ -5,6 +5,11 @@ protected-branch change by this worker.
 
 Base: `ec910d7a7275296ecbc8b5e5c459d356205165d1`
 (`integration/canopy-plasma6-20261127` live tip at branch point).
+Production source head: `d242fc95a60ec750051c801bd97fecdaa0f57ba4`; the
+artifacts and independent-review checks are pinned at exact head
+`dfbe27f1776b48a27ca2b9b4d60dafed6c2f8186`, which added evidence files only.
+The subsequent evidence-gap remediation changes documentation, the evidence
+index and evidence tooling only; no production or compiled source is altered.
 Owner directive: `Canopy_LacOS_Master_Execution_Directive_2026-11-28_Rev3.md`,
 SHA-256 prefix `1fba4b1e`, M2/M3 sections and evidence-label rules.
 
@@ -65,11 +70,44 @@ its current base without duplicating that PR.
 | Python/compiled parity | `python scratch/native_host_wiring/parity_check.py` | `verdict=PASS`, 13/13 vectors, zero wiring-marker or visual-path findings (`parity_report.json`) |
 | Wire-contract tests | `python -m unittest discover -s scratch/native_host_wiring/tests -p 'test_*.py'` | `Ran 11 tests ... OK`, rc=0 (`contract_tests.log`) |
 | Existing targeted suites | `python -m unittest tests.test_pe025_display_change_response tests.test_pe075_display_scaling_contracts tests.test_c100_reliability_screen_topology_change tests.test_quick_controls_host_state tests.test_quick_controls_host_injection tests.test_classic_status_a11y tests.test_nd041_native_settings_controls_wiring` | `Ran 109 tests ... OK`, rc=0 (`targeted_tests.log`) |
-
 | Full suite | `PYTHONPATH=<worktree> python -m unittest discover -s tests` | `Ran 4671 tests in 680.816s`, `OK (skipped=49)`, rc=0 (`full_tests.log`, `full_tests.rc`) |
 
 All of the above are **SYNTHETIC** source/offline checks on the Windows 11
 host. The compiled binary is a Windows PE (`MZ`, `.exe`), not a Linux binary.
+
+## Vector provenance: embedded synthetic fixtures
+
+The compiled `--self-test-native-display-host` binary does **not** read an
+external vector file. Its 13 expected cases and 18 input steps are embedded
+as `kNativeDisplayCases` / `kNativeDisplaySteps` in
+`prototype/classic/main.cpp`; this is an explicit fixture-in-binary design so
+the offscreen self-test needs no runtime file access. Those fixtures are
+**SYNTHETIC generated data**, produced offline by
+`scratch/native_host_wiring/generate_vectors.py` from the Python contract and
+pasted verbatim into the translation unit. The external mirrors are
+`scratch/native_host_wiring/canonical_vectors.json` and
+`scratch/native_host_wiring/canonical_vectors_cpp.txt`; their SHA-256 digests
+are frozen in `parity_report.json`, `SHA256SUMS.txt` and `evidence.json`, and
+the embedded C++ rows were compared row-for-row against the mirrored
+fragment (`18` steps / `13` cases, zero row differences). The parity gate only
+checks that the compiled program's 13 emitted log rows match the Python
+contract's canonical expectations. It is an equivalence check between two
+offline implementations, **not** an observation of a real Plasma monitor or
+DPI event. `NATIVE_RUNTIME` remains `NOT_RUN`.
+
+## GitHub check terminal state at the pinned head
+
+The independent review was conducted while `qt-evidence` was still
+`IN_PROGRESS`. Re-querying `gh pr view 754 --json statusCheckRollup` at the
+exact pinned head `dfbe27f1776b48a27ca2b9b4d60dafed6c2f8186` showed all three
+checks terminal: `qt-evidence` **COMPLETED / SUCCESS**
+(`2026-11-28T09:08:58Z`, run `46128486358`, job `140928263798`),
+`fake-gio-launch-fixture` **COMPLETED / SUCCESS**
+(`2026-11-28T09:02:00Z`) and `foundation` **COMPLETED / SUCCESS**
+(`2026-11-28T09:03:26Z`). These are CI build/smoke/Python checks at that
+exact SHA; they do **not** change the `NOT_RUN` native-runtime classification.
+After the evidence-only remediation commit the head advances, so the check
+state on the new head must be re-queried and is not claimed here.
 
 ## Native runtime: `NOT_RUN`
 

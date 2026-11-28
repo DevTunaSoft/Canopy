@@ -97,6 +97,22 @@ def main() -> int:
     report = {
         "artifact": "native_display_host_parity_gate",
         "classification": "SYNTHETIC",
+        "vector_provenance": {
+            "classification": "EMBEDDED_SYNTHETIC_GENERATED_FIXTURES",
+            "compiled_location": ("prototype/classic/main.cpp :: "
+                                  "kNativeDisplaySteps / kNativeDisplayCases"),
+            "generator": "scratch/native_host_wiring/generate_vectors.py",
+            "external_mirrors": (
+                "scratch/native_host_wiring/canonical_vectors.json",
+                "scratch/native_host_wiring/canonical_vectors_cpp.txt",
+            ),
+            "note": ("The compiled offscreen self-test uses vectors frozen in "
+                     "the translation unit, not an external fixture file. "
+                     "The mirrors are generated offline from the Python "
+                     "contract; this gate compares the compiled log rows "
+                     "with those canonical expectations. It is a synthetic "
+                     "equivalence check, not a runtime observation."),
+        },
         "verdict": verdict,
         "vector_count": len(payload["cases"]),
         "observed_vector_count": len(rows),

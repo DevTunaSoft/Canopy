@@ -13,6 +13,16 @@
     "main.cpp": "1167853b00820ebd74eb9d07f5bfba9f2d731a69b8ea0e1bf62f9205453300f4"
   },
   "vector_count": 13,
+  "vector_provenance": {
+    "classification": "EMBEDDED_SYNTHETIC_GENERATED_FIXTURES",
+    "compiled_location": "prototype/classic/main.cpp :: kNativeDisplaySteps / kNativeDisplayCases",
+    "external_mirrors": [
+      "scratch/native_host_wiring/canonical_vectors.json",
+      "scratch/native_host_wiring/canonical_vectors_cpp.txt"
+    ],
+    "generator": "scratch/native_host_wiring/generate_vectors.py",
+    "note": "The compiled offscreen self-test uses vectors frozen in the translation unit, not an external fixture file. The mirrors are generated offline from the Python contract; this gate compares the compiled log rows with those canonical expectations. It is a synthetic equivalence check, not a runtime observation."
+  },
   "verdict": "PASS",
   "visual_paths_changed": []
 }

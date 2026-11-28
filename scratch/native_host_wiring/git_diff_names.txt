@@ -1,6 +1,7 @@
 canopy_features/quick_controls/native_display_contract.py
 docs/NATIVE_HOST_WIRING.md
 prototype/classic/main.cpp
+scratch/native_host_wiring/SHA256SUMS.txt
 scratch/native_host_wiring/adapter_json.log
 scratch/native_host_wiring/blocker_binary_format.txt
 scratch/native_host_wiring/blocker_guestcontrol_attempt.txt
@@ -14,6 +15,7 @@ scratch/native_host_wiring/canonical_vectors_cpp.txt
 scratch/native_host_wiring/cmake_configure.log
 scratch/native_host_wiring/compiled_self_test.log
 scratch/native_host_wiring/contract_tests.log
+scratch/native_host_wiring/evidence.json
 scratch/native_host_wiring/full_tests.log
 scratch/native_host_wiring/full_tests.rc
 scratch/native_host_wiring/generate_vectors.log

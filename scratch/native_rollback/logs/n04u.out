@@ -1,0 +1,7 @@
+ID: N04U
+STAGE: N04 config after refusal
+LABEL: PASS
+COMMAND: ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; for c in /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc /home/canopy/.config/plasmashellrc; do printf 'CFG %s sha256=%s mode=%s size=%s\n' "$(basename "$c")" "$(sha256sum "$c"|awk '{print $1}')" "$(stat -c '%a' "$c")" "$(stat -c '%s' "$c")"; done
+rc=0
+CFG plasma-org.kde.plasma.desktop-appletsrc sha256=fa81ab829aeb54153e1f6e088571b388b7c3c4a597e598e518d383454a793a8c mode=600 size=5780
+CFG plasmashellrc sha256=a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774 mode=600 size=1811

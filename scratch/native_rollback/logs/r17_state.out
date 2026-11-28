@@ -1,0 +1,23 @@
+ID: R17
+STAGE: final state before staging cleanup
+LABEL: PASS
+COMMAND: ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; bash /home/canopy/native_rollback_rt/guest_state.sh
+rc=0
+=== STATE 2026-11-28T04:15:31Z ===
+CFG plasma-org.kde.plasma.desktop-appletsrc sha256=141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751 mode=600 size=5738
+CFG plasmashellrc sha256=a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774 mode=600 size=1811
+MANIFEST ABSENT
+BIN_INSTALLED ABSENT
+AUTOSTART ABSENT
+USERFILE /home/canopy/g2_g4_final_status.txt sha256=9798e783184feb8149e6ad99a49ecc09a1e12577048180457bd23fde7003868e
+USERFILE /home/canopy/g2_source_bundle/README.md sha256=2de8134b43a26eb05b8d796e14e794023f5130533cf5dfdc6a4fe87244b147dc
+USERFILE /home/canopy/g3_g4_runtime_package/README.md sha256=33b45e0be02af70bb8e894428f6a1561576a682ac9164642431882ae32c71222
+USERFILE /home/canopy/g3_g4_runtime_package/ACCEPTANCE_CHECKLIST.md sha256=074ee060d54973c3877c663e222c043750f8e9afa28258c47931f83acd490e7e
+USERFILE /home/canopy/g3_g4_runtime_package/config.env sha256=418011820f78ee0abf2d358beb337ad76432edec1e798b0ad3f03a991a422c8c
+USERFILE /home/canopy/g2_g4_status.txt sha256=541214d833ba936095c902db503073629ead7934fb3f277d0adba26e745a32ed
+USERFILE /home/canopy/g2_g4_copy_hashes.txt sha256=91f0551abbeb05c179a920bd06bea4a261f7059045afca83e5f518bcc3d34c07
+USERFILE /home/canopy/g2_g4_retry_status.txt sha256=edabd1fff759674eb037b9d8e5bfb67d8979a0337a0bbf17722ece1f47fd0e1e
+USERFILE /home/canopy/.config/kwinoutputconfig.json sha256=3ac08a9117c6da5a46ae751de32796137cc53a918d105c8dc593c0065f88cc25
+USERFILE /home/canopy/g2_g4_manifest_check.txt sha256=8f1689ac622dcc21b63dae27219171c34bced53def91be0385da436a61103db4
+PROCESSES kwin=1 plasmashell=1 classic_spike=0
+=== STATE DONE ===

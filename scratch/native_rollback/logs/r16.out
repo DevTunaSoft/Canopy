@@ -1,0 +1,7 @@
+ID: R16
+STAGE: cycle 2 verify final stock
+LABEL: PASS
+COMMAND: ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash verify.sh
+rc=0
+[canopy-classic][verify] STATUS=NOT_INSTALLED (no install manifest)
+[canopy-classic][verify] runtime desktop probes (Plasma/DBus): NOT_RUN

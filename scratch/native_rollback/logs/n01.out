@@ -1,0 +1,10 @@
+ID: N01
+STAGE: N01 negative control: unhashed snapshot refused
+LABEL: PASS
+COMMAND: ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash rollback.sh --restore-only --no-restart
+rc=1
+[canopy-classic][rollback] rollback: explicit restore-only path (verified snapshot; installed binary not required)
+[canopy-classic][uninstall] installed binary absent; restore-only path (installed asset not required)
+[canopy-classic][uninstall] installed wallpaper absent; restore-only path (installed asset not required)
+[stderr]
+[canopy-classic][uninstall] ERROR: snapshot hash mismatch: /home/canopy/.local/share/canopy-classic/backup/plasma-org.kde.plasma.desktop-appletsrc

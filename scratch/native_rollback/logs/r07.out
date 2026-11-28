@@ -1,0 +1,15 @@
+ID: R07
+STAGE: cycle 1 auto restore-only rollback
+LABEL: PASS
+COMMAND: ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash rollback.sh --no-restart
+rc=0
+[canopy-classic][rollback] rollback: install assets already absent (post-uninstall ordering); using restore-only path
+[canopy-classic][uninstall] installed binary absent; restore-only path (installed asset not required)
+[canopy-classic][uninstall] installed wallpaper absent; restore-only path (installed asset not required)
+[canopy-classic][uninstall] WARN --force-restore: overwriting user-modified config: /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc
+[canopy-classic][uninstall] restore-only: no installed binary required; snapshot restore next
+[canopy-classic][uninstall] restored stock config: /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc (mode=600 sha256=141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751)
+[canopy-classic][uninstall] restored stock config: /home/canopy/.config/plasmashellrc (mode=600 sha256=a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774)
+[canopy-classic][uninstall] removed manifest and snapshot (clean restore/uninstall)
+[canopy-classic][uninstall] restart NOT_RUN (pass --restart or log out/in)
+[canopy-classic][uninstall] restore-only complete (verified Plasma snapshot restored; no installed binary required)

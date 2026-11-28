@@ -1,0 +1,8 @@
+ID: N01P
+STAGE: N01 direct before/after config proof
+LABEL: PASS
+COMMAND: host-side map comparison of N01B and N01U
+rc=0
+before={"plasma-org.kde.plasma.desktop-appletsrc": {"mode": "600", "sha256": "fa81ab829aeb54153e1f6e088571b388b7c3c4a597e598e518d383454a793a8c", "size": "5780"}, "plasmashellrc": {"mode": "600", "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774", "size": "1811"}}
+after={"plasma-org.kde.plasma.desktop-appletsrc": {"mode": "600", "sha256": "fa81ab829aeb54153e1f6e088571b388b7c3c4a597e598e518d383454a793a8c", "size": "5780"}, "plasmashellrc": {"mode": "600", "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774", "size": "1811"}}
+equal=True

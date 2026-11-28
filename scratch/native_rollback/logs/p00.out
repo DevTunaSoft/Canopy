@@ -1,0 +1,9 @@
+ID: P00
+STAGE: guest source asset pins + stock preflight
+LABEL: PASS
+COMMAND: ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; echo BIN_SHA=$(sha256sum /home/canopy/g2_source_bundle/build/classic/canopy-classic-spike|awk "{print \$1}"); echo WALL_SHA=$(sha256sum /home/canopy/g2_source_bundle/source/prototype/classic/assets/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png|awk "{print \$1}"); echo MANIFEST=$([ -f /home/canopy/.local/share/canopy-classic/install-manifest.env ]&&echo PRESENT||echo ABSENT); echo BIN_INSTALLED=$([ -f /home/canopy/.local/bin/canopy-classic ]&&echo PRESENT||echo ABSENT)
+rc=0
+BIN_SHA=4089251cf6a557d74ca308f3e32f59fea318f62d3285204e9ec7872bcc6b3f14
+WALL_SHA=8c6cab50a0977fc129c0d2a20523d9361646f36da66f2f3f2b2436a0d9001381
+MANIFEST=ABSENT
+BIN_INSTALLED=ABSENT

@@ -1,0 +1,7 @@
+ID: F01SET
+STAGE: stock fallback setup: pinned orphan binary, no manifest
+LABEL: PASS
+COMMAND: ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; echo MANIFEST=$([ -f /home/canopy/.local/share/canopy-classic/install-manifest.env ]&&echo PRESENT||echo ABSENT); cp -p /home/canopy/g2_source_bundle/build/classic/canopy-classic-spike /home/canopy/.local/bin/canopy-classic && chmod 755 /home/canopy/.local/bin/canopy-classic && echo ORPHAN_SHA=$(sha256sum /home/canopy/.local/bin/canopy-classic|awk "{print \$1}")
+rc=0
+MANIFEST=ABSENT
+ORPHAN_SHA=4089251cf6a557d74ca308f3e32f59fea318f62d3285204e9ec7872bcc6b3f14

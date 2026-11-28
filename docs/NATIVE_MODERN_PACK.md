@@ -96,6 +96,10 @@ it add no product code. It checks the catalog CLI, eight-definition inventory,
 healthy prepare/apply/verify/release, failed-verify rollback, five illegal
 transition controls, 100 round trips, owned-path scope with zero Classic path
 changes, and absence of paid/activation/telemetry fields or QML runtime hooks.
+The historical Classic diff is supporting evidence only: when a shallow CI
+checkout lacks the base commit, the test degrades to source-contract checks
+(Classic is unlisted in the catalog, unbound to a manifest and free of asset
+references) rather than failing on a missing git object.
 
 Explicitly **NOT_RUN**: native Plasma/KWin session switch, live Classic→any
 pack switch preserving applications, compiled Qt/QML rendering and screenshots,

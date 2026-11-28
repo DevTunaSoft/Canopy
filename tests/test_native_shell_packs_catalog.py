@@ -207,15 +207,38 @@ class InitialShellPackCatalogTests(unittest.TestCase):
             with self.assertRaises(m.ShellPackManifestError):
                 case()
 
-    def test_approved_classic_paths_unchanged_from_base(self):
-        changed = subprocess.run(
-            ["git", "diff", "--name-only", BASE, "HEAD", "--",
-             "prototype/classic", "docs/CLASSIC*",
-             "canopy_features/settings/persisted_preferences.py"],
+    def test_classic_identity_binding_unchanged(self):
+        classic = m.inventory_snapshot().get(m.CLASSIC_BUILTIN_ID)
+        self.assertIsNotNone(classic)
+        self.assertEqual(classic.source, "built-in:approved-classic")
+        self.assertEqual(classic.capabilities, frozenset())
+        self.assertNotIn(m.CLASSIC_BUILTIN_ID, m.CATALOG_IDS)
+        self.assertNotIn("classic", INITIAL_CATALOG)
+        self.assertFalse((CATALOG / "classic").exists())
+        for name in INITIAL_CATALOG:
+            for rel in ("manifest.json", "ui/Main.qml", "README.md"):
+                path = CATALOG / name / rel
+                if not path.exists():
+                    continue
+                text = path.read_text(encoding="utf-8").lower()
+                for token in ("alpine", "wallpaper", "tux",
+                              "prototype/classic", "persisted_preferences"):
+                    self.assertNotIn(token, text, (name, rel, token))
+        # Historical diff is supporting evidence only: shallow CI checkouts
+        # may not carry the base commit, so absence degrades to source checks.
+        probe = subprocess.run(
+            ["git", "cat-file", "-e", BASE + "^{commit}"],
             cwd=str(ROOT), capture_output=True, text=True, timeout=60,
         )
-        self.assertEqual(changed.returncode, 0, changed.stderr)
-        self.assertEqual(changed.stdout.strip(), "")
+        if probe.returncode == 0:
+            changed = subprocess.run(
+                ["git", "diff", "--name-only", BASE, "HEAD", "--",
+                 "prototype/classic", "docs/CLASSIC*",
+                 "canopy_features/settings/persisted_preferences.py"],
+                cwd=str(ROOT), capture_output=True, text=True, timeout=60,
+            )
+            self.assertEqual(changed.returncode, 0, changed.stderr)
+            self.assertEqual(changed.stdout.strip(), "")
 
 
 if __name__ == "__main__":

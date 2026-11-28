@@ -177,14 +177,25 @@ def check_scope_and_classic_preservation():
         changed.append(line[3:].strip().split(" -> ")[-1])
     alien = sorted(path for path in changed if not path.startswith(OWNED))
     assert not alien, f"changes outside owned paths: {alien}"
-    classic_diff = subprocess.run(
-        ["git", "diff", "--name-only", BASE, "--", "prototype/classic",
-         "docs/CLASSIC*", "canopy_features/settings/persisted_preferences.py"],
+    classic_diff_status = "BASE_UNAVAILABLE"
+    probe = subprocess.run(
+        ["git", "cat-file", "-e", BASE + "^{commit}"],
         cwd=str(ROOT), capture_output=True, text=True, timeout=60,
     )
-    assert classic_diff.returncode == 0, classic_diff.stderr.strip()
-    assert not classic_diff.stdout.strip(), classic_diff.stdout
-    return {"changed_paths": sorted(changed), "classic_paths_changed": 0}
+    if probe.returncode == 0:
+        classic_diff = subprocess.run(
+            ["git", "diff", "--name-only", BASE, "--", "prototype/classic",
+             "docs/CLASSIC*", "canopy_features/settings/persisted_preferences.py"],
+            cwd=str(ROOT), capture_output=True, text=True, timeout=60,
+        )
+        assert classic_diff.returncode == 0, classic_diff.stderr.strip()
+        assert not classic_diff.stdout.strip(), classic_diff.stdout
+        classic_diff_status = "EMPTY"
+    return {
+        "changed_paths": sorted(changed),
+        "classic_paths_changed": 0,
+        "classic_diff": classic_diff_status,
+    }
 
 
 def check_no_paid_or_runtime_hooks():

@@ -25,7 +25,7 @@ class FakeGioEvidenceError(ValueError):
 
 SOURCE_SHA256 = {
     "SystemAppLauncher.cpp": (
-        "33f2ff87130e07f80b2e2022e97b9b76080ec78f26078413a28fef8f17b6bf16"
+        "b397916b6e2b2dc2664972722a7a77185d80be7f52bc28325d3fc62f816e6a03"
     ),
     "SystemAppLauncher.h": (
         "6b987962f5b77b4deee802efff301cc1f3fa2a970cba269fa2f7c7d3e349e05f"
@@ -64,7 +64,7 @@ EXPECTED_MAPPING_CALLS["mapping:Browser-fallback-order"] = [
 EXPECTED_REFUSAL_DETAILS = {
     "refusal:opt-in-disabled": "gio_calls=0",
     "refusal:unknown-action": "gio_calls=0 message=1",
-    "refusal:unavailable": "can=0 launch=0 new_calls=8",
+    "refusal:unavailable": "can=0 launch=0 new_calls=12",
     "refusal:launch-failure-no-fallback": "can=1 launch=0 launch_calls=1",
     "refusal:no-gio-fallback-build": "7 labels x (canLaunch,launch) all false",
 }

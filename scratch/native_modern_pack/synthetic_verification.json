@@ -1,0 +1,184 @@
+{
+  "label": "SYNTHETIC",
+  "task": "M3 Shell Pack Modern",
+  "base_sha": "ec910d7a",
+  "head_sha": "3975414ecdfbf37b2b5024a71c9db5d56c8fafd1",
+  "checks": {
+    "manifest_passes_offline_checker": {
+      "status": "PASS",
+      "detail": {
+        "id": "io.canopy.modern",
+        "cli": "SHELL_PACK_MANIFEST_PASS: io.canopy.modern (metadata only; no runtime loading or trust verification)"
+      }
+    },
+    "first_party_inventory": {
+      "status": "PASS",
+      "detail": {
+        "definitions": [
+          {
+            "builtin_id": "org.canopy.classic",
+            "manifest_id": "org.canopy.classic",
+            "name": "Classic",
+            "capabilities": [],
+            "entrypoint": "host-owned",
+            "source": "built-in:approved-classic",
+            "tier": "included",
+            "owned_services": []
+          },
+          {
+            "builtin_id": "org.canopy.modern",
+            "manifest_id": "io.canopy.modern",
+            "name": "Modern Shell Pack",
+            "capabilities": [
+              "app-launcher",
+              "settings-panel",
+              "system-status",
+              "taskbar",
+              "window-list",
+              "workspace-list"
+            ],
+            "entrypoint": "ui/Main.qml",
+            "source": "tools/shell_packs/modern",
+            "tier": "included",
+            "owned_services": []
+          }
+        ],
+        "problems": [],
+        "checked_manifests": 1,
+        "paid_tiers": [],
+        "activation_required": false,
+        "telemetry_endpoints": []
+      }
+    },
+    "prepare_apply_verify_release": {
+      "status": "PASS",
+      "detail": {
+        "from_id": "org.canopy.classic",
+        "target_id": "org.canopy.modern",
+        "active_id": "org.canopy.modern",
+        "committed_id": "org.canopy.modern",
+        "phase": "RELEASED",
+        "steps": [
+          {
+            "name": "PREPARE",
+            "status": "OK",
+            "note": "metadata-only candidate; host must verify compatibility offscreen"
+          },
+          {
+            "name": "APPLY",
+            "status": "APPLIED_PENDING_VERIFY",
+            "note": "bookkeeping only"
+          },
+          {
+            "name": "VERIFY",
+            "status": "OK",
+            "note": "synthetic verdict only"
+          },
+          {
+            "name": "RELEASE_INACTIVE",
+            "status": "OK",
+            "note": "host unsubscribes old UI; shared core services unchanged"
+          }
+        ],
+        "rolled_back": false,
+        "real_runtime_verified": false
+      }
+    },
+    "failed_verify_rollback": {
+      "status": "PASS",
+      "detail": {
+        "verified_failure": {
+          "from_id": "org.canopy.classic",
+          "target_id": "org.canopy.modern",
+          "active_id": "org.canopy.classic",
+          "committed_id": "org.canopy.classic",
+          "phase": "ROLLED_BACK",
+          "steps": [
+            {
+              "name": "PREPARE",
+              "status": "OK",
+              "note": "metadata-only candidate; host must verify compatibility offscreen"
+            },
+            {
+              "name": "APPLY",
+              "status": "APPLIED_PENDING_VERIFY",
+              "note": "bookkeeping only"
+            },
+            {
+              "name": "VERIFY",
+              "status": "FAILED",
+              "note": "synthetic verdict only"
+            },
+            {
+              "name": "ROLLBACK",
+              "status": "OK",
+              "note": "committed pack restored"
+            }
+          ],
+          "rolled_back": true,
+          "real_runtime_verified": false
+        },
+        "explicit_rollback": {
+          "from_id": "org.canopy.classic",
+          "target_id": "org.canopy.modern",
+          "active_id": "org.canopy.classic",
+          "committed_id": "org.canopy.classic",
+          "phase": "ROLLED_BACK",
+          "steps": [
+            {
+              "name": "PREPARE",
+              "status": "OK",
+              "note": "metadata-only candidate; host must verify compatibility offscreen"
+            },
+            {
+              "name": "APPLY",
+              "status": "APPLIED_PENDING_VERIFY",
+              "note": "bookkeeping only"
+            },
+            {
+              "name": "ROLLBACK",
+              "status": "OK",
+              "note": "synthetic rollback: candidate unhealthy"
+            }
+          ],
+          "rolled_back": true,
+          "real_runtime_verified": false
+        }
+      }
+    },
+    "illegal_transition_negative_controls": {
+      "status": "PASS",
+      "detail": {
+        "illegal_transitions_rejected": 4
+      }
+    },
+    "owned_paths_and_classic_preserved": {
+      "status": "PASS",
+      "detail": {
+        "changed_paths": [],
+        "classic_paths_changed": 0
+      }
+    },
+    "no_paid_tiers_activation_telemetry_or_runtime_hooks": {
+      "status": "PASS",
+      "detail": {
+        "manifest_banned_tokens": [],
+        "qml_runtime_hooks": []
+      }
+    }
+  },
+  "verdict": "PASS",
+  "not_run": [
+    "native Plasma/KWin session switch",
+    "live Classic-to-Modern switch preserving running applications",
+    "compiled Qt/QML rendering and owner visual acceptance",
+    "real PSS/CPU/GPU measurement",
+    "screen-reader and real desktop keyboard verification",
+    "install, rollback and upgrade on a disposable guest"
+  ],
+  "resource_impact": {
+    "measured": "SYNTHETIC: metadata-only validation and immutable ledger transitions",
+    "not_measured": "NOT_RUN: native runtime PSS, CPU, GPU, wakeups and frame times",
+    "rationale": "No process, service, timer, compositor change or UI code is added or executed."
+  }
+}

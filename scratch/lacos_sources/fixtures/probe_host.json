@@ -1,0 +1,63 @@
+{
+  "context": "host",
+  "ecosystems": {
+    "apt_deb": {
+      "core_mutation_absent": false,
+      "environment_isolated": false,
+      "foreign_repo_absent": false,
+      "no_always_on_service": false,
+      "privileged_absent": false,
+      "provenance": "",
+      "signature_verified": false,
+      "source_verified": false,
+      "tool_present": false
+    },
+    "dnf_rpm": {
+      "core_mutation_absent": false,
+      "environment_isolated": false,
+      "foreign_repo_absent": false,
+      "no_always_on_service": false,
+      "privileged_absent": false,
+      "provenance": "",
+      "signature_verified": false,
+      "source_verified": false,
+      "tool_present": false
+    },
+    "flatpak_flathub": {
+      "core_mutation_absent": false,
+      "environment_isolated": false,
+      "foreign_repo_absent": false,
+      "no_always_on_service": false,
+      "privileged_absent": false,
+      "provenance": "",
+      "signature_verified": false,
+      "source_verified": false,
+      "tool_present": false
+    },
+    "pacman": {
+      "core_mutation_absent": false,
+      "environment_isolated": false,
+      "foreign_repo_absent": false,
+      "no_always_on_service": false,
+      "privileged_absent": false,
+      "provenance": "",
+      "signature_verified": false,
+      "source_verified": false,
+      "tool_present": false
+    },
+    "rootless_podman_oci": {
+      "core_mutation_absent": false,
+      "environment_isolated": false,
+      "foreign_repo_absent": false,
+      "no_always_on_service": false,
+      "privileged_absent": false,
+      "provenance": "",
+      "signature_verified": false,
+      "source_verified": false,
+      "tool_present": false
+    }
+  },
+  "evidence_class": "host-readonly",
+  "guest_executed": false,
+  "schema_version": 1
+}

@@ -1,0 +1,20 @@
+{
+  "manifest_core_mutation.json": "TOP_NO_CORE_MUTATION_REQUIRED",
+  "manifest_default_runtime.json": "dnf_rpm:NOT_ON_DEMAND",
+  "manifest_foreign_mix.json": "TOP_FOREIGN_HOST_REPO_MIXING_REQUIRED",
+  "manifest_host_target.json": "TOP_TARGET_INVALID",
+  "manifest_missing_ecosystem.json": "ECOSYSTEM_SET_INVALID",
+  "manifest_paid_tiers.json": "TOP_PAID_TIERS_REQUIRED",
+  "manifest_partial_upgrade.json": "pacman:CAPABILITY_FORBIDDEN",
+  "manifest_privileged_podman.json": "rootless_podman_oci:CAPABILITY_FORBIDDEN",
+  "manifest_telemetry.json": "TOP_TELEMETRY_REQUIRED",
+  "manifest_third_party.json": "flatpak_flathub:SOURCE_PROVENANCE_INVALID",
+  "manifest_unsigned.json": "apt_deb:SOURCE_SIGNATURE_INVALID",
+  "probe_always_on.json": "flatpak_flathub:ALWAYS_ON_SERVICE",
+  "probe_core_mutation.json": "dnf_rpm:CORE_MUTATION_OBSERVED",
+  "probe_foreign_repo.json": "apt_deb:FOREIGN_REPO_MIXED",
+  "probe_live_claim.json": "FACTS_GUEST_FLAG_INVALID",
+  "probe_privileged_podman.json": "rootless_podman_oci:PRIVILEGED_DEFAULT",
+  "probe_tool_missing.json": "pacman:TOOL_MISSING",
+  "probe_unsigned_guest.json": "flatpak_flathub:SIGNATURE_UNVERIFIED"
+}

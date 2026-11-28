@@ -1,0 +1,118 @@
+{
+  "duplicate_always_on_services": false,
+  "ecosystems": {
+    "apt_deb": {
+      "capabilities": [
+        "search",
+        "install",
+        "update",
+        "remove",
+        "launch"
+      ],
+      "enabled": true,
+      "on_demand": true,
+      "runtime_installed_by_default": false,
+      "sources": [
+        {
+          "id": "ubuntu-archive",
+          "provenance": "ubuntu-archive",
+          "scope": "guest-only",
+          "signature": "apt-signed-by",
+          "verified": true
+        }
+      ]
+    },
+    "dnf_rpm": {
+      "capabilities": [
+        "search",
+        "install",
+        "update",
+        "remove",
+        "launch"
+      ],
+      "enabled": true,
+      "on_demand": true,
+      "runtime_installed_by_default": false,
+      "sources": [
+        {
+          "id": "fedora-official",
+          "provenance": "fedora-official",
+          "scope": "guest-only",
+          "signature": "rpm-gpg",
+          "verified": true
+        }
+      ]
+    },
+    "flatpak_flathub": {
+      "capabilities": [
+        "search",
+        "install",
+        "update",
+        "remove",
+        "launch",
+        "permissions"
+      ],
+      "enabled": true,
+      "on_demand": true,
+      "runtime_installed_by_default": false,
+      "sources": [
+        {
+          "id": "flathub",
+          "provenance": "official-flathub",
+          "scope": "guest-only",
+          "signature": "gpg",
+          "verified": true
+        }
+      ]
+    },
+    "pacman": {
+      "capabilities": [
+        "search",
+        "install",
+        "update",
+        "remove",
+        "launch"
+      ],
+      "enabled": true,
+      "on_demand": true,
+      "runtime_installed_by_default": false,
+      "sources": [
+        {
+          "id": "arch-official",
+          "provenance": "arch-official",
+          "scope": "guest-only",
+          "signature": "pacman-key",
+          "verified": true
+        }
+      ]
+    },
+    "rootless_podman_oci": {
+      "capabilities": [
+        "search",
+        "pull",
+        "run",
+        "update",
+        "remove",
+        "permissions"
+      ],
+      "enabled": true,
+      "on_demand": true,
+      "runtime_installed_by_default": false,
+      "sources": [
+        {
+          "id": "official-registry",
+          "provenance": "official-registry",
+          "scope": "guest-only",
+          "signature": "cosign",
+          "verified": true
+        }
+      ]
+    }
+  },
+  "foreign_host_repo_mixing": false,
+  "no_core_mutation": true,
+  "paid_tiers": false,
+  "schema_version": 1,
+  "target": "lacos-guest",
+  "telemetry": false
+}

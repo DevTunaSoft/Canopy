@@ -1,0 +1,140 @@
+{
+  "checks": [
+    {
+      "id": "FIXTURE_HASHES",
+      "status": "PASS"
+    },
+    {
+      "id": "STATIC_NO_TOOL_EXEC",
+      "status": "PASS"
+    },
+    {
+      "id": "STATIC_NO_WRITE_IO",
+      "status": "PASS"
+    },
+    {
+      "id": "STATIC_FIVE_ECOSYSTEMS",
+      "status": "PASS"
+    },
+    {
+      "id": "STATIC_FORBIDDEN_CAPABILITIES",
+      "status": "PASS"
+    },
+    {
+      "id": "MANIFEST_VALID",
+      "status": "PASS"
+    },
+    {
+      "id": "MANIFEST_ALL_DECLARED",
+      "status": "PASS"
+    },
+    {
+      "id": "PROBE_HOST_NO_GRANTS",
+      "status": "PASS"
+    },
+    {
+      "id": "PROBE_GUEST_SYNTHETIC_GRANTS",
+      "status": "PASS"
+    },
+    {
+      "id": "NO_REAL_GUEST_ACCEPTANCE",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_COUNT_BOUND",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_MANIFEST_CORE_MUTATION",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_MANIFEST_DEFAULT_RUNTIME",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_MANIFEST_FOREIGN_MIX",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_MANIFEST_HOST_TARGET",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_MANIFEST_MISSING_ECOSYSTEM",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_MANIFEST_PAID_TIERS",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_MANIFEST_PARTIAL_UPGRADE",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_MANIFEST_PRIVILEGED_PODMAN",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_MANIFEST_TELEMETRY",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_MANIFEST_THIRD_PARTY",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_MANIFEST_UNSIGNED",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_PROBE_ALWAYS_ON",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_PROBE_CORE_MUTATION",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_PROBE_FOREIGN_REPO",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_PROBE_LIVE_CLAIM",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_PROBE_PRIVILEGED_PODMAN",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_PROBE_TOOL_MISSING",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_PROBE_UNSIGNED_GUEST",
+      "status": "PASS"
+    }
+  ],
+  "evidence_labels": [
+    "STATIC SOURCE ONLY",
+    "SYNTHETIC"
+  ],
+  "fixture_sha256": {
+    ".gitattributes": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da",
+    "manifest_valid.json": "f0d656acb162d278a22ad790401e886727e71487df91f0b584314098e1977971",
+    "negative_cases.json": "2f17432eff7bc6718b70b7412a40a86e60b66b2704695f4d5b281eb664f2419f",
+    "probe_guest_synthetic.json": "b10288558f997c4d729539c39e9993883758e2bdface7424ca254794fbf27524",
+    "probe_host.json": "5b1c4b2e91431730bba5ab502f5aa4a2ee5cdc05bdfc986f8fe184b5a55a6168"
+  },
+  "guest_acceptance": "NOT_RUN",
+  "guest_execution": "NOT_RUN",
+  "production_sha256": {
+    "__init__.py": "551c39b9e386eaf84d3adb086099587f557841c25dff850c319c878619861cf1",
+    "capability_manifest.py": "91ca6a8bd677c7a584b6c89ada7bb737b5c3a8bbe9da7b1c4cba21344df4d983",
+    "source_probe.py": "66685a317e745cddaf33f7c6d92b7d4fe195bc83716b43c55683ac292d981ade"
+  },
+  "schema_version": 1,
+  "verdict": "PASS"
+}

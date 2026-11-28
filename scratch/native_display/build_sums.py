@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 DIR = ROOT / "scratch" / "native_display"
-EXCLUDE = {"SHA256SUMS.txt", "full_suite_final.log", "full_suite_final.rc"}
+EXCLUDE = {"SHA256SUMS.txt"}
 
 paths = [
     "canopy_features/dock/display_change_response.py",

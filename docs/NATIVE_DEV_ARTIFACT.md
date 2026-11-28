@@ -8,7 +8,7 @@ head `21c32b61a29f61210fef38c6b9447b49dbfd10bf`. This branch is
 **NO RELEASE.** `NO_RELEASE`, `NO_VISUAL_APPROVAL`, `NO_MERGE`, `NO_APPROVAL`,
 `NO_CI_CLAIM`. No protected branch, PR, approval or merge is touched here. The
 artifact exists so an independent tester does not have to assemble PRs by hand.
-Owner directive SHA prefix: `79e30d79`.
+Owner directive SHA-256: `1fba4b1e7128b6bc33aba577c05fdccfa45fcac56ee714f02e9d8b43e32a0f2a` (Rev3, prefix `1fba4b1e`). The previous 2026-11-27 integrated directive pin is `SUPERSEDED_POINT_IN_TIME`.
 
 ## Exact pins
 
@@ -30,7 +30,7 @@ tree is embedded as `SOURCE_ID.json` inside the artifact (git blob bytes, LF).
 ## What is in the one archive
 
 ```
-canopy-native-dev-artifact-20261128/
+.                         archive root = bundle root (flat, no wrapper)
   README.md                 this document, copied verbatim at build time
   ARTIFACT_ID.json          pins, scope, embedded-path list, verdict PASS
   SOURCE_ID.json            SHA-256 of every file in the pinned candidate tree
@@ -72,7 +72,7 @@ Host-side checks:
 cd "$WT/scratch/native_dev_artifact"
 sha256sum -c SHA256SUMS.txt
 tar -xzf canopy-native-dev-artifact-20261128.tar.gz -C <check-dir>
-cd <check-dir>/canopy-native-dev-artifact-20261128
+cd <check-dir>
 sha256sum -c SHA256SUMS
 ```
 
@@ -85,15 +85,15 @@ user-scoped: no system files, no approved asset bytes changed, no VM mutation.
 ```bash
 # 0. outer and inner integrity checks above must pass first
 tar -xzf canopy-native-dev-artifact-20261128.tar.gz -C ~/canopy-dev-artifact
-B=~/canopy-dev-artifact/canopy-native-dev-artifact-20261128
+B=~/canopy-dev-artifact
 cd "$B"
 sha256sum -c SHA256SUMS
 
 # 1. extract and check the exact KPackage archive
 mkdir -p ~/canopy-dev-package ~/canopy-dev-state
-tar -xzf binary/org.kde.plasma.canopyclassic-0.1.0-dev-baseline.tar.gz \
+tar -xzf "$B/binary/org.kde.plasma.canopyclassic-0.1.0-dev-baseline.tar.gz" \
     -C ~/canopy-dev-package
-cd ~/canopy-dev-package/org.kde.plasma.canopyclassic
+cd ~/canopy-dev-package
 sha256sum -c SHA256SUMS                       # 17 members including wallpaper
 
 # 2. install at user scope, then verify
@@ -106,12 +106,21 @@ kpackagetool6 --type Plasma/Applet --list | grep org.kde.plasma.canopyclassic
 
 `install.sh` snapshots `~/.config/plasma-org.kde.plasma.desktop-appletsrc`
 into `<state>/backup/`, checks the approved wallpaper hash, installs with
-`kpackagetool6` at user scope and records `<state>/installed-config.sha256`.
+`kpackagetool6` and records `<state>/installed-config.sha256`. If
+`org.kde.plasma.canopyclassic` is already listed, the shipped script uses
+`kpackagetool6 --upgrade` on the exact archive (in-place upgrade for this same
+package id); on a fresh host it uses `--install`. An in-place upgrade keeps the
+config snapshot taken by that install and does not preserve later user edits;
+for a different package version/id, a failed upgrade, or any rollback, use the
+uninstall-then-install path below. The shipped `uninstall.sh` restores a
+snapshot byte-for-byte only while the config still matches
+`<state>/installed-config.sha256`; otherwise it preserves the user copy and
+reports `UNINSTALL_PASS_USER_CONFIG_PRESERVED`.
 
 ## Uninstall
 
 ```bash
-cd ~/canopy-dev-package/org.kde.plasma.canopyclassic
+cd ~/canopy-dev-package
 ./uninstall.sh ~/canopy-dev-state
 kpackagetool6 --type Plasma/Applet --list | grep org.kde.plasma.canopyclassic || echo absent
 ```
@@ -120,8 +129,9 @@ kpackagetool6 --type Plasma/Applet --list | grep org.kde.plasma.canopyclassic ||
 byte-for-byte **only if** it still matches the install-time hash. If the user
 changed the config in the meantime, it is not overwritten: a copy is saved at
 `<state>/user-preserved/plasma-org.kde.plasma.desktop-appletsrc` and the script
-reports `UNINSTALL_PASS_USER_CONFIG_PRESERVED`. There is no in-place upgrade
-path; a version change is uninstall-then-install.
+reports `UNINSTALL_PASS_USER_CONFIG_PRESERVED`. An in-place `--upgrade` is
+supported only for the same package id; a version change uses
+uninstall-then-install, and rollback always starts from an uninstall.
 
 ## Rollback to known-good
 
@@ -144,10 +154,22 @@ from `ec910d7a7275` (evidence: `docs/NATIVE_BUILD_BASELINE.md` and
    never merged or promoted. No VM snapshot is created or reverted by the
    artifact itself.
 
-Real guest install/rollback proof at the pinned baseline: 67/67 PASS steps,
-config byte-for-byte restoration and 10/10 personal files unchanged
-(`docs/NATIVE_ROLLBACK.md`). That evidence is cited, not re-executed by this
-artifact build.
+Real guest proof for the exact bytes shipped here:
+`scratch/native_dev_artifact/SHIPPED_ROLLBACK_PROOF.json` records **24/24 PASS**
+steps on `Canopy-Test-Plasma6` (`REAL_GUEST_SCOPED`): fresh install,
+`verify.sh`, in-place `--upgrade` of the same package id, uninstall with
+byte-for-byte config restoration, personal-file preservation, reinstall and
+cleanup. It pins `install.sh` = `a4f7ca9ca8fd6a2d4e0a68798b97bacc6a14806553f9829f591640f06c7ff5c2`,
+`uninstall.sh` = `94324c5eb7708fa884fc9f3c392ece6c0692b20d5246107ab922b5a61d03c9dc`,
+`verify.sh` = `ffa210cd22807db08dfbb7faafd21ef129eb5cca4d928f86f67c496119b7bb61`,
+compiled binary = `4950fd793d067aa722a64ea8b09f0c1c65a55263b7f96c8fd418bf579e9f4a32`
+and KPackage archive = `ec9e44cfaa3ba3059aef492b429a6e6c6b94da32a230d4acb6cb28a1ef3ece35`.
+The earlier 67/67 proof in `docs/NATIVE_ROLLBACK.md` is
+`SUPERSEDED_POINT_IN_TIME`: it measured a different script/binary identity and
+does not prove this bundle. Guest wallpaper-D-Bus recovery was required before
+the run and is recorded as a scoped guest-session precondition, not a product
+change. Visual acceptance, CI-on-guest automation, approval, merge and release
+remain `NOT_RUN` / `NO_RELEASE`.
 
 ## Smoke checklist
 
@@ -161,6 +183,7 @@ the tester's own log; a checkbox is not evidence.
 - [ ] Approved wallpaper SHA-256 equals `8c6cab50…01381` before and after install.
 - [ ] One active Plasma X11 user session, exactly one `kwin_x11`, at least one `plasmashell`, no second compositor.
 - [ ] `kpackagetool6 --type Plasma/Applet --install` of the exact archive succeeds; `--show` metadata identity OK.
+- [ ] In-place `--upgrade` of the same package id succeeds; rollback starts with `uninstall.sh`.
 - [ ] Compiled binary launched in that session; a live X11 window is observed.
 - [ ] Wallpaper path present in the Plasma image-wallpaper config group; real desktop capture recorded (functional render only).
 - [ ] `./verify.sh <state>` prints `VERIFY_PASS`.
@@ -180,7 +203,7 @@ acceptance, protected-branch merge, public release (`NOT_RUN` / `NO_RELEASE`).
 | Embedded binary SHA/size and prior manifest pin agreement | PASS |
 | Deterministic bundle: two byte-identical packagings | PASS (`SYNTHETIC`) |
 | Inner and outer `SHA256SUMS` verified from current bytes | PASS |
-| Real Plasma guest install/uninstall in this task | NOT_RUN (prior pinned evidence cited) |
+| Real Plasma guest install/rollback at exact shipped script/binary hashes | PASS (24/24, `REAL_GUEST_SCOPED`; `SHIPPED_ROLLBACK_PROOF.json`) |
 | CI, visual acceptance, merge, approval, release | NOT_RUN / NO_RELEASE |
 
 No approved icon, wallpaper, QML or C++ source was redesigned or modified by

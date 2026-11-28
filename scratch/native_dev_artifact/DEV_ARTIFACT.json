@@ -1,10 +1,10 @@
 {
   "artifact": {
-    "bytes": 25175331,
+    "bytes": 25176064,
     "name": "canopy-native-dev-artifact-20261128.tar.gz",
     "rebuild_byte_identical": true,
-    "rebuild_sha256": "7251c9dbe1f5bffdc4a46935ecbbba418618cd0a5ff7f30b6bbd5d623fe20c4f",
-    "sha256": "7251c9dbe1f5bffdc4a46935ecbbba418618cd0a5ff7f30b6bbd5d623fe20c4f"
+    "rebuild_sha256": "b1de4894f5cd8ac4c4e7e939146f822e139550bff8338be0be41c4a96f835c51",
+    "sha256": "b1de4894f5cd8ac4c4e7e939146f822e139550bff8338be0be41c4a96f835c51"
   },
   "binary": {
     "bytes": 5503210,
@@ -18,7 +18,7 @@
     "verify": "PYTHONPATH=<worktree> python tools/native/artifact/build_dev_artifact.py --worktree <worktree> --out <out> --verify-only"
   },
   "doc_path": "docs/NATIVE_DEV_ARTIFACT.md",
-  "doc_sha256": "937e2dc304d5d27493fadbb16d1fc9e8362fda76eaf8e9aa4832a7bf5ddaaf90",
+  "doc_sha256": "4431af4249e7ec6b834dafeb83810e04e6da0528fe0cc0a0ce394acc3d56c85d",
   "embedded_source_files": 97,
   "gates": [
     [
@@ -49,7 +49,7 @@
     [
       "archive_rebuild_byte_identical",
       "PASS",
-      "7251c9dbe1f5bffdc4a46935ecbbba418618cd0a5ff7f30b6bbd5d623fe20c4f"
+      "b1de4894f5cd8ac4c4e7e939146f822e139550bff8338be0be41c4a96f835c51"
     ],
     [
       "no_release_no_merge_boundary",
@@ -57,15 +57,15 @@
       "DEVELOPMENT_ARTIFACT_ONLY;NO_RELEASE;NO_VISUAL_APPROVAL;NO_MERGE;NO_APPROVAL;NO_CI_CLAIM"
     ]
   ],
-  "generated_utc": "2026-11-28T07:42:30Z",
+  "generated_utc": "2026-11-28T08:56:56Z",
   "inner_members": 101,
-  "note": "Deterministic bytes are SYNTHETIC evidence of reproducibility; prior real Plasma guest install/rollback evidence is cited at the pinned baseline and is NOT re-executed here. No CI, visual acceptance, release or merge claim.",
-  "owner_directive_sha_prefix": "79e30d79",
+  "note": "Deterministic bytes are SYNTHETIC evidence of reproducibility; the real Plasma guest proof against the exact shipped scripts/binary is scratch/native_dev_artifact/SHIPPED_ROLLBACK_PROOF.json (24/24 PASS, REAL_GUEST_SCOPED); the earlier 67/67 proof at a different script/binary identity is SUPERSEDED_POINT_IN_TIME. No CI, visual acceptance, release or merge claim.",
+  "owner_directive_sha_prefix": "1fba4b1e",
   "schema": "canopy.native.dev_artifact_evidence/1",
   "scope": "DEVELOPMENT_ARTIFACT_ONLY;NO_RELEASE;NO_VISUAL_APPROVAL;NO_MERGE;NO_APPROVAL;NO_CI_CLAIM",
   "source_commit": "21c32b61a29f61210fef38c6b9447b49dbfd10bf",
   "source_id_sha256": "2b896e300b2cea4cf7b980ea6c4ddffb206697161411789797a7f05c36f3e8b9",
   "source_tree": "1b962fd2ab9f319409de895765d7b5c5f3261294",
   "verdict": "PASS",
-  "worktree_head": "21c32b61a29f61210fef38c6b9447b49dbfd10bf"
+  "worktree_head": "7ebfbc50c50847b07c48209ddc0d5d341123dfac"
 }

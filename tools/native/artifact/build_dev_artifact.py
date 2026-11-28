@@ -43,7 +43,7 @@ SCHEMA_ARTIFACT_ID = "canopy.native.dev_artifact/1"
 SCHEMA_EVIDENCE = "canopy.native.dev_artifact_evidence/1"
 
 BRANCH = "integration/native-dev-artifact-20261128"
-OWNER_DIRECTIVE_SHA_PREFIX = "79e30d79"
+OWNER_DIRECTIVE_SHA_PREFIX = "1fba4b1e"
 SOURCE_COMMIT = "21c32b61a29f61210fef38c6b9447b49dbfd10bf"
 BASELINE_COMMIT = "ec910d7a7275296ecbc8b5e5c459d356205165d1"
 BASELINE_TREE = "3c6110a77e9e34be367a4d11b29c3d6a13138bab"
@@ -374,9 +374,12 @@ def build(worktree: Path, out: Path, source_commit: str, doc_path: Path) -> dict
                        "build_dev_artifact.py --worktree <worktree> --out <out> --verify-only"),
         },
         "note": ("Deterministic bytes are SYNTHETIC evidence of reproducibility; "
-                 "prior real Plasma guest install/rollback evidence is cited at the "
-                 "pinned baseline and is NOT re-executed here. No CI, visual "
-                 "acceptance, release or merge claim."),
+                 "the real Plasma guest proof against the exact shipped "
+                 "scripts/binary is scratch/native_dev_artifact/"
+                 "SHIPPED_ROLLBACK_PROOF.json (24/24 PASS, REAL_GUEST_SCOPED); "
+                 "the earlier 67/67 proof at a different script/binary identity "
+                 "is SUPERSEDED_POINT_IN_TIME. No CI, visual acceptance, "
+                 "release or merge claim."),
     }
     (out / "DEV_ARTIFACT.json").write_text(
         json.dumps(evidence, indent=2, sort_keys=True) + "\n", encoding="utf-8")

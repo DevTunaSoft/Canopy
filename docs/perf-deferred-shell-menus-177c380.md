@@ -115,8 +115,8 @@ still assert those strings across the two documents.
 - `docs/evidence/perf-deferred-menus-177c380/batch4.json` —
   `bfcf0b4c4d60090e63d9ea9f5f69f82db2e694a33273dfa855973269720e223c`
 - `docs/evidence/perf-deferred-menus-177c380/combined.json` —
-  `6f92e2c6a7281c0fe120a02ee672cae71718a1fd70b58463bd53dbdd54b80db7`
+  `12708749cc574c37fe4a4e2333fc5f9ed6448c7f850d6fa03f4ec6b4e36ac856`
 - `docs/evidence/perf-deferred-menus-177c380/suite-base.txt` —
-  `4215d653424b7b9daff5e48ed1e1c8dc7d6d26db4217a861b06515bc411007b8`
+  `8a9104fd6d6f9a2203328d2aa2eab833fbe5b4aa01b1a95a0b5f1ceeefb68b43`
 - `docs/evidence/perf-deferred-menus-177c380/suite-candidate.txt` —
-  `4fc4da2cdd11aaab3d58cf28b9e7d7eeb8b1f9bb33fc463892b878688cdde4f3`
+  `793c715f0ba051eee97186299987d7754d30795cc55e135c6fb263893d9fb822`

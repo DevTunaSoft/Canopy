@@ -2,7 +2,7 @@
 [2/52] Copying canopy-classic-spike qml resources into build dir
 [3/52] Running qmlimportscanner for canopy-classic-spike
 [4/52] Generating qt.conf part for canopy-classic-spike
-[5/52] Populating .qmlls.build.ini file at C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy-qc-host-build/.qt/.qmlls.build.ini
+[5/52] Populating .qmlls.build.ini file at private-evidence/scratch/canopy-qc-host-build/.qt/.qmlls.build.ini
 [6/52] Generating qt.conf file
 [7/52] Automatic MOC and UIC for target canopy-classic-spike
 [8/52] Running rcc for resource qmake_Canopy_Classic

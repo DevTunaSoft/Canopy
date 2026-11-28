@@ -19,17 +19,18 @@ Correction applied at integration tip `ec4ccc65a07071f85c0ce627447bc06c0dc3e0ad`
 - `classic-1200x750.png` `dd13497b3d232b68ede1fbecc09a4086ad71de331328a8449471edfd14049ce4`
 - `classic-1920x1080.png` `b844754d864525b9e737b79cdc5324536953b855a1ff616c9f2f29b3aaacc6db`
 - `classic-760x500.png` `710b1d8c6da8abac1f77def58ed4d1928f1fd1f3d8f600d9bc86119a766f6515`
-- `cmake-config.log` `26e42d914105b0e357f528635322c065cd8c99c4e8a3ac57e3d906a43ffae21b`
-- `compile.log` `8284ee19f3499355ac2a259e02f73ba6e6d01b14b0dac1abb3a3431d1c0ea003`
+- `cmake-config.log` `fb46615a646a6c5bfe3fe5be9b5ed7a0b8b6edd7fa6cc0a7c492947c0aa14726`
+- `compile.log` `68159a79ddf6f06729e7dd6d454a2206ec86f937f323a151acdf1005a5b41a9c`
 - `compiled-qt.log` `aad4cc6e248064a4fa4a550a53b663f155abf511bb76b42c287731ca69e5ffc6`
 - `evidence.md` - no self-hash; verify externally (git blob ID / raw-byte SHA-256, see normalization note)
 - `foundation-check.txt` `129871f6cc021e47dda115aa0fd87eb66c0d65ce785dab53a4bff19dd0af606f`
 - `recompile.log` `66d2325af77174fe1ef857d27f05e27247c5658b52c3fbff81b1eb02fbb9f19b`
-- `red-proof.txt` `8cfcf369cc0471dc6dd313184300cd8ee4bd5830f27a2a9ba5af3c98ec6cb3fd`
-- `sha256.txt` `cde85a8bc4d2901cfded1b08afb5c18a7225adcf10a8e517b556cd1974d6c90a`
+- `red-proof.txt` `e5e162513bf41cd048a2706b775c6972a077b7546d84614235f84c294e71c8e8`
+- `sha256.txt` - self-referential manifest; final digest recorded in the
+  ND-050 remediation evidence ledger outside this bundle
 - `status-fixtures.log` `850ab89a33b8c39e655698faa78f3ad84070f9b6dcec140352c0fc5f7df2ace5`
-- `suite-baseline.txt` `cbcf188030f23b25f091c3627d60ead0c84b96b91226f0eff95c3830a0666950`
-- `suite-candidate.txt` `1f6ba032e227f6288dd6e552ef2ab2245889c2d62d71dadbee20693f2c994384`
+- `suite-baseline.txt` `4a4cce3d783d776a70d5130347d301daee0a5af59b02ae599f0154276759f980`
+- `suite-candidate.txt` `e7c09f008a4d20b30036c98481f52cb03a8da530036e06f0e4bf68066ca6170a`
 - `target-test.txt` `065c7d15facfd20f14fb9182747be315f3349fa1d5e1a0e966047509f4bfa9b1`
 
 Normalization note: every SHA-256 in the table is over the exact committed blob bytes. The evidence directory pins `* -text`, so CRLF bytes are authoritative (`git ls-files --eol`: `i/crlf w/crlf attr/-text`); an LF-normalized copy hashes differently and is not authoritative. No SHA-256 is recorded for `evidence.md` itself: a file cannot contain its own final digest, so the previous self-citation was stale by construction (it named the pre-#610 blob `f2f25394...`). Verify this file externally with `git rev-parse <commit>:docs/evidence/classic-remaining-dock-launch-b3d2552/evidence.md` (git blob ID) and `git cat-file blob <commit>:<path> | sha256sum` (raw-byte SHA-256). The `sha256.txt` citation above is the raw SHA-256 of that manifest's committed blob, `cde85a8b...`, not the stale `5b2ac034...` and not the LF-normalized `939e4f6a...`. The manifest's own `evidence.md` row still records the historical pre-#610 blob `f2f25394...`; it is not a claim about the current bytes of this file. The frozen manifest and all logs/screenshots were left untouched.

@@ -2,7 +2,7 @@
   "label": "SYNTHETIC / WINDOWS-RUNTIME offscreen software raster; scoped, NOT Mint, NOT GPU, NOT release evidence",
   "batches": [
     {
-      "artifact": "C:/Users/X1/AppData/Local/hermes/cache/scratch/wc-c-paired/results.json",
+      "artifact": "private-evidence/scratch/wc-c-paired/results.json",
       "artifact_sha256": "71b9c9d7ece77eebfea66ed47705d2108bce07a6ffeaf4e2afa10397e8cbbd45",
       "binary_base_sha256": "dee53e14fa165ef923309f6925b8e9fdcb3787b6bfb578ea4ea3cf8ad475c2de",
       "binary_cand_sha256": "023f3a706ac628743b135894f5ccb8d4201c53e0cde79a327b42ceea16573b3b",
@@ -15,7 +15,7 @@
       ]
     },
     {
-      "artifact": "C:/Users/X1/AppData/Local/hermes/cache/scratch/wc-c-paired2/results.json",
+      "artifact": "private-evidence/scratch/wc-c-paired2/results.json",
       "artifact_sha256": "ab7a912e4e9fdb941c1522da595ddc34d1dca8a06848c69adf10658c17760326",
       "binary_base_sha256": "dee53e14fa165ef923309f6925b8e9fdcb3787b6bfb578ea4ea3cf8ad475c2de",
       "binary_cand_sha256": "023f3a706ac628743b135894f5ccb8d4201c53e0cde79a327b42ceea16573b3b",
@@ -28,7 +28,7 @@
       ]
     },
     {
-      "artifact": "C:/Users/X1/AppData/Local/hermes/cache/scratch/wc-c-paired3/results.json",
+      "artifact": "private-evidence/scratch/wc-c-paired3/results.json",
       "artifact_sha256": "a0088644514e1e0b6aaf017e0036e014c7c4fb67af7cff584814edd7a3fa2ff8",
       "binary_base_sha256": "dee53e14fa165ef923309f6925b8e9fdcb3787b6bfb578ea4ea3cf8ad475c2de",
       "binary_cand_sha256": "023f3a706ac628743b135894f5ccb8d4201c53e0cde79a327b42ceea16573b3b",
@@ -39,7 +39,7 @@
       "frame_mismatch_pairs": []
     },
     {
-      "artifact": "C:/Users/X1/AppData/Local/hermes/cache/scratch/wc-c-final-paired/results.json",
+      "artifact": "private-evidence/scratch/wc-c-final-paired/results.json",
       "artifact_sha256": "bfcf0b4c4d60090e63d9ea9f5f69f82db2e694a33273dfa855973269720e223c",
       "binary_base_sha256": "dee53e14fa165ef923309f6925b8e9fdcb3787b6bfb578ea4ea3cf8ad475c2de",
       "binary_cand_sha256": "98beda09c2ac1b18ac664a298fb1533e292fdfd0ea1a0ff3e89840a34f079a0a",

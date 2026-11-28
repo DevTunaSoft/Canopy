@@ -2,7 +2,7 @@
 
 ## Scope and method
 
-- Worktree: `C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy_perf_clean_128c973`, branch `perf/shell-service-audit-128c973`, exact base `128c973e8dc64b5ce1b3c1a3e06fe1e55ed64366` (clean at audit start).
+- Worktree: `private-evidence/scratch/canopy_perf_clean_128c973`, branch `perf/shell-service-audit-128c973`, exact base `128c973e8dc64b5ce1b3c1a3e06fe1e55ed64366` (clean at audit start).
 - Read-only first pass over **15 owned source files / 3,236 lines** in `canopy_features/reliability/**` and `canopy_features/security/**`. No other path was edited.
 - Static counts were produced by AST/text scan (`static_owned_counts.py` in scratch) and the `performance-memory-audit` scanner. Dynamic checks are **SYNTHETIC** deterministic probes of the pure functions (finite counting mappings, `tracemalloc`), not a running Classic shell. Real desktop PSS/CPU, Mint guest, Qt launch and screen-reader behavior are **NOT_RUN** on this Windows host.
 - No RSS/CPU value in this report is a real-runtime measurement. No timing-based speedup is claimed.

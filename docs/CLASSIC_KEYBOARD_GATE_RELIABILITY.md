@@ -10,7 +10,7 @@ or global config were touched. The baseline and the fix are both pinned at
 ## Symptom (exact log)
 
 Concurrent-load full-suite log:
-`C:/Users/X1/AppData/Local/hermes/cache/terminal-output/out-1795645104-14640-3bb0.log`
+`private-evidence/terminal-output/out-1795645104-14640-3bb0.log`
 SHA-256 `52081a66e24bc51edb4733ed652ecd77547edf28c5a3fb101d517aac6b10cddc`.
 
 `tests/test_c100_classic_keyboard_accessibility.py` reported **18 tests in

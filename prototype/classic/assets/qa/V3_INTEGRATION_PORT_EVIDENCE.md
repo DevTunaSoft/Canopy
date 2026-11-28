@@ -48,7 +48,7 @@ Changed three 62x62 crop hashes at 1920x1080: Mail `a1cfc0bb17471ac8faf592d6a988
 
 ## Pixel diff (genuine frames)
 
-Changed pixels at 760x500 / 1200x750 / 1920x1080: Browser 0/0/0, Files 0/0/0, Calendar 0/0/0, Photos 0/0/0, Music 0/0/0; Mail 2823, Terminal 2797, Settings 2822 at every size. Unexpected non-icon pixels: 0 at all sizes. Clock-region pixels: 0/0/53. Full machine-readable manifest SHA-256 `ebb0a467a708633390aaf287ae8a73105d326b8b1fb4634ac3b06f88a6516748` at `C:/Users/X1/AppData/Local/hermes/cache/scratch/v3port-evidence/v3port_evidence_manifest.json`.
+Changed pixels at 760x500 / 1200x750 / 1920x1080: Browser 0/0/0, Files 0/0/0, Calendar 0/0/0, Photos 0/0/0, Music 0/0/0; Mail 2823, Terminal 2797, Settings 2822 at every size. Unexpected non-icon pixels: 0 at all sizes. Clock-region pixels: 0/0/53. Full machine-readable manifest SHA-256 `ebb0a467a708633390aaf287ae8a73105d326b8b1fb4634ac3b06f88a6516748` at `private-evidence/scratch/v3port-evidence/v3port_evidence_manifest.json`.
 
 ## Five-pack transparency and provenance
 

@@ -7,15 +7,15 @@ those two inputs explicit and stable without editing the tracked worktree.
 ```sh
 # Stage pinned sources from git blobs in scratch (never from the CRLF worktree):
 python tools/build/repro_build_helper.py prepare \
-  --source C:/Users/X1/Projects/Canopy \
+  --source <repo-root> \
   --source-sha <exact-40-hex-commit> \
-  --out C:/Users/X1/AppData/Local/Temp/canopy-repro-stage
+  --out private-evidence/temp/canopy-repro-stage
 
 # Re-derive every staged byte and mtime from the same pin:
 python tools/build/repro_build_helper.py verify \
-  --source C:/Users/X1/Projects/Canopy \
+  --source <repo-root> \
   --source-sha <exact-40-hex-commit> \
-  --stage C:/Users/X1/AppData/Local/Temp/canopy-repro-stage
+  --stage private-evidence/temp/canopy-repro-stage
 ```
 
 `prepare` writes `repro_stage_report.json` with per-file blob/stage SHA-256,

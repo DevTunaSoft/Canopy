@@ -86,7 +86,7 @@ compared every pixel byte-for-byte: full-frame verdict `PASS`,
 | 760x500 | `b9781183aeee71094bdfb47712ca575d636318e1222a6f1a9a66d581d01dd584` | `0908ef4df468769db26e85e7586055d873e213c39873eaa9b0dfcbe5d64c2504` |
 
 Logs, both capture timelines and all twelve PNGs are covered by the on-disk
-manifest `C:/Users/X1/AppData/Local/Temp/clock-evidence-9a37427/SHA256SUMS.txt`.
+manifest `private-evidence/temp/clock-evidence-9a37427/SHA256SUMS.txt`.
 Offscreen toolchain captures are evidence of identical rendering, not owner
 visual approval or Linux Mint acceptance.
 

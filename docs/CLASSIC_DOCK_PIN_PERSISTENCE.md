@@ -47,7 +47,7 @@ Hostile identifier types raise `DockPinPersistenceError` before any write.
 
 Base: `integration/canopy-classic-20261123` at
 `90dd463dc96d70bae00cfe4b2391784a86fb0b12`; private worktree
-`C:/Users/X1/AppData/Local/hermes/cache/scratch/pe004-dock-pin`, branch
+`private-evidence/scratch/pe004-dock-pin`, branch
 `fix/dock-pin-persist-90dd463`. Runner: uv isolated pytest, repository on
 `PYTHONPATH` (`PYTHONPATH=. uv run --no-project pytest ...`).
 

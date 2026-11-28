@@ -10,7 +10,7 @@
 set -euo pipefail
 
 FIXTURE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO="${REPO:-${GITHUB_WORKSPACE:-C:/Users/X1/Projects/Canopy}}"
+REPO="${REPO:-${GITHUB_WORKSPACE:-.}}"
 TIP="${TIP:-HEAD}"
 OUTPUT_DIR="${OUTPUT_DIR:-${RUNNER_TEMP:-/tmp}/canopy-fake-gio-launch-fixture}"
 

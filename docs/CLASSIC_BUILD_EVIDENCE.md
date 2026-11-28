@@ -4,7 +4,7 @@ Workstream 5 (build/release engineering). This document records the exact
 executed run at the live integration tip `9cf39ebeaf0bc5f6a25279ec81d12b29cdeda3c2`.
 It is **not** a claim of visual approval, Mint acceptance, installer readiness
 or a `main` merge. All build output is scratch-only under
-`C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy-classic-release-9cf39eb/`.
+`private-evidence/scratch/canopy-classic-release-9cf39eb`.
 
 ## Source pin: explicit, caller-supplied, never inferred
 
@@ -18,8 +18,8 @@ either file. The pin is now an explicit argument to both programs:
 | Source commit (HEAD) | `9cf39ebeaf0bc5f6a25279ec81d12b29cdeda3c2` |
 | Source tree SHA | `83c7df9557c59b9acdb9ef0f9e69c15ff536a0b1` |
 | Integration ref observed locally | `integration/canopy-classic-20261123` (remote tip `9cf39eb`) |
-| Build source worktree | `C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy-pin-base-9cf39eb` (detached at `9cf39eb`, clean) |
-| Changed tooling worktree | `C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy-pin-fix-9cf39eb` (branch `fix/classic-build-source-pin-9cf39eb`) |
+| Build source worktree | `private-evidence/scratch/canopy-pin-base-9cf39eb` (detached at `9cf39eb`, clean) |
+| Changed tooling worktree | `private-evidence/scratch/canopy-pin-fix-9cf39eb` (branch `fix/classic-build-source-pin-9cf39eb`) |
 | Tracked/staged source changes during build | none (`git diff --quiet` and `git diff --cached --quiet` both 0) |
 | Build target | `prototype/classic/CMakeLists.txt` → `canopy-classic-spike.exe` (Release) |
 
@@ -59,9 +59,9 @@ binary emits no observable self-test lines on this host.
 
 ```sh
 python tools/build/classic_release_build.py \
-  --source C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy-pin-base-9cf39eb \
+  --source private-evidence/scratch/canopy-pin-base-9cf39eb \
   --source-sha 9cf39ebeaf0bc5f6a25279ec81d12b29cdeda3c2 \
-  --out C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy-classic-release-9cf39eb
+  --out private-evidence/scratch/canopy-classic-release-9cf39eb
 ```
 
 Executed sequence (recorded verbatim in the evidence bundle's `commands.txt`):

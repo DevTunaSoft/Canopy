@@ -1,0 +1,254 @@
+Updates, Upgrades & Rollbacks :: Fedora Docs
+In this section
+Fedora Atomic Desktops
+Installation
+Getting Started
+Updates, Upgrades & Rollbacks
+Toolbx
+Technical Information
+Reading and Resources
+Contributing
+Troubleshooting
+FAQ
+Tips and Tricks
+Configuration Guides
+Sway Configuration Guide
+Fedora Atomic Desktops
+A Beginner's Guide to Fedora
+ARM Single Board Computers
+Community Architecture (CommArch)
+Community Linux Engineering
+Defensive Coding Guide
+Engineering Teams
+EPEL
+Fedora Accessibility (a11y) WG
+Fedora Accounts
+Fedora AI/ML SIG
+Fedora Asahi Remix
+Fedora Atomic Desktops
+Fedora Badges
+Fedora CI
+Fedora Cloud
+Fedora Community Ops
+Fedora Container Docs
+Fedora CoreOS
+Fedora Council
+Fedora Data Working Group (FDWG)
+Fedora Design Team
+Fedora Discussion Forum (Self-)Moderation Guidelines and Rules
+Fedora Diversity, Equity, and Inclusion (DEI)
+Fedora Documentation
+Fedora Documentation Team
+Fedora ELN
+Fedora Forge Documentation
+Fedora Gaming
+Fedora Infrastructure & Release Engineering
+Fedora Internet Of Things
+Fedora IoT Working Group
+Fedora Join SIG
+Fedora KDE Plasma Desktop Edition
+Fedora Legal
+Fedora Linux Releases
+Fedora Localization Team
+Fedora Magazine
+Fedora Marketing Team
+Fedora Matrix WG
+Fedora Mentored Projects
+Fedora Mindshare Committee
+Fedora Minimal
+Fedora Program Operations
+Fedora Project
+Fedora Quality Docs
+Fedora Rawhide Gating
+Fedora Release Notes
+Fedora Robotics SIG
+Fedora Security SIG
+Fedora Server User Documentation
+Fedora Server Working Group
+Fedora Spins & Labs
+Fedora Tools
+Fedora Websites & Apps
+Fedora Workstation Documentation
+Fedora Workstation Working Group
+Fedora/CentOS bootc
+FESCo
+Flatpak
+i3 SIG
+Java Packaging HOWTO
+Localization help and stats
+Mindshare Teams
+NeuroFedora User Documentation
+Package Maintainers
+Packaging Guidelines
+Quick Docs
+Reproducible Builds
+Fedora Atomic Desktops
+Updates, Upgrades & Rollbacks
+en-US
+en-US
+ar
+ast
+az
+be
+bg
+bn
+ca
+cs
+de
+el
+es
+es_419
+fa
+fi
+fil
+fr
+fur
+ga
+gl
+he
+hi
+hr
+hu
+hy
+id
+it
+ja
+jp
+ka
+kab
+km
+ko
+lb
+lo
+lt
+mr
+ms
+my
+nb_NO
+ne
+nl
+nn
+or
+pl
+pt
+pt_BR
+pt_PT
+ro
+ru
+si
+sk
+sq
+sv
+sw
+szl
+te
+tr
+tzm
+uk
+ur
+ur_PK
+uz
+vi
+zh_CN
+zh_Hans
+zh_Hant
+zh_TW
+Updates, Upgrades & Rollbacks
+Installing updates on Fedora Atomic Desktops is easy and fast.
+It also has a special rollback feature, in case anything goes wrong.
+Additionally, you can choose to have multiple versions of your operating system installed at all times, and you can choose which one to boot into whenever you start up your system.
+Updating Fedora Atomic Desktops
+On Atomic Desktops, you can keep using your computer while applying OS updates as they are downloaded and installed in the background.
+Once an update has been installed, you can reboot your computer to start using the new version.
+You will not have to wait for the update to be installed either during shutdown or boot up.
+On Fedora Silverblue and Fedora Kinoite, OS updates are downloaded automatically and you will be notified when updates are ready to be applied via a reboot.
+This behavior can be changed in the settings.
+On Fedora Budgie Atomic, you can update the OS manually using Plasma Discover.
+On Fedora Sway Atomic and Fedora COSMIC Atomic, you can update the OS manually via the command line.
+Alternative: Updating using the command line
+It is also possible to update using the command line.
+To update the system, run:
+$ rpm-ostree upgrade
+This will check for new updates and download and install them if they are available.
+Alternatively, to check for available updates without downloading them, run:
+$ rpm-ostree upgrade --check
+Upgrading between major versions
+On Atomic Desktops, you can keep using your computer while applying major OS updates (such as from Fedora 44 to Fedora 45) as they are downloaded and installed in the background.
+Once an update has been installed, you can reboot your computer to start using the new version.
+You will not have to wait for the update to be installed either during shutdown or boot up.
+It is recommended to update to the latest version of the current major version before upgrading to a new major version.
+Make sure to reboot before starting the update to the next major version.
+On Fedora Silverblue, major version updates can be applied using GNOME Software.
+On Fedora Kinoite and Fedora Budgie Atomic, major version updates can be applied using Plasma Discover.
+On Fedora Sway Atomic and Fedora COSMIC Atomic, major version updates can be applied using the command line.
+Skipping major releases is currently untested and is thus not supported for all Atomic Desktops.
+You should update only one major release at a time, i.e. from Fedora 44 to 45, etc.
+Alternative: Upgrading between major versions using the command line
+First, make sure that you are running the latest update for the current version:
+$ rpm-ostree upgrade
+Reboot your system if needed.
+Then, verify that the branch for the next major version is available.
+You can print all available branches for the Fedora Atomic Desktop variant that you are currently using with the following commands:
+$ source /etc/os-release
+$ ostree remote refs ${ID} | grep $(arch) | grep ${VARIANT_ID}
+After you’ve verified the name of your branch, you are ready to proceed.
+For example, to upgrade to Fedora Silverblue 45, the command is:
+$ rpm-ostree rebase fedora:fedora/45/x86_64/silverblue
+The old variant name for Sway Atomic is sericea and for Budgie Atomic it is onyx.
+The process is very similar to a system update: the new OS is downloaded and installed in the background, and you just boot into it when it is ready.
+If you are using the RPM Fusion repositories and are having issues during major updates, see the Enabling RPM Fusion repos section.
+Rebasing to another Atomic Desktop
+Additionally, you can choose to rebase to a different variant of Fedora Atomic.
+For example, if you are currently using Silverblue, you can switch to Kinoite.
+Fedora Kinoite is similar to Fedora Silverblue, except for the fact that it uses the KDE Plasma desktop instead of the GNOME desktop.
+What this means is, you can rebase to Fedora Kinoite to try it out, without ever touching your current system.
+Because the two system images are isolated from each other, the two desktop environments will never be installed at the same time.
+All your flatpak apps and files in the /home directory will remain persistent between rebases.
+Same applies for testing out the development version of Fedora Atomic Desktops, which is Rawhide.
+By default, OSTree only keeps the two most recent deployments.
+If you decide to rebase, make sure to pin your current deployment, so you don’t accidentally lose it.
+Rolling back
+Fedora Atomic Desktops keep a record of the previous OS version, which can be switched to instead of the latest version.
+While this shouldn’t usually be necessary, it can be helpful if there is a problem with an update or an upgrade (rollbacks work the same way for both), as well as for development purposes.
+There are two ways to roll back to the previous version:
+Temporary rollbacks: to temporarily roll back to a previous version, simply reboot and select the previous version from the boot menu (often known as the GRUB menu).
+Permanent rollbacks: to permanently switch back to the previous deployment, use the rpm-ostree rollback command.
+After rolling back, you will technically be on an old OS version, and may be prompted to update.
+Updating will undo the rollback, so it should be avoided if you want the rollback to stay in effect.
+rpm-ostree only keeps one rollback version available by default.
+If you want to rollback to another version than the one currently available on your system, you can do so with the following commands:
+Pull the ostree commit log from the remote repository:
+$ source /etc/os-release
+$ sudo ostree pull --commit-metadata-only --depth=10 ${ID} ${ID}/45/$(arch)/${VARIANT_ID}
+Display the log:
+$ ostree log ${ID}:${ID}/45/$(arch)/${VARIANT_ID}
+Deploy a specific commit:
+$ rpm-ostree deploy 45.20251031.0
+This will deploy the exact version as requested and will not include overlayed packages and other changes.
+Pinning and cleaning deployments
+By default, the rpm-ostree upgrade or rpm-ostree rebase commands will keep at most two bootable deployments, though the underlying technology supports more.
+In some cases, such as a major version upgrade or rebase, you may want to keep your current deployment as a guaranteed fallback.
+OSTree allows you to pin deployments.
+Pinning ensures that your deployment of choice is kept and not discarded.
+To pin an deployment, you need to know its index number.
+To print the index numbers of the deployments, run the following command:
+$ rpm-ostree status --verbose
+If you want to pin your currently booted deployment, run the following command:
+$ sudo ostree admin pin 0
+If you pin many deployments, the /boot partition may run out of space and as a consequence the system may not be able to be upgraded.
+In such cases, it is necessary to unpin and clean up some deployments.
+To unpin a deployment, run the following command:
+$ sudo ostree admin pin INDEX --unpin
+You can run the above command multiple times to free up more space.
+Then clean up unpinned deployments:
+$ rpm-ostree cleanup --rollback
+The rpm-ostree cleanup --rollback command will not remove pinned deployments.
+Want to help? Learn how to contribute to Fedora Docs ›
+All Fedora Documentation content available under CC BY-SA 4.0 or, when specifically noted, under another accepted free and open content license.
+Privacy Statement
+Legal
+Code of Conduct
+Sponsors
+Last build: 2026-11-28 03:50:09 UTC | Last content update: 2026-03-14
+Fedora is sponsored by Red Hat.
+Learn more about the relationship between Red Hat and Fedora.

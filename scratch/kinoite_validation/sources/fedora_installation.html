@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Installing a Fedora Atomic Desktop :: Fedora Docs</title>
+    <link rel="canonical" href="https://docs.fedoraproject.org/en-US/atomic-desktops/installation/">
+    <meta name="generator" content="Antora 3.1.15">
+    <link rel="stylesheet" href="../../_/css/site.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+<link rel="stylesheet" href="../../_/css/vendor/tabs.css">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Fedora Docs">
+<meta property="og:title" content="Installing a Fedora Atomic Desktop">
+
+<meta property="og:description" content="Learn more about Fedora Linux, the Fedora Project & the Fedora Community.">
+<meta property="og:image" content="https://docs.fedoraproject.org/en-US/_/img/docs_logo.png">
+
+    <script>if (localStorage.darkmode === 'true' || (!('darkmode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) { document.documentElement.classList.add('dark');} else {document.documentElement.classList.remove('dark');}</script>
+  </head>
+  <body class="article dark:bg-fp-blue-darkest text-black dark:text-white">
+<!-- Add any HTML code to show at the top of each page — like a banner to a survey, some announcement, etc. Leave this file empty to not show anything-->
+<header class="header" role="banner">
+  <nav class="fixed z-50 top-0 w-full bg-gradient-to-l from-fp-blue to-fp-blue-light dark:bg-none dark:bg-fp-blue-dark" style="">
+    <div class="mx-auto px-2 sm:px-6 lg:px-8">
+      <div class="relative flex h-14 items-center justify-between">
+        <div
+          class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start"
+        >
+          <div class="flex flex-shrink-0 items-center">
+            <a href="https://docs.fedoraproject.org/en-US">
+              <img class="h-6 z-10 w-auto" src="../../_/img/docs_logo_white.svg">
+            </a>
+          </div>
+
+
+	  <div class="hidden sm:ml-auto sm:block">
+            <div class="flex space-x-4">
+
+
+              <div id="search-field" class="relative inline-flex cursor-pointer items-center rounded px-4 text-xs text-gray-500 dark:text-gray-200">
+                <svg class="absolute left-6 fill-gray-400 dark:fill-gray-400 h-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg>
+                <input id="search-input" class="pl-6 pr-28 h-8 w-64 rounded-xl dark:bg-black" type="text" placeholder="Search Docs">
+                <label class="ml-2 absolute right-6 filter checkbox border-l border-gray-500 pl-2">
+		 <input type="checkbox" class="appearance-none h-3 w-3 border border-gray-500 rounded bg-white dark:bg-black checked:bg-fp-blue-light checked:border-fp-blue-light dark:checked:bg-fp-blue dark:checked:border-fp-blue focus:outline-none transition duration-200 cursor-pointer my-0.5 mr-1 float-left" data-facet-filter="component:atomic-desktops"> In this section
+                </label>
+              </div>
+            </div>
+          </div>
+	  <button type="button" id="themeSwitch" class="hidden sm:block stroke-white fill-white ">
+	    <span class="dark:hidden">
+	      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+	        <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"></path>
+		<path d="M12 4v1M17.66 6.344l-.828.828M20.005 12.004h-1M17.66 17.664l-.828-.828M12 20.01V19M6.34 17.664l.835-.836M3.995 12.004h1.01M6 6l.835.836"></path>
+	      </svg>
+	    </span>
+	    <span class="hidden dark:inline">
+	      <svg viewBox="0 0 512 512" class="w-4 h-4">
+	        <path d="M421.6 379.9c-.6641 0-1.35 .0625-2.049 .1953c-11.24 2.143-22.37 3.17-33.32 3.17c-94.81 0-174.1-77.14-174.1-175.5c0-63.19 33.79-121.3 88.73-152.6c8.467-4.812 6.339-17.66-3.279-19.44c-11.2-2.078-29.53-3.746-40.9-3.746C132.3 31.1 32 132.2 32 256c0 123.6 100.1 224 223.8 224c69.04 0 132.1-31.45 173.8-82.93C435.3 389.1 429.1 379.9 421.6 379.9zM255.8 432C158.9 432 80 353 80 256c0-76.32 48.77-141.4 116.7-165.8C175.2 125 163.2 165.6 163.2 207.8c0 99.44 65.13 183.9 154.9 212.8C298.5 428.1 277.4 432 255.8 432z"/>
+              </svg>
+	    </span>
+	  </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container dark:text-gray-300 bg-fp-gray-lightest dark:bg-fp-blue-darker dark:border-r dark:border-gray-800" data-component="atomic-desktops" data-version="">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title text-fp-blue-dark dark:text-fp-blue font-bold"><a href="../">Fedora Atomic Desktops</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="./">Installation</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../getting-started/">Getting Started</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../updates-upgrades-rollbacks/">Updates, Upgrades &amp; Rollbacks</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../toolbox/">Toolbx</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../technical-information/">Technical Information</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../reading-and-resources/">Reading and Resources</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../contributing/">Contributing</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../troubleshooting/">Troubleshooting</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../faq/">FAQ</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../tips-and-tricks/">Tips and Tricks</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Configuration Guides</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../sway-configuration-guide/">Sway Configuration Guide</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore bg-gray-50 dark:bg-fp-blue-darkest" data-panel="explore">
+  <div class="context dark:border-t dark:border-gray-800">
+    <span class="title">Fedora Atomic Desktops</span>
+    <span class="version"></span>
+  </div>
+  <ul class="components bg-gray-100 dark:bg-fp-blue-darkest">
+    <li class="component">
+      <a class="title" href="../../beginners-guide/">A Beginner's Guide to Fedora</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../arm-sbc/">ARM Single Board Computers</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../community/">Community Architecture (CommArch)</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../cle/">Community Linux Engineering</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../defensive-coding/">Defensive Coding Guide</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../engineering/">Engineering Teams</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../epel/">EPEL</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../a11y/">Fedora Accessibility (a11y) WG</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fedora-accounts/">Fedora Accounts</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../ai-ml/">Fedora AI/ML SIG</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fedora-asahi-remix/">Fedora Asahi Remix</a>
+    </li>
+    <li class="component is-current">
+      <a class="title" href="../">Fedora Atomic Desktops</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../badges/">Fedora Badges</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../ci/">Fedora CI</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../cloud/">Fedora Cloud</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../commops/">Fedora Community Ops</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../containers/">Fedora Container Docs</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fedora-coreos/">Fedora CoreOS</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../council/">Fedora Council</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fdwg/">Fedora Data Working Group (FDWG)</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../design/">Fedora Design Team</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../discussion-forum-guidelines-and-rules/">Fedora Discussion Forum (Self-)Moderation Guidelines and Rules</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../dei/">Fedora Diversity, Equity, and Inclusion (DEI)</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../docs/">Fedora Documentation</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fedora-docs/team-info/">Fedora Documentation Team</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../eln/">Fedora ELN</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../forge-documentation/">Fedora Forge Documentation</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../gaming/">Fedora Gaming</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../infra/">Fedora Infrastructure & Release Engineering</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../iot/">Fedora Internet Of Things</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../iot-wg/">Fedora IoT Working Group</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fedora-join/">Fedora Join SIG</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../kde/">Fedora KDE Plasma Desktop Edition</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../legal/">Fedora Legal</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../releases/">Fedora Linux Releases</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../localization/">Fedora Localization Team</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fedora-magazine/">Fedora Magazine</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../marketing/">Fedora Marketing Team</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../matrix/">Fedora Matrix WG</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../mentored-projects/">Fedora Mentored Projects</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../mindshare-committee/">Fedora Mindshare Committee</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../minimal/">Fedora Minimal</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../operations/">Fedora Program Operations</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../project/">Fedora Project</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../qa-docs/">Fedora Quality Docs</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../rawhide-gating/">Fedora Rawhide Gating</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../release-notes/">Fedora Release Notes</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../robotics-sig/">Fedora Robotics SIG</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fedora/">Fedora Security SIG</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fedora-server/">Fedora Server User Documentation</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../server-working-group/">Fedora Server Working Group</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../spins-labs/">Fedora Spins & Labs</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../tools/">Fedora Tools</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../websites/">Fedora Websites & Apps</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../workstation-docs/">Fedora Workstation Documentation</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../workstation-working-group/">Fedora Workstation Working Group</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../bootc/">Fedora/CentOS bootc</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../fesco/">FESCo</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../flatpak/">Flatpak</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../i3/">i3 SIG</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../java-packaging-howto/">Java Packaging HOWTO</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../docs-l10n/">Localization help and stats</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../mindshare/">Mindshare Teams</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../neurofedora/overview/">NeuroFedora User Documentation</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../package-maintainers/">Package Maintainers</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../packaging-guidelines/">Packaging Guidelines</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../quick-docs/">Quick Docs</a>
+    </li>
+    <li class="component">
+      <a class="title" href="../../reproducible-builds/">Reproducible Builds</a>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar bg-fp-gray-lightest dark:bg-fp-blue-darkest dark:text-gray-300 dark:border-b dark:border-gray-800" role="navigation">
+<button class="toolbar-icon nav-toggle"></button>
+  <a href="../../docs/" class="toolbar-icon home-link"></a>
+<nav class="crumbs" role="navigation" aria-label="breadcrumbs">
+  <ul>
+    <li class="after:text-gray-800 dark:after:text-gray-400"><a href="../">Fedora Atomic Desktops</a></li>
+    <li class="after:text-gray-800 dark:after:text-gray-400"><a href="./">Installation</a></li>
+  </ul>
+</nav>
+
+        <div class="page-languages">
+            <button class="languages-menu-toggle" title="Show other languages of the site">
+                en-US
+            </button>
+            <div class="languages-menu">
+    
+<a class="language" href="../../../en-US/atomic-desktops/installation/">en-US</a>
+<a class="language" href="../../../ar/atomic-desktops/installation/">ar</a>
+<a class="language" href="../../../ast/atomic-desktops/installation/">ast</a>
+<a class="language" href="../../../az/atomic-desktops/installation/">az</a>
+<a class="language" href="../../../be/atomic-desktops/installation/">be</a>
+<a class="language" href="../../../bg/atomic-desktops/installation/">bg</a>
+<a class="language" href="../../../bn/atomic-desktops/installation/">bn</a>
+<a class="language" href="../../../ca/atomic-desktops/installation/">ca</a>
+<a class="language" href="../../../cs/atomic-desktops/installation/">cs</a>
+<a class="language" href="../../../de/atomic-desktops/installation/">de</a>
+<a class="language" href="../../../el/atomic-desktops/installation/">el</a>
+<a class="language" href="../../../es/atomic-desktops/installation/">es</a>
+<a class="language" href="../../../es_419/atomic-desktops/installation/">es_419</a>
+<a class="language" href="../../../fa/atomic-desktops/installation/">fa</a>
+<a class="language" href="../../../fi/atomic-desktops/installation/">fi</a>
+<a class="language" href="../../../fil/atomic-desktops/installation/">fil</a>
+<a class="language" href="../../../fr/atomic-desktops/installation/">fr</a>
+<a class="language" href="../../../fur/atomic-desktops/installation/">fur</a>
+<a class="language" href="../../../ga/atomic-desktops/installation/">ga</a>
+<a class="language" href="../../../gl/atomic-desktops/installation/">gl</a>
+<a class="language" href="../../../he/atomic-desktops/installation/">he</a>
+<a class="language" href="../../../hi/atomic-desktops/installation/">hi</a>
+<a class="language" href="../../../hr/atomic-desktops/installation/">hr</a>
+<a class="language" href="../../../hu/atomic-desktops/installation/">hu</a>
+<a class="language" href="../../../hy/atomic-desktops/installation/">hy</a>
+<a class="language" href="../../../id/atomic-desktops/installation/">id</a>
+<a class="language" href="../../../it/atomic-desktops/installation/">it</a>
+<a class="language" href="../../../ja/atomic-desktops/installation/">ja</a>
+<a class="language" href="../../../jp/atomic-desktops/installation/">jp</a>
+<a class="language" href="../../../ka/atomic-desktops/installation/">ka</a>
+<a class="language" href="../../../kab/atomic-desktops/installation/">kab</a>
+<a class="language" href="../../../km/atomic-desktops/installation/">km</a>
+<a class="language" href="../../../ko/atomic-desktops/installation/">ko</a>
+<a class="language" href="../../../lb/atomic-desktops/installation/">lb</a>
+<a class="language" href="../../../lo/atomic-desktops/installation/">lo</a>
+<a class="language" href="../../../lt/atomic-desktops/installation/">lt</a>
+<a class="language" href="../../../mr/atomic-desktops/installation/">mr</a>
+<a class="language" href="../../../ms/atomic-desktops/installation/">ms</a>
+<a class="language" href="../../../my/atomic-desktops/installation/">my</a>
+<a class="language" href="../../../nb_NO/atomic-desktops/installation/">nb_NO</a>
+<a class="language" href="../../../ne/atomic-desktops/installation/">ne</a>
+<a class="language" href="../../../nl/atomic-desktops/installation/">nl</a>
+<a class="language" href="../../../nn/atomic-desktops/installation/">nn</a>
+<a class="language" href="../../../or/atomic-desktops/installation/">or</a>
+<a class="language" href="../../../pl/atomic-desktops/installation/">pl</a>
+<a class="language" href="../../../pt/atomic-desktops/installation/">pt</a>
+<a class="language" href="../../../pt_BR/atomic-desktops/installation/">pt_BR</a>
+<a class="language" href="../../../pt_PT/atomic-desktops/installation/">pt_PT</a>
+<a class="language" href="../../../ro/atomic-desktops/installation/">ro</a>
+<a class="language" href="../../../ru/atomic-desktops/installation/">ru</a>
+<a class="language" href="../../../si/atomic-desktops/installation/">si</a>
+<a class="language" href="../../../sk/atomic-desktops/installation/">sk</a>
+<a class="language" href="../../../sq/atomic-desktops/installation/">sq</a>
+<a class="language" href="../../../sv/atomic-desktops/installation/">sv</a>
+<a class="language" href="../../../sw/atomic-desktops/installation/">sw</a>
+<a class="language" href="../../../szl/atomic-desktops/installation/">szl</a>
+<a class="language" href="../../../te/atomic-desktops/installation/">te</a>
+<a class="language" href="../../../tr/atomic-desktops/installation/">tr</a>
+<a class="language" href="../../../tzm/atomic-desktops/installation/">tzm</a>
+<a class="language" href="../../../uk/atomic-desktops/installation/">uk</a>
+<a class="language" href="../../../ur/atomic-desktops/installation/">ur</a>
+<a class="language" href="../../../ur_PK/atomic-desktops/installation/">ur_PK</a>
+<a class="language" href="../../../uz/atomic-desktops/installation/">uz</a>
+<a class="language" href="../../../vi/atomic-desktops/installation/">vi</a>
+<a class="language" href="../../../zh_CN/atomic-desktops/installation/">zh_CN</a>
+<a class="language" href="../../../zh_Hans/atomic-desktops/installation/">zh_Hans</a>
+<a class="language" href="../../../zh_Hant/atomic-desktops/installation/">zh_Hant</a>
+<a class="language" href="../../../zh_TW/atomic-desktops/installation/">zh_TW</a>
+
+            </div>
+        </div>
+      <div class="edit-this-page"><a href="https://forge.fedoraproject.org/atomic-desktops/docs/commits/branch/main/modules/ROOT/pages/installation.adoc" title="Page history"><i class="fas fa-history"></i></a></div>
+  <div class="edit-this-page"><a href="https://forge.fedoraproject.org/atomic-desktops/docs/src/branch/main/modules/ROOT/pages/installation.adoc" title="Edit this Page"><i class="fas fa-edit"></i></a></div>
+  <div class="edit-this-page"><a href="https://forge.fedoraproject.org/atomic-desktops/docs/issues/new?title=[main] Doc issue in file modules/ROOT/pages/installation.adoc" title="Report an issue"><i class="fas fa-bug"></i></a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar dark:text-fp-gray-light" data-title="Contents" data-levels="2">
+  <div class="toc-content">
+    <div class="toc-menu"></div>
+    <div class="pt-6">
+        </div>
+  </div>
+
+</aside>
+<article class="doc dark:text-gray-100">
+<h1 class="page mt-8 mb-1">Installing a Fedora Atomic Desktop</h1>
+<div class="is-before-toc text-xs text-gray-400 border-b border-gray-300 mb-6 pb-1">
+</div>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Fedora Atomic Desktops can be installed in the same way as other Fedora variants, and the official Fedora installation guide can be followed for your Fedora version.
+See the <a href="https://docs.fedoraproject.org/en-US/docs/">Fedora documentation site</a> for more details.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="before-you-begin"><a class="anchor" href="#before-you-begin"></a>Before you begin</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As with installing any new operating system, it is important to back up any data that you want to save before starting, and have a clear understanding of the consequences of what you are doing.</p>
+</div>
+<div class="paragraph">
+<p>Fedora Atomic Desktops are intended to provide the full range of capabilities that you would expect from an installation of Fedora.
+However, there are some differences in terms of which applications can be installed, and how the operating system environment works.</p>
+</div>
+<div class="paragraph">
+<p>It is therefore recommended that you read this user guide before deciding to install a Fedora Atomic Desktop.
+It is also recommended that you determine whether a Fedora Atomic Desktop meets the specific needs or requirements that you might have.
+If you are uncertain about this, a Fedora Atomic Desktop can also be tested in a virtual machine prior to installation.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="known-limitations"><a class="anchor" href="#known-limitations"></a>Known limitations</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>Dual booting and manual partitioning is not fully functional.</strong></p>
+</div>
+<div class="paragraph">
+<p>It is possible to make Fedora Atomic Desktops work for both dual boot and manual partitioning, and some guidance is provided on manual partitioning below.
+However, there are hazards involved in both cases, and you should only attempt to use these features if you have done the necessary research, and are confident that you can overcome any issues that you might encounter.</p>
+</div>
+<div class="paragraph">
+<p>This issue is tracked in <a href="https://forge.fedoraproject.org/atomic-desktops/tracker/issues/110">issue #110</a>.</p>
+</div>
+<div class="paragraph">
+<p><strong>Known issues for specific Fedora Atomic Desktop variants.</strong></p>
+</div>
+<div class="paragraph">
+<p>For Fedora Kinoite, a list of currently known bugs, issues and missing features is compiled in <a href="https://forge.fedoraproject.org/kde/tracker/issues/112">issue #112</a> in the <a href="https://forge.fedoraproject.org/kde/tracker/issues">KDE SIG tracker</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="getting-atomic-desktop"><a class="anchor" href="#getting-atomic-desktop"></a>Getting a Fedora Atomic Desktop</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If you are using Fedora Media Writer, the Fedora Atomic Desktops should be listed as a download option.
+However, if it isn&#8217;t, or if you want to download it manually, an install image can be downloaded from <a href="https://fedoraproject.org/atomic-desktops/">the main Fedora website</a>.</p>
+</div>
+<div class="paragraph">
+<p>See the individual download page for each Fedora Atomic Desktop variant:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://fedoraproject.org/atomic-desktops/silverblue/download">Fedora Silverblue</a></p>
+</li>
+<li>
+<p><a href="https://fedoraproject.org/atomic-desktops/kinoite/download">Fedora Kinoite</a></p>
+</li>
+<li>
+<p><a href="https://fedoraproject.org/atomic-desktops/sway/download">Fedora Sway Atomic</a></p>
+</li>
+<li>
+<p><a href="https://fedoraproject.org/atomic-desktops/budgie/download">Fedora Budgie Atomic</a></p>
+</li>
+<li>
+<p><a href="https://fedoraproject.org/atomic-desktops/cosmic/download">Fedora COSMIC Atomic</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Once you have got your copy of a Fedora Atomic Desktop, it can be installed in the usual manner.
+We hope that you love it!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="preparing-boot-media"><a class="anchor" href="#preparing-boot-media"></a>Preparing Boot Media</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Fedora installation images are <strong>Hybrid ISOs</strong> and can be used to create installation media with both optical and USB disks, for booting on both BIOS and UEFI systems.</p>
+</div>
+<div class="paragraph">
+<p>We recommend using Fedora Media Writer to make a bootable USB media to install a Fedora Atomic Desktop.
+Other USB media creation software may work as well but are not regularly tested.</p>
+</div>
+<div class="paragraph">
+<p>See the <a href="https://docs.fedoraproject.org/en-US/fedora/latest/preparing-boot-media/#_fedora_media_writer">Fedora Media Writer</a> section to learn how to use it.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="manual-partition"><a class="anchor" href="#manual-partition"></a>Manual Partitioning</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As described above, there are known issues with manual partitioning on Fedora Atomic Desktops, and it should be used with caution.
+The following notes are intended as hints for those attempting it, and should not be treated as recommended practice.
+Automatic partitioning is recommended.</p>
+</div>
+<div class="paragraph">
+<p>With Fedora Atomic Desktops, only certain mounts can be manually specified as partitions.
+These include:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The root filesystem: <code>/</code></p>
+</li>
+<li>
+<p><code>/boot/efi</code> (for the UEFI boot loaders)</p>
+</li>
+<li>
+<p><code>/boot</code></p>
+</li>
+<li>
+<p><code>/var</code></p>
+</li>
+<li>
+<p>Subdirectories under <code>/var</code>, including:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>/var/home</code> (there is a symlink from <code>/home</code> to <code>/var/home</code>)</p>
+</li>
+<li>
+<p><code>/var/log</code></p>
+</li>
+<li>
+<p><code>/var/lib/containers</code></p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The Fedora installer is not aware of these restrictions and will accept custom partitions without error, even if they are incompatible with Fedora Atomic Desktops.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If you are re-installing over an existing system or setting up a dual boot installation, you must create a dedicated EFI System Partition for the Fedora Atomic Desktop installation.
+You must also make sure that it is formatted by the installer.
+This issue is tracked in <a href="https://forge.fedoraproject.org/atomic-desktops/tracker/issues/110">issue #110</a>.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../_images/faw-manual-partition-complete.png" alt="faw manual partition complete">
+</div>
+<div class="title">Figure 1. Partitioning Complete</div>
+</div>
+<div class="paragraph">
+<p>The above screenshot shows a typical configuration with manual partitioning in UEFI firmware, with partitions for <code>/boot</code>, <code>/boot/efi</code>, <code>/</code>, and <code>/var/home</code>.</p>
+</div>
+<div class="paragraph">
+<p>Manual partitioning on Fedora Atomic Desktops can be done with <code>BTRFS</code>, <a href="https://en.wikipedia.org/wiki/Logical_Volume_Manager_%28Linux%29">LVM</a>, as well as standard partitions or an <code>XFS</code> filesystem.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>BTRFS filesystems smaller than 5 GiB should be formatted using <code>--mixed</code> (<code>-M</code>) flag.
+Currently neither <code>mkfs.btrfs</code> nor Blivet does this automatically.
+See <a href="https://btrfs.readthedocs.io/en/latest/mkfs.btrfs.html#mkfs-feature-mixed-bg">BTRFS documentation</a> for more details.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="first-run"><a class="anchor" href="#first-run"></a>First Run</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_fedora_silverblue"><a class="anchor" href="#_fedora_silverblue"></a>Fedora Silverblue</h3>
+<div class="paragraph">
+<p>On first startup you will be asked to enable third-party repositories, location services, and to create a new user.
+You can enable third-party repositories and location later, but you must create a new user by entering your desired name and password.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../_images/Fedora_40_new_user.png" alt="Fedora 40 new user">
+</div>
+<div class="title">Figure 2. Silverblue - Create New User</div>
+</div>
+<div class="paragraph">
+<p>Once you have created the user you can start using your Fedora Silverblue system.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_fedora_kinoite"><a class="anchor" href="#_fedora_kinoite"></a>Fedora Kinoite</h3>
+<div class="paragraph">
+<p>On first startup, you will be asked to enter the password for the user created during installation.
+Depending on different personal needs, there are several starting actions and installations that you could perform on newly installed Fedora Kinoite for a customized user experience.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../_images/kinoite-first-run.png" alt="kinoite first run">
+</div>
+<div class="title">Figure 3. Kinoite - Welcome Center</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_fedora_sway_atomic"><a class="anchor" href="#_fedora_sway_atomic"></a>Fedora Sway Atomic</h3>
+<div class="paragraph">
+<p>On first startup, you will be asked to enter the password for the user created during installation.
+Then, you can start using Fedora Sway Atomic.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../_images/sway-atomic-first-run.png" alt="sway atomic first run">
+</div>
+<div class="title">Figure 4. Sway Atomic - First Run</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_fedora_budgie_atomic"><a class="anchor" href="#_fedora_budgie_atomic"></a>Fedora Budgie Atomic</h3>
+<div class="paragraph">
+<p>On first startup, you will be asked to enter the password for the user created during installation.
+Then, you can start using Fedora Budgie Atomic.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../_images/budgie-atomic-first-run.png" alt="budgie atomic first run">
+</div>
+<div class="title">Figure 5. Budgie Atomic - First Run</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_fedora_cosmic_atomic"><a class="anchor" href="#_fedora_cosmic_atomic"></a>Fedora COSMIC Atomic</h3>
+<div class="paragraph">
+<p>On first startup, you will be asked to enter the password for the user created during installation.
+Then, you can configure the system using the "Welcome" program.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../_images/cosmic-atomic-first-run.png" alt="cosmic atomic first run">
+</div>
+<div class="title">Figure 6. COSMIC Atomic - First Run</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_where_to_go_next"><a class="anchor" href="#_where_to_go_next"></a>Where to go next?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Depending on different personal needs, there are several starting actions and installations that you could perform on a newly installed Fedora Atomic Desktop for a customized user experience.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If you are new to Fedora Atomic Desktops and before installing software in your newly installed system, you should read the <a href="../getting-started/" class="xref page">Getting Started</a> section to learn about the difference between <strong>Flatpak</strong>, <strong>Toolbox</strong> and <strong>package layering</strong> (rpm-ostree).</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>For some tips about Fedora Atomic Desktops, see the <a href="../tips-and-tricks/" class="xref page">Tips and Tricks</a> section.</p>
+</div>
+</div>
+</div>
+<div id="" class="mt-16">
+    <p class="contribute px-6 py-3 w-fit bg-gray-100 dark:bg-fp-blue-darker rounded-full">Want to help? <a class="" href="https://docs.fedoraproject.org/en-US/fedora-docs/contributing/">Learn how to contribute to Fedora Docs <span class="ml-2 inline-block text-3xl leading-4 h-max align-top text-black dark:text-white">›</span></a></p>
+</div>
+</article>
+
+  </div>
+</main>
+</div>
+<footer class="flex flex-col bg-fp-gray-lightest dark:bg-fp-blue-darkest dark:text-fp-gray-light text-sm dark:border-t dark:border-gray-800">
+  <section class="pt-2 pb-6 px-2">
+
+    <p class="text-center">All Fedora Documentation content available under <a href="http://creativecommons.org/licenses/by-sa/4.0/legalcode">CC BY-SA 4.0</a> or, when specifically noted, under another <a href="https://fedoraproject.org/wiki/Licensing:Main">accepted</a> free and open content license.</p>
+
+    <div class="container mx-auto flex flex-col lg:flex-row my-4">
+      <div class="mx-auto lg:mx-0 lg:basis-3/12">
+        <img
+          src="../../_/img/fedora-blue.svg"
+          alt="Fedora Logo"
+          class="w-36 mb-4 lg:mb-0"
+        />
+      </div>
+      <ul
+        class="mx-4 flex items-center grow justify-center gap-4 lg:mx-0 lg:gap-12 xl:gap-20 2xl:gap-28 lg:justify-start"
+      >
+        <li class="list-none">
+          <a
+            href="/en-US/legal/privacy/"
+            class="text-fp-gray-darkest dark:text-fp-gray transition duration-300 ease-in-out hover:text-fp-gray dark:hover:text-fp-gray-light"
+            >Privacy Statement</a
+          >
+        </li>
+        <li class="list-none">
+          <a
+            href="/en-US/legal/"
+            class="text-fp-gray-darkest transition duration-300 ease-in-out hover:text-fp-gray dark:text-fp-gray dark:hover:text-fp-gray-light"
+            >Legal</a
+          >
+        </li>
+        <li class="list-none">
+          <a
+            href="/en-US/project/code-of-conduct/"
+            class="text-fp-gray-darkest transition duration-300 ease-in-out hover:text-fp-gray dark:text-fp-gray dark:hover:text-fp-gray-light"
+            >Code of Conduct</a
+          >
+        </li>
+        <li class="list-none">
+          <a
+            href="https://getfedora.org/en/sponsors/"
+            class="text-fp-gray-darkest transition duration-300 ease-in-out hover:text-fp-gray dark:text-fp-gray dark:hover:text-fp-gray-light"
+            >Sponsors</a
+          >
+        </li>
+      </ul>
+    </div>
+    <p class="text-center text-xs text-fp-gray-dark">Last build: 2026-11-28 03:50:09 UTC  | Last content update: 2026-04-28 </p>
+  </section>
+  <!-- Red Hat Sponsorship Section -->
+  <section class="bg-black py-6 text-center md:text-left px-2">
+    <div class="container mx-auto flex flex-col lg:flex-row">
+      <div class="mx-auto items-center lg:mx-0 lg:basis-3/12">
+        <img
+          src="../../_/img/logo-sponsored-by-red-hat.svg"
+          alt="Sponsored by Red Hat Logo"
+          class="mb-4 xl:mb-0"
+        />
+      </div>
+
+      <div class="flex items-center justify-center text-center lg:text-left lg:ml-8 xl:-ml-8 2xl:ml-5">
+        <p class="text-white">
+          Fedora is sponsored by Red Hat.
+          <a class="block text-fp-gray xl:ml-2 xl:inline" href="https://www.redhat.com/en/technologies/linux-platforms/articles/relationship-between-fedora-and-rhel">
+            Learn more about the relationship between Red Hat and Fedora.
+          </a>
+        </p>
+      </div>
+    </div>
+  </section>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+<script async src="../../_/js/vendor/datatables.js"></script>
+<script async src="../../_/js/vendor/tabs.js"></script>
+<script src="../../_/js/vendor/lunr.js"></script>
+<script src="../../_/js/search-ui.js" id="search-ui-script" data-site-root-path="../.." data-snippet-length="100" data-stylesheet="../../_/css/search.css"></script>
+<script async src="../../search-index.js"></script>
+  </body>
+</html>

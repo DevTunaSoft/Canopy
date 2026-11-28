@@ -1,0 +1,27 @@
+Autostart Autostarthttp://docs.kde.org/ AutostartAnne-Marie Mahfouf Revision Plasma 5.20 (2021-04-05)Table of ContentsAutostart ManagerMigration from KDE Workspaces 4Disabling Autostart Files Provided by Your DistributionFiles displayActionsAutostart ManagerThis module is a configuration tool for managing what programs start up with your personal Plasma™. It allows you to add programs or scripts so they automatically run during startup or shutdown of your Plasma™ session and to manage them.NotePlease note that in this module all changes are immediately applied.The program scans $HOME/.config/autostart/ for applications and login scripts, $HOME/.config/plasma-workspace/env for pre-startup scripts and $HOME/.config/plasma-workspace/shutdown for logout scripts to check what programs and scripts are already there and displays them. It allows you to manage them easily.
+Login scripts are .desktop files with a X-KDE-AutostartScript=true key. Pre-startup scripts are run earlier and can be used to set environment variables.
+NoteNote that you can change the location of your Autostart
+folder in Applications → Locations
+in the Personalization category of the System Settings and set a different folder
+than $HOME/.config/autostart.Please read also Desktop Session and Background Services for information how to configure the startup behavior of your Plasma™ session.Some KDE applications handle the autostart behavior on their own, e.g. you can enable or disable autostart of an application in the settings dialog (KAlarm) or you have to use File → Quit (Konversation, Kopete), otherwise the application is still running in the systemtray and will be restarted on next login.
+Migration from KDE Workspaces 4To migrate your personal autostart setting from KDE Workspaces 4:Copy desktop files from $HOME/.kde/Autostart to $HOME/.config/autostartCopy pre startup script files from $HOME/.kde/Autostart to $HOME/.config/plasma-workspace/envCopy shutdown script files from $HOME/.kde/Autostart to $HOME/.config/plasma-workspace/shutdownDisabling Autostart Files Provided by Your DistributionThe correct way to disable an autostart item, for example the printer-applet if you use printer from time to time, is to copy its .desktop file to your personal autostart folder. Anything of the same name in $HOME/.config/autostart overrides the .desktop file in the default package. Add the following line to the copied .desktop file:
+Hidden=true
+Files displayThe main part of the module displays the programs that are loaded when Plasma™ starts and scripts that are run when Plasma™ starts or shutdowns.Icon
+This column shows the icon of the program or script you want to start with Plasma™. The icon is extracted from the Desktop file from the Icon key for a program and is the default icon for a script.
+Name
+This column shows the name of the program or script you want to start with Plasma™. The name is extracted from the .desktop file from the Name key for a program and is the filename for a script.
+Properties
+This button is only shown when you hover the item with the mouse pointer. The button (only enabled for programs and login scripts i.e. .desktop files) allows you to change the properties of the program or script. You have general properties, permissions properties, a preview when applicable, and properties related to the application or login script. The default command is extracted from the .desktop file from the Exec key.
+For a logout script, the command is the path to the script and can not be modified.
+Remove
+This button is only shown when you hover the item with the mouse pointer. Pressing the − button will immediately remove the Desktop file for the program or the script or symbolic link in the Autostart folder.
+Actions
+On the bottom, you have the combined Add... button to choose the type of item you want to add. You can add programs and login or logout scripts.
+Add Program
+Clicking this item displays the standard Plasma™ Choose Application dialog and allows you to choose which program you want to start. After choosing the program, clicking OK brings you the properties for this program.
+This will copy the program .desktop file in your Autostart folder.
+Add Login Script...
+This item opens a dialog that asks you for the location of the script you want to add. Scripts set to run on login will have a corresponding .desktop file created in your Autostart folder and will be run during Plasma startup.
+Add Logout Script...
+This item opens a dialog that asks you for the location of the script you want to add. Scripts set on to be run on logout are copied or symlinked in the $HOME/.config/plasma-workspace/shutdown directory and will be automatically run during Plasma™ shutdown after the user has logged out.
+http://docs.kde.org/

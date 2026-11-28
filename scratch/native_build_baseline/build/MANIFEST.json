@@ -1,0 +1,191 @@
+{
+  "approved_assets": {
+    "icons": {
+      "icons/Browser_Option_3.png": "28283672dec0621172f3cf793dc6f00174fdce944d986ff144a1d2d1a881469a",
+      "icons/Calendar_Option_3.png": "c99c3356a178f8d0a28c809fada712c8df571c12db8d0f3472521f732fa559b2",
+      "icons/Files_Option_2.png": "aa659307d1a5273fdaa61a9df6f8f70546882d6e89b1380b23ff0f9eb59bf57b",
+      "icons/Mail_Option_5.png": "7baad00f0ddd507b1def24dc067e949e32991e3db06d246bf3a61ec9eaf98b79",
+      "icons/Music_Option_3.png": "57ca966467597ad0ea8485b51701d8856b2584dd3b28bd194010ffeed149c43f",
+      "icons/Photos_Option_2.png": "8ed643b8f67e676ae1ffddfd997cc1156fbc859acfd1e9c935c2b9085e11fc5f",
+      "icons/Settings_Option_8.png": "7ee4434d0acf34c676a3d3d908ee363b2553228debd5f7157b3693f7faee6a79",
+      "icons/Terminal_Option_4.png": "40473e715b42037d2619c87e37fa1757419b6a1cdf99cb9ce5236d6bbfd929a5"
+    },
+    "wallpaper": {
+      "path": "Canopy_Classic_Master_Wallpaper_1920x1080.png",
+      "sha256": "8c6cab50a0977fc129c0d2a20523d9361646f36da66f2f3f2b2436a0d9001381"
+    }
+  },
+  "artifact": "canopy-classic-native-plasma6-development-baseline",
+  "binary": {
+    "path": "contents/bin/canopy-classic-spike",
+    "sha256": "4950fd793d067aa722a64ea8b09f0c1c65a55263b7f96c8fd418bf579e9f4a32"
+  },
+  "commands": {
+    "build": "cmake -S /home/canopy/native_build_baseline/source/prototype/classic -B /home/canopy/native_build_baseline/out/build -G Ninja",
+    "compile": "ninja -C /home/canopy/native_build_baseline/out/build",
+    "install": "install.sh <archive> <state-dir>",
+    "uninstall": "uninstall.sh <state-dir>",
+    "verify": "verify.sh <state-dir>"
+  },
+  "gates": [
+    [
+      "source_commit_pinned",
+      "PASS",
+      "ec910d7a7275296ecbc8b5e5c459d356205165d1"
+    ],
+    [
+      "source_tree_pinned",
+      "PASS",
+      "3c6110a77e9e34be367a4d11b29c3d6a13138bab"
+    ],
+    [
+      "source_files_byte_identical",
+      "PASS",
+      "760 files"
+    ],
+    [
+      "approved_icons_eight_exact",
+      "PASS",
+      "8 icons"
+    ],
+    [
+      "approved_wallpaper_sha256",
+      "PASS",
+      "8c6cab50a0977fc129c0d2a20523d9361646f36da66f2f3f2b2436a0d9001381"
+    ],
+    [
+      "legacy_wave_asset_unmodified",
+      "PASS",
+      "1efa6e83deee160ce9cf225db010025f4f162975f4dfc23e6da3f3ca0973528a"
+    ],
+    [
+      "compiled_binary_present",
+      "PASS",
+      "4950fd793d067aa722a64ea8b09f0c1c65a55263b7f96c8fd418bf579e9f4a32"
+    ],
+    [
+      "package_rebuild_byte_identical",
+      "PASS",
+      "ec9e44cfaa3ba3059aef492b429a6e6c6b94da32a230d4acb6cb28a1ef3ece35"
+    ]
+  ],
+  "generated_utc": "2026-11-28T05:03:30Z",
+  "host": "Linux-7.0.0-14-generic-x86_64-with-glibc2.43",
+  "note": "SHA-256 values are content identities; SOURCE commit/tree are git SHA-1 identities.",
+  "package": {
+    "archive": "org.kde.plasma.canopyclassic-0.1.0-dev-baseline.tar.gz",
+    "archive_bytes": 5503210,
+    "archive_sha256": "ec9e44cfaa3ba3059aef492b429a6e6c6b94da32a230d4acb6cb28a1ef3ece35",
+    "determinism": {
+      "gzip_filename": "empty",
+      "gzip_mtime": 0,
+      "member_order": "sorted POSIX",
+      "mtime": 0,
+      "rebuild_byte_identical": true,
+      "tar_format": "GNU",
+      "uid_gid": 0,
+      "uname_gname": "empty"
+    },
+    "id": "org.kde.plasma.canopyclassic",
+    "members": [
+      {
+        "bytes": 220810,
+        "path": "contents/approved/icons/Browser_Option_3.png",
+        "sha256": "28283672dec0621172f3cf793dc6f00174fdce944d986ff144a1d2d1a881469a"
+      },
+      {
+        "bytes": 205769,
+        "path": "contents/approved/icons/Calendar_Option_3.png",
+        "sha256": "c99c3356a178f8d0a28c809fada712c8df571c12db8d0f3472521f732fa559b2"
+      },
+      {
+        "bytes": 197375,
+        "path": "contents/approved/icons/Files_Option_2.png",
+        "sha256": "aa659307d1a5273fdaa61a9df6f8f70546882d6e89b1380b23ff0f9eb59bf57b"
+      },
+      {
+        "bytes": 205096,
+        "path": "contents/approved/icons/Mail_Option_5.png",
+        "sha256": "7baad00f0ddd507b1def24dc067e949e32991e3db06d246bf3a61ec9eaf98b79"
+      },
+      {
+        "bytes": 222463,
+        "path": "contents/approved/icons/Music_Option_3.png",
+        "sha256": "57ca966467597ad0ea8485b51701d8856b2584dd3b28bd194010ffeed149c43f"
+      },
+      {
+        "bytes": 213883,
+        "path": "contents/approved/icons/Photos_Option_2.png",
+        "sha256": "8ed643b8f67e676ae1ffddfd997cc1156fbc859acfd1e9c935c2b9085e11fc5f"
+      },
+      {
+        "bytes": 193072,
+        "path": "contents/approved/icons/Settings_Option_8.png",
+        "sha256": "7ee4434d0acf34c676a3d3d908ee363b2553228debd5f7157b3693f7faee6a79"
+      },
+      {
+        "bytes": 168854,
+        "path": "contents/approved/icons/Terminal_Option_4.png",
+        "sha256": "40473e715b42037d2619c87e37fa1757419b6a1cdf99cb9ce5236d6bbfd929a5"
+      },
+      {
+        "bytes": 1889,
+        "path": "contents/approved/manifest.json",
+        "sha256": "5aa040ddbfeddbd38dcbd1808710676982efbc4146987c42e93eaa57ad0d4737"
+      },
+      {
+        "bytes": 3107170,
+        "path": "contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png",
+        "sha256": "8c6cab50a0977fc129c0d2a20523d9361646f36da66f2f3f2b2436a0d9001381"
+      },
+      {
+        "bytes": 159987,
+        "path": "contents/approved/wallpaper/canopy-wave-preview.png",
+        "sha256": "1efa6e83deee160ce9cf225db010025f4f162975f4dfc23e6da3f3ca0973528a"
+      },
+      {
+        "bytes": 2442112,
+        "path": "contents/bin/canopy-classic-spike",
+        "sha256": "4950fd793d067aa722a64ea8b09f0c1c65a55263b7f96c8fd418bf579e9f4a32"
+      },
+      {
+        "bytes": 668,
+        "path": "contents/ui/main.qml",
+        "sha256": "f5a0f3704ea04394707d76ebd3fc14a9c423e8bcf53f6b268ae68e0547e57582"
+      },
+      {
+        "bytes": 3223,
+        "path": "install.sh",
+        "sha256": "a4f7ca9ca8fd6a2d4e0a68798b97bacc6a14806553f9829f591640f06c7ff5c2"
+      },
+      {
+        "bytes": 1103,
+        "path": "metadata.json",
+        "sha256": "3f3207c50f87d3c68a0760676392b0e4825ea3512d531387e0ec86e03b278cbe"
+      },
+      {
+        "bytes": 1604,
+        "path": "uninstall.sh",
+        "sha256": "94324c5eb7708fa884fc9f3c392ece6c0692b20d5246107ab922b5a61d03c9dc"
+      },
+      {
+        "bytes": 1553,
+        "path": "verify.sh",
+        "sha256": "ffa210cd22807db08dfbb7faafd21ef129eb5cca4d928f86f67c496119b7bb61"
+      }
+    ],
+    "plasma_api_minimum": "6.0",
+    "rebuild_sha256": "ec9e44cfaa3ba3059aef492b429a6e6c6b94da32a230d4acb6cb28a1ef3ece35",
+    "structure": "Plasma/Applet",
+    "version": "0.1.0-dev-baseline"
+  },
+  "schema": "canopy.native.build_manifest/1",
+  "scope": "DEVELOPMENT_BASELINE_ONLY;NO_RELEASE;NO_VISUAL_APPROVAL;NO_MERGE",
+  "source": {
+    "commit": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+    "file_count": 760,
+    "source_id_sha256": "b0d6f3be406da5d1a461b6bfdd710b4ac3c9a277694e8e1a87698d154daa9dbe",
+    "tree": "3c6110a77e9e34be367a4d11b29c3d6a13138bab"
+  },
+  "verdict": "PASS"
+}

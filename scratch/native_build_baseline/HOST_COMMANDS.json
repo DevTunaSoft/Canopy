@@ -1,0 +1,102 @@
+[
+  {
+    "command": "git -C C:/Users/X1/AppData/Local/hermes/cache/scratch/wt-native-build-baseline-20261127 rev-parse 'ec910d7a7275296ecbc8b5e5c459d356205165d1^{commit}'",
+    "started_utc": "2026-11-28T05:00:30Z",
+    "rc": 0
+  },
+  {
+    "command": "git -C C:/Users/X1/AppData/Local/hermes/cache/scratch/wt-native-build-baseline-20261127 rev-parse '3c6110a77e9e34be367a4d11b29c3d6a13138bab^{tree}'",
+    "started_utc": "2026-11-28T05:00:30Z",
+    "rc": 0
+  },
+  {
+    "command": "'C:/Program Files/Oracle/VirtualBox/VBoxManage.exe' showvminfo Canopy-Test-Plasma6 --machinereadable",
+    "started_utc": "2026-11-28T05:00:30Z",
+    "rc": 0
+  },
+  {
+    "command": "ssh -i C:/Users/X1/AppData/Local/hermes/cache/scratch/g1_ubuntu_evidence/ssh/g1_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=10 -p 2223 canopy@127.0.0.1 'echo NATIVE_BASELINE_SSH_READY'",
+    "started_utc": "2026-11-28T05:00:30Z",
+    "rc": 0
+  },
+  {
+    "command": "ssh -i C:/Users/X1/AppData/Local/hermes/cache/scratch/g1_ubuntu_evidence/ssh/g1_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=10 -p 2223 canopy@127.0.0.1 'mkdir -p /home/canopy/native_build_baseline /home/canopy/native_build_baseline/tools/native /home/canopy/native_build_baseline/tools/native/templates /home/canopy/native_build_baseline/evidence'",
+    "started_utc": "2026-11-28T05:00:31Z",
+    "rc": 0
+  },
+  {
+    "command": "git -C C:/Users/X1/AppData/Local/hermes/cache/scratch/wt-native-build-baseline-20261127 archive --format=tar.gz --prefix=source/ ec910d7a7275296ecbc8b5e5c459d356205165d1",
+    "started_utc": "2026-11-28T05:00:32Z",
+    "rc": 0
+  },
+  {
+    "command": "scp -i C:/Users/X1/AppData/Local/hermes/cache/scratch/g1_ubuntu_evidence/ssh/g1_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=10 -P 2223 C:/Users/X1/AppData/Local/hermes/cache/scratch/wt-native-build-baseline-20261127/scratch/native_build_baseline/source_baseline.tar.gz canopy@127.0.0.1:/home/canopy/native_build_baseline/",
+    "started_utc": "2026-11-28T05:00:37Z",
+    "rc": 0
+  },
+  {
+    "command": "scp -i C:/Users/X1/AppData/Local/hermes/cache/scratch/g1_ubuntu_evidence/ssh/g1_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=10 -P 2223 C:/Users/X1/AppData/Local/hermes/cache/scratch/wt-native-build-baseline-20261127/tools/native/__init__.py C:/Users/X1/AppData/Local/hermes/cache/scratch/wt-native-build-baseline-20261127/tools/native/baseline_common.py C:/Users/X1/AppData/Local/hermes/cache/scratch/wt-native-build-baseline-20261127/tools/native/build_baseline.py C:/Users/X1/AppData/Local/hermes/cache/scratch/wt-native-build-baseline-20261127/tools/native/guest_smoke.sh C:/Users/X1/AppData/Local/hermes/cache/scratch/wt-native-build-baseline-20261127/tools/native/smoke_test.py canopy@127.0.0.1:/home/canopy/native_build_baseline/tools/native/",
+    "started_utc": "2026-11-28T05:00:39Z",
+    "rc": 0
+  },
+  {
+    "command": "scp -i C:/Users/X1/AppData/Local/hermes/cache/scratch/g1_ubuntu_evidence/ssh/g1_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=10 -P 2223 C:/Users/X1/AppData/Local/hermes/cache/scratch/wt-native-build-baseline-20261127/tools/native/templates/metadata.json.template C:/Users/X1/AppData/Local/hermes/cache/scratch/wt-native-build-baseline-20261127/tools/native/templates/main.qml C:/Users/X1/AppData/Local/hermes/cache/scratch/wt-native-build-baseline-20261127/tools/native/templates/install.sh C:/Users/X1/AppData/Local/hermes/cache/scratch/wt-native-build-baseline-20261127/tools/native/templates/uninstall.sh C:/Users/X1/AppData/Local/hermes/cache/scratch/wt-native-build-baseline-20261127/tools/native/templates/verify.sh canopy@127.0.0.1:/home/canopy/native_build_baseline/tools/native/templates/",
+    "started_utc": "2026-11-28T05:00:40Z",
+    "rc": 0
+  },
+  {
+    "command": "ssh -i C:/Users/X1/AppData/Local/hermes/cache/scratch/g1_ubuntu_evidence/ssh/g1_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=10 -p 2223 canopy@127.0.0.1 'rm -rf /home/canopy/native_build_baseline/source && mkdir -p /home/canopy/native_build_baseline/source && tar -xzf /home/canopy/native_build_baseline/source_baseline.tar.gz -C /home/canopy/native_build_baseline'",
+    "started_utc": "2026-11-28T05:00:41Z",
+    "rc": 0
+  },
+  {
+    "command": "ssh -i C:/Users/X1/AppData/Local/hermes/cache/scratch/g1_ubuntu_evidence/ssh/g1_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=10 -p 2223 canopy@127.0.0.1 'cd /home/canopy/native_build_baseline && python3 tools/native/build_baseline.py --source /home/canopy/native_build_baseline/source --out /home/canopy/native_build_baseline/out --source-sha ec910d7a7275296ecbc8b5e5c459d356205165d1 --tree-sha 3c6110a77e9e34be367a4d11b29c3d6a13138bab --emit-source-id /home/canopy/native_build_baseline/source/SOURCE_ID.json'",
+    "started_utc": "2026-11-28T05:00:42Z",
+    "rc": 0
+  },
+  {
+    "command": "ssh -i C:/Users/X1/AppData/Local/hermes/cache/scratch/g1_ubuntu_evidence/ssh/g1_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=10 -p 2223 canopy@127.0.0.1 'cd /home/canopy/native_build_baseline && python3 tools/native/build_baseline.py --source /home/canopy/native_build_baseline/source --out /home/canopy/native_build_baseline/out --source-sha ec910d7a7275296ecbc8b5e5c459d356205165d1 --tree-sha 3c6110a77e9e34be367a4d11b29c3d6a13138bab'",
+    "started_utc": "2026-11-28T05:00:44Z",
+    "rc": 0
+  },
+  {
+    "command": "scp -i C:/Users/X1/AppData/Local/hermes/cache/scratch/g1_ubuntu_evidence/ssh/g1_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=10 -P 2223 canopy@127.0.0.1:/home/canopy/native_build_baseline/out/MANIFEST.json C:/Users/X1/AppData/Local/hermes/cache/scratch/wt-native-build-baseline-20261127/scratch/native_build_baseline/build",
+    "started_utc": "2026-11-28T05:03:30Z",
+    "rc": 0
+  },
+  {
+    "command": "scp -i C:/Users/X1/AppData/Local/hermes/cache/scratch/g1_ubuntu_evidence/ssh/g1_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=10 -P 2223 canopy@127.0.0.1:/home/canopy/native_build_baseline/out/BUILD_RESULT.json C:/Users/X1/AppData/Local/hermes/cache/scratch/wt-native-build-baseline-20261127/scratch/native_build_baseline/build",
+    "started_utc": "2026-11-28T05:03:31Z",
+    "rc": 0
+  },
+  {
+    "command": "scp -i C:/Users/X1/AppData/Local/hermes/cache/scratch/g1_ubuntu_evidence/ssh/g1_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=10 -P 2223 canopy@127.0.0.1:/home/canopy/native_build_baseline/out/SHA256SUMS C:/Users/X1/AppData/Local/hermes/cache/scratch/wt-native-build-baseline-20261127/scratch/native_build_baseline/build",
+    "started_utc": "2026-11-28T05:03:32Z",
+    "rc": 0
+  },
+  {
+    "command": "scp -i C:/Users/X1/AppData/Local/hermes/cache/scratch/g1_ubuntu_evidence/ssh/g1_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=10 -P 2223 'canopy@127.0.0.1:/home/canopy/native_build_baseline/out/*.log' C:/Users/X1/AppData/Local/hermes/cache/scratch/wt-native-build-baseline-20261127/scratch/native_build_baseline/build",
+    "started_utc": "2026-11-28T05:03:33Z",
+    "rc": 0
+  },
+  {
+    "command": "scp -i C:/Users/X1/AppData/Local/hermes/cache/scratch/g1_ubuntu_evidence/ssh/g1_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=10 -P 2223 canopy@127.0.0.1:/home/canopy/native_build_baseline/out/dist/org.kde.plasma.canopyclassic-0.1.0-dev-baseline.tar.gz C:/Users/X1/AppData/Local/hermes/cache/scratch/wt-native-build-baseline-20261127/scratch/native_build_baseline/build/dist",
+    "started_utc": "2026-11-28T05:03:34Z",
+    "rc": 0
+  },
+  {
+    "command": "ssh -i C:/Users/X1/AppData/Local/hermes/cache/scratch/g1_ubuntu_evidence/ssh/g1_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=10 -p 2223 canopy@127.0.0.1 'for s in $(loginctl list-sessions --no-legend | awk '\"'\"'$3==\"canopy\" {print $1}'\"'\"'); do t=$(loginctl show-session \"$s\" -p Type --value 2>/dev/null); c=$(loginctl show-session \"$s\" -p Class --value 2>/dev/null); a=$(loginctl show-session \"$s\" -p Active --value 2>/dev/null); d=$(loginctl show-session \"$s\" -p Display --value 2>/dev/null); if [ \"$t\" = x11 ] && [ \"$c\" = user ] && [ \"$a\" = yes ]; then echo \"session=$s Type=$t Class=$c Active=$a Display=$d\"; exit 0; fi; done; echo NO_NATIVE_X11_SESSION'",
+    "started_utc": "2026-11-28T05:03:35Z",
+    "rc": 0
+  },
+  {
+    "command": "ssh -i C:/Users/X1/AppData/Local/hermes/cache/scratch/g1_ubuntu_evidence/ssh/g1_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=10 -p 2223 canopy@127.0.0.1 'ARCHIVE=/home/canopy/native_build_baseline/out/dist/org.kde.plasma.canopyclassic-0.1.0-dev-baseline.tar.gz ARCHIVE_SHA=ec9e44cfaa3ba3059aef492b429a6e6c6b94da32a230d4acb6cb28a1ef3ece35 BINARY_SHA=4950fd793d067aa722a64ea8b09f0c1c65a55263b7f96c8fd418bf579e9f4a32 RESULTS=/home/canopy/native_build_baseline/smoke-results SOURCE_SHA=ec910d7a7275296ecbc8b5e5c459d356205165d1 STATE=/home/canopy/native_build_baseline/smoke-state WALLPAPER_SHA=8c6cab50a0977fc129c0d2a20523d9361646f36da66f2f3f2b2436a0d9001381 bash /home/canopy/native_build_baseline/tools/native/guest_smoke.sh'",
+    "started_utc": "2026-11-28T05:03:37Z",
+    "rc": 0
+  },
+  {
+    "command": "scp -i C:/Users/X1/AppData/Local/hermes/cache/scratch/g1_ubuntu_evidence/ssh/g1_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=10 -P 2223 'canopy@127.0.0.1:/home/canopy/native_build_baseline/smoke-results/*' C:/Users/X1/AppData/Local/hermes/cache/scratch/wt-native-build-baseline-20261127/scratch/native_build_baseline/smoke",
+    "started_utc": "2026-11-28T05:03:51Z",
+    "rc": 0
+  }
+]

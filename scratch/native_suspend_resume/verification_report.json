@@ -1,0 +1,76 @@
+{
+  "schema": "native_suspend_resume_verification_v1",
+  "directive_rev3_sha256_prefix": "1fba4b1e",
+  "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+  "branch": "product/native-suspend-resume-20261128",
+  "head_sha": "b8ab34fbaa4c443128d2805127b8f636bfcd7d8c",
+  "head_sha_note": "Exact verified remediation commit whose tree produced the targeted tests, foundation result, source hashes and evidence artifacts below. This head-pinning commit changes only this report and SHA256SUMS.txt; the pushed branch head and PR body are re-queried after push.",
+  "labels": {
+    "targeted_tests": "SYNTHETIC",
+    "static_ast_scan": "STATIC SOURCE ONLY",
+    "cli_probe": "SYNTHETIC",
+    "real_suspend_resume": "NOT RUN"
+  },
+  "commands": [
+    {
+      "command": "PYTHONPATH=<worktree> python -m unittest discover -s tools/session_recovery -p 'test_*.py' -v",
+      "result": "Ran 33 tests in 0.041s / OK",
+      "return_code": 0,
+      "artifact": "targeted_tests.log",
+      "label": "SYNTHETIC"
+    },
+    {
+      "command": "PYTHONPATH=<worktree> python tools/check_foundation.py",
+      "result": "PASS: foundation files, tagline, and local Markdown links",
+      "return_code": 0,
+      "artifact": "foundation.log",
+      "label": "STATIC SOURCE ONLY"
+    },
+    {
+      "command": "PYTHONPATH=<worktree> python tools/session_recovery/probe_readonly.py --logind-file sample_logind.txt --upower-file sample_upower.txt --plasma-file sample_plasma.txt",
+      "result": "STATIC SOURCE ONLY / BLOCKED native-evidence-absent; writes=0 commands_executed=0 polls=0",
+      "return_code": 0,
+      "artifact": "probe_readonly_output.json",
+      "label": "SYNTHETIC"
+    },
+    {
+      "command": "unittest StaticTests.test_no_daemon_or_io_imports_in_production_modules (AST scan of canopy_features/session_recovery/*.py)",
+      "result": "OK: 0 forbidden imports ({subprocess, socket, threading, asyncio, dbus, time, os}) and 0 forbidden calls ({sleep, poll, select, spawn, Popen, system, exec, eval})",
+      "return_code": 0,
+      "artifact": "targeted_tests.log",
+      "label": "STATIC SOURCE ONLY"
+    }
+  ],
+  "source_sha256": {
+    "canopy_features/session_recovery/__init__.py": "2f4d5141f7503a7a05f903d0aec45df500960aa26043575d214f9ec56e66a6d4",
+    "canopy_features/session_recovery/contracts.py": "5cf44e126444bcaaa4337336d4100e9e75c805ba85b0e28234b200bc8c85d3bb",
+    "canopy_features/session_recovery/logind_upower.py": "792df89b9c672b3b935f7e42d1aaef744db5de5b36233fa0151374961c8108bb",
+    "canopy_features/session_recovery/native_integration.py": "185b90020c701c40e1203ef56d0f18f520dacc7500012a51593a91ccbf535b5b",
+    "docs/NATIVE_SUSPEND_RESUME_CONTRACT.md": "0ff5d46c32abfabf29a8173eb7be99ddf8680dcc7a3fb16a1fb25e045f5bd96e",
+    "tools/session_recovery/probe_readonly.py": "81c72798fbefd1816227f329301a49add7498a6c6cd767581ec46acfe8b3af8e",
+    "tools/session_recovery/test_contracts.py": "e8595cff5edd15abcaf60c59126b0f26d7dc5b872f4e79536cffe195f8c5ac14"
+  },
+  "bounds": {
+    "checkpoint_records": 8,
+    "facts_per_capture": 6,
+    "parser_text_bytes": 16384,
+    "parser_lines": 128,
+    "parser_line_chars": 256
+  },
+  "full_suite": {
+    "status": "NOT RUN",
+    "reason": "New files only under owned paths; no tests/ path changed. CI discovery scope is unchanged."
+  },
+  "resource_impact": {
+    "measured": "SYNTHETIC bounded allocations and zero-I/O static proof only",
+    "not_run": "real desktop PSS, CPU/GPU, scheduler wakeups, screen-reader",
+    "screen_reader": "NOT_RUN"
+  },
+  "verdict": "BLOCKED_NOT_RUN",
+  "disjoint_from_pr_748": {
+    "status": "TRUE_AFTER_REMEDIATION",
+    "resolution": "The earlier claim was false: PR #757 originally added docs/NATIVE_SUSPEND_RESUME.md, also added by READY sibling PR #748 (head 9f766d06225f4a7e7cfe9be010a3432a4109ea05) with a different blob on the same base ec910d7a7275296ecbc8b5e5c459d356205165d1. PR #757 now owns docs/NATIVE_SUSPEND_RESUME_CONTRACT.md and no longer claims the #748 doc path.",
+    "shared_paths_with_pr_748": [],
+    "sibling_doc_path_owner": "PR #748 (docs/NATIVE_SUSPEND_RESUME.md)"
+  }
+}

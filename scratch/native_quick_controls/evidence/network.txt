@@ -1,0 +1,29 @@
+M3_PROBE_SECTION=network
+M3_PROBE_UTC=2026-11-28T04:14:52Z
+$ gdbus call --system --dest org.freedesktop.NetworkManager --object-path /org/freedesktop/NetworkManager --method org.freedesktop.NetworkManager.GetPermissions
+({'org.freedesktop.NetworkManager.checkpoint-rollback': 'auth', 'org.freedesktop.NetworkManager.enable-disable-connectivity-check': 'no', 'org.freedesktop.NetworkManager.enable-disable-network': 'no', 'org.freedesktop.NetworkManager.enable-disable-statistics': 'no', 'org.freedesktop.NetworkManager.enable-disable-wifi': 'no', 'org.freedesktop.NetworkManager.enable-disable-wimax': 'no', 'org.freedesktop.NetworkManager.enable-disable-wwan': 'no', 'org.freedesktop.NetworkManager.network-control': 'auth', 'org.freedesktop.NetworkManager.reload': 'auth', 'org.freedesktop.NetworkManager.settings.modify.global-dns': 'auth', 'org.freedesktop.NetworkManager.settings.modify.hostname': 'auth', 'org.freedesktop.NetworkManager.settings.modify.own': 'auth', 'org.freedesktop.NetworkManager.settings.modify.system': 'auth', 'org.freedesktop.NetworkManager.sleep-wake': 'no', 'org.freedesktop.NetworkManager.wifi.scan': 'auth', 'org.freedesktop.NetworkManager.wifi.share.open': 'no', 'org.freedesktop.NetworkManager.wifi.share.protected': 'no'},)
+[exit=0]
+$ gdbus call --system --dest org.freedesktop.NetworkManager --object-path /org/freedesktop/NetworkManager --method org.freedesktop.DBus.Properties.Get org.freedesktop.NetworkManager State
+(<uint32 70>,)
+[exit=0]
+$ gdbus call --system --dest org.freedesktop.NetworkManager --object-path /org/freedesktop/NetworkManager --method org.freedesktop.DBus.Properties.Get org.freedesktop.NetworkManager Connectivity
+(<uint32 4>,)
+[exit=0]
+$ gdbus call --system --dest org.freedesktop.NetworkManager --object-path /org/freedesktop/NetworkManager --method org.freedesktop.DBus.Properties.Get org.freedesktop.NetworkManager ConnectivityCheckAvailable
+(<false>,)
+[exit=0]
+$ gdbus call --system --dest org.freedesktop.NetworkManager --object-path /org/freedesktop/NetworkManager --method org.freedesktop.DBus.Properties.Get org.freedesktop.NetworkManager ActiveConnections
+(<[objectpath '/org/freedesktop/NetworkManager/ActiveConnection/2', '/org/freedesktop/NetworkManager/ActiveConnection/1']>,)
+[exit=0]
+$ gdbus call --system --dest org.freedesktop.NetworkManager --object-path /org/freedesktop/NetworkManager --method org.freedesktop.NetworkManager.CheckConnectivity
+Error: GDBus.Error:org.freedesktop.NetworkManager.PermissionDenied: Not authorized to recheck connectivity
+[exit=1]
+$ nmcli general status
+STATE      CONNECTIVITY  WIFI-HW  WIFI     WWAN-HW  WWAN     METERED      
+connected  full          missing  enabled  missing  enabled  no (guessed) 
+[exit=0]
+$ nmcli device status
+DEVICE  TYPE      STATE                   CONNECTION         
+enp0s3  ethernet  connected               Wired connection 1 
+lo      loopback  connected (externally)  lo                 
+[exit=0]

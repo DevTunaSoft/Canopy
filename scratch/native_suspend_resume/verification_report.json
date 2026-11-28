@@ -3,8 +3,8 @@
   "directive_rev3_sha256_prefix": "1fba4b1e",
   "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
   "branch": "product/native-suspend-resume-20261128",
-  "head_sha": null,
-  "head_sha_note": "Head SHA pinned to the exact verified remediation commit after this tree is committed; the final pushed head and PR body are re-queried after push.",
+  "head_sha": "b8ab34fbaa4c443128d2805127b8f636bfcd7d8c",
+  "head_sha_note": "Exact verified remediation commit whose tree produced the targeted tests, foundation result, source hashes and evidence artifacts below. This head-pinning commit changes only this report and SHA256SUMS.txt; the pushed branch head and PR body are re-queried after push.",
   "labels": {
     "targeted_tests": "SYNTHETIC",
     "static_ast_scan": "STATIC SOURCE ONLY",

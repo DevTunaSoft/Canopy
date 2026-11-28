@@ -1,0 +1,6 @@
+ID: N02R
+STAGE: N02 remove unknown source
+LABEL: PASS
+COMMAND: ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; rm -f /home/canopy/.local/bin/canopy-classic; echo BIN_AFTER=$([ -e /home/canopy/.local/bin/canopy-classic ]&&echo PRESENT||echo ABSENT)
+rc=0
+BIN_AFTER=ABSENT

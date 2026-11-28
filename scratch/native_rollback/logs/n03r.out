@@ -1,0 +1,6 @@
+ID: N03R
+STAGE: N03 restore snapshot metadata bytes
+LABEL: PASS
+COMMAND: ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cp -p /home/canopy/native_rollback_rt/n03_meta.bak /home/canopy/.local/share/canopy-classic/backup/snapshot.meta && echo META_RESTORED_SHA=$(sha256sum /home/canopy/.local/share/canopy-classic/backup/snapshot.meta|awk "{print \$1}")
+rc=0
+META_RESTORED_SHA=4698a613e372c40ca03bedb249e7a065a2e0c44398bcf58380664ea82c72afdc

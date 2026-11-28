@@ -1,0 +1,9 @@
+ID: R11
+STAGE: cycle 2 snapshot manifest capture
+LABEL: PASS
+COMMAND: ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; bash -c 'M=/home/canopy/.local/share/canopy-classic/backup/snapshot.meta; echo META_SHA=$(sha256sum $M|awk "{print \$1}"); while IFS=$(printf "\t") read -r p mo sh; do [ -n "$p" ] && printf "SNAP\t%s\t%s\t%s\n" "$p" "$mo" "$sh"; done < $M; echo MANIFEST_SHA=$(sha256sum /home/canopy/.local/share/canopy-classic/install-manifest.env|awk "{print \$1}")'
+rc=0
+META_SHA=4698a613e372c40ca03bedb249e7a065a2e0c44398bcf58380664ea82c72afdc
+SNAP	/home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc	600	141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751
+SNAP	/home/canopy/.config/plasmashellrc	600	a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774
+MANIFEST_SHA=7badc517f798508ee25947be10772e49d742ff8420384e70ceef126d1adcf550

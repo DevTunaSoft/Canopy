@@ -1,0 +1,13 @@
+ID: R02
+STAGE: cycle 1 verify installed
+LABEL: PASS
+COMMAND: ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash verify.sh
+rc=0
+[canopy-classic][verify] PASS binary: present, executable, SHA-256 matches pin
+[canopy-classic][verify] PASS wallpaper: present, SHA-256 matches approved pin
+[canopy-classic][verify] PASS autostart: Canopy entry present and points at pinned binary
+[canopy-classic][verify] PASS snapshot: metadata present
+[canopy-classic][verify] PASS snapshot file: /home/canopy/.local/share/canopy-classic/backup/plasma-org.kde.plasma.desktop-appletsrc
+[canopy-classic][verify] PASS snapshot file: /home/canopy/.local/share/canopy-classic/backup/plasmashellrc
+[canopy-classic][verify] STATUS=INSTALLED_INTEGRITY_OK
+[canopy-classic][verify] runtime desktop probes (Plasma/DBus): NOT_RUN

@@ -1,0 +1,1177 @@
+{
+  "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+  "checks": {
+    "F01_config_untouched": {
+      "after": {
+        "plasma-org.kde.plasma.desktop-appletsrc": {
+          "mode": "600",
+          "sha256": "141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751",
+          "size": "5738"
+        },
+        "plasmashellrc": {
+          "mode": "600",
+          "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774",
+          "size": "1811"
+        }
+      },
+      "before": {
+        "plasma-org.kde.plasma.desktop-appletsrc": {
+          "mode": "600",
+          "sha256": "141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751",
+          "size": "5738"
+        },
+        "plasmashellrc": {
+          "mode": "600",
+          "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774",
+          "size": "1811"
+        }
+      },
+      "direct_hash_proof": true,
+      "equal": true
+    },
+    "N01_config_untouched": {
+      "after": {
+        "plasma-org.kde.plasma.desktop-appletsrc": {
+          "mode": "600",
+          "sha256": "fa81ab829aeb54153e1f6e088571b388b7c3c4a597e598e518d383454a793a8c",
+          "size": "5780"
+        },
+        "plasmashellrc": {
+          "mode": "600",
+          "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774",
+          "size": "1811"
+        }
+      },
+      "before": {
+        "plasma-org.kde.plasma.desktop-appletsrc": {
+          "mode": "600",
+          "sha256": "fa81ab829aeb54153e1f6e088571b388b7c3c4a597e598e518d383454a793a8c",
+          "size": "5780"
+        },
+        "plasmashellrc": {
+          "mode": "600",
+          "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774",
+          "size": "1811"
+        }
+      },
+      "direct_hash_proof": true,
+      "equal": true
+    },
+    "N02_config_untouched": {
+      "after": {
+        "plasma-org.kde.plasma.desktop-appletsrc": {
+          "mode": "600",
+          "sha256": "fa81ab829aeb54153e1f6e088571b388b7c3c4a597e598e518d383454a793a8c",
+          "size": "5780"
+        },
+        "plasmashellrc": {
+          "mode": "600",
+          "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774",
+          "size": "1811"
+        }
+      },
+      "before": {
+        "plasma-org.kde.plasma.desktop-appletsrc": {
+          "mode": "600",
+          "sha256": "fa81ab829aeb54153e1f6e088571b388b7c3c4a597e598e518d383454a793a8c",
+          "size": "5780"
+        },
+        "plasmashellrc": {
+          "mode": "600",
+          "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774",
+          "size": "1811"
+        }
+      },
+      "direct_hash_proof": true,
+      "equal": true
+    },
+    "N03_config_untouched": {
+      "after": {
+        "plasma-org.kde.plasma.desktop-appletsrc": {
+          "mode": "600",
+          "sha256": "fa81ab829aeb54153e1f6e088571b388b7c3c4a597e598e518d383454a793a8c",
+          "size": "5780"
+        },
+        "plasmashellrc": {
+          "mode": "600",
+          "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774",
+          "size": "1811"
+        }
+      },
+      "before": {
+        "plasma-org.kde.plasma.desktop-appletsrc": {
+          "mode": "600",
+          "sha256": "fa81ab829aeb54153e1f6e088571b388b7c3c4a597e598e518d383454a793a8c",
+          "size": "5780"
+        },
+        "plasmashellrc": {
+          "mode": "600",
+          "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774",
+          "size": "1811"
+        }
+      },
+      "direct_hash_proof": true,
+      "equal": true
+    },
+    "N04_config_untouched": {
+      "after": {
+        "plasma-org.kde.plasma.desktop-appletsrc": {
+          "mode": "600",
+          "sha256": "fa81ab829aeb54153e1f6e088571b388b7c3c4a597e598e518d383454a793a8c",
+          "size": "5780"
+        },
+        "plasmashellrc": {
+          "mode": "600",
+          "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774",
+          "size": "1811"
+        }
+      },
+      "before": {
+        "plasma-org.kde.plasma.desktop-appletsrc": {
+          "mode": "600",
+          "sha256": "fa81ab829aeb54153e1f6e088571b388b7c3c4a597e598e518d383454a793a8c",
+          "size": "5780"
+        },
+        "plasmashellrc": {
+          "mode": "600",
+          "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774",
+          "size": "1811"
+        }
+      },
+      "direct_hash_proof": true,
+      "equal": true
+    },
+    "R07_exact_restore": {
+      "baseline": {
+        "plasma-org.kde.plasma.desktop-appletsrc": {
+          "mode": "600",
+          "sha256": "141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751",
+          "size": "5738"
+        },
+        "plasmashellrc": {
+          "mode": "600",
+          "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774",
+          "size": "1811"
+        }
+      },
+      "exact": true,
+      "live": {
+        "plasma-org.kde.plasma.desktop-appletsrc": {
+          "mode": "600",
+          "sha256": "141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751",
+          "size": "5738"
+        },
+        "plasmashellrc": {
+          "mode": "600",
+          "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774",
+          "size": "1811"
+        }
+      }
+    },
+    "R15_exact_restore": {
+      "baseline": {
+        "plasma-org.kde.plasma.desktop-appletsrc": {
+          "mode": "600",
+          "sha256": "141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751",
+          "size": "5738"
+        },
+        "plasmashellrc": {
+          "mode": "600",
+          "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774",
+          "size": "1811"
+        }
+      },
+      "exact": true,
+      "live": {
+        "plasma-org.kde.plasma.desktop-appletsrc": {
+          "mode": "600",
+          "sha256": "141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751",
+          "size": "5738"
+        },
+        "plasmashellrc": {
+          "mode": "600",
+          "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774",
+          "size": "1811"
+        }
+      }
+    },
+    "baseline": {
+      "config": {
+        "plasma-org.kde.plasma.desktop-appletsrc": {
+          "mode": "600",
+          "sha256": "141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751",
+          "size": "5738"
+        },
+        "plasmashellrc": {
+          "mode": "600",
+          "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774",
+          "size": "1811"
+        }
+      },
+      "user_files": {
+        "/home/canopy/.config/kwinoutputconfig.json": "3ac08a9117c6da5a46ae751de32796137cc53a918d105c8dc593c0065f88cc25",
+        "/home/canopy/g2_g4_copy_hashes.txt": "91f0551abbeb05c179a920bd06bea4a261f7059045afca83e5f518bcc3d34c07",
+        "/home/canopy/g2_g4_final_status.txt": "9798e783184feb8149e6ad99a49ecc09a1e12577048180457bd23fde7003868e",
+        "/home/canopy/g2_g4_manifest_check.txt": "8f1689ac622dcc21b63dae27219171c34bced53def91be0385da436a61103db4",
+        "/home/canopy/g2_g4_retry_status.txt": "edabd1fff759674eb037b9d8e5bfb67d8979a0337a0bbf17722ece1f47fd0e1e",
+        "/home/canopy/g2_g4_status.txt": "541214d833ba936095c902db503073629ead7934fb3f277d0adba26e745a32ed",
+        "/home/canopy/g2_source_bundle/README.md": "2de8134b43a26eb05b8d796e14e794023f5130533cf5dfdc6a4fe87244b147dc",
+        "/home/canopy/g3_g4_runtime_package/ACCEPTANCE_CHECKLIST.md": "074ee060d54973c3877c663e222c043750f8e9afa28258c47931f83acd490e7e",
+        "/home/canopy/g3_g4_runtime_package/README.md": "33b45e0be02af70bb8e894428f6a1561576a682ac9164642431882ae32c71222",
+        "/home/canopy/g3_g4_runtime_package/config.env": "418011820f78ee0abf2d358beb337ad76432edec1e798b0ad3f03a991a422c8c"
+      }
+    },
+    "cycle1_edited_config": {
+      "plasma-org.kde.plasma.desktop-appletsrc": {
+        "mode": "600",
+        "sha256": "fa81ab829aeb54153e1f6e088571b388b7c3c4a597e598e518d383454a793a8c",
+        "size": "5780"
+      },
+      "plasmashellrc": {
+        "mode": "600",
+        "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774",
+        "size": "1811"
+      }
+    },
+    "cycle1_preserved_config": {
+      "plasma-org.kde.plasma.desktop-appletsrc": {
+        "mode": "600",
+        "sha256": "fa81ab829aeb54153e1f6e088571b388b7c3c4a597e598e518d383454a793a8c",
+        "size": "5780"
+      },
+      "plasmashellrc": {
+        "mode": "600",
+        "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774",
+        "size": "1811"
+      }
+    },
+    "cycle1_snapshot": {
+      "manifest_sha256": "375fd19fedec7f27011bf44ad7ce8717c10a8a23cdf9fc51bbd97fce1724000e",
+      "meta_sha256": "4698a613e372c40ca03bedb249e7a065a2e0c44398bcf58380664ea82c72afdc",
+      "rows": [
+        [
+          "/home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc",
+          "600",
+          "141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751"
+        ],
+        [
+          "/home/canopy/.config/plasmashellrc",
+          "600",
+          "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774"
+        ]
+      ]
+    },
+    "cycle2_edited_config": {
+      "plasma-org.kde.plasma.desktop-appletsrc": {
+        "mode": "600",
+        "sha256": "eee9aa29f6c10cdcd1689246790f184425202a1916e24c5afe8f947812cee9ec",
+        "size": "5838"
+      },
+      "plasmashellrc": {
+        "mode": "600",
+        "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774",
+        "size": "1811"
+      }
+    },
+    "cycle2_preserved_config": {
+      "plasma-org.kde.plasma.desktop-appletsrc": {
+        "mode": "600",
+        "sha256": "eee9aa29f6c10cdcd1689246790f184425202a1916e24c5afe8f947812cee9ec",
+        "size": "5838"
+      },
+      "plasmashellrc": {
+        "mode": "600",
+        "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774",
+        "size": "1811"
+      }
+    },
+    "final_state": {
+      "config": {
+        "plasma-org.kde.plasma.desktop-appletsrc": {
+          "mode": "600",
+          "sha256": "141b7e8889709c41228e1b72841e990180854409e897287cdb284199feefc751",
+          "size": "5738"
+        },
+        "plasmashellrc": {
+          "mode": "600",
+          "sha256": "a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774",
+          "size": "1811"
+        }
+      },
+      "user_files": {
+        "/home/canopy/.config/kwinoutputconfig.json": "3ac08a9117c6da5a46ae751de32796137cc53a918d105c8dc593c0065f88cc25",
+        "/home/canopy/g2_g4_copy_hashes.txt": "91f0551abbeb05c179a920bd06bea4a261f7059045afca83e5f518bcc3d34c07",
+        "/home/canopy/g2_g4_final_status.txt": "9798e783184feb8149e6ad99a49ecc09a1e12577048180457bd23fde7003868e",
+        "/home/canopy/g2_g4_manifest_check.txt": "8f1689ac622dcc21b63dae27219171c34bced53def91be0385da436a61103db4",
+        "/home/canopy/g2_g4_retry_status.txt": "edabd1fff759674eb037b9d8e5bfb67d8979a0337a0bbf17722ece1f47fd0e1e",
+        "/home/canopy/g2_g4_status.txt": "541214d833ba936095c902db503073629ead7934fb3f277d0adba26e745a32ed",
+        "/home/canopy/g2_source_bundle/README.md": "2de8134b43a26eb05b8d796e14e794023f5130533cf5dfdc6a4fe87244b147dc",
+        "/home/canopy/g3_g4_runtime_package/ACCEPTANCE_CHECKLIST.md": "074ee060d54973c3877c663e222c043750f8e9afa28258c47931f83acd490e7e",
+        "/home/canopy/g3_g4_runtime_package/README.md": "33b45e0be02af70bb8e894428f6a1561576a682ac9164642431882ae32c71222",
+        "/home/canopy/g3_g4_runtime_package/config.env": "418011820f78ee0abf2d358beb337ad76432edec1e798b0ad3f03a991a422c8c"
+      }
+    },
+    "personal_data_preservation": {
+      "after": {
+        "/home/canopy/.config/kwinoutputconfig.json": "3ac08a9117c6da5a46ae751de32796137cc53a918d105c8dc593c0065f88cc25",
+        "/home/canopy/g2_g4_copy_hashes.txt": "91f0551abbeb05c179a920bd06bea4a261f7059045afca83e5f518bcc3d34c07",
+        "/home/canopy/g2_g4_final_status.txt": "9798e783184feb8149e6ad99a49ecc09a1e12577048180457bd23fde7003868e",
+        "/home/canopy/g2_g4_manifest_check.txt": "8f1689ac622dcc21b63dae27219171c34bced53def91be0385da436a61103db4",
+        "/home/canopy/g2_g4_retry_status.txt": "edabd1fff759674eb037b9d8e5bfb67d8979a0337a0bbf17722ece1f47fd0e1e",
+        "/home/canopy/g2_g4_status.txt": "541214d833ba936095c902db503073629ead7934fb3f277d0adba26e745a32ed",
+        "/home/canopy/g2_source_bundle/README.md": "2de8134b43a26eb05b8d796e14e794023f5130533cf5dfdc6a4fe87244b147dc",
+        "/home/canopy/g3_g4_runtime_package/ACCEPTANCE_CHECKLIST.md": "074ee060d54973c3877c663e222c043750f8e9afa28258c47931f83acd490e7e",
+        "/home/canopy/g3_g4_runtime_package/README.md": "33b45e0be02af70bb8e894428f6a1561576a682ac9164642431882ae32c71222",
+        "/home/canopy/g3_g4_runtime_package/config.env": "418011820f78ee0abf2d358beb337ad76432edec1e798b0ad3f03a991a422c8c"
+      },
+      "all_equal": true,
+      "before": {
+        "/home/canopy/.config/kwinoutputconfig.json": "3ac08a9117c6da5a46ae751de32796137cc53a918d105c8dc593c0065f88cc25",
+        "/home/canopy/g2_g4_copy_hashes.txt": "91f0551abbeb05c179a920bd06bea4a261f7059045afca83e5f518bcc3d34c07",
+        "/home/canopy/g2_g4_final_status.txt": "9798e783184feb8149e6ad99a49ecc09a1e12577048180457bd23fde7003868e",
+        "/home/canopy/g2_g4_manifest_check.txt": "8f1689ac622dcc21b63dae27219171c34bced53def91be0385da436a61103db4",
+        "/home/canopy/g2_g4_retry_status.txt": "edabd1fff759674eb037b9d8e5bfb67d8979a0337a0bbf17722ece1f47fd0e1e",
+        "/home/canopy/g2_g4_status.txt": "541214d833ba936095c902db503073629ead7934fb3f277d0adba26e745a32ed",
+        "/home/canopy/g2_source_bundle/README.md": "2de8134b43a26eb05b8d796e14e794023f5130533cf5dfdc6a4fe87244b147dc",
+        "/home/canopy/g3_g4_runtime_package/ACCEPTANCE_CHECKLIST.md": "074ee060d54973c3877c663e222c043750f8e9afa28258c47931f83acd490e7e",
+        "/home/canopy/g3_g4_runtime_package/README.md": "33b45e0be02af70bb8e894428f6a1561576a682ac9164642431882ae32c71222",
+        "/home/canopy/g3_g4_runtime_package/config.env": "418011820f78ee0abf2d358beb337ad76432edec1e798b0ad3f03a991a422c8c"
+      },
+      "count": 10
+    }
+  },
+  "finished_utc": "2026-11-28T04:15:42Z",
+  "gap_disposition": {
+    "B01_PASS_WITH_GAPS": "superseded by this real-runtime pass for the measured scope",
+    "N02_config_untouched": "DIRECT before/after hashes",
+    "N03_config_untouched": "DIRECT before/after hashes",
+    "N04_config_untouched": "DIRECT before/after hashes",
+    "R07_restoration": "byte/mode exact vs baseline",
+    "R15_restoration": "byte/mode exact vs baseline",
+    "personal_data_preservation": "10 user files hashed before/after",
+    "stock_fallback_no_manifest": "config unchanged, pinned orphan removed"
+  },
+  "ledger": [
+    {
+      "SHA256SUMS_sha256": "32000906b84ddd653d38a4c2602353ed2012263bac724b7ab8d9b51460435e1e",
+      "command": "cd \"C:/Users/X1/AppData/Local/hermes/cache/scratch/native_classic_reversible_install\" && sha256sum -c SHA256SUMS && for f in install.sh uninstall.sh verify.sh rollback.sh; do bash -n \"$f\" || exit 1; done",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "install.sh: OK",
+        "uninstall.sh: OK",
+        "verify.sh: OK",
+        "rollback.sh: OK",
+        "README.md: OK"
+      ],
+      "id": "C00",
+      "label": "PASS",
+      "log": "logs/c00.out",
+      "package_file_sha256": {
+        "README.md": "e6aeece8f8b5a0764abc30b146149cd83c4eacb1556538c2b6ceaa9dc0869a1c",
+        "install.sh": "fa0e2e08dddc22856582d7651fbeeed92aa6abe19057424327b9164dfe13bce6",
+        "rollback.sh": "6bfad054baf44bf6702f56244d898338c072141bd10d7e0d7357de8f036d67af",
+        "uninstall.sh": "31006f54d3b8e8f8ea0ce11f597f05037384904a67f5e6a7e36c35b6233a4ebd",
+        "verify.sh": "01c32f0a24eab06a371606a13e98b6bd53e9082be7d029e7cbb7665151e37dbc"
+      },
+      "rc": 0,
+      "stage": "host pinned-package integrity + syntax"
+    },
+    {
+      "command": "ssh <redacted-key> mkdir -p /home/canopy/native_rollback_rt ; scp <pinned files> canopy@127.0.0.1:/home/canopy/native_rollback_rt/",
+      "expected_rc": 0,
+      "id": "C01",
+      "label": "PASS",
+      "log": "logs/c01_staging.out",
+      "rc": 0,
+      "stage": "guest staging of exact pinned scripts"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && chmod 755 *.sh guest_state.sh && sha256sum -c SHA256SUMS && for f in install.sh uninstall.sh verify.sh rollback.sh; do bash -n \"$f\" || exit 1; done",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "install.sh: OK",
+        "uninstall.sh: OK",
+        "verify.sh: OK",
+        "rollback.sh: OK",
+        "README.md: OK"
+      ],
+      "id": "C02",
+      "label": "PASS",
+      "log": "logs/c02.out",
+      "rc": 0,
+      "stage": "guest pinned-package integrity + syntax"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; if [ -f /home/canopy/.local/share/canopy-classic/install-manifest.env ]; then (cd /home/canopy/native_rollback_rt && bash rollback.sh --restore-only --no-restart) || true; fi; rm -f /home/canopy/.local/bin/canopy-classic /home/canopy/.config/autostart/canopy-classic.desktop; rm -rf /home/canopy/.local/share/canopy-classic/wallpapers; rm -rf /home/canopy/.local/share/canopy-classic/backup; echo MANIFEST=$([ -f /home/canopy/.local/share/canopy-classic/install-manifest.env ]&&echo PRESENT||echo ABSENT); echo BIN_INSTALLED=$([ -f /home/canopy/.local/bin/canopy-classic ]&&echo PRESENT||echo ABSENT); echo AUTOSTART=$([ -f /home/canopy/.config/autostart/canopy-classic.desktop ]&&echo PRESENT||echo ABSENT); echo BACKUP=$([ -d /home/canopy/.local/share/canopy-classic/backup ]&&echo PRESENT||echo ABSENT)",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "MANIFEST=ABSENT",
+        "BIN_INSTALLED=ABSENT",
+        "AUTOSTART=ABSENT",
+        "BACKUP=ABSENT"
+      ],
+      "id": "C03",
+      "label": "PASS",
+      "log": "logs/c03.out",
+      "rc": 0,
+      "stage": "preflight normalization to stock (idempotent reruns)"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; echo BIN_SHA=$(sha256sum /home/canopy/g2_source_bundle/build/classic/canopy-classic-spike|awk \"{print \\$1}\"); echo WALL_SHA=$(sha256sum /home/canopy/g2_source_bundle/source/prototype/classic/assets/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png|awk \"{print \\$1}\"); echo MANIFEST=$([ -f /home/canopy/.local/share/canopy-classic/install-manifest.env ]&&echo PRESENT||echo ABSENT); echo BIN_INSTALLED=$([ -f /home/canopy/.local/bin/canopy-classic ]&&echo PRESENT||echo ABSENT)",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "BIN_SHA=4089251cf6a557d74ca308f3e32f59fea318f62d3285204e9ec7872bcc6b3f14",
+        "WALL_SHA=8c6cab50a0977fc129c0d2a20523d9361646f36da66f2f3f2b2436a0d9001381",
+        "MANIFEST=ABSENT",
+        "BIN_INSTALLED=ABSENT"
+      ],
+      "id": "P00",
+      "label": "PASS",
+      "log": "logs/p00.out",
+      "rc": 0,
+      "stage": "guest source asset pins + stock preflight"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; bash /home/canopy/native_rollback_rt/guest_state.sh",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "=== STATE DONE ==="
+      ],
+      "id": "S00",
+      "label": "PASS",
+      "log": "logs/s00_state.out",
+      "rc": 0,
+      "stage": "baseline stock state + user-file hashes"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash install.sh --binary /home/canopy/g2_source_bundle/build/classic/canopy-classic-spike --wallpaper /home/canopy/g2_source_bundle/source/prototype/classic/assets/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "manifest written",
+        "wallpaper applied via plasma-apply-wallpaperimage"
+      ],
+      "id": "R01",
+      "label": "PASS",
+      "log": "logs/r01.out",
+      "rc": 0,
+      "stage": "cycle 1 install (exact pinned assets)"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash verify.sh",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "STATUS=INSTALLED_INTEGRITY_OK"
+      ],
+      "id": "R02",
+      "label": "PASS",
+      "log": "logs/r02.out",
+      "rc": 0,
+      "stage": "cycle 1 verify installed"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash install.sh --binary /home/canopy/g2_source_bundle/build/classic/canopy-classic-spike --wallpaper /home/canopy/g2_source_bundle/source/prototype/classic/assets/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png",
+      "expected_rc": 1,
+      "expected_tokens": [
+        "already installed (manifest:"
+      ],
+      "id": "U00",
+      "label": "PASS",
+      "log": "logs/u00_upgrade_refused.out",
+      "rc": 1,
+      "stage": "upgrade fail-closed: install refuses existing manifest"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; bash -c 'M=/home/canopy/.local/share/canopy-classic/backup/snapshot.meta; echo META_SHA=$(sha256sum $M|awk \"{print \\$1}\"); while IFS=$(printf \"\\t\") read -r p mo sh; do [ -n \"$p\" ] && printf \"SNAP\\t%s\\t%s\\t%s\\n\" \"$p\" \"$mo\" \"$sh\"; done < $M; echo MANIFEST_SHA=$(sha256sum /home/canopy/.local/share/canopy-classic/install-manifest.env|awk \"{print \\$1}\")'",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "META_SHA=",
+        "MANIFEST_SHA=",
+        "SNAP\t"
+      ],
+      "id": "R03",
+      "label": "PASS",
+      "log": "logs/r03.out",
+      "parsed": {},
+      "rc": 0,
+      "stage": "cycle 1 snapshot manifest capture"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; printf '\\n# native-rollback-proof cycle1 user edit\\n' >> /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc; echo CFG_EDITED_SHA=$(sha256sum /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc|awk \"{print \\$1}\")",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "CFG_EDITED_SHA="
+      ],
+      "id": "R04",
+      "label": "PASS",
+      "log": "logs/r04.out",
+      "rc": 0,
+      "stage": "cycle 1 user config edit after install"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; for c in /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc /home/canopy/.config/plasmashellrc; do printf 'CFG %s sha256=%s mode=%s size=%s\\n' \"$(basename \"$c\")\" \"$(sha256sum \"$c\"|awk '{print $1}')\" \"$(stat -c '%a' \"$c\")\" \"$(stat -c '%s' \"$c\")\"; done",
+      "expected_rc": 0,
+      "id": "R04X",
+      "label": "PASS",
+      "log": "logs/r04x.out",
+      "rc": 0,
+      "stage": "cycle 1 edited config hash"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash uninstall.sh",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "preserving user settings",
+        "kept manifest and snapshot",
+        "removed hash-verified Canopy binary, wallpaper and autostart entry"
+      ],
+      "id": "R05",
+      "label": "PASS",
+      "log": "logs/r05.out",
+      "rc": 0,
+      "stage": "cycle 1 uninstall preserving user settings"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; for c in /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc /home/canopy/.config/plasmashellrc; do printf 'CFG %s sha256=%s mode=%s size=%s\\n' \"$(basename \"$c\")\" \"$(sha256sum \"$c\"|awk '{print $1}')\" \"$(stat -c '%a' \"$c\")\" \"$(stat -c '%s' \"$c\")\"; done",
+      "expected_rc": 0,
+      "id": "R05P",
+      "label": "PASS",
+      "log": "logs/r05p.out",
+      "rc": 0,
+      "stage": "cycle 1 post-uninstall preservation proof"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash verify.sh",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "STATUS=UNINSTALLED_PENDING_RESTORE",
+        "restore-only available: rollback.sh --restore-only"
+      ],
+      "id": "R06",
+      "label": "PASS",
+      "log": "logs/r06.out",
+      "rc": 0,
+      "stage": "cycle 1 verify pending restore"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cp -p /home/canopy/.local/share/canopy-classic/backup/$(basename /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc) /home/canopy/native_rollback_rt/n01_appletsrc.bak && printf 'CORRUPT' >> /home/canopy/.local/share/canopy-classic/backup/$(basename /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc) && echo TAMPERED_SHA=$(sha256sum /home/canopy/.local/share/canopy-classic/backup/$(basename /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc)|awk \"{print \\$1}\")",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "TAMPERED_SHA="
+      ],
+      "id": "N01SET",
+      "label": "PASS",
+      "log": "logs/n01set.out",
+      "rc": 0,
+      "stage": "N01 setup: corrupt one snapshot backup"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; for c in /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc /home/canopy/.config/plasmashellrc; do printf 'CFG %s sha256=%s mode=%s size=%s\\n' \"$(basename \"$c\")\" \"$(sha256sum \"$c\"|awk '{print $1}')\" \"$(stat -c '%a' \"$c\")\" \"$(stat -c '%s' \"$c\")\"; done",
+      "expected_rc": 0,
+      "id": "N01B",
+      "label": "PASS",
+      "log": "logs/n01b.out",
+      "rc": 0,
+      "stage": "N01 config before refusal"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash rollback.sh --restore-only --no-restart",
+      "expected_rc": 1,
+      "expected_tokens": [
+        "snapshot hash mismatch"
+      ],
+      "id": "N01",
+      "label": "PASS",
+      "log": "logs/n01.out",
+      "rc": 1,
+      "stage": "N01 negative control: unhashed snapshot refused"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; for c in /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc /home/canopy/.config/plasmashellrc; do printf 'CFG %s sha256=%s mode=%s size=%s\\n' \"$(basename \"$c\")\" \"$(sha256sum \"$c\"|awk '{print $1}')\" \"$(stat -c '%a' \"$c\")\" \"$(stat -c '%s' \"$c\")\"; done",
+      "expected_rc": 0,
+      "id": "N01U",
+      "label": "PASS",
+      "log": "logs/n01u.out",
+      "rc": 0,
+      "stage": "N01 config after refusal"
+    },
+    {
+      "command": "host-side map comparison of N01B and N01U",
+      "expected_rc": 0,
+      "id": "N01P",
+      "label": "PASS",
+      "log": "logs/n01p_config_proof.out",
+      "rc": 0,
+      "stage": "N01 direct before/after config proof"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cp -p /home/canopy/native_rollback_rt/n01_appletsrc.bak /home/canopy/.local/share/canopy-classic/backup/$(basename /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc) && echo RESTORED_SHA=$(sha256sum /home/canopy/.local/share/canopy-classic/backup/$(basename /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc)|awk \"{print \\$1}\")",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "RESTORED_SHA="
+      ],
+      "id": "N01R",
+      "label": "PASS",
+      "log": "logs/n01r.out",
+      "rc": 0,
+      "stage": "N01 restore snapshot bytes"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; printf 'unknown-source-native-rollback' > /home/canopy/.local/bin/canopy-classic && chmod 755 /home/canopy/.local/bin/canopy-classic && echo PRESENT_SHA=$(sha256sum /home/canopy/.local/bin/canopy-classic|awk \"{print \\$1}\")",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "PRESENT_SHA="
+      ],
+      "id": "N02SET",
+      "label": "PASS",
+      "log": "logs/n02set.out",
+      "rc": 0,
+      "stage": "N02 setup: unhashed binary at installed path"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; for c in /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc /home/canopy/.config/plasmashellrc; do printf 'CFG %s sha256=%s mode=%s size=%s\\n' \"$(basename \"$c\")\" \"$(sha256sum \"$c\"|awk '{print $1}')\" \"$(stat -c '%a' \"$c\")\" \"$(stat -c '%s' \"$c\")\"; done",
+      "expected_rc": 0,
+      "id": "N02B",
+      "label": "PASS",
+      "log": "logs/n02b.out",
+      "rc": 0,
+      "stage": "N02 config before refusal"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash rollback.sh --no-restart",
+      "expected_rc": 1,
+      "expected_tokens": [
+        "installed binary present but not hash-pinned",
+        "refusing unknown asset"
+      ],
+      "id": "N02",
+      "label": "PASS",
+      "log": "logs/n02.out",
+      "rc": 1,
+      "stage": "N02 negative control: unknown installed source refused"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; for c in /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc /home/canopy/.config/plasmashellrc; do printf 'CFG %s sha256=%s mode=%s size=%s\\n' \"$(basename \"$c\")\" \"$(sha256sum \"$c\"|awk '{print $1}')\" \"$(stat -c '%a' \"$c\")\" \"$(stat -c '%s' \"$c\")\"; done",
+      "expected_rc": 0,
+      "id": "N02U",
+      "label": "PASS",
+      "log": "logs/n02u.out",
+      "rc": 0,
+      "stage": "N02 config after refusal"
+    },
+    {
+      "command": "host-side map comparison of N02B and N02U",
+      "expected_rc": 0,
+      "id": "N02P",
+      "label": "PASS",
+      "log": "logs/n02p_config_proof.out",
+      "rc": 0,
+      "stage": "N02 direct before/after config proof"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; rm -f /home/canopy/.local/bin/canopy-classic; echo BIN_AFTER=$([ -e /home/canopy/.local/bin/canopy-classic ]&&echo PRESENT||echo ABSENT)",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "BIN_AFTER=ABSENT"
+      ],
+      "id": "N02R",
+      "label": "PASS",
+      "log": "logs/n02r.out",
+      "rc": 0,
+      "stage": "N02 remove unknown source"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cp -p /home/canopy/.local/share/canopy-classic/backup/snapshot.meta /home/canopy/native_rollback_rt/n03_meta.bak && printf '/home/canopy/.config/unknown-source.conf\\t600\\t4089251cf6a557d74ca308f3e32f59fea318f62d3285204e9ec7872bcc6b3f14\\n' \"$(sha256sum /home/canopy/.local/share/canopy-classic/backup/snapshot.meta|awk \"{print \\$1}\")\" >> /home/canopy/.local/share/canopy-classic/backup/snapshot.meta && tail -1 /home/canopy/.local/share/canopy-classic/backup/snapshot.meta",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "unknown-source.conf"
+      ],
+      "id": "N03SET",
+      "label": "PASS",
+      "log": "logs/n03set.out",
+      "rc": 0,
+      "stage": "N03 setup: unknown snapshot asset row"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; for c in /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc /home/canopy/.config/plasmashellrc; do printf 'CFG %s sha256=%s mode=%s size=%s\\n' \"$(basename \"$c\")\" \"$(sha256sum \"$c\"|awk '{print $1}')\" \"$(stat -c '%a' \"$c\")\" \"$(stat -c '%s' \"$c\")\"; done",
+      "expected_rc": 0,
+      "id": "N03B",
+      "label": "PASS",
+      "log": "logs/n03b.out",
+      "rc": 0,
+      "stage": "N03 config before refusal"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash rollback.sh --no-restart",
+      "expected_rc": 1,
+      "expected_tokens": [
+        "unknown snapshot asset refused"
+      ],
+      "id": "N03",
+      "label": "PASS",
+      "log": "logs/n03.out",
+      "rc": 1,
+      "stage": "N03 negative control: unknown snapshot asset refused"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; for c in /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc /home/canopy/.config/plasmashellrc; do printf 'CFG %s sha256=%s mode=%s size=%s\\n' \"$(basename \"$c\")\" \"$(sha256sum \"$c\"|awk '{print $1}')\" \"$(stat -c '%a' \"$c\")\" \"$(stat -c '%s' \"$c\")\"; done",
+      "expected_rc": 0,
+      "id": "N03U",
+      "label": "PASS",
+      "log": "logs/n03u.out",
+      "rc": 0,
+      "stage": "N03 config after refusal"
+    },
+    {
+      "command": "host-side map comparison of N03B and N03U",
+      "expected_rc": 0,
+      "id": "N03P",
+      "label": "PASS",
+      "log": "logs/n03p_config_proof.out",
+      "rc": 0,
+      "stage": "N03 direct before/after config proof"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cp -p /home/canopy/native_rollback_rt/n03_meta.bak /home/canopy/.local/share/canopy-classic/backup/snapshot.meta && echo META_RESTORED_SHA=$(sha256sum /home/canopy/.local/share/canopy-classic/backup/snapshot.meta|awk \"{print \\$1}\")",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "META_RESTORED_SHA="
+      ],
+      "id": "N03R",
+      "label": "PASS",
+      "log": "logs/n03r.out",
+      "rc": 0,
+      "stage": "N03 restore snapshot metadata bytes"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cp -p /home/canopy/.local/share/canopy-classic/install-manifest.env /home/canopy/native_rollback_rt/n04_manifest.bak && sed -i 's|^CANOPY_BINARY_SHA256=.*|CANOPY_BINARY_SHA256=0000000000000000000000000000000000000000000000000000000000000000|' /home/canopy/.local/share/canopy-classic/install-manifest.env && grep '^CANOPY_BINARY_SHA256=' /home/canopy/.local/share/canopy-classic/install-manifest.env",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "CANOPY_BINARY_SHA256=0000"
+      ],
+      "id": "N04SET",
+      "label": "PASS",
+      "log": "logs/n04set.out",
+      "rc": 0,
+      "stage": "N04 setup: tamper manifest binary pin"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; for c in /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc /home/canopy/.config/plasmashellrc; do printf 'CFG %s sha256=%s mode=%s size=%s\\n' \"$(basename \"$c\")\" \"$(sha256sum \"$c\"|awk '{print $1}')\" \"$(stat -c '%a' \"$c\")\" \"$(stat -c '%s' \"$c\")\"; done",
+      "expected_rc": 0,
+      "id": "N04B",
+      "label": "PASS",
+      "log": "logs/n04b.out",
+      "rc": 0,
+      "stage": "N04 config before refusal"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash rollback.sh --no-restart",
+      "expected_rc": 1,
+      "expected_tokens": [
+        "manifest binary pin mismatch",
+        "refusing unknown asset"
+      ],
+      "id": "N04",
+      "label": "PASS",
+      "log": "logs/n04.out",
+      "rc": 1,
+      "stage": "N04 negative control: tampered manifest pin refused"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; for c in /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc /home/canopy/.config/plasmashellrc; do printf 'CFG %s sha256=%s mode=%s size=%s\\n' \"$(basename \"$c\")\" \"$(sha256sum \"$c\"|awk '{print $1}')\" \"$(stat -c '%a' \"$c\")\" \"$(stat -c '%s' \"$c\")\"; done",
+      "expected_rc": 0,
+      "id": "N04U",
+      "label": "PASS",
+      "log": "logs/n04u.out",
+      "rc": 0,
+      "stage": "N04 config after refusal"
+    },
+    {
+      "command": "host-side map comparison of N04B and N04U",
+      "expected_rc": 0,
+      "id": "N04P",
+      "label": "PASS",
+      "log": "logs/n04p_config_proof.out",
+      "rc": 0,
+      "stage": "N04 direct before/after config proof"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cp -p /home/canopy/native_rollback_rt/n04_manifest.bak /home/canopy/.local/share/canopy-classic/install-manifest.env && echo MANIFEST_RESTORED_SHA=$(sha256sum /home/canopy/.local/share/canopy-classic/install-manifest.env|awk \"{print \\$1}\")",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "MANIFEST_RESTORED_SHA="
+      ],
+      "id": "N04R",
+      "label": "PASS",
+      "log": "logs/n04r.out",
+      "rc": 0,
+      "stage": "N04 restore manifest bytes"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash rollback.sh --no-restart",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "restored stock config:",
+        "removed manifest and snapshot",
+        "restore-only complete"
+      ],
+      "id": "R07",
+      "label": "PASS",
+      "log": "logs/r07.out",
+      "rc": 0,
+      "stage": "cycle 1 auto restore-only rollback"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; bash /home/canopy/native_rollback_rt/guest_state.sh",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "=== STATE DONE ==="
+      ],
+      "id": "R07S",
+      "label": "PASS",
+      "log": "logs/r07s_state.out",
+      "rc": 0,
+      "stage": "cycle 1 post-restore state"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; for c in /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc /home/canopy/.config/plasmashellrc; do printf 'CFG %s sha256=%s mode=%s size=%s\\n' \"$(basename \"$c\")\" \"$(sha256sum \"$c\"|awk '{print $1}')\" \"$(stat -c '%a' \"$c\")\" \"$(stat -c '%s' \"$c\")\"; done",
+      "expected_rc": 0,
+      "id": "R07X",
+      "label": "PASS",
+      "log": "logs/r07x.out",
+      "rc": 0,
+      "stage": "cycle 1 byte/mode-exact stock restore proof"
+    },
+    {
+      "command": "host-side comparison of R07X config map against S00 baseline",
+      "expected_rc": 0,
+      "id": "R07C",
+      "label": "PASS",
+      "log": "logs/r07c_exact_assertion.out",
+      "rc": 0,
+      "stage": "R07 exact-restore assertion"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash verify.sh",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "STATUS=NOT_INSTALLED"
+      ],
+      "id": "R08",
+      "label": "PASS",
+      "log": "logs/r08.out",
+      "rc": 0,
+      "stage": "cycle 1 verify stock after restore"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash install.sh --binary /home/canopy/g2_source_bundle/build/classic/canopy-classic-spike --wallpaper /home/canopy/g2_source_bundle/source/prototype/classic/assets/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "manifest written",
+        "wallpaper applied via plasma-apply-wallpaperimage"
+      ],
+      "id": "R09",
+      "label": "PASS",
+      "log": "logs/r09.out",
+      "rc": 0,
+      "stage": "cycle 2 reinstall (upgrade path)"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash verify.sh",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "STATUS=INSTALLED_INTEGRITY_OK"
+      ],
+      "id": "R10",
+      "label": "PASS",
+      "log": "logs/r10.out",
+      "rc": 0,
+      "stage": "cycle 2 verify installed"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; bash -c 'M=/home/canopy/.local/share/canopy-classic/backup/snapshot.meta; echo META_SHA=$(sha256sum $M|awk \"{print \\$1}\"); while IFS=$(printf \"\\t\") read -r p mo sh; do [ -n \"$p\" ] && printf \"SNAP\\t%s\\t%s\\t%s\\n\" \"$p\" \"$mo\" \"$sh\"; done < $M; echo MANIFEST_SHA=$(sha256sum /home/canopy/.local/share/canopy-classic/install-manifest.env|awk \"{print \\$1}\")'",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "META_SHA=",
+        "MANIFEST_SHA=",
+        "SNAP\t"
+      ],
+      "id": "R11",
+      "label": "PASS",
+      "log": "logs/r11.out",
+      "rc": 0,
+      "stage": "cycle 2 snapshot manifest capture"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; printf '\\n# native-rollback-proof cycle2 user edit\\n' >> /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc; echo CFG_EDITED_SHA=$(sha256sum /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc|awk \"{print \\$1}\")",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "CFG_EDITED_SHA="
+      ],
+      "id": "R12",
+      "label": "PASS",
+      "log": "logs/r12.out",
+      "rc": 0,
+      "stage": "cycle 2 user config edit after install"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; for c in /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc /home/canopy/.config/plasmashellrc; do printf 'CFG %s sha256=%s mode=%s size=%s\\n' \"$(basename \"$c\")\" \"$(sha256sum \"$c\"|awk '{print $1}')\" \"$(stat -c '%a' \"$c\")\" \"$(stat -c '%s' \"$c\")\"; done",
+      "expected_rc": 0,
+      "id": "R12X",
+      "label": "PASS",
+      "log": "logs/r12x.out",
+      "rc": 0,
+      "stage": "cycle 2 edited config hash"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash uninstall.sh",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "preserving user settings",
+        "kept manifest and snapshot"
+      ],
+      "id": "R13",
+      "label": "PASS",
+      "log": "logs/r13.out",
+      "rc": 0,
+      "stage": "cycle 2 uninstall preserving user settings"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; for c in /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc /home/canopy/.config/plasmashellrc; do printf 'CFG %s sha256=%s mode=%s size=%s\\n' \"$(basename \"$c\")\" \"$(sha256sum \"$c\"|awk '{print $1}')\" \"$(stat -c '%a' \"$c\")\" \"$(stat -c '%s' \"$c\")\"; done",
+      "expected_rc": 0,
+      "id": "R13P",
+      "label": "PASS",
+      "log": "logs/r13p.out",
+      "rc": 0,
+      "stage": "cycle 2 post-uninstall preservation proof"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash verify.sh",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "STATUS=UNINSTALLED_PENDING_RESTORE"
+      ],
+      "id": "R14",
+      "label": "PASS",
+      "log": "logs/r14.out",
+      "rc": 0,
+      "stage": "cycle 2 verify pending restore"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash rollback.sh --restore-only --no-restart",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "restored stock config:",
+        "removed manifest and snapshot",
+        "restore-only complete"
+      ],
+      "id": "R15",
+      "label": "PASS",
+      "log": "logs/r15.out",
+      "rc": 0,
+      "stage": "cycle 2 explicit restore-only rollback"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; for c in /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc /home/canopy/.config/plasmashellrc; do printf 'CFG %s sha256=%s mode=%s size=%s\\n' \"$(basename \"$c\")\" \"$(sha256sum \"$c\"|awk '{print $1}')\" \"$(stat -c '%a' \"$c\")\" \"$(stat -c '%s' \"$c\")\"; done",
+      "expected_rc": 0,
+      "id": "R15X",
+      "label": "PASS",
+      "log": "logs/r15x.out",
+      "rc": 0,
+      "stage": "cycle 2 byte/mode-exact stock restore proof"
+    },
+    {
+      "command": "host-side comparison of R15X config map against S00 baseline",
+      "expected_rc": 0,
+      "id": "R15C",
+      "label": "PASS",
+      "log": "logs/r15c_exact_assertion.out",
+      "rc": 0,
+      "stage": "R15 exact-restore assertion"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash verify.sh",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "STATUS=NOT_INSTALLED"
+      ],
+      "id": "R16",
+      "label": "PASS",
+      "log": "logs/r16.out",
+      "rc": 0,
+      "stage": "cycle 2 verify final stock"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; bash /home/canopy/native_rollback_rt/guest_state.sh",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "=== STATE DONE ==="
+      ],
+      "id": "R17",
+      "label": "PASS",
+      "log": "logs/r17_state.out",
+      "rc": 0,
+      "stage": "final state before staging cleanup"
+    },
+    {
+      "command": "host-side comparison of USERFILE hashes from S00 and R17",
+      "expected_rc": 0,
+      "id": "R18",
+      "label": "PASS",
+      "log": "logs/r18_user_files.out",
+      "rc": 0,
+      "stage": "personal data preservation (10 user files)"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; echo MANIFEST=$([ -f /home/canopy/.local/share/canopy-classic/install-manifest.env ]&&echo PRESENT||echo ABSENT); cp -p /home/canopy/g2_source_bundle/build/classic/canopy-classic-spike /home/canopy/.local/bin/canopy-classic && chmod 755 /home/canopy/.local/bin/canopy-classic && echo ORPHAN_SHA=$(sha256sum /home/canopy/.local/bin/canopy-classic|awk \"{print \\$1}\")",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "MANIFEST=ABSENT",
+        "ORPHAN_SHA=4089251cf6a557d74ca308f3e32f59fea318f62d3285204e9ec7872bcc6b3f14"
+      ],
+      "id": "F01SET",
+      "label": "PASS",
+      "log": "logs/f01set.out",
+      "rc": 0,
+      "stage": "stock fallback setup: pinned orphan binary, no manifest"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; for c in /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc /home/canopy/.config/plasmashellrc; do printf 'CFG %s sha256=%s mode=%s size=%s\\n' \"$(basename \"$c\")\" \"$(sha256sum \"$c\"|awk '{print $1}')\" \"$(stat -c '%a' \"$c\")\" \"$(stat -c '%s' \"$c\")\"; done",
+      "expected_rc": 0,
+      "id": "F01B",
+      "label": "PASS",
+      "log": "logs/f01b.out",
+      "rc": 0,
+      "stage": "stock fallback config before"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash rollback.sh --no-restart",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "WARN manifest missing",
+        "removed orphan binary (SHA-256 matched pin)",
+        "WARN stock Plasma config was NOT restored",
+        "rollback orphan cleanup complete"
+      ],
+      "id": "F01",
+      "label": "PASS",
+      "log": "logs/f01.out",
+      "rc": 0,
+      "stage": "stock fallback with no manifest (orphan cleanup only)"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; for c in /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc /home/canopy/.config/plasmashellrc; do printf 'CFG %s sha256=%s mode=%s size=%s\\n' \"$(basename \"$c\")\" \"$(sha256sum \"$c\"|awk '{print $1}')\" \"$(stat -c '%a' \"$c\")\" \"$(stat -c '%s' \"$c\")\"; done",
+      "expected_rc": 0,
+      "id": "F01U",
+      "label": "PASS",
+      "log": "logs/f01u.out",
+      "rc": 0,
+      "stage": "stock fallback config after"
+    },
+    {
+      "command": "host-side map comparison of F01B and F01U",
+      "expected_rc": 0,
+      "id": "F01P",
+      "label": "PASS",
+      "log": "logs/f01p_config_proof.out",
+      "rc": 0,
+      "stage": "F01 direct before/after config proof"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; echo BIN_AFTER=$([ -e /home/canopy/.local/bin/canopy-classic ]&&echo PRESENT||echo ABSENT)",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "BIN_AFTER=ABSENT"
+      ],
+      "id": "F01C",
+      "label": "PASS",
+      "log": "logs/f01c.out",
+      "rc": 0,
+      "stage": "stock fallback orphan removed"
+    },
+    {
+      "command": "ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; rm -rf /home/canopy/native_rollback_rt; echo STAGING=$([ -e /home/canopy/native_rollback_rt ]&&echo PRESENT||echo ABSENT)",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "STAGING=ABSENT"
+      ],
+      "id": "R20",
+      "label": "PASS",
+      "log": "logs/r20.out",
+      "rc": 0,
+      "stage": "remove guest staging created by this proof"
+    },
+    {
+      "command": "ssh <redacted-key> 'bash -s' < guest_state.sh (host inline)",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "=== STATE DONE ==="
+      ],
+      "id": "R21",
+      "label": "PASS",
+      "log": "logs/r21_state.out",
+      "rc": 0,
+      "stage": "final stock state after staging cleanup (inline probe)"
+    },
+    {
+      "command": "\"C:/Program Files/Oracle/VirtualBox/VBoxManage.exe\" showvminfo Canopy-Test-Plasma6 --machinereadable | grep -E \"^(VMState|Forwarding)\"",
+      "expected_rc": 0,
+      "expected_tokens": [
+        "VMState=\"running\""
+      ],
+      "id": "R22",
+      "label": "PASS",
+      "log": "logs/r22_vm_state.out",
+      "rc": 0,
+      "stage": "VM state after proof"
+    }
+  ],
+  "owner_directive_sha": "79e30d79",
+  "package": {
+    "SHA256SUMS_sha256": "32000906b84ddd653d38a4c2602353ed2012263bac724b7ab8d9b51460435e1e",
+    "files": {
+      "README.md": "e6aeece8f8b5a0764abc30b146149cd83c4eacb1556538c2b6ceaa9dc0869a1c",
+      "install.sh": "fa0e2e08dddc22856582d7651fbeeed92aa6abe19057424327b9164dfe13bce6",
+      "rollback.sh": "6bfad054baf44bf6702f56244d898338c072141bd10d7e0d7357de8f036d67af",
+      "uninstall.sh": "31006f54d3b8e8f8ea0ce11f597f05037384904a67f5e6a7e36c35b6233a4ebd",
+      "verify.sh": "01c32f0a24eab06a371606a13e98b6bd53e9082be7d029e7cbb7665151e37dbc"
+    },
+    "path": "C:/Users/X1/AppData/Local/hermes/cache/scratch/native_classic_reversible_install"
+  },
+  "release_ready": false,
+  "schema_version": "native_rollback_runtime_evidence/1",
+  "scope": "real dedicated test VM runtime; no main merge, no release, no visual approval, no host apt/dpkg changes",
+  "screenshots": [
+    {
+      "bytes": 2791386,
+      "capture": "real VBoxManage framebuffer capture",
+      "label": "PASS",
+      "path": "screenshots/r07_stock.png",
+      "sha256": "e91b1d81e2c77204b654fa1c088fd8f6bbdcae595947d45dd0b9a07f3a76c163"
+    },
+    {
+      "bytes": 1025060,
+      "capture": "real VBoxManage framebuffer capture",
+      "label": "PASS",
+      "path": "screenshots/r15_stock.png",
+      "sha256": "fe21d8ad92dbd6de1729082a1892722426a1ffa626b5456aa1787a79d06e65bc"
+    }
+  ],
+  "started_utc": "2026-11-28T04:11:40Z",
+  "summary": {
+    "hold": 0,
+    "hold_ids": [],
+    "notes": [],
+    "pass": 67,
+    "screenshots": 2,
+    "steps": 67
+  },
+  "task": "M4 close B01 rollback evidence gaps with real native Plasma guest runtime proof",
+  "verdict": "PASS",
+  "vm": {
+    "credential_note": "key path redacted; no credential content recorded",
+    "guest_user": "canopy",
+    "name": "Canopy-Test-Plasma6",
+    "state": "running",
+    "transport": "host VBoxManage + SSH on forwarded port 2223"
+  }
+}

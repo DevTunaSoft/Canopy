@@ -1,0 +1,6 @@
+ID: R12
+STAGE: cycle 2 user config edit after install
+LABEL: PASS
+COMMAND: ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; printf '\n# native-rollback-proof cycle2 user edit\n' >> /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc; echo CFG_EDITED_SHA=$(sha256sum /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc|awk "{print \$1}")
+rc=0
+CFG_EDITED_SHA=eee9aa29f6c10cdcd1689246790f184425202a1916e24c5afe8f947812cee9ec

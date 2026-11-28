@@ -7,7 +7,10 @@ host state. A caller supplies the bytes it already owns, receives a canonical
 current-version document, and keeps ownership of every persistence decision.
 In particular, corrupt/unreadable/oversized state still follows the existing
 quarantine contract: a migration decision is not permission to overwrite raw
-bytes that the store could not inspect.
+bytes that the store could not inspect. ``PersistedPreferences`` calls
+:func:`migrate_document` lazily for a non-empty flat document on read, so a
+legacy setting survives a restart; the store still owns every write and keeps
+the exact legacy bytes in its bounded quarantine before replacing them.
 
 Two document shapes are defined (see ``docs/CLASSIC_CONFIG_SCHEMA_MIGRATION.md``):
 

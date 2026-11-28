@@ -1,0 +1,161 @@
+{
+  "ecosystems": [
+    {
+      "capabilities": [
+        "install",
+        "launch",
+        "remove",
+        "search",
+        "update"
+      ],
+      "core_mutation": "ABSENT_DECLARED",
+      "guest_acceptance": "NOT_RUN",
+      "id": "snap",
+      "isolation": "APT/DEB only in its own compatible environment with its own database; no foreign host repository or host library overwrite",
+      "label": "APT / DEB (Ubuntu and Debian)",
+      "probe_status": "NOT_RUN",
+      "provenance": [
+        "ubuntu-archive"
+      ],
+      "signature_schemes": [
+        "apt-signed-by"
+      ],
+      "signature_status": "DECLARED_NOT_VERIFIED",
+      "source_ids": [
+        "ubuntu-archive"
+      ],
+      "status": "DECLARED"
+    },
+    {
+      "capabilities": [
+        "install",
+        "launch",
+        "remove",
+        "search",
+        "update"
+      ],
+      "core_mutation": "ABSENT_DECLARED",
+      "guest_acceptance": "NOT_RUN",
+      "id": "dnf_rpm",
+      "isolation": "DNF/RPM only in a Fedora-compatible environment; signed official sources, no foreign host repository or host library overwrite",
+      "label": "DNF / RPM (Fedora)",
+      "probe_status": "NOT_RUN",
+      "provenance": [
+        "fedora-official"
+      ],
+      "signature_schemes": [
+        "rpm-gpg"
+      ],
+      "signature_status": "DECLARED_NOT_VERIFIED",
+      "source_ids": [
+        "fedora-official"
+      ],
+      "status": "DECLARED"
+    },
+    {
+      "capabilities": [
+        "install",
+        "launch",
+        "permissions",
+        "remove",
+        "search",
+        "update"
+      ],
+      "core_mutation": "ABSENT_DECLARED",
+      "guest_acceptance": "NOT_RUN",
+      "id": "flatpak_flathub",
+      "isolation": "Flatpak sandbox with explicit portal permissions; no host filesystem, device, socket or privileged-service access by default",
+      "label": "Flatpak / Flathub",
+      "probe_status": "NOT_RUN",
+      "provenance": [
+        "official-flathub"
+      ],
+      "signature_schemes": [
+        "gpg"
+      ],
+      "signature_status": "DECLARED_NOT_VERIFIED",
+      "source_ids": [
+        "flathub"
+      ],
+      "status": "DECLARED"
+    },
+    {
+      "capabilities": [
+        "install",
+        "launch",
+        "remove",
+        "search",
+        "update"
+      ],
+      "core_mutation": "ABSENT_DECLARED",
+      "guest_acceptance": "NOT_RUN",
+      "id": "pacman",
+      "isolation": "Pacman only in an isolated Arch-compatible environment with a separate database; no partial upgrades and no foreign host repos",
+      "label": "Pacman (Arch)",
+      "probe_status": "NOT_RUN",
+      "provenance": [
+        "arch-official"
+      ],
+      "signature_schemes": [
+        "pacman-key"
+      ],
+      "signature_status": "DECLARED_NOT_VERIFIED",
+      "source_ids": [
+        "arch-official"
+      ],
+      "status": "DECLARED"
+    },
+    {
+      "capabilities": [
+        "permissions",
+        "pull",
+        "remove",
+        "run",
+        "search",
+        "update"
+      ],
+      "core_mutation": "ABSENT_DECLARED",
+      "guest_acceptance": "NOT_RUN",
+      "id": "rootless_podman_oci",
+      "isolation": "Rootless Podman is not a complete sandbox: restrict host files, credentials, devices, sockets, privileged services and network; no privileged defaults and no always-on runtime",
+      "label": "Rootless Podman / OCI",
+      "probe_status": "NOT_RUN",
+      "provenance": [
+        "official-registry"
+      ],
+      "signature_schemes": [
+        "cosign"
+      ],
+      "signature_status": "DECLARED_NOT_VERIFIED",
+      "source_ids": [
+        "official-registry"
+      ],
+      "status": "DECLARED"
+    }
+  ],
+  "evidence_labels": [
+    "STATIC SOURCE ONLY",
+    "SYNTHETIC"
+  ],
+  "guest_acceptance": "NOT_RUN",
+  "policy": {
+    "accounts": false,
+    "duplicate_always_on_services": false,
+    "foreign_host_repo_mixing": false,
+    "no_core_mutation": true,
+    "paid_tiers": false,
+    "telemetry": false
+  },
+  "runtime": "BLOCKED_NOT_RUN",
+  "schema_version": 1,
+  "source": {
+    "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+    "consumption": "read-only",
+    "head_sha": "616ce171a7b71f69f19060122f53c97ada346662",
+    "pr": 753,
+    "sha256": {
+      "capability_manifest.py": "91ca6a8bd677c7a584b6c89ada7bb737b5c3a8bbe9da7b1c4cba21344df4d983",
+      "source_probe.py": "66685a317e745cddaf33f7c6d92b7d4fe195bc83716b43c55683ac292d981ade"
+    }
+  }
+}

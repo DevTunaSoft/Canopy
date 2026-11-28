@@ -12,8 +12,15 @@ Modes
                 is an ordinary GitHub merge API call subject to live branch protection.
                 No admin bypass, force-push, self-approval, review creation or PR edit.
 
-All product PRs are pinned to exact heads observed at runbook creation (2026-11-28);
-#749 was re-pinned to its remediated head on the same day with a live re-query.
+All product PRs are pinned to exact heads observed live at runbook creation or at the
+#751-#758 extension probe on 2026-11-28; #749 was re-pinned to its remediated head
+earlier the same day. The extension keeps #721/#723 and #724/#728 mutually exclusive
+(they are legacy-base PRs with 9 and 4 overlapping paths respectively, and neither is
+in ORDER), records the historical #757/#748 add/add conflict on
+docs/NATIVE_SUSPEND_RESUME.md and its live resolution by rename at #757's exact head,
+and keeps #746 over its unresolved overlapping-path conflict with #758 on
+canopy_features/dock/display_change_response.py. #756 is the verified native
+dev-artifact consolidation and is ordered last, after all other covered PRs.
 Live review authorization is read from GraphQL `reviewDecision` (the REST pull
 object does not carry that field), and each counted review must carry an exact,
 non-null `commit_id`. The script refuses to proceed on head/base/scope/check
@@ -111,6 +118,32 @@ PINS: dict[int, dict] = {
     750: dict(head="0439efa283bad00a92faccc3c62a99cb6a85b605", files=4,
               paths_sha256="b411d30ca22ad91ae6a417a41cc8f3bd0d4cfdc0785fae05e635c5e83633285c",
               deps=[722], title="Rev3 instruction reconciliation"),
+    751: dict(head="813ec445f042049615e4ed5c02f9a4831a2aba83", files=29,
+              paths_sha256="f9feb071f1f80f259092d820dc9a56cd7ac51cc74e793b98f4326c20fc6c073a",
+              deps=[], title="bounded first-party Modern Shell Pack definition"),
+    752: dict(head="906181cdc7ba5d1e3fb3565b50ec79526ea7f9e0", files=16,
+              paths_sha256="670ab42e67ade491bdcfb40a33c21680d178fd644e779719f07d915d4ba1d0de",
+              deps=[732], title="QML secondary-label names and compact Window/Help reachability"),
+    753: dict(head="616ce171a7b71f69f19060122f53c97ada346662", files=30,
+              paths_sha256="600b5959734f8a44392567611c546b6922e3925fa665e7f953399bd106528ec8",
+              deps=[], title="bounded LacOS P0 software-source manifest and read-only probes"),
+    754: dict(head="56dbb99b7ed6d62140b17b9abfba79231f9cbe96", files=30,
+              paths_sha256="151f6eb0fdb2fdd04c915e84b6bba31529aede5bc23a2a70b57e5e0bbd97f46a",
+              deps=[], title="native display recovery and logical-DPI host bridge (compiled)"),
+    755: dict(head="b5fd0b8337322d292e8f9c55bbedbb03fd9cab94", files=18,
+              paths_sha256="a22cc65e05e6a3b897efbc3cc1b3051ee08cb1c1e1fae0d9aa8ecc9900c21fa2",
+              deps=[752], title="root-caused Classic a11y labels and compact Window/Help fix"),
+    756: dict(head="b88f07c7db27546d425445c1b693d97292cbae3c", files=469,
+              paths_sha256="085c1f87d38e565a8f564cd9414c054b64f179efdf780550e30dc83b79cf5a05",
+              deps=[722, 741, 733, 737, 736, 732, 752, 755, 735, 745, 743, 744, 748, 740,
+                    746, 747, 751, 753, 754, 757],
+              title="verified native dev-artifact remediation consolidation (ordered last)"),
+    757: dict(head="4e4471a5c3719041353c432653f1bf0986091815", files=17,
+              paths_sha256="7938aee2c3e9ea96493d248bf1ec28d370eabbe566b6f32eab5695c369cbe777",
+              deps=[748], title="read-only native suspend/resume recovery contract (add/add resolved at this head)"),
+    758: dict(head="6589656644eeecc0fde38166f02d1962510a658a", files=15,
+              paths_sha256="90a6d8a24bba5ea653c701c7fd2f7fe553c0e24342677679d40e6a026915477a",
+              deps=[], title="KWin/KScreen multi-monitor/HiDPI response (HELD)"),
 }
 
 SKIP = {
@@ -120,9 +153,23 @@ SKIP = {
     742: "REVIEW_HOLD_DOC_CORRECTION: independent review requires two documentation corrections before promotion; stage_06_verify.log and board_probe.log are ABSENT at the exact head and the '37 tests' claim has no artifact.",
     749: "HOLD_NO_PROMOTION: re-pinned live head f8cbe123ba2a88edbdc509c5dd8ebe9e20b85260 (sampler/report remediated); body still says 'No merge, no self-approval, no ready-for-merge promotion; independent review only'; machine verdict SOAK_WARN_CRASH_OR_ERROR_EVENT+SAMPLING_GAP+SERVICE_COUNT_DRIFT.",
     750: "OVERLAP_HOLD: shares 4 instruction paths (.github/PULL_REQUEST_TEMPLATE.md, AGENTS.md, docs/AGENTS_WORKFORCE.md, docs/ROADMAP.md) with #722; exact-base trial merge conflicts on all four after #722 is promoted. Requires an authorized re-pin onto the post-#722 tip with a fresh independent review and 3/3 checks at the new head. No PR edit is performed by this runbook; the external Rev3 directive SHA remains controlling.",
+    758: "OVERLAP_HOLD: #758 changes canopy_features/dock/display_change_response.py and docs/NATIVE_DISPLAY_RESPONSE.md, both already owned and changed by ordered #746; exact-SHA trial merge conflicts with #746 even when sequenced after it (merge-tree rc=1). #746 stays in ORDER; #758 is held for an explicit integrator decision or an authorized combined implementation with a fresh independent review and 3/3 checks at the new head.",
 }
 
-ORDER = [722, 741, 733, 737, 736, 732, 735, 745, 743, 744, 748, 740, 746, 747]
+ORDER = [722, 741, 733, 737, 736, 732, 752, 755, 735, 745, 743, 744, 748, 740, 746, 747,
+         751, 753, 754, 757, 756]
+
+# Legacy-base mutual exclusions: never promote both members of a pair into one chain.
+# Live overlap at probe: #721/#723 share 9 paths; #724/#728 share 4 paths.
+MUTEX_GROUPS = ((721, 723), (724, 728))
+# Conflict holds and resolutions, derived at the exact live heads.
+# #757 originally add/add-conflicted with #748 on docs/NATIVE_SUSPEND_RESUME.md at
+# head 50cc402...; its live head 4e4471... renames that file to
+# docs/NATIVE_SUSPEND_RESUME_CONTRACT.md and the exact-SHA trial merge is clean.
+# #758 still overlaps #746 on two paths and conflicts at its live head, so #746 wins.
+CONFLICT_HOLDS = {758: 746}
+RESOLVED_CONFLICTS = {757: 748}
+NEW_PRS = tuple(range(751, 759))
 
 DENY_WORKFLOW = re.compile(r"^\.github/workflows/", re.I)
 DENY_HOLD = re.compile(r"(^|/)(AGENTS\.md|MASTER_HANDOFF\.md|NEXT_TASKS\.md)$", re.I)
@@ -139,7 +186,9 @@ def run(argv, cwd=None, env=None):
 
 
 def gh_json(endpoint):
-    rc, out, err = run(["gh", "api", f"repos/{REPO}/{endpoint}"])
+    # --paginate matters for file lists: #756 has 469 changed paths, far beyond
+    # one 100-item REST page; a truncated page would produce SCOPE_DRIFT.
+    rc, out, err = run(["gh", "api", f"repos/{REPO}/{endpoint}", "--paginate"])
     if rc != 0:
         raise Refused(f"gh api failed for {endpoint}: rc={rc} err={err.strip()[:300]}")
     try:
@@ -272,6 +321,13 @@ def verify_skip_reason(number, pr, body):
         b = gh_json("pulls/750/files?per_page=100")
         overlap = {f.get("filename") for f in a} & {f.get("filename") for f in b}
         still = (len(overlap) == 4 and "Do not merge" in body)
+    elif number == 758:
+        a = {f.get("filename") for f in gh_json("pulls/746/files?per_page=100")}
+        b = {f.get("filename") for f in gh_json("pulls/758/files?per_page=100")}
+        still = ({"canopy_features/dock/display_change_response.py",
+                  "docs/NATIVE_DISPLAY_RESPONSE.md"} <= (a & b)
+                 and head == PINS[758]["head"]
+                 and "The integrator must choose or combine the implementations explicitly" in body)
     else:
         raise Refused(f"no skip rule for PR {number}")
     return still
@@ -509,12 +565,33 @@ def self_test():
                       (738, "BASELINE_CAPTURED_NOT_ACCEPTED"),
                       (749, "no ready-for-merge promotion")]:
         assert marker, n
-    assert len(ORDER) == 14 and len(SKIP) == 6 and len(PINS) == 20
+    assert len(ORDER) == 21 and len(SKIP) == 7 and len(PINS) == 28
     assert set(ORDER).isdisjoint(SKIP)
     assert set(ORDER) | set(SKIP) == set(PINS)
+    assert set(NEW_PRS) <= set(PINS)
     for n in ORDER:
         for dep in PINS[n]["deps"]:
             assert dep in ORDER and ORDER.index(dep) < ORDER.index(n), f"dependency order broken at #{n}"
+    # Extension invariants: mutually exclusive legacy pairs stay out of the chain,
+    # and each conflict hold keeps its ordered winner instead of both candidates.
+    for a, b in MUTEX_GROUPS:
+        assert a != b and a not in ORDER and b not in ORDER, f"mutex pair promoted: {a}/{b}"
+    assert set(CONFLICT_HOLDS) <= set(SKIP)
+    for held, winner in CONFLICT_HOLDS.items():
+        assert held in SKIP and winner in ORDER and held not in ORDER, f"conflict hold broken: {held}/{winner}"
+    for resolved, other in RESOLVED_CONFLICTS.items():
+        assert resolved in ORDER and other in ORDER, f"resolved conflict not ordered: {resolved}/{other}"
+    assert 748 in ORDER and PINS[757]["deps"] == [748], "#757 must follow its add/add winner"
+    assert ORDER[-1] == 756, "consolidation PR must be last"
+    assert set(PINS[756]["deps"]) == set(ORDER[:-1]), "consolidation must follow every other merge"
+    assert ORDER[-2] == 757 and ORDER[-1] == 756
+    for n in NEW_PRS:
+        pin = PINS[n]
+        assert HEX40.match(pin["head"]), f"bad new head pin #{n}"
+        assert len(pin["paths_sha256"]) == 64 and pin["files"] > 0, f"bad new scope pin #{n}"
+    assert PINS[757]["head"] == "4e4471a5c3719041353c432653f1bf0986091815"
+    assert PINS[758]["head"] == "6589656644eeecc0fde38166f02d1962510a658a"
+    assert PINS[755]["head"] == "b5fd0b8337322d292e8f9c55bbedbb03fd9cab94"
     assert HEX40.match(BASE_SHA) and HEX40.match(REV3_SHA256) is None
     assert len(REV3_SHA256) == 64
     pin749 = PINS[749]
@@ -574,7 +651,7 @@ def self_test():
     assert 'ap.add_argument("--plan", action="store_true"' in main_src
     assert 'ap.add_argument("--apply", action="store_true"' in main_src
     assert "DISTINCT_APPROVAL_FLAG_REQUIRED" in inspect.getsource(apply_runbook)
-    print("SELF_TEST_PASS gates=checks+approval+graphql-decision+commit-id+dismiss-stale+order+skip-disjointness+pin-shape+apply-sibling")
+    print("SELF_TEST_PASS gates=checks+approval+graphql-decision+commit-id+dismiss-stale+order+skip-disjointness+pin-shape+apply-sibling+mutex+conflict-holds+resolved-add-add+new-pins")
 
 
 def plan(approver=None):

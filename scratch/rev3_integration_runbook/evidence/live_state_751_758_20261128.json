@@ -1,0 +1,248 @@
+{
+ "artifact": "scratch/rev3_integration_runbook/evidence/live_state_751_758_20261128.json",
+ "base_pin": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+ "generated_utc": "2026-11-28T11:43:58+00:00",
+ "integration_tip": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+ "prs": {
+  "751": {
+   "base_ref": "integration/canopy-plasma6-20261127",
+   "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+   "checks": [
+    [
+     "fake-gio-launch-fixture",
+     "completed",
+     "success"
+    ],
+    [
+     "foundation",
+     "completed",
+     "success"
+    ],
+    [
+     "qt-evidence",
+     "completed",
+     "success"
+    ]
+   ],
+   "file_count": 29,
+   "head_sha": "813ec445f042049615e4ed5c02f9a4831a2aba83",
+   "is_draft": false,
+   "local_ref_sha": "813ec445f042049615e4ed5c02f9a4831a2aba83",
+   "mergeable": "MERGEABLE",
+   "mergeable_state": "BLOCKED",
+   "paths_sha256": "f9feb071f1f80f259092d820dc9a56cd7ac51cc74e793b98f4326c20fc6c073a",
+   "review_decision": "REVIEW_REQUIRED",
+   "updated_at": "2026-11-28T10:42:19Z"
+  },
+  "752": {
+   "base_ref": "integration/canopy-plasma6-20261127",
+   "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+   "checks": [
+    [
+     "fake-gio-launch-fixture",
+     "completed",
+     "success"
+    ],
+    [
+     "foundation",
+     "completed",
+     "success"
+    ],
+    [
+     "qt-evidence",
+     "completed",
+     "success"
+    ]
+   ],
+   "file_count": 16,
+   "head_sha": "906181cdc7ba5d1e3fb3565b50ec79526ea7f9e0",
+   "is_draft": false,
+   "local_ref_sha": "906181cdc7ba5d1e3fb3565b50ec79526ea7f9e0",
+   "mergeable": "MERGEABLE",
+   "mergeable_state": "BLOCKED",
+   "paths_sha256": "670ab42e67ade491bdcfb40a33c21680d178fd644e779719f07d915d4ba1d0de",
+   "review_decision": "REVIEW_REQUIRED",
+   "updated_at": "2026-11-28T10:42:21Z"
+  },
+  "753": {
+   "base_ref": "integration/canopy-plasma6-20261127",
+   "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+   "checks": [
+    [
+     "fake-gio-launch-fixture",
+     "completed",
+     "success"
+    ],
+    [
+     "foundation",
+     "completed",
+     "success"
+    ],
+    [
+     "qt-evidence",
+     "completed",
+     "success"
+    ]
+   ],
+   "file_count": 30,
+   "head_sha": "616ce171a7b71f69f19060122f53c97ada346662",
+   "is_draft": false,
+   "local_ref_sha": "616ce171a7b71f69f19060122f53c97ada346662",
+   "mergeable": "MERGEABLE",
+   "mergeable_state": "BLOCKED",
+   "paths_sha256": "600b5959734f8a44392567611c546b6922e3925fa665e7f953399bd106528ec8",
+   "review_decision": "REVIEW_REQUIRED",
+   "updated_at": "2026-11-28T09:12:37Z"
+  },
+  "754": {
+   "base_ref": "integration/canopy-plasma6-20261127",
+   "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+   "checks": [
+    [
+     "fake-gio-launch-fixture",
+     "completed",
+     "success"
+    ],
+    [
+     "foundation",
+     "completed",
+     "success"
+    ],
+    [
+     "qt-evidence",
+     "completed",
+     "success"
+    ]
+   ],
+   "file_count": 30,
+   "head_sha": "56dbb99b7ed6d62140b17b9abfba79231f9cbe96",
+   "is_draft": false,
+   "local_ref_sha": "56dbb99b7ed6d62140b17b9abfba79231f9cbe96",
+   "mergeable": "MERGEABLE",
+   "mergeable_state": "BLOCKED",
+   "paths_sha256": "151f6eb0fdb2fdd04c915e84b6bba31529aede5bc23a2a70b57e5e0bbd97f46a",
+   "review_decision": "REVIEW_REQUIRED",
+   "updated_at": "2026-11-28T10:53:56Z"
+  },
+  "755": {
+   "base_ref": "integration/canopy-plasma6-20261127",
+   "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+   "checks": [
+    [
+     "fake-gio-launch-fixture",
+     "completed",
+     "success"
+    ],
+    [
+     "foundation",
+     "completed",
+     "success"
+    ],
+    [
+     "qt-evidence",
+     "completed",
+     "success"
+    ]
+   ],
+   "file_count": 18,
+   "head_sha": "b5fd0b8337322d292e8f9c55bbedbb03fd9cab94",
+   "is_draft": true,
+   "local_ref_sha": "b5fd0b8337322d292e8f9c55bbedbb03fd9cab94",
+   "mergeable": "MERGEABLE",
+   "mergeable_state": "BLOCKED",
+   "paths_sha256": "a22cc65e05e6a3b897efbc3cc1b3051ee08cb1c1e1fae0d9aa8ecc9900c21fa2",
+   "review_decision": "REVIEW_REQUIRED",
+   "updated_at": "2026-11-28T10:33:51Z"
+  },
+  "756": {
+   "base_ref": "integration/canopy-plasma6-20261127",
+   "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+   "checks": [
+    [
+     "fake-gio-launch-fixture",
+     "completed",
+     "success"
+    ],
+    [
+     "foundation",
+     "completed",
+     "success"
+    ],
+    [
+     "qt-evidence",
+     "completed",
+     "success"
+    ]
+   ],
+   "file_count": 469,
+   "head_sha": "b88f07c7db27546d425445c1b693d97292cbae3c",
+   "is_draft": true,
+   "local_ref_sha": "b88f07c7db27546d425445c1b693d97292cbae3c",
+   "mergeable": "MERGEABLE",
+   "mergeable_state": "BLOCKED",
+   "paths_sha256": "085c1f87d38e565a8f564cd9414c054b64f179efdf780550e30dc83b79cf5a05",
+   "review_decision": "REVIEW_REQUIRED",
+   "updated_at": "2026-11-28T09:52:20Z"
+  },
+  "757": {
+   "base_ref": "integration/canopy-plasma6-20261127",
+   "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+   "checks": [
+    [
+     "fake-gio-launch-fixture",
+     "completed",
+     "success"
+    ],
+    [
+     "foundation",
+     "completed",
+     "success"
+    ],
+    [
+     "qt-evidence",
+     "completed",
+     "success"
+    ]
+   ],
+   "file_count": 17,
+   "head_sha": "4e4471a5c3719041353c432653f1bf0986091815",
+   "is_draft": true,
+   "local_ref_sha": "4e4471a5c3719041353c432653f1bf0986091815",
+   "mergeable": "MERGEABLE",
+   "mergeable_state": "BLOCKED",
+   "paths_sha256": "7938aee2c3e9ea96493d248bf1ec28d370eabbe566b6f32eab5695c369cbe777",
+   "review_decision": "REVIEW_REQUIRED",
+   "updated_at": "2026-11-28T10:39:58Z"
+  },
+  "758": {
+   "base_ref": "integration/canopy-plasma6-20261127",
+   "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+   "checks": [
+    [
+     "fake-gio-launch-fixture",
+     "completed",
+     "success"
+    ],
+    [
+     "foundation",
+     "completed",
+     "success"
+    ],
+    [
+     "qt-evidence",
+     "completed",
+     "success"
+    ]
+   ],
+   "file_count": 15,
+   "head_sha": "6589656644eeecc0fde38166f02d1962510a658a",
+   "is_draft": false,
+   "local_ref_sha": "6589656644eeecc0fde38166f02d1962510a658a",
+   "mergeable": "MERGEABLE",
+   "mergeable_state": "BLOCKED",
+   "paths_sha256": "90a6d8a24bba5ea653c701c7fd2f7fe553c0e24342677679d40e6a026915477a",
+   "review_decision": "REVIEW_REQUIRED",
+   "updated_at": "2026-11-28T10:35:43Z"
+  }
+ }
+}

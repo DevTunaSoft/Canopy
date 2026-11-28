@@ -1,0 +1,31 @@
+# exact-SHA trial conflict evidence, generated 2026-11-28T11:43:58+00:00
+# chain tip through #754: cf3af8a2d6fa4a393e8ca320641f77eed1b3ffd1
+# merge base: ec910d7a7275296ecbc8b5e5c459d356205165d1
+
+## #757 historical head (add/add against #748)
+head 50cc4023a9a84ad61ffa39d4f25b48dd90195836 rc=1
+58d5831f928426ef4744048432480e06596e513d
+100644 8163f1bebadd74514681dbdb6d72a505556903f2 2	docs/NATIVE_SUSPEND_RESUME.md
+100644 164161ae7f0844b25828c346c7c91021ca235d38 3	docs/NATIVE_SUSPEND_RESUME.md
+
+Auto-merging docs/NATIVE_SUSPEND_RESUME.md
+CONFLICT (add/add): Merge conflict in docs/NATIVE_SUSPEND_RESUME.md
+
+## #757 live head (rename resolves the add/add)
+head 4e4471a5c3719041353c432653f1bf0986091815 rc=0
+fc2110abb7432564615959a5e38e3d8ebb13eddb
+
+## #758 live head vs #746 overlap
+head 6589656644eeecc0fde38166f02d1962510a658a rc=1
+b31436f0d59c79c7a354f3f93542f21f8da6e661
+100644 2d11782397bc53c855f38513cb9fc5a26fd03405 1	canopy_features/dock/display_change_response.py
+100644 d7ba806cfb9469c2905e896693c42b1592833c3b 2	canopy_features/dock/display_change_response.py
+100644 b9eb835683464cf62f1528eac29245d7c86369e5 3	canopy_features/dock/display_change_response.py
+100644 7d0c6fea2afdc31aa10bd3a76353cb2500b55d4c 2	docs/NATIVE_DISPLAY_RESPONSE.md
+100644 b920de7584fa7112004583a01bacd5318bebff3f 3	docs/NATIVE_DISPLAY_RESPONSE.md
+
+Auto-merging canopy_features/dock/display_change_response.py
+CONFLICT (content): Merge conflict in canopy_features/dock/display_change_response.py
+Auto-merging docs/NATIVE_DISPLAY_RESPONSE.md
+CONFLICT (add/add): Merge conflict in docs/NATIVE_DISPLAY_RESPONSE.md
+

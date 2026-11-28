@@ -1,0 +1,62 @@
+{
+ "conflict_holds": [
+  {
+   "held": 758,
+   "rule": "exact-SHA trial merge conflicts; #746 stays in ORDER, #758 held",
+   "shared_paths": [
+    "canopy_features/dock/display_change_response.py",
+    "docs/NATIVE_DISPLAY_RESPONSE.md"
+   ],
+   "winner": 746
+  }
+ ],
+ "generated_utc": "2026-11-28T11:43:58+00:00",
+ "mutually_exclusive_pairs": [
+  {
+   "base": "integration/canopy-classic-20261123",
+   "pair": [
+    721,
+    723
+   ],
+   "rule": "at most one member may be promoted into a single chain; neither is in ORDER",
+   "shared_path_count": 9,
+   "shared_paths": [
+    ".github/PULL_REQUEST_TEMPLATE.md",
+    "CONTRIBUTING.md",
+    "README.md",
+    "docs/AGENTS_WORKFORCE.md",
+    "docs/ARCHITECTURE.md",
+    "docs/CLASSIC_OWNER_ICONS_OPTIN.md",
+    "docs/QUALITY.md",
+    "docs/ROADMAP.md",
+    "docs/WALLPAPER_CHANGE_PATH_CONTRACT.md"
+   ]
+  },
+  {
+   "base": "integration/canopy-classic-20261123",
+   "pair": [
+    724,
+    728
+   ],
+   "rule": "at most one member may be promoted into a single chain; neither is in ORDER",
+   "shared_path_count": 4,
+   "shared_paths": [
+    "prototype/classic/HOST_EVENT_BRIDGE.md",
+    "prototype/classic/main.cpp",
+    "tests/test_host_event_bounded_lifetime.py",
+    "tests/test_nd039_host_event_bridge.py"
+   ]
+  }
+ ],
+ "resolved_conflicts": [
+  {
+   "historical_conflict_path": "docs/NATIVE_SUSPEND_RESUME.md",
+   "historical_head": "50cc4023a9a84ad61ffa39d4f25b48dd90195836",
+   "live_head": "4e4471a5c3719041353c432653f1bf0986091815",
+   "live_rename": "docs/NATIVE_SUSPEND_RESUME_CONTRACT.md",
+   "other": 748,
+   "pr": 757,
+   "rule": "#757 ordered after #748; exact-SHA trial merge clean at live head"
+  }
+ ]
+}

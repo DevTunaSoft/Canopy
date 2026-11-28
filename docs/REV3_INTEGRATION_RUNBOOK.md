@@ -6,13 +6,14 @@
 - Base / known-good rollback SHA: `ec910d7a7275296ecbc8b5e5c459d356205165d1` (`integration/canopy-plasma6-20261127` live tip at drafting).
 - Runbook branch: `integration/rev3-approval-runbook-20261128`, created from `ec910d7a`. It owns only `tools/integration/apply_rev3_approval_runbook.py`, `docs/REV3_INTEGRATION_RUNBOOK.md` and `scratch/rev3_integration_runbook/**`.
 - **This runbook did not merge, approve, edit, promote or comment on any PR.** It did not change any protection setting, global config, visual asset, named hold (#151/#278/#279) or security/release gate. Its only remote mutation is pushing its own runbook branch. (Creating this remediation worktree is a local checkout change, not a remote or PR mutation.)
-- At drafting, all 14 ordered candidates were mergeable with 3/3 terminal `success` checks at their exact heads and no approving review; green CI is evidence, not authorization. Six further PRs are held for independent reasons (below), not merely for lack of approval.
+- At drafting, all 14 original candidates were mergeable with 3/3 terminal `success` checks at their exact heads and no approving review; green CI is evidence, not authorization. The 2026-11-28 extension covers #751-#758 at fresh live pins: seven more PRs join the ordered chain (#751, #752, #753, #754, #755, #757, #756) and #758 is held for an unresolved overlap with #746. Eight PRs in total are held for independent reasons (below), not merely for lack of approval.
+- Project-scoped concurrency cap is 8 Canopy/LacOS subagents plus Hermes; 6 slots were occupied at extension time. No worker was spawned, reassigned or interrupted for this extension.
 
-## Live evidence captured at drafting (UTC 2026-11-28T08:10:19Z)
+## Live evidence captured at drafting (UTC 2026-11-28T08:10:19Z) and extension probe (2026-11-28T10:44Z)
 
 - Integration and `main` protection: `required_approving_review_count=1`, `dismiss_stale_reviews=true`, `enforce_admins.enabled=true`, `strict=true`, required contexts `foundation`, `qt-evidence`, `fake-gio-launch-fixture`.
-- Every PR base ref/sha = `integration/canopy-plasma6-20261127` / `ec910d7a…`; all 20 heads pinned in the script; all 20 file-path sets pinned by count and SHA-256.
-- Raw curated probes: `scratch/rev3_integration_runbook/evidence/live_state_20261128.json`, `protection_20261128.json`, `trial_merge_20261128.json`, `decisions_20261128.json`, `pr750_conflict_20261128.txt`, plus the remediation re-pin probe `repin_749_20261128.json`; directory verified with `SHA256SUMS.txt`.
+- Every plasma-base PR base ref/sha = `integration/canopy-plasma6-20261127` / `ec910d7a…`; all 28 heads pinned in the script; all 28 file-path sets pinned by count and SHA-256. The added pins are the live heads observed at the extension probe; #755 and #758 advanced during an earlier probe and were re-pinned to the newer observed heads (`b5fd0b83…`, `65896566…`), not to stale ones.
+- Raw curated probes: `scratch/rev3_integration_runbook/evidence/live_state_20261128.json`, `protection_20261128.json`, `trial_merge_20261128.json`, `decisions_20261128.json`, `pr750_conflict_20261128.txt`, plus the remediation re-pin probe `repin_749_20261128.json` and the extension probes `live_state_751_758_20261128.json`, `mutex_conflicts_751_758_20261128.json`, `conflicts_751_758_20261128.txt`; directory verified with `SHA256SUMS.txt` (9 entries).
 
 ## Execution gate (mandatory)
 
@@ -30,7 +31,7 @@ python tools/integration/apply_rev3_approval_runbook.py --apply --distinct-appro
 - The only merge call is the ordinary GitHub merge API (`PUT /pulls/<n>/merge` with `merge_method=merge` and the exact head `sha`). There is **no** admin endpoint, `--admin`, force-push, reset, review creation, self-approval or PR edit anywhere in the script.
 - Head/base/scope/check drift, non-mergeable or conflicting state, unexpected protected/workflow paths, a dirty trial merge, a changed sibling blob in the sequential trial chain (`prior_tip` comparison in **both** plan and apply), a live tip that advanced before the merge, a failed last-moment approval/protection re-check, or a post-merge regression stop the chain and write refusal evidence to `scratch/rev3_integration_runbook/runs/<UTC>/run.json` with a `SHA256SUMS.txt` sidecar.
 
-## Exact dependency-ordered merge sequence (14 merges)
+## Exact dependency-ordered merge sequence (21 merges)
 
 | # | PR | Exact head | Depends on | Reason |
 |---|----|------------|------------|--------|
@@ -40,16 +41,23 @@ python tools/integration/apply_rev3_approval_runbook.py --apply --distinct-appro
 | 4 | #737 | `35c1fe7a0c76cc3dbebe9e3f633b587cbfc377e6` | #741 | Approved dock geometry 32/96/14/7 port with synced test pins |
 | 5 | #736 | `df73dfb6d1272b72e1f57b3b57539373c05dd636` | #741 | Host-event limiter/epoch ceilings for reliable native events |
 | 6 | #732 | `a14e335a75f35f775bcd669de4e2ba5ab173168c` | #736, #737 | Bounded native quick controls with truthful PASS/NOT_RUN labels |
-| 7 | #735 | `349742749a4ab9dbf2903df876e3d9b70e299986` | #737 | Native Konsole launch from the restored Terminal dock tile |
-| 8 | #745 | `80097f8b97b7d5df35b4e53bb9cd835b546aca9f` | #735 | Native launcher search over the same upstream desktop catalog |
-| 9 | #743 | `2b8bca910d84b19966b29db37dfb3ce7512e810f` | #745 | Bounded KWin/window/workspace decision boundary |
-| 10 | #744 | `2733f7e09e0e3447fe39eebce6a71171e2ebf476` | #743 | Session settings persistence and crash recovery |
-| 11 | #748 | `9f766d06225f4a7e7cfe9be010a3432a4109ea05` | #744 | Fail-closed suspend/resume verdicts over recovered session state |
-| 12 | #740 | `f8ba8187bc67b8bf1de49c4e40977f33e17d6e74` | #744 | Native AT-SPI role vocabulary and scoped verification |
-| 13 | #746 | `050853173419c7224ab8875233f5ef1d7aea622c` | #744 | Bounded display response for monitor add/remove and HiDPI |
-| 14 | #747 | `ca378da2c2b116db8ce79dc711001add9af59897` | #741 | Notifications/tray reusing the single upstream Plasma owner |
+| 7 | #752 | `906181cdc7ba5d1e3fb3565b50ec79526ea7f9e0` | #732 | QML secondary-label names and compact Window/Help reachability |
+| 8 | #755 | `b5fd0b8337322d292e8f9c55bbedbb03fd9cab94` | #752 | Root-caused Classic a11y labels; completes #752's out-of-ownership hunks |
+| 9 | #735 | `349742749a4ab9dbf2903df876e3d9b70e299986` | #737 | Native Konsole launch from the restored Terminal dock tile |
+| 10 | #745 | `80097f8b97b7d5df35b4e53bb9cd835b546aca9f` | #735 | Native launcher search over the same upstream desktop catalog |
+| 11 | #743 | `2b8bca910d84b19966b29db37dfb3ce7512e810f` | #745 | Bounded KWin/window/workspace decision boundary |
+| 12 | #744 | `2733f7e09e0e3447fe39eebce6a71171e2ebf476` | #743 | Session settings persistence and crash recovery |
+| 13 | #748 | `9f766d06225f4a7e7cfe9be010a3432a4109ea05` | #744 | Fail-closed suspend/resume verdicts over recovered session state |
+| 14 | #740 | `f8ba8187bc67b8bf1de49c4e40977f33e17d6e74` | #744 | Native AT-SPI role vocabulary and scoped verification |
+| 15 | #746 | `050853173419c7224ab8875233f5ef1d7aea622c` | #744 | Bounded display response for monitor add/remove and HiDPI |
+| 16 | #747 | `ca378da2c2b116db8ce79dc711001add9af59897` | #741 | Notifications/tray reusing the single upstream Plasma owner |
+| 17 | #751 | `813ec445f042049615e4ed5c02f9a4831a2aba83` | — | Bounded first-party Modern Shell Pack metadata; disjoint from all others |
+| 18 | #753 | `616ce171a7b71f69f19060122f53c97ada346662` | — | Bounded LacOS P0 software-source manifest and read-only probes |
+| 19 | #754 | `56dbb99b7ed6d62140b17b9abfba79231f9cbe96` | — | Compiled native display/DPI host bridge over the shared contract |
+| 20 | #757 | `4e4471a5c3719041353c432653f1bf0986091815` | #748 | Read-only suspend/resume recovery contract; historical add/add resolved by rename |
+| 21 | #756 | `b88f07c7db27546d425445c1b693d97292cbae3c` | all above | Verified native dev-artifact consolidation; must be last |
 
-The dependency list is topological and asserted by `--self-test`. `#750` depends on `#722` by file overlap but is held (below); `#741` therefore follows `#722` directly.
+The dependency list is topological and asserted by `--self-test`, including the extension's `#752 -> #755`, `#748 -> #757` and `#756`-last constraints. `#750` depends on `#722` by file overlap but is held (below); `#741` therefore follows `#722` directly. `#757` previously add/add-conflicted with `#748` at head `50cc4023…` on `docs/NATIVE_SUSPEND_RESUME.md`; its live head renames that path to `docs/NATIVE_SUSPEND_RESUME_CONTRACT.md` and the exact-SHA trial merge is clean, so it is ordered after `#748`. `#758` still conflicts with `#746` and is held.
 
 ## Skipped PRs (re-derived live at plan time; holds remain authoritative)
 
@@ -61,8 +69,16 @@ The dependency list is topological and asserted by `--self-test`. `#750` depends
 | #742 | Independent review requires two documentation corrections before promotion; `stage_06_verify.log` and `board_probe.log` are ABSENT at the exact head and the "37 tests" claim has no artifact. |
 | #749 | Re-pinned to live head `f8cbe123ba2a88edbdc509c5dd8ebe9e20b85260` (sampler/report remediated); body still says "no merge, no self-approval, no ready-for-merge promotion; independent review only"; machine verdict `SOAK_WARN_CRASH_OR_ERROR_EVENT+SAMPLING_GAP+SERVICE_COUNT_DRIFT`. |
 | #750 | `OVERLAP_HOLD`: shares `.github/PULL_REQUEST_TEMPLATE.md`, `AGENTS.md`, `docs/AGENTS_WORKFORCE.md`, `docs/ROADMAP.md` with #722. Trial merge onto the post-#722 trial tree conflicts in all four files (`pr750_conflict_20261128.txt`). Requires an authorized re-pin onto the post-#722 tip, a fresh independent review and 3/3 checks at the new head. The external Rev3 directive SHA remains controlling in the meantime. No PR edit is performed by this runbook. |
+| #758 | `OVERLAP_HOLD`: changes `canopy_features/dock/display_change_response.py` and `docs/NATIVE_DISPLAY_RESPONSE.md`, both already changed by ordered #746. Exact-SHA trial merge conflicts with #746 even when #758 is sequenced after it (`conflicts_751_758_20261128.txt`). #746 stays in ORDER; #758 needs an explicit integrator decision or an authorized combined implementation with fresh review and 3/3 checks at a new head. |
 
-A hold that appears cleared live is still skipped: re-baselining needs a new authorized review, not an automatic promotion.
+A hold that appears cleared live is still skipped: re-baselining needs a new authorized review, not an automatic promotion. `#757` is the deliberate exception: its conflict was resolved by the author at the exact live head that is pinned here, and the exact-SHA trial chain proves compatibility; no PR edit was made by this runbook.
+
+## Mutual exclusion and conflict policy
+
+- `#721` and `#723` (legacy base `integration/canopy-classic-20261123`) share 9 paths; `#724` and `#728` share 4 (`mutex_conflicts_751_758_20261128.json`). Each pair is mutually exclusive: at most one member may be promoted into one chain. Neither pair is in `ORDER`; `MUTEX_GROUPS` and `--self-test` enforce this.
+- `#748` vs `#757`: historical add/add conflict on `docs/NATIVE_SUSPEND_RESUME.md` at `#757` head `50cc4023…` (merge-tree rc=1). The pinned live head `4e4471a5…` renames the file; the exact-SHA trial merge is clean. `RESOLVED_CONFLICTS` records this, and `#757` is ordered immediately after `#748`.
+- `#746` vs `#758`: unresolved overlapping-path conflict on `canopy_features/dock/display_change_response.py` and `docs/NATIVE_DISPLAY_RESPONSE.md`; exact-SHA trial merge fails. `CONFLICT_HOLDS = {758: 746}`; `#746` remains ordered, `#758` is held.
+- No PR was merged, approved, edited, commented on or promoted by this extension. The only remote mutation is the push of the runbook branch itself.
 
 ## Trial merge result validation
 
@@ -77,7 +93,7 @@ git diff --name-status <trial-tip> <trial-tree>
 
 The script refuses on non-zero rc, conflict markers, any net path outside the PR's pinned file set, workflow/unowned protected paths, or a sibling path whose blob changed between the prior and current trial tip. The `prior_tip` sibling comparison runs in `--plan` **and** `--apply`; `apply` uses the evolving trial commit from the preceding PR, not just the live tip. `--merge-base` is pinned to `ec910d7a` because this checkout is shallow; every pinned PR branches from that base. The trial commit is a local `commit-tree` object only — no ref, branch, PR or remote is changed by the trial itself (the separate `fetch` step does create local `refs/rev3-runbook/*`).
 
-Observed at drafting: **14/14 trial merges clean**; #750 conflicts on the four shared instruction files and is held. The post-#722 **trial commit** was `6473bac4afd674429e087bd2fff6c001e7f45a5d`; its **tree** was `5a38dc10cc9293fa37471329d6ba2d06132ab83d`. A commit SHA and a tree SHA are different objects and are labelled separately in evidence (`trial_commit` vs `tree`/`trial_tree`).
+Observed at drafting: **14/14 trial merges clean**; #750 conflicts on the four shared instruction files and is held. The post-#722 **trial commit** was `6473bac4afd674429e087bd2fff6c001e7f45a5d`; its **tree** was `5a38dc10cc9293fa37471329d6ba2d06132ab83d`. A commit SHA and a tree SHA are different objects and are labelled separately in evidence (`trial_commit` vs `tree`/`trial_tree`). After extension: **21/21 trial merges clean** in the table order (including all seven newly ordered PRs); #758 conflicts with #746 and is held (`conflicts_751_758_20261128.txt`). File lists are read with REST pagination so #756's 469 paths are all checked; a single-page read would falsely report scope drift.
 
 ## Post-merge checks and regression stop
 
@@ -105,6 +121,13 @@ Any regression stops dependent integrations immediately; unaffected independent 
 - `python tools/integration/apply_rev3_approval_runbook.py --apply --distinct-approval fake-human` → refused at PR #722 with `DISTINCT_APPROVAL_NOT_VERIFIED`, `REVIEW_DECISION_NOT_APPROVED`, `STILL_BLOCKED_BY_PROTECTION`, rc=3; evidence `scratch/rev3_integration_runbook/runs/20261128T094104Z/run.json`; no merge attempted. The decision check now reads the live GraphQL field instead of the absent REST field, so a genuine distinct approval can evaluate.
 - Live GraphQL re-query: `reviewDecision=REVIEW_REQUIRED` for #722 and #749; #722 `headRefOid` matched its REST head. No review was created by this runbook.
 - #749 re-pin was verified live at `f8cbe123ba2a88edbdc509c5dd8ebe9e20b85260`: 32 files, paths SHA-256 `aab4da5484cec499d1ffbddeb0fc8b200f6093285e9e26cfa834c3b28894f59b`, 3/3 terminal `success` checks at that head, body still withholding promotion. A later live push moved #749 to `bff56000…`; that is `HEAD_DRIFT` under the script and #749 remains skipped — no promotion was attempted.
+
+## Extension verification (#751-#758, branch head 7765ec8 base)
+
+- `python tools/integration/apply_rev3_approval_runbook.py --self-test` → `SELF_TEST_PASS gates=checks+approval+graphql-decision+commit-id+dismiss-stale+order+skip-disjointness+pin-shape+apply-sibling+mutex+conflict-holds+resolved-add-add+new-pins`, rc=0: 21 ordered, 7 skipped, 28 pins complete and disjoint; legacy mutex pairs absent from ORDER; `#757` follows `#748` and `#756` follows all merges; exact new head pins asserted.
+- `python tools/integration/apply_rev3_approval_runbook.py --plan` → `PLAN_ONLY_DISTINCT_APPROVAL_PENDING`, live tip equals `ec910d7a…`, both protections `PASS`, **21/21 TRIAL_CLEAN**, 7 skip holds re-derived live `True`. No PR, branch, protection or remote state was mutated.
+- Live probe: all eight PRs have `baseRefOid = ec910d7a…`, 3/3 terminal `success` contexts at their pinned heads and `reviewDecision = REVIEW_REQUIRED`; #755 and #758 were re-pinned after an observed head advance. No approval exists or was created.
+- Conflict evidence: `#757` add/add conflict at historical head `50cc4023…` (rc=1) versus clean trial at pinned head `4e4471a5…`; `#758` still conflicts with `#746` (rc=1).
 
 ## Remediation of review holds G1–G4 (branch head 166546a)
 

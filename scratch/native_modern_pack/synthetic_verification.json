@@ -2,7 +2,7 @@
   "label": "SYNTHETIC",
   "task": "M3 Shell Pack initial eight library",
   "base_sha": "ec910d7a",
-  "head_sha": "fd32c916f39f4340f1c41c63456f427b6311af38",
+  "head_sha": "40e063534437f4c7d84bb405e414e1528de17403",
   "initial_pack_ids": [
     "org.canopy.classic",
     "org.canopy.modern",
@@ -301,7 +301,8 @@
       "status": "PASS",
       "detail": {
         "changed_paths": [],
-        "classic_paths_changed": 0
+        "classic_paths_changed": 0,
+        "classic_diff": "EMPTY"
       }
     },
     "no_paid_tiers_activation_telemetry_or_runtime_hooks": {

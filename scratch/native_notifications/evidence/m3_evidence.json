@@ -1,0 +1,106 @@
+{
+  "agent_cap": 8,
+  "base_sha": "ec910d7a",
+  "branch": "product/native-notifications-tray-20261127",
+  "doc": {
+    "path": "docs/NATIVE_NOTIFICATIONS_TRAY.md",
+    "sha256": "9a27f1e90e7e26b0b5b4caf1e0cf9081ac11540edc3adbf88daa7c9e4b2ea22b"
+  },
+  "draft_pr_only": true,
+  "duplicate_daemon_started": false,
+  "generated_at_utc": "2026-11-28T06:26:19Z",
+  "head_sha": "32c142272bf874636b7716e2d70c4229218194d0",
+  "head_tree": "d5241a8c8e67b0b6c19a16f88b0cdc1aa45aff13",
+  "labels": {
+    "not_run": [
+      "fresh delivery roundtrip",
+      "fresh tray/center interaction",
+      "screen-reader",
+      "compiled Qt bridge",
+      "owner visual acceptance"
+    ],
+    "real_plasma_scoped": "single-owner guard only",
+    "synthetic": "35 M3 contract tests + 125 related tests"
+  },
+  "no_merge_no_self_approval": true,
+  "owned_paths_only": true,
+  "owner_directive_sha": "79e30d79",
+  "production_sources": {
+    "center_badge.py": {
+      "bytes": 4209,
+      "sha256": "4f33b404df46e603b3bc4c35c9ecd01bed83bbae434ec4c526de3e6508131ebd"
+    },
+    "daemon_owner.py": {
+      "bytes": 7063,
+      "sha256": "a9a15e6582d4e507833d739d13ae25e2c0b19636c5a456b1c1ea8e07aaefcecd"
+    },
+    "freedesktop_notifications.py": {
+      "bytes": 9644,
+      "sha256": "04eaa6778d4d923b5658d772d7f3d02a9e4306d4934d964cf73206c7aeb54626"
+    },
+    "tray_interaction.py": {
+      "bytes": 6263,
+      "sha256": "1f0ab8e482d115ff15bb029df30c2ac54bc6586f3e33a9ca72ff90220ff7d095"
+    }
+  },
+  "real_plasma": {
+    "artifacts": {
+      "final_probe.log": {
+        "sha256": "22fbd4a36da67baa596a56be647775c2b1f0b53333c192d603009283c23a05e5"
+      },
+      "guest_harness_run.log": {
+        "sha256": "bdb9e5f72540e994c9311b97ff0dfd4de43105d4fd50a5d473dec55798cb15e2"
+      },
+      "guest_harness_run2.log": {
+        "sha256": "06f41e3efcf9ab63709e1367be01d4710414da262bce02b39796ec6a9cb0c05a"
+      },
+      "pre_probe_vm.png": {
+        "sha256": "592b23a55cd81e35e163786269a4672890a2da839b5d5c8b05a60aa886ac9514"
+      }
+    },
+    "earlier_live_roundtrip": "SCOPED_HISTORICAL_PASS_20261127T1838Z_NOT_CURRENT",
+    "foreign_daemon_scan": [
+      "NO_FOREIGN_NOTIFICATION_DAEMON=YES",
+      "NO_CANOPY_NOTIFICATION_DAEMON=YES"
+    ],
+    "fresh_delivery_roundtrip": {
+      "blocker": "GetServerInformation / GetCapabilities / Notify against live owner :1.22 all returned rc=124 (8s timeout); Peer.Ping returned ()",
+      "observed_at_probe": "2026-11-28T06:13:37Z and 2026-11-28T06:24:14Z",
+      "verdict": "NOT_RUN"
+    },
+    "fresh_tray_interaction": {
+      "blocker": "xdotool getmouselocation and xdotool key Escape returned rc=124 with DISPLAY=:0 and live XAUTHORITY=/tmp/xauth_zdKrsq; xdpyinfo/xset q also silent",
+      "verdict": "NOT_RUN"
+    },
+    "guest_access": "existing local SSH key artifact; no password typed or guessed",
+    "owner_guard": "OWNER_GUARD_PASS /home/canopy/m3ev/owner_guard/verdict.txt",
+    "owner_line": "org.freedesktop.Notifications bus=session owner=:1.22 pid=5422 comm=plasmashell allowed=plasmashell",
+    "release_ready": false,
+    "service_files": "ORG_FREEDESKTOP_NOTIFICATIONS_SERVICE_FILE_COUNT=0",
+    "single_owner_verdict": "REAL_PLASMA_SCOPED_PASS",
+    "visual_acceptance": "AWAITING_OWNER",
+    "vm": "Canopy-Test-Plasma6",
+    "vm_state": "running"
+  },
+  "schema_version": 1,
+  "task": "M3 native notifications/tray contracts and scoped real-Plasma reverify",
+  "tests": {
+    "location_label": "SYNTHETIC_SCRATCH_NOT_IN_CI_DISCOVER",
+    "m3_contracts": {
+      "duration": "0.042s",
+      "fails": [],
+      "ok": true,
+      "ran": 35
+    },
+    "path": "scratch/native_notifications/tests/test_m3_contracts.py",
+    "related_notification_suites": {
+      "duration": "0.106s",
+      "fails": [],
+      "ok": true,
+      "ran": 125
+    },
+    "sha256": "b25fe446f22391f7ffe6c66f4a9d8a942d5d298d23b7751e733c3ca541ba4471"
+  },
+  "upstream_daemon_reused": true,
+  "verification_head_note": "Production code, doc and raw logs were verified at this head; subsequent commits add only evidence files and a scratch package marker."
+}

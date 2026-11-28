@@ -1,0 +1,1 @@
+kpackagetool6 --type Plasma/Applet --remove org.kde.plasma.canopyclassic.nativetasks; echo REMOVE_RC=$?

@@ -1,0 +1,1 @@
+cd /home/canopy/canopy_native_tasksmodel_m2/package && find . -type f -print0 | sort -z | xargs -0 sha256sum

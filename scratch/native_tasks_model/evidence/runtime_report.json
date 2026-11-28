@@ -1,0 +1,254 @@
+{
+  "harness_ready": true,
+  "log_hashes": {
+    "copy_activated.log": "fa9fe07bd632ae6b8064e3fc2d0fa9117255c4844c50829de4fa64761b125ae0",
+    "copy_baseline.log": "1143404962f5d241b8cced57c6048bda2ee3a30fa944687c7f9a486c1e1614b6",
+    "copy_final.log": "842e59224f80e0514caedf36e11e51c41f6d7bf0a96024d7e6728090205e9318",
+    "copy_focused.log": "77e13fd75d3d7821ea80b25867439195b254084df3eef743ed8736b70e66628d",
+    "copy_running.log": "907abf0b2fdc5ac615926745f199d6a2a27c8d9d54a5118f5f9b77c50fcec750",
+    "package_00_source_hash.log": "80f53d5e04f79727bb98cfea9ed4498dd57f01e6b55a973f933a51879b92c0e0",
+    "package_01_before.log": "8ed8add301274ff5daf95d92918af90dafa3ea9392d0aafbf34fac1490afa1d8",
+    "package_02_install.log": "99b67678b56de173b4b6784b9f4c8f45b8a93e9eccd640c81d9ecb7f7a69c74c",
+    "package_03_show.log": "9151328de7a9bd30ba2f6e474102ab24fcdafd4d094fc348a3a2f7c5d2960026",
+    "package_04_installed_files.log": "acd6da43b5d3d3beb01aa1e0e71ba2061d3b2077e7d49eedfc02f66a4e5de2c9",
+    "package_05_after.log": "fc144ebe22b0004d283337da55433a85b5c183e8fbdaa742822608f5a34dd396",
+    "package_06_remove.log": "11f0ce1070061888128423db919379c2a269b884e8cc0c5fa6259314578d698e",
+    "package_07_final.log": "70ea099a8da10b174577d618d3903801cc2aebec3661779de865b0e757565944",
+    "runtime_00_session_guard.log": "878c2841adfff5195b6333de3cd88abebaa9f542297c97aec3a51543a17f0137",
+    "runtime_01_start.log": "78055454c0b37738860df1464cbadc42ac4309701c9c82a37e087cada6041245",
+    "runtime_02_launch_app.log": "9104707eb35fba9160754614a36f618b4722f700b0eba2331d1ef4462853a74a",
+    "runtime_02_wait_ready.log": "f430f721a5df4929c529a74be42e93b1e0cbc2848356636f9beacd1cd42c517b",
+    "runtime_03_running_observe.log": "7bd3e9ce3cbdc2e2f04fd68273ce817f5cbb0a1cee408142c49f15f8880c108d",
+    "runtime_04_activation_observe.log": "7193e6ac7b1766146764969d1b66775c2b21aaf6954716b55c6fa65763e60467",
+    "runtime_05_stop.log": "d776959d33306be4a734a644820e92f49effe7b1d9e4d933a650f233c89edd05",
+    "shot_activated.log": "4e952dc5053af27e8b89172d4d6db73ad5f2e51d525b13822ecf1163a6f8e58e",
+    "shot_baseline.log": "90a7232351f99f1d900a3f6103b65503fdeb95496c5b83c3f079cd049ecfe6dd",
+    "shot_final.log": "537f0df09fcf3bdd452a4ad1a7c69b16a52bf28881ef63bb9eefe74eaae9cef4",
+    "shot_focused.log": "a0098e61bd80b5c5a08515612be4615c5cd1926ef24af07ba894a665dcad68d9",
+    "shot_running.log": "37722d83a2846fa0f76631c19637777c93069470102a4f82cf47ae5cfc2d96f0"
+  },
+  "owner_directive_sha256": "79e30d79a580bd05cf9d6cb09a45cbbb7887c0c35c5116a34bb6a0ace6042083",
+  "package_install": {
+    "marker": true,
+    "rc": 0
+  },
+  "package_remove": {
+    "marker": true,
+    "rc": 0
+  },
+  "schema": "native_tasks_model_runtime_v1",
+  "screenshots": {
+    "activated": {
+      "bytes": 1912129,
+      "path": "C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\wt-native-tasksmodel-20261127\\scratch\\native_tasks_model\\evidence\\runtime_activated.png",
+      "sha256": "be665350a31ea2c2ad3515af1c0dc3c433c051282d59ae57deb9cc6c9446aa4b"
+    },
+    "baseline": {
+      "bytes": 1907898,
+      "path": "C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\wt-native-tasksmodel-20261127\\scratch\\native_tasks_model\\evidence\\runtime_baseline.png",
+      "sha256": "8d33a6b18e1c2e468aa44ce294d4361112df3dfafcaa14a8a1e136802472c516"
+    },
+    "final": {
+      "bytes": 1912129,
+      "path": "C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\wt-native-tasksmodel-20261127\\scratch\\native_tasks_model\\evidence\\runtime_final.png",
+      "sha256": "be665350a31ea2c2ad3515af1c0dc3c433c051282d59ae57deb9cc6c9446aa4b"
+    },
+    "focused": {
+      "bytes": 1909038,
+      "path": "C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\wt-native-tasksmodel-20261127\\scratch\\native_tasks_model\\evidence\\runtime_focused.png",
+      "sha256": "88ed3decf1eb4e03f05f8d4e20e822cb0d1b0a9d0e0612abf5a4210405ab2892"
+    },
+    "running": {
+      "bytes": 1912063,
+      "path": "C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\wt-native-tasksmodel-20261127\\scratch\\native_tasks_model\\evidence\\runtime_running.png",
+      "sha256": "9c39aef71bf921ac2ca0b81faf456a0c890b8897e2dae633ccc309441cebb3bb"
+    }
+  },
+  "source_commit": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+  "stages": [
+    {
+      "command": "ssh -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'",
+      "label": "runtime_00_session_guard",
+      "rc": 0,
+      "stdout_sha256": "bfc2ae34770b918850522ad09c9ed5e29a2e95147c2f2a67db161fa8cb99bf4a",
+      "utc": "2026-11-28T05:12:41Z"
+    },
+    {
+      "command": "ssh -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'",
+      "label": "runtime_01_start",
+      "rc": 0,
+      "stdout_sha256": "5e33eb824131814c4509ba28d64aadb3abe3e6443de4e5db8d1867230453bb39",
+      "utc": "2026-11-28T05:12:42Z"
+    },
+    {
+      "command": "ssh -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'",
+      "label": "runtime_02_wait_ready",
+      "rc": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "utc": "2026-11-28T05:12:43Z"
+    },
+    {
+      "command": "ssh -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'",
+      "label": "runtime_02_wait_ready",
+      "rc": 0,
+      "stdout_sha256": "5ccf27a5ce746d5d1c81cb85b172786b0cd9c88231ee0d73f19d3f6c7f95b188",
+      "utc": "2026-11-28T05:12:45Z"
+    },
+    {
+      "command": "ssh -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'",
+      "label": "shot_baseline",
+      "rc": 0,
+      "stdout_sha256": "1dcb5fa95dd26a9e281d59a304d9cb7db3964673dcba7cc15f1cd1400a7ccc70",
+      "utc": "2026-11-28T05:12:47Z"
+    },
+    {
+      "command": "scp -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -P 2223 canopy@127.0.0.1:/home/canopy/canopy_native_tasksmodel_m2/evidence_baseline.png 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\wt-native-tasksmodel-20261127\\scratch\\native_tasks_model\\evidence\\runtime_baseline.png'",
+      "label": "copy_baseline",
+      "rc": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "utc": "2026-11-28T05:12:49Z"
+    },
+    {
+      "command": "ssh -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'",
+      "label": "runtime_02_launch_app",
+      "rc": 0,
+      "stdout_sha256": "57194f5d1493551c3abe9281fb59447dcf4e21676d63f4e1bbca88dbcb361f98",
+      "utc": "2026-11-28T05:12:53Z"
+    },
+    {
+      "command": "ssh -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'",
+      "label": "shot_running",
+      "rc": 0,
+      "stdout_sha256": "5a6416a2a7ed661f9174801b6892551f69eb30a634dff05b3e27a4b2c7da98c0",
+      "utc": "2026-11-28T05:12:59Z"
+    },
+    {
+      "command": "scp -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -P 2223 canopy@127.0.0.1:/home/canopy/canopy_native_tasksmodel_m2/evidence_running.png 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\wt-native-tasksmodel-20261127\\scratch\\native_tasks_model\\evidence\\runtime_running.png'",
+      "label": "copy_running",
+      "rc": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "utc": "2026-11-28T05:13:00Z"
+    },
+    {
+      "command": "ssh -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'",
+      "label": "runtime_03_running_observe",
+      "rc": 0,
+      "stdout_sha256": "86984119f2de224568a8e08baf23a8dd3157459b3e9c8609a10b091fae6c6ece",
+      "utc": "2026-11-28T05:13:02Z"
+    },
+    {
+      "command": "ssh -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'",
+      "label": "shot_focused",
+      "rc": 0,
+      "stdout_sha256": "60f74cbb44a0ec08d6d98b36892ebe1de3d1f994317c4c576904a92836b967a2",
+      "utc": "2026-11-28T05:13:04Z"
+    },
+    {
+      "command": "scp -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -P 2223 canopy@127.0.0.1:/home/canopy/canopy_native_tasksmodel_m2/evidence_focused.png 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\wt-native-tasksmodel-20261127\\scratch\\native_tasks_model\\evidence\\runtime_focused.png'",
+      "label": "copy_focused",
+      "rc": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "utc": "2026-11-28T05:13:05Z"
+    },
+    {
+      "command": "ssh -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'",
+      "label": "shot_activated",
+      "rc": 0,
+      "stdout_sha256": "832d869d247e81b74f6812d21b8927b5d3b0c6f7f89ae9aaf5d62ca2014e715a",
+      "utc": "2026-11-28T05:13:17Z"
+    },
+    {
+      "command": "scp -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -P 2223 canopy@127.0.0.1:/home/canopy/canopy_native_tasksmodel_m2/evidence_activated.png 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\wt-native-tasksmodel-20261127\\scratch\\native_tasks_model\\evidence\\runtime_activated.png'",
+      "label": "copy_activated",
+      "rc": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "utc": "2026-11-28T05:13:18Z"
+    },
+    {
+      "command": "ssh -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'",
+      "label": "runtime_04_activation_observe",
+      "rc": 0,
+      "stdout_sha256": "3c8ba90bfc7ce7b83948828302054896d5e878ae2c899c2fd920341aed0c6ff8",
+      "utc": "2026-11-28T05:13:20Z"
+    },
+    {
+      "command": "ssh -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'",
+      "label": "shot_final",
+      "rc": 0,
+      "stdout_sha256": "ffacdd6ab2a2d8aa4c79ebf401f8c4c4ee8f4230dfda0376904822205f27e703",
+      "utc": "2026-11-28T05:13:27Z"
+    },
+    {
+      "command": "scp -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -P 2223 canopy@127.0.0.1:/home/canopy/canopy_native_tasksmodel_m2/evidence_final.png 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\wt-native-tasksmodel-20261127\\scratch\\native_tasks_model\\evidence\\runtime_final.png'",
+      "label": "copy_final",
+      "rc": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "utc": "2026-11-28T05:13:28Z"
+    },
+    {
+      "command": "ssh -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'",
+      "label": "runtime_05_stop",
+      "rc": 0,
+      "stdout_sha256": "6196fdbc744abbf09d7f4d517052ab9ef7704f8e924f0cbe3b2a59186f7e2337",
+      "utc": "2026-11-28T05:13:30Z"
+    },
+    {
+      "command": "ssh -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'",
+      "label": "package_00_source_hash",
+      "rc": 0,
+      "stdout_sha256": "8e766a42ddafebd136502e13c77a83bf5902dffeb5cca1bf0ccba0db2275d903",
+      "utc": "2026-11-28T05:13:31Z"
+    },
+    {
+      "command": "ssh -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'",
+      "label": "package_01_before",
+      "rc": 0,
+      "stdout_sha256": "56607bdc461497a0cc26328b0f9b70bb09aea8ddffd73ebcfdc0b3b3fb288a74",
+      "utc": "2026-11-28T05:13:32Z"
+    },
+    {
+      "command": "ssh -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'",
+      "label": "package_02_install",
+      "rc": 0,
+      "stdout_sha256": "37ddf79fe1354c1e4eda75c561b89ce398a56f7436649f5ccbc24ae672cda9d6",
+      "utc": "2026-11-28T05:13:33Z"
+    },
+    {
+      "command": "ssh -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'",
+      "label": "package_03_show",
+      "rc": 0,
+      "stdout_sha256": "7b67fb531b162ccc65a685416ecd00e502d5698620a1a69b9fb9c136f7eb6bc1",
+      "utc": "2026-11-28T05:13:34Z"
+    },
+    {
+      "command": "ssh -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'",
+      "label": "package_04_installed_files",
+      "rc": 0,
+      "stdout_sha256": "8c54b5c4302fe49ad07689c8b5dafc0ea837ba225b49510e7c90a1d6cccaef19",
+      "utc": "2026-11-28T05:13:35Z"
+    },
+    {
+      "command": "ssh -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'",
+      "label": "package_05_after",
+      "rc": 0,
+      "stdout_sha256": "4aa9c5b02b6d2227203c7829de4d0e5198930a5b53b770616c3f55c7abd1552d",
+      "utc": "2026-11-28T05:13:36Z"
+    },
+    {
+      "command": "ssh -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'",
+      "label": "package_06_remove",
+      "rc": 0,
+      "stdout_sha256": "2d9e7d88f0ef427139f552189745f6621e2d896eea4e8779e8fb4c13809ae73b",
+      "utc": "2026-11-28T05:13:37Z"
+    },
+    {
+      "command": "ssh -i 'C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\g1_ubuntu_evidence\\ssh\\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'",
+      "label": "package_07_final",
+      "rc": 0,
+      "stdout_sha256": "ebbeef66563c1c72dab9c23f9bd0801df22957c45325ff1e55c2b684a58d105f",
+      "utc": "2026-11-28T05:13:38Z"
+    }
+  ],
+  "utc_end": "2026-11-28T05:13:38Z",
+  "utc_start": "2026-11-28T05:12:39Z"
+}

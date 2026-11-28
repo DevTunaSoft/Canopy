@@ -1,0 +1,42 @@
+{
+  "candidate": {
+    "origin": "synthetic-kinoite-image",
+    "signature_state": "VERIFIED",
+    "size_bytes": 1073741824,
+    "target_digest": "2222222222222222222222222222222222222222222222222222222222222222",
+    "version": "43.20261205.0"
+  },
+  "checkpoint": {
+    "commit_digest": "1111111111111111111111111111111111111111111111111111111111111111",
+    "created_at": "2026-11-28T00:00:00Z",
+    "deployment_id": "dep-current",
+    "pinned": true
+  },
+  "confirm_ok": true,
+  "expect": "BLOCKED",
+  "gates": {
+    "activation_deferred": true,
+    "checkpoint_retained": true,
+    "core_immutable": false,
+    "digest_match": true,
+    "no_layered_mutation": true,
+    "signature_ok": true,
+    "stock_plasma_fallback": true,
+    "within_bounds": true
+  },
+  "guest_status": "NOT_RUN",
+  "label": "SYNTHETIC",
+  "name": "F003-core-mutation-claim",
+  "observation": {
+    "booted": true,
+    "commit_digest": "1111111111111111111111111111111111111111111111111111111111111111",
+    "core_writable": true,
+    "deployment_id": "dep-current",
+    "observed_at": "2026-11-28T00:00:00Z",
+    "retained": true,
+    "signature_state": "VERIFIED",
+    "staged_digest": "2222222222222222222222222222222222222222222222222222222222222222",
+    "version": "42.20261128.0"
+  },
+  "schema": "lacos-atomic-updates-fixture/1"
+}

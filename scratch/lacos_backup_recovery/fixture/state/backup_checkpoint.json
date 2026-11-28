@@ -1,0 +1,1 @@
+{"deployment_id":"deployment.20261128.0","generation":1,"integrity_digest":"37af7cf8715ac2755e74b9425a51cc121d51221f747cb7baccac65853d3f6746","plan_id":"backup_plan_synthetic","provenance_digest":"c90a9b53a1eb03d1b208a8b9970db002b2262e1610465f5e288c1c4d15188d75","rollback_deployment":"deployment.20261128.1","schema":1,"state":"ROLLBACK"}

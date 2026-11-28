@@ -50,6 +50,7 @@ __all__ = [
     "REASON_INVALID_OPERATION", "AVAILABLE", "UNAVAILABLE", "OPERATIONS",
     "DISCLOSURES", "SuspendResumeNativeError", "NativeDecision",
     "IntakeResult", "BatchResult", "DrainReport", "SuspendResumeNativePath",
+    "EVIDENCE_LABELS", "OUTCOMES", "RuntimeOutcome", "runtime_outcome",
 ]
 
 # Bounds are hard ceilings: a caller may lower them, never raise them.
@@ -421,3 +422,94 @@ class SuspendResumeNativePath:
         snapshot = self.view()
         return {key: (dict(value) if isinstance(value, Mapping) else value)
                 for key, value in snapshot.items()}
+
+
+# -- M4 real-runtime evidence mapping (pure; no I/O) ---------------------
+
+EVIDENCE_LABELS = _decisions.EVIDENCE_LABELS
+OUTCOMES = _decisions.OUTCOMES
+
+_PHASE_KEYS = {
+    "before": frozenset(
+        {"shell_active", "dock_visible", "launcher_visible", "window_visible"}),
+    "during": frozenset({"shell_active", "suspend_confirmed"}),
+    "after": frozenset(
+        {"shell_active", "dock_visible", "launcher_visible", "window_visible",
+         "resume_confirmed"}),
+}
+_OBSERVATION_KEYS = frozenset({"evidence_label", "before", "during", "after"})
+
+
+@dataclass(frozen=True)
+class RuntimeOutcome:
+    """Directive 79e30d79 outcome for one bounded desktop observation set."""
+
+    evidence_label: str
+    outcome: str
+    reason: str
+
+    def __post_init__(self):
+        if self.evidence_label not in EVIDENCE_LABELS:
+            raise SuspendResumeNativeError("invalid evidence label")
+        if self.outcome not in OUTCOMES or type(self.reason) is not str \
+                or not self.reason:
+            raise SuspendResumeNativeError("invalid runtime outcome")
+
+    def to_dict(self):
+        return {
+            "evidence_label": self.evidence_label,
+            "outcome": self.outcome,
+            "reason": self.reason,
+        }
+
+
+def runtime_outcome(observation):
+    """Map observed pre/during/post facts to an M4 conclusion, failing closed.
+
+    This function performs no host action and reads no host state. A caller
+    supplies only already-collected facts; missing, extra, wrong-typed or
+    unconfirmed facts can never produce a PASS. A synthetic or static report
+    can never be promoted to ``NATIVE RUNTIME`` by this mapping.
+    """
+    if (isinstance(observation, (str, bytes, bytearray))
+            or not isinstance(observation, Mapping)
+            or frozenset(observation) != _OBSERVATION_KEYS):
+        raise SuspendResumeNativeError("invalid runtime observation shape")
+    label = observation["evidence_label"]
+    if type(label) is not str or label not in EVIDENCE_LABELS:
+        raise SuspendResumeNativeError("invalid runtime evidence label")
+    phases = {}
+    for name, allowed in _PHASE_KEYS.items():
+        record = observation[name]
+        if (isinstance(record, (str, bytes, bytearray))
+                or not isinstance(record, Mapping)
+                or frozenset(record) != allowed):
+            raise SuspendResumeNativeError("invalid runtime phase record")
+        for key, value in record.items():
+            # ``None`` means the fact was not observed, not that it was
+            # observed absent. Only explicit booleans can prove or disprove it.
+            if value is not None and type(value) is not bool:
+                raise SuspendResumeNativeError("runtime fact must be boolean or null")
+        phases[name] = dict(record)
+
+    def result(outcome, reason):
+        return RuntimeOutcome(label, outcome, reason)
+
+    if label != "NATIVE RUNTIME":
+        return result("BLOCKED", "non-native-evidence")
+    if phases["during"]["suspend_confirmed"] is not True:
+        return result("NOT RUN", "suspend-not-observed")
+    if phases["after"]["resume_confirmed"] is not True:
+        return result("NOT RUN", "resume-not-observed")
+    if phases["during"]["shell_active"] is True:
+        return result("FAIL", "shell-active-during-suspend")
+    for name in ("before", "after"):
+        record = phases[name]
+        if any(record[key] is None for key in (
+                "shell_active", "dock_visible", "launcher_visible",
+                "window_visible")):
+            return result("NOT RUN", "desktop-state-not-reobserved")
+        if not record["shell_active"] or not record["dock_visible"] \
+                or not record["launcher_visible"] or not record["window_visible"]:
+            return result("FAIL", "desktop-state-not-observed")
+    return result("PASS", "suspend-resume-recovery-verified")

@@ -42,6 +42,6 @@ test_screenshot_validator_rejects_fake_png (tests.test_classic_qt_source.Classic
 test_workflow_captures_three_resolutions_and_five_minute_sample (tests.test_classic_qt_source.ClassicQtSourceTests.test_workflow_captures_three_resolutions_and_five_minute_sample) ... ok
 
 ----------------------------------------------------------------------
-Ran 42 tests in 0.282s
+Ran 42 tests in 0.531s
 
 OK

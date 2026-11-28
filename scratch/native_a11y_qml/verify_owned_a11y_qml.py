@@ -22,9 +22,11 @@ OWNED = (
     "prototype/classic/QuickControlsOverlay.qml",
     "prototype/classic/SettingsPanel.qml",
 )
-# Frozen visual constants from the owner-approved 32/96/14/7 geometry line.
-# This base (ec910d7a) still carries the then-current dock mirror; the gate
-# only requires that neither Theme.qml nor any artwork byte was touched.
+# Theme.qml is only required to be untouched; do NOT claim a byte-frozen
+# "32/96/14/7 geometry line" — at this base the pinned visual constants are
+# barHeight: 32, dockSize: 88, dockPadding: 12 and dockSpacing: 7, as asserted
+# by tests/test_classic_qt_source.py. The honest rendered-input proof here is
+# the projection check below (all Accessible.* lines stripped).
 BASE_THEME_SHA = hashlib.sha256(
     (CLASSIC / "Theme.qml").read_bytes()).hexdigest()
 
@@ -40,13 +42,16 @@ def read(name: str) -> str:
     return (CLASSIC / name).read_text(encoding="utf-8")
 
 
-def git_diff() -> str:
+def git_diff(paths: tuple[str, ...] = ()) -> str:
     return subprocess.run(
-        ["git", "diff", "--unified=0", "ec910d7a", "--"],
+        ["git", "diff", "--unified=0", "ec910d7a", "--", *paths],
         cwd=str(ROOT), capture_output=True, text=True, check=True).stdout
 
 
-diff = git_diff()
+# Scope the added-line checks to the four owned QML files only. Counting the
+# whole tree would count the script's own "Accessible." string literals and
+# the docs/test pin-sync lines as product edits (the clean-checkout mismatch).
+qml_diff = git_diff(OWNED)
 changed = subprocess.run(
     ["git", "diff", "--name-only", "ec910d7a", "--"],
     cwd=str(ROOT), capture_output=True, text=True, check=True).stdout.split()
@@ -56,7 +61,7 @@ check("owned_qml_files_changed",
       len(tracked_changed) == len(OWNED),
       "changed owned QML: " + ", ".join(sorted(tracked_changed)))
 
-added = [l[1:] for l in diff.splitlines()
+added = [l[1:] for l in qml_diff.splitlines()
          if l.startswith("+") and not l.startswith("+++")]
 added_acc = [l for l in added if "Accessible." in l]
 check("secondary_labels_named_or_described",
@@ -87,7 +92,8 @@ check("compact_window_help_reachability",
       and "onActivated: windowMenu.open()" in bar
       and "onActivated: helpMenu.open()" in bar
       and bar.count("Shortcut {") == 2,
-      "Alt+W and Alt+H reach the two existing menu proxies at compact width")
+      "SOURCE/COMPILED-LOAD ONLY: Alt+W and Alt+H bind to the two existing "
+      "menu proxies; no native keyboard-activation run is claimed")
 check("shortcuts_do_not_collide_with_classic_bindings",
       not re.search(r'sequence: "(Ctrl\\+W|Ctrl\\+Space|Ctrl\\+Shift\\+F|Ctrl\\+Alt\\+N)"', bar),
       "no reuse of the four registered Classic shortcuts")
@@ -100,11 +106,17 @@ check("no_geometry_or_art_change_in_added_lines",
       not geometry_hits,
       "added lines contain no geometry/visual binding")
 
+# The only tests/** path permitted here is the mechanical ND-041 pin sync
+# for the Accessible-only lines added below `visible: opened`.
+ALLOWED_NON_QML = (
+    "docs/NATIVE_A11Y_QML_FIX.md",
+    "scratch/native_a11y_qml/",
+    "tests/test_nd041_native_settings_controls_wiring.py",
+)
 outside = [p for p in changed if p not in OWNED
            and p + "/" not in OWNED]
 check("changes_limited_to_owned_paths",
-      all(p.startswith(("docs/NATIVE_A11Y_QML_FIX.md", "scratch/native_a11y_qml/"))
-          for p in outside),
+      all(p.startswith(ALLOWED_NON_QML) for p in outside),
       "non-QML changed paths: " + (", ".join(sorted(outside)) or "none"))
 check("theme_and_approved_art_untouched",
       not any(p.startswith(("prototype/classic/Theme.qml",

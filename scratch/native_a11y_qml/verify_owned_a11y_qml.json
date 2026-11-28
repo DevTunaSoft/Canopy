@@ -32,7 +32,7 @@
     {
       "name": "compact_window_help_reachability",
       "status": "PASS",
-      "detail": "Alt+W and Alt+H reach the two existing menu proxies at compact width"
+      "detail": "SOURCE/COMPILED-LOAD ONLY: Alt+W and Alt+H bind to the two existing menu proxies; no native keyboard-activation run is claimed"
     },
     {
       "name": "shortcuts_do_not_collide_with_classic_bindings",
@@ -47,7 +47,7 @@
     {
       "name": "changes_limited_to_owned_paths",
       "status": "PASS",
-      "detail": "non-QML changed paths: none"
+      "detail": "non-QML changed paths: docs/NATIVE_A11Y_QML_FIX.md, scratch/native_a11y_qml/ATSPI_BLOCKER.md, scratch/native_a11y_qml/COMMIT_MSG.txt, scratch/native_a11y_qml/OUT_OF_OWNERSHIP_ROOT_CAUSES.md, scratch/native_a11y_qml/REMEDIATION_EVIDENCE.md, scratch/native_a11y_qml/accessibility_pattern_tests.log, scratch/native_a11y_qml/atspi_native_blocker_probe.txt, scratch/native_a11y_qml/extended_tests.log, scratch/native_a11y_qml/targeted_tests.log, scratch/native_a11y_qml/verify_owned_a11y_qml.json, scratch/native_a11y_qml/verify_owned_a11y_qml.py, tests/test_nd041_native_settings_controls_wiring.py"
     },
     {
       "name": "theme_and_approved_art_untouched",

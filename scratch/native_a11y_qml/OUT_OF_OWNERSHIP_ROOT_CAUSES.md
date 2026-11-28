@@ -33,9 +33,11 @@ this document was applied to any repository file.
   six-menu `Repeater`: `visible: !root.compactLayout || (modelData !== "Window" && modelData !== "Help")`.
 - Evidence: at 760x500 the buttons named `Window menu` and `Help menu` are in
   the AT tree with `extents: null`, while File/Edit/View/Go have real extents.
-- This change restores **reachability** inside the owned `ShellMenuBar.qml`
-  with non-visual `Alt+W` / `Alt+H` shortcuts that call the existing
-  `windowMenu.open()` / `helpMenu.open()` proxies; `Main.qml` is untouched.
+- This change restores **source-level reachability** inside the owned
+  `ShellMenuBar.qml` with non-visual `Alt+W` / `Alt+H` shortcuts that call the
+  existing `windowMenu.open()` / `helpMenu.open()` proxies; `Main.qml` is
+  untouched. Evidence is source-gated plus Qt CI compiled-load only — no
+  native `Alt+W` / `Alt+H` or Tab activation was run.
 - Alternative hunk if the owning workstream prefers to stop advertising the
   hidden buttons instead (NOT APPLIED — file not owned here):
 
@@ -61,6 +63,8 @@ pins after this change are:
 The complementary byte-level projection gate
 (`tests/test_classic_status_a11y.py::test_visual_inputs_are_byte_frozen`)
 strips `Accessible.*` lines and **passes**, proving that rendered text,
-geometry, colours, fonts, ordering and assets are unchanged. Re-pinning the
-ND-041 constant belongs to that test's owner (`tests/**` is outside this
-change's ownership).
+geometry, colours, fonts, ordering and assets are unchanged. The two
+`RENDERED_VISUAL_SHA256` constants were synchronized in the remediation
+commit as a mechanical, test-only pin sync authorized for these
+Accessible-only lines; no visual source was edited and no other `tests/**`
+path was touched.

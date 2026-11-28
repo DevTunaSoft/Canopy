@@ -48,7 +48,9 @@ QStringList SystemAppLauncher::candidatesFor(const QString &dockName) {
             QStringLiteral("gnome-terminal.desktop"),
             QStringLiteral("org.gnome.Terminal.desktop"),
             QStringLiteral("mate-terminal.desktop"),
-            QStringLiteral("xfce4-terminal.desktop")}},
+            QStringLiteral("xfce4-terminal.desktop"),
+            QStringLiteral("org.kde.konsole.desktop"),
+            QStringLiteral("konsole.desktop")}},
         {QStringLiteral("Settings"), {
             QStringLiteral("cinnamon-settings.desktop"),
             QStringLiteral("org.gnome.Settings.desktop"),

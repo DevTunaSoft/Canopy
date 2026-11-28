@@ -1,0 +1,14 @@
+# guest preflight recorded 2026-11-28T06:20:41Z
+$ python3 --version
+Python 3.14.4
+$ sha256sum /tmp/canopy_m4_session.tgz
+03e7d6f63d2f3a0954f7664f0ec58ff0d4ebbca71840f2198468de14b8677802  /tmp/canopy_m4_session.tgz
+$ sha256sum /home/canopy/native_session_m4_verify/verify_native_session_recovery.py
+bc3e584313acdeadc7322e32c5f503741da27198d99753cc64cfa4e4ee7dda74  /home/canopy/native_session_m4_verify/verify_native_session_recovery.py
+$ pgrep -a kwin
+5384 /usr/bin/kwin_x11 --replace
+$ loginctl show-session 65 -p Type -p State -p Active
+Type=x11
+Active=yes
+State=active
+$ env | grep XDG_CURRENT_DESKTOP (ssh shell, not a desktop claim)

@@ -1,0 +1,334 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "height": 750,
+        "kind": "relayout",
+        "reason": "connect",
+        "sequence": 1,
+        "source": "qt.screen",
+        "version": 1,
+        "width": 1200
+      },
+      "id": "recovery_initial",
+      "steps": [
+        {
+          "call": "recovery",
+          "connectors": [
+            "HDMI-1"
+          ],
+          "height": 1080,
+          "primary": "HDMI-1",
+          "width": 1920
+        }
+      ]
+    },
+    {
+      "expected": {
+        "height": 750,
+        "kind": "no_op",
+        "reason": "unchanged",
+        "sequence": 2,
+        "source": "qt.screen",
+        "version": 1,
+        "width": 1200
+      },
+      "id": "recovery_secondary_connect",
+      "steps": [
+        {
+          "call": "recovery",
+          "connectors": [
+            "HDMI-1"
+          ],
+          "height": 1080,
+          "primary": "HDMI-1",
+          "width": 1920
+        },
+        {
+          "call": "recovery",
+          "connectors": [
+            "HDMI-1",
+            "DP-1"
+          ],
+          "height": 1080,
+          "primary": "HDMI-1",
+          "width": 1920
+        }
+      ]
+    },
+    {
+      "expected": {
+        "height": 720,
+        "kind": "relayout",
+        "reason": "resolution_changed",
+        "sequence": 2,
+        "source": "qt.screen",
+        "version": 1,
+        "width": 1200
+      },
+      "id": "recovery_resolution_changed",
+      "steps": [
+        {
+          "call": "recovery",
+          "connectors": [
+            "HDMI-1"
+          ],
+          "height": 1080,
+          "primary": "HDMI-1",
+          "width": 1920
+        },
+        {
+          "call": "recovery",
+          "connectors": [
+            "HDMI-1"
+          ],
+          "height": 720,
+          "primary": "HDMI-1",
+          "width": 1280
+        }
+      ]
+    },
+    {
+      "expected": {
+        "height": 750,
+        "kind": "relayout",
+        "reason": "primary_changed",
+        "sequence": 2,
+        "source": "qt.screen",
+        "version": 1,
+        "width": 1200
+      },
+      "id": "recovery_primary_changed",
+      "steps": [
+        {
+          "call": "recovery",
+          "connectors": [
+            "HDMI-1",
+            "DP-1"
+          ],
+          "height": 1080,
+          "primary": "HDMI-1",
+          "width": 1920
+        },
+        {
+          "call": "recovery",
+          "connectors": [
+            "HDMI-1",
+            "DP-1"
+          ],
+          "height": 1080,
+          "primary": "DP-1",
+          "width": 1920
+        }
+      ]
+    },
+    {
+      "expected": {
+        "height": 750,
+        "kind": "relayout",
+        "reason": "connect",
+        "sequence": 1,
+        "source": "qt.screen",
+        "version": 1,
+        "width": 1200
+      },
+      "id": "recovery_unsupported_clamped",
+      "steps": [
+        {
+          "call": "recovery",
+          "connectors": [
+            "HDMI-1"
+          ],
+          "height": 1000,
+          "primary": "HDMI-1",
+          "width": 1600
+        }
+      ]
+    },
+    {
+      "expected": {
+        "height": 750,
+        "kind": "suspend",
+        "reason": "no_display",
+        "sequence": 2,
+        "source": "qt.screen",
+        "version": 1,
+        "width": 1200
+      },
+      "id": "recovery_last_monitor_removed",
+      "steps": [
+        {
+          "call": "recovery",
+          "connectors": [
+            "HDMI-1"
+          ],
+          "height": 1080,
+          "primary": "HDMI-1",
+          "width": 1920
+        },
+        {
+          "call": "recovery",
+          "connectors": [],
+          "height": null,
+          "primary": null,
+          "width": null
+        }
+      ]
+    },
+    {
+      "expected": {
+        "height": 720,
+        "kind": "relayout",
+        "reason": "logical_dpi_changed",
+        "sequence": 1,
+        "source": "qt.screen",
+        "version": 1,
+        "width": 1200
+      },
+      "id": "dpi_150_percent",
+      "steps": [
+        {
+          "call": "dpi",
+          "connector": "HDMI-1",
+          "height": 1080,
+          "scale": 1.5,
+          "width": 1920
+        }
+      ]
+    },
+    {
+      "expected": {
+        "height": 540,
+        "kind": "relayout",
+        "reason": "logical_dpi_changed",
+        "sequence": 1,
+        "source": "qt.screen",
+        "version": 1,
+        "width": 960
+      },
+      "id": "dpi_200_percent",
+      "steps": [
+        {
+          "call": "dpi",
+          "connector": "HDMI-1",
+          "height": 1080,
+          "scale": 2.0,
+          "width": 1920
+        }
+      ]
+    },
+    {
+      "expected": {
+        "height": 750,
+        "kind": "no_op",
+        "reason": "logical_size_unchanged",
+        "sequence": 1,
+        "source": "qt.screen",
+        "version": 1,
+        "width": 1200
+      },
+      "id": "dpi_logical_unchanged",
+      "steps": [
+        {
+          "call": "dpi",
+          "connector": "HDMI-1",
+          "height": 750,
+          "scale": 1.0,
+          "width": 1200
+        }
+      ]
+    },
+    {
+      "expected": {
+        "height": 750,
+        "kind": "hold",
+        "reason": "below_minimum",
+        "sequence": 1,
+        "source": "qt.screen",
+        "version": 1,
+        "width": 1200
+      },
+      "id": "dpi_below_minimum",
+      "steps": [
+        {
+          "call": "dpi",
+          "connector": "HDMI-1",
+          "height": 600,
+          "scale": 2.0,
+          "width": 1000
+        }
+      ]
+    },
+    {
+      "expected": {
+        "height": 720,
+        "kind": "no_op",
+        "reason": "unchanged",
+        "sequence": 2,
+        "source": "qt.screen",
+        "version": 1,
+        "width": 1200
+      },
+      "id": "dpi_duplicate_signal",
+      "steps": [
+        {
+          "call": "dpi",
+          "connector": "HDMI-1",
+          "height": 1080,
+          "scale": 1.5,
+          "width": 1920
+        },
+        {
+          "call": "dpi",
+          "connector": "HDMI-1",
+          "height": 1080,
+          "scale": 1.5,
+          "width": 1920
+        }
+      ]
+    },
+    {
+      "expected": {
+        "height": 750,
+        "kind": "hold",
+        "reason": "invalid_event",
+        "sequence": 1,
+        "source": "qt.screen",
+        "version": 1,
+        "width": 1200
+      },
+      "id": "dpi_hostile_scale",
+      "steps": [
+        {
+          "call": "dpi",
+          "connector": "HDMI-1",
+          "height": 1080,
+          "scale": 5.0,
+          "width": 1920
+        }
+      ]
+    },
+    {
+      "expected": {
+        "height": 750,
+        "kind": "hold",
+        "reason": "invalid_event",
+        "sequence": 1,
+        "source": "qt.screen",
+        "version": 1,
+        "width": 1200
+      },
+      "id": "dpi_hostile_connector",
+      "steps": [
+        {
+          "call": "dpi",
+          "connector": "bad|connector",
+          "height": 1080,
+          "scale": 1.5,
+          "width": 1920
+        }
+      ]
+    }
+  ],
+  "wire_version": 1
+}

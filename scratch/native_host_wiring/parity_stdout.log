@@ -1,0 +1,18 @@
+{
+  "artifact": "native_display_host_parity_gate",
+  "classification": "SYNTHETIC",
+  "forbidden_bridge_tokens": [],
+  "mismatches": [],
+  "missing_wiring_markers": [],
+  "note": "Compiled offscreen self-test and source inspection only. NOT_RUN: real Plasma compositor, real monitor/DPI change, screenshots, screen reader and owner visual acceptance.",
+  "observed_vector_count": 13,
+  "self_test_pass_marker": true,
+  "sha256": {
+    "canonical_vectors.json": "d3e2bf9cf66586d2bf68fc31fd936f1322d4943f37c92fc2e84c3f8572bd9085",
+    "compiled_self_test.log": "5004664423aea4fc6eb58c7699fee6287041bb17b6d74c9f0811c52c6be2089f",
+    "main.cpp": "1167853b00820ebd74eb9d07f5bfba9f2d731a69b8ea0e1bf62f9205453300f4"
+  },
+  "vector_count": 13,
+  "verdict": "PASS",
+  "visual_paths_changed": []
+}

@@ -1,0 +1,2 @@
+binary_prefix= b'MZ'
+suffix= .exe

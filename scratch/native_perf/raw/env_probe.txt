@@ -1,0 +1,159 @@
+UTC=2026-11-28T04:47:04Z
+$ hostname
+canopy-plasma6
+$ uname -a
+Linux canopy-plasma6 7.0.0-14-generic #14-Ubuntu SMP PREEMPT_DYNAMIC Mon Apr 13 11:09:53 UTC 2026 x86_64 GNU/Linux
+$ cat /etc/os-release
+PRETTY_NAME="Ubuntu 26.04 LTS"
+NAME="Ubuntu"
+VERSION_ID="26.04"
+VERSION="26.04 (Resolute Raccoon)"
+VERSION_CODENAME=resolute
+ID=ubuntu
+ID_LIKE=debian
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+UBUNTU_CODENAME=resolute
+LOGO=ubuntu-logo
+$ lscpu
+Architecture:                            x86_64
+CPU op-mode(s):                          32-bit, 64-bit
+Address sizes:                           39 bits physical, 48 bits virtual
+Byte Order:                              Little Endian
+CPU(s):                                  2
+On-line CPU(s) list:                     0,1
+Vendor ID:                               GenuineIntel
+Model name:                              11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz
+CPU family:                              6
+Model:                                   140
+Thread(s) per core:                      1
+Core(s) per socket:                      2
+Socket(s):                               1
+Stepping:                                1
+BogoMIPS:                                4838.39
+Flags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch ibrs_enhanced fsgsbase bmi1 avx2 bmi2 invpcid rdseed adx clflushopt sha_ni arat md_clear flush_l1d arch_capabilities
+Hypervisor vendor:                       KVM
+Virtualization type:                     full
+L1d cache:                               96 KiB (2 instances)
+L1i cache:                               64 KiB (2 instances)
+L2 cache:                                2.5 MiB (2 instances)
+L3 cache:                                16 MiB (2 instances)
+NUMA node(s):                            1
+NUMA node0 CPU(s):                       0,1
+Vulnerability Gather data sampling:      Not affected
+$ dpkg-query plasma/kwin/qt6
+kwin-x11 4:6.6.4-0ubuntu1 amd64
+plasma-workspace 4:6.6.7-0ubuntu0.1 amd64
+qt6-base-dev 6.10.2+dfsg-7 amd64
+$ qmake6 -v
+QMake version 3.1
+Using Qt version 6.10.2 in /usr/lib/x86_64-linux-gnu
+$ pkg-config Qt6Core Qt6Quick
+6.10.2
+6.10.2
+$ running system services
+  accounts-daemon.service       loaded active running Accounts Service
+  avahi-daemon.service          loaded active running Avahi mDNS/DNS-SD Stack
+  chrony.service                loaded active running chrony, an NTP client/server
+  cron.service                  loaded active running Regular background program processing daemon
+  cups-browsed.service          loaded active running Make remote CUPS printers available locally
+  cups.service                  loaded active running CUPS Scheduler
+  dbus.service                  loaded active running D-Bus System Message Bus
+  geoclue.service               loaded active running Location Lookup Service
+  ModemManager.service          loaded active running Modem Manager
+  networkd-dispatcher.service   loaded active running Dispatcher daemon for systemd-networkd
+  NetworkManager.service        loaded active running Network Manager
+  polkit.service                loaded active running Authorization Manager
+  power-profiles-daemon.service loaded active running Power Profiles daemon
+  rsyslog.service               loaded active running System Logging Service
+  rtkit-daemon.service          loaded active running RealtimeKit Scheduling Policy Service
+  sddm.service                  loaded active running Simple Desktop Display Manager
+  snapd.service                 loaded active running Snap Daemon
+  ssh.service                   loaded active running OpenBSD Secure Shell server
+  switcheroo-control.service    loaded active running Switcheroo Control Proxy service
+  systemd-journald.service      loaded active running Journal Service
+  systemd-logind.service        loaded active running User Login Management
+  systemd-resolved.service      loaded active running Network Name Resolution
+  systemd-udevd.service         loaded active running Rule-based Manager for Device Events and Files
+  udisks2.service               loaded active running Disk Manager
+  unattended-upgrades.service   loaded active running Unattended Upgrades Shutdown
+  upower.service                loaded active running Daemon for power management
+  user@1000.service             loaded active running User Manager for UID 1000
+  wpa_supplicant.service        loaded active running WPA supplicant
+$ running user services
+  app-canopy\x2dclassic@autostart.service                 loaded active running Canopy Classic
+  app-geoclue\x2ddemo\x2dagent@autostart.service          loaded active running Geoclue Demo agent
+  app-org.kde.discover.notifier@autostart.service         loaded active running Discover
+  app-org.kde.kdeconnect.daemon@autostart.service         loaded active running KDE Connect
+  at-spi-dbus-bus.service                                 loaded active running Accessibility services bus
+  dbus.service                                            loaded active running D-Bus User Message Bus
+  dconf.service                                           loaded active running User preferences database
+  drkonqi-coredump-launcher@25-4112-8787_8808-0.service   loaded active running Launch DrKonqi for a systemd-coredump crash (PID 8787/UID 0)
+  drkonqi-coredump-launcher@26-4114-13467_11165-0.service loaded active running Launch DrKonqi for a systemd-coredump crash (PID 13467/UID 0)
+  drkonqi-coredump-launcher@27-4115-13529_11209-0.service loaded active running Launch DrKonqi for a systemd-coredump crash (PID 13529/UID 0)
+  drkonqi-coredump-launcher@28-4116-13623_14656-0.service loaded active running Launch DrKonqi for a systemd-coredump crash (PID 13623/UID 0)
+  drkonqi-coredump-launcher@29-4117-13651_14673-0.service loaded active running Launch DrKonqi for a systemd-coredump crash (PID 13651/UID 0)
+  drkonqi-coredump-launcher@30-4118-13671_14689-0.service loaded active running Launch DrKonqi for a systemd-coredump crash (PID 13671/UID 0)
+  drkonqi-coredump-launcher@31-4119-13698_11283-0.service loaded active running Launch DrKonqi for a systemd-coredump crash (PID 13698/UID 0)
+  drkonqi-coredump-launcher@32-20-13729_14710-0.service   loaded active running Launch DrKonqi for a systemd-coredump crash (PID 13729/UID 0)
+  drkonqi-coredump-launcher@33-21-13772_11336-0.service   loaded active running Launch DrKonqi for a systemd-coredump crash (PID 13772/UID 0)
+  drkonqi-coredump-launcher@34-4122-13834_14746-0.service loaded active running Launch DrKonqi for a systemd-coredump crash (PID 13834/UID 0)
+  drkonqi-coredump-launcher@35-25-13886_14781-0.service   loaded active running Launch DrKonqi for a systemd-coredump crash (PID 13886/UID 0)
+  drkonqi-coredump-launcher@36-26-13934_14812-0.service   loaded active running Launch DrKonqi for a systemd-coredump crash (PID 13934/UID 0)
+  drkonqi-coredump-launcher@37-27-13983_11446-0.service   loaded active running Launch DrKonqi for a systemd-coredump crash (PID 13983/UID 0)
+  drkonqi-coredump-launcher@38-28-14012_11465-0.service   loaded active running Launch DrKonqi for a systemd-coredump crash (PID 14012/UID 0)
+  drkonqi-coredump-launcher@39-29-14066_11477-0.service   loaded active running Launch DrKonqi for a systemd-coredump crash (PID 14066/UID 0)
+  drkonqi-coredump-launcher@40-30-14090_11493-0.service   loaded active running Launch DrKonqi for a systemd-coredump crash (PID 14090/UID 0)
+  filter-chain.service                                    loaded active running PipeWire filter chain daemon
+  kunifiedpush-distributor.service                        loaded active running KUnifiedPush Distributor
+  mpris-proxy.service                                     loaded active running Bluetooth mpris proxy
+  obex.service                                            loaded active running Bluetooth OBEX service
+  pipewire-pulse.service                                  loaded active running PipeWire PulseAudio
+  pipewire.service                                        loaded active running PipeWire Multimedia Service
+  plasma-gmenudbusmenuproxy.service                       loaded active running Proxies GTK DBus menus to a Plasma readable format
+  plasma-kaccess.service                                  loaded active running KAccess
+  plasma-kactivitymanagerd.service                        loaded active running KActivityManager Activity manager Service
+  plasma-kded6.service                                    loaded active running KDE Daemon 6
+  plasma-kglobalaccel.service                             loaded active running KDE Global Shortcuts Server
+  plasma-knighttimed.service                              loaded active running KDE Night Time Service
+  plasma-kscreen.service                                  loaded active running KScreen
+  plasma-ksmserver.service                                loaded active running KDE Session Management Server
+  plasma-kwin_x11.service                                 loaded active running KDE Window Manager
+  plasma-plasmashell.service                              loaded active running KDE Plasma Workspace
+  plasma-polkit-agent.service                             loaded active running KDE PolicyKit Authentication Agent
+  plasma-powerdevil.service                               loaded active running Powerdevil
+  plasma-xdg-desktop-portal-kde.service                   loaded active running Xdg Desktop Portal For KDE
+  plasma-xembedsniproxy.service                           loaded active running Handle legacy xembed system tray icons
+  ssh-agent.service                                       loaded active running OpenSSH Agent
+  wireplumber.service                                     loaded active running Multimedia Service Session Manager
+  xdg-desktop-portal-gtk.service                          loaded active running Portal service (GTK/GNOME implementation)
+  xdg-desktop-portal.service                              loaded active running Portal service
+  xdg-permission-store.service                            loaded active running sandboxed app permission store
+$ canopy binary identity
+/home/canopy/native_build_baseline/out/build/canopy-classic-spike 2442112 bytes mtime=2026-11-28 04:46:31.535220220 +0000
+f7497694e81890e119a5f3b3b1306e13229dc585c87aeb15632f553eb4ca4011  /home/canopy/native_build_baseline/out/build/canopy-classic-spike
+$ canopy pids/cmdlines
+5667 /home/canopy/.local/bin/canopy-classic
+30924 ./build/native-task-harness --auto ./harness/NativeTaskHarness.qml
+33163 ./build/native-task-harness --auto ./harness/NativeTaskHarness.qml
+$ X session
+0x00600013 -1 5422   0    0    1920 1080 canopy-plasma6 Desktop @ QRect(0,0 1024x768) 
+0x0060002e -1 5422   0    1026 1920 54   canopy-plasma6 plasmashell
+0x02a00012  0 5667   0    28   1920 998  canopy-plasma6 Canopy Classic — Technology Spike — Canopy Classic Spike
+0x03600014  0 30924  410  207  1100 640  canopy-plasma6 Canopy Classic native task dock
+0x03800014  0 33163  450  228  1100 640  canopy-plasma6 Canopy Classic native task dock
+$ xrandr
+Screen 0: minimum 320 x 200, current 1920 x 1080, maximum 16384 x 16384
+VGA-1 connected primary 1920x1080+0+0 (normal left inverted right x axis y axis) 0mm x 0mm
+   1024x768      59.95 +  60.00  
+   1920x1080     60.00* 
+   1600x1200     60.00  
+   1680x1050     59.95    59.88  
+   1400x1050     59.98    59.95  
+   1600x900      60.00  
+   1280x1024     60.02  
+   1440x900      59.89    59.90  
+   1280x960      60.00  
+   1366x768      59.79    60.00  

@@ -1,0 +1,189 @@
+{
+  "aggregate_all_observed": {
+    "cpu_percent_one_core": 6.1768,
+    "cpu_percent_two_cores": 3.0884,
+    "cpu_ticks_delta_sum": 1921.0,
+    "processes": 4,
+    "pss_kib_sum_mean": 723437.1,
+    "pss_kib_sum_of_per_process_peaks": 736063.0
+  },
+  "aggregate_canopy": {
+    "cpu_percent_one_core": 0.209,
+    "cpu_percent_two_cores": 0.1045,
+    "cpu_ticks_delta_sum": 65.0,
+    "processes": 1,
+    "pss_kib_sum_mean": 133139.0,
+    "pss_kib_sum_of_per_process_peaks": 135228.0
+  },
+  "aggregate_stock_shell": {
+    "cpu_percent_one_core": 5.9678,
+    "cpu_percent_two_cores": 2.9839,
+    "cpu_ticks_delta_sum": 1856.0,
+    "processes": 3,
+    "pss_kib_sum_mean": 590298.1,
+    "pss_kib_sum_of_per_process_peaks": 600835.0
+  },
+  "canopy_processes": {
+    "5667": {
+      "comm": "canopy-classic",
+      "cpu_percent_one_core": 0.209,
+      "cpu_ticks_delta": 65.0,
+      "nonvoluntary_ctx_delta": 32,
+      "pss_kib": {
+        "max": 135228.0,
+        "mean": 133139.0,
+        "min": 126419.0
+      },
+      "rss_kib": {
+        "max": 268976.0,
+        "mean": 261018.0,
+        "min": 198936.0
+      },
+      "samples": 44,
+      "voluntary_ctx_delta": 70
+    }
+  },
+  "clk_tck": 100.0,
+  "elapsed_seconds": 311.0,
+  "end_utc": "2026-11-28T04:52:38Z",
+  "guest": "canopy-plasma6",
+  "label": "CANOPY_CLASSIC",
+  "per_process": {
+    "4656": {
+      "comm": "startplasma-x11",
+      "cpu_percent_one_core": 0.0,
+      "cpu_ticks_delta": 0.0,
+      "nonvoluntary_ctx_delta": 0,
+      "pss_kib": {
+        "max": 7156.0,
+        "mean": 7025.1,
+        "min": 6653.0
+      },
+      "rss_kib": {
+        "max": 46224.0,
+        "mean": 46017.5,
+        "min": 44432.0
+      },
+      "samples": 44,
+      "voluntary_ctx_delta": 0
+    },
+    "5384": {
+      "comm": "kwin_x11",
+      "cpu_percent_one_core": 5.6527,
+      "cpu_ticks_delta": 1758.0,
+      "nonvoluntary_ctx_delta": 3171,
+      "pss_kib": {
+        "max": 126034.0,
+        "mean": 120959.2,
+        "min": 113069.0
+      },
+      "rss_kib": {
+        "max": 279984.0,
+        "mean": 264197.8,
+        "min": 204960.0
+      },
+      "samples": 44,
+      "voluntary_ctx_delta": 10348
+    },
+    "5422": {
+      "comm": "plasmashell",
+      "cpu_percent_one_core": 0.3151,
+      "cpu_ticks_delta": 98.0,
+      "nonvoluntary_ctx_delta": 502,
+      "pss_kib": {
+        "max": 467645.0,
+        "mean": 462313.8,
+        "min": 440151.0
+      },
+      "rss_kib": {
+        "max": 617392.0,
+        "mean": 606718.6,
+        "min": 526212.0
+      },
+      "samples": 44,
+      "voluntary_ctx_delta": 648
+    },
+    "5667": {
+      "comm": "canopy-classic",
+      "cpu_percent_one_core": 0.209,
+      "cpu_ticks_delta": 65.0,
+      "nonvoluntary_ctx_delta": 32,
+      "pss_kib": {
+        "max": 135228.0,
+        "mean": 133139.0,
+        "min": 126419.0
+      },
+      "rss_kib": {
+        "max": 268976.0,
+        "mean": 261018.0,
+        "min": 198936.0
+      },
+      "samples": 44,
+      "voluntary_ctx_delta": 70
+    }
+  },
+  "raw_path": "C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\wt-native-perf-baseline-20261127\\scratch\\native_perf\\raw\\canopy_idle.tsv",
+  "sample_rows": 176,
+  "schema": "canopy.native_idle_report/1",
+  "start_utc": "2026-11-28T04:47:13Z",
+  "stock_shell_processes": {
+    "4656": {
+      "comm": "startplasma-x11",
+      "cpu_percent_one_core": 0.0,
+      "cpu_ticks_delta": 0.0,
+      "nonvoluntary_ctx_delta": 0,
+      "pss_kib": {
+        "max": 7156.0,
+        "mean": 7025.1,
+        "min": 6653.0
+      },
+      "rss_kib": {
+        "max": 46224.0,
+        "mean": 46017.5,
+        "min": 44432.0
+      },
+      "samples": 44,
+      "voluntary_ctx_delta": 0
+    },
+    "5384": {
+      "comm": "kwin_x11",
+      "cpu_percent_one_core": 5.6527,
+      "cpu_ticks_delta": 1758.0,
+      "nonvoluntary_ctx_delta": 3171,
+      "pss_kib": {
+        "max": 126034.0,
+        "mean": 120959.2,
+        "min": 113069.0
+      },
+      "rss_kib": {
+        "max": 279984.0,
+        "mean": 264197.8,
+        "min": 204960.0
+      },
+      "samples": 44,
+      "voluntary_ctx_delta": 10348
+    },
+    "5422": {
+      "comm": "plasmashell",
+      "cpu_percent_one_core": 0.3151,
+      "cpu_ticks_delta": 98.0,
+      "nonvoluntary_ctx_delta": 502,
+      "pss_kib": {
+        "max": 467645.0,
+        "mean": 462313.8,
+        "min": 440151.0
+      },
+      "rss_kib": {
+        "max": 617392.0,
+        "mean": 606718.6,
+        "min": 526212.0
+      },
+      "samples": 44,
+      "voluntary_ctx_delta": 648
+    }
+  },
+  "system_idle": {
+    "idle_delta_ticks": 25655.0,
+    "idle_percent_of_all_cpu_time": 41.246
+  }
+}

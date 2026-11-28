@@ -1,0 +1,23 @@
+{
+  "duration_s": 3659,
+  "end_utc": "2026-11-28T07:26:55Z",
+  "label": "NATIVE_SOAK_60M",
+  "not_run": [
+    "24H_SOAK",
+    "TRUE_LOW_END_HARDWARE",
+    "RELEASE_ACCEPTANCE"
+  ],
+  "sample_count": "51",
+  "start_utc": "2026-11-28T06:25:56Z",
+  "verdict": "SOAK_WARN_CRASH_OR_ERROR_EVENT+SAMPLING_GAP+SERVICE_COUNT_DRIFT",
+  "warnings": [
+    "CRASH_OR_ERROR_EVENT",
+    "SAMPLING_GAP",
+    "SERVICE_COUNT_DRIFT"
+  ]
+}
+shell:startplasma-x11 pid=4656   PSS first/mean/last=5377/5377.0/5377 KiB growth=0.0% CPU=0.0% ctx/s=0.0
+shell:kwin_x11 pid=5384   PSS first/mean/last=138401/127194.294/110221 KiB growth=-20.36% CPU=0.7467% ctx/s=29.139
+shell:plasmashell pid=5422   PSS first/mean/last=457361/453016.882/446204 KiB growth=-2.44% CPU=0.0014% ctx/s=0.0
+canopy    pid=5667   PSS first/mean/last=128124/126679.569/124342 KiB growth=-2.95% CPU=0.0% ctx/s=0.0
+system units min/max=48/54 user units min/max=53/53 idle% min/mean=86.48200754860663/88.01

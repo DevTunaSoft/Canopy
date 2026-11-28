@@ -1,0 +1,273 @@
+2026-11-28T06:48:49+00:00 canopy-plasma6 kernel: watchdog: BUG: soft lockup - CPU#0 stuck for 22s! [swapper/0:0]
+2026-11-28T06:48:49+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '1012' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:48:49+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '188' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:48:49+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '62' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:50:54+00:00 canopy-plasma6 kernel: watchdog: BUG: soft lockup - CPU#0 stuck for 26s! [swapper/0:0]
+2026-11-28T06:50:54+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '1012' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:50:54+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '188' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:50:54+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '62' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:51:24+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '1012' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:51:24+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '188' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:51:24+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '62' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:51:24+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '1012' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:51:24+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '188' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:51:24+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '62' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:51:24+00:00 canopy-plasma6 kernel: watchdog: BUG: soft lockup - CPU#0 stuck for 28s! [swapper/0:0]
+2026-11-28T06:51:24+00:00 canopy-plasma6 kernel: watchdog: BUG: soft lockup - CPU#1 stuck for 28s! [unattended-upgr:66146]
+2026-11-28T06:51:53+00:00 canopy-plasma6 kernel: watchdog: BUG: soft lockup - CPU#0 stuck for 27s! [swapper/0:0]
+2026-11-28T06:51:53+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '1012' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:51:53+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '188' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:51:53+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '62' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:51:53+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '1012' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:51:53+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '188' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:51:53+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '62' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:51:53+00:00 canopy-plasma6 kernel: watchdog: BUG: soft lockup - CPU#1 stuck for 27s! [unattended-upgr:66146]
+2026-11-28T06:52:31+00:00 canopy-plasma6 kernel: watchdog: BUG: soft lockup - CPU#0 stuck for 34s! [swapper/0:0]
+2026-11-28T06:52:31+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '1012' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:52:31+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '188' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:52:31+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '62' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:53:01+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '1012' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:53:01+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '188' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:53:01+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '62' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:53:01+00:00 canopy-plasma6 kernel: watchdog: BUG: soft lockup - CPU#0 stuck for 28s! [swapper/0:0]
+2026-11-28T06:53:31+00:00 canopy-plasma6 kernel: watchdog: BUG: soft lockup - CPU#0 stuck for 26s! [swapper/0:0]
+2026-11-28T06:53:31+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '1012' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:53:31+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '188' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:53:31+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '62' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:53:31+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '1012' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:53:31+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '188' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:53:31+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '62' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:53:31+00:00 canopy-plasma6 kernel: watchdog: BUG: soft lockup - CPU#1 stuck for 26s! [unattended-upgr:66146]
+2026-11-28T06:56:32+00:00 canopy-plasma6 kernel: rcu: INFO: rcu_preempt detected stalls on CPUs/tasks:
+2026-11-28T06:56:32+00:00 canopy-plasma6 kernel: rcu:         (detected by 0, t=178511 jiffies, g=1021289, q=63 ncpus=2)
+2026-11-28T06:56:32+00:00 canopy-plasma6 kernel: rcu: All QSes seen, last rcu_preempt kthread activity 178511 (4305179463-4305000952), jiffies_till_next_fqs=3, root ->qsmask 0x0
+2026-11-28T06:56:32+00:00 canopy-plasma6 kernel: watchdog: BUG: soft lockup - CPU#1 stuck for 167s! [unattended-upgr:66146]
+2026-11-28T06:56:32+00:00 canopy-plasma6 kernel: rcu: rcu_preempt kthread starved for 178511 jiffies! g1021289 f0x2 RCU_GP_WAIT_FQS(5) ->state=0x0 ->cpu=1
+2026-11-28T06:56:32+00:00 canopy-plasma6 kernel: rcu:         Unless rcu_preempt kthread gets sufficient CPU time, OOM is now expected behavior.
+2026-11-28T06:56:32+00:00 canopy-plasma6 kernel: rcu: RCU grace-period kthread stack dump:
+2026-11-28T06:56:32+00:00 canopy-plasma6 kernel: rcu: Stack dump where RCU GP kthread last ran:
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: systemd-udevd.service: Watchdog timeout (limit 3min)!
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: systemd-resolved.service: Watchdog timeout (limit 3min)!
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: Process 337 (systemd-journal) of user 0 dumped core.
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: Coredump diverted to /var/lib/systemd/coredump/core.systemd-journal.0.d947231973cd4d5ebccffac973b5d5db.337.1795848990000000.zst
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: Module /usr/lib/systemd/systemd-journald from deb systemd-259.5-0ubuntu3.amd64
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: Module linux-vdso.so.1 from deb linux-7.0.0-14.14.amd64
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: Module libpcre2-8.so.0 from deb pcre2-10.46-1ubuntu0.1.amd64
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: Module libselinux.so.1 from deb libselinux-3.9-4build1.amd64
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: Module libzstd.so.1 from deb libzstd-1.5.7+dfsg-3.amd64
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: Module libz.so.1 from deb zlib-1:1.3.dfsg+really1.3.1-1ubuntu3.2.amd64
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: Module libcrypto.so.3 from deb openssl-3.5.5-1ubuntu3.amd64
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: Module libcrypt.so.1 from deb libxcrypt-1:4.5.1-1.amd64
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: Module libsystemd-shared-259.so from deb systemd-259.5-0ubuntu3.amd64
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: Stack trace of thread 337:
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: #0  0x00007919cd7d22d3 n/a (libzstd.so.1 + 0x952d3)
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: #1  0x00007919cd7ddbd9 ZSTD_createDCtx (libzstd.so.1 + 0xa0bd9)
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: #2  0x00007919cda2de5a decompress_blob_zstd (libsystemd-shared-259.so + 0x22de5a)
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: #3  0x00007919cdab12e5 journal_file_data_payload (libsystemd-shared-259.so + 0x2b12e5)
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: #4  0x00007919cdab164e journal_file_find_data_object_with_hash (libsystemd-shared-259.so + 0x2b164e)
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: #5  0x00007919cdab192b n/a (libsystemd-shared-259.so + 0x2b192b)
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: #6  0x00007919cdab24ee journal_file_append_entry (libsystemd-shared-259.so + 0x2b24ee)
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: #7  0x0000568f590ef562 n/a (/usr/lib/systemd/systemd-journald + 0x17562)
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: #8  0x0000568f590e8a8b n/a (/usr/lib/systemd/systemd-journald + 0x10a8b)
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: #9  0x00007919cdad9094 n/a (libsystemd-shared-259.so + 0x2d9094)
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: #10 0x00007919cdad9393 sd_event_dispatch (libsystemd-shared-259.so + 0x2d9393)
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: #11 0x00007919cdadac38 sd_event_run (libsystemd-shared-259.so + 0x2dac38)
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: #12 0x0000568f590e317f n/a (/usr/lib/systemd/systemd-journald + 0xb17f)
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: #13 0x00007919cd42a601 __libc_start_call_main (libc.so.6 + 0x2a601)
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: #14 0x00007919cd42a718 __libc_start_main_impl (libc.so.6 + 0x2a718)
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: #15 0x0000568f590e3735 n/a (/usr/lib/systemd/systemd-journald + 0xb735)
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66240]: ELF object binary architecture: AMD x86-64
+2026-11-28T06:56:30+00:00 canopy-plasma6 systemd[1]: systemd-logind.service: Watchdog timeout (limit 3min)!
+2026-11-28T06:56:30+00:00 canopy-plasma6 systemd[1]: systemd-journald.service: Watchdog timeout (limit 3min)!
+2026-11-28T06:56:30+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '1012' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:56:30+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '188' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:56:31+00:00 canopy-plasma6 systemd-coredump[66240]: Process 337 (systemd-journal) of user 0 dumped core.
+2026-11-28T06:56:30+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '62' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66247]: Process 386 (systemd-udevd) of user 0 dumped core.
+                                                                  
+                                                                  Module /usr/bin/udevadm from deb systemd-259.5-0ubuntu3.amd64
+                                                                  Module linux-vdso.so.1 from deb linux-7.0.0-14.14.amd64
+                                                                  Module libnss_systemd.so.2 from deb systemd-259.5-0ubuntu3.amd64
+                                                                  Module libmount.so.1 from deb util-linux-2.41.3-3ubuntu2.2.amd64
+                                                                  Module libkmod.so.2 from deb kmod-34.2-2ubuntu2.amd64
+                                                                  Module libblkid.so.1 from deb util-linux-2.41.3-3ubuntu2.2.amd64
+                                                                  Module libpcre2-8.so.0 from deb pcre2-10.46-1ubuntu0.1.amd64
+                                                                  Module libselinux.so.1 from deb libselinux-3.9-4build1.amd64
+                                                                  Module libzstd.so.1 from deb libzstd-1.5.7+dfsg-3.amd64
+                                                                  Module libz.so.1 from deb zlib-1:1.3.dfsg+really1.3.1-1ubuntu3.2.amd64
+                                                                  Module libcrypto.so.3 from deb openssl-3.5.5-1ubuntu3.amd64
+                                                                  Module libcrypt.so.1 from deb libxcrypt-1:4.5.1-1.amd64
+                                                                  Module libsystemd-shared-259.so from deb systemd-259.5-0ubuntu3.amd64
+                                                                  Stack trace of thread 386:
+                                                                  #0  0x000076c3df0a06c6 __internal_syscall_cancel (libc.so.6 + 0xa06c6)
+                                                                  #1  0x000076c3df137a95 epoll_wait (libc.so.6 + 0x137a95)
+                                                                  #2  0x000076c3df6d9734 sd_event_wait (libsystemd-shared-259.so + 0x2d9734)
+                                                                  #3  0x000076c3df6daccb sd_event_run (libsystemd-shared-259.so + 0x2daccb)
+                                                                  #4  0x000076c3df6dae6f sd_event_loop (libsystemd-shared-259.so + 0x2dae6f)
+                                                                  #5  0x00005fca421bd7d2 n/a (/usr/bin/udevadm + 0x237d2)
+                                                                  #6  0x000076c3df02a601 __libc_start_call_main (libc.so.6 + 0x2a601)
+                                                                  #7  0x000076c3df02a718 __libc_start_main_impl (libc.so.6 + 0x2a718)
+                                                                  #8  0x00005fca421be045 n/a (/usr/bin/udevadm + 0x24045)
+                                                                  ELF object binary architecture: AMD x86-64
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd-coredump[66246]: Process 750 (systemd-logind) of user 0 dumped core.
+                                                                  
+                                                                  Module /usr/lib/systemd/systemd-logind from deb systemd-259.5-0ubuntu3.amd64
+                                                                  Module linux-vdso.so.1 from deb linux-7.0.0-14.14.amd64
+                                                                  Module libnss_systemd.so.2 from deb systemd-259.5-0ubuntu3.amd64
+                                                                  Module libpcre2-8.so.0 from deb pcre2-10.46-1ubuntu0.1.amd64
+                                                                  Module libselinux.so.1 from deb libselinux-3.9-4build1.amd64
+                                                                  Module libzstd.so.1 from deb libzstd-1.5.7+dfsg-3.amd64
+                                                                  Module libz.so.1 from deb zlib-1:1.3.dfsg+really1.3.1-1ubuntu3.2.amd64
+                                                                  Module libcrypto.so.3 from deb openssl-3.5.5-1ubuntu3.amd64
+                                                                  Module libcrypt.so.1 from deb libxcrypt-1:4.5.1-1.amd64
+                                                                  Module libsystemd-shared-259.so from deb systemd-259.5-0ubuntu3.amd64
+                                                                  Stack trace of thread 750:
+                                                                  #0  0x0000757d912a06c6 __internal_syscall_cancel (libc.so.6 + 0xa06c6)
+                                                                  #1  0x0000757d91337a95 epoll_wait (libc.so.6 + 0x137a95)
+                                                                  #2  0x0000757d918d9734 sd_event_wait (libsystemd-shared-259.so + 0x2d9734)
+                                                                  #3  0x0000757d918daccb sd_event_run (libsystemd-shared-259.so + 0x2daccb)
+                                                                  #4  0x0000599ad30d57a0 n/a (/usr/lib/systemd/systemd-logind + 0x137a0)
+                                                                  #5  0x0000757d9122a601 __libc_start_call_main (libc.so.6 + 0x2a601)
+                                                                  #6  0x0000757d9122a718 __libc_start_main_impl (libc.so.6 + 0x2a718)
+                                                                  #7  0x0000599ad30d67a5 n/a (/usr/lib/systemd/systemd-logind + 0x147a5)
+                                                                  ELF object binary architecture: AMD x86-64
+2026-11-28T06:56:33+00:00 canopy-plasma6 systemd-coredump[66248]: Process 385 (systemd-resolve) of user 989 dumped core.
+                                                                  
+                                                                  Module /usr/lib/systemd/systemd-resolved from deb systemd-259.5-0ubuntu3.amd64
+                                                                  Module linux-vdso.so.1 from deb linux-7.0.0-14.14.amd64
+                                                                  Module libunistring.so.5 from deb libunistring-1.3-2build1.amd64
+                                                                  Module libidn2.so.0 from deb libidn2-2.3.8-4build1.amd64
+                                                                  Module libpcre2-8.so.0 from deb pcre2-10.46-1ubuntu0.1.amd64
+                                                                  Module libselinux.so.1 from deb libselinux-3.9-4build1.amd64
+                                                                  Module libzstd.so.1 from deb libzstd-1.5.7+dfsg-3.amd64
+                                                                  Module libz.so.1 from deb zlib-1:1.3.dfsg+really1.3.1-1ubuntu3.2.amd64
+                                                                  Module libcrypt.so.1 from deb libxcrypt-1:4.5.1-1.amd64
+                                                                  Module libcrypto.so.3 from deb openssl-3.5.5-1ubuntu3.amd64
+                                                                  Module libssl.so.3 from deb openssl-3.5.5-1ubuntu3.amd64
+                                                                  Module libsystemd-shared-259.so from deb systemd-259.5-0ubuntu3.amd64
+                                                                  Stack trace of thread 385:
+                                                                  #0  0x00007abe1d6a06c6 __internal_syscall_cancel (libc.so.6 + 0xa06c6)
+                                                                  #1  0x00007abe1d737a95 epoll_wait (libc.so.6 + 0x137a95)
+                                                                  #2  0x00007abe1e4d9734 sd_event_wait (libsystemd-shared-259.so + 0x2d9734)
+                                                                  #3  0x00007abe1e4daccb sd_event_run (libsystemd-shared-259.so + 0x2daccb)
+                                                                  #4  0x00007abe1e4dae6f sd_event_loop (libsystemd-shared-259.so + 0x2dae6f)
+                                                                  #5  0x00005a5a21ff1ab6 n/a (/usr/lib/systemd/systemd-resolved + 0x23ab6)
+                                                                  #6  0x00005a5a21fe9a83 n/a (/usr/lib/systemd/systemd-resolved + 0x1ba83)
+                                                                  #7  0x00007abe1d62a601 __libc_start_call_main (libc.so.6 + 0x2a601)
+                                                                  #8  0x00007abe1d62a718 __libc_start_main_impl (libc.so.6 + 0x2a718)
+                                                                  #9  0x00005a5a21fe9ae5 n/a (/usr/lib/systemd/systemd-resolved + 0x1bae5)
+                                                                  ELF object binary architecture: AMD x86-64
+2026-11-28T06:56:35+00:00 canopy-plasma6 systemd[1]: Failed to start apport-coredump-hook@93-4172-66241_64198-0.service.
+2026-11-28T06:56:35+00:00 canopy-plasma6 systemd[1]: Failed to start apport-coredump-hook@92-4171-66243_64200-0.service.
+2026-11-28T06:58:55+00:00 canopy-plasma6 kernel: watchdog: BUG: soft lockup - CPU#0 stuck for 79s! [swapper/0:0]
+2026-11-28T06:58:55+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '1014' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:58:55+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '1012' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:58:55+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '62' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:59:55+00:00 canopy-plasma6 kernel: watchdog: BUG: soft lockup - CPU#0 stuck for 46s! [swapper/0:0]
+2026-11-28T06:59:55+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '1014' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:59:55+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '1012' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T06:59:55+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '62' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T07:12:56+00:00 canopy-plasma6 kernel: watchdog: BUG: soft lockup - CPU#0 stuck for 453s! [swapper/0:0]
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: systemd-logind.service: Watchdog timeout (limit 3min)!
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: systemd-resolved.service: Watchdog timeout (limit 3min)!
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: systemd-udevd.service: Watchdog timeout (limit 3min)!
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: snapd.service: Watchdog timeout (limit 5min)!
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: Process 67719 (systemd-journal) of user 0 dumped core.
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: Coredump diverted to /var/lib/systemd/coredump/core.systemd-journal.0.d947231973cd4d5ebccffac973b5d5db.67719.1795849975000000.zst
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: Module /usr/lib/systemd/systemd-journald from deb systemd-259.5-0ubuntu3.4.amd64
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: Module linux-vdso.so.1 from deb linux-7.0.0-14.14.amd64
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: Module libpcre2-8.so.0 from deb pcre2-10.46-1ubuntu0.1.amd64
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: Module libselinux.so.1 from deb libselinux-3.9-4build1.amd64
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: Module libzstd.so.1 from deb libzstd-1.5.7+dfsg-3.amd64
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: Module libz.so.1 from deb zlib-1:1.3.dfsg+really1.3.1-1ubuntu3.2.amd64
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: Module libcrypto.so.3 from deb openssl-3.5.5-1ubuntu3.amd64
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: Module libcrypt.so.1 from deb libxcrypt-1:4.5.1-1.amd64
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: Module libsystemd-shared-259.so from deb systemd-259.5-0ubuntu3.4.amd64
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: Stack trace of thread 67719:
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: #0  0x00007f8ba46a06c6 __internal_syscall_cancel (libc.so.6 + 0xa06c6)
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: #1  0x00007f8ba4737a95 epoll_wait (libc.so.6 + 0x137a95)
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: #2  0x00007f8ba4cd97f4 sd_event_wait (libsystemd-shared-259.so + 0x2d97f4)
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: #3  0x00007f8ba4cdad8b sd_event_run (libsystemd-shared-259.so + 0x2dad8b)
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: #4  0x00006205d01e917f n/a (/usr/lib/systemd/systemd-journald + 0xb17f)
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: #5  0x00007f8ba462a601 __libc_start_call_main (libc.so.6 + 0x2a601)
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: #6  0x00007f8ba462a718 __libc_start_main_impl (libc.so.6 + 0x2a718)
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: #7  0x00006205d01e9735 n/a (/usr/lib/systemd/systemd-journald + 0xb735)
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: ELF object binary architecture: AMD x86-64
+2026-11-28T07:12:55+00:00 canopy-plasma6 systemd[1]: systemd-journald.service: Watchdog timeout (limit 3min)!
+2026-11-28T07:12:55+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '1014' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T07:12:55+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '1012' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T07:12:55+00:00 canopy-plasma6 rsyslogd[805]: get tty for session '62' failed with [61]:No data available  [v8.2512.0]
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd-coredump[75404]: Process 67719 (systemd-journal) of user 0 dumped core.
+2026-11-28T07:12:57+00:00 canopy-plasma6 systemd-coredump[75407]: Process 67863 (systemd-udevd) of user 0 dumped core.
+                                                                  
+                                                                  Module /usr/bin/udevadm from deb systemd-259.5-0ubuntu3.4.amd64
+                                                                  Module linux-vdso.so.1 from deb linux-7.0.0-14.14.amd64
+                                                                  Module libnss_systemd.so.2 from deb systemd-259.5-0ubuntu3.4.amd64
+                                                                  Module libmount.so.1 from deb util-linux-2.41.3-3ubuntu2.2.amd64
+                                                                  Module libkmod.so.2 from deb kmod-34.2-2ubuntu2.amd64
+                                                                  Module libblkid.so.1 from deb util-linux-2.41.3-3ubuntu2.2.amd64
+                                                                  Module libpcre2-8.so.0 from deb pcre2-10.46-1ubuntu0.1.amd64
+                                                                  Module libselinux.so.1 from deb libselinux-3.9-4build1.amd64
+                                                                  Module libzstd.so.1 from deb libzstd-1.5.7+dfsg-3.amd64
+                                                                  Module libz.so.1 from deb zlib-1:1.3.dfsg+really1.3.1-1ubuntu3.2.amd64
+                                                                  Module libcrypto.so.3 from deb openssl-3.5.5-1ubuntu3.amd64
+                                                                  Module libcrypt.so.1 from deb libxcrypt-1:4.5.1-1.amd64
+                                                                  Module libsystemd-shared-259.so from deb systemd-259.5-0ubuntu3.4.amd64
+                                                                  Stack trace of thread 67863:
+                                                                  #0  0x00007a33c30a06c6 __internal_syscall_cancel (libc.so.6 + 0xa06c6)
+                                                                  #1  0x00007a33c3137a95 epoll_wait (libc.so.6 + 0x137a95)
+                                                                  #2  0x00007a33c36d97f4 sd_event_wait (libsystemd-shared-259.so + 0x2d97f4)
+                                                                  #3  0x00007a33c36dad8b sd_event_run (libsystemd-shared-259.so + 0x2dad8b)
+                                                                  #4  0x00007a33c36daf2f sd_event_loop (libsystemd-shared-259.so + 0x2daf2f)
+                                                                  #5  0x000064265bfbb7d2 n/a (/usr/bin/udevadm + 0x237d2)
+                                                                  #6  0x00007a33c302a601 __libc_start_call_main (libc.so.6 + 0x2a601)
+                                                                  #7  0x00007a33c302a718 __libc_start_main_impl (libc.so.6 + 0x2a718)
+                                                                  #8  0x000064265bfbc045 n/a (/usr/bin/udevadm + 0x24045)
+                                                                  ELF object binary architecture: AMD x86-64
+2026-11-28T07:12:58+00:00 canopy-plasma6 systemd-coredump[75408]: Process 68009 (systemd-resolve) of user 989 dumped core.
+                                                                  
+                                                                  Module /usr/lib/systemd/systemd-resolved from deb systemd-259.5-0ubuntu3.4.amd64
+                                                                  Module linux-vdso.so.1 from deb linux-7.0.0-14.14.amd64
+                                                                  Module libunistring.so.5 from deb libunistring-1.3-2build1.amd64
+                                                                  Module libidn2.so.0 from deb libidn2-2.3.8-4build1.amd64
+                                                                  Module libpcre2-8.so.0 from deb pcre2-10.46-1ubuntu0.1.amd64
+                                                                  Module libselinux.so.1 from deb libselinux-3.9-4build1.amd64
+                                                                  Module libzstd.so.1 from deb libzstd-1.5.7+dfsg-3.amd64
+                                                                  Module libz.so.1 from deb zlib-1:1.3.dfsg+really1.3.1-1ubuntu3.2.amd64
+                                                                  Module libcrypt.so.1 from deb libxcrypt-1:4.5.1-1.amd64
+                                                                  Module libcrypto.so.3 from deb openssl-3.5.5-1ubuntu3.amd64
+                                                                  Module libssl.so.3 from deb openssl-3.5.5-1ubuntu3.amd64
+                                                                  Module libsystemd-shared-259.so from deb systemd-259.5-0ubuntu3.4.amd64
+                                                                  Stack trace of thread 68009:
+                                                                  #0  0x00007a66338a06c6 __internal_syscall_cancel (libc.so.6 + 0xa06c6)
+                                                                  #1  0x00007a6633937a95 epoll_wait (libc.so.6 + 0x137a95)
+                                                                  #2  0x00007a66346d97f4 sd_event_wait (libsystemd-shared-259.so + 0x2d97f4)
+                                                                  #3  0x00007a66346dad8b sd_event_run (libsystemd-shared-259.so + 0x2dad8b)
+                                                                  #4  0x00007a66346daf2f sd_event_loop (libsystemd-shared-259.so + 0x2daf2f)
+                                                                  #5  0x00005848f3c78ab6 n/a (/usr/lib/systemd/systemd-resolved + 0x23ab6)
+                                                                  #6  0x00005848f3c70a83 n/a (/usr/lib/systemd/systemd-resolved + 0x1ba83)
+                                                                  #7  0x00007a663382a601 __libc_start_call_main (libc.so.6 + 0x2a601)
+                                                                  #8  0x00007a663382a718 __libc_start_main_impl (libc.so.6 + 0x2a718)
+                                                                  #9  0x00005848f3c70ae5 n/a (/usr/lib/systemd/systemd-resolved + 0x1bae5)
+                                                                  ELF object binary architecture: AMD x86-64
+2026-11-28T07:12:58+00:00 canopy-plasma6 systemd-coredump[75406]: Process 66280 (systemd-logind) of user 0 dumped core.
+                                                                  
+                                                                  Module linux-vdso.so.1 from deb linux-7.0.0-14.14.amd64
+                                                                  Module libpcre2-8.so.0 from deb pcre2-10.46-1ubuntu0.1.amd64
+                                                                  Module libselinux.so.1 from deb libselinux-3.9-4build1.amd64
+                                                                  Module libzstd.so.1 from deb libzstd-1.5.7+dfsg-3.amd64
+                                                                  Module libz.so.1 from deb zlib-1:1.3.dfsg+really1.3.1-1ubuntu3.2.amd64
+                                                                  Module libcrypto.so.3 from deb openssl-3.5.5-1ubuntu3.amd64
+                                                                  Module libcrypt.so.1 from deb libxcrypt-1:4.5.1-1.amd64
+                                                                  Stack trace of thread 66280:
+                                                                  #0  0x000079bfcc0a06c6 __internal_syscall_cancel (libc.so.6 + 0xa06c6)
+                                                                  #1  0x000079bfcc137a95 epoll_wait (libc.so.6 + 0x137a95)
+                                                                  #2  0x000079bfcc6d9734 n/a (/usr/lib/x86_64-linux-gnu/systemd/libsystemd-shared-259.so (deleted) + 0x2d9734)
+                                                                  #3  0x000079bfcc6daccb n/a (/usr/lib/x86_64-linux-gnu/systemd/libsystemd-shared-259.so (deleted) + 0x2daccb)
+                                                                  #4  0x000056e37cf2a7a0 n/a (/usr/lib/systemd/systemd-logind (deleted) + 0x137a0)
+                                                                  #5  0x000079bfcc02a601 __libc_start_call_main (libc.so.6 + 0x2a601)
+                                                                  #6  0x000079bfcc02a718 __libc_start_main_impl (libc.so.6 + 0x2a718)
+                                                                  #7  0x000056e37cf2b7a5 n/a (/usr/lib/systemd/systemd-logind (deleted) + 0x147a5)
+                                                                  ELF object binary architecture: AMD x86-64
+---
+TOTAL=271

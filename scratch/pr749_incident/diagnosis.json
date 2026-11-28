@@ -1,0 +1,35 @@
+{
+  "schema": "pr749-soak-diagnosis/1",
+  "subject_pr": 749,
+  "subject_head_sha": "449e39e7bd00af24aec50a05c70340c0b10a8120",
+  "soak_window_utc": ["2026-11-28T06:25:56Z", "2026-11-28T07:26:55Z"],
+  "verdict": "SOAK_WARN_GUEST_SYSTEM_NOISE_NOT_CANOPY_NO_INTEGRATION",
+  "warnings_explained": {
+    "CRASH_OR_ERROR_EVENT": "Single terminal journal_probe at t=3659 emitted coredump_total=8 and hostname-filtered journal_system_errors_total=132; report.py lines 143-145 raised the warning. The 132 count is a hostname false-positive subset (replay: 132 of 271 error lines match 'canopy-plasma6'); the 8 coredumps are real.",
+    "SAMPLING_GAP": "179 s (t1654 06:53:31Z -> t1833 06:56:30Z) and 541 s (t2278 07:03:54Z -> t2819 07:12:55Z). Guest kernel soft lockups plus VirtualBox heartbeat flatlines/catch-up lag of 178.5 s and 483.3 s match both gaps exactly; not a systemctl probe issue.",
+    "SERVICE_COUNT_DRIFT": "48 baseline -> 54 max -> 52 last; 48->49 apt-daily-upgrade.service; transient systemd-coredump@/drkonqi-coredump-processor@/apport-coredump-hook@ units plus user@107.service, session-1013.scope and packagekit.service explain the peak; no Canopy units involved. Exact membership not stored by sampler."
+  },
+  "coredumps": [
+    {"utc": "2026-11-28T06:56:32Z", "pid": 337, "unit": "systemd-journald", "signal": "SIGABRT", "cause": "systemd watchdog timeout (3min)"},
+    {"utc": "2026-11-28T06:56:33Z", "pid": 386, "unit": "systemd-udevd/udevadm", "signal": "SIGABRT", "cause": "systemd watchdog timeout (3min)"},
+    {"utc": "2026-11-28T06:56:33Z", "pid": 750, "unit": "systemd-logind", "signal": "SIGABRT", "cause": "systemd watchdog timeout (3min)"},
+    {"utc": "2026-11-28T06:56:33Z", "pid": 385, "unit": "systemd-resolved", "signal": "SIGABRT", "cause": "systemd watchdog timeout (3min)"},
+    {"utc": "2026-11-28T07:12:57Z", "pid": 67719, "unit": "systemd-journald", "signal": "SIGABRT", "cause": "systemd watchdog timeout (3min)"},
+    {"utc": "2026-11-28T07:12:57Z", "pid": 67863, "unit": "systemd-udevd/udevadm", "signal": "SIGABRT", "cause": "systemd watchdog timeout (3min)"},
+    {"utc": "2026-11-28T07:12:58Z", "pid": 68009, "unit": "systemd-resolved", "signal": "SIGABRT", "cause": "systemd watchdog timeout (3min)"},
+    {"utc": "2026-11-28T07:12:58Z", "pid": 66280, "unit": "systemd-logind", "signal": "SIGABRT", "cause": "systemd watchdog timeout (3min)"}
+  ],
+  "root_cause": "Guest kernel soft lockups (CPU#1 stuck 167s in unattended-upgr:66146 at 06:56:32; CPU#0 stuck 453s at 07:12:56) starved systemd services; their 3-minute watchdogs fired and systemd sent SIGABRT. VirtualBox log shows matching 208.7s/500.5s catch-up lag and 178s/483s heartbeat flatlines, no VM state change. Guest/package maintenance and host VM scheduling stall, not Canopy.",
+  "canopy_evidence": {
+    "target_pids": [4656, 5384, 5422, 5667],
+    "process_starts_after_t0": 0,
+    "process_exits": 0,
+    "target_coredumps": 0,
+    "canopy_classic_cpu_ticks_delta": 0,
+    "canopy_classic_ctx_delta": 0,
+    "canopy_classic_pss_kib": [128124, 124342]
+  },
+  "remediation": "Bounded proposal only: fix journal regex to exclude hostname; store bounded per-sample unit names; add read-only VBox/guest soft-lockup gap classifier; rerun 1h on exclusively owned quiesced guest with zero lockups/coredumps/gaps. Not executed.",
+  "not_run": ["24H_SOAK", "CLEAN_SERIALIZED_AB", "LOW_END_HARDWARE", "MINT_GUEST", "CI_ON_GUEST", "WAKEUPS", "VISUAL_ACCEPTANCE", "INTEGRATION", "MERGE", "APPROVAL"],
+  "vm_actions": "read-only SSH journal/coredumpctl/systemctl queries and on-disk VBox log reads only; no destructive action"
+}

@@ -1,0 +1,17 @@
+UTC_LAUNCH=2026-11-28T06:25:53Z
+DURATION_S=3600
+INTERVAL_S=60
+LABEL=NATIVE_SOAK_60M
+BASE_SHA=ec910d7a7275296ecbc8b5e5c459d356205165d1
+DIRECTIVE_SHA_PREFIX=79e30d79
+VM_NAME=Canopy-Test-Plasma6
+VM_UUID=3aecd840-4dd6-4481-913f-64a289da406d
+SAMPLER_CMD=ssh -i $KEY -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=10 -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -p 2223 canopy@127.0.0.1 'python3 - 3600 60 NATIVE_SOAK_60M' < tools/stability/native_soak_sampler.py > scratch/native_stability/raw/soak.tsv 2> scratch/native_stability/raw/soak.err
+REPORT_CMD=python3 tools/stability/native_soak_report.py scratch/native_stability/raw/soak.tsv scratch/native_stability/raw/soak.json
+KEY_PATH=C:/Users/X1/AppData/Local/hermes/cache/scratch/g1_ubuntu_evidence/ssh/g1_ed25519 (pre-existing scratch key; private material not committed)
+UTC_START=2026-11-28T06:25:54Z
+UTC_END=2026-11-28T07:26:59Z
+SAMPLER_RC=0
+RAW_LINES=220
+REPORT_RC=0
+UTC_DONE=2026-11-28T07:27:00Z

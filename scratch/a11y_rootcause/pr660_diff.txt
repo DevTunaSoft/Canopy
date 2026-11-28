@@ -1,0 +1,596 @@
+diff --git a/prototype/classic/Main.qml b/prototype/classic/Main.qml
+index 57d88f23..3d450591 100644
+--- a/prototype/classic/Main.qml
++++ b/prototype/classic/Main.qml
+@@ -141,14 +141,23 @@ ApplicationWindow {
+                     id: launcherMenu
+                     MenuItem {
+                         text: "Browse applications"
++                        objectName: "canopyLauncherMenuBrowse"
++                        Accessible.name: "Browse applications"
++                        Accessible.description: "Open the application catalogue"
+                         onTriggered: appLauncher.openLauncher()
+                     }
+                     MenuItem {
+                         text: "About Canopy Classic"
++                        objectName: "canopyLauncherMenuAbout"
++                        Accessible.name: "About Canopy Classic"
++                        Accessible.description: "Show information about this preview"
+                         onTriggered: aboutPopup.open()
+                     }
+                     MenuItem {
+                         text: "Show Files"
++                        objectName: "canopyLauncherMenuFiles"
++                        Accessible.name: "Show Files"
++                        Accessible.description: "Open the in-preview Files window"
+                         onTriggered: filesPreview.visible = true
+                     }
+                 }
+diff --git a/prototype/classic/PreviewWindow.qml b/prototype/classic/PreviewWindow.qml
+index 04c253c5..2d79b21a 100644
+--- a/prototype/classic/PreviewWindow.qml
++++ b/prototype/classic/PreviewWindow.qml
+@@ -520,6 +520,11 @@ Rectangle {
+                 clip: true
+                 focus: visible
+                 model: fileModel
++                activeFocusOnTab: true
++                Accessible.name: "Files in " + preview.currentPath
++                Accessible.description: "Tab reaches the file list after search. " +
++                        "Arrow keys select, Return or Space opens the focused folder, " +
++                        "Backspace goes up, Escape closes"
+                 boundsBehavior: Flickable.StopAtBounds
+                 ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+                 Keys.onPressed: function(event) {
+@@ -531,6 +536,18 @@ Rectangle {
+                         event.accepted = true
+                     }
+                 }
++                function activateFocusedFileRow(event) {
++                    if (currentItem && currentItem.isDir) {
++                        preview.navigate(currentItem.path)
++                        event.accepted = true
++                    }
++                }
++                Keys.onReturnPressed: function(event) {
++                    activateFocusedFileRow(event)
++                }
++                Keys.onSpacePressed: function(event) {
++                    activateFocusedFileRow(event)
++                }
+                 delegate: Item {
+                     objectName: "canopyFileRow"
+                     required property string name
+diff --git a/tests/test_classic_status_a11y.py b/tests/test_classic_status_a11y.py
+index 5f6a3dec..72615eeb 100644
+--- a/tests/test_classic_status_a11y.py
++++ b/tests/test_classic_status_a11y.py
+@@ -34,7 +34,7 @@
+ # A11Y-ANNOUNCE block removed) of the pristine b8735dc base blobs.
+ BASE_VISUAL_PROJECTION_SHA256 = {
+     "PreviewWindow.qml":
+-        "741091d6324db4193b2c4300c438a502631ed550604c271405e9d2e56d2eaeec",
++        "6550f68bc4614d0c8bbf86976b47a08778a113f9d54daba5e10c19931b410885",
+     "LauncherOverlay.qml":
+         "e5e1f3169fe9abca57744e8a5dc45f2a8d338fa05d0d719ea731f5633c43b6ce",
+     "QuickControlsOverlay.qml":
+diff --git a/tests/test_pe015_a11y_names_focus_order.py b/tests/test_pe015_a11y_names_focus_order.py
+new file mode 100644
+index 00000000..1c6d74ed
+--- /dev/null
++++ b/tests/test_pe015_a11y_names_focus_order.py
+@@ -0,0 +1,309 @@
++"""PE-015 focused gate: accessible names and tab order in Classic QML.
++
++Offline source-contract test. It reads the checked-in QML and never compiles
++Qt, launches a screen reader or claims Mint acceptance. Negative controls
++prove the guard rejects each missing name / focus-order binding.
++"""
++from __future__ import annotations
++
++import unittest
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parents[1]
++MAIN = ROOT / "prototype" / "classic" / "Main.qml"
++PREVIEW = ROOT / "prototype" / "classic" / "PreviewWindow.qml"
++
++# PE-046 pins for QA-019-F2/F3. Both checks must be scoped to the actual
++# declaration: a delegate name must not stand in for the list's own name, and
++# Backspace/Escape acceptance must not stand in for Enter acceptance.
++FILE_LIST_ACCESSIBLE_NAME = '"Files in " + preview.currentPath'
++ENTER_HANDLER = "Keys.onReturnPressed: function(event) {"
++ROW_ACTIVATION_HELPER = "function activateFocusedFileRow(event) {"
++ROW_ACTIVATION_CALL = "activateFocusedFileRow(event)"
++ACCEPT_EVENT = "event.accepted = true"
++
++# (visible label, stable objectName, accessible name, accessible description)
++LAUNCHER_MENU = {
++    "Browse applications": (
++        "canopyLauncherMenuBrowse", "Browse applications",
++        "Open the application catalogue"),
++    "About Canopy Classic": (
++        "canopyLauncherMenuAbout", "About Canopy Classic",
++        "Show information about this preview"),
++    "Show Files": (
++        "canopyLauncherMenuFiles", "Show Files",
++        "Open the in-preview Files window"),
++}
++
++# Rendering inputs in the two touched files. Every line below is frozen by the
++# visual lock; PE-015 may add accessibility properties but no pixels.
++FROZEN_VISUAL = {
++    MAIN: (
++        'text: "Browse applications"',
++        'text: "About Canopy Classic"',
++        'text: "Show Files"',
++        'Accessible.name: "Canopy penguin launcher"',
++        'border.width: topMenuButton.activeFocus ? 1 : 0',
++    ),
++    PREVIEW: (
++        'text: "Home"',
++        'text: "Back"',
++        'text: "Up"',
++        'placeholderText: "Search this folder"',
++        'objectName: "canopyFileList"',
++        'focus: visible',
++        'model: fileModel',
++        'Keys.onPressed: function(event) {',
++    ),
++}
++
++
++def normalized(text: str) -> str:
++    if not isinstance(text, str):
++        raise AssertionError("QML source must be text")
++    return text.replace("\r\n", "\n")
++
++
++def _indent(line: str) -> int:
++    return len(line) - len(line.lstrip())
++
++
++def _block(lines: list[str], marker: str) -> tuple[int, list[str]]:
++    """Return (start index, block lines) for the first declaration at marker."""
++    for index, line in enumerate(lines):
++        if marker not in line or line.lstrip().startswith("//"):
++            continue
++        base = _indent(line)
++        end = index + 1
++        while end < len(lines):
++            candidate = lines[end]
++            if candidate.strip() and not candidate.lstrip().startswith("//") \
++                    and _indent(candidate) <= base:
++                break
++            end += 1
++        return index, lines[index:end]
++    raise AssertionError("declaration not found: " + marker)
++
++
++def _property(block: list[str], key: str) -> str:
++    for line in block:
++        stripped = line.strip()
++        if stripped.startswith(key + ":"):
++            return stripped[len(key) + 1:].strip()
++    return ""
++
++
++def _id_block(lines: list[str], declaration: str, object_id: str) -> tuple[int, list[str]]:
++    """Find a declaration block whose body contains the requested id."""
++    for index, line in enumerate(lines):
++        if declaration not in line or line.lstrip().startswith("//"):
++            continue
++        start, block = _block(lines[index:], declaration)
++        if object_id in "\n".join(block):
++            return index + start, block
++    raise AssertionError("declaration with id not found: " + object_id)
++
++
++def launcher_menu_items(main_source: str) -> dict[str, list[str]]:
++    """Read the launcher MenuItem declarations from Main.qml source text."""
++    lines = normalized(main_source).split("\n")
++    menu_index, menu = _id_block(lines, "Menu {", "id: launcherMenu")
++    menu_indent = _indent(lines[menu_index])
++    items: dict[str, list[str]] = {}
++    for index in range(menu_index + 1, menu_index + len(menu)):
++        line = lines[index]
++        if "MenuItem {" not in line:
++            continue
++        _, block = _block(lines[index:], "MenuItem {")
++        label = _property(block, "text").strip('"')
++        items[label] = block
++    return items
++
++
++def file_list_block(preview_source: str) -> list[str]:
++    lines = normalized(preview_source).split("\n")
++    _, block = _id_block(lines, "ListView {", "id: fileList")
++    return block
++
++
++def file_list_direct_properties(preview_source: str) -> list[str]:
++    """Only properties declared on fileList itself, never on its delegate."""
++    lines = normalized(preview_source).split("\n")
++    _, block = _id_block(lines, "ListView {", "id: fileList")
++    id_lines = [line for line in block if line.strip().startswith("id: ")]
++    if len(id_lines) != 1:
++        raise AssertionError("file list id declaration is not unique")
++    field_indent = _indent(id_lines[0])
++    return [line for line in block
++            if line.strip() and _indent(line) == field_indent]
++
++
++def _scoped_handler(block: list[str], header: str, label: str) -> list[str]:
++    """Return exactly one handler block, failing closed on duplicates."""
++    matches = [index for index, line in enumerate(block) if header in line]
++    if len(matches) != 1:
++        raise AssertionError("%s handler count is %d, expected 1"
++                             % (label, len(matches)))
++    start = matches[0]
++    base = _indent(block[start])
++    end = start + 1
++    while end < len(block):
++        candidate = block[end]
++        if candidate.strip() and not candidate.lstrip().startswith("//") \
++                and _indent(candidate) <= base:
++            break
++        end += 1
++    return block[start:end]
++
++
++def enter_acceptance_path(preview_source: str) -> bool:
++    """Fail closed unless Enter delegates to a helper that accepts the key."""
++    file_list = file_list_block(preview_source)
++    handler = normalized("\n".join(
++        _scoped_handler(file_list, ENTER_HANDLER, "file-list Enter")))
++    if handler.count(ROW_ACTIVATION_CALL) != 1:
++        raise AssertionError("file-list Enter does not delegate to row activation")
++    helper = normalized("\n".join(
++        _scoped_handler(file_list, ROW_ACTIVATION_HELPER, "shared row activation")))
++    if helper.count(ACCEPT_EVENT) != 1:
++        raise AssertionError("Enter activation path does not accept the event")
++    navigate = "preview.navigate(currentItem.path)"
++    if helper.count(navigate) != 1:
++        raise AssertionError("Enter activation path does not navigate the row")
++    if helper.index(ACCEPT_EVENT) <= helper.index(navigate):
++        raise AssertionError("Enter activation accepts before navigation")
++    return True
++
++
++def check_contract(main_source: str, preview_source: str) -> bool:
++    """Fail closed unless names and tab order are present on the real source."""
++    items = launcher_menu_items(main_source)
++    if set(items) != set(LAUNCHER_MENU):
++        raise AssertionError("launcher menu labels changed: %r" % (sorted(items),))
++    names: list[str] = []
++    for label, (object_name, name, description) in LAUNCHER_MENU.items():
++        block = items[label]
++        if _property(block, "objectName").strip('"') != object_name:
++            raise AssertionError("menu item lost objectName: " + label)
++        actual_name = _property(block, "Accessible.name").strip('"')
++        if actual_name != name:
++            raise AssertionError("menu item lost accessible name: " + label)
++        if _property(block, "Accessible.description").strip('"') != description:
++            raise AssertionError("menu item lost accessible description: " + label)
++        if "Accessible.ignored: true" in normalized("\n".join(block)):
++            raise AssertionError("named menu item is hidden from assistive tech: " + label)
++        names.append(actual_name)
++    if len(set(names)) != len(names):
++        raise AssertionError("launcher menu accessible names are not distinct")
++
++    file_list = file_list_block(preview_source)
++    file_text = normalized("\n".join(file_list))
++    if "activeFocusOnTab: true" not in file_text:
++        raise AssertionError("file list is not reachable by Tab")
++    direct_properties = file_list_direct_properties(preview_source)
++    if _property(direct_properties, "Accessible.name") != FILE_LIST_ACCESSIBLE_NAME:
++        raise AssertionError("file list lost its own accessible name binding")
++    if not _property(direct_properties, "Accessible.description"):
++        raise AssertionError("file list has no keyboard description")
++    if not enter_acceptance_path(preview_source):
++        raise AssertionError("focused file row cannot be opened with Enter")
++    if "Keys.onPressed: function(event) {" not in file_text:
++        raise AssertionError("existing Backspace/Escape contract lost")
++
++    for path, frozen_lines in FROZEN_VISUAL.items():
++        source = normalized(path.read_text(encoding="utf-8"))
++        for line in frozen_lines:
++            if source.count(line) != 1:
++                raise AssertionError("frozen rendering input changed: " + line)
++    return True
++
++
++class A11yNamesFocusOrderTests(unittest.TestCase):
++    def setUp(self):
++        self.main = MAIN.read_text(encoding="utf-8")
++        self.preview = PREVIEW.read_text(encoding="utf-8")
++
++    def test_checked_in_qml_passes_the_names_and_focus_contract(self):
++        self.assertTrue(check_contract(self.main, self.preview))
++
++    def test_all_three_launcher_menu_actions_have_distinct_names(self):
++        items = launcher_menu_items(self.main)
++        self.assertEqual(set(items), set(LAUNCHER_MENU))
++        names = [_property(block, "Accessible.name").strip('"')
++                 for block in items.values()]
++        self.assertEqual(len(set(names)), 3)
++
++    def test_file_list_is_in_tab_order(self):
++        self.assertIn("activeFocusOnTab: true",
++                      "\n".join(file_list_block(self.preview)))
++
++    def test_file_list_own_accessible_name_is_pinned(self):
++        direct = file_list_direct_properties(self.preview)
++        self.assertEqual(_property(direct, "Accessible.name"),
++                         FILE_LIST_ACCESSIBLE_NAME)
++
++    def test_enter_activation_accepts_the_key_event(self):
++        self.assertTrue(enter_acceptance_path(self.preview))
++
++    def test_negative_control_file_list_own_name_removed_fails(self):
++        line = next(line for line in file_list_direct_properties(self.preview)
++                    if line.strip().startswith("Accessible.name:"))
++        hostile = self.preview.replace(line + "\n", "", 1)
++        self.assertTrue(hostile != self.preview, "mutation did not apply")
++        with self.assertRaisesRegex(AssertionError,
++                                    "file list lost its own accessible name"):
++            check_contract(self.main, hostile)
++
++    def test_negative_control_enter_event_not_accepted_fails(self):
++        block = "\n".join(_scoped_handler(file_list_block(self.preview),
++                                          ROW_ACTIVATION_HELPER,
++                                          "shared row activation"))
++        hostile = self.preview.replace(
++            block, block.replace(ACCEPT_EVENT, "event.accepted = false", 1), 1)
++        self.assertTrue(hostile != self.preview, "mutation did not apply")
++        with self.assertRaisesRegex(AssertionError,
++                                    "Enter activation path does not accept"):
++            check_contract(self.main, hostile)
++
++    def test_negative_control_enter_delegation_removed_fails(self):
++        block = "\n".join(_scoped_handler(file_list_block(self.preview),
++                                          ENTER_HANDLER, "file-list Enter"))
++        hostile = self.preview.replace(
++            block, block.replace(ROW_ACTIVATION_CALL, "noop(event)", 1), 1)
++        self.assertTrue(hostile != self.preview, "mutation did not apply")
++        with self.assertRaisesRegex(AssertionError,
++                                    "file-list Enter does not delegate"):
++            check_contract(self.main, hostile)
++
++    def test_negative_control_missing_menu_name_fails(self):
++        hostile = self.main.replace(
++            '                        Accessible.name: "Browse applications"\n',
++            "", 1)
++        self.assertTrue(hostile != self.main, "mutation did not apply")
++        with self.assertRaises(AssertionError):
++            check_contract(hostile, self.preview)
++
++    def test_negative_control_duplicate_menu_name_fails(self):
++        hostile = self.main.replace(
++            'Accessible.name: "Show Files"',
++            'Accessible.name: "Browse applications"', 1)
++        self.assertTrue(hostile != self.main, "mutation did not apply")
++        with self.assertRaises(AssertionError):
++            check_contract(hostile, self.preview)
++
++    def test_negative_control_file_list_out_of_tab_order_fails(self):
++        hostile = self.preview.replace("                activeFocusOnTab: true\n", "", 1)
++        self.assertTrue(hostile != self.preview, "mutation did not apply")
++        with self.assertRaises(AssertionError):
++            check_contract(self.main, hostile)
++
++    def test_negative_control_enter_navigation_removed_fails(self):
++        hostile = self.preview.replace(
++            "                        preview.navigate(currentItem.path)\n", "", 1)
++        self.assertTrue(hostile != self.preview, "mutation did not apply")
++        with self.assertRaises(AssertionError):
++            check_contract(self.main, hostile)
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/tests/test_pe036_file_row_keyboard_activation.py b/tests/test_pe036_file_row_keyboard_activation.py
+new file mode 100644
+index 00000000..712f46fc
+--- /dev/null
++++ b/tests/test_pe036_file_row_keyboard_activation.py
+@@ -0,0 +1,199 @@
++"""PE-036 focused gate: Return/Space activation of Files rows (QA-005-002).
++
++Offline source-contract test over the checked-in QML. It does not compile Qt,
++dispatch real key events, launch a screen reader or claim Mint acceptance.
++Both keys must delegate to one shared directory-row activation helper; each
++path has its own positive test and its own negative control, so a missing
++handler cannot be masked by the other key.
++"""
++from __future__ import annotations
++
++import unittest
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parents[1]
++PREVIEW = ROOT / "prototype" / "classic" / "PreviewWindow.qml"
++
++RETURN_HEADER = "Keys.onReturnPressed: function(event) {"
++SPACE_HEADER = "Keys.onSpacePressed: function(event) {"
++SHARED_HEADER = "function activateFocusedFileRow(event) {"
++CALL = "activateFocusedFileRow(event)"
++NAVIGATE = "preview.navigate(currentItem.path)"
++ACCEPT = "event.accepted = true"
++GUARD = "if (currentItem && currentItem.isDir) {"
++
++# Frozen rendering inputs: PE-036 adds key handling only, never pixels.
++FROZEN_ROW_LINES = (
++    'objectName: "canopyFileList"',
++    "focus: visible",
++    "model: fileModel",
++    'objectName: "canopyFileRow"',
++    "required property string name",
++    "required property string path",
++    "required property bool isDir",
++    "MouseArea {",
++)
++
++
++def normalized(text: str) -> str:
++    if not isinstance(text, str):
++        raise AssertionError("QML source must be text")
++    return text.replace("\r\n", "\n")
++
++
++def _indent(line: str) -> int:
++    return len(line) - len(line.lstrip())
++
++
++def _block(lines: list[str], start_index: int) -> list[str]:
++    base = _indent(lines[start_index])
++    end = start_index + 1
++    while end < len(lines):
++        candidate = lines[end]
++        if candidate.strip() and not candidate.lstrip().startswith("//") \
++                and _indent(candidate) <= base:
++            break
++        end += 1
++    return lines[start_index:end]
++
++
++def file_list_block(source: str) -> list[str]:
++    lines = normalized(source).split("\n")
++    for index, line in enumerate(lines):
++        if "ListView {" not in line:
++            continue
++        block = _block(lines, index)
++        if "id: fileList" in "\n".join(block):
++            return block
++    raise AssertionError("fileList declaration not found")
++
++
++def _unique_block(source: str, header: str, label: str) -> list[str]:
++    block = file_list_block(source)
++    matches = [index for index, line in enumerate(block) if header in line]
++    if len(matches) != 1:
++        raise AssertionError("%s handler count is %d, expected 1"
++                             % (label, len(matches)))
++    return _block(block, matches[0])
++
++
++def activation_block(source: str, key: str) -> list[str]:
++    if key not in ("Return", "Space"):
++        raise AssertionError("unknown activation key: " + key)
++    header = RETURN_HEADER if key == "Return" else SPACE_HEADER
++    return _unique_block(source, header, "file-list " + key + " activation")
++
++
++def shared_block(source: str) -> list[str]:
++    return _unique_block(source, SHARED_HEADER, "shared file-row activation")
++
++
++def check_activation_path(source: str, key: str) -> bool:
++    """Fail closed unless one key reaches the shared directory activation."""
++    handler = normalized("\n".join(activation_block(source, key)))
++    prefix = "file-list %s activation" % key
++    if handler.count(CALL) != 1:
++        raise AssertionError(prefix + " does not delegate to the shared path")
++    body = normalized("\n".join(shared_block(source)))
++    if GUARD not in body:
++        raise AssertionError("shared activation does not guard on a directory")
++    if NAVIGATE not in body:
++        raise AssertionError("shared activation does not navigate the row")
++    if ACCEPT not in body:
++        raise AssertionError("shared activation does not accept the key event")
++    if body.index(GUARD) >= body.index(NAVIGATE):
++        raise AssertionError("shared activation navigates outside the guard")
++    if body.index(NAVIGATE) >= body.index(ACCEPT):
++        raise AssertionError("shared activation accepts before navigating")
++    return True
++
++
++def check_contract(source: str) -> bool:
++    """Both paths, the shared action and the old keys must all survive."""
++    check_activation_path(source, "Return")
++    check_activation_path(source, "Space")
++    file_text = normalized("\n".join(file_list_block(source)))
++    if "Keys.onPressed: function(event) {" not in file_text:
++        raise AssertionError("existing Backspace/Escape contract lost")
++    for key in ("Return", "Space"):
++        if key not in file_text:
++            raise AssertionError("keyboard activation key omitted: " + key)
++    lines = normalized(source).split("\n")
++    for frozen in FROZEN_ROW_LINES:
++        if sum(1 for line in lines if line.strip() == frozen) != 1:
++            raise AssertionError("frozen file-row rendering input changed: "
++                                 + frozen)
++    if not any("preview.navigate(path)" in line for line in lines):
++        raise AssertionError("pointer activation contract lost")
++    return True
++
++
++def _mutate(source: str, block: list[str], old: str, new: str) -> str:
++    """Mutate only one block and prove the mutation applied."""
++    text = "\n".join(block)
++    if text.count(old) != 1:
++        raise AssertionError("mutation target not unique: " + old)
++    mutated = source.replace(text, text.replace(old, new, 1), 1)
++    if mutated == source:
++        raise AssertionError("mutation did not apply")
++    return mutated
++
++
++class FileRowKeyboardActivationTests(unittest.TestCase):
++    def setUp(self):
++        self.source = normalized(PREVIEW.read_text(encoding="utf-8"))
++
++    def test_checked_in_qml_supports_both_activation_paths(self):
++        self.assertTrue(check_contract(self.source))
++
++    def test_return_activates_the_focused_directory_row(self):
++        self.assertTrue(check_activation_path(self.source, "Return"))
++
++    def test_space_activates_the_focused_directory_row(self):
++        self.assertTrue(check_activation_path(self.source, "Space"))
++
++    def test_negative_control_return_handler_removed_fails(self):
++        hostile = self.source.replace(RETURN_HEADER + "\n", "", 1)
++        self.assertNotEqual(hostile, self.source, "mutation did not apply")
++        with self.assertRaisesRegex(AssertionError,
++                                    "Return activation handler count"):
++            activation_block(hostile, "Return")
++
++    def test_negative_control_space_handler_removed_fails(self):
++        hostile = self.source.replace(SPACE_HEADER + "\n", "", 1)
++        self.assertNotEqual(hostile, self.source, "mutation did not apply")
++        with self.assertRaisesRegex(AssertionError,
++                                    "Space activation handler count"):
++            activation_block(hostile, "Space")
++
++    def test_negative_control_return_path_not_delegated_fails(self):
++        hostile = _mutate(self.source, activation_block(self.source, "Return"),
++                          CALL, "noop(event)")
++        with self.assertRaisesRegex(AssertionError,
++                                    "Return activation does not delegate"):
++            check_activation_path(hostile, "Return")
++
++    def test_negative_control_space_path_not_delegated_fails(self):
++        hostile = _mutate(self.source, activation_block(self.source, "Space"),
++                          CALL, "noop(event)")
++        with self.assertRaisesRegex(AssertionError,
++                                    "Space activation does not delegate"):
++            check_activation_path(hostile, "Space")
++
++    def test_negative_control_shared_navigation_removed_fails(self):
++        hostile = _mutate(self.source, shared_block(self.source),
++                          NAVIGATE, "noop()")
++        with self.assertRaisesRegex(AssertionError,
++                                    "shared activation does not navigate"):
++            check_activation_path(hostile, "Space")
++
++    def test_negative_control_shared_event_not_accepted_fails(self):
++        hostile = _mutate(self.source, shared_block(self.source),
++                          ACCEPT, "noop()")
++        with self.assertRaisesRegex(AssertionError,
++                                    "shared activation does not accept"):
++            check_activation_path(hostile, "Return")
++
++
++if __name__ == "__main__":
++    unittest.main()

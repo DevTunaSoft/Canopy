@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "base_commit": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+  "branch": "product/a11y-rootcause-20261128",
+  "scope": "STATIC/SYNTHETIC source gate; no Qt compile, VM, AT-SPI or reader",
+  "checks": [
+    {
+      "name": "owned_qml_files_changed",
+      "status": "PASS",
+      "detail": "changed owned QML: prototype/classic/Main.qml, prototype/classic/PreviewWindow.qml"
+    },
+    {
+      "name": "changes_limited_to_owned_paths",
+      "status": "PASS",
+      "detail": "outside owned paths: none"
+    },
+    {
+      "name": "preview_window_rendered_input_byte_frozen",
+      "status": "PASS",
+      "detail": "SHA-256 of non-accessibility projection: 741091d6324db4193b2c4300c438a502631ed550604c271405e9d2e56d2eaeec"
+    },
+    {
+      "name": "preview_empty_secondary_label_ignored_for_folders",
+      "status": "PASS",
+      "detail": "folder rows have no size; the empty label is excluded from AT"
+    },
+    {
+      "name": "preview_labels_have_names_and_descriptions",
+      "status": "PASS",
+      "detail": "explicit name/description on both file-row labels"
+    },
+    {
+      "name": "main_compact_window_help_hide_rule_removed",
+      "status": "PASS",
+      "detail": "the 760x500 hide rule for Window/Help no longer exists"
+    },
+    {
+      "name": "main_all_six_menus_visible_at_every_width",
+      "status": "PASS",
+      "detail": "topMenuButton is visible at compact width; six approved menus unchanged"
+    },
+    {
+      "name": "main_menu_accessible_names_preserved",
+      "status": "PASS",
+      "detail": "Window menu and Help menu keep their accessible name/description"
+    },
+    {
+      "name": "all_prior_accessibility_lines_preserved",
+      "status": "PASS",
+      "detail": "base Accessible lines=19, head Accessible lines=24, none removed"
+    },
+    {
+      "name": "main_rendered_bindings_unchanged_except_visibility",
+      "status": "PASS",
+      "detail": "all other Main.qml rendered bindings are byte-identical"
+    },
+    {
+      "name": "approved_dock_tail_byte_frozen",
+      "status": "PASS",
+      "detail": "dock/footer region including the final root brace is unchanged"
+    },
+    {
+      "name": "approved_top_bar_geometry_constants_unchanged",
+      "status": "PASS",
+      "detail": "approved margins, spacing, bar height, button height and padding intact"
+    },
+    {
+      "name": "no_geometry_art_or_shortcut_change_in_added_lines",
+      "status": "PASS",
+      "detail": "added lines contain only accessibility bindings, the visibility fix and explanatory comments"
+    },
+    {
+      "name": "no_new_shortcuts_or_menu_actions",
+      "status": "PASS",
+      "detail": "no accelerator/action change; no duplicate of PR #752 Alt+W/Alt+H"
+    },
+    {
+      "name": "theme_and_approved_art_untouched",
+      "status": "PASS",
+      "detail": "Theme.qml bytes identical and prototype/classic/assets/** absent"
+    }
+  ],
+  "all_pass": true
+}

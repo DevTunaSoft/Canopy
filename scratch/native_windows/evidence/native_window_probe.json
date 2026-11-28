@@ -1,0 +1,73 @@
+{
+  "artifacts": {
+    "guest_probe.log": {
+      "bytes": 1538,
+      "sha256": "b2c2f76053159e751b29f5e77fd5dbc7a5290874ef48d5e5a172348d4c32d2b2"
+    }
+  },
+  "checks": [
+    {
+      "command": "pgrep -a -u canopy -f 'startplasma-x11|kwin_x11|plasmashell'",
+      "id": "P01",
+      "result": "4656 /usr/bin/startplasma-x11\n4926 /usr/bin/ssh-agent /usr/bin/im-launch /usr/bin/startplasma-x11\n5384 /usr/bin/kwin_x11 --replace\n5422 /usr/bin/plasmashell --no-respawn",
+      "status": "PASS",
+      "title": "real Plasma X11 session"
+    },
+    {
+      "command": "pgrep -c -x kwin_x11; pgrep -c -x plasmashell",
+      "id": "P02",
+      "result": "before: kwin_x11=1 plasmashell=1 | after: kwin_x11=1 plasmashell=1",
+      "status": "PASS",
+      "title": "one compositor and one shared shell service, unchanged"
+    },
+    {
+      "command": "busctl --user introspect org.kde.KWin /KWin | grep currentDesktop/setCurrentDesktop",
+      "id": "P03",
+      "result": ".currentDesktop                     method    -         i            -\n.nextDesktop                        method    -         -            -\n.previousDesktop                    method    -         -            -\n.setCurrentDesktop                  method    i         b            -",
+      "status": "PASS",
+      "title": "KWin D-Bus exposes workspace inventory/switch methods"
+    },
+    {
+      "command": "busctl --user list --no-pager | grep -w org.kde.KWin",
+      "id": "P04",
+      "result": "org.kde.KWin                                  5384 kwin_x11        canopy :1.20         user@1000.service -       -",
+      "status": "PASS",
+      "title": "KWin present on FreeDesktop session bus"
+    },
+    {
+      "command": "busctl --user call org.kde.KWin /KWin org.kde.KWin currentDesktop; busctl --user call org.kde.KWin /KWin org.kde.KWin setCurrentDesktop i 1",
+      "id": "P05",
+      "result": "current=i 1 set=b false after=i 1",
+      "status": "PASS",
+      "title": "KWin workspace read-back and reversible no-op switch"
+    },
+    {
+      "command": "timeout 8 xprop -root _NET_CURRENT_DESKTOP _NET_ACTIVE_WINDOW _NET_DESKTOP_NAMES",
+      "id": "P06",
+      "result": "EWMH_RC=; output=EWMH_RC=124; external X blocker=54982       1 Ss         05:36 bash -c export DISPLAY=:0 XAUTHORITY=/tmp/xauth_zdKrsq; command -v xdotool; command -v scrot; xdotool key Escape; sleep 0.3; xdotool mousemove 1818 1046 click 1; sleep 1.2; scrot -o /home/canopy/m3_tray_open.png; xdotool mousemove 1700 880 click 1; sleep 1.2; scrot -o /home/canopy/m3_tray_interacted.png; xdotool key Escape; echo TRAY_SEQUENCE_DONE; ls -la /home/canopy/m3_tray*.png",
+      "status": "NOT_RUN",
+      "title": "EWMH active-window/current-desktop read on real Plasma"
+    },
+    {
+      "command": "timeout 8 wmctrl -l",
+      "id": "P07",
+      "result": "WMCTRL_RC=; output=WMCTRL_RC=124",
+      "status": "NOT_RUN",
+      "title": "X client liveness for activation/focus recovery"
+    }
+  ],
+  "command": "bash /home/canopy/native_window_management_20261127/probe/guest_probe.sh",
+  "duplicate_compositors": 0,
+  "generated_utc": "2026-11-28T06:16:58Z",
+  "guest": "Canopy-Test-Plasma6 (NAT ssh 127.0.0.1:2223)",
+  "head_sha": "9ba055870120c4f5998a858fdcf48fe8646ceaec",
+  "labels": {
+    "NOT_RUN": "EWMH window activation/focus-recovery read-back (external X client grab), screen-reader behavior, automatic CI-on-guest, owner visual acceptance, merge/release",
+    "SCOPED_ON_GUEST_RUNTIME": "KWin/FreeDesktop D-Bus calls on the stock Plasma guest at the exact head above",
+    "SYNTHETIC": "16 scoped unittest checks are pure Python, not runtime evidence"
+  },
+  "schema": "canopy.native_window_management_probe/1",
+  "services_started_by_probe": 0,
+  "ssh_rc": 0,
+  "verdict": "PASS_WITH_NOT_RUN"
+}

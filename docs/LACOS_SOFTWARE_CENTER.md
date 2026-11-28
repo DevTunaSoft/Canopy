@@ -10,7 +10,7 @@ search, launch, update or remove software on a host or guest. It does not
 implement a search/install/update/launch/remove/permissions runtime and it does
 not open a UI. No real guest, package manager, repository, service, core image
 or Software Center runtime was executed: all runtime work is
-`BLOCKED` / `NOT_RUN`.
+`BLOCKED_NOT_RUN`.
 
 ## Read-only source consumption
 
@@ -84,8 +84,9 @@ card is produced.
   `verify-write`, `pin --yes` CLI. This is an explicit bounded gate; no file
   was added under `tests/` because that path is outside this task's ownership,
   so Foundation's `unittest discover -s tests` does not discover this verifier.
-- `scratch/lacos_software_center/fixtures/**` — one projected snapshot, 14
-  synthetic negative fixtures, `negative_cases.json` and `SHA256SUMS`.
+- `scratch/lacos_software_center/fixtures/**` — one projected snapshot, 17
+  synthetic negative fixtures (including one for each forbidden evidence
+  label), `negative_cases.json` and `SHA256SUMS` (19 inputs).
 - `scratch/lacos_software_center/evidence/**` — generated consumption record
   and verification report.
 - This document.
@@ -105,10 +106,10 @@ PYTHONPATH=. python tools/lacos_software_center/check_center.py verify-write
 sha256sum -c scratch/lacos_software_center/fixtures/SHA256SUMS   # run from fixtures dir
 ```
 
-Observed at head `ec910d7a` + this change:
+Observed at this head:
 `python -m py_compile` rc=0; bounded verifier
-`SUMMARY checks=38 pass=38 fail=0 verdict=PASS` (report SHA-256
-`62b41567e5c74cc778508ec07b01193d7dd1903890fa7c68c4166ee5e9ab3492`);
+`SUMMARY checks=43 pass=43 fail=0 verdict=PASS` (report SHA-256
+`f043f2dd45f97d46705e07239c869562a5253374e107196e83d9aec1f71cac0d`);
 consumption record SHA-256
 `2c44b42c3026cb77c1412ffbd59efee654d596f9d3d548f4e81b9d7ee6d4e26a`.
 PR #753's own verifier was re-run read-only in its detached worktree and passed
@@ -118,10 +119,17 @@ Negative controls fail closed with pinned reason codes: unknown/missing
 ecosystem, paid tiers, accounts, telemetry, core mutation, duplicate services,
 foreign repo mixing, a `VERIFIED` signature claim, a privileged capability, a
 `READY` probe claim, a native-runtime claim, a wrong field type and a duplicate
-JSON key. In-process hardening checks additionally reject unordered containers,
-a string used as a sequence, a non-mapping top level, an extra top-level field,
-a changed source SHA-256 pin, a native-runtime evidence label and a caller
-claiming guest acceptance.
+JSON key. Three extra fixtures carry every required label plus exactly one
+forbidden evidence label (`NATIVE RUNTIME`, `GUEST ACCEPTED`, `VERIFIED`) so an
+emptied denylist cannot hide behind the missing-required-labels branch: that
+mutation yields 6 FAIL checks and rc=1. In-process hardening checks additionally
+reject unordered containers, a string used as a sequence, a non-mapping top
+level, an extra top-level field, a changed source SHA-256 pin, all three
+forbidden evidence labels and a caller claiming guest acceptance. If a guard
+raises instead of returning a verdict, the CLI emits `CHECK ... FAIL`, the
+pinned `CODE` (for example `POLICY_NO_CORE_MUTATION_REQUIRED`) and a terminal
+`SUMMARY ... verdict=FAIL` with rc=1; the core-mutation mutant was verified to
+take that path.
 
 ## Resource impact
 

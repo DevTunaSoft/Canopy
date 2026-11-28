@@ -39,7 +39,7 @@ EVIDENCE = ROOT / "scratch/lacos_software_center/evidence"
 PRODUCTION = ROOT / "canopy_features/software_center"
 SNAPSHOT = "software_center_snapshot.json"
 MAX_JSON_BYTES = 65_536
-EXPECTED_NEGATIVES = 14
+EXPECTED_NEGATIVES = 17
 PR753_HEAD = "616ce171a7b71f69f19060122f53c97ada346662"
 PR753_BASE = "ec910d7a7275296ecbc8b5e5c459d356205165d1"
 SOURCE_PINS = {
@@ -65,6 +65,19 @@ WRITE_METHODS = frozenset((
 ))
 _NAME = re.compile(r"[A-Za-z0-9_][A-Za-z0-9_.-]*\Z")
 _HEX64 = re.compile(r"[0-9a-f]{64}\Z")
+
+# Pinned terminal codes: an unexpected verifier exception still emits a
+# machine-readable CHECK + CODE + SUMMARY instead of a bare traceback.
+VERIFIER_EXCEPTION_CODE = "VERIFIER_EXCEPTION"
+CORE_MUTATION_CODES = frozenset((
+    "POLICY_NO_CORE_MUTATION_REQUIRED", "CORE_MUTATION_INVALID",
+    "CAPABILITY_FORBIDDEN",
+))
+FORBIDDEN_LABEL_CHECKS = (
+    ("NATIVE RUNTIME", "HARDEN_RUNTIME_LABEL_REJECTED"),
+    ("GUEST ACCEPTED", "HARDEN_GUEST_ACCEPTED_LABEL_REJECTED"),
+    ("VERIFIED", "HARDEN_VERIFIED_LABEL_REJECTED"),
+)
 
 
 def _sha(path: Path) -> str:
@@ -175,8 +188,77 @@ def _expect_code(fn, code: str) -> bool:
     return False
 
 
+def _emit(checks, failed, verdict, code=None):
+    """Print every check and one terminal SUMMARY, even on a guard exception."""
+    for name, status in checks:
+        print(f"CHECK\t{name}\t{status}")
+    if code is not None:
+        print(f"CODE\t{code}")
+    print(f"SUMMARY\tchecks={len(checks)}\tpass={len(checks) - len(failed)}"
+          f"\tfail={len(failed)}\tverdict={verdict}")
+    if failed:
+        print("FIRST\t" + failed[0])
+
+
+def _write_report(checks, failed, verdict, context, failure_code=None):
+    report = {
+        "schema_version": 1,
+        "evidence_labels": ["STATIC SOURCE ONLY", "SYNTHETIC"],
+        "guest_execution": "NOT_RUN",
+        "guest_acceptance": "NOT_RUN",
+        "software_center_runtime": "BLOCKED_NOT_RUN",
+        "source_consumption": "read-only",
+        "source_pr": 753,
+        "source_head_sha": PR753_HEAD,
+        "source_base_sha": PR753_BASE,
+        "source_sha256": SOURCE_PINS,
+        "production_sha256": {
+            name: _sha(PRODUCTION / name)
+            for name in sorted(context["texts"])},
+        "fixture_sha256": dict(sorted(context["actual"].items())),
+        "checks": [{"id": name, "status": status} for name, status in checks],
+        "verdict": verdict,
+        "note": ("Declaration-only presentation. No core mutation, paid tiers, "
+                 "accounts, telemetry or duplicate always-on services. "
+                 "No real guest or Software Center runtime was executed."),
+    }
+    if failure_code is not None:
+        report["failure_code"] = failure_code
+    EVIDENCE.mkdir(parents=True, exist_ok=True)
+    (EVIDENCE / "verification_report.json").write_text(
+        json.dumps(report, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8", newline="\n")
+
+
+def _terminal_failure(checks, code, write_report, context):
+    """Emit a pinned reason code and a terminal FAIL SUMMARY on any exception."""
+    name = ("CORE_MUTATION_GUARD" if code in CORE_MUTATION_CODES
+            else "VERIFIER_EXCEPTION")
+    _record(checks, name, False)
+    failed = [name]
+    _emit(checks, failed, "FAIL", code=code)
+    if write_report:
+        _write_report(checks, failed, "FAIL", context, failure_code=code)
+    return 1
+
+
 def verify(write_report: bool = False):
     checks = []
+    context = {"actual": {}, "texts": {}}
+    try:
+        failed = _run_checks(checks, context)
+    except SoftwareCenterError as exc:
+        return _terminal_failure(checks, exc.code, write_report, context)
+    except Exception:
+        return _terminal_failure(checks, VERIFIER_EXCEPTION_CODE, write_report, context)
+    verdict = "PASS" if not failed else "FAIL"
+    _emit(checks, failed, verdict)
+    if write_report:
+        _write_report(checks, failed, verdict, context)
+    return 0 if verdict == "PASS" else 1
+
+
+def _run_checks(checks, context):
     pinned = _fixture_hashes()
     actual = {name: _sha(FIXTURES / name) for name in pinned
               if (FIXTURES / name).is_file()}
@@ -267,50 +349,21 @@ def verify(write_report: bool = False):
     hostile["source"]["sha256"]["source_probe.py"] = "0" * 64
     _record(checks, "HARDEN_SOURCE_PIN_INVALID",
             _expect_code(lambda: build_center_view(hostile), "SOURCE_SHA256_INVALID"))
-    hostile = copy.deepcopy(snapshot)
-    hostile["evidence_labels"] = ["NATIVE RUNTIME"]
-    _record(checks, "HARDEN_RUNTIME_LABEL_REJECTED",
-            _expect_code(lambda: build_center_view(hostile), "EVIDENCE_LABELS_INVALID"))
+    # Required labels are kept in every probe: an empty forbidden-label
+    # denylist must not be able to hide behind the missing-required branch.
+    for label, check_name in FORBIDDEN_LABEL_CHECKS:
+        hostile = copy.deepcopy(snapshot)
+        hostile["evidence_labels"] = ["STATIC SOURCE ONLY", "SYNTHETIC", label]
+        _record(checks, check_name, _expect_code(
+            lambda h=hostile: build_center_view(h), "EVIDENCE_LABELS_INVALID"))
     hostile = copy.deepcopy(snapshot)
     hostile["ecosystems"][0]["guest_acceptance"] = "READY"
     _record(checks, "HARDEN_GUEST_CLAIM_REJECTED",
             _expect_code(lambda: build_center_view(hostile), "GUEST_ACCEPTANCE_INVALID"))
 
-    failed = [name for name, status in checks if status == "FAIL"]
-    verdict = "PASS" if not failed else "FAIL"
-    for name, status in checks:
-        print(f"CHECK\t{name}\t{status}")
-    print(f"SUMMARY\tchecks={len(checks)}\tpass={len(checks) - len(failed)}"
-          f"\tfail={len(failed)}\tverdict={verdict}")
-    if failed:
-        print("FIRST\t" + failed[0])
-
-    if write_report:
-        EVIDENCE.mkdir(parents=True, exist_ok=True)
-        report = {
-            "schema_version": 1,
-            "evidence_labels": ["STATIC SOURCE ONLY", "SYNTHETIC"],
-            "guest_execution": "NOT_RUN",
-            "guest_acceptance": "NOT_RUN",
-            "software_center_runtime": "BLOCKED_NOT_RUN",
-            "source_consumption": "read-only",
-            "source_pr": 753,
-            "source_head_sha": PR753_HEAD,
-            "source_base_sha": PR753_BASE,
-            "source_sha256": SOURCE_PINS,
-            "production_sha256": {
-                name: _sha(PRODUCTION / name) for name in sorted(texts)},
-            "fixture_sha256": dict(sorted(actual.items())),
-            "checks": [{"id": name, "status": status} for name, status in checks],
-            "verdict": verdict,
-            "note": ("Declaration-only presentation. No core mutation, paid tiers, "
-                     "accounts, telemetry or duplicate always-on services. "
-                     "No real guest or Software Center runtime was executed."),
-        }
-        (EVIDENCE / "verification_report.json").write_text(
-            json.dumps(report, indent=2, sort_keys=True) + "\n",
-            encoding="utf-8", newline="\n")
-    return 0 if verdict == "PASS" else 1
+    context["actual"] = actual
+    context["texts"] = texts
+    return [name for name, status in checks if status == "FAIL"]
 
 
 def main(argv=None):

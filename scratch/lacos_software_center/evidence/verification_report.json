@@ -89,6 +89,18 @@
       "status": "PASS"
     },
     {
+      "id": "NEGATIVE_SNAPSHOTFORBIDDENLABELGUESTACCEPTED",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_SNAPSHOTFORBIDDENLABELNATIVERUNTIME",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_SNAPSHOTFORBIDDENLABELVERIFIED",
+      "status": "PASS"
+    },
+    {
       "id": "NEGATIVE_SNAPSHOTFOREIGNREPO",
       "status": "PASS"
     },
@@ -149,6 +161,14 @@
       "status": "PASS"
     },
     {
+      "id": "HARDEN_GUEST_ACCEPTED_LABEL_REJECTED",
+      "status": "PASS"
+    },
+    {
+      "id": "HARDEN_VERIFIED_LABEL_REJECTED",
+      "status": "PASS"
+    },
+    {
       "id": "HARDEN_GUEST_CLAIM_REJECTED",
       "status": "PASS"
     }
@@ -158,12 +178,15 @@
     "SYNTHETIC"
   ],
   "fixture_sha256": {
-    "negative_cases.json": "49c408629d346941f86c230c30de977d11a6ff8bf34284eaebe5ef2bfca67aff",
+    "negative_cases.json": "c6ea58d342e24d8ae42019ecd32549fcc5363de2f95d4fd6289dab615cf99527",
     "snapshot_accounts.json": "fcad7db9795e176162bfc9e41feb3069bd9879563b51612ac1f6f71773632ecd",
     "snapshot_core_mutation.json": "0c38bad4c2533e4c717580852552fc9fac03ef3f2d4eca0af5bb3c8226f5250a",
     "snapshot_duplicate_key.json": "d54187f2d0f92d68bae51241db694043401822957f43174eab4782440604bf90",
     "snapshot_duplicate_services.json": "f6052d3b5cb5922354456d2b4c1443a6f278d428752903306125442b23fde633",
     "snapshot_forbidden_capability.json": "a197b33441f2770ce29045c84ddd70e01b1f74de938bd98ca87072606ab20e21",
+    "snapshot_forbidden_label_guest_accepted.json": "38409feaf2c047436ced046873699f7e3a44a9935920c3ff3b5cf02a0ef0b72b",
+    "snapshot_forbidden_label_native_runtime.json": "8cd224ec83822d3b83b6c1690cf016b86eec5c056372ae67ffe5b86fdbb5f444",
+    "snapshot_forbidden_label_verified.json": "b03e4bac624831c8b3cd8264c56659dfa5a36d20165c031abc2d853ad353c53c",
     "snapshot_foreign_repo.json": "256701f2b1655c55d9a071694b22d5cb3662545ea4e167d5338c59277c5a2ef2",
     "snapshot_missing_ecosystem.json": "78fd514cd2c132523cfdc4708031903942153312559d24e215d148d71618223b",
     "snapshot_paid_tiers.json": "e866766e54871fc104fa89dc3b764af6fbcd7c3767f57e8bbf514c93d5e46036",

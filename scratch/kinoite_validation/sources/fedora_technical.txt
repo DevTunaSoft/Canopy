@@ -1,0 +1,197 @@
+Technical Information :: Fedora Docs
+In this section
+Fedora Atomic Desktops
+Installation
+Getting Started
+Updates, Upgrades & Rollbacks
+Toolbx
+Technical Information
+Reading and Resources
+Contributing
+Troubleshooting
+FAQ
+Tips and Tricks
+Configuration Guides
+Sway Configuration Guide
+Fedora Atomic Desktops
+A Beginner's Guide to Fedora
+ARM Single Board Computers
+Community Architecture (CommArch)
+Community Linux Engineering
+Defensive Coding Guide
+Engineering Teams
+EPEL
+Fedora Accessibility (a11y) WG
+Fedora Accounts
+Fedora AI/ML SIG
+Fedora Asahi Remix
+Fedora Atomic Desktops
+Fedora Badges
+Fedora CI
+Fedora Cloud
+Fedora Community Ops
+Fedora Container Docs
+Fedora CoreOS
+Fedora Council
+Fedora Data Working Group (FDWG)
+Fedora Design Team
+Fedora Discussion Forum (Self-)Moderation Guidelines and Rules
+Fedora Diversity, Equity, and Inclusion (DEI)
+Fedora Documentation
+Fedora Documentation Team
+Fedora ELN
+Fedora Forge Documentation
+Fedora Gaming
+Fedora Infrastructure & Release Engineering
+Fedora Internet Of Things
+Fedora IoT Working Group
+Fedora Join SIG
+Fedora KDE Plasma Desktop Edition
+Fedora Legal
+Fedora Linux Releases
+Fedora Localization Team
+Fedora Magazine
+Fedora Marketing Team
+Fedora Matrix WG
+Fedora Mentored Projects
+Fedora Mindshare Committee
+Fedora Minimal
+Fedora Program Operations
+Fedora Project
+Fedora Quality Docs
+Fedora Rawhide Gating
+Fedora Release Notes
+Fedora Robotics SIG
+Fedora Security SIG
+Fedora Server User Documentation
+Fedora Server Working Group
+Fedora Spins & Labs
+Fedora Tools
+Fedora Websites & Apps
+Fedora Workstation Documentation
+Fedora Workstation Working Group
+Fedora/CentOS bootc
+FESCo
+Flatpak
+i3 SIG
+Java Packaging HOWTO
+Localization help and stats
+Mindshare Teams
+NeuroFedora User Documentation
+Package Maintainers
+Packaging Guidelines
+Quick Docs
+Reproducible Builds
+Fedora Atomic Desktops
+Technical Information
+en-US
+en-US
+ar
+ast
+az
+be
+bg
+bn
+ca
+cs
+de
+el
+es
+es_419
+fa
+fi
+fil
+fr
+fur
+ga
+gl
+he
+hi
+hr
+hu
+hy
+id
+it
+ja
+jp
+ka
+kab
+km
+ko
+lb
+lo
+lt
+mr
+ms
+my
+nb_NO
+ne
+nl
+nn
+or
+pl
+pt
+pt_BR
+pt_PT
+ro
+ru
+si
+sk
+sq
+sv
+sw
+szl
+te
+tr
+tzm
+uk
+ur
+ur_PK
+uz
+vi
+zh_CN
+zh_Hans
+zh_Hant
+zh_TW
+Technical Information
+This page provides some background technical information on Fedora Atomic Desktops, including information on the core technologies used to build it, as well as the filesystem layout.
+Users should not need to know this information.
+It is provided here for those who are interested in the technical details or those who want to use Fedora Atomic Desktops in a non-standard manner.
+ostree and rpm-ostree
+ostree is the core technology that is used to compose, deploy and update Fedora Atomic Desktops.
+ostree operates in a similar manner to a version control system, but it operates on entire filesystem trees.
+It is often described as “Git for operating system binaries”.
+For Fedora Atomic Desktops installations, ostree is responsible for deploying and updating the OS image (including everything below / that is not symlinked into /var).
+It also updates grub.cfg entries to point to the current image.
+rpm-ostree builds on top of ostree, and makes it possible to install RPMs as a “layer” on top of an ostree image.
+This makes it possible to install RPMs on Fedora Atomic Desktops.
+When a package is installed with rpm-ostree, a new OS image is composed by adding the RPM payload to the existing OS image, and creating a new, combined image.
+To see the newly installed RPMs, the system needs to be rebooted with the new image.
+rpm-ostree also takes care of recreating the layered image whenever you update the base OS image.
+Fedora Atomic Desktops filesystem layout
+On Fedora Atomic Desktops, the root filesystem (/) is mounted read-only.
+The /usr directory and everything below it is also read-only.
+The /etc and /var directories are respectively used to store configuration files and runtime state and are thus writable.
+Symlinks are used to make traditional state-carrying directories available in their expected locations.
+This includes:
+/home → /var/home
+/opt → /var/opt
+/srv → /var/srv
+/root → /var/roothome
+/usr/local → /var/usrlocal
+/mnt→ /var/mnt
+/tmp → /sysroot/tmp
+This means that separate home partitions should be mounted on /var/home.
+Since Fedora Linux 37, the /sysroot directory is also mounted read-only.
+The /boot and /boot/efi directories are currently also mounted as writable but there are plans to mount them read-only in the future or even not mount them at all.
+See Mount /boot as Read Only by default and Do not mount /boot/efi by default.
+For a more detailed explanation of Fedora Atomic Desktops' filesystem layout, refer to the libostree documentation.
+Want to help? Learn how to contribute to Fedora Docs ›
+All Fedora Documentation content available under CC BY-SA 4.0 or, when specifically noted, under another accepted free and open content license.
+Privacy Statement
+Legal
+Code of Conduct
+Sponsors
+Last build: 2026-11-28 03:50:09 UTC | Last content update: 2025-07-01
+Fedora is sponsored by Red Hat.
+Learn more about the relationship between Red Hat and Fedora.

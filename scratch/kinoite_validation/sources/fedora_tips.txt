@@ -1,0 +1,296 @@
+Tips and Tricks :: Fedora Docs
+In this section
+Fedora Atomic Desktops
+Installation
+Getting Started
+Updates, Upgrades & Rollbacks
+Toolbx
+Technical Information
+Reading and Resources
+Contributing
+Troubleshooting
+FAQ
+Tips and Tricks
+Configuration Guides
+Sway Configuration Guide
+Fedora Atomic Desktops
+A Beginner's Guide to Fedora
+ARM Single Board Computers
+Community Architecture (CommArch)
+Community Linux Engineering
+Defensive Coding Guide
+Engineering Teams
+EPEL
+Fedora Accessibility (a11y) WG
+Fedora Accounts
+Fedora AI/ML SIG
+Fedora Asahi Remix
+Fedora Atomic Desktops
+Fedora Badges
+Fedora CI
+Fedora Cloud
+Fedora Community Ops
+Fedora Container Docs
+Fedora CoreOS
+Fedora Council
+Fedora Data Working Group (FDWG)
+Fedora Design Team
+Fedora Discussion Forum (Self-)Moderation Guidelines and Rules
+Fedora Diversity, Equity, and Inclusion (DEI)
+Fedora Documentation
+Fedora Documentation Team
+Fedora ELN
+Fedora Forge Documentation
+Fedora Gaming
+Fedora Infrastructure & Release Engineering
+Fedora Internet Of Things
+Fedora IoT Working Group
+Fedora Join SIG
+Fedora KDE Plasma Desktop Edition
+Fedora Legal
+Fedora Linux Releases
+Fedora Localization Team
+Fedora Magazine
+Fedora Marketing Team
+Fedora Matrix WG
+Fedora Mentored Projects
+Fedora Mindshare Committee
+Fedora Minimal
+Fedora Program Operations
+Fedora Project
+Fedora Quality Docs
+Fedora Rawhide Gating
+Fedora Release Notes
+Fedora Robotics SIG
+Fedora Security SIG
+Fedora Server User Documentation
+Fedora Server Working Group
+Fedora Spins & Labs
+Fedora Tools
+Fedora Websites & Apps
+Fedora Workstation Documentation
+Fedora Workstation Working Group
+Fedora/CentOS bootc
+FESCo
+Flatpak
+i3 SIG
+Java Packaging HOWTO
+Localization help and stats
+Mindshare Teams
+NeuroFedora User Documentation
+Package Maintainers
+Packaging Guidelines
+Quick Docs
+Reproducible Builds
+Fedora Atomic Desktops
+Tips and Tricks
+en-US
+en-US
+ar
+ast
+az
+be
+bg
+bn
+ca
+cs
+de
+el
+es
+es_419
+fa
+fi
+fil
+fr
+fur
+ga
+gl
+he
+hi
+hr
+hu
+hy
+id
+it
+ja
+jp
+ka
+kab
+km
+ko
+lb
+lo
+lt
+mr
+ms
+my
+nb_NO
+ne
+nl
+nn
+or
+pl
+pt
+pt_BR
+pt_PT
+ro
+ru
+si
+sk
+sq
+sv
+sw
+szl
+te
+tr
+tzm
+uk
+ur
+ur_PK
+uz
+vi
+zh_CN
+zh_Hans
+zh_Hant
+zh_TW
+Tips and Tricks
+Hiding the default browser (Firefox)
+If you’re using another browser than the one installed by default (Firefox) then you can hide the default one from the interface via the following commands:
+$ sudo mkdir -p /usr/local/share/applications
+$ sudo cp /usr/share/applications/org.mozilla.firefox.desktop /usr/local/share/applications/
+$ sudo sed -i "2a\\NotShowIn=GNOME;KDE" /usr/local/share/applications/org.mozilla.firefox.desktop
+$ sudo update-desktop-database /usr/local/share/applications/
+Reenabling the default browser (Firefox)
+If you want to make the default browser (Firefox) visible again after hiding it, you can follow these steps:
+$ sudo rm -f /usr/local/share/applications/org.mozilla.firefox.desktop
+$ sudo update-desktop-database /usr/local/share/applications
+Alternative method
+If you are using sway, or want to hide the default browser for only your user, you can do that with these commands:
+$ mkdir -p ~/.local/share/applications
+$ cp /usr/share/applications/org.mozilla.firefox.desktop ~/.local/share/applications/
+$ sed -i "2a\\NotShowIn=GNOME;KDE;sway" ~/.local/share/applications/org.mozilla.firefox.desktop
+$ update-desktop-database ~/.local/share/applications
+and to reenable:
+$ rm -f ~/.local/share/applications/org.mozilla.firefox.desktop
+$ update-desktop-database ~/.local/share/applications
+Enabling RPM Fusion repos
+This section discusses third-party software sources not officially affiliated with or endorsed by the Fedora Project.
+Use them at your own discretion.
+Fedora recommends the use of free and open source software and avoidance of software encumbered by patents.
+Users may want to take advantage of the non-free software that is made available via the RPM Fusion repos in order to use the proprietary NVIDIA drivers, multimedia codecs, or other software not distributed as part of Fedora.
+First installation
+The first time you install the RPM Fusion repos, you need to install the versioned RPMs:
+$ sudo rpm-ostree install \
+https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+$ reboot
+Then continue with the next section to prepare your system for major Fedora updates.
+Major Fedora updates
+Once you have rebooted into the new deployment, you can run the following command to remove the “lock” on the versioned packages that were installed previously.
+This will enable the RPM Fusion repos to be automatically updated and versioned correctly across major Fedora version rebases:
+$ sudo rpm-ostree update \
+--uninstall rpmfusion-free-release \
+--uninstall rpmfusion-nonfree-release \
+--install rpmfusion-free-release \
+--install rpmfusion-nonfree-release
+$ reboot
+For more information, see this thread on Fedora Discussion.
+Working with Toolbx
+Finding out if you are currently in a Toolbx container
+If you frequently make use of Toolbx to perform various tasks and use multiple Toolbx containers it can be hard to keep track of whether you are currently executing commands on the host or in a Toolbx container.
+Furthermore, there is currently no command to tell you in which Toolbx container you are working.
+To alleviate this, you can add the following shell alias at the end of your ~/.bashrc:
+alias istoolbx='[ -f "/run/.toolboxenv" ] && grep -oP "(?<=name=\")[^\";]+" /run/.containerenv'
+When you open a new shell, you now have access to the new command istoolbx.
+This will behave as follows:
+When run from the host, returns an exit code of 1.
+When run from a Toolbx container, returns an exit code of 0 and prints the current Toolbx containers name to the console.
+If a more automated solution is your preference the following added to your ~/.bashrc will change your bash prompt to include "[toolbox <name>]":
+function is_toolbox() {
+if [ -f "/run/.toolboxenv" ]
+then
+TOOLBOX_NAME=$(cat /run/.containerenv | grep -oP "(?<=name=\")[^\";]+")
+echo "[${HOSTNAME} ${TOOLBOX_NAME}]"
+fi
+}
+Now you can include is_toolbox in your PS1 variable and not need to execute any extra commands in order to know whether or not your are in a toolbox or host shell.
+Example:
+export PS1="\[\e[31m\]\`is_toolbox\`\]\e[m\]\[\e[32m\]\\$ \[\e[m\]\[\e[37m\]❱\[\e[m\] "
+This results in a prompt which appears as such when not in a toolbox: $ ❱
+However, when running in a toolbox named "default" looks like: [toolbox default]$ ❱
+Running applications from inside Toolbx on the host
+This can be necessary if you want to interact with tools available from the host, for example podman, nmcli or rpm-ostree without leaving the Toolbx container in between.
+You can use flatpak-spawn, included in the base installation for this:
+$ flatpak-spawn --host podman --help
+If the application you want to call requires sudo access, the -S option must be supplied to sudo like below:
+$ flatpak-spawn --host sudo -S rpm-ostree status
+If you find yourself using commands like these frequently to access e.g. the flatpak command from inside the Toolbx container, you can create yourself a short custom wrapper script (inside the Toolbx container).
+To do this, perform the following steps:
+Define the istoolbx alias (for convenience) by executing the command mentioned above in your terminal.
+Make sure you are in a Toolbx container.
+If the following command doesn’t produce any output, you are likely still working on the host!
+[toolbx]$ istoolbx
+<Toolbx container name here>
+Once you have made sure you’re in a Toolbx container, execute the following command:
+[toolbx]$ echo -e '#!/bin/sh\nexec /usr/bin/flatpak-spawn --host flatpak "$@"' | \
+sudo tee /usr/local/bin/flatpak 1>/dev/null && sudo chmod +x /usr/local/bin/flatpak
+You now have a flatpak command available that allows you to interact with flatpak as if you were running the command on the host.
+Working with ostree/rpm-ostree
+Tracking changes to the base OS
+Some directories in ostree-based operating systems are writable by the user, like /etc.
+You can get a quick overview of the files changed under /etc using the following command:
+$ sudo ostree admin config-diff
+To get a more elaborate diff, you can use something like this:
+$ sudo diff -yrW200 --suppress-common-lines --color=always /usr/etc /etc 2>/dev/null
+This works because ostree keeps an unmodified copy of the /etc directory under /usr/etc.
+All of your changes go to /etc directly.
+Working with Flatpak applications
+Directly accessing Flatpak applications from the CLI
+The most noticable change when using Flatpak applications instead of conventional installations is that the applications cannot be directly called from the CLI any more, like so:
+$ evince
+bash: command not found: evince
+Instead, one can call them like this:
+$ flatpak run org.gnome.Evince
+In addition, most Flatpak applications export their internal binaries under an installation-dependent location:
+For Flatpak applications installed from system remotes, these can be found under /var/lib/flatpak/exports/bin/.
+For Flatpak applications installed from user remotes, these can be found under $HOME/.local/share/flatpak/exports/bin/.
+If you’re unsure to which installation a Flatpak application belongs, you can use this command to print it out:
+$ flatpak list --app --columns=name,installation
+You can then either add these directories to your $PATH:
+$ org.gnome.Evince
+or setup shell `alias`es as needed to make them available to the CLI like so:
+$ alias evince="flatpak run org.gnome.Evince"
+### or:
+alias evince="org.gnome.Evince"
+$ evince
+Modifying the GRUB config
+Do not use grubby or grub2-mkconfig to edit the GRUB configuration or kernel arguments on Fedora Atomic Desktops:
+Use this section to add GRUB configuration options.
+Use rpm-ostree kargs to edit kernel arguments.
+Fedora Atomic Desktops use a static GRUB configuration.
+You should not edit the GRUB configuration directly as it is managed by bootupd and may be overwritten or updated in the future.
+Additional configuration options can still be added to GRUB by writting them to a specific configuration file:
+Systems installed before Fedora 42 should use /boot/grub2/custom.cfg.
+Systems installed from Fedora 42 and later should use /boot/grub2/user.cfg.
+Starting with systems installed from Fedora 45, the /boot partition is also mounted read-only.
+You thus you need to remount it read-write before editing the configuration file:
+# Enter a temporary mount namespace to keep /boot mounted as read only for the rest of the system
+$ sudo unshare -m
+# Remount as read-write
+$ mount -o remount,rw /boot
+# Edit configuration file
+$ nano /boot/grub2/user.cfg
+### or:
+$ nano /boot/grub2/custom.cfg
+For example, to increase the GRUB boot selection timer:
+$ sudo cat /boot/grub2/user.cfg
+set timeout=10
+Want to help? Learn how to contribute to Fedora Docs ›
+All Fedora Documentation content available under CC BY-SA 4.0 or, when specifically noted, under another accepted free and open content license.
+Privacy Statement
+Legal
+Code of Conduct
+Sponsors
+Last build: 2026-11-28 03:50:09 UTC | Last content update: 2026-11-25
+Fedora is sponsored by Red Hat.
+Learn more about the relationship between Red Hat and Fedora.

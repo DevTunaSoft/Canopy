@@ -1,0 +1,473 @@
+{
+  "generated_utc": "2026-11-28T06:08:49Z",
+  "exact_head": "bca3ddf72785753fb499eb5287dffbb083750f1e",
+  "reviewed_head": "93c4dbc8c8d650034d387de69ea8955dacd74d57",
+  "scope": "STATIC SOURCE ONLY evidence gate plus host-side planner execution; no native Kinoite runtime",
+  "source_count": 20,
+  "sources_ok": true,
+  "checks": [
+    {
+      "id": "E01",
+      "claim": "Official deployment path",
+      "evidence_class": "STATIC SOURCE ONLY",
+      "verdict": "PASS",
+      "source_keys": [
+        "fedora_kinoite_guide",
+        "fedora_installation",
+        "fedora_download"
+      ],
+      "proof": [
+        {
+          "source": "fedora_kinoite_guide",
+          "source_url": "https://docs.fedoraproject.org/en-US/atomic-desktops/",
+          "quote": "Fedora Kinoite is a variant of Fedora KDE Plasma Desktop",
+          "text_sha256": "e826f10acbd337cce947ae110e842d23c684d3d27b6f31d77f87606c124ef99e"
+        },
+        {
+          "source": "fedora_installation",
+          "source_url": "https://docs.fedoraproject.org/en-US/atomic-desktops/installation/",
+          "quote": "We recommend using Fedora Media Writer to make a bootable USB media to install a Fedora Atomic Desktop.",
+          "text_sha256": "3d70f4325332a972ae9c97860d987962d202efeba25a5495ef12c7a20be12163"
+        },
+        {
+          "source": "fedora_download",
+          "source_url": "https://fedoraproject.org/atomic-desktops/kinoite/download/",
+          "quote": "Download Fedora Kinoite 45",
+          "text_sha256": "06ae84929a78d352ab418112a2de78b024be5b81f746a5c65211574788573800"
+        }
+      ],
+      "unmatched": [],
+      "note": "Source text proves documentation/upstream behavior only; it is not a native runtime result."
+    },
+    {
+      "id": "E02",
+      "claim": "Atomic update commands",
+      "evidence_class": "STATIC SOURCE ONLY",
+      "verdict": "PASS",
+      "source_keys": [
+        "fedora_updates_rollbacks",
+        "rpm_ostree_handbook"
+      ],
+      "proof": [
+        {
+          "source": "fedora_updates_rollbacks",
+          "source_url": "https://docs.fedoraproject.org/en-US/atomic-desktops/updates-upgrades-rollbacks/",
+          "quote": "$ rpm-ostree upgrade",
+          "text_sha256": "081f80f3780d43bca3ce30fc7758907f1d4df4456bbe102135b51bde2a5c37ec"
+        },
+        {
+          "source": "fedora_updates_rollbacks",
+          "source_url": "https://docs.fedoraproject.org/en-US/atomic-desktops/updates-upgrades-rollbacks/",
+          "quote": "$ rpm-ostree upgrade --check",
+          "text_sha256": "081f80f3780d43bca3ce30fc7758907f1d4df4456bbe102135b51bde2a5c37ec"
+        },
+        {
+          "source": "rpm_ostree_handbook",
+          "source_url": "https://coreos.github.io/rpm-ostree/administrator-handbook/",
+          "quote": "# rpm-ostree status",
+          "text_sha256": "76a4ce1cf310945833816c24ae6dacba867fe41f86949999223322512ba4af7d"
+        }
+      ],
+      "unmatched": [],
+      "note": "Source text proves documentation/upstream behavior only; it is not a native runtime result."
+    },
+    {
+      "id": "E03",
+      "claim": "Rollback and pinning commands",
+      "evidence_class": "STATIC SOURCE ONLY",
+      "verdict": "PASS",
+      "source_keys": [
+        "fedora_updates_rollbacks",
+        "rpm_ostree_handbook"
+      ],
+      "proof": [
+        {
+          "source": "fedora_updates_rollbacks",
+          "source_url": "https://docs.fedoraproject.org/en-US/atomic-desktops/updates-upgrades-rollbacks/",
+          "quote": "Permanent rollbacks: to permanently switch back to the previous deployment, use the rpm-ostree rollback command.",
+          "text_sha256": "081f80f3780d43bca3ce30fc7758907f1d4df4456bbe102135b51bde2a5c37ec"
+        },
+        {
+          "source": "fedora_updates_rollbacks",
+          "source_url": "https://docs.fedoraproject.org/en-US/atomic-desktops/updates-upgrades-rollbacks/",
+          "quote": "By default, OSTree only keeps the two most recent deployments.",
+          "text_sha256": "081f80f3780d43bca3ce30fc7758907f1d4df4456bbe102135b51bde2a5c37ec"
+        },
+        {
+          "source": "rpm_ostree_handbook",
+          "source_url": "https://coreos.github.io/rpm-ostree/administrator-handbook/",
+          "quote": "# rpm-ostree rollback",
+          "text_sha256": "76a4ce1cf310945833816c24ae6dacba867fe41f86949999223322512ba4af7d"
+        },
+        {
+          "source": "rpm_ostree_handbook",
+          "source_url": "https://coreos.github.io/rpm-ostree/administrator-handbook/",
+          "quote": "# rpm-ostree deploy <version>",
+          "text_sha256": "76a4ce1cf310945833816c24ae6dacba867fe41f86949999223322512ba4af7d"
+        }
+      ],
+      "unmatched": [],
+      "note": "Source text proves documentation/upstream behavior only; it is not a native runtime result."
+    },
+    {
+      "id": "E04",
+      "claim": "Major upgrade / rebase path",
+      "evidence_class": "STATIC SOURCE ONLY",
+      "verdict": "PASS",
+      "source_keys": [
+        "fedora_updates_rollbacks",
+        "rpm_ostree_handbook"
+      ],
+      "proof": [
+        {
+          "source": "fedora_updates_rollbacks",
+          "source_url": "https://docs.fedoraproject.org/en-US/atomic-desktops/updates-upgrades-rollbacks/",
+          "quote": "$ rpm-ostree rebase fedora:fedora/45/x86_64/silverblue",
+          "text_sha256": "081f80f3780d43bca3ce30fc7758907f1d4df4456bbe102135b51bde2a5c37ec"
+        },
+        {
+          "source": "fedora_updates_rollbacks",
+          "source_url": "https://docs.fedoraproject.org/en-US/atomic-desktops/updates-upgrades-rollbacks/",
+          "quote": "All your flatpak apps and files in the /home directory will remain persistent between rebases.",
+          "text_sha256": "081f80f3780d43bca3ce30fc7758907f1d4df4456bbe102135b51bde2a5c37ec"
+        },
+        {
+          "source": "rpm_ostree_handbook",
+          "source_url": "https://coreos.github.io/rpm-ostree/administrator-handbook/",
+          "quote": "Like every other rpm-ostree operation, All layered packages and local state will be carried across.",
+          "text_sha256": "76a4ce1cf310945833816c24ae6dacba867fe41f86949999223322512ba4af7d"
+        }
+      ],
+      "unmatched": [],
+      "note": "Source text proves documentation/upstream behavior only; it is not a native runtime result."
+    },
+    {
+      "id": "E05",
+      "claim": "Kernel/driver and security update path",
+      "evidence_class": "STATIC SOURCE ONLY",
+      "verdict": "PASS",
+      "source_keys": [
+        "fedora_project_kinoite",
+        "fedora_troubleshooting",
+        "fedora_getting_started"
+      ],
+      "proof": [
+        {
+          "source": "fedora_project_kinoite",
+          "source_url": "https://fedoraproject.org/atomic-desktops/kinoite/",
+          "quote": "Each version is updated for approximately 13 months, and each update takes effect on your next reboot, keeping your system consistent.",
+          "text_sha256": "9816ee44e0dae383c088968e6c77dd63e5b96168d9a22d0abc56e05d022f4aac"
+        },
+        {
+          "source": "fedora_troubleshooting",
+          "source_url": "https://docs.fedoraproject.org/en-US/atomic-desktops/troubleshooting/",
+          "quote": "# rpm-ostree install kmod-nvidia xorg-x11-drv-nvidia",
+          "text_sha256": "df516deb2d3ff518321662b441f0b9d91a27a7ac6704838bd9df7772eb4441e6"
+        },
+        {
+          "source": "fedora_troubleshooting",
+          "source_url": "https://docs.fedoraproject.org/en-US/atomic-desktops/troubleshooting/",
+          "quote": "# rpm-ostree kargs --append=rd.driver.blacklist=nouveau,nova-core",
+          "text_sha256": "df516deb2d3ff518321662b441f0b9d91a27a7ac6704838bd9df7772eb4441e6"
+        },
+        {
+          "source": "fedora_getting_started",
+          "source_url": "https://docs.fedoraproject.org/en-US/atomic-desktops/getting-started/",
+          "quote": "Good examples of packages to be layered would be:",
+          "text_sha256": "e61a088fb29c81c69a3d7ada6f325ab846115e0cde0f2f6f753e07362bffff31"
+        }
+      ],
+      "unmatched": [],
+      "note": "Source text proves documentation/upstream behavior only; it is not a native runtime result."
+    },
+    {
+      "id": "E06",
+      "claim": "Read-only core behavior",
+      "evidence_class": "STATIC SOURCE ONLY",
+      "verdict": "PASS",
+      "source_keys": [
+        "fedora_technical",
+        "rpm_ostree_handbook",
+        "ostree_adapting"
+      ],
+      "proof": [
+        {
+          "source": "fedora_technical",
+          "source_url": "https://docs.fedoraproject.org/en-US/atomic-desktops/technical-information/",
+          "quote": "On Fedora Atomic Desktops, the root filesystem (/) is mounted read-only.",
+          "text_sha256": "d6e990c6482621ffc5df23c19db4b453108971d5e1e7ff67faba74f4fb31c7cc"
+        },
+        {
+          "source": "fedora_technical",
+          "source_url": "https://docs.fedoraproject.org/en-US/atomic-desktops/technical-information/",
+          "quote": "The /usr directory and everything below it is also read-only.",
+          "text_sha256": "d6e990c6482621ffc5df23c19db4b453108971d5e1e7ff67faba74f4fb31c7cc"
+        },
+        {
+          "source": "fedora_technical",
+          "source_url": "https://docs.fedoraproject.org/en-US/atomic-desktops/technical-information/",
+          "quote": "The /etc and /var directories are respectively used to store configuration files and runtime state and are thus writable.",
+          "text_sha256": "d6e990c6482621ffc5df23c19db4b453108971d5e1e7ff67faba74f4fb31c7cc"
+        },
+        {
+          "source": "rpm_ostree_handbook",
+          "source_url": "https://coreos.github.io/rpm-ostree/administrator-handbook/",
+          "quote": "The only writable directories are /etc and /var. In particular, /usr has a read-only bind mount at all times.",
+          "text_sha256": "76a4ce1cf310945833816c24ae6dacba867fe41f86949999223322512ba4af7d"
+        },
+        {
+          "source": "ostree_adapting",
+          "source_url": "https://ostreedev.github.io/ostree/adapting-existing/",
+          "quote": "/home → /var/home",
+          "text_sha256": "6dd8a24d8e068c655617208e5c56595147bf8ab9ab350a6663eb5cd873e9094a"
+        }
+      ],
+      "unmatched": [],
+      "note": "Source text proves documentation/upstream behavior only; it is not a native runtime result."
+    },
+    {
+      "id": "E07",
+      "claim": "Stock Plasma fallback path",
+      "evidence_class": "STATIC SOURCE ONLY",
+      "verdict": "PASS",
+      "source_keys": [
+        "fedora_project_kinoite",
+        "sddm_theming",
+        "kde_autostart"
+      ],
+      "proof": [
+        {
+          "source": "fedora_project_kinoite",
+          "source_url": "https://fedoraproject.org/atomic-desktops/kinoite/",
+          "quote": "Includes the latest versions of the modern and modular desktop, built by the KDE community.",
+          "text_sha256": "9816ee44e0dae383c088968e6c77dd63e5b96168d9a22d0abc56e05d022f4aac"
+        },
+        {
+          "source": "sddm_theming",
+          "source_url": "https://raw.githubusercontent.com/sddm/sddm/develop/docs/THEMING.md",
+          "quote": "This information is gathered by parsing the desktop files in the `/usr/share/xsessions` directory.",
+          "text_sha256": "83c3c3176f2003ef72b3765e2851c577e0da40bc180c5b84af070f88af40196c"
+        },
+        {
+          "source": "kde_autostart",
+          "source_url": "https://docs.kde.org/trunk_kf6/en/plasma-workspace/kcontrol/autostart/index.html",
+          "quote": "The program scans $HOME/.config/autostart/ for applications and login scripts",
+          "text_sha256": "3b892638bb296eb4d3874f76676c2cf9deb9d8e86bf9c077b2672cde19c98b6b"
+        }
+      ],
+      "unmatched": [],
+      "note": "Source text proves documentation/upstream behavior only; it is not a native runtime result."
+    },
+    {
+      "id": "E08",
+      "claim": "User-level Canopy extension compatibility",
+      "evidence_class": "STATIC SOURCE ONLY",
+      "verdict": "PASS",
+      "source_keys": [
+        "systemd_unit",
+        "fedora_technical",
+        "flatpak_using"
+      ],
+      "proof": [
+        {
+          "source": "systemd_unit",
+          "source_url": "https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html",
+          "quote": "~/.config/systemd/user/*",
+          "text_sha256": "111a3d77145399756684ff60e1361ccb53326548c2b8d048ce617bdf2337c3af"
+        },
+        {
+          "source": "systemd_unit",
+          "source_url": "https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html",
+          "quote": "$XDG_DATA_HOME/systemd/user or $HOME/.local/share/systemd/user",
+          "text_sha256": "111a3d77145399756684ff60e1361ccb53326548c2b8d048ce617bdf2337c3af"
+        },
+        {
+          "source": "fedora_technical",
+          "source_url": "https://docs.fedoraproject.org/en-US/atomic-desktops/technical-information/",
+          "quote": "/home → /var/home",
+          "text_sha256": "d6e990c6482621ffc5df23c19db4b453108971d5e1e7ff67faba74f4fb31c7cc"
+        },
+        {
+          "source": "flatpak_using",
+          "source_url": "https://docs.flatpak.org/en/latest/using-flatpak.html",
+          "quote": "Flatpak commands can be run either system-wide or per-user.",
+          "text_sha256": "0f44ecbdd1150b0d861bbd1a6d499f80b73adbbc8c7f99dcfe2449772b82c202"
+        }
+      ],
+      "unmatched": [],
+      "note": "Source text proves documentation/upstream behavior only; it is not a native runtime result."
+    },
+    {
+      "id": "E10",
+      "claim": "Flatpak / Flathub independent app updates",
+      "evidence_class": "STATIC SOURCE ONLY",
+      "verdict": "PASS",
+      "source_keys": [
+        "flatpak_using",
+        "fedora_getting_started"
+      ],
+      "proof": [
+        {
+          "source": "flatpak_using",
+          "source_url": "https://docs.flatpak.org/en/latest/using-flatpak.html",
+          "quote": "$ flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo",
+          "text_sha256": "0f44ecbdd1150b0d861bbd1a6d499f80b73adbbc8c7f99dcfe2449772b82c202"
+        },
+        {
+          "source": "flatpak_using",
+          "source_url": "https://docs.flatpak.org/en/latest/using-flatpak.html",
+          "quote": "$ flatpak update",
+          "text_sha256": "0f44ecbdd1150b0d861bbd1a6d499f80b73adbbc8c7f99dcfe2449772b82c202"
+        },
+        {
+          "source": "fedora_getting_started",
+          "source_url": "https://docs.fedoraproject.org/en-US/atomic-desktops/getting-started/",
+          "quote": "Flatpak is the primary way that apps can be installed on Fedora Atomic Desktops.",
+          "text_sha256": "e61a088fb29c81c69a3d7ada6f325ab846115e0cde0f2f6f753e07362bffff31"
+        }
+      ],
+      "unmatched": [],
+      "note": "Source text proves documentation/upstream behavior only; it is not a native runtime result."
+    },
+    {
+      "id": "E11",
+      "claim": "DNF path without writing the base OS",
+      "evidence_class": "STATIC SOURCE ONLY",
+      "verdict": "PASS",
+      "source_keys": [
+        "fedora_toolbox",
+        "fedora_dnf",
+        "fedora_faq"
+      ],
+      "proof": [
+        {
+          "source": "fedora_toolbox",
+          "source_url": "https://docs.fedoraproject.org/en-US/atomic-desktops/toolbox/",
+          "quote": "$ toolbox create",
+          "text_sha256": "e9c57fa576b7ea57abb71542d8ba50510b9e65ff5aa2445fecf2fbc4b0c0343a"
+        },
+        {
+          "source": "fedora_toolbox",
+          "source_url": "https://docs.fedoraproject.org/en-US/atomic-desktops/toolbox/",
+          "quote": "$ toolbox enter",
+          "text_sha256": "e9c57fa576b7ea57abb71542d8ba50510b9e65ff5aa2445fecf2fbc4b0c0343a"
+        },
+        {
+          "source": "fedora_toolbox",
+          "source_url": "https://docs.fedoraproject.org/en-US/atomic-desktops/toolbox/",
+          "quote": "Once inside the toolbox, you can access common command line tools, and install new ones using a package manager (e.g., DNF on Fedora).",
+          "text_sha256": "e9c57fa576b7ea57abb71542d8ba50510b9e65ff5aa2445fecf2fbc4b0c0343a"
+        },
+        {
+          "source": "fedora_dnf",
+          "source_url": "https://docs.fedoraproject.org/en-US/quick-docs/dnf/",
+          "quote": "DNF applies to standard Fedora editions. On image-based variants such as the Fedora Atomic Desktops and Fedora CoreOS, package management works differently.",
+          "text_sha256": "9ddbb7e281a46f3c19915e621faac362b217d03f672699d05320032c354515bf"
+        }
+      ],
+      "unmatched": [],
+      "note": "Source text proves documentation/upstream behavior only; it is not a native runtime result."
+    },
+    {
+      "id": "E12",
+      "claim": "No custom image maintenance required",
+      "evidence_class": "STATIC SOURCE ONLY",
+      "verdict": "PASS",
+      "source_keys": [
+        "fedora_getting_started",
+        "rpm_ostree_handbook",
+        "fedora_project_kinoite"
+      ],
+      "proof": [
+        {
+          "source": "fedora_getting_started",
+          "source_url": "https://docs.fedoraproject.org/en-US/atomic-desktops/getting-started/",
+          "quote": "It’s generally expected that you use package layering sparingly, and use Flatpak and Toolbx whenever possible.",
+          "text_sha256": "e61a088fb29c81c69a3d7ada6f325ab846115e0cde0f2f6f753e07362bffff31"
+        },
+        {
+          "source": "fedora_project_kinoite",
+          "source_url": "https://fedoraproject.org/atomic-desktops/kinoite/",
+          "quote": "Graphical applications are installed via Flatpak, and keep themselves separate from the base system.",
+          "text_sha256": "9816ee44e0dae383c088968e6c77dd63e5b96168d9a22d0abc56e05d022f4aac"
+        },
+        {
+          "source": "rpm_ostree_handbook",
+          "source_url": "https://coreos.github.io/rpm-ostree/administrator-handbook/",
+          "quote": "These additional “layered” packages are persistent across upgrades, rebases, and deploys",
+          "text_sha256": "76a4ce1cf310945833816c24ae6dacba867fe41f86949999223322512ba4af7d"
+        }
+      ],
+      "unmatched": [],
+      "note": "Source text proves documentation/upstream behavior only; it is not a native runtime result."
+    },
+    {
+      "id": "E09",
+      "claim": "User-level Canopy extension and operation without LacOS infrastructure (host-side plan and source scan)",
+      "evidence_class": "NATIVE RUNTIME (Windows host, NOT Kinoite)",
+      "verdict": "PASS",
+      "planner_expectations": {
+        "dry_run": true,
+        "performs_changes": true,
+        "privileged": true,
+        "session_changes_empty": true,
+        "system_paths_written_empty": true,
+        "guest_execution_not_run": true,
+        "snapshot_safe": true,
+        "snapshot_session_probes_absent": true
+      },
+      "planner_sources": {
+        "planner_install.json": "de8e82f1aedfdaa12c129b9c113f27ea8933a533860506b592a980f8b6dc53a5",
+        "planner_snapshot.json": "a89149589795f01f0e40f20d27ffddd652eef40457c77eed15bea081b318b5bd"
+      },
+      "local_planner_commands": [
+        "python3 -m canopy_features.mint.install_recovery_plan --home <scratch>/empty_home --action snapshot",
+        "python3 -m canopy_features.mint.install_recovery_plan --home <scratch>/empty_home --action install --binary <scratch>/canopy-classic-demo"
+      ],
+      "boundary": "Executed on Windows/MSYS against pure-Python planner only. No Kinoite session, compositor or systemd user manager was exercised.",
+      "lacos_dependency_scan": {
+        "files_scanned": 248,
+        "code_hits": [],
+        "count": 0,
+        "excluded": "tools/kinoite/** (validation tooling, not product code)"
+      }
+    },
+    {
+      "id": "E13",
+      "claim": "Native Kinoite runtime verification of atomic update/rollback, read-only mount, Plasma fallback, Flatpak/DNF updates",
+      "evidence_class": "NATIVE RUNTIME",
+      "verdict": "NOT_RUN",
+      "blocker": "BLOCKED: no disposable Fedora Kinoite environment on this host",
+      "probe": {
+        "class": "NATIVE RUNTIME (host probe)",
+        "missing_cli": [
+          "rpm-ostree",
+          "ostree",
+          "flatpak",
+          "podman",
+          "docker",
+          "toolbox"
+        ],
+        "wsl_output": "Windows Subsystem for Linux has no installed distributions.\r\nYou can resolve this by installing a distribution with the instructions below:\r\n\r\nUse 'wsl.exe --list --online' to list available distributions\r\nand 'wsl.exe --install <Distro>' to install.",
+        "vbox_vms": "\"<inaccessible>\" {7c64864c-2ab1-4c67-9afb-451bf72fe9bd}\r\n\"Canopy-Test-Mint\" {fbf69438-6729-47d4-897f-2ff1473b02a3}\r\n\"Canopy-Test-Plasma6\" {3aecd840-4dd6-4481-913f-64a289da406d}",
+        "kinoite_vm_present": false,
+        "fedora_kinoite_runtime_available": false,
+        "reason": "No rpm-ostree/ostree/flatpak/toolbox CLI, no WSL distributions, no Kinoite VM. Shared Ubuntu Plasma VM is not a disposable Kinoite environment."
+      },
+      "commands_to_run_in_a_disposable_kinoite_vm": [
+        "rpm-ostree status --verbose",
+        "findmnt -no OPTIONS /usr",
+        "rpm-ostree upgrade --check",
+        "sudo rpm-ostree upgrade && sudo systemctl reboot",
+        "rpm-ostree rollback && sudo systemctl reboot",
+        "sudo rpm-ostree deploy 45.YYYYMMDD.N",
+        "flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo",
+        "flatpak update",
+        "toolbox create && toolbox enter && sudo dnf upgrade",
+        "python3 tools/register_classic_preview.py install --dry-run --binary <path>"
+      ]
+    }
+  ],
+  "overall_static_verdict": "PASS",
+  "native_runtime_verdict": "NOT_RUN"
+}

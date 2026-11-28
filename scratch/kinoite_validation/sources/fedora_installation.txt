@@ -1,0 +1,247 @@
+Installing a Fedora Atomic Desktop :: Fedora Docs
+In this section
+Fedora Atomic Desktops
+Installation
+Getting Started
+Updates, Upgrades & Rollbacks
+Toolbx
+Technical Information
+Reading and Resources
+Contributing
+Troubleshooting
+FAQ
+Tips and Tricks
+Configuration Guides
+Sway Configuration Guide
+Fedora Atomic Desktops
+A Beginner's Guide to Fedora
+ARM Single Board Computers
+Community Architecture (CommArch)
+Community Linux Engineering
+Defensive Coding Guide
+Engineering Teams
+EPEL
+Fedora Accessibility (a11y) WG
+Fedora Accounts
+Fedora AI/ML SIG
+Fedora Asahi Remix
+Fedora Atomic Desktops
+Fedora Badges
+Fedora CI
+Fedora Cloud
+Fedora Community Ops
+Fedora Container Docs
+Fedora CoreOS
+Fedora Council
+Fedora Data Working Group (FDWG)
+Fedora Design Team
+Fedora Discussion Forum (Self-)Moderation Guidelines and Rules
+Fedora Diversity, Equity, and Inclusion (DEI)
+Fedora Documentation
+Fedora Documentation Team
+Fedora ELN
+Fedora Forge Documentation
+Fedora Gaming
+Fedora Infrastructure & Release Engineering
+Fedora Internet Of Things
+Fedora IoT Working Group
+Fedora Join SIG
+Fedora KDE Plasma Desktop Edition
+Fedora Legal
+Fedora Linux Releases
+Fedora Localization Team
+Fedora Magazine
+Fedora Marketing Team
+Fedora Matrix WG
+Fedora Mentored Projects
+Fedora Mindshare Committee
+Fedora Minimal
+Fedora Program Operations
+Fedora Project
+Fedora Quality Docs
+Fedora Rawhide Gating
+Fedora Release Notes
+Fedora Robotics SIG
+Fedora Security SIG
+Fedora Server User Documentation
+Fedora Server Working Group
+Fedora Spins & Labs
+Fedora Tools
+Fedora Websites & Apps
+Fedora Workstation Documentation
+Fedora Workstation Working Group
+Fedora/CentOS bootc
+FESCo
+Flatpak
+i3 SIG
+Java Packaging HOWTO
+Localization help and stats
+Mindshare Teams
+NeuroFedora User Documentation
+Package Maintainers
+Packaging Guidelines
+Quick Docs
+Reproducible Builds
+Fedora Atomic Desktops
+Installation
+en-US
+en-US
+ar
+ast
+az
+be
+bg
+bn
+ca
+cs
+de
+el
+es
+es_419
+fa
+fi
+fil
+fr
+fur
+ga
+gl
+he
+hi
+hr
+hu
+hy
+id
+it
+ja
+jp
+ka
+kab
+km
+ko
+lb
+lo
+lt
+mr
+ms
+my
+nb_NO
+ne
+nl
+nn
+or
+pl
+pt
+pt_BR
+pt_PT
+ro
+ru
+si
+sk
+sq
+sv
+sw
+szl
+te
+tr
+tzm
+uk
+ur
+ur_PK
+uz
+vi
+zh_CN
+zh_Hans
+zh_Hant
+zh_TW
+Installing a Fedora Atomic Desktop
+Fedora Atomic Desktops can be installed in the same way as other Fedora variants, and the official Fedora installation guide can be followed for your Fedora version.
+See the Fedora documentation site for more details.
+Before you begin
+As with installing any new operating system, it is important to back up any data that you want to save before starting, and have a clear understanding of the consequences of what you are doing.
+Fedora Atomic Desktops are intended to provide the full range of capabilities that you would expect from an installation of Fedora.
+However, there are some differences in terms of which applications can be installed, and how the operating system environment works.
+It is therefore recommended that you read this user guide before deciding to install a Fedora Atomic Desktop.
+It is also recommended that you determine whether a Fedora Atomic Desktop meets the specific needs or requirements that you might have.
+If you are uncertain about this, a Fedora Atomic Desktop can also be tested in a virtual machine prior to installation.
+Known limitations
+Dual booting and manual partitioning is not fully functional.
+It is possible to make Fedora Atomic Desktops work for both dual boot and manual partitioning, and some guidance is provided on manual partitioning below.
+However, there are hazards involved in both cases, and you should only attempt to use these features if you have done the necessary research, and are confident that you can overcome any issues that you might encounter.
+This issue is tracked in issue #110.
+Known issues for specific Fedora Atomic Desktop variants.
+For Fedora Kinoite, a list of currently known bugs, issues and missing features is compiled in issue #112 in the KDE SIG tracker.
+Getting a Fedora Atomic Desktop
+If you are using Fedora Media Writer, the Fedora Atomic Desktops should be listed as a download option.
+However, if it isn’t, or if you want to download it manually, an install image can be downloaded from the main Fedora website.
+See the individual download page for each Fedora Atomic Desktop variant:
+Fedora Silverblue
+Fedora Kinoite
+Fedora Sway Atomic
+Fedora Budgie Atomic
+Fedora COSMIC Atomic
+Once you have got your copy of a Fedora Atomic Desktop, it can be installed in the usual manner.
+We hope that you love it!
+Preparing Boot Media
+Fedora installation images are Hybrid ISOs and can be used to create installation media with both optical and USB disks, for booting on both BIOS and UEFI systems.
+We recommend using Fedora Media Writer to make a bootable USB media to install a Fedora Atomic Desktop.
+Other USB media creation software may work as well but are not regularly tested.
+See the Fedora Media Writer section to learn how to use it.
+Manual Partitioning
+As described above, there are known issues with manual partitioning on Fedora Atomic Desktops, and it should be used with caution.
+The following notes are intended as hints for those attempting it, and should not be treated as recommended practice.
+Automatic partitioning is recommended.
+With Fedora Atomic Desktops, only certain mounts can be manually specified as partitions.
+These include:
+The root filesystem: /
+/boot/efi (for the UEFI boot loaders)
+/boot
+/var
+Subdirectories under /var, including:
+/var/home (there is a symlink from /home to /var/home)
+/var/log
+/var/lib/containers
+The Fedora installer is not aware of these restrictions and will accept custom partitions without error, even if they are incompatible with Fedora Atomic Desktops.
+If you are re-installing over an existing system or setting up a dual boot installation, you must create a dedicated EFI System Partition for the Fedora Atomic Desktop installation.
+You must also make sure that it is formatted by the installer.
+This issue is tracked in issue #110.
+Figure 1. Partitioning Complete
+The above screenshot shows a typical configuration with manual partitioning in UEFI firmware, with partitions for /boot, /boot/efi, /, and /var/home.
+Manual partitioning on Fedora Atomic Desktops can be done with BTRFS, LVM, as well as standard partitions or an XFS filesystem.
+BTRFS filesystems smaller than 5 GiB should be formatted using --mixed (-M) flag.
+Currently neither mkfs.btrfs nor Blivet does this automatically.
+See BTRFS documentation for more details.
+First Run
+Fedora Silverblue
+On first startup you will be asked to enable third-party repositories, location services, and to create a new user.
+You can enable third-party repositories and location later, but you must create a new user by entering your desired name and password.
+Figure 2. Silverblue - Create New User
+Once you have created the user you can start using your Fedora Silverblue system.
+Fedora Kinoite
+On first startup, you will be asked to enter the password for the user created during installation.
+Depending on different personal needs, there are several starting actions and installations that you could perform on newly installed Fedora Kinoite for a customized user experience.
+Figure 3. Kinoite - Welcome Center
+Fedora Sway Atomic
+On first startup, you will be asked to enter the password for the user created during installation.
+Then, you can start using Fedora Sway Atomic.
+Figure 4. Sway Atomic - First Run
+Fedora Budgie Atomic
+On first startup, you will be asked to enter the password for the user created during installation.
+Then, you can start using Fedora Budgie Atomic.
+Figure 5. Budgie Atomic - First Run
+Fedora COSMIC Atomic
+On first startup, you will be asked to enter the password for the user created during installation.
+Then, you can configure the system using the "Welcome" program.
+Figure 6. COSMIC Atomic - First Run
+Where to go next?
+Depending on different personal needs, there are several starting actions and installations that you could perform on a newly installed Fedora Atomic Desktop for a customized user experience.
+If you are new to Fedora Atomic Desktops and before installing software in your newly installed system, you should read the Getting Started section to learn about the difference between Flatpak, Toolbox and package layering (rpm-ostree).
+For some tips about Fedora Atomic Desktops, see the Tips and Tricks section.
+Want to help? Learn how to contribute to Fedora Docs ›
+All Fedora Documentation content available under CC BY-SA 4.0 or, when specifically noted, under another accepted free and open content license.
+Privacy Statement
+Legal
+Code of Conduct
+Sponsors
+Last build: 2026-11-28 03:50:09 UTC | Last content update: 2026-04-28
+Fedora is sponsored by Red Hat.
+Learn more about the relationship between Red Hat and Fedora.

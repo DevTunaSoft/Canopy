@@ -23,7 +23,18 @@ MAX_INTERVAL_SECONDS = 300.0
 MAX_CLOCK_TICKS_PER_SECOND = 1_000_000
 MAX_STARTUP_SECONDS = 86_400.0
 MAX_SCOPE_TEXT = 128
+MAX_PATH_TEXT = 4096  # Linux PATH_MAX, including the terminating NUL.
 STARTUP_PHASES = ("launch_request", "process_spawn", "first_frame", "ready")
+
+# Error text is drawn only from these fixed, bounded tokens. Caller-supplied
+# values are never interpolated: a hostile string must not be echoed back in
+# an error or make the message size depend on its input.
+_PATH_TOKENS = frozenset(("proc path", "proc root", "input path", "output path"))
+_NUMBER_TOKENS = frozenset(
+    ("interval seconds", "elapsed seconds", "clock ticks per second",
+     "start clock reading", "end clock reading")
+    + tuple(f"{phase} timestamp" for phase in STARTUP_PHASES)
+)
 
 _KIB_LINE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*):[ \t]+([0-9]+)[ \t]+kB[ \t]*$")
 
@@ -39,9 +50,49 @@ class MeasurementError(ValueError):
     """Fail-closed domain error for invalid or unreadable measurement input."""
 
 
+def _token(allowed, label, fallback):
+    """Return a fixed, caller-independent error token."""
+    return label if isinstance(label, str) and label in allowed else fallback
+
+
+def _as_path(value, label):
+    """Coerce a caller path to Path or fail closed with a bounded token.
+
+    ``Path()`` raises a raw TypeError for wrong types and accepts arbitrarily
+    long text. Neither may escape the probe: only short, printable ``str`` or
+    ``os.PathLike`` values are accepted, and every rejection is reported with
+    a fixed token instead of a repr of the offending value.
+    """
+    token = _token(_PATH_TOKENS, label, "proc path")
+    error = f"invalid {token}"
+    if (isinstance(value, (bytes, bytearray))
+            or not isinstance(value, (str, os.PathLike))):
+        raise MeasurementError(error)
+    try:
+        text = os.fspath(value)
+    except (TypeError, ValueError, OSError):
+        raise MeasurementError(error) from None
+    if (not isinstance(text, str) or not text or len(text) > MAX_PATH_TEXT
+            or not all(char.isprintable() for char in text)):
+        raise MeasurementError(error)
+    try:
+        return Path(text)
+    except (TypeError, ValueError, OSError):
+        raise MeasurementError(error) from None
+
+
+def _resolve_path(value, label):
+    """Resolve a caller path, translating host failures to a fixed token."""
+    path = _as_path(value, label)
+    try:
+        return path.resolve()
+    except (OSError, RuntimeError, ValueError):
+        raise MeasurementError(f"invalid {_token(_PATH_TOKENS, label, 'proc path')}") from None
+
+
 def _require_pid(pid):
     if type(pid) is not int or not 0 < pid <= MAX_PID:
-        raise MeasurementError(f"invalid pid: {pid!r}")
+        raise MeasurementError("invalid pid")
     return pid
 
 
@@ -52,9 +103,9 @@ def _read_bounded(path, proc_root=None):
     it and ``path`` is checked for symlinks: checking only the final component
     lets a symlinked pid directory redirect the read outside the proc tree.
     """
-    path = Path(path)
+    path = _as_path(path, "proc path")
     if proc_root is not None:
-        root = Path(proc_root)
+        root = _as_path(proc_root, "proc root")
         try:
             relative = path.relative_to(root)
         except ValueError as exc:
@@ -118,7 +169,7 @@ def read_memory(pid, proc_root=Path("/proc")):
     a null must never be silently converted into a target comparison.
     """
     pid = _require_pid(pid)
-    root = Path(proc_root)
+    root = _as_path(proc_root, "proc root")
     pid_dir = root / str(pid)
 
     rollup = pid_dir / "smaps_rollup"
@@ -145,11 +196,15 @@ def read_memory(pid, proc_root=Path("/proc")):
 
 
 def _finite_number(value, label):
+    token = _token(_NUMBER_TOKENS, label, "numeric measurement value")
     if isinstance(value, bool) or not isinstance(value, (int, float)):
-        raise MeasurementError(f"invalid {label}: {value!r}")
-    number = float(value)
+        raise MeasurementError(f"invalid {token}")
+    try:
+        number = float(value)
+    except (OverflowError, ValueError, TypeError):
+        raise MeasurementError(f"invalid {token}") from None
     if not math.isfinite(number):
-        raise MeasurementError(f"nonfinite {label}")
+        raise MeasurementError(f"nonfinite {token}")
     return number
 
 
@@ -170,7 +225,7 @@ def validate_interval(seconds):
 def read_cpu_ticks(pid, proc_root=Path("/proc")):
     """Read cumulative scheduler ticks and the process start tick from stat."""
     pid = _require_pid(pid)
-    root = Path(proc_root)
+    root = _as_path(proc_root, "proc root")
     text = _read_bounded(root / str(pid) / "stat", root)
     close = text.rfind(")")
     if close < 0 or not text.startswith(f"{pid} ("):
@@ -267,13 +322,13 @@ def _numeric_field(text, name):
 def read_wakeups(pid, proc_root=Path("/proc")):
     """Read the optional ``nr_wakeups`` counter from ``/proc/pid/sched``."""
     pid = _require_pid(pid)
-    root = Path(proc_root)
+    root = _as_path(proc_root, "proc root")
     text = _read_optional(root / str(pid) / "sched", root)
     return _numeric_field(text, "nr_wakeups")
 
 
 def _context_switches(pid, proc_root):
-    root = Path(proc_root)
+    root = _as_path(proc_root, "proc root")
     text = _read_optional(root / str(pid) / "status", root)
     voluntary = _numeric_field(text, "voluntary_ctxt_switches")
     nonvoluntary = _numeric_field(text, "nonvoluntary_ctxt_switches")
@@ -464,6 +519,7 @@ def measure(pids, *, proc_root=Path("/proc"), source="fixture", session="fixture
     if len(set(pids)) != len(pids):
         raise MeasurementError("duplicate measurement PID")
     pids = sorted(pids)
+    proc_root = _as_path(proc_root, "proc root")
 
     scope = validate_scope(included or [], excluded or [])
     included_pids = {entry["pid"] for entry in scope["included_processes"]}
@@ -525,7 +581,7 @@ def measure(pids, *, proc_root=Path("/proc"), source="fixture", session="fixture
 
 
 def _load_json(path):
-    text = _read_bounded(Path(path))
+    text = _read_bounded(_as_path(path, "input path"))
 
     def no_duplicate_keys(pairs):
         result = {}
@@ -567,11 +623,12 @@ def main(argv=None):
         if set(scope) != {"included_processes", "excluded_processes"}:
             raise MeasurementError("scope JSON has unexpected keys")
         startup = _load_json(args.startup) if args.startup else None
-        output = Path(args.output).resolve() if args.output else None
-        if output is not None and output.is_relative_to(Path(args.proc_root).resolve()):
+        output = _resolve_path(args.output, "output path") if args.output else None
+        proc_root = _resolve_path(args.proc_root, "proc root")
+        if output is not None and output.is_relative_to(proc_root):
             raise MeasurementError("output must not be inside the proc root")
         report = measure(
-            args.pids, proc_root=Path(args.proc_root), source=args.source,
+            args.pids, proc_root=proc_root, source=args.source,
             session=args.session, interval_seconds=args.interval,
             clock_ticks_per_second=args.clock_ticks_per_second,
             startup_timestamps=startup,
@@ -583,8 +640,11 @@ def main(argv=None):
             sys.stdout.write(text)
         else:
             output.write_text(text, encoding="utf-8", newline="\n")
-    except (MeasurementError, OSError) as exc:
+    except MeasurementError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
+    except OSError:
+        print("ERROR: unreadable or unwritable measurement path", file=sys.stderr)
         return 2
     return 0
 

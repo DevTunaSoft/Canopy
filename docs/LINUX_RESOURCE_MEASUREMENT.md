@@ -64,6 +64,30 @@ exception. Committed fixture tests cover a realistic modern rollup, the
 end-to-end `proc` source path, and negative controls for malformed/out-of-range
 lines, unknown unitless lines, symlinked parents and invalid UTF-8.
 
+## Bounded error contract
+
+Every fail-closed `MeasurementError` uses a fixed token from a small allowlist;
+caller-supplied values are never interpolated or `repr`-ed. A bad PID reports
+`invalid pid`, an invalid numeric input reports `invalid <label>`, and path or
+root failures report `invalid proc path`, `invalid proc root`,
+`invalid input path` or `invalid output path`. A hostile 5,000-character
+argument therefore produces the same short token as a one-character one, and
+error text never scales with attacker input.
+
+Caller paths pass through one bounded coercion gate: only non-empty, printable
+`str` or `os.PathLike` values up to 4,096 characters are accepted, and any
+`TypeError`, `ValueError`, `OSError` or numeric overflow during validation is
+translated to the module's domain error. CLI path resolution failures use the
+same fixed tokens. Valid string, `Path` and `PathLike` roots keep identical
+read behavior; only invalid inputs changed.
+
+Committed fixture tests cover oversized strings, oversized integers, wrong
+types at every proc-reading entry point, wrong path/root types through the
+private read gates, and CLI handling of an oversized `--proc-root`
+(`SYNTHETIC`). Real-runtime resource impact was not measured (`NOT_RUN`): the
+change adds only bounded scalar checks and leaves the read/parse path
+untouched. Screen-reader behavior is `NOT_RUN`.
+
 ## Run it
 
 From the repository root:

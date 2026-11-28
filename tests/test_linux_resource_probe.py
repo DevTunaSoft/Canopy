@@ -3,6 +3,8 @@
 All numbers here come from synthetic /proc fixtures. No real Linux Mint,
 desktop-session, GPU or screen-reader measurement is claimed by this module.
 """
+import contextlib
+import io
 import json
 import tempfile
 import unittest
@@ -20,6 +22,9 @@ from tools.qa.linux_resource_probe import (
     validate_scope,
     main,
     measure,
+    validate_interval,
+    _load_json,
+    _read_bounded,
 )
 
 
@@ -474,6 +479,114 @@ class LinuxResourceProbeTests(unittest.TestCase):
         (pid_dir / "smaps_rollup").write_bytes(b"Rss: 10 kB\nPss: \xff\xfe kB\n")
         with self.assertRaises(MeasurementError):
             read_memory(4307, self.proc)
+
+
+    # PE-121 regression: hostile scalars must never be echoed back in probe
+    # errors, and wrong path/root types must fail closed with a fixed token.
+    _HUGE_TEXT = "P" * 5000
+    _ERROR_TEXT_LIMIT = 128
+
+    def _assert_fixed_token(self, error, token):
+        text = str(error)
+        self.assertLessEqual(len(text), self._ERROR_TEXT_LIMIT)
+        self.assertEqual(text, token)
+        self.assertNotIn("PPPPPPPP", text)
+
+    def test_huge_string_pid_yields_fixed_token(self):
+        for call in (
+            lambda: read_memory(self._HUGE_TEXT, self.proc),
+            lambda: build_wakeups([self._HUGE_TEXT], self.proc),
+            lambda: validate_scope(
+                [{"pid": self._HUGE_TEXT, "label": "shell", "reason": "owned"}], []),
+        ):
+            with self.assertRaises(MeasurementError) as caught:
+                call()
+            self._assert_fixed_token(caught.exception, "invalid pid")
+
+    def test_huge_and_overflowing_numbers_yield_fixed_tokens(self):
+        for value in (self._HUGE_TEXT, 10 ** 5000):
+            with self.assertRaises(MeasurementError) as caught:
+                validate_interval(value)
+            self._assert_fixed_token(caught.exception, "invalid interval seconds")
+        with self.assertRaises(MeasurementError) as caught:
+            build_startup_timings({"launch_request": self._HUGE_TEXT})
+        self._assert_fixed_token(caught.exception, "invalid launch_request timestamp")
+
+    def _measure_with_root(self, root):
+        return measure(
+            [11], proc_root=root, source="fixture", clock_ticks_per_second=100,
+            clock=lambda: 1.0, sleep=lambda _: None,
+            included=[{"pid": 11, "label": "shell", "reason": "owned"}], excluded=[],
+        )
+
+    def test_wrong_proc_root_types_fail_closed_at_every_entry_point(self):
+        class BadRoot:
+            pass
+
+        class BytesRoot:
+            def __fspath__(self):
+                return b"/proc"
+
+        for root in (BadRoot(), 17, ["proc"], BytesRoot()):
+            for call in (
+                lambda: read_memory(11, root),
+                lambda: read_cpu_ticks(11, root),
+                lambda: read_wakeups(11, root),
+                lambda: build_wakeups([11], root),
+                lambda: self._measure_with_root(root),
+            ):
+                with self.assertRaises(MeasurementError) as caught:
+                    call()
+                self._assert_fixed_token(caught.exception, "invalid proc root")
+
+    def test_huge_proc_root_yields_fixed_token(self):
+        with self.assertRaises(MeasurementError) as caught:
+            read_memory(11, self._HUGE_TEXT)
+        self._assert_fixed_token(caught.exception, "invalid proc root")
+
+    def test_private_path_gates_translate_wrong_and_huge_paths(self):
+        for bad in (None, 17, object(), b"/proc", self._HUGE_TEXT):
+            with self.assertRaises(MeasurementError) as caught:
+                _load_json(bad)
+            self._assert_fixed_token(caught.exception, "invalid input path")
+            with self.assertRaises(MeasurementError) as caught:
+                _read_bounded(bad)
+            self._assert_fixed_token(caught.exception, "invalid proc path")
+            if bad is not None:  # None is the documented "no root check" sentinel.
+                with self.assertRaises(MeasurementError) as caught:
+                    _read_bounded(self.proc / "11" / "stat", proc_root=bad)
+                self._assert_fixed_token(caught.exception, "invalid proc root")
+
+    def test_cli_huge_proc_root_returns_bounded_error(self):
+        scope = self.temp.name + "/scope.json"
+        Path(scope).write_text(
+            '{"included_processes":[{"pid":11,"label":"shell","reason":"owned"}],'
+            '"excluded_processes":[]}\n', encoding="utf-8"
+        )
+        stderr = io.StringIO()
+        with contextlib.redirect_stderr(stderr):
+            code = main(["--pid", "11", "--proc-root", self._HUGE_TEXT,
+                         "--source", "fixture", "--scope", scope])
+        self.assertEqual(code, 2)
+        self.assertLessEqual(len(stderr.getvalue()), self._ERROR_TEXT_LIMIT)
+        self.assertIn("invalid proc root", stderr.getvalue())
+
+    def test_pathlike_proc_root_preserves_probe_semantics(self):
+        class RootLike:
+            def __init__(self, path):
+                self.path = path
+
+            def __fspath__(self):
+                return str(self.path)
+
+        pid_dir = self._pid_dir(4311)
+        (pid_dir / "smaps_rollup").write_text(
+            "Rss: 10 kB\nPss: 5 kB\n", encoding="utf-8", newline="\n"
+        )
+        self.assertEqual(
+            read_memory(4311, RootLike(self.proc)),
+            {"pid": 4311, "pss_kib": 5, "rss_kib": 10, "source": "smaps_rollup"},
+        )
 
 
 if __name__ == "__main__":

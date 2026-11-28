@@ -1,0 +1,56 @@
+{
+  "adaptation_not_copy": true,
+  "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+  "branch": "product/native-host-events-20261127",
+  "evidence_labels": {
+    "not_run": [
+      "compiled Qt bridge",
+      "Mint guest",
+      "real Plasma session",
+      "screen reader",
+      "real transport",
+      "visual acceptance",
+      "shell PSS/CPU"
+    ],
+    "scenarios": "SYNTHETIC (injected clock, real HostEvent instances)"
+  },
+  "merge": "none",
+  "owner_directive_sha": "79e30d79",
+  "scenarios": {
+    "episode_budgets": "explicit-condition rebasing only; retained entries capped",
+    "epoch_ceiling_200_events": "200 producer calls, 3 reconciliations, newest state wins",
+    "exhausted_bucket_no_further_events": "clock advance alone emits nothing; next real dispatch flushes once",
+    "flood_17_per_tick_20_ticks": "20 refresh requests, rings stay 16/4",
+    "same_tick_burst_200": "200 delivered, 16 applied, 184 deferred",
+    "sustained_200_spaced_valid_events": "all accepted past 64"
+  },
+  "source_head": "39a9fd21665098858e582a879866b42cf4bb8e44",
+  "source_pr": 728,
+  "targets": [
+    "canopy_core/host_events.py",
+    "canopy_features/reliability/native_host_event_ceilings.py",
+    "tests/test_host_event_bounded_lifetime.py",
+    "tests/test_host_event_ceiling_contracts.py",
+    "docs/NATIVE_HOST_EVENTS.md"
+  ],
+  "task": "M3 native Plasma host-event limiter and ceiling port",
+  "tests": {
+    "foundation": "PASS: foundation files, tagline, and local Markdown links",
+    "full_suite": {
+      "failed": false,
+      "log": "scratch/native_host_events/full_suite.log",
+      "ok": true,
+      "ran": 4686,
+      "seconds": 964.55,
+      "skipped": 49
+    },
+    "targeted": {
+      "failed": false,
+      "log": "scratch/native_host_events/targeted.log",
+      "ok": true,
+      "ran": 31,
+      "seconds": 0.212,
+      "skipped": 0
+    }
+  }
+}

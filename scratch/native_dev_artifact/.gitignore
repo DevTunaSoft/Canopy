@@ -1,0 +1,3 @@
+# Build intermediates; only the final archive, SHA256SUMS.txt and evidence JSON are versioned.
+stage/
+rebuild-check/

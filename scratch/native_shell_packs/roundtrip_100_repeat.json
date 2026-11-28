@@ -1,0 +1,110 @@
+{
+  "blocker": {
+    "code": "NO_COMPILED_SWITCHER_WIRING",
+    "detail": "The base tree has only the in-process Python lifecycle prototype canopy_core.shell_host.ShellHost with inert presenters; no compiled Qt/host entry point calls ShellHost.switch. docs/SHELL_PACK_ARCHITECTURE.md states it is not connected to Qt, compositor/window state or a Mint session. A Mint VM therefore has no native switcher to exercise.",
+    "guest_switch_session": "NOT_RUN",
+    "source": "docs/SHELL_PACK_ARCHITECTURE.md:178-198",
+    "vm_observed": "Canopy-Test-Plasma6 registered and running; not used"
+  },
+  "claims": {
+    "compiled_qt_switcher": "NOT_RUN",
+    "native_mint_round_trip": "NOT_RUN",
+    "pack_qml_execution": "NOT_RUN",
+    "process_or_socket": "NOT_RUN",
+    "real_hardware_resources": "NOT_RUN",
+    "screen_reader": "NOT_RUN"
+  },
+  "contract_checks": {
+    "builtin_count": 8,
+    "checks": 12,
+    "future_ids_checked": 64,
+    "history_cap": 16
+  },
+  "harness": "tools/shell_packs/roundtrip_harness.py",
+  "inventory": {
+    "builtin_ids": [
+      "org.canopy.classic",
+      "org.canopy.modern",
+      "org.canopy.heritage",
+      "org.canopy.flow",
+      "org.canopy.lite",
+      "org.canopy.studio",
+      "org.canopy.cloud",
+      "org.canopy.touch"
+    ],
+    "count": 8,
+    "future_pack_cap": null,
+    "paid_tiers": [],
+    "shared_core_services": [
+      "accessibility",
+      "app-launcher",
+      "compositor-session",
+      "notifications",
+      "settings",
+      "system-status",
+      "window-management"
+    ],
+    "tier": "included"
+  },
+  "labels": [
+    "SYNTHETIC",
+    "STATIC_PYTHON_HARNESS",
+    "NOT_MINT_RUNTIME",
+    "NO_VISUAL_CHANGE"
+  ],
+  "negative_controls": {
+    "activate": {
+      "active_id": "org.canopy.classic",
+      "committed_id": "org.canopy.classic",
+      "recovery_required": false,
+      "status": "ACTIVATE_FAILED"
+    },
+    "deactivate": {
+      "active_id": "org.canopy.classic",
+      "committed_id": "org.canopy.classic",
+      "recovery_required": false,
+      "status": "DEACTIVATE_FAILED"
+    },
+    "prepare": {
+      "active_id": "org.canopy.classic",
+      "committed_id": "org.canopy.classic",
+      "recovery_required": false,
+      "status": "PREPARE_FAILED"
+    },
+    "recovery": {
+      "committed_id": "org.canopy.classic",
+      "recovery_required": true,
+      "status": "RECOVERY_REQUIRED"
+    },
+    "reentrancy": {
+      "SwitchBusy": true,
+      "outer_status": "SWITCHED"
+    },
+    "rejected_targets": {
+      "count": 5,
+      "factory_calls": 1
+    }
+  },
+  "python": "3.14.9",
+  "round_trips": {
+    "active_presenter_after_stop": 0,
+    "active_presenter_during_switching": 1,
+    "active_presenter_max": 1,
+    "committed_id": "org.canopy.flow",
+    "factory_calls": 201,
+    "history_bounded": true,
+    "needs_recovery": false,
+    "presenters_created": 201,
+    "presenters_disposed": 201,
+    "presenters_disposed_during_switching": 200,
+    "round_trips": 100,
+    "statuses": [
+      "SWITCHED"
+    ],
+    "stopped": "STOPPED",
+    "switch_successes": 200,
+    "switches": 200
+  },
+  "schema": 1,
+  "sha256": "2d51efff611877d85baa4ba408e87a0d49f8bfc96ec3167f8e66f236e80ccfa7"
+}

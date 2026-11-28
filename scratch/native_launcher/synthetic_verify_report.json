@@ -1,0 +1,11 @@
+{
+  "classification": "SYNTHETIC",
+  "errors": [],
+  "failures": [],
+  "log": "test_directory_entry_point_reuses_the_single_producer (__main__.NativeSearchContractTests.test_directory_entry_point_reuses_the_single_producer) ... ok\ntest_fixed_claims_are_true_by_construction (__main__.NativeSearchContractTests.test_fixed_claims_are_true_by_construction) ... ok\ntest_limit_and_query_types_fail_closed (__main__.NativeSearchContractTests.test_limit_and_query_types_fail_closed) ... ok\ntest_ranking_tiers_are_total_and_deterministic (__main__.NativeSearchContractTests.test_ranking_tiers_are_total_and_deterministic) ... ok\ntest_results_are_bounded_and_immutable (__main__.NativeSearchContractTests.test_results_are_bounded_and_immutable) ... ok\ntest_upstream_caps_are_not_widened (__main__.NativeSearchContractTests.test_upstream_caps_are_not_widened) ... ok\ntest_wire_shape_fail_closed (__main__.NativeSearchContractTests.test_wire_shape_fail_closed) ... ok\n\n----------------------------------------------------------------------\nRan 7 tests in 0.307s\n\nOK\n",
+  "module": "C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\wt-native-launcher-20261127\\canopy_features\\launcher\\native_launcher_search.py",
+  "module_sha256": "19dc5ca72d0d0a93e5a06364fe809f6bc223ea491b6618a5049695fc6c87899c",
+  "script_sha256": "5ca05042dd3173fe37df23e25b56b4160f7ffe053a16c3c3319394ecef0905b7",
+  "tests_run": 7,
+  "verdict": "PASS"
+}

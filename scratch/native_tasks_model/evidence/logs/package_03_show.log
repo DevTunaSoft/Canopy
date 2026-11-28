@@ -1,0 +1,9 @@
+$ ssh -i 'C:\Users\X1\AppData\Local\hermes\cache\scratch\g1_ubuntu_evidence\ssh\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'
+Showing info for package: org.kde.plasma.canopyclassic.nativetasks
+  Name       : Canopy Classic native tasks
+  Description: Bounded PR #730 port: one authoritative upstream TaskManager.TasksModel for running-app tracking and window activation.
+  Plugin     : org.kde.plasma.canopyclassic.nativetasks
+  Author     : Canopy Classic
+  Path       : /home/canopy/.local/share/plasma/plasmoids/org.kde.plasma.canopyclassic.nativetasks/
+SHOW_RC=0
+[utc=2026-11-28T05:13:34Z] [rc=0]

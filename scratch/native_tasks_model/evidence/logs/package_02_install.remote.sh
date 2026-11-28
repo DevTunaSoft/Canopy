@@ -1,0 +1,1 @@
+kpackagetool6 --type Plasma/Applet --install /home/canopy/canopy_native_tasksmodel_m2/package; echo INSTALL_RC=$?

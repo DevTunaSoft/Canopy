@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+<title>Canopy Files — original icon artwork</title>
+<desc>Original static 128-pixel Canopy Classic vector artwork, independent of commercial app icons.</desc>
+<defs><linearGradient id="b" x1="0" y1="0" x2=".9" y2="1"><stop offset="0" stop-color="#a2e8ff"/><stop offset=".45" stop-color="#55bce7"/><stop offset="1" stop-color="#1262ab"/></linearGradient><linearGradient id="p" x1="0" y1="0" x2=".95" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#f6fcff"/><stop offset="1" stop-color="#c9dce9"/></linearGradient></defs><path d="M14 43 Q14 34 23 34 H49 L59 42 H105 Q115 42 115 52 V99 Q115 110 104 110 H23 Q14 110 14 101Z" fill="#2679b4" stroke="#1b6599" stroke-width="3"/>
+<path d="M22 30 Q22 25 28 25 H61 L69 33 H95 Q103 33 103 41 V87 H22Z" fill="url(#p)" stroke="#a2c4d9" stroke-width="2"/>
+<path d="M13 50 Q13 44 21 44 H104 Q114 44 114 53 V102 Q114 111 105 111 H22 Q13 111 13 102Z" fill="url(#b)" stroke="#317fab" stroke-width="3"/>
+<path d="M21 60 H105" stroke="#e5faff" stroke-opacity=".7" stroke-width="3"/>
+<path d="M25 100 Q58 104 103 98" stroke="#effdff" stroke-opacity=".32" stroke-width="2" fill="none"/></svg>

@@ -1,0 +1,17 @@
+$ ssh -i 'C:\Users\X1\AppData\Local\hermes\cache\scratch\g1_ubuntu_evidence\ssh\g1_ed25519' -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2223 canopy@127.0.0.1 'bash -s'
+NATIVE_ENV_SOURCE_PID=5422
+NATIVE_ENV_IMPORTED DISPLAY=:0 XDG_CURRENT_DESKTOP=KDE XDG_SESSION_TYPE=x11
+$ clean prior harness/app instances
+SEAT_SESSION=65
+LOCKED_HINT=no
+$ ps
+   4559       1 /usr/bin/sddm
+   4563    4559 /usr/lib/xorg/Xorg -nolisten tcp -background none -seat seat0 vt2 -auth /run/sddm/xauth_dyaoSt -noreset -displayfd 16
+   4648    4559 /usr/lib/x86_64-linux-gnu/sddm/sddm-helper --socket /tmp/sddm-auth-9388f21c-1d29-46ca-a364-e7257f36f502 --id 1 --start /usr/bin/startplasma-x11 --user canopy --autologin
+   5384    4390 /usr/bin/kwin_x11 --replace
+   5422    4390 /usr/bin/plasmashell --no-respawn
+$ wmctrl
+0x00600013 -1 5422   canopy-plasma6 Desktop @ QRect(0,0 1024x768) 
+0x0060002e -1 5422   canopy-plasma6 plasmashell
+0x02a00012  0 5667   canopy-plasma6 Canopy Classic — Technology Spike — Canopy Classic Spike
+[utc=2026-11-28T05:12:41Z] [rc=0]

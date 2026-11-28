@@ -1,0 +1,22 @@
+{
+    "KPlugin": {
+        "Id": "org.kde.plasma.canopyclassic.nativetasks",
+        "Name": "Canopy Classic native tasks",
+        "Description": "Bounded PR #730 port: one authoritative upstream TaskManager.TasksModel for running-app tracking and window activation.",
+        "Icon": "utilities-terminal",
+        "Category": "Desktop",
+        "Version": "0.1.0",
+        "License": "GPL-2.0-or-later",
+        "Authors": [
+            {
+                "Name": "Canopy Classic",
+                "Email": ""
+            }
+        ]
+    },
+    "KPackageStructure": "Plasma/Applet",
+    "X-Plasma-API-Minimum-Version": "6.0",
+    "X-Canopy-Product-Task": "M2-native-running-application-tracking",
+    "X-Canopy-Ported-From": "PR #730 head 53a22fe96259c49e339e6d03ea844936cb99fb10",
+    "X-Canopy-Scope": "ONE_UPSTREAM_TASKS_MODEL;NO_SECOND_MODEL;NO_SYNTHETIC_WINDOW_STATE;NO_OWN_COMPOSITOR"
+}

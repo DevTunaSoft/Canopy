@@ -1,0 +1,1 @@
+kpackagetool6 --type Plasma/Applet --list | grep -i canopy || echo NO_CANOPY_APPLET

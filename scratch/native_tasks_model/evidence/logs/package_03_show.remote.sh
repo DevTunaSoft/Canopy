@@ -1,0 +1,1 @@
+kpackagetool6 --type Plasma/Applet --show org.kde.plasma.canopyclassic.nativetasks; echo SHOW_RC=$?

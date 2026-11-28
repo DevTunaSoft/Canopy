@@ -1,0 +1,589 @@
+{
+  "artifact": "scratch/rev3_integration_runbook/evidence/live_state_20261128.json",
+  "integration_tip": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+  "plan_generated_utc": "2026-11-28T08:40:58+00:00",
+  "probe_utc": "2026-11-28T08:10:19.822125+00:00",
+  "prs": {
+    "722": {
+      "approvals": 0,
+      "base_ref": "integration/canopy-plasma6-20261127",
+      "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+      "checks": [
+        {
+          "conclusion": "success",
+          "name": "fake-gio-launch-fixture",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "qt-evidence",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "foundation",
+          "status": "completed"
+        }
+      ],
+      "draft_live": false,
+      "file_count": 15,
+      "head_sha": "035fa9c2d00e6f8a0dde7ca70036049010ac436b",
+      "mergeable": true,
+      "mergeable_state": "blocked",
+      "merged": false,
+      "state": "open"
+    },
+    "732": {
+      "approvals": 0,
+      "base_ref": "integration/canopy-plasma6-20261127",
+      "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+      "checks": [
+        {
+          "conclusion": "success",
+          "name": "foundation",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "qt-evidence",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "fake-gio-launch-fixture",
+          "status": "completed"
+        }
+      ],
+      "draft_live": false,
+      "file_count": 21,
+      "head_sha": "a14e335a75f35f775bcd669de4e2ba5ab173168c",
+      "mergeable": true,
+      "mergeable_state": "blocked",
+      "merged": false,
+      "state": "open"
+    },
+    "733": {
+      "approvals": 0,
+      "base_ref": "integration/canopy-plasma6-20261127",
+      "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+      "checks": [
+        {
+          "conclusion": "success",
+          "name": "fake-gio-launch-fixture",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "qt-evidence",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "foundation",
+          "status": "completed"
+        }
+      ],
+      "draft_live": false,
+      "file_count": 77,
+      "head_sha": "a0b1c77b94bd0cb3b341a472f68de596ff5f6dce",
+      "mergeable": true,
+      "mergeable_state": "blocked",
+      "merged": false,
+      "state": "open"
+    },
+    "734": {
+      "approvals": 0,
+      "base_ref": "integration/canopy-plasma6-20261127",
+      "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+      "checks": [
+        {
+          "conclusion": "success",
+          "name": "fake-gio-launch-fixture",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "qt-evidence",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "foundation",
+          "status": "completed"
+        }
+      ],
+      "draft_live": false,
+      "file_count": 53,
+      "head_sha": "bd67e7359908b56d53cb68acbb1fb9941b84cc11",
+      "mergeable": true,
+      "mergeable_state": "blocked",
+      "merged": false,
+      "state": "open"
+    },
+    "735": {
+      "approvals": 0,
+      "base_ref": "integration/canopy-plasma6-20261127",
+      "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+      "checks": [
+        {
+          "conclusion": "success",
+          "name": "fake-gio-launch-fixture",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "qt-evidence",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "foundation",
+          "status": "completed"
+        }
+      ],
+      "draft_live": false,
+      "file_count": 17,
+      "head_sha": "349742749a4ab9dbf2903df876e3d9b70e299986",
+      "mergeable": true,
+      "mergeable_state": "blocked",
+      "merged": false,
+      "state": "open"
+    },
+    "736": {
+      "approvals": 0,
+      "base_ref": "integration/canopy-plasma6-20261127",
+      "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+      "checks": [
+        {
+          "conclusion": "success",
+          "name": "fake-gio-launch-fixture",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "qt-evidence",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "foundation",
+          "status": "completed"
+        }
+      ],
+      "draft_live": false,
+      "file_count": 10,
+      "head_sha": "df73dfb6d1272b72e1f57b3b57539373c05dd636",
+      "mergeable": true,
+      "mergeable_state": "blocked",
+      "merged": false,
+      "state": "open"
+    },
+    "737": {
+      "approvals": 0,
+      "base_ref": "integration/canopy-plasma6-20261127",
+      "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+      "checks": [
+        {
+          "conclusion": "success",
+          "name": "fake-gio-launch-fixture",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "qt-evidence",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "foundation",
+          "status": "completed"
+        }
+      ],
+      "draft_live": false,
+      "file_count": 45,
+      "head_sha": "35c1fe7a0c76cc3dbebe9e3f633b587cbfc377e6",
+      "mergeable": true,
+      "mergeable_state": "blocked",
+      "merged": false,
+      "state": "open"
+    },
+    "738": {
+      "approvals": 0,
+      "base_ref": "integration/canopy-plasma6-20261127",
+      "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+      "checks": [
+        {
+          "conclusion": "success",
+          "name": "qt-evidence",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "fake-gio-launch-fixture",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "foundation",
+          "status": "completed"
+        }
+      ],
+      "draft_live": false,
+      "file_count": 23,
+      "head_sha": "07a5d8c3b750eb7c76d9a69be460384797c4937f",
+      "mergeable": true,
+      "mergeable_state": "blocked",
+      "merged": false,
+      "state": "open"
+    },
+    "739": {
+      "approvals": 0,
+      "base_ref": "integration/canopy-plasma6-20261127",
+      "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+      "checks": [
+        {
+          "conclusion": "success",
+          "name": "foundation",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "qt-evidence",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "fake-gio-launch-fixture",
+          "status": "completed"
+        }
+      ],
+      "draft_live": false,
+      "file_count": 9,
+      "head_sha": "cde4b120f427cd1cc682c84037e71169e2f547a3",
+      "mergeable": true,
+      "mergeable_state": "blocked",
+      "merged": false,
+      "state": "open"
+    },
+    "740": {
+      "approvals": 0,
+      "base_ref": "integration/canopy-plasma6-20261127",
+      "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+      "checks": [
+        {
+          "conclusion": "success",
+          "name": "qt-evidence",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "fake-gio-launch-fixture",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "foundation",
+          "status": "completed"
+        }
+      ],
+      "draft_live": false,
+      "file_count": 6,
+      "head_sha": "f8ba8187bc67b8bf1de49c4e40977f33e17d6e74",
+      "mergeable": true,
+      "mergeable_state": "blocked",
+      "merged": false,
+      "state": "open"
+    },
+    "741": {
+      "approvals": 0,
+      "base_ref": "integration/canopy-plasma6-20261127",
+      "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+      "checks": [
+        {
+          "conclusion": "success",
+          "name": "fake-gio-launch-fixture",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "qt-evidence",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "foundation",
+          "status": "completed"
+        }
+      ],
+      "draft_live": false,
+      "file_count": 33,
+      "head_sha": "ba1994b835308132ac964520ffcbe032923c177c",
+      "mergeable": true,
+      "mergeable_state": "blocked",
+      "merged": false,
+      "state": "open"
+    },
+    "742": {
+      "approvals": 0,
+      "base_ref": "integration/canopy-plasma6-20261127",
+      "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+      "checks": [
+        {
+          "conclusion": "success",
+          "name": "fake-gio-launch-fixture",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "qt-evidence",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "foundation",
+          "status": "completed"
+        }
+      ],
+      "draft_live": false,
+      "file_count": 74,
+      "head_sha": "83854452db545e30777017906974f69f385bae39",
+      "mergeable": true,
+      "mergeable_state": "blocked",
+      "merged": false,
+      "state": "open"
+    },
+    "743": {
+      "approvals": 0,
+      "base_ref": "integration/canopy-plasma6-20261127",
+      "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+      "checks": [
+        {
+          "conclusion": "success",
+          "name": "fake-gio-launch-fixture",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "qt-evidence",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "foundation",
+          "status": "completed"
+        }
+      ],
+      "draft_live": false,
+      "file_count": 11,
+      "head_sha": "2b8bca910d84b19966b29db37dfb3ce7512e810f",
+      "mergeable": true,
+      "mergeable_state": "blocked",
+      "merged": false,
+      "state": "open"
+    },
+    "744": {
+      "approvals": 0,
+      "base_ref": "integration/canopy-plasma6-20261127",
+      "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+      "checks": [
+        {
+          "conclusion": "success",
+          "name": "qt-evidence",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "fake-gio-launch-fixture",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "foundation",
+          "status": "completed"
+        }
+      ],
+      "draft_live": false,
+      "file_count": 10,
+      "head_sha": "2733f7e09e0e3447fe39eebce6a71171e2ebf476",
+      "mergeable": true,
+      "mergeable_state": "blocked",
+      "merged": false,
+      "state": "open"
+    },
+    "745": {
+      "approvals": 0,
+      "base_ref": "integration/canopy-plasma6-20261127",
+      "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+      "checks": [
+        {
+          "conclusion": "success",
+          "name": "foundation",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "qt-evidence",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "fake-gio-launch-fixture",
+          "status": "completed"
+        }
+      ],
+      "draft_live": false,
+      "file_count": 7,
+      "head_sha": "80097f8b97b7d5df35b4e53bb9cd835b546aca9f",
+      "mergeable": true,
+      "mergeable_state": "blocked",
+      "merged": false,
+      "state": "open"
+    },
+    "746": {
+      "approvals": 0,
+      "base_ref": "integration/canopy-plasma6-20261127",
+      "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+      "checks": [
+        {
+          "conclusion": "success",
+          "name": "fake-gio-launch-fixture",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "qt-evidence",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "foundation",
+          "status": "completed"
+        }
+      ],
+      "draft_live": false,
+      "file_count": 25,
+      "head_sha": "050853173419c7224ab8875233f5ef1d7aea622c",
+      "mergeable": true,
+      "mergeable_state": "blocked",
+      "merged": false,
+      "state": "open"
+    },
+    "747": {
+      "approvals": 0,
+      "base_ref": "integration/canopy-plasma6-20261127",
+      "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+      "checks": [
+        {
+          "conclusion": "success",
+          "name": "foundation",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "qt-evidence",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "fake-gio-launch-fixture",
+          "status": "completed"
+        }
+      ],
+      "draft_live": false,
+      "file_count": 17,
+      "head_sha": "ca378da2c2b116db8ce79dc711001add9af59897",
+      "mergeable": true,
+      "mergeable_state": "blocked",
+      "merged": false,
+      "state": "open"
+    },
+    "748": {
+      "approvals": 0,
+      "base_ref": "integration/canopy-plasma6-20261127",
+      "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+      "checks": [
+        {
+          "conclusion": "success",
+          "name": "fake-gio-launch-fixture",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "foundation",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "qt-evidence",
+          "status": "completed"
+        }
+      ],
+      "draft_live": false,
+      "file_count": 20,
+      "head_sha": "9f766d06225f4a7e7cfe9be010a3432a4109ea05",
+      "mergeable": true,
+      "mergeable_state": "blocked",
+      "merged": false,
+      "state": "open"
+    },
+    "749": {
+      "approvals": 0,
+      "base_ref": "integration/canopy-plasma6-20261127",
+      "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+      "checks": [
+        {
+          "conclusion": "success",
+          "name": "qt-evidence",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "fake-gio-launch-fixture",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "foundation",
+          "status": "completed"
+        }
+      ],
+      "draft_live": false,
+      "file_count": 20,
+      "head_sha": "449e39e7bd00af24aec50a05c70340c0b10a8120",
+      "mergeable": true,
+      "mergeable_state": "blocked",
+      "merged": false,
+      "state": "open"
+    },
+    "750": {
+      "approvals": 0,
+      "base_ref": "integration/canopy-plasma6-20261127",
+      "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+      "checks": [
+        {
+          "conclusion": "success",
+          "name": "qt-evidence",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "foundation",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "fake-gio-launch-fixture",
+          "status": "completed"
+        }
+      ],
+      "draft_live": false,
+      "file_count": 4,
+      "head_sha": "0439efa283bad00a92faccc3c62a99cb6a85b605",
+      "mergeable": true,
+      "mergeable_state": "blocked",
+      "merged": false,
+      "state": "open"
+    }
+  },
+  "source": "gh api REST live reads (pulls, check-runs, reviews, files)"
+}

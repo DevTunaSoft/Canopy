@@ -1,0 +1,56 @@
+{
+  "distinct_approval": "fake-human",
+  "full_suite": true,
+  "gate_failures": {
+    "722": [
+      "DISTINCT_APPROVAL_NOT_VERIFIED",
+      "REVIEW_DECISION_NOT_APPROVED",
+      "STILL_BLOCKED_BY_PROTECTION"
+    ]
+  },
+  "known_good_rollback_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+  "merges": [],
+  "mode": "apply",
+  "post_merge": [],
+  "protection": {
+    "integration/canopy-plasma6-20261127": {
+      "branch": "integration/canopy-plasma6-20261127",
+      "contexts": [
+        "fake-gio-launch-fixture",
+        "foundation",
+        "qt-evidence"
+      ],
+      "dismiss_stale_reviews": true,
+      "enforce_admins": true,
+      "problems": [],
+      "required_approving_review_count": 1,
+      "strict": true,
+      "verdict": "PASS"
+    },
+    "main": {
+      "branch": "main",
+      "contexts": [
+        "fake-gio-launch-fixture",
+        "foundation",
+        "qt-evidence"
+      ],
+      "dismiss_stale_reviews": true,
+      "enforce_admins": true,
+      "problems": [],
+      "required_approving_review_count": 1,
+      "strict": true,
+      "verdict": "PASS"
+    }
+  },
+  "rev3_sha256": "1fba4b1e7128b6bc33aba577c05fdccfa45fcac56ee714f02e9d8b43e32a0f2a",
+  "skipped": {
+    "734": "STALE_BODY_HEAD_PIN + NO_MERGE_REQUESTED: body pins 93c4dbc8, live head bd67e735; native runtime NOT_RUN/BLOCKED; body says 'No merge is requested or authorized by this PR'.",
+    "738": "FAILING_VERDICT: body says BASELINE_CAPTURED_NOT_ACCEPTED with EVIDENCE_GAP (executed-binary hash withdrawn); not an accepted increment.",
+    "739": "HOLD_INCOMPLETE: INCOMPLETE_600S_CAP (no terminal full-suite verdict) and NO_COMPILED_SWITCHER_WIRING; incomplete runtime wiring.",
+    "742": "REVIEW_HOLD_DOC_CORRECTION: independent review requires two documentation corrections before promotion; stage_06_verify.log and board_probe.log are ABSENT at the exact head and the '37 tests' claim has no artifact.",
+    "749": "HOLD_NO_PROMOTION: body says 'No merge, no self-approval, no ready-for-merge promotion; independent review only'; machine verdict SOAK_WARN_CRASH_OR_ERROR_EVENT+SAMPLING_GAP+SERVICE_COUNT_DRIFT.",
+    "750": "OVERLAP_HOLD: shares 4 instruction paths (.github/PULL_REQUEST_TEMPLATE.md, AGENTS.md, docs/AGENTS_WORKFORCE.md, docs/ROADMAP.md) with #722; exact-base trial merge conflicts on all four after #722 is promoted. Requires an authorized re-pin onto the post-#722 tip with a fresh independent review and 3/3 checks at the new head. No PR edit is performed by this runbook; the external Rev3 directive SHA remains controlling."
+  },
+  "started_utc": "2026-11-28T08:43:57+00:00",
+  "verdict": "STOPPED_PR_722_GATES"
+}

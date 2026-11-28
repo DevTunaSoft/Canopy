@@ -1,0 +1,35 @@
+{
+  "artifact": "scratch/rev3_integration_runbook/evidence/protection_20261128.json",
+  "branches": {
+    "integration/canopy-plasma6-20261127": {
+      "branch": "integration/canopy-plasma6-20261127",
+      "contexts": [
+        "fake-gio-launch-fixture",
+        "foundation",
+        "qt-evidence"
+      ],
+      "dismiss_stale_reviews": true,
+      "enforce_admins": true,
+      "problems": [],
+      "required_approving_review_count": 1,
+      "strict": true,
+      "verdict": "PASS"
+    },
+    "main": {
+      "branch": "main",
+      "contexts": [
+        "fake-gio-launch-fixture",
+        "foundation",
+        "qt-evidence"
+      ],
+      "dismiss_stale_reviews": true,
+      "enforce_admins": true,
+      "problems": [],
+      "required_approving_review_count": 1,
+      "strict": true,
+      "verdict": "PASS"
+    }
+  },
+  "queried_utc": "2026-11-28T08:40:58+00:00",
+  "requery_at_apply": "mandatory; script check_protection() refuses on absence or weakened settings"
+}

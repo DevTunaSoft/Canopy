@@ -1,0 +1,18 @@
+UTC=2026-11-28T06:18:09Z
+UPTIME=8212.32 10020.81
+--- session65 ---
+Display=:0
+Type=x11
+Active=yes
+State=active
+LockedHint=no
+--- shell processes ---
+5422 /usr/bin/plasmashell --no-respawn
+5384 /usr/bin/kwin_x11 --replace
+--- user units ---
+active
+--- logind capability ---
+s "challenge"
+--- X clients (bounded; X may be unresponsive) ---
+WMCTRL_RC=124
+OBSERVE_DONE

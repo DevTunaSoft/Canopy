@@ -1,0 +1,29 @@
+{
+  "artifact": "M4 visual review of real Plasma guest framebuffer captures",
+  "review_method": "vision_analyze on the exact PNG bytes; no visual approval claim",
+  "reviewed_utc": "2026-11-28T06:20:00Z",
+  "before": {
+    "path": "scratch/native_suspend/evidence/before.png",
+    "sha256": "592b23a55cd81e35e163786269a4672890a2da839b5d5c8b05a60aa886ac9514",
+    "resolution": "1920x1080",
+    "dock_visible": true,
+    "launcher_visible": true,
+    "window_visible": true,
+    "observation": "Live logged-in Plasma-style desktop: top bar with Files/global menu, centered floating dock with file-manager, browser, settings, image, terminal and trash tiles and an active indicator on the folder tile, bottom panel launcher, and an open Files window at /home/canopy. This is functional presence only, not visual acceptance."
+  },
+  "suspended": {
+    "path": "scratch/native_suspend/evidence/suspended.png",
+    "sha256": "592b23a55cd81e35e163786269a4672890a2da839b5d5c8b05a60aa886ac9514",
+    "byte_identical_to_before": true,
+    "observation": "Frozen framebuffer during guest S3; no fresh render asserted."
+  },
+  "after": {
+    "path": "scratch/native_suspend/evidence/after.png",
+    "sha256": "592b23a55cd81e35e163786269a4672890a2da839b5d5c8b05a60aa886ac9514",
+    "byte_identical_to_before": true,
+    "dock_visible": null,
+    "launcher_visible": null,
+    "window_visible": null,
+    "observation": "Same frozen frame as before: the guest X server does not answer new clients (wmctrl/xdpyinfo rc=124 before and after suspend), so this capture cannot prove a fresh post-resume dock/launcher/window render. Visual recovery is NOT RUN, not FAIL."
+  }
+}

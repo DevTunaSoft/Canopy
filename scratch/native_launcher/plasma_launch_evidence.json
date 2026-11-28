@@ -1,0 +1,374 @@
+{
+  "checks": [
+    {
+      "command": "VBoxManage showvminfo Canopy-Test-Plasma6 --machinereadable",
+      "id": "C01",
+      "result": {
+        "changed": "VMStateChangeTime=\"2026-11-28T04:00:24.168000000\"",
+        "rc": 0,
+        "vm_state": "VMState=\"running\""
+      },
+      "status": "PASS",
+      "title": "VM observed read-only before launch"
+    },
+    {
+      "command": "loginctl list-sessions --no-legend; pgrep -a kwin_x11",
+      "id": "C02",
+      "result": "188 1000 canopy -     12719 user    -    no -\n 62 1000 canopy -     4390  manager -    no -\n 65 1000 canopy seat0 4648  user    tty2 no -\n980 1000 canopy -     63313 user    -    no -\n5384 /usr/bin/kwin_x11 --replace\nDISPLAY=unset",
+      "status": "PASS",
+      "title": "real Plasma session and single compositor"
+    },
+    {
+      "command": "pgrep -x konsole",
+      "id": "B_konsole",
+      "result": {
+        "pids": [],
+        "raw": "NONE",
+        "rc": 0
+      },
+      "status": "PASS",
+      "title": "baseline process set for konsole"
+    },
+    {
+      "command": "pgrep -x dolphin",
+      "id": "B_dolphin",
+      "result": {
+        "pids": [],
+        "raw": "NONE",
+        "rc": 0
+      },
+      "status": "PASS",
+      "title": "baseline process set for dolphin"
+    },
+    {
+      "command": "pgrep -x kate",
+      "id": "B_kate",
+      "result": {
+        "pids": [],
+        "raw": "NONE",
+        "rc": 0
+      },
+      "status": "PASS",
+      "title": "baseline process set for kate"
+    },
+    {
+      "command": "scp installed entry; sha256sum host and guest",
+      "id": "D_org.kde.konsole.desktop",
+      "result": {
+        "byte_identical": true,
+        "host_copy": "C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\native_launcher_runtime\\raw\\org.kde.konsole.desktop",
+        "installed_path": "/usr/share/applications/org.kde.konsole.desktop",
+        "sha256_guest": "cd15f8c829a7ae0edfb27d67920fcd2cafb252209c950ce2e5791b9d24d15d38",
+        "sha256_host": "cd15f8c829a7ae0edfb27d67920fcd2cafb252209c950ce2e5791b9d24d15d38"
+      },
+      "status": "PASS",
+      "title": "installed desktop entry copied byte-identically"
+    },
+    {
+      "command": "scp installed entry; sha256sum host and guest",
+      "id": "D_org.kde.dolphin.desktop",
+      "result": {
+        "byte_identical": true,
+        "host_copy": "C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\native_launcher_runtime\\raw\\org.kde.dolphin.desktop",
+        "installed_path": "/usr/share/applications/org.kde.dolphin.desktop",
+        "sha256_guest": "dd642377423d1b6b9749c62d3819ad905bc06a2de44841db00860758782f3599",
+        "sha256_host": "dd642377423d1b6b9749c62d3819ad905bc06a2de44841db00860758782f3599"
+      },
+      "status": "PASS",
+      "title": "installed desktop entry copied byte-identically"
+    },
+    {
+      "command": "scp installed entry; sha256sum host and guest",
+      "id": "D_org.kde.kate.desktop",
+      "result": {
+        "byte_identical": true,
+        "host_copy": "C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\native_launcher_runtime\\raw\\org.kde.kate.desktop",
+        "installed_path": "/usr/share/applications/org.kde.kate.desktop",
+        "sha256_guest": "0fa4b8cab547ae990e281456ab8833e492b63acce13aca49513ce4063eeadc89",
+        "sha256_host": "0fa4b8cab547ae990e281456ab8833e492b63acce13aca49513ce4063eeadc89"
+      },
+      "status": "PASS",
+      "title": "installed desktop entry copied byte-identically"
+    },
+    {
+      "command": "search_native_directory(<scratch applications>, 'Konsole', limit=3)",
+      "id": "S_org.kde.konsole.desktop",
+      "result": {
+        "catalog_rows": 3,
+        "expected_app_id": "org.kde.konsole.desktop",
+        "format_scalars_removed": 5,
+        "main_fields_byte_identical": true,
+        "query": "Konsole",
+        "removed_codepoints": [
+          "0x200d"
+        ],
+        "result_count": 1,
+        "source": "installed desktop entry, scratch copy",
+        "top": {
+          "app_id": "org.kde.konsole.desktop",
+          "index": 2,
+          "score": 4,
+          "tier": "exact",
+          "title": "Konsole"
+        }
+      },
+      "status": "PASS",
+      "title": "bounded search ranks the installed entry first"
+    },
+    {
+      "command": "search_native_directory(<scratch applications>, 'Dolphin', limit=3)",
+      "id": "S_org.kde.dolphin.desktop",
+      "result": {
+        "catalog_rows": 3,
+        "expected_app_id": "org.kde.dolphin.desktop",
+        "format_scalars_removed": 4,
+        "main_fields_byte_identical": true,
+        "query": "Dolphin",
+        "removed_codepoints": [
+          "0x200d"
+        ],
+        "result_count": 1,
+        "source": "installed desktop entry, scratch copy",
+        "top": {
+          "app_id": "org.kde.dolphin.desktop",
+          "index": 0,
+          "score": 4,
+          "tier": "exact",
+          "title": "Dolphin"
+        }
+      },
+      "status": "PASS",
+      "title": "bounded search ranks the installed entry first"
+    },
+    {
+      "command": "search_native_directory(<scratch applications>, 'Kate', limit=3)",
+      "id": "S_org.kde.kate.desktop",
+      "result": {
+        "catalog_rows": 3,
+        "expected_app_id": "org.kde.kate.desktop",
+        "format_scalars_removed": 4,
+        "main_fields_byte_identical": true,
+        "query": "Kate",
+        "removed_codepoints": [
+          "0x200b"
+        ],
+        "result_count": 1,
+        "source": "installed desktop entry, scratch copy",
+        "top": {
+          "app_id": "org.kde.kate.desktop",
+          "index": 1,
+          "score": 4,
+          "tier": "exact",
+          "title": "Kate"
+        }
+      },
+      "status": "PASS",
+      "title": "bounded search ranks the installed entry first"
+    },
+    {
+      "command": "env DISPLAY=:0 XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_CURRENT_DESKTOP=KDE XDG_SESSION_TYPE=x11 gio launch /usr/share/applications/org.kde.konsole.desktop </dev/null >/dev/null 2>&1; echo GIO_RC=$?",
+      "id": "L_konsole",
+      "result": {
+        "gio_rc_output": "GIO_RC=0",
+        "new_pids": [
+          64229
+        ],
+        "pgrep": "64229 /usr/bin/konsole",
+        "process_and_bus": "PID    PPID    PGID     SID STAT     ELAPSED COMMAND\n  64229       1   64162   64162 Sl         00:06 /usr/bin/konsole\n:1.279                                       64229 konsole         canopy :1.279        session-990.scope 990     -"
+      },
+      "status": "PASS",
+      "title": "GIO desktop-entry launch in real Plasma"
+    },
+    {
+      "command": "env DISPLAY=:0 XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_CURRENT_DESKTOP=KDE XDG_SESSION_TYPE=x11 gio launch /usr/share/applications/org.kde.dolphin.desktop </dev/null >/dev/null 2>&1; echo GIO_RC=$?",
+      "id": "L_dolphin",
+      "result": {
+        "gio_rc_output": "GIO_RC=0",
+        "new_pids": [
+          64538
+        ],
+        "pgrep": "64538 /usr/bin/dolphin",
+        "process_and_bus": "PID    PPID    PGID     SID STAT     ELAPSED COMMAND\n  64538       1   64471   64471 Sl         00:06 /usr/bin/dolphin\n:1.282                                       64538 dolphin         canopy :1.282        session-993.scope 993     -"
+      },
+      "status": "PASS",
+      "title": "GIO desktop-entry launch in real Plasma"
+    },
+    {
+      "command": "env DISPLAY=:0 XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_CURRENT_DESKTOP=KDE XDG_SESSION_TYPE=x11 gio launch /usr/share/applications/org.kde.kate.desktop </dev/null >/dev/null 2>&1; echo GIO_RC=$?",
+      "id": "L_kate",
+      "result": {
+        "gio_rc_output": "GIO_RC=0",
+        "new_pids": [
+          64847
+        ],
+        "pgrep": "64847 /usr/bin/kate -b",
+        "process_and_bus": "PID    PPID    PGID     SID STAT     ELAPSED COMMAND\n  64847       1   64780   64780 Sl         00:06 /usr/bin/kate -b\n:1.285                                       64847 kate            canopy :1.285        session-996.scope 996     -"
+      },
+      "status": "PASS",
+      "title": "GIO desktop-entry launch in real Plasma"
+    },
+    {
+      "command": "xprop -root _NET_CLIENT_LIST",
+      "id": "W01",
+      "result": "XPROP_UNAVAILABLE",
+      "status": "PASS",
+      "title": "X11 client list read-only after launches"
+    },
+    {
+      "command": "VBoxManage controlvm Canopy-Test-Plasma6 screenshotpng <scratch>",
+      "id": "P01",
+      "result": {
+        "bytes": 2092539,
+        "classification": "REAL_PLASMA_GUEST functional evidence; not visual approval",
+        "path": "C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\native_launcher_runtime\\plasma_after_launch.png",
+        "rc": 0,
+        "sha256": "592b23a55cd81e35e163786269a4672890a2da839b5d5c8b05a60aa886ac9514"
+      },
+      "status": "PASS",
+      "title": "VM framebuffer captured"
+    },
+    {
+      "command": "kill <launched pids>; pgrep -a <binary>; VBoxManage showvminfo",
+      "id": "R01",
+      "result": {
+        "changed_after": "VMStateChangeTime=\"2026-11-28T04:00:24.168000000\"",
+        "changed_before": "VMStateChangeTime=\"2026-11-28T04:00:24.168000000\"",
+        "kills": [
+          {
+            "pid": 64229,
+            "result": "KILL_RC=0"
+          },
+          {
+            "pid": 64538,
+            "result": "KILL_RC=0"
+          },
+          {
+            "pid": 64847,
+            "result": "KILL_RC=0"
+          }
+        ],
+        "residual": {
+          "dolphin": "NONE",
+          "kate": "NONE",
+          "konsole": "NONE"
+        },
+        "vm_state_after": "VMState=\"running\"",
+        "vm_state_before": "VMState=\"running\""
+      },
+      "status": "PASS",
+      "title": "launched apps terminated; VM state unchanged"
+    }
+  ],
+  "classification": "REAL_PLASMA_GUEST_SCOPED",
+  "desktop_entry_evidence": {
+    "org.kde.dolphin.desktop": {
+      "byte_identical": true,
+      "host_copy": "C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\native_launcher_runtime\\raw\\org.kde.dolphin.desktop",
+      "installed_path": "/usr/share/applications/org.kde.dolphin.desktop",
+      "sha256_guest": "dd642377423d1b6b9749c62d3819ad905bc06a2de44841db00860758782f3599",
+      "sha256_host": "dd642377423d1b6b9749c62d3819ad905bc06a2de44841db00860758782f3599"
+    },
+    "org.kde.kate.desktop": {
+      "byte_identical": true,
+      "host_copy": "C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\native_launcher_runtime\\raw\\org.kde.kate.desktop",
+      "installed_path": "/usr/share/applications/org.kde.kate.desktop",
+      "sha256_guest": "0fa4b8cab547ae990e281456ab8833e492b63acce13aca49513ce4063eeadc89",
+      "sha256_host": "0fa4b8cab547ae990e281456ab8833e492b63acce13aca49513ce4063eeadc89"
+    },
+    "org.kde.konsole.desktop": {
+      "byte_identical": true,
+      "host_copy": "C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\native_launcher_runtime\\raw\\org.kde.konsole.desktop",
+      "installed_path": "/usr/share/applications/org.kde.konsole.desktop",
+      "sha256_guest": "cd15f8c829a7ae0edfb27d67920fcd2cafb252209c950ce2e5791b9d24d15d38",
+      "sha256_host": "cd15f8c829a7ae0edfb27d67920fcd2cafb252209c950ce2e5791b9d24d15d38"
+    }
+  },
+  "guest": {
+    "access": "existing NAT SSH forward 127.0.0.1:2223 with existing scratch key; BatchMode=yes, StrictHostKeyChecking=yes, no password",
+    "compositor": "kwin_x11 (single)",
+    "host": "canopy-plasma6",
+    "user": "canopy",
+    "vm": "Canopy-Test-Plasma6"
+  },
+  "not_claimed": [
+    "owner visual acceptance",
+    "CI-on-guest",
+    "release readiness",
+    "compiled Canopy Qt host launch",
+    "CI acceptance"
+  ],
+  "reuse": {
+    "catalog_source": "native_catalog_producer over installed desktop entries",
+    "consumer": "canopy_features.launcher.native_launcher_search",
+    "duplicate_services": "none; no daemon, poll, cache, telemetry or paid tier",
+    "fixed_claims": [
+      "no_duplicate_catalog_service",
+      "no_network",
+      "no_paid_tier",
+      "no_persistent_state",
+      "no_process_launch",
+      "no_telemetry",
+      "no_visual_change"
+    ]
+  },
+  "search_rows": [
+    {
+      "catalog_rows": 3,
+      "expected_app_id": "org.kde.konsole.desktop",
+      "format_scalars_removed": 5,
+      "main_fields_byte_identical": true,
+      "query": "Konsole",
+      "removed_codepoints": [
+        "0x200d"
+      ],
+      "result_count": 1,
+      "source": "installed desktop entry, scratch copy",
+      "top": {
+        "app_id": "org.kde.konsole.desktop",
+        "index": 2,
+        "score": 4,
+        "tier": "exact",
+        "title": "Konsole"
+      }
+    },
+    {
+      "catalog_rows": 3,
+      "expected_app_id": "org.kde.dolphin.desktop",
+      "format_scalars_removed": 4,
+      "main_fields_byte_identical": true,
+      "query": "Dolphin",
+      "removed_codepoints": [
+        "0x200d"
+      ],
+      "result_count": 1,
+      "source": "installed desktop entry, scratch copy",
+      "top": {
+        "app_id": "org.kde.dolphin.desktop",
+        "index": 0,
+        "score": 4,
+        "tier": "exact",
+        "title": "Dolphin"
+      }
+    },
+    {
+      "catalog_rows": 3,
+      "expected_app_id": "org.kde.kate.desktop",
+      "format_scalars_removed": 4,
+      "main_fields_byte_identical": true,
+      "query": "Kate",
+      "removed_codepoints": [
+        "0x200b"
+      ],
+      "result_count": 1,
+      "source": "installed desktop entry, scratch copy",
+      "top": {
+        "app_id": "org.kde.kate.desktop",
+        "index": 1,
+        "score": 4,
+        "tier": "exact",
+        "title": "Kate"
+      }
+    }
+  ],
+  "verdict": "PASS"
+}

@@ -32,16 +32,17 @@ STATUS_LABELS = (
 
 # SHA-256 of the visual projection (every Accessible.* line and the
 # A11Y-ANNOUNCE block removed) of the current blobs. ND-041 added only
-# state-binding logic above `visible: opened` in the two owned panels; the
-# rendered visual half is still byte-frozen and separately pinned by
-# tests/test_nd041_native_settings_controls_wiring.py.
+# tests/test_nd041_native_settings_controls_wiring.py. The PR #732 fix
+# added four fail-closed disclosure strings to disclosureForReason above
+# that boundary; the pin below is a test-only sync to the new bytes and
+# no rendered visual input changed.
 BASE_VISUAL_PROJECTION_SHA256 = {
     "PreviewWindow.qml":
         "741091d6324db4193b2c4300c438a502631ed550604c271405e9d2e56d2eaeec",
     "LauncherOverlay.qml":
         "e5e1f3169fe9abca57744e8a5dc45f2a8d338fa05d0d719ea731f5633c43b6ce",
     "QuickControlsOverlay.qml":
-        "ff384289b67c4bdb235258d8294ef28d668d42064c8a753bfebbef885d99c6d1",
+        "7754bd824a6dda993609b264be16dfc8b884cc211f68f9bdb4cc262ff4d92cef",
     "SettingsPanel.qml":
         "1cf64ea493b1a291a8d2049bc7575c3938922ac9a13727dc7728ec433617c2d7",
     "NotificationCenter.qml":

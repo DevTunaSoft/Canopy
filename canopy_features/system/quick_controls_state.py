@@ -41,9 +41,17 @@ __all__ = [
     "SESSION_TOPIC",
     "AVAILABLE",
     "UNAVAILABLE",
+    "EXECUTION_PASS",
+    "EXECUTION_NOT_RUN",
+    "EXECUTION_BLOCKED",
+    "EXECUTION_LABELS",
     "REASON_OK",
     "REASON_NO_HOST_OBSERVATION",
     "REASON_NO_HOST_INTERFACE",
+    "REASON_CAPABILITY_ABSENT",
+    "REASON_CAPABILITY_DENIED",
+    "REASON_NO_CAPABILITY_PROBE",
+    "REASON_NO_CHANGE",
     "REASON_BRIDGE_DISABLED",
     "REASON_PRIVILEGED_HOST_CHANGE",
     "REASON_INVALID_DOMAIN",
@@ -100,9 +108,26 @@ if SESSION_TOPIC not in _HOST_EVENT_TOPICS:  # pragma: no cover - contract guard
 AVAILABLE = "AVAILABLE"
 UNAVAILABLE = "UNAVAILABLE"
 
+# Execution labels are deliberately independent of availability. A planner can
+# offer a bounded action (AVAILABLE) while the host has NOT_RUN it yet; a
+# capability or policy gate can BLOCK an action before any call is made. Only
+# a trusted host that actually completed a bounded command may report PASS.
+EXECUTION_PASS = "PASS"
+EXECUTION_NOT_RUN = "NOT_RUN"
+EXECUTION_BLOCKED = "BLOCKED"
+EXECUTION_LABELS = MappingProxyType({
+    EXECUTION_PASS: "PASS — host executed the bounded command",
+    EXECUTION_NOT_RUN: "NOT_RUN — no host command was performed",
+    EXECUTION_BLOCKED: "BLOCKED — host capability or policy refused the command",
+})
+
 REASON_OK = "ok"
 REASON_NO_HOST_OBSERVATION = "no-host-observation"
 REASON_NO_HOST_INTERFACE = "no-host-interface"
+REASON_CAPABILITY_ABSENT = "capability-absent"
+REASON_CAPABILITY_DENIED = "capability-denied"
+REASON_NO_CAPABILITY_PROBE = "no-capability-probe"
+REASON_NO_CHANGE = "no-bounded-change"
 REASON_BRIDGE_DISABLED = "bridge-disabled"
 REASON_PRIVILEGED_HOST_CHANGE = "privileged-host-change"
 REASON_INVALID_DOMAIN = "invalid-domain"
@@ -115,6 +140,10 @@ DISCLOSURES = MappingProxyType({
     REASON_OK: "Available",
     REASON_NO_HOST_OBSERVATION: "Unavailable — no host status observation",
     REASON_NO_HOST_INTERFACE: "Unavailable — no host control interface",
+    REASON_CAPABILITY_ABSENT: "Unavailable — host capability is absent",
+    REASON_CAPABILITY_DENIED: "Unavailable — host capability denied by policy",
+    REASON_NO_CAPABILITY_PROBE: "Unavailable — no trusted capability probe",
+    REASON_NO_CHANGE: "Unavailable — adjustment is outside the bounded range",
     REASON_BRIDGE_DISABLED: "Unavailable — host control bridge disabled",
     REASON_PRIVILEGED_HOST_CHANGE:
         "Unavailable — privileged host changes are not performed",

@@ -1,0 +1,69 @@
+{
+  "task": "native-dock-geometry-20261127",
+  "owner_directive_sha": "79e30d79",
+  "base": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+  "branch": "product/native-dock-geometry-20261127",
+  "port_source": {
+    "pr": 729,
+    "head": "cf596ddaba70c717a02106b12beb99c345279821",
+    "file": "prototype/classic/Theme.qml"
+  },
+  "production_edits": [
+    "prototype/classic/Theme.qml"
+  ],
+  "unchanged_owned": [
+    "prototype/classic/Main.qml",
+    "prototype/classic/DockTile.qml"
+  ],
+  "approved_assets_diff_empty": true,
+  "guest": {
+    "vm": "Canopy-Test-Plasma6",
+    "os": "Ubuntu 26.04 LTS",
+    "session": "real KWin X11 with plasmashell",
+    "compositor": "/usr/bin/kwin_x11"
+  },
+  "binary_sha256": "9f713eadb3fce76a292eb0aa68cff6e543bb6afeeb331030770cb009d7ae22eb",
+  "source_archive_sha256": "441677d9311ca6e1f35474ae1c92426624d250d2c43411c0873a2eddf865c1f0",
+  "approved_manifest_sha256": "5aa040ddbfeddbd38dcbd1808710676982efbc4146987c42e93eaa57ad0d4737",
+  "theme_sha256_after": "f79ab1eb44c4ad953c03e17ac2f045dadadb289f89372aa118f7f19f3cffd866",
+  "screenshots": {
+    "1920x1080": "scratch/native_dock_geometry/screenshots/screen_1920x1080.png",
+    "1200x750": "scratch/native_dock_geometry/screenshots/screen_1200x750.png",
+    "760x500": "scratch/native_dock_geometry/screenshots/screen_760x500.png"
+  },
+  "screenshot_sha256": {
+    "1920x1080": "f65e95d17b8f5f555efdb51da23f479c0d286bcea7e8f33e613075bee845215f",
+    "1200x750": "ccfcd96fa8b7841934ff947b2890fe301f83fef5e25831a2dd640948c78eae69",
+    "760x500": "64261840df02580f881d8f3703912ee6f8180a7cf90c95b69664e5b08fca447e"
+  },
+  "measurements": {
+    "1920x1080": {
+      "bar": 32,
+      "dock": 96,
+      "padding": 14,
+      "spacing": 7
+    },
+    "1200x750": {
+      "bar": 32,
+      "dock": 96,
+      "padding": 14,
+      "spacing": 7
+    },
+    "760x500": {
+      "bar": 32,
+      "dock": 96,
+      "padding": 14,
+      "spacing": 7
+    }
+  },
+  "approved_tuple": "32/96/14/7",
+  "all_match": true,
+  "known_conflict": {
+    "tests_stale_pins_out_of_scope": 3,
+    "prepared_patch": "scratch/native_dock_geometry/tests_pin_sync_prepared.patch",
+    "applied": false
+  },
+  "merge": false,
+  "self_approval": false,
+  "visual_acceptance": "AWAITING_OWNER_FINAL_VISUAL_ACCEPTANCE"
+}

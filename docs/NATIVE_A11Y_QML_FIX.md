@@ -18,9 +18,10 @@ Four HOLD causes are closed here without touching `PreviewWindow.qml`,
 
 1. **Foundation red — two stale ND-041 pins.** The `visible: opened`-to-EOF
    digests in `tests/test_nd041_native_settings_controls_wiring.py` were still
-   the base-tip bytes. They are synced to the exact owned-QML blobs at PR head
-   `395cced`; the only delta is `Accessible.*` name/description lines below
-   the boundary. Test-only sync, no visual source edit.
+   the base-tip bytes. They are synced to the exact owned-QML blobs at the
+   verified PR head `906181cdc7ba5d1e3fb3565b50ec79526ea7f9e0`; the only delta is `Accessible.*`
+   name/description lines below the boundary. Test-only sync, no visual
+   source edit.
 2. **verify JSON clean-checkout mismatch.** The committed JSON was generated
    in a dirty tree. Added-line checks are now scoped to the four owned QML
    files and the two documented non-QML evidence paths are explicit, and the
@@ -59,7 +60,7 @@ icons are unchanged.
 | --- | --- | --- |
 | Secondary labels in the four owned QML files named/described | `PASS` (static) | 11/11 `verify_owned_a11y_qml.py` checks; 42 targeted source tests. |
 | 7/7/6 unnamed file-detail labels from PR #740 | `ROOT_CAUSED_NOT_APPLIED_OUTSIDE_OWNERSHIP` | Exact source is `PreviewWindow.qml` lines 562-566, not in this ownership set. Minimal hunk recorded in `scratch/native_a11y_qml/OUT_OF_OWNERSHIP_ROOT_CAUSES.md`. |
-| Window/Help menus reachable at 760x500 | `PASS` (source + compiled-load only); native activation `NOT_RUN` | `Alt+W` / `Alt+H` are source-bound to the existing `windowMenu.open()` / `helpMenu.open()` proxies while `Main.qml`'s compact-layout visibility rule is preserved. The Qt CI run at `395cced` compiled and loaded `ShellMenuBar.qml`, but no runtime `Alt+W` / `Alt+H` (or Tab) activation was exercised. No native reachability claim; the hidden top-bar buttons remain out of ownership. |
+| Window/Help menus reachable at 760x500 | `PASS` (source + compiled-load only); native activation `NOT_RUN` | `Alt+W` / `Alt+H` are source-bound to the existing `windowMenu.open()` / `helpMenu.open()` proxies while `Main.qml`'s compact-layout visibility rule is preserved. The Qt CI compiled and loaded `ShellMenuBar.qml` at the verified tree `906181cdc7ba5d1e3fb3565b50ec79526ea7f9e0` (source bytes unchanged since that run), but no runtime `Alt+W` / `Alt+H` (or Tab) activation was exercised. No native reachability claim; the hidden top-bar buttons remain out of ownership. |
 | AT-SPI name/description/role re-measure at this head in real Plasma | `BLOCKED` | Running VM but no guest execution service and no supplied guest login; see `scratch/native_a11y_qml/ATSPI_BLOCKER.md`. |
 | Screen-reader announcements / Orca | `NOT_RUN` | No reader started or queried. |
 | Final owner visual acceptance | `AWAITING_OWNER_FINAL_VISUAL_ACCEPTANCE` | No compiled screenshot or visual claim in this change. |

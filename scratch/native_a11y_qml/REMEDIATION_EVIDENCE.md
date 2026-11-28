@@ -12,7 +12,8 @@ source edit.
 1. Foundation red from two stale ND-041 pins. Base digests:
    `SettingsPanel.qml = 38f1cf1512dff833dee7f8e1f844724682b2a1319bb3c798c501de0ebbbf192c`,
    `QuickControlsOverlay.qml = 257e00bb5f337495bcd46ba97c34cbdb33d68ac99566802e7bd92f0e4d4fd02b`.
-   Synced to the owned-QML bytes at PR head `395cced`:
+   Synced to the owned-QML bytes at the verified PR head
+   `906181cdc7ba5d1e3fb3565b50ec79526ea7f9e0`:
    `SettingsPanel.qml = e5520ba7705c453014148cc98d36f3a71e725f65f68150b644adca6d2dc2c1c5`,
    `QuickControlsOverlay.qml = 19349a4fdd952bc9a83d24ea644e5ea84dbd512ad9f2be1f76074c67dddcda0c`.
    Every added byte in those halves is an `Accessible.*` name/description line.
@@ -29,8 +30,10 @@ source edit.
    `tests/test_classic_qt_source.py` pins `barHeight: 32`, `dockSize: 88`,
    `dockPadding: 12`, `dockSpacing: 7` — i.e. `32/88/12/7`.
 4. `Alt+W` / `Alt+H` evidence is labelled source-gated plus compiled-load only.
-   Qt CI at `395cced` compiled `ShellMenuBar.qml` into the qmlcache and the
-   binary self-tests ran at 1920x1080 / 1200x750 / 760x500; neither shortcut
+   Qt CI at the verified tree `906181cdc7ba5d1e3fb3565b50ec79526ea7f9e0`
+   (source bytes unchanged since that run) compiled `ShellMenuBar.qml` into
+   the qmlcache and the binary self-tests ran at 1920x1080 / 1200x750 /
+   760x500; neither shortcut
    nor Tab activation was exercised at runtime, so native reachability stays
    `NOT_RUN`.
 
@@ -48,3 +51,14 @@ source edit.
 
 No native AT-SPI, screen-reader, owner visual acceptance or release-ready claim
 is made here.
+
+
+## Head-pin remediation (Rev3 consistency follow-up)
+
+The prior abbreviated source-commit pin in this evidence record and in
+`docs/NATIVE_A11Y_QML_FIX.md` was replaced by the exact verified tree head
+`906181cdc7ba5d1e3fb3565b50ec79526ea7f9e0`. No code, test-pin constant or
+visual source was edited: only the two evidence documents and the rebuilt
+`scratch/native_a11y_qml/SHA256SUMS.txt` changed. The owned static gate was
+re-run at the pinned head and remains 11/11 PASS; targeted checks were re-run
+at the same head. No merge, no approval.

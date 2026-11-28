@@ -1,0 +1,189 @@
+{
+  "canopy_cpu_5min_windows": [
+    {
+      "cpu_pct_of_one_core": 0.0,
+      "end_s": 15,
+      "start_s": 0,
+      "window_index": 0
+    }
+  ],
+  "clk_tck": 100,
+  "duration_s": 15,
+  "end_utc": "2026-11-28T06:25:03Z",
+  "guest": null,
+  "journal_probe": {
+    "coredump_total": 0,
+    "coredumps": [],
+    "errors": [],
+    "event": "journal_probe",
+    "journal_system_errors": [],
+    "journal_system_errors_total": 0,
+    "journal_user_errors": [],
+    "journal_user_errors_total": 0,
+    "since": "2026-11-28T06:24:47Z",
+    "t": 15
+  },
+  "kernel": "7.0.0-14-generic",
+  "label": "PILOT2",
+  "not_run": [
+    "24H_SOAK",
+    "TRUE_LOW_END_HARDWARE",
+    "RELEASE_ACCEPTANCE"
+  ],
+  "process_exit_events": [],
+  "process_start_events": [],
+  "processes": [
+    {
+      "comm": "startplasma-x11",
+      "cpu_pct_of_one_core": 0.0,
+      "cpu_ticks_delta": 0,
+      "ctx_per_s": 0.0,
+      "ctx_total_delta": 0,
+      "first_t_s": 0,
+      "last_t_s": 15,
+      "pid": 4656,
+      "pss_growth_kib": 0,
+      "pss_growth_pct": 0.0,
+      "pss_kib": {
+        "first": 5377,
+        "last": 5377,
+        "max": 5377,
+        "mean": 5377.0,
+        "min": 5377
+      },
+      "role": "shell:startplasma-x11",
+      "rss_kib": {
+        "first": 5520,
+        "last": 5520,
+        "max": 5520,
+        "mean": 5520.0,
+        "min": 5520
+      },
+      "samples": 4,
+      "starttime_ticks": 48637,
+      "wakeups_delta": null,
+      "wakeups_exported": false
+    },
+    {
+      "comm": "kwin_x11",
+      "cpu_pct_of_one_core": 0.8,
+      "cpu_ticks_delta": 12,
+      "ctx_per_s": 45.6,
+      "ctx_total_delta": 684,
+      "first_t_s": 0,
+      "last_t_s": 15,
+      "pid": 5384,
+      "pss_growth_kib": 0,
+      "pss_growth_pct": 0.0,
+      "pss_kib": {
+        "first": 138406,
+        "last": 138406,
+        "max": 138406,
+        "mean": 138406.0,
+        "min": 138406
+      },
+      "role": "shell:kwin_x11",
+      "rss_kib": {
+        "first": 166344,
+        "last": 166344,
+        "max": 166344,
+        "mean": 166344.0,
+        "min": 166344
+      },
+      "samples": 4,
+      "starttime_ticks": 50056,
+      "wakeups_delta": null,
+      "wakeups_exported": false
+    },
+    {
+      "comm": "plasmashell",
+      "cpu_pct_of_one_core": 0.0,
+      "cpu_ticks_delta": 0,
+      "ctx_per_s": 0.0,
+      "ctx_total_delta": 0,
+      "first_t_s": 0,
+      "last_t_s": 15,
+      "pid": 5422,
+      "pss_growth_kib": 0,
+      "pss_growth_pct": 0.0,
+      "pss_kib": {
+        "first": 457362,
+        "last": 457362,
+        "max": 457362,
+        "mean": 457362.0,
+        "min": 457362
+      },
+      "role": "shell:plasmashell",
+      "rss_kib": {
+        "first": 484004,
+        "last": 484004,
+        "max": 484004,
+        "mean": 484004.0,
+        "min": 484004
+      },
+      "samples": 4,
+      "starttime_ticks": 50251,
+      "wakeups_delta": null,
+      "wakeups_exported": false
+    },
+    {
+      "comm": "canopy-classic",
+      "cpu_pct_of_one_core": 0.0,
+      "cpu_ticks_delta": 0,
+      "ctx_per_s": 0.0,
+      "ctx_total_delta": 0,
+      "first_t_s": 0,
+      "last_t_s": 15,
+      "pid": 5667,
+      "pss_growth_kib": 0,
+      "pss_growth_pct": 0.0,
+      "pss_kib": {
+        "first": 128124,
+        "last": 128124,
+        "max": 128124,
+        "mean": 128124.0,
+        "min": 128124
+      },
+      "role": "canopy",
+      "rss_kib": {
+        "first": 147108,
+        "last": 147108,
+        "max": 147108,
+        "mean": 147108.0,
+        "min": 147108
+      },
+      "samples": 4,
+      "starttime_ticks": 51252,
+      "wakeups_delta": null,
+      "wakeups_exported": false
+    }
+  ],
+  "sample_count": "4",
+  "schema": "native-soak-report/1",
+  "source": "scratch/native_stability/raw/pilot2.tsv",
+  "start_utc": "2026-11-28T06:24:47Z",
+  "system_idle_pct": {
+    "first": 86.65211265424931,
+    "last": 86.67914901089753,
+    "max": 86.67914901089753,
+    "mean": 86.666,
+    "min": 86.65211265424931
+  },
+  "system_running_units": {
+    "first": 48,
+    "last": 48,
+    "max": 48,
+    "mean": 48.0,
+    "min": 48
+  },
+  "target_rules": "argv0 basename in {startplasma-x11,kwin_x11,plasmashell} or startswith('canopy-classic'); exact argv0, no substring guessing",
+  "user_running_units": {
+    "first": 53,
+    "last": 53,
+    "max": 53,
+    "mean": 53.0,
+    "min": 53
+  },
+  "verdict": "SOAK_STABLE_BOUNDED",
+  "warnings": []
+}

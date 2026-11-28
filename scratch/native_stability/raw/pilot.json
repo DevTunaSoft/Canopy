@@ -1,0 +1,202 @@
+{
+  "canopy_cpu_5min_windows": [],
+  "clk_tck": 100,
+  "duration_s": 0,
+  "end_utc": null,
+  "guest": null,
+  "journal_probe": {},
+  "kernel": "7.0.0-14-generic",
+  "label": "PILOT",
+  "not_run": [
+    "24H_SOAK",
+    "TRUE_LOW_END_HARDWARE",
+    "RELEASE_ACCEPTANCE"
+  ],
+  "process_exit_events": [],
+  "process_start_events": [
+    {
+      "event": "process_start",
+      "pid": 4656,
+      "role": "shell:startplasma-x11",
+      "starttime": 48637,
+      "t": 0
+    },
+    {
+      "event": "process_start",
+      "pid": 5384,
+      "role": "shell:kwin_x11",
+      "starttime": 50056,
+      "t": 0
+    },
+    {
+      "event": "process_start",
+      "pid": 5422,
+      "role": "shell:plasmashell",
+      "starttime": 50251,
+      "t": 0
+    },
+    {
+      "event": "process_start",
+      "pid": 5667,
+      "role": "canopy",
+      "starttime": 51252,
+      "t": 0
+    }
+  ],
+  "processes": [
+    {
+      "comm": null,
+      "cpu_pct_of_one_core": 0.0,
+      "cpu_ticks_delta": 0,
+      "ctx_per_s": 0.0,
+      "ctx_total_delta": 0,
+      "first_t_s": 0,
+      "last_t_s": 15,
+      "pid": 4656,
+      "pss_growth_kib": 0,
+      "pss_growth_pct": 0.0,
+      "pss_kib": {
+        "first": 5377,
+        "last": 5377,
+        "max": 5377,
+        "mean": 5377.0,
+        "min": 5377
+      },
+      "role": null,
+      "rss_kib": {
+        "first": 5520,
+        "last": 5520,
+        "max": 5520,
+        "mean": 5520.0,
+        "min": 5520
+      },
+      "samples": 4,
+      "starttime_ticks": 48637,
+      "wakeups_delta": null,
+      "wakeups_exported": false
+    },
+    {
+      "comm": null,
+      "cpu_pct_of_one_core": 1.2667,
+      "cpu_ticks_delta": 19,
+      "ctx_per_s": 48.267,
+      "ctx_total_delta": 724,
+      "first_t_s": 0,
+      "last_t_s": 15,
+      "pid": 5384,
+      "pss_growth_kib": 0,
+      "pss_growth_pct": 0.0,
+      "pss_kib": {
+        "first": 138405,
+        "last": 138405,
+        "max": 138405,
+        "mean": 138405.0,
+        "min": 138405
+      },
+      "role": null,
+      "rss_kib": {
+        "first": 166344,
+        "last": 166344,
+        "max": 166344,
+        "mean": 166344.0,
+        "min": 166344
+      },
+      "samples": 4,
+      "starttime_ticks": 50056,
+      "wakeups_delta": null,
+      "wakeups_exported": false
+    },
+    {
+      "comm": null,
+      "cpu_pct_of_one_core": 0.0,
+      "cpu_ticks_delta": 0,
+      "ctx_per_s": 0.0,
+      "ctx_total_delta": 0,
+      "first_t_s": 0,
+      "last_t_s": 15,
+      "pid": 5422,
+      "pss_growth_kib": 0,
+      "pss_growth_pct": 0.0,
+      "pss_kib": {
+        "first": 457360,
+        "last": 457360,
+        "max": 457360,
+        "mean": 457360.0,
+        "min": 457360
+      },
+      "role": null,
+      "rss_kib": {
+        "first": 484004,
+        "last": 484004,
+        "max": 484004,
+        "mean": 484004.0,
+        "min": 484004
+      },
+      "samples": 4,
+      "starttime_ticks": 50251,
+      "wakeups_delta": null,
+      "wakeups_exported": false
+    },
+    {
+      "comm": null,
+      "cpu_pct_of_one_core": 0.0,
+      "cpu_ticks_delta": 0,
+      "ctx_per_s": 0.0,
+      "ctx_total_delta": 0,
+      "first_t_s": 0,
+      "last_t_s": 15,
+      "pid": 5667,
+      "pss_growth_kib": 0,
+      "pss_growth_pct": 0.0,
+      "pss_kib": {
+        "first": 128124,
+        "last": 128124,
+        "max": 128124,
+        "mean": 128124.0,
+        "min": 128124
+      },
+      "role": null,
+      "rss_kib": {
+        "first": 147108,
+        "last": 147108,
+        "max": 147108,
+        "mean": 147108.0,
+        "min": 147108
+      },
+      "samples": 4,
+      "starttime_ticks": 51252,
+      "wakeups_delta": null,
+      "wakeups_exported": false
+    }
+  ],
+  "sample_count": null,
+  "schema": "native-soak-report/1",
+  "source": "scratch/native_stability/raw/pilot.tsv",
+  "start_utc": "2026-11-28T06:23:03Z",
+  "system_idle_pct": {
+    "first": 86.48409893992932,
+    "last": 86.50786242876649,
+    "max": 86.50786242876649,
+    "mean": 86.495,
+    "min": 86.48409893992932
+  },
+  "system_running_units": {
+    "first": 48,
+    "last": 48,
+    "max": 48,
+    "mean": 48.0,
+    "min": 48
+  },
+  "target_rules": "argv0 basename in {startplasma-x11,kwin_x11,plasmashell} or startswith('canopy-classic'); exact argv0, no substring guessing",
+  "user_running_units": {
+    "first": 53,
+    "last": 53,
+    "max": 53,
+    "mean": 53.0,
+    "min": 53
+  },
+  "verdict": "SOAK_WARN_PROCESS_RESTART",
+  "warnings": [
+    "PROCESS_RESTART"
+  ]
+}

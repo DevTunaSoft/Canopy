@@ -1,0 +1,32 @@
+# schema=native-soak-sample/2
+# label=PILOT2
+# start_utc=2026-11-28T06:24:47Z
+# clk_tck=100
+# guest=canopy-plasma6
+# kernel=7.0.0-14-generic
+# target_rules=argv0 basename in {startplasma-x11,kwin_x11,plasmashell} or startswith('canopy-classic'); exact argv0, no substring guessing
+# column_set: t_rel_s utc pid role comm starttime_ticks utime_ticks stime_ticks rss_kib pss_kib vol_ctx invol_ctx wakeups_or_NA sys_idle_ticks sys_total_ticks procs_running system_units user_units
+EVENT {"event": "process_start", "pid": 4656, "role": "shell:startplasma-x11", "starttime": 48637, "t": 0}
+S 0 2026-11-28T06:24:48Z 4656 shell:startplasma-x11 startplasma-x11 48637 13 35 5520 5377 343 87 NA 1063354 1227153 1 48 53
+EVENT {"event": "process_start", "pid": 5384, "role": "shell:kwin_x11", "starttime": 50056, "t": 0}
+S 0 2026-11-28T06:24:48Z 5384 shell:kwin_x11 kwin_x11 50056 9177 12418 166344 138406 295017 72837 NA 1063354 1227153 1 48 53
+EVENT {"event": "process_start", "pid": 5422, "role": "shell:plasmashell", "starttime": 50251, "t": 0}
+S 0 2026-11-28T06:24:48Z 5422 shell:plasmashell plasmashell 50251 3136 4077 484004 457362 19997 18767 NA 1063354 1227153 1 48 53
+EVENT {"event": "process_start", "pid": 5667, "role": "canopy", "starttime": 51252, "t": 0}
+S 0 2026-11-28T06:24:48Z 5667 canopy canopy-classic 51252 973 1033 147108 128124 2461 2634 NA 1063354 1227153 1 48 53
+S 5 2026-11-28T06:24:53Z 4656 shell:startplasma-x11 startplasma-x11 48637 13 35 5520 5377 343 87 NA 1064293 1228108 2 48 53
+S 5 2026-11-28T06:24:53Z 5384 shell:kwin_x11 kwin_x11 50056 9178 12421 166344 138406 295223 72856 NA 1064293 1228108 2 48 53
+S 5 2026-11-28T06:24:53Z 5422 shell:plasmashell plasmashell 50251 3136 4077 484004 457362 19997 18767 NA 1064293 1228108 2 48 53
+S 5 2026-11-28T06:24:53Z 5667 canopy canopy-classic 51252 973 1033 147108 128124 2461 2634 NA 1064293 1228108 2 48 53
+S 10 2026-11-28T06:24:58Z 4656 shell:startplasma-x11 startplasma-x11 48637 13 35 5520 5377 343 87 NA 1065232 1229058 1 48 53
+S 10 2026-11-28T06:24:58Z 5384 shell:kwin_x11 kwin_x11 50056 9179 12424 166344 138406 295434 72883 NA 1065232 1229058 1 48 53
+S 10 2026-11-28T06:24:58Z 5422 shell:plasmashell plasmashell 50251 3136 4077 484004 457362 19997 18767 NA 1065232 1229058 1 48 53
+S 10 2026-11-28T06:24:58Z 5667 canopy canopy-classic 51252 973 1033 147108 128124 2461 2634 NA 1065232 1229058 1 48 53
+S 15 2026-11-28T06:25:03Z 4656 shell:startplasma-x11 startplasma-x11 48637 13 35 5520 5377 343 87 NA 1066157 1230004 1 48 53
+S 15 2026-11-28T06:25:03Z 5384 shell:kwin_x11 kwin_x11 50056 9181 12426 166344 138406 295639 72899 NA 1066157 1230004 1 48 53
+S 15 2026-11-28T06:25:03Z 5422 shell:plasmashell plasmashell 50251 3136 4077 484004 457362 19997 18767 NA 1066157 1230004 1 48 53
+S 15 2026-11-28T06:25:03Z 5667 canopy canopy-classic 51252 973 1033 147108 128124 2461 2634 NA 1066157 1230004 1 48 53
+EVENT {"coredump_total": 0, "coredumps": [], "errors": [], "event": "journal_probe", "journal_system_errors": [], "journal_system_errors_total": 0, "journal_user_errors": [], "journal_user_errors_total": 0, "since": "2026-11-28T06:24:47Z", "t": 15}
+# samples=4
+# elapsed_s=15
+# end_utc=2026-11-28T06:25:03Z

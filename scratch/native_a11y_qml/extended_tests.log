@@ -1,0 +1,9 @@
+..............................................................
+----------------------------------------------------------------------
+Ran 62 tests in 48.888s
+
+OK
+VERDICT FAIL compiled mode requires a binary SHA-256 pin
+VERDICT FAIL
+VERDICT PASS
+VERDICT FAIL compiled mode cannot be combined with driver, binary or report

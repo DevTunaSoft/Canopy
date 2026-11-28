@@ -1,0 +1,13 @@
+a11y(qml): name secondary labels and restore compact Window/Help reachability
+
+Accessibility-only additions in the four owned Classic QML files:
+- names/descriptions on secondary labels in QuickControlsOverlay,
+  SettingsPanel and the deferred shell menu items;
+- non-visual Alt+W / Alt+H shortcuts in ShellMenuBar reach the existing
+  Window/Help menu proxies at 760x500 while Main.qml compact-layout
+  visibility stays unchanged.
+
+No geometry, artwork, theme, asset, menu action or behaviour change.
+Real Plasma AT-SPI is BLOCKED (no guest execution service, no supplied
+guest login); screen-reader runs remain NOT_RUN. Static gates: 11/11,
+42 and 132 tests pass. No merge or approval.

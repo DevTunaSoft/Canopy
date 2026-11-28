@@ -103,6 +103,26 @@ Item {
         }
     }
 
+    // Compact-width reachability (e.g. 760x500): Main.qml keeps the six
+    // approved top-bar buttons but hides Window and Help when compactLayout
+    // is active. These non-visual shortcuts reach the same two existing menu
+    // proxies by keyboard, without editing Main.qml or changing approved
+    // geometry, artwork or menu actions. Alt+W / Alt+H are not registered by
+    // the Classic shell (its bindings are Ctrl+Space, Ctrl+W, Ctrl+Shift+F
+    // and Ctrl+Alt+N).
+    Shortcut {
+        objectName: "canopyWindowMenuReachabilityShortcut"
+        sequence: "Alt+W"
+        context: Qt.ApplicationShortcut
+        onActivated: windowMenu.open()
+    }
+    Shortcut {
+        objectName: "canopyHelpMenuReachabilityShortcut"
+        sequence: "Alt+H"
+        context: Qt.ApplicationShortcut
+        onActivated: helpMenu.open()
+    }
+
     function menuFor(name) {
         switch (name) {
         case "File": return fileMenu

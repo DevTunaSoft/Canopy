@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "base_commit": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+  "branch": "product/native-a11y-qml-20261128",
+  "scope": "STATIC/SYNTHETIC source-gate; no Qt compile, VM, AT-SPI or reader",
+  "checks": [
+    {
+      "name": "owned_qml_files_changed",
+      "status": "PASS",
+      "detail": "changed owned QML: prototype/classic/QuickControlsOverlay.qml, prototype/classic/SettingsPanel.qml, prototype/classic/ShellMenuBar.qml, prototype/classic/ShellMenuPopupSet.qml"
+    },
+    {
+      "name": "secondary_labels_named_or_described",
+      "status": "PASS",
+      "detail": "14 accessibility-only lines added (name/description)"
+    },
+    {
+      "name": "QuickControlsOverlay.qml_secondary_label_names",
+      "status": "PASS",
+      "detail": "all required name tokens present"
+    },
+    {
+      "name": "SettingsPanel.qml_secondary_label_names",
+      "status": "PASS",
+      "detail": "all required name tokens present"
+    },
+    {
+      "name": "ShellMenuPopupSet.qml_secondary_label_names",
+      "status": "PASS",
+      "detail": "all required name tokens present"
+    },
+    {
+      "name": "compact_window_help_reachability",
+      "status": "PASS",
+      "detail": "SOURCE/COMPILED-LOAD ONLY: Alt+W and Alt+H bind to the two existing menu proxies; no native keyboard-activation run is claimed"
+    },
+    {
+      "name": "shortcuts_do_not_collide_with_classic_bindings",
+      "status": "PASS",
+      "detail": "no reuse of the four registered Classic shortcuts"
+    },
+    {
+      "name": "no_geometry_or_art_change_in_added_lines",
+      "status": "PASS",
+      "detail": "added lines contain no geometry/visual binding"
+    },
+    {
+      "name": "changes_limited_to_owned_paths",
+      "status": "PASS",
+      "detail": "non-QML changed paths: docs/NATIVE_A11Y_QML_FIX.md, scratch/native_a11y_qml/ATSPI_BLOCKER.md, scratch/native_a11y_qml/COMMIT_MSG.txt, scratch/native_a11y_qml/OUT_OF_OWNERSHIP_ROOT_CAUSES.md, scratch/native_a11y_qml/REMEDIATION_EVIDENCE.md, scratch/native_a11y_qml/SHA256SUMS.txt, scratch/native_a11y_qml/accessibility_pattern_tests.log, scratch/native_a11y_qml/atspi_native_blocker_probe.txt, scratch/native_a11y_qml/extended_tests.log, scratch/native_a11y_qml/targeted_tests.log, scratch/native_a11y_qml/verify_owned_a11y_qml.json, scratch/native_a11y_qml/verify_owned_a11y_qml.py, tests/test_nd041_native_settings_controls_wiring.py"
+    },
+    {
+      "name": "theme_and_approved_art_untouched",
+      "status": "PASS",
+      "detail": "Theme.qml and prototype/classic/assets/** not in diff"
+    },
+    {
+      "name": "rendered_inputs_byte_frozen",
+      "status": "PASS",
+      "detail": "rendered halves of both panels are byte-identical after stripping Accessibility-only lines"
+    }
+  ],
+  "all_pass": true
+}

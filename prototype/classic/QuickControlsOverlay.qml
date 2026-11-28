@@ -350,6 +350,8 @@ FocusScope {
             wrapMode: Text.WordWrap
             horizontalAlignment: Text.AlignHCenter
             width: panel.width - 40
+            Accessible.name: text
+            Accessible.description: "Host-reported status; unavailable controls stay disabled"
         }
 
         Column {
@@ -388,6 +390,7 @@ FocusScope {
                                 color: "#273345"
                                 font.pixelSize: 14
                                 font.weight: Font.DemiBold
+                                Accessible.name: text
                             }
                             Item { Layout.fillWidth: true }
                             Label {
@@ -395,6 +398,8 @@ FocusScope {
                                 text: quickControls.statusFor(modelData)
                                 color: "#537da4"
                                 font.pixelSize: 12
+                                Accessible.name: text
+                                Accessible.description: quickControls.titleFor(modelData) + " host status"
                             }
                         }
                         Label {
@@ -436,6 +441,7 @@ FocusScope {
                                     font.pixelSize: 11
                                     verticalAlignment: Text.AlignVCenter
                                     horizontalAlignment: Text.AlignHCenter
+                                    Accessible.name: text
                                 }
                             }
                             Button {
@@ -465,6 +471,7 @@ FocusScope {
                                     font.pixelSize: 11
                                     verticalAlignment: Text.AlignVCenter
                                     horizontalAlignment: Text.AlignHCenter
+                                    Accessible.name: text
                                 }
                             }
                         }

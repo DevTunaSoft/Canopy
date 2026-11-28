@@ -23,14 +23,21 @@ CLASSIC = ROOT / "prototype" / "classic"
 SETTINGS = CLASSIC / "SettingsPanel.qml"
 OVERLAY = CLASSIC / "QuickControlsOverlay.qml"
 
-# SHA-256 of every byte from the first `visible: opened` line to EOF at the
-# exact base tip 7535c0e9bc030d8fdf500967e56e385530bede96. All geometry,
-# colours, fonts, object names, labels and component order live in this half.
+# SHA-256 of every byte from the first `visible: opened` line to EOF for the
+# owned QML blobs at PR head 395cced2c2be3bf91e7b9f113754d26638b43287
+# (unchanged by the remediation commit). The only byte delta from the base
+# pins (38f1cf15… / 257e00bb…) is `Accessible.*` name/description lines added
+# below the boundary by the owned a11y change; no geometry, colour, font,
+# object name, label or component-order line changed. The complementary
+# rendered-input projection (all `Accessible.*` lines removed) stays byte
+# frozen and is pinned by tests/test_classic_status_a11y.py and by
+# scratch/native_a11y_qml/verify_owned_a11y_qml.py. Test-only sync; no
+# visual source was edited here.
 RENDERED_VISUAL_SHA256 = {
     "SettingsPanel.qml":
-        "38f1cf1512dff833dee7f8e1f844724682b2a1319bb3c798c501de0ebbbf192c",
+        "e5520ba7705c453014148cc98d36f3a71e725f65f68150b644adca6d2dc2c1c5",
     "QuickControlsOverlay.qml":
-        "257e00bb5f337495bcd46ba97c34cbdb33d68ac99566802e7bd92f0e4d4fd02b",
+        "19349a4fdd952bc9a83d24ea644e5ea84dbd512ad9f2be1f76074c67dddcda0c",
 }
 
 FORBIDDEN = (

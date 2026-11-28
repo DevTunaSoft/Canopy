@@ -229,6 +229,8 @@ FocusScope {
             font.pixelSize: 11
             wrapMode: Text.WordWrap
             horizontalAlignment: Text.AlignHCenter
+            Accessible.name: text
+            Accessible.description: "Only contract-backed preferences can be saved"
         }
 
         Flickable {
@@ -285,6 +287,7 @@ FocusScope {
                                     font.pixelSize: 12
                                     font.weight: Font.DemiBold
                                     elide: Text.ElideRight
+                                    Accessible.name: text
                                 }
                                 Label {
                                     id: disclosureLabel
@@ -340,6 +343,7 @@ FocusScope {
                                         font.pixelSize: 10
                                         verticalAlignment: Text.AlignVCenter
                                         horizontalAlignment: Text.AlignHCenter
+                                        Accessible.name: text
                                     }
                                 }
                             }
@@ -366,6 +370,7 @@ FocusScope {
                                     font.pixelSize: 10
                                     verticalAlignment: Text.AlignVCenter
                                     horizontalAlignment: Text.AlignHCenter
+                                    Accessible.name: text
                                 }
                             }
                         }
@@ -434,6 +439,7 @@ FocusScope {
                 font.pixelSize: 11
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
+                Accessible.name: text
             }
         }
     }

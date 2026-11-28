@@ -558,11 +558,16 @@ Rectangle {
                             font.pixelSize: 12
                             elide: Text.ElideRight
                             width: Math.min(360, fileList.width - 120)
+                            Accessible.name: name
+                            Accessible.description: isDir ? "Folder name" : "File name"
                         }
                         Label {
                             text: isDir ? "" : size + " B"
                             color: "#8292a3"
                             font.pixelSize: 10
+                            Accessible.ignored: isDir
+                            Accessible.name: isDir ? "" : size + " B"
+                            Accessible.description: "File size in bytes"
                         }
                     }
                     MouseArea {

@@ -1,0 +1,41 @@
+{
+  "utc": "2026-11-28T09:23:07.406164+00:00",
+  "head_scope": "source-static gate at product/a11y-rootcause-20261128",
+  "vm_mutations": 0,
+  "guest_commands": 0,
+  "credentials_used": 0,
+  "running_vms": {
+    "rc": 0,
+    "output": "\"Canopy-Test-Plasma6\" {3aecd840-4dd6-4481-913f-64a289da406d}"
+  },
+  "vm_info_filtered": {
+    "rc": 0,
+    "output": "VMState=\"running\"\nnic1=\"nat\"\nForwarding(0)=\"guestssh,tcp,127.0.0.1,2223,,22\""
+  },
+  "guest_properties": {
+    "rc": 0,
+    "count": 7,
+    "guest_execution_channel_properties": [],
+    "sample": [
+      "/VirtualBox/HostGuest/SysprepArgs = ''       @ 2026-11-28T04:00:23.984Z TRANSIENT, RDONLYGUEST",
+      "/VirtualBox/HostGuest/SysprepExec = ''       @ 2026-11-28T04:00:23.984Z TRANSIENT, RDONLYGUEST",
+      "/VirtualBox/HostInfo/VBoxRev      = '175245' @ 2026-11-28T04:00:24.168Z TRANSIENT, RDONLYGUEST",
+      "/VirtualBox/HostInfo/VBoxVer      = '7.2.22' @ 2026-11-28T04:00:24.168Z TRANSIENT, RDONLYGUEST",
+      "/VirtualBox/HostInfo/VBoxVerExt   = '7.2.22' @ 2026-11-28T04:00:24.168Z TRANSIENT, RDONLYGUEST",
+      "/VirtualBox/VMInfo/ResetCounter   = '0'      @ 2026-11-28T04:00:23.984Z TRANSIENT, RDONLYGUEST",
+      "/VirtualBox/VMInfo/ResumeCounter  = '0'      @ 2026-11-28T04:00:23.984Z TRANSIENT, RDONLYGUEST"
+    ]
+  },
+  "ssh_dir_entries": [
+    "known_hosts",
+    "known_hosts.old"
+  ],
+  "private_key_present": false,
+  "host_pyatspi": "UNAVAILABLE: ModuleNotFoundError",
+  "host_display": "UNSET",
+  "host_qt_qpa_platform": "UNSET",
+  "screen_reader_processes": "NONE_ON_HOST_PATH",
+  "at_spi_native": "BLOCKED",
+  "screen_reader": "NOT_RUN",
+  "blocker": "No host AT-SPI bus (Windows, no DISPLAY/QT_QPA_PLATFORM, no pyatspi), no supplied guest login or private key, and no authorized guest lease for this session. Guest execution was deliberately not attempted; no credential was guessed. PR #740/#752 AT-SPI evidence predates this head and is not relabelled as verification of it."
+}

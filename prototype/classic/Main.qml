@@ -169,8 +169,12 @@ ApplicationWindow {
                     id: topMenuButton
                     required property string modelData
                     readonly property var actionMenu: shellMenus.menuFor(modelData)
-                    visible: !root.compactLayout
-                             || (modelData !== "Window" && modelData !== "Help")
+                    // Keep every approved menu button in the AT tree at every
+                    // width. At 760x500 the former compact-layout rule left
+                    // Window/Help named but with null extents (unreachable).
+                    // The existing spacer absorbs the two buttons; no geometry,
+                    // colour, font, art or menu action is changed.
+                    visible: true
                     text: modelData
                     hoverEnabled: true
                     Layout.preferredHeight: 27

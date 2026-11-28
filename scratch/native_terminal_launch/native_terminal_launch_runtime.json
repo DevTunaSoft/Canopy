@@ -1,0 +1,142 @@
+{
+  "artifacts": {
+    "konsole_window.png": {
+      "bytes": 3971,
+      "sha256": "2719513aa80ee5bb63f028daaba69700c17c8ebb4c6997bd5cad5dcd002c6e8c"
+    },
+    "root_after.png": {
+      "bytes": 180906,
+      "sha256": "709b5d019e00692d8806fea946efb31024378538eac016b66534b4c12c357d01"
+    },
+    "runtime_console.log": {
+      "bytes": 4017,
+      "sha256": "823a0e7420549de608b5e0cc3e8208d4c7167d0f0117c11e49dde2239f67f18b"
+    },
+    "vm_after.png": {
+      "bytes": 164625,
+      "sha256": "39a47c62ff1400c8129ea2ba69223ce110f022ad7cbc05e340283d1e3c13c68c"
+    },
+    "vm_before.png": {
+      "bytes": 164625,
+      "sha256": "39a47c62ff1400c8129ea2ba69223ce110f022ad7cbc05e340283d1e3c13c68c"
+    }
+  },
+  "binary_sha256": "9bdcb7f525b0e8846b565484caf7e6e2211ef350dab77732b5d55b8536d84a8d",
+  "checks": [
+    {
+      "command": "pgrep -a -u canopy -f 'startplasma-x11|kwin_x11|plasmashell'",
+      "id": "R01",
+      "result": "4656 /usr/bin/startplasma-x11\n4926 /usr/bin/ssh-agent /usr/bin/im-launch /usr/bin/startplasma-x11\n5384 /usr/bin/kwin_x11 --replace\n5422 /usr/bin/plasmashell --no-respawn",
+      "status": "PASS",
+      "title": "real Plasma X11 session"
+    },
+    {
+      "command": "python3 gio_lookup.py (Gio.DesktopAppInfo.new, six closed IDs)",
+      "id": "R02",
+      "result": "gnome-terminal.desktop ABSENT TypeError\norg.gnome.Terminal.desktop ABSENT TypeError\nmate-terminal.desktop ABSENT TypeError\nxfce4-terminal.desktop ABSENT TypeError\norg.kde.konsole.desktop RESOLVED True konsole\nkonsole.desktop ABSENT TypeError",
+      "status": "PASS",
+      "title": "native Konsole desktop entry resolves in stock XDG dirs"
+    },
+    {
+      "command": "runtime driver sets only DISPLAY/XAUTHORITY/XDG_RUNTIME_DIR/DBUS address",
+      "id": "R03",
+      "result": "stock XDG data dirs used; no staged copy, no XDG override",
+      "status": "PASS",
+      "title": "no staged/duplicated service entry"
+    },
+    {
+      "command": "/home/canopy/native_terminal_launch_20261127/build/canopy-classic-spike --enable-system-apps --self-test-approved --approved-art-dir /home/canopy/native_terminal_launch_20261127/src/prototype/classic/assets/approved --self-test-terminal-dock-fixture",
+      "id": "R04",
+      "result": "CANOPY_APPROVED_ART_VERIFIED: eight exact PNG icons and legacy blue wave\nFIVE_PRODUCTION_PACK_FALLBACK: exact original-derived Qt renderer\nDOCK_CLEAN_EDGES_ACTIVE: exact approved source cleanup selected for normal startup; frozen PNGs and QML geometry unchanged\nDOCK_FIVE_CENTER_ACTIVE: Browser, Mail, Files, Terminal, Settings v3 composition inside unchanged mask; Calendar/Photos/Music exact pixel lock retained\nCANOPY_ROUNDED_DOCK_VERIFIED: eight original icons, padded, alpha-clipped\nWINDOW_ACTIVATION_ADAPTER_LOADED\nCANOPY_QUICK_CONTROLS_HOST_INJECTED: in-process view() only\nqt.qml.context: qrc:/Canopy/Classic/NotificationCenter.qml:255:13 Parameter \"text\" is not declared. Injection of parameters into signal handlers is deprecated. Use JavaScript functions with formal parameters instead.\nqt.qml.context: qrc:/Canopy/Classic/LauncherOverlay.qml:362:13 Parameter \"text\" is not declared. Injection of parameters into signal handlers is deprecated. Use JavaScript functions with formal parameters instead.\nqt.qml.context: qrc:/Canopy/Classic/PreviewWindow.qml:677:17 Parameter \"text\" is not declared. Injection of parameters into signal handlers is deprecated. Use JavaScript functions with formal parameters instead.\nCANOPY_CLASSIC_WINDOW_READY\nCANOPY_QUICK_CONTROLS_REGISTERED: hidden until requested, no host control bridge, no visual asset changes\nCANOPY_SETTINGS_PANEL_REGISTERED: hidden until requested, one contract-backed preference, no approved visual changes\nCANOPY_SYSTEM_APP_DOCK_CONNECTED: opt-in, fixed allowlist only\nCANOPY_FILES_DOCK_NATIVE_LAUNCH_CONNECTED\nCANOPY_BROWSER_DOCK_NATIVE_LAUNCH_CONNECTED\nCANOPY_MAIL_DOCK_NATIVE_LAUNCH_CONNECTED\nCANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED \"Calendar\"\nCANOPY_REMAINING_DOCK_NATIVE_LAUNCH_CONNECTED \"Photos\"\nCANOPY_TERMINAL_DOCK_NATIVE_LAUNCH_CONNECTED \"Terminal\"\nCANOPY_INTENT_DOCK_CONNECTED \"Music\"\nCANOPY_INTENT_DOCK_CONNECTED \"Settings\"\nCANOPY_TERMINAL_DOCK_REJECTED: unknown action\nCANOPY_APP_LAUNCH_REQUESTED: \"Terminal\"\nCANOPY_TERMINAL_DOCK_NATIVE_LAUNCH_REQUESTED\n\"TERMINAL_DOCK_LAUNCH_FIXTURE_PASS\" dock signal reached the native GIO launcher\nLAUNCH_RC=0",
+      "status": "PASS",
+      "title": "compiled patched dock launches terminal"
+    },
+    {
+      "command": "pgrep -a konsole; ps -o pid,ppid,pgid,sid,stat,etime,args",
+      "id": "R05",
+      "result": "19242 /usr/bin/konsole",
+      "status": "PASS",
+      "title": "real /usr/bin/konsole process started"
+    },
+    {
+      "command": "busctl --user list --no-pager | grep -iE 'konsole|terminal'",
+      "id": "R06",
+      "result": ":1.100                                       19242 konsole         canopy :1.100        user@1000.service -       -\norg.kde.konsole-19242                        19242 konsole         canopy :1.100        user@1000.service -       -",
+      "status": "PASS",
+      "title": "native KDE service registered on session bus"
+    },
+    {
+      "command": "wmctrl -l | grep -iE 'konsole|canopy classic'; xdotool getwindowgeometry; scrot -u",
+      "id": "R07",
+      "result": "0x02a00012  0 canopy-plasma6 Canopy Classic \u2014 Technology Spike \u2014 Canopy Classic Spike\n0x03600008  0 canopy-plasma6 ~ : bash \u2014 Konsole\nWindow 56623112\n  Position: 268,187 (screen: 0)\n  Geometry: 223x100",
+      "status": "PASS",
+      "title": "Konsole X window mapped in Plasma"
+    },
+    {
+      "command": "scrot -o root_after.png",
+      "id": "R08",
+      "result": "root_after.png present in evidence directory",
+      "status": "PASS",
+      "title": "screenshot captured"
+    },
+    {
+      "command": "kill owned konsole PIDs; sha256sum /usr/share/applications/org.kde.konsole.desktop",
+      "id": "R09",
+      "result": "KILLED 19242\nNO_KONSOLE",
+      "status": "PASS",
+      "title": "launched terminal terminated; stock entry unchanged"
+    },
+    {
+      "command": "none",
+      "id": "R10",
+      "result": "NOT_RUN: no assistive-technology session exercised; no accessibility label changed",
+      "status": "NOT_RUN",
+      "title": "screen-reader behavior"
+    },
+    {
+      "command": "none",
+      "id": "R11",
+      "result": "NOT_RUN: no CI runner provisions this guest; host-orchestrated guest evidence only",
+      "status": "NOT_RUN",
+      "title": "automatic CI-on-guest gate"
+    },
+    {
+      "command": "none",
+      "id": "R12",
+      "result": "NOT_RUN: no visual approval, release or merge claimed",
+      "status": "NOT_RUN",
+      "title": "visual approval / release / merge"
+    }
+  ],
+  "generated_utc": "2026-11-28T04:26:54Z",
+  "head_source_sha256": "b397916b6e2b2dc2664972722a7a77185d80be7f52bc28325d3fc62f816e6a03",
+  "key_output": [
+    "CANOPY_TERMINAL_DOCK_NATIVE_LAUNCH_CONNECTED \"Terminal\"",
+    "CANOPY_TERMINAL_DOCK_REJECTED: unknown action",
+    "CANOPY_APP_LAUNCH_REQUESTED: \"Terminal\"",
+    "CANOPY_TERMINAL_DOCK_NATIVE_LAUNCH_REQUESTED",
+    "\"TERMINAL_DOCK_LAUNCH_FIXTURE_PASS\" dock signal reached the native GIO launcher",
+    "LAUNCH_RC=0",
+    "19242 /usr/bin/konsole",
+    "  19242       1   19162   19162 Sl         00:04 /usr/bin/konsole",
+    "org.kde.konsole-19242                        19242 konsole         canopy :1.100        user@1000.service -       -",
+    "NO_KONSOLE",
+    "cd15f8c829a7ae0edfb27d67920fcd2cafb252209c950ce2e5791b9d24d15d38  /usr/share/applications/org.kde.konsole.desktop"
+  ],
+  "labels": [
+    "SCOPED_ON_GUEST_RUNTIME",
+    "STOCK_DESKTOP_ENTRIES_ONLY",
+    "NOT_CI_ACCEPTANCE",
+    "NOT_VISUAL_APPROVAL"
+  ],
+  "runtime_command": "bash /home/canopy/native_terminal_launch_20261127/runtime/run_runtime.sh",
+  "schema": "canopy.native_terminal_launch_runtime/1",
+  "status_counts": {
+    "NOT_RUN": 3,
+    "PASS": 9
+  },
+  "task": "M3 native Terminal dock launch in stock KDE Plasma",
+  "verdict": "PASS",
+  "verdict_reason": "Patched binary launched the real installed Konsole from the Terminal dock in a live Plasma X11 session via native GIO desktop-entry activation, with no staged or duplicated service.",
+  "vm": "Canopy-Test-Plasma6"
+}

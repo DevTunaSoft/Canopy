@@ -132,9 +132,48 @@ The next action is owner-gated host wiring plus a real Plasma guest run.
   rendering loop or asset and does not trade stability, security,
   accessibility or the approved visuals for a minor gain.
 
-## Overlap boundary
+## Overlap boundary and integrator choice
 
-PR #746 is open and touches two of the same owned paths from the same base.
-This branch is an additive, independent candidate, not a rebase or a stacked
-PR; no merge, approval or scope takeover is performed here. The integrator
-should choose or combine the two implementations explicitly after review.
+PR #746 (`product/native-display-response-20261127`, OPEN, DRAFT) touches two
+of the same owned paths from the same base:
+`canopy_features/dock/display_change_response.py` (modification) and
+`docs/NATIVE_DISPLAY_RESPONSE.md` (added in that PR). This branch is an
+additive, independent candidate, not a rebase or a stacked PR; no merge,
+approval or scope takeover is performed here.
+
+The integrator choice is explicitly deferred: after exact-SHA review the
+integrator decides whether to (a) take this branch's bounded push seam,
+(b) take PR #746's implementation, or (c) combine both by resolving the two
+shared paths deliberately. This workstream does not merge, approve, re-pin,
+close or otherwise act on PR #746. The reviewed head of this branch remains
+`6ed3638c7316212a9d4a8d730c6b66bff5fad472`, and the runtime verdict remains
+`NATIVE_RUNTIME = BLOCKED / NOT_RUN` under either choice until a real Plasma
+guest exercises the selected compiled adapter.
+
+## Bounded evidence remediation (PR #758 gaps)
+
+The sealed evidence pins the exact reviewed final head
+`6ed3638c7316212a9d4a8d730c6b66bff5fad472` in
+`scratch/native_multimonitor/head.txt`, with base
+`ec910d7a7275296ecbc8b5e5c459d356205165d1`. `git_diff_names.txt` now lists
+the 15 live paths of `git diff --name-only <base>..<reviewed head>`. Re-run at
+that head: 15 scenarios / 27 steps with 27/27 passed (`PASS_SYNTHETIC`),
+6 tool-side unittest checks `OK`, and the existing 79 display tests `OK` at
+both the pinned base and the head. No runtime verdict was upgraded.
+
+## Intentional CRLF in byte-pinned evidence
+
+`scratch/native_multimonitor/evidence.json` and the three
+`targeted_tests_base.log`, `targeted_tests_head.log` and `tool_tests_head.log`
+files use CRLF. The fixture runner emits text with Python `Path.write_text`
+on this Windows host, which translates its LF output to CRLF; a rerun of the
+runner reproduced `evidence.json` byte-for-byte. Those four files are
+byte-pinned in `SHA256SUMS.txt`, so normalizing their line endings would
+change the pinned bytes and invalidate the digests. The CRLF is therefore
+intentional and preserved: `git diff --check` reports trailing whitespace on
+those lines as a CRLF artifact, not as added spaces. Pinned digests:
+
+- `evidence.json` `957041f322821a9b227e01f741b0a6663146f5e91205e2dba0018ad90cbd6d34`
+- `targeted_tests_base.log` `07c30d0cf3e95cfce83878f33f9702fc26c0ce826afd58478d2117441484098b`
+- `targeted_tests_head.log` `28bc168217556b9f41c569c34aacb93c43fac039d4ada5ef9dd54cfba2f6be58`
+- `tool_tests_head.log` `dd74a93ffde369c932266349f924f83d85a76d8ebe74d133d969bc1b458cb471`

@@ -1,0 +1,22 @@
+# guest session blocker probe, executed 2026-11-28T06:20:15Z
+$ VBoxManage-equivalent guest identity: canopy-plasma6; PRETTY_NAME="Ubuntu 26.04 LTS"
+$ loginctl list-sessions --no-legend
+188 1000 canopy -     12719 user    -    no -
+ 62 1000 canopy -     4390  manager -    no -
+ 65 1000 canopy seat0 4648  user    tty2 no -
+865 1000 canopy -     54946 user    -    no -
+953 1000 canopy -     61035 user    -    no -
+954 1000 canopy -     61040 user    -    no -
+$ loginctl show-session 65 -p Type -p State -p Active -p Class
+Type=x11
+Class=user
+Active=yes
+State=active
+$ pgrep -a kwin
+5384 /usr/bin/kwin_x11 --replace
+$ pgrep -a plasmashell
+5422 /usr/bin/plasmashell --no-respawn
+$ ps -eo pid,etime,args | grep -E 'xdotool|wmctrl|screenshotpng|keyboardputfile' | grep -v grep
+  54982       08:53 bash -c export DISPLAY=:0 XAUTHORITY=/tmp/xauth_zdKrsq; command -v xdotool; command -v scrot; xdotool key Escape; sleep 0.3; xdotool mousemove 1818 1046 click 1; sleep 1.2; scrot -o /home/canopy/m3_tray_open.png; xdotool mousemove 1700 880 click 1; sleep 1.2; scrot -o /home/canopy/m3_tray_interacted.png; xdotool key Escape; echo TRAY_SEQUENCE_DONE; ls -la /home/canopy/m3_tray*.png
+  58924       02:06 xdotool key Escape
+$ END

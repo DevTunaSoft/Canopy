@@ -1,0 +1,19 @@
+{
+  "manifest_version": 1,
+  "id": "io.canopy.heritage",
+  "name": "Heritage Shell Pack",
+  "description": "Free first-party traditional familiar presentation on the shared Canopy host; layout only, one shared core and no duplicate compositor or services.",
+  "shell_api": 1,
+  "kind": "presentation",
+  "ui_engine": "qt-qml",
+  "entrypoint": "ui/Main.qml",
+  "capabilities": [
+    "app-launcher",
+    "taskbar",
+    "window-list",
+    "system-status",
+    "settings-panel"
+  ],
+  "switch_strategy": "same-session",
+  "permissions": []
+}

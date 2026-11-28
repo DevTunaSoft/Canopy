@@ -20,6 +20,7 @@ built-in identity ``org.canopy.modern`` without granting extra privileges.
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass, replace
 from pathlib import Path
 from types import MappingProxyType
@@ -40,8 +41,20 @@ __all__ = [
     "TELEMETRY_ENDPOINTS",
     "MAX_DEFINITIONS",
     "MAX_LEDGER_STEPS",
+    "ROUND_TRIP_COUNT",
+    "INITIAL_PACK_IDS",
+    "BUILTIN_IDS",
+    "CATALOG_ROOT",
+    "CATALOG_IDS",
+    "PACK_DIRS",
     "CLASSIC_BUILTIN_ID",
     "MODERN_BUILTIN_ID",
+    "HERITAGE_BUILTIN_ID",
+    "FLOW_BUILTIN_ID",
+    "LITE_BUILTIN_ID",
+    "STUDIO_BUILTIN_ID",
+    "CLOUD_BUILTIN_ID",
+    "TOUCH_BUILTIN_ID",
     "MODERN_MANIFEST_ID",
     "MODERN_PACK_DIR",
     "SHARED_CORE_SERVICES",
@@ -52,6 +65,7 @@ __all__ = [
     "SwitchStep",
     "SwitchLedger",
     "load_modern_definition",
+    "load_pack_definition",
     "inventory_snapshot",
     "shared_core_snapshot",
     "prepare_switch",
@@ -59,6 +73,7 @@ __all__ = [
     "verify_switch",
     "rollback_switch",
     "release_inactive",
+    "run_synthetic_round_trips",
 ]
 
 SCHEMA_VERSION = 1
@@ -74,9 +89,43 @@ MAX_NOTE_CHARS = 160
 
 CLASSIC_BUILTIN_ID = "org.canopy.classic"
 MODERN_BUILTIN_ID = "org.canopy.modern"
+HERITAGE_BUILTIN_ID = "org.canopy.heritage"
+FLOW_BUILTIN_ID = "org.canopy.flow"
+LITE_BUILTIN_ID = "org.canopy.lite"
+STUDIO_BUILTIN_ID = "org.canopy.studio"
+CLOUD_BUILTIN_ID = "org.canopy.cloud"
+TOUCH_BUILTIN_ID = "org.canopy.touch"
+
 MODERN_MANIFEST_ID = "io.canopy.modern"
 MODERN_PACK_DIR = Path("tools/shell_packs/modern")
-BUILTIN_IDS = frozenset({CLASSIC_BUILTIN_ID, MODERN_BUILTIN_ID})
+CATALOG_ROOT = Path("tools/shell_packs")
+ROUND_TRIP_COUNT = 100
+MAX_ROUND_TRIPS = 100
+
+# Eight initial first-party identities. MAX_DEFINITIONS is the bound on this
+# checked-in inventory, not a ceiling on later catalog packs; the independent
+# registry/checker discovers additional packs without changing this core.
+INITIAL_PACK_IDS = (
+    CLASSIC_BUILTIN_ID, MODERN_BUILTIN_ID, HERITAGE_BUILTIN_ID,
+    FLOW_BUILTIN_ID, LITE_BUILTIN_ID, STUDIO_BUILTIN_ID,
+    CLOUD_BUILTIN_ID, TOUCH_BUILTIN_ID,
+)
+BUILTIN_IDS = frozenset(INITIAL_PACK_IDS)
+
+# Classic is reserved: no catalog descriptor is authored, read or rewritten
+# for it, so approved identity/assets stay byte-identical.
+_INITIAL_CATALOG = (
+    (MODERN_BUILTIN_ID, MODERN_MANIFEST_ID, MODERN_PACK_DIR),
+    (HERITAGE_BUILTIN_ID, "io.canopy.heritage", CATALOG_ROOT / "heritage"),
+    (FLOW_BUILTIN_ID, "io.canopy.flow", CATALOG_ROOT / "flow"),
+    (LITE_BUILTIN_ID, "io.canopy.lite", CATALOG_ROOT / "lite"),
+    (STUDIO_BUILTIN_ID, "io.canopy.studio", CATALOG_ROOT / "studio"),
+    (CLOUD_BUILTIN_ID, "io.canopy.cloud", CATALOG_ROOT / "cloud"),
+    (TOUCH_BUILTIN_ID, "io.canopy.touch", CATALOG_ROOT / "touch"),
+)
+CATALOG_IDS = {builtin: manifest for builtin, manifest, _ in _INITIAL_CATALOG}
+PACK_DIRS = {builtin: directory for builtin, _, directory in _INITIAL_CATALOG}
+CATALOG_ID_TO_BUILTIN = {manifest: builtin for builtin, manifest, _ in _INITIAL_CATALOG}
 
 # The host owns one instance of each. A pack may request a UI affordance but
 # may never start a parallel copy of any service below.
@@ -174,6 +223,9 @@ class InventorySnapshot:
             raise ShellPackManifestError("inventory exceeds bounded definition set")
         if any(not isinstance(item, PackDefinition) for item in self.definitions):
             raise ShellPackManifestError("inventory entries must be definitions")
+        ids = [item.builtin_id for item in self.definitions]
+        if len(set(ids)) != len(ids):
+            raise ShellPackManifestError("inventory has duplicate identities")
         if not isinstance(self.problems, tuple):
             raise ShellPackManifestError("problems must be a tuple")
 
@@ -191,6 +243,7 @@ class InventorySnapshot:
 
     def as_dict(self) -> dict:
         return {
+            "initial_pack_ids": list(INITIAL_PACK_IDS),
             "definitions": [item.as_dict() for item in self.definitions],
             "problems": list(self.problems),
             "checked_manifests": self.checked_manifests,
@@ -266,47 +319,67 @@ def _classic_definition() -> PackDefinition:
     )
 
 
-def _pack_root(pack_root: Optional[Path]) -> Path:
+def _catalog_path(catalog_root, builtin_id: str) -> Path:
+    base = (Path(catalog_root) if catalog_root is not None
+            else Path(__file__).resolve().parents[2])
+    require_real_path_components(base, "catalog root must be a real directory")
+    if not base.is_dir():
+        raise ShellPackManifestError("catalog root must be a real directory")
+    return base / PACK_DIRS[builtin_id]
+
+
+def load_pack_definition(builtin_id: str, pack_root: Optional[Path] = None,
+                         catalog_root: Optional[Path] = None) -> PackDefinition:
+    """Validate one catalog descriptor; never load or run its QML entrypoint."""
+    if type(builtin_id) is not str or builtin_id not in CATALOG_IDS:
+        raise ShellPackManifestError("unknown first-party built-in identity")
     root = (Path(pack_root) if pack_root is not None
-            else Path(__file__).resolve().parents[2] / MODERN_PACK_DIR)
-    require_real_path_components(root, "modern pack root must be a real directory")
-    return root
-
-
-def load_modern_definition(pack_root: Optional[Path] = None) -> PackDefinition:
-    """Validate the Modern manifest only; never load or run its QML entrypoint."""
-    root = _pack_root(pack_root)
+            else _catalog_path(catalog_root, builtin_id))
     manifest = validate_pack(root)
-    manifest_id = manifest["id"]
-    if manifest_id != MODERN_MANIFEST_ID:
-        raise ShellPackManifestError("Modern manifest identity is not the bound id")
+    if manifest["id"] != CATALOG_IDS[builtin_id]:
+        raise ShellPackManifestError("manifest identity is not the bound id")
     capabilities = frozenset(manifest["capabilities"])
     if not capabilities or not capabilities <= CAPABILITIES:
-        raise ShellPackManifestError("Modern requests unsupported capabilities")
+        raise ShellPackManifestError("requests unsupported capabilities")
     return PackDefinition(
-        builtin_id=MODERN_BUILTIN_ID,
-        manifest_id=manifest_id,
+        builtin_id=builtin_id,
+        manifest_id=manifest["id"],
         name=manifest["name"],
         capabilities=capabilities,
         entrypoint=manifest["entrypoint"],
-        source=str(MODERN_PACK_DIR.as_posix()),
+        source=PACK_DIRS[builtin_id].as_posix(),
     )
 
 
-def inventory_snapshot(pack_root: Optional[Path] = None) -> InventorySnapshot:
-    """Return a bounded, fail-closed view of Classic + Modern definitions."""
+def load_modern_definition(pack_root: Optional[Path] = None,
+                           catalog_root: Optional[Path] = None) -> PackDefinition:
+    """Backward-compatible Modern-only loader; metadata validation only."""
+    return load_pack_definition(MODERN_BUILTIN_ID, pack_root, catalog_root)
+
+
+def inventory_snapshot(pack_root: Optional[Path] = None,
+                       catalog_root: Optional[Path] = None) -> InventorySnapshot:
+    """Return a bounded, fail-closed view of all eight initial definitions.
+
+    ``pack_root`` remains the legacy Modern-only override; ``catalog_root``
+    overrides the checked-in ``tools/shell_packs`` catalog for every pack.
+    """
     definitions = [_classic_definition()]
     problems = []
-    try:
-        definitions.append(load_modern_definition(pack_root))
-    except (PackValidationError, ShellPackManifestError, OSError, TypeError, ValueError) as exc:
-        problems.append(str(exc)[:MAX_PROBLEM_CHARS])
-    # An invalid Modern descriptor is reported, never silently replaced with
-    # a guessed definition, and Classic remains independently available.
+    for builtin_id in INITIAL_PACK_IDS[1:]:
+        override = pack_root if builtin_id == MODERN_BUILTIN_ID else None
+        try:
+            definitions.append(
+                load_pack_definition(builtin_id, override, catalog_root)
+            )
+        except (PackValidationError, ShellPackManifestError, OSError, TypeError, ValueError) as exc:
+            problems.append(f"{builtin_id}: {str(exc)[:MAX_PROBLEM_CHARS]}")
+    # Invalid descriptors are reported, never silently replaced with guessed
+    # definitions. Classic stays independently available and untouched.
     return InventorySnapshot(
         definitions=tuple(definitions),
         problems=tuple(problems),
-        checked_manifests=1,
+        checked_manifests=len(INITIAL_PACK_IDS) - 1,
     )
 
 
@@ -406,3 +479,42 @@ def release_inactive(ledger: SwitchLedger) -> SwitchLedger:
             "host unsubscribes old UI; shared core services unchanged",
         ),),
     )
+
+
+def run_synthetic_round_trips(snapshot: InventorySnapshot,
+                              rounds: int = ROUND_TRIP_COUNT) -> dict:
+    """Pure bookkeeping: bounded A->B->A round trips over the eight packs.
+
+    Each round trip has one healthy transition in each direction plus one
+    failed-verify rollback. No UI, process, session or setting is touched.
+    """
+    if not isinstance(snapshot, InventorySnapshot):
+        raise ShellPackManifestError("inventory snapshot is required")
+    if type(rounds) is not int or not 0 < rounds <= MAX_ROUND_TRIPS:
+        raise ShellPackManifestError("round count is out of bounds")
+    ids = INITIAL_PACK_IDS
+    for index in range(rounds):
+        source = ids[index % len(ids)]
+        # Offset stays in 1..7, so a round trip is never a same-pack no-op.
+        offset = (index // len(ids)) % (len(ids) - 1) + 1
+        target = ids[(index + offset) % len(ids)]
+        for origin, destination in ((source, target), (target, source)):
+            committed = release_inactive(verify_switch(
+                apply_switch(prepare_switch(snapshot, origin, destination)), True
+            ))
+            if committed.phase != "RELEASED" or committed.committed_id != destination:
+                raise ShellPackManifestError("healthy round trip did not commit")
+        restored = verify_switch(
+            apply_switch(prepare_switch(snapshot, source, target)), False
+        )
+        if restored.phase != "ROLLED_BACK" or restored.active_id != source:
+            raise ShellPackManifestError("failed-verify rollback did not restore")
+    sequence = ",".join(ids[index % len(ids)] for index in range(rounds))
+    return {
+        "round_trips": rounds,
+        "transitions": rounds * 3,
+        "pack_ids": list(ids),
+        "final_committed_id": source,
+        "sequence_sha256": hashlib.sha256(sequence.encode("ascii")).hexdigest(),
+        "real_runtime_verified": False,
+    }

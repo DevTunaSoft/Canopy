@@ -1,0 +1,20 @@
+{
+  "manifest_version": 1,
+  "id": "io.canopy.studio",
+  "name": "Studio Shell Pack",
+  "description": "Free first-party creation workspace presentation on the shared Canopy host; host affordances only, one shared core and no duplicate compositor or services.",
+  "shell_api": 1,
+  "kind": "presentation",
+  "ui_engine": "qt-qml",
+  "entrypoint": "ui/Main.qml",
+  "capabilities": [
+    "app-launcher",
+    "dock",
+    "workspace-list",
+    "window-list",
+    "system-status",
+    "settings-panel"
+  ],
+  "switch_strategy": "same-session",
+  "permissions": []
+}

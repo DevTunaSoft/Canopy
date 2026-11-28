@@ -1,0 +1,17 @@
+{
+  "manifest_version": 1,
+  "id": "io.canopy.lite",
+  "name": "Lite Shell Pack",
+  "description": "Free first-party low-overhead presentation on the shared Canopy host; minimal affordances, one shared core and no duplicate compositor or services.",
+  "shell_api": 1,
+  "kind": "presentation",
+  "ui_engine": "qt-qml",
+  "entrypoint": "ui/Main.qml",
+  "capabilities": [
+    "app-launcher",
+    "top-bar",
+    "system-status"
+  ],
+  "switch_strategy": "same-session",
+  "permissions": []
+}

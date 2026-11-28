@@ -1,0 +1,433 @@
+2026-11-28T06:25:03+00:00 canopy-plasma6 systemd[1]: session-1009.scope: Deactivated successfully.
+2026-11-28T06:25:03+00:00 canopy-plasma6 systemd[1]: session-1009.scope: Consumed 1.628s CPU time over 16.340s wall clock time, 10.2M memory peak.
+2026-11-28T06:25:07+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:25:37+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:25:54+00:00 canopy-plasma6 systemd[1]: Started session-1011.scope - Session 1011 of User canopy.
+2026-11-28T06:25:55+00:00 canopy-plasma6 systemd[1]: session-1011.scope: Deactivated successfully.
+2026-11-28T06:25:55+00:00 canopy-plasma6 systemd[1]: session-1011.scope: Consumed 1.275s CPU time over 1.273s wall clock time, 5.5M memory peak.
+2026-11-28T06:25:56+00:00 canopy-plasma6 systemd[1]: Started session-1012.scope - Session 1012 of User canopy.
+2026-11-28T06:26:07+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:26:37+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:27:07+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:27:37+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:28:07+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:28:37+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:29:07+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:29:37+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:29:37+00:00 canopy-plasma6 systemd[1]: Starting fwupd-refresh.service - Refresh fwupd metadata and update motd...
+2026-11-28T06:29:38+00:00 canopy-plasma6 systemd[1]: fwupd-refresh.service: Deactivated successfully.
+2026-11-28T06:29:38+00:00 canopy-plasma6 systemd[1]: Finished fwupd-refresh.service - Refresh fwupd metadata and update motd.
+2026-11-28T06:30:00+00:00 canopy-plasma6 systemd[1]: Starting sysstat-collect.service - system activity accounting tool...
+2026-11-28T06:30:00+00:00 canopy-plasma6 systemd[1]: sysstat-collect.service: Deactivated successfully.
+2026-11-28T06:30:00+00:00 canopy-plasma6 systemd[1]: Finished sysstat-collect.service - system activity accounting tool.
+2026-11-28T06:30:07+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:30:37+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:31:07+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:31:37+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:32:07+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:32:37+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:33:07+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:33:37+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:34:07+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:34:37+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:35:07+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:35:37+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:36:07+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:36:37+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:37:07+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:37:37+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:38:07+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:38:37+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:39:07+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:39:38+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:40:00+00:00 canopy-plasma6 systemd[1]: Starting sysstat-collect.service - system activity accounting tool...
+2026-11-28T06:40:00+00:00 canopy-plasma6 systemd[1]: sysstat-collect.service: Deactivated successfully.
+2026-11-28T06:40:00+00:00 canopy-plasma6 systemd[1]: Finished sysstat-collect.service - system activity accounting tool.
+2026-11-28T06:40:07+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:40:37+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:41:07+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:41:37+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:42:07+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:42:37+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:43:07+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:43:37+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:44:07+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:44:37+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:45:07+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:45:37+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:46:07+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:46:37+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:47:07+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:47:37+00:00 canopy-plasma6 systemd[1]: Starting apt-daily-upgrade.service - Daily apt upgrade and clean activities...
+2026-11-28T06:47:37+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:48:20+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:48:49+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:49:24+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:49:54+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:50:07+00:00 canopy-plasma6 systemd[1]: Starting sysstat-collect.service - system activity accounting tool...
+2026-11-28T06:50:08+00:00 canopy-plasma6 systemd[1]: sysstat-collect.service: Deactivated successfully.
+2026-11-28T06:50:08+00:00 canopy-plasma6 systemd[1]: Finished sysstat-collect.service - system activity accounting tool.
+2026-11-28T06:50:24+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:50:54+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:51:24+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:51:53+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:52:31+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:53:01+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:53:31+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: systemd-udevd.service: Watchdog timeout (limit 3min)!
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: systemd-udevd.service: Killing process 386 (systemd-udevd) with signal SIGABRT.
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: systemd-resolved.service: Watchdog timeout (limit 3min)!
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: systemd-resolved.service: Killing process 385 (systemd-resolve) with signal SIGABRT.
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: Started systemd-coredump@92-4171-66243_64200-0.service - Process Core Dump (PID 66243/UID 0).
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: Started systemd-coredump@93-4172-66241_64198-0.service - Process Core Dump (PID 66241/UID 0).
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: Started systemd-coredump@94-4173-66242_64199-0.service - Process Core Dump (PID 66242/UID 0).
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: Started drkonqi-coredump-processor@92-4171-66243_64200-0.service - Pass systemd-coredump journal entries to relevant user for potential DrKonqi handling.
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: Started drkonqi-coredump-processor@93-4172-66241_64198-0.service - Pass systemd-coredump journal entries to relevant user for potential DrKonqi handling.
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: Started drkonqi-coredump-processor@94-4173-66242_64199-0.service - Pass systemd-coredump journal entries to relevant user for potential DrKonqi handling.
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: systemd-journald.service: Main process exited, code=dumped, status=6/ABRT
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: systemd-journald.service: Failed with result 'watchdog'.
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: systemd-journald.service: Consumed 23.317s CPU time over 2h 54min 44.563s wall clock time, 36.5M memory peak.
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: systemd-journald.service: Scheduled restart job, restart counter is at 1.
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: Starting systemd-journald.service - Journal Service...
+2026-11-28T06:56:30+00:00 canopy-plasma6 systemd[1]: systemd-logind.service: Watchdog timeout (limit 3min)!
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: Started systemd-journald.service - Journal Service.
+2026-11-28T06:56:30+00:00 canopy-plasma6 systemd[1]: systemd-logind.service: Killing process 750 (systemd-logind) with signal SIGABRT.
+2026-11-28T06:56:30+00:00 canopy-plasma6 systemd[1]: systemd-journald.service: Watchdog timeout (limit 3min)!
+2026-11-28T06:56:30+00:00 canopy-plasma6 systemd[1]: systemd-journald.service: Killing process 337 (systemd-journal) with signal SIGABRT.
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: systemd-udevd.service: Main process exited, code=dumped, status=6/ABRT
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: systemd-udevd.service: Failed with result 'watchdog'.
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: systemd-udevd.service: Consumed 9.394s CPU time over 2h 54min 43.662s wall clock time, 47.8M memory peak.
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: systemd-coredump@93-4172-66241_64198-0.service: Deactivated successfully.
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: systemd-coredump@93-4172-66241_64198-0.service: Triggering OnSuccess= dependencies.
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: systemd-udevd.service: Scheduled restart job, restart counter is at 1.
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: Starting systemd-udevd.service - Rule-based Manager for Device Events and Files...
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: Starting apport-coredump-hook@93-4172-66241_64198-0.service...
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: systemd-coredump@92-4171-66243_64200-0.service: Deactivated successfully.
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: systemd-coredump@92-4171-66243_64200-0.service: Triggering OnSuccess= dependencies.
+2026-11-28T06:56:33+00:00 canopy-plasma6 systemd[1]: systemd-logind.service: Main process exited, code=dumped, status=6/ABRT
+2026-11-28T06:56:33+00:00 canopy-plasma6 systemd[1]: systemd-logind.service: Failed with result 'watchdog'.
+2026-11-28T06:56:33+00:00 canopy-plasma6 systemd[1]: systemd-logind.service: Consumed 20.692s CPU time over 2h 54min 32.231s wall clock time, 2.8M memory peak.
+2026-11-28T06:56:33+00:00 canopy-plasma6 systemd[1]: systemd-logind.service: Scheduled restart job, restart counter is at 1.
+2026-11-28T06:56:33+00:00 canopy-plasma6 systemd[1]: modprobe@drm.service - Load Kernel Module drm skipped, unmet condition check ConditionKernelModuleLoaded=!drm
+2026-11-28T06:56:33+00:00 canopy-plasma6 systemd[1]: Starting systemd-logind.service - User Login Management...
+2026-11-28T06:56:33+00:00 canopy-plasma6 systemd[1]: Starting apport-coredump-hook@92-4171-66243_64200-0.service...
+2026-11-28T06:56:33+00:00 canopy-plasma6 systemd[1]: Started systemd-logind.service - User Login Management.
+2026-11-28T06:56:34+00:00 canopy-plasma6 systemd[1]: systemd-coredump@94-4173-66242_64199-0.service: Deactivated successfully.
+2026-11-28T06:56:34+00:00 canopy-plasma6 systemd[1]: systemd-coredump@94-4173-66242_64199-0.service: Triggering OnSuccess= dependencies.
+2026-11-28T06:56:34+00:00 canopy-plasma6 systemd[1]: systemd-resolved.service: Main process exited, code=dumped, status=6/ABRT
+2026-11-28T06:56:34+00:00 canopy-plasma6 systemd[1]: systemd-resolved.service: Failed with result 'watchdog'.
+2026-11-28T06:56:34+00:00 canopy-plasma6 systemd[1]: systemd-resolved.service: Scheduled restart job, restart counter is at 1.
+2026-11-28T06:56:34+00:00 canopy-plasma6 systemd[1]: Starting systemd-resolved.service - Network Name Resolution...
+2026-11-28T06:56:34+00:00 canopy-plasma6 systemd[1]: Starting apport-coredump-hook@94-4173-66242_64199-0.service...
+2026-11-28T06:56:34+00:00 canopy-plasma6 systemd[1]: drkonqi-coredump-processor@94-4173-66242_64199-0.service: Deactivated successfully.
+2026-11-28T06:56:34+00:00 canopy-plasma6 systemd[1]: Started systemd-resolved.service - Network Name Resolution.
+2026-11-28T06:56:34+00:00 canopy-plasma6 systemd[1]: Started systemd-udevd.service - Rule-based Manager for Device Events and Files.
+2026-11-28T06:56:35+00:00 canopy-plasma6 systemd[1]: apport-coredump-hook@93-4172-66241_64198-0.service: Main process exited, code=exited, status=1/FAILURE
+2026-11-28T06:56:35+00:00 canopy-plasma6 systemd[1]: apport-coredump-hook@93-4172-66241_64198-0.service: Failed with result 'exit-code'.
+2026-11-28T06:56:35+00:00 canopy-plasma6 systemd[1]: Failed to start apport-coredump-hook@93-4172-66241_64198-0.service.
+2026-11-28T06:56:35+00:00 canopy-plasma6 systemd[1]: apport-coredump-hook@92-4171-66243_64200-0.service: Main process exited, code=exited, status=1/FAILURE
+2026-11-28T06:56:35+00:00 canopy-plasma6 systemd[1]: apport-coredump-hook@92-4171-66243_64200-0.service: Failed with result 'exit-code'.
+2026-11-28T06:56:35+00:00 canopy-plasma6 systemd[1]: Failed to start apport-coredump-hook@92-4171-66243_64200-0.service.
+2026-11-28T06:56:35+00:00 canopy-plasma6 systemd[1]: apport-coredump-hook@94-4173-66242_64199-0.service: Deactivated successfully.
+2026-11-28T06:56:35+00:00 canopy-plasma6 systemd[1]: Finished apport-coredump-hook@94-4173-66242_64199-0.service.
+2026-11-28T06:56:37+00:00 canopy-plasma6 systemd[1]: Created slice user-107.slice - User Slice of UID 107.
+2026-11-28T06:56:37+00:00 canopy-plasma6 systemd[1]: Starting user-runtime-dir@107.service - User Runtime Directory /run/user/107...
+2026-11-28T06:56:37+00:00 canopy-plasma6 systemd[1]: Finished user-runtime-dir@107.service - User Runtime Directory /run/user/107.
+2026-11-28T06:56:37+00:00 canopy-plasma6 systemd[1]: Starting user@107.service - User Manager for UID 107...
+2026-11-28T06:56:38+00:00 canopy-plasma6 systemd[1]: Started user@107.service - User Manager for UID 107.
+2026-11-28T06:56:38+00:00 canopy-plasma6 systemd[1]: Started session-1013.scope - Session 1013 of User sddm.
+2026-11-28T06:56:57+00:00 canopy-plasma6 systemd[1]: Reload requested from client PID 66519 ('systemctl') (unit apt-daily-upgrade.service)...
+2026-11-28T06:56:57+00:00 canopy-plasma6 systemd[1]: Reloading...
+2026-11-28T06:56:58+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/xfs_scrub_all.service:26: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T06:56:58+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/system-xfs_scrub.slice:15: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T06:56:59+00:00 canopy-plasma6 systemd[1]: Reloading finished in 2066 ms.
+2026-11-28T06:56:59+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:57:09+00:00 canopy-plasma6 systemd[1]: Starting packagekit.service - PackageKit Daemon...
+2026-11-28T06:57:09+00:00 canopy-plasma6 systemd[1]: Started packagekit.service - PackageKit Daemon.
+2026-11-28T06:57:29+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:58:55+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T06:59:55+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:00:04+00:00 canopy-plasma6 systemd[1]: Starting sysstat-collect.service - system activity accounting tool...
+2026-11-28T07:00:04+00:00 canopy-plasma6 systemd[1]: sysstat-collect.service: Deactivated successfully.
+2026-11-28T07:00:04+00:00 canopy-plasma6 systemd[1]: Finished sysstat-collect.service - system activity accounting tool.
+2026-11-28T07:00:24+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:00:55+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:00:57+00:00 canopy-plasma6 systemd[1]: user@1000.service: Sent signal SIGRTMIN+25 to main process 4390 (systemd) on client request.
+2026-11-28T07:00:57+00:00 canopy-plasma6 systemd[1]: user@107.service: Sent signal SIGRTMIN+25 to main process 66373 (systemd) on client request.
+2026-11-28T07:00:57+00:00 canopy-plasma6 systemd[1]: Received SIGRTMIN+25 from PID 67437 (n/a).
+2026-11-28T07:00:57+00:00 canopy-plasma6 systemd[1]: Reexecuting.
+2026-11-28T07:00:58+00:00 canopy-plasma6 systemd[1]: systemd 259.5-0ubuntu3.4 running in system mode (+PAM +AUDIT +SELINUX +APPARMOR +IMA +IPE +SMACK +SECCOMP +GCRYPT -GNUTLS +OPENSSL +ACL +BLKID +CURL +ELFUTILS +FIDO2 +IDN2 -IDN +KMOD +LIBCRYPTSETUP +LIBCRYPTSETUP_PLUGINS +LIBFDISK +PCRE2 +PWQUALITY +P11KIT +QRENCODE +TPM2 +BZIP2 +LZ4 +XZ +ZLIB +ZSTD +BPF_FRAMEWORK +BTF -XKBCOMMON -UTMP +SYSVINIT +LIBARCHIVE)
+2026-11-28T07:00:58+00:00 canopy-plasma6 systemd[1]: Detected virtualization oracle.
+2026-11-28T07:00:58+00:00 canopy-plasma6 systemd[1]: Detected architecture x86-64.
+2026-11-28T07:00:58+00:00 canopy-plasma6 systemd[1]: bpf-restrict-fs: BPF LSM hook not enabled in the kernel, BPF LSM not supported.
+2026-11-28T07:00:59+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/xfs_scrub_all.service:26: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T07:00:59+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/system-xfs_scrub.slice:15: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T07:00:59+00:00 canopy-plasma6 systemd[1]: Starting motd-news.service - Message of the Day...
+2026-11-28T07:00:59+00:00 canopy-plasma6 systemd[1]: motd-news.service: Deactivated successfully.
+2026-11-28T07:00:59+00:00 canopy-plasma6 systemd[1]: Finished motd-news.service - Message of the Day.
+2026-11-28T07:01:00+00:00 canopy-plasma6 systemd[1]: Reload requested from client PID 67591 ('systemctl') (unit apt-daily-upgrade.service)...
+2026-11-28T07:01:00+00:00 canopy-plasma6 systemd[1]: Reloading...
+2026-11-28T07:01:01+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/xfs_scrub_all.service:26: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T07:01:01+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/system-xfs_scrub.slice:15: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T07:01:01+00:00 canopy-plasma6 systemd[1]: Reloading finished in 1279 ms.
+2026-11-28T07:01:02+00:00 canopy-plasma6 systemd[1]: Stopping systemd-journald.service - Journal Service...
+2026-11-28T07:01:02+00:00 canopy-plasma6 systemd[1]: systemd-journald.service: Deactivated successfully.
+2026-11-28T07:01:02+00:00 canopy-plasma6 systemd[1]: Stopped systemd-journald.service - Journal Service.
+2026-11-28T07:01:02+00:00 canopy-plasma6 systemd[1]: Starting systemd-journald.service - Journal Service...
+2026-11-28T07:01:02+00:00 canopy-plasma6 systemd[1]: Started systemd-journald.service - Journal Service.
+2026-11-28T07:01:05+00:00 canopy-plasma6 systemd[1]: Reload requested from client PID 67732 ('systemctl') (unit apt-daily-upgrade.service)...
+2026-11-28T07:01:05+00:00 canopy-plasma6 systemd[1]: Reloading...
+2026-11-28T07:01:06+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/xfs_scrub_all.service:26: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T07:01:06+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/system-xfs_scrub.slice:15: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T07:01:06+00:00 canopy-plasma6 systemd[1]: Reloading finished in 1311 ms.
+2026-11-28T07:01:07+00:00 canopy-plasma6 systemd[1]: Stopping systemd-udevd.service - Rule-based Manager for Device Events and Files...
+2026-11-28T07:01:07+00:00 canopy-plasma6 systemd[1]: systemd-udevd.service: Deactivated successfully.
+2026-11-28T07:01:07+00:00 canopy-plasma6 systemd[1]: Stopped systemd-udevd.service - Rule-based Manager for Device Events and Files.
+2026-11-28T07:01:07+00:00 canopy-plasma6 systemd[1]: Starting systemd-udevd.service - Rule-based Manager for Device Events and Files...
+2026-11-28T07:01:07+00:00 canopy-plasma6 systemd[1]: Started systemd-udevd.service - Rule-based Manager for Device Events and Files.
+2026-11-28T07:01:08+00:00 canopy-plasma6 systemd[1]: Reload requested from client PID 67877 ('systemctl') (unit apt-daily-upgrade.service)...
+2026-11-28T07:01:08+00:00 canopy-plasma6 systemd[1]: Reloading...
+2026-11-28T07:01:09+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/xfs_scrub_all.service:26: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T07:01:09+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/system-xfs_scrub.slice:15: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T07:01:10+00:00 canopy-plasma6 systemd[1]: Reloading finished in 1394 ms.
+2026-11-28T07:01:10+00:00 canopy-plasma6 systemd[1]: Stopping systemd-resolved.service - Network Name Resolution...
+2026-11-28T07:01:10+00:00 canopy-plasma6 systemd[1]: systemd-resolved.service: Deactivated successfully.
+2026-11-28T07:01:10+00:00 canopy-plasma6 systemd[1]: Stopped systemd-resolved.service - Network Name Resolution.
+2026-11-28T07:01:10+00:00 canopy-plasma6 systemd[1]: Starting systemd-resolved.service - Network Name Resolution...
+2026-11-28T07:01:10+00:00 canopy-plasma6 systemd[1]: Started systemd-resolved.service - Network Name Resolution.
+2026-11-28T07:01:11+00:00 canopy-plasma6 systemd[1]: Reload requested from client PID 68017 ('systemctl') (unit apt-daily-upgrade.service)...
+2026-11-28T07:01:11+00:00 canopy-plasma6 systemd[1]: Reloading...
+2026-11-28T07:01:12+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/xfs_scrub_all.service:26: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T07:01:12+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/system-xfs_scrub.slice:15: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T07:01:13+00:00 canopy-plasma6 systemd[1]: Reloading finished in 1393 ms.
+2026-11-28T07:01:13+00:00 canopy-plasma6 systemd[1]: Reload requested from client PID 68153 ('systemctl') (unit apt-daily-upgrade.service)...
+2026-11-28T07:01:13+00:00 canopy-plasma6 systemd[1]: Reloading...
+2026-11-28T07:01:14+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/xfs_scrub_all.service:26: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T07:01:14+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/system-xfs_scrub.slice:15: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T07:01:14+00:00 canopy-plasma6 systemd[1]: Reloading finished in 1127 ms.
+2026-11-28T07:01:24+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:01:30+00:00 canopy-plasma6 systemd[1]: drkonqi-coredump-processor@92-4171-66243_64200-0.service: Service reached runtime time limit. Stopping.
+2026-11-28T07:01:30+00:00 canopy-plasma6 systemd[1]: drkonqi-coredump-processor@93-4172-66241_64198-0.service: Service reached runtime time limit. Stopping.
+2026-11-28T07:01:30+00:00 canopy-plasma6 systemd[1]: drkonqi-coredump-processor@92-4171-66243_64200-0.service: Failed with result 'timeout'.
+2026-11-28T07:01:30+00:00 canopy-plasma6 systemd[1]: drkonqi-coredump-processor@93-4172-66241_64198-0.service: Failed with result 'timeout'.
+2026-11-28T07:01:54+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:02:24+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:02:54+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:03:25+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:03:54+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:04:24+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: systemd-logind.service: Watchdog timeout (limit 3min)!
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: systemd-logind.service: Killing process 66280 (systemd-logind) with signal SIGABRT.
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: systemd-resolved.service: Watchdog timeout (limit 3min)!
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: systemd-resolved.service: Killing process 68009 (systemd-resolve) with signal SIGABRT.
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: systemd-udevd.service: Watchdog timeout (limit 3min)!
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: systemd-udevd.service: Killing process 67863 (systemd-udevd) with signal SIGABRT.
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: snapd.service: Watchdog timeout (limit 5min)!
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: snapd.service: Killing process 747 (snapd) with signal SIGABRT.
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: Starting sysstat-collect.service - system activity accounting tool...
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: Started systemd-coredump@95-61-75401_76150-0.service - Process Core Dump (PID 75401/UID 0).
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: Started systemd-coredump@96-62-75402_76151-0.service - Process Core Dump (PID 75402/UID 0).
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: Started systemd-coredump@97-63-75403_76152-0.service - Process Core Dump (PID 75403/UID 0).
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: Started drkonqi-coredump-processor@95-61-75401_76150-0.service - Pass systemd-coredump journal entries to relevant user for potential DrKonqi handling.
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: Started drkonqi-coredump-processor@96-62-75402_76151-0.service - Pass systemd-coredump journal entries to relevant user for potential DrKonqi handling.
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: Started drkonqi-coredump-processor@97-63-75403_76152-0.service - Pass systemd-coredump journal entries to relevant user for potential DrKonqi handling.
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: snapd.service: Main process exited, code=exited, status=2/INVALIDARGUMENT
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: snapd.service: Failed with result 'watchdog'.
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: packagekit.service: Deactivated successfully.
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: snapd.service: Scheduled restart job, restart counter is at 1.
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: Starting snapd.service - Snap Daemon...
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: sysstat-collect.service: Deactivated successfully.
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: Finished sysstat-collect.service - system activity accounting tool.
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: systemd-journald.service: Main process exited, code=dumped, status=6/ABRT
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: systemd-journald.service: Failed with result 'watchdog'.
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: systemd-journald.service: Scheduled restart job, restart counter is at 1.
+2026-11-28T07:12:56+00:00 canopy-plasma6 systemd[1]: Starting systemd-journald.service - Journal Service...
+2026-11-28T07:12:55+00:00 canopy-plasma6 systemd[1]: systemd-journald.service: Watchdog timeout (limit 3min)!
+2026-11-28T07:12:55+00:00 canopy-plasma6 systemd[1]: systemd-journald.service: Killing process 67719 (systemd-journal) with signal SIGABRT.
+2026-11-28T07:12:57+00:00 canopy-plasma6 systemd[1]: Started systemd-journald.service - Journal Service.
+2026-11-28T07:12:57+00:00 canopy-plasma6 systemd[1]: systemd-coredump@96-62-75402_76151-0.service: Deactivated successfully.
+2026-11-28T07:12:57+00:00 canopy-plasma6 systemd[1]: systemd-coredump@96-62-75402_76151-0.service: Triggering OnSuccess= dependencies.
+2026-11-28T07:12:57+00:00 canopy-plasma6 systemd[1]: systemd-udevd.service: Main process exited, code=dumped, status=6/ABRT
+2026-11-28T07:12:57+00:00 canopy-plasma6 systemd[1]: systemd-udevd.service: Failed with result 'watchdog'.
+2026-11-28T07:12:58+00:00 canopy-plasma6 systemd[1]: systemd-udevd.service: Scheduled restart job, restart counter is at 1.
+2026-11-28T07:12:58+00:00 canopy-plasma6 systemd[1]: Starting systemd-udevd.service - Rule-based Manager for Device Events and Files...
+2026-11-28T07:12:58+00:00 canopy-plasma6 systemd[1]: Starting apport-coredump-hook@96-62-75402_76151-0.service...
+2026-11-28T07:12:58+00:00 canopy-plasma6 systemd[1]: systemd-coredump@97-63-75403_76152-0.service: Deactivated successfully.
+2026-11-28T07:12:58+00:00 canopy-plasma6 systemd[1]: systemd-coredump@97-63-75403_76152-0.service: Triggering OnSuccess= dependencies.
+2026-11-28T07:12:58+00:00 canopy-plasma6 systemd[1]: Starting apport-coredump-hook@97-63-75403_76152-0.service...
+2026-11-28T07:12:58+00:00 canopy-plasma6 systemd[1]: systemd-coredump@95-61-75401_76150-0.service: Deactivated successfully.
+2026-11-28T07:12:58+00:00 canopy-plasma6 systemd[1]: systemd-coredump@95-61-75401_76150-0.service: Triggering OnSuccess= dependencies.
+2026-11-28T07:12:58+00:00 canopy-plasma6 systemd[1]: Starting apport-coredump-hook@95-61-75401_76150-0.service...
+2026-11-28T07:12:58+00:00 canopy-plasma6 systemd[1]: systemd-resolved.service: Main process exited, code=dumped, status=6/ABRT
+2026-11-28T07:12:58+00:00 canopy-plasma6 systemd[1]: systemd-resolved.service: Failed with result 'watchdog'.
+2026-11-28T07:12:59+00:00 canopy-plasma6 systemd[1]: systemd-resolved.service: Scheduled restart job, restart counter is at 1.
+2026-11-28T07:12:59+00:00 canopy-plasma6 systemd[1]: Starting systemd-resolved.service - Network Name Resolution...
+2026-11-28T07:12:59+00:00 canopy-plasma6 systemd[1]: systemd-logind.service: Main process exited, code=dumped, status=6/ABRT
+2026-11-28T07:12:59+00:00 canopy-plasma6 systemd[1]: systemd-logind.service: Failed with result 'watchdog'.
+2026-11-28T07:12:59+00:00 canopy-plasma6 systemd[1]: systemd-logind.service: Scheduled restart job, restart counter is at 2.
+2026-11-28T07:12:59+00:00 canopy-plasma6 systemd[1]: modprobe@drm.service - Load Kernel Module drm skipped, unmet condition check ConditionKernelModuleLoaded=!drm
+2026-11-28T07:12:59+00:00 canopy-plasma6 systemd[1]: Starting systemd-logind.service - User Login Management...
+2026-11-28T07:12:59+00:00 canopy-plasma6 systemd[1]: Started systemd-udevd.service - Rule-based Manager for Device Events and Files.
+2026-11-28T07:13:00+00:00 canopy-plasma6 systemd[1]: Started systemd-logind.service - User Login Management.
+2026-11-28T07:13:00+00:00 canopy-plasma6 systemd[1]: Started systemd-resolved.service - Network Name Resolution.
+2026-11-28T07:13:01+00:00 canopy-plasma6 systemd[1]: drkonqi-coredump-processor@97-63-75403_76152-0.service: Deactivated successfully.
+2026-11-28T07:13:01+00:00 canopy-plasma6 systemd[1]: drkonqi-coredump-processor@97-63-75403_76152-0.service: Consumed 747ms CPU time over 5.568s wall clock time, 103.7M memory peak.
+2026-11-28T07:13:01+00:00 canopy-plasma6 systemd[1]: drkonqi-coredump-processor@96-62-75402_76151-0.service: Deactivated successfully.
+2026-11-28T07:13:01+00:00 canopy-plasma6 systemd[1]: drkonqi-coredump-processor@96-62-75402_76151-0.service: Consumed 616ms CPU time over 5.703s wall clock time, 70.1M memory peak.
+2026-11-28T07:13:01+00:00 canopy-plasma6 systemd[1]: drkonqi-coredump-processor@95-61-75401_76150-0.service: Deactivated successfully.
+2026-11-28T07:13:01+00:00 canopy-plasma6 systemd[1]: drkonqi-coredump-processor@95-61-75401_76150-0.service: Consumed 645ms CPU time over 5.778s wall clock time, 68.2M memory peak.
+2026-11-28T07:13:03+00:00 canopy-plasma6 systemd[1]: apport-coredump-hook@95-61-75401_76150-0.service: Deactivated successfully.
+2026-11-28T07:13:03+00:00 canopy-plasma6 systemd[1]: Finished apport-coredump-hook@95-61-75401_76150-0.service.
+2026-11-28T07:13:03+00:00 canopy-plasma6 systemd[1]: apport-coredump-hook@97-63-75403_76152-0.service: Deactivated successfully.
+2026-11-28T07:13:03+00:00 canopy-plasma6 systemd[1]: Finished apport-coredump-hook@97-63-75403_76152-0.service.
+2026-11-28T07:13:03+00:00 canopy-plasma6 systemd[1]: apport-coredump-hook@96-62-75402_76151-0.service: Deactivated successfully.
+2026-11-28T07:13:03+00:00 canopy-plasma6 systemd[1]: Finished apport-coredump-hook@96-62-75402_76151-0.service.
+2026-11-28T07:13:04+00:00 canopy-plasma6 systemd[1]: Started session-1015.scope - Session 1015 of User sddm.
+2026-11-28T07:13:07+00:00 canopy-plasma6 systemd[1]: tmp-syscheck\x2dmountpoint\x2d1532785038.mount: Deactivated successfully.
+2026-11-28T07:13:08+00:00 canopy-plasma6 systemd[1]: Started snapd.service - Snap Daemon.
+2026-11-28T07:13:08+00:00 canopy-plasma6 systemd[1]: Starting systemd-timedated.service - Time & Date Service...
+2026-11-28T07:13:08+00:00 canopy-plasma6 systemd[1]: Started systemd-timedated.service - Time & Date Service.
+2026-11-28T07:13:17+00:00 canopy-plasma6 systemd[1]: Starting packagekit.service - PackageKit Daemon...
+2026-11-28T07:13:18+00:00 canopy-plasma6 systemd[1]: Started packagekit.service - PackageKit Daemon.
+2026-11-28T07:13:25+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:13:29+00:00 canopy-plasma6 systemd[1]: Started session-1016.scope - Session 1016 of User canopy.
+2026-11-28T07:13:31+00:00 canopy-plasma6 systemd[1]: session-1016.scope: Deactivated successfully.
+2026-11-28T07:13:31+00:00 canopy-plasma6 systemd[1]: session-1016.scope: Consumed 1.038s CPU time over 1.747s wall clock time, 5.2M memory peak.
+2026-11-28T07:13:40+00:00 canopy-plasma6 systemd[1]: systemd-timedated.service: Deactivated successfully.
+2026-11-28T07:13:56+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:14:06+00:00 canopy-plasma6 systemd[1]: Reload requested from client PID 76459 ('systemctl') (unit apt-daily-upgrade.service)...
+2026-11-28T07:14:06+00:00 canopy-plasma6 systemd[1]: Reloading...
+2026-11-28T07:14:06+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/xfs_scrub_all.service:26: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T07:14:06+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/system-xfs_scrub.slice:15: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T07:14:06+00:00 canopy-plasma6 systemd[1]: Reloading finished in 740 ms.
+2026-11-28T07:14:07+00:00 canopy-plasma6 systemd[1]: apt-daily-upgrade.timer: Deactivated successfully.
+2026-11-28T07:14:07+00:00 canopy-plasma6 systemd[1]: Stopped apt-daily-upgrade.timer - Daily apt upgrade and clean activities.
+2026-11-28T07:14:07+00:00 canopy-plasma6 systemd[1]: Stopping apt-daily-upgrade.timer - Daily apt upgrade and clean activities...
+2026-11-28T07:14:07+00:00 canopy-plasma6 systemd[1]: Started apt-daily-upgrade.timer - Daily apt upgrade and clean activities.
+2026-11-28T07:14:07+00:00 canopy-plasma6 systemd[1]: apt-daily.timer: Deactivated successfully.
+2026-11-28T07:14:07+00:00 canopy-plasma6 systemd[1]: Stopped apt-daily.timer - Daily apt download activities.
+2026-11-28T07:14:07+00:00 canopy-plasma6 systemd[1]: Stopping apt-daily.timer - Daily apt download activities...
+2026-11-28T07:14:07+00:00 canopy-plasma6 systemd[1]: Started apt-daily.timer - Daily apt download activities.
+2026-11-28T07:14:25+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:14:31+00:00 canopy-plasma6 systemd[1]: Reload requested from client PID 76862 ('systemctl') (unit apt-daily-upgrade.service)...
+2026-11-28T07:14:31+00:00 canopy-plasma6 systemd[1]: Reloading...
+2026-11-28T07:14:31+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/xfs_scrub_all.service:26: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T07:14:31+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/system-xfs_scrub.slice:15: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T07:14:32+00:00 canopy-plasma6 systemd[1]: Reloading finished in 676 ms.
+2026-11-28T07:14:32+00:00 canopy-plasma6 systemd[1]: Starting fwupd-refresh.service - Refresh fwupd metadata and update motd...
+2026-11-28T07:14:32+00:00 canopy-plasma6 systemd[1]: fwupd-refresh.service: Deactivated successfully.
+2026-11-28T07:14:32+00:00 canopy-plasma6 systemd[1]: Finished fwupd-refresh.service - Refresh fwupd metadata and update motd.
+2026-11-28T07:14:33+00:00 canopy-plasma6 systemd[1]: Reload requested from client PID 77007 ('systemctl') (unit apt-daily-upgrade.service)...
+2026-11-28T07:14:33+00:00 canopy-plasma6 systemd[1]: Reloading...
+2026-11-28T07:14:33+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/xfs_scrub_all.service:26: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T07:14:33+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/system-xfs_scrub.slice:15: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T07:14:34+00:00 canopy-plasma6 systemd[1]: Reloading finished in 888 ms.
+2026-11-28T07:14:34+00:00 canopy-plasma6 systemd[1]: cups.path: Deactivated successfully.
+2026-11-28T07:14:34+00:00 canopy-plasma6 systemd[1]: Stopped cups.path - CUPS Scheduler.
+2026-11-28T07:14:34+00:00 canopy-plasma6 systemd[1]: Stopping cups.path - CUPS Scheduler...
+2026-11-28T07:14:34+00:00 canopy-plasma6 systemd[1]: Started cups.path - CUPS Scheduler.
+2026-11-28T07:14:34+00:00 canopy-plasma6 systemd[1]: Stopping cups-browsed.service - Make remote CUPS printers available locally...
+2026-11-28T07:14:34+00:00 canopy-plasma6 systemd[1]: cups-browsed.service: Deactivated successfully.
+2026-11-28T07:14:34+00:00 canopy-plasma6 systemd[1]: Stopped cups-browsed.service - Make remote CUPS printers available locally.
+2026-11-28T07:14:34+00:00 canopy-plasma6 systemd[1]: Stopping cups.service - CUPS Scheduler...
+2026-11-28T07:14:34+00:00 canopy-plasma6 systemd[1]: cups.service: Deactivated successfully.
+2026-11-28T07:14:34+00:00 canopy-plasma6 systemd[1]: Stopped cups.service - CUPS Scheduler.
+2026-11-28T07:14:34+00:00 canopy-plasma6 systemd[1]: Removed slice system-cups.slice - CUPS Slice.
+2026-11-28T07:14:34+00:00 canopy-plasma6 systemd[1]: system-cups.slice: Consumed 1.499s CPU time over 3h 12min 47.927s wall clock time, 31M memory peak.
+2026-11-28T07:14:34+00:00 canopy-plasma6 systemd[1]: Stopping system-cups.slice - CUPS Slice...
+2026-11-28T07:14:34+00:00 canopy-plasma6 systemd[1]: Created slice system-cups.slice - CUPS Slice.
+2026-11-28T07:14:34+00:00 canopy-plasma6 systemd[1]: cups.path: Deactivated successfully.
+2026-11-28T07:14:34+00:00 canopy-plasma6 systemd[1]: Stopped cups.path - CUPS Scheduler.
+2026-11-28T07:14:34+00:00 canopy-plasma6 systemd[1]: Stopping cups.path - CUPS Scheduler...
+2026-11-28T07:14:34+00:00 canopy-plasma6 systemd[1]: Started cups.path - CUPS Scheduler.
+2026-11-28T07:14:34+00:00 canopy-plasma6 systemd[1]: cups.socket: Deactivated successfully.
+2026-11-28T07:14:34+00:00 canopy-plasma6 systemd[1]: Closed cups.socket - CUPS Scheduler.
+2026-11-28T07:14:34+00:00 canopy-plasma6 systemd[1]: Stopping cups.socket - CUPS Scheduler...
+2026-11-28T07:14:34+00:00 canopy-plasma6 systemd[1]: Listening on cups.socket - CUPS Scheduler.
+2026-11-28T07:14:34+00:00 canopy-plasma6 systemd[1]: Starting cups.service - CUPS Scheduler...
+2026-11-28T07:14:34+00:00 canopy-plasma6 systemd[1]: Started cups.service - CUPS Scheduler.
+2026-11-28T07:14:35+00:00 canopy-plasma6 systemd[1]: Started cups-browsed.service - Make remote CUPS printers available locally.
+2026-11-28T07:14:55+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:15:25+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:15:55+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:16:11+00:00 canopy-plasma6 systemd[1]: Reload requested from client PID 77954 ('systemctl') (unit apt-daily-upgrade.service)...
+2026-11-28T07:16:11+00:00 canopy-plasma6 systemd[1]: Reloading...
+2026-11-28T07:16:13+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/xfs_scrub_all.service:26: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T07:16:13+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/system-xfs_scrub.slice:15: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T07:16:13+00:00 canopy-plasma6 systemd[1]: Reloading finished in 2520 ms.
+2026-11-28T07:16:14+00:00 canopy-plasma6 systemd[1]: Stopping ModemManager.service - Modem Manager...
+2026-11-28T07:16:14+00:00 canopy-plasma6 systemd[1]: ModemManager.service: Deactivated successfully.
+2026-11-28T07:16:14+00:00 canopy-plasma6 systemd[1]: Stopped ModemManager.service - Modem Manager.
+2026-11-28T07:16:14+00:00 canopy-plasma6 systemd[1]: ModemManager.service: Consumed 3.443s CPU time over 3h 14min 9.834s wall clock time, 13.6M memory peak.
+2026-11-28T07:16:14+00:00 canopy-plasma6 systemd[1]: Stopping polkit.service - Authorization Manager...
+2026-11-28T07:16:14+00:00 canopy-plasma6 systemd[1]: polkit.service: Deactivated successfully.
+2026-11-28T07:16:14+00:00 canopy-plasma6 systemd[1]: Stopped polkit.service - Authorization Manager.
+2026-11-28T07:16:14+00:00 canopy-plasma6 systemd[1]: polkit.service: Consumed 6.471s CPU time over 3h 14min 14.177s wall clock time, 7.5M memory peak.
+2026-11-28T07:16:14+00:00 canopy-plasma6 systemd[1]: Starting polkit.service - Authorization Manager...
+2026-11-28T07:16:15+00:00 canopy-plasma6 systemd[1]: Started polkit.service - Authorization Manager.
+2026-11-28T07:16:15+00:00 canopy-plasma6 systemd[1]: Starting ModemManager.service - Modem Manager...
+2026-11-28T07:16:16+00:00 canopy-plasma6 systemd[1]: Reload requested from client PID 78113 ('systemctl') (unit apt-daily-upgrade.service)...
+2026-11-28T07:16:16+00:00 canopy-plasma6 systemd[1]: Reloading...
+2026-11-28T07:16:18+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/xfs_scrub_all.service:26: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T07:16:18+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/system-xfs_scrub.slice:15: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T07:16:19+00:00 canopy-plasma6 systemd[1]: Reloading finished in 2982 ms.
+2026-11-28T07:16:20+00:00 canopy-plasma6 systemd[1]: Started ModemManager.service - Modem Manager.
+2026-11-28T07:16:20+00:00 canopy-plasma6 systemd[1]: polkit-agent-helper.socket: Deactivated successfully.
+2026-11-28T07:16:20+00:00 canopy-plasma6 systemd[1]: Closed polkit-agent-helper.socket - Authorization Manager Agent Helper.
+2026-11-28T07:16:20+00:00 canopy-plasma6 systemd[1]: Stopping polkit-agent-helper.socket - Authorization Manager Agent Helper...
+2026-11-28T07:16:20+00:00 canopy-plasma6 systemd[1]: Listening on polkit-agent-helper.socket - Authorization Manager Agent Helper.
+2026-11-28T07:16:25+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:16:55+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:17:25+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:17:56+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:18:10+00:00 canopy-plasma6 systemd[1]: Starting systemd-timedated.service - Time & Date Service...
+2026-11-28T07:18:11+00:00 canopy-plasma6 systemd[1]: Started systemd-timedated.service - Time & Date Service.
+2026-11-28T07:18:25+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:18:41+00:00 canopy-plasma6 systemd[1]: systemd-timedated.service: Deactivated successfully.
+2026-11-28T07:18:55+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:19:25+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:19:55+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:20:00+00:00 canopy-plasma6 systemd[1]: Starting sysstat-collect.service - system activity accounting tool...
+2026-11-28T07:20:01+00:00 canopy-plasma6 systemd[1]: sysstat-collect.service: Deactivated successfully.
+2026-11-28T07:20:01+00:00 canopy-plasma6 systemd[1]: Finished sysstat-collect.service - system activity accounting tool.
+2026-11-28T07:20:25+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:20:56+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:21:25+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:21:47+00:00 canopy-plasma6 systemd[1]: packagekit.service: Deactivated successfully.
+2026-11-28T07:21:55+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:22:26+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:22:55+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:23:25+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:23:30+00:00 canopy-plasma6 systemd[1]: Starting packagekit.service - PackageKit Daemon...
+2026-11-28T07:23:31+00:00 canopy-plasma6 systemd[1]: Started packagekit.service - PackageKit Daemon.
+2026-11-28T07:23:55+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:24:25+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:24:56+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:25:26+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:25:55+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:26:10+00:00 canopy-plasma6 systemd[1]: Reloading dbus.service - D-Bus System Message Bus...
+2026-11-28T07:26:10+00:00 canopy-plasma6 systemd[1]: Reloaded dbus.service - D-Bus System Message Bus.
+2026-11-28T07:26:11+00:00 canopy-plasma6 systemd[1]: Reload requested from client PID 86054 ('systemctl') (unit apt-daily-upgrade.service)...
+2026-11-28T07:26:11+00:00 canopy-plasma6 systemd[1]: Reloading...
+2026-11-28T07:26:12+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/xfs_scrub_all.service:26: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T07:26:12+00:00 canopy-plasma6 systemd[1]: /usr/lib/systemd/system/system-xfs_scrub.slice:15: Support for option CPUAccounting= has been removed and it is ignored
+2026-11-28T07:26:13+00:00 canopy-plasma6 systemd[1]: Reloading finished in 1842 ms.
+2026-11-28T07:26:13+00:00 canopy-plasma6 systemd[1]: Stopping avahi-daemon.service - Avahi mDNS/DNS-SD Stack...
+2026-11-28T07:26:13+00:00 canopy-plasma6 systemd[1]: avahi-daemon.service: Deactivated successfully.
+2026-11-28T07:26:13+00:00 canopy-plasma6 systemd[1]: Stopped avahi-daemon.service - Avahi mDNS/DNS-SD Stack.
+2026-11-28T07:26:13+00:00 canopy-plasma6 systemd[1]: Starting avahi-daemon.service - Avahi mDNS/DNS-SD Stack...
+2026-11-28T07:26:13+00:00 canopy-plasma6 systemd[1]: avahi-daemon.service: Deactivated successfully.
+2026-11-28T07:26:13+00:00 canopy-plasma6 systemd[1]: Stopped avahi-daemon.service - Avahi mDNS/DNS-SD Stack.
+2026-11-28T07:26:13+00:00 canopy-plasma6 systemd[1]: avahi-daemon.socket: Deactivated successfully.
+2026-11-28T07:26:13+00:00 canopy-plasma6 systemd[1]: Closed avahi-daemon.socket - Avahi mDNS/DNS-SD Stack Activation Socket.
+2026-11-28T07:26:13+00:00 canopy-plasma6 systemd[1]: Stopping avahi-daemon.socket - Avahi mDNS/DNS-SD Stack Activation Socket...
+2026-11-28T07:26:13+00:00 canopy-plasma6 systemd[1]: Listening on avahi-daemon.socket - Avahi mDNS/DNS-SD Stack Activation Socket.
+2026-11-28T07:26:13+00:00 canopy-plasma6 systemd[1]: Starting avahi-daemon.service - Avahi mDNS/DNS-SD Stack...
+2026-11-28T07:26:13+00:00 canopy-plasma6 systemd[1]: Started avahi-daemon.service - Avahi mDNS/DNS-SD Stack.
+2026-11-28T07:26:26+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:26:55+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth
+2026-11-28T07:26:59+00:00 canopy-plasma6 systemd[1]: session-1012.scope: Deactivated successfully.
+2026-11-28T07:26:59+00:00 canopy-plasma6 systemd[1]: session-1012.scope: Consumed 9.473s CPU time over 1h 1min 3.024s wall clock time, 262M memory peak.
+2026-11-28T07:27:25+00:00 canopy-plasma6 systemd[1]: bluetooth.service - Bluetooth service skipped, unmet condition check ConditionPathIsDirectory=/sys/class/bluetooth

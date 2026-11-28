@@ -155,3 +155,15 @@ proxy, not wakeup counts.
   `scratch/native_stability/TOOLS_SHA256SUMS.txt` — byte-exact manifests.
 - `scratch/native_stability/CLAIM.md` — claim, ownership, serialization,
   time-box.
+
+## 7. Post-diagnosis remediation (no promotion)
+
+The WARN in this document was diagnosed from read-only guest/VBox evidence as
+guest soft-lockup/package noise, not a Canopy failure (`39ad2835`). The
+sampler/report defects found there are fixed on this branch; see
+`docs/NATIVE_STABILITY_REMEDIATION.md` and
+`scratch/native_stability/raw/soak_remediated.json`. The original raw bytes are
+unchanged; the regenerated report keeps a `SOAK_WARN_...` verdict, marks the
+legacy hostname-inflated error count unreliable, proves both >120 s gaps from
+read-only evidence, and labels the exclusive-guest 1 h rerun `NOT_RUN`. There is
+still no READY promotion, merge or approval.

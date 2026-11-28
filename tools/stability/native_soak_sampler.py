@@ -10,6 +10,16 @@ compositor or persistent setting is changed. Process identity is taken from
 /proc/<pid>/cmdline and the observed starttime tick, never from sampled values.
 `/proc/<pid>/sched` wakeup export is probed; when the kernel does not export
 it, context switches from /proc/<pid>/status are the labelled proxy.
+
+PR749 remediation (read-only changes only):
+  * journal error keywords are matched against the *message body only*; the
+    short-iso timestamp/hostname/unit prefix is stripped first, so a guest
+    named ``canopy-plasma6`` can no longer inflate error totals.
+  * a bounded per-sample ``unit_sample`` EVENT records the running unit names
+    (capped, with a truncation flag) so COUNT drift can be decomposed without
+    a second probe.  The ``S`` row column set is unchanged (schema /2).
+  * helpers are importable; the collection loop runs only under __main__ so
+    regression tests can exercise the parsing without touching the guest.
 """
 import calendar
 import datetime as dt
@@ -21,16 +31,23 @@ import subprocess
 import sys
 import time
 
-DURATION = int(sys.argv[1]) if len(sys.argv) > 1 else 1800
-INTERVAL = int(sys.argv[2]) if len(sys.argv) > 2 else 60
-LABEL = sys.argv[3] if len(sys.argv) > 3 else "SOAK"
-CLK = os.sysconf("SC_CLK_TCK")
-START_MONO = time.monotonic()
-START_UTC = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+UNIT_NAME_CAP = 64
 
 TARGET_RULES = (
     "argv0 basename in {startplasma-x11,kwin_x11,plasmashell} or "
     "startswith('canopy-classic'); exact argv0, no substring guessing"
+)
+
+# `journalctl -o short-iso` layout: TIMESTAMP HOSTNAME UNIT[PID]: MESSAGE
+SHORT_ISO_PREFIX = re.compile(
+    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:[.,]\d+)?(?:Z|[+-]\d{2}:?\d{2})\s+\S+\s+"
+)
+UNIT_TAG = re.compile(r"^[^:\s][^:]*?(?:\[\d+\])?:\s")
+
+# Applied to the message body only (never to the hostname).
+ERROR_PATTERN = re.compile(
+    r"canopy|kwin|plasmashell|startplasma|segfault|SIGSEGV|SIGABRT|core dumped|soft lockup",
+    re.IGNORECASE,
 )
 
 
@@ -40,6 +57,26 @@ def utc_now():
 
 def emit(*fields):
     print(*fields, sep=" ", flush=True)
+
+
+def journal_message_body(line):
+    """Strip the short-iso timestamp + hostname + unit tag from one line.
+
+    The hostname (e.g. ``canopy-plasma6``) is *never* keyword-matched: doing so
+    was the PR749 defect that inflated ``journal_system_errors_total`` to 132.
+    Lines without a recognisable prefix are returned unchanged so no evidence
+    is silently dropped.
+    """
+    body = SHORT_ISO_PREFIX.sub("", line.strip(), count=1)
+    body = UNIT_TAG.sub("", body, count=1)
+    return body.strip()
+
+
+def matching_error_lines(stdout_text):
+    """Return (matched_bodies, distinct_bodies) from journalctl short-iso text."""
+    bodies = [journal_message_body(ln) for ln in stdout_text.splitlines()]
+    matched = [b for b in bodies if b and ERROR_PATTERN.search(b)]
+    return matched, list(dict.fromkeys(matched))
 
 
 def target_pids():
@@ -129,36 +166,50 @@ def running_procs():
     return "NA"
 
 
-def unit_count(scope):
+def systemctl_units(scope):
+    """Return (count, sorted_unit_names) or (None, None) on probe failure."""
     cmd = ["systemctl", "list-units", "--state=running", "--no-legend", "--plain"]
     if scope == "user":
         cmd.insert(1, "--user")
     try:
         out = subprocess.run(cmd, capture_output=True, text=True, timeout=8)
-        return len([ln for ln in out.stdout.splitlines() if ln.strip()])
+        if out.returncode != 0:
+            return None, None
+        names = sorted({ln.split()[0] for ln in out.stdout.splitlines() if ln.strip()})
+        return len(names), names
     except (OSError, subprocess.SubprocessError):
-        return "NA"
+        return None, None
 
 
-def journal_events():
+def unit_sample_event(scope, t, count, names, cap=UNIT_NAME_CAP):
+    """Bounded per-sample unit membership; never truncates silently."""
+    if names is None:
+        return {"event": "unit_sample", "t": t, "scope": scope, "count": "NA",
+                "units": [], "unit_cap": cap, "truncated": False,
+                "status": "PROBE_UNAVAILABLE"}
+    return {"event": "unit_sample", "t": t, "scope": scope, "count": count,
+            "units": names[:cap], "unit_cap": cap,
+            "truncated": len(names) > cap, "status": "OK"}
+
+
+def journal_events(start_utc):
     """Return bounded, single-line summaries of errors since soak start."""
     result = {"journal_user_errors": [], "journal_system_errors": [],
-              "coredumps": [], "errors": []}
+              "coredumps": [], "errors": [],
+              "journal_match_scope": "message_body_only",
+              "journal_warning": "hostname prefix stripped before keyword match (PR749 fix)"}
     since_args = ["--since", "@%d" % calendar.timegm(dt.datetime.strptime(
-        START_UTC, "%Y-%m-%dT%H:%M:%SZ").timetuple())]
-    patterns = re.compile(
-        r"canopy|kwin|plasmashell|startplasma|segfault|SIGSEGV|SIGABRT|core dumped",
-        re.IGNORECASE,
-    )
+        start_utc, "%Y-%m-%dT%H:%M:%SZ").timetuple())]
     for key, cmd in (
         ("journal_user_errors", ["journalctl", "--user", "-b", "--no-pager", "-q", "-p", "err", "-o", "short-iso"]),
         ("journal_system_errors", ["journalctl", "-b", "--no-pager", "-q", "-p", "err", "-o", "short-iso"]),
     ):
         try:
             proc = subprocess.run(cmd + since_args, capture_output=True, text=True, timeout=20)
-            lines = [ln.strip() for ln in proc.stdout.splitlines() if patterns.search(ln)]
-            result[key] = lines[-12:]
-            result[key + "_total"] = len(lines)
+            matched, distinct = matching_error_lines(proc.stdout)
+            result[key] = matched[-12:]
+            result[key + "_total"] = len(matched)
+            result[key + "_distinct_total"] = len(distinct)
             if proc.returncode != 0:
                 result["errors"].append("%s rc=%d" % (key, proc.returncode))
         except (OSError, subprocess.SubprocessError) as exc:
@@ -167,7 +218,7 @@ def journal_events():
         proc = subprocess.run(["coredumpctl", "list", "--no-pager"],
                               capture_output=True, text=True, timeout=20)
         recent = []
-        start_dt = dt.datetime.strptime(START_UTC, "%Y-%m-%dT%H:%M:%SZ").replace(
+        start_dt = dt.datetime.strptime(start_utc, "%Y-%m-%dT%H:%M:%SZ").replace(
             tzinfo=dt.timezone.utc)
         for line in proc.stdout.splitlines():
             parts = line.split(None, 3)
@@ -189,55 +240,74 @@ def journal_events():
     return result
 
 
-emit("# schema=native-soak-sample/2")
-emit("# label=%s" % LABEL)
-emit("# start_utc=%s" % START_UTC)
-emit("# clk_tck=%s" % CLK)
-emit("# guest=%s" % platform.node())
-emit("# kernel=%s" % platform.uname().release)
-emit("# target_rules=%s" % TARGET_RULES)
-emit("# column_set: t_rel_s utc pid role comm starttime_ticks utime_ticks stime_ticks rss_kib pss_kib vol_ctx invol_ctx wakeups_or_NA sys_idle_ticks sys_total_ticks procs_running system_units user_units")
+def main():
+    duration = int(sys.argv[1]) if len(sys.argv) > 1 else 1800
+    interval = int(sys.argv[2]) if len(sys.argv) > 2 else 60
+    label = sys.argv[3] if len(sys.argv) > 3 else "SOAK"
+    clk = os.sysconf("SC_CLK_TCK")
+    start_mono = time.monotonic()
+    start_utc = utc_now()
 
-seen = {}          # (pid, starttime) -> {"role", "first_t"}
-last_set = set()
-samples = 0
-while True:
-    now = time.monotonic()
-    elapsed = int(now - START_MONO)
-    targets = target_pids()
-    idle, total = system_ticks()
-    sys_units = unit_count("system")
-    user_units = unit_count("user")
-    procs = running_procs()
-    for pid, (role, base) in sorted(targets.items()):
-        try:
-            st = stat_fields(pid)
-        except OSError:
-            continue
-        key = (pid, st["starttime"])
-        if key not in seen:
-            seen[key] = {"role": role, "first_t": elapsed}
+    emit("# schema=native-soak-sample/2")
+    emit("# label=%s" % label)
+    emit("# start_utc=%s" % start_utc)
+    emit("# clk_tck=%s" % clk)
+    emit("# guest=%s" % platform.node())
+    emit("# kernel=%s" % platform.uname().release)
+    emit("# target_rules=%s" % TARGET_RULES)
+    emit("# unit_name_cap=%s" % UNIT_NAME_CAP)
+    emit("# journal_match_scope=message_body_only")
+    emit("# column_set: t_rel_s utc pid role comm starttime_ticks utime_ticks stime_ticks rss_kib pss_kib vol_ctx invol_ctx wakeups_or_NA sys_idle_ticks sys_total_ticks procs_running system_units user_units")
+
+    seen = {}          # (pid, starttime) -> {"role", "first_t"}
+    last_set = set()
+    samples = 0
+    while True:
+        now = time.monotonic()
+        elapsed = int(now - start_mono)
+        targets = target_pids()
+        idle, total = system_ticks()
+        sys_count, sys_names = systemctl_units("system")
+        user_count, user_names = systemctl_units("user")
+        procs = running_procs()
+        for pid, (role, base) in sorted(targets.items()):
+            try:
+                st = stat_fields(pid)
+            except OSError:
+                continue
+            key = (pid, st["starttime"])
+            if key not in seen:
+                seen[key] = {"role": role, "first_t": elapsed}
+                emit("EVENT %s" % json.dumps(
+                    {"event": "process_start", "t": elapsed, "pid": pid,
+                     "role": role, "starttime": st["starttime"]}, sort_keys=True))
+            ctx = ctx_switches(pid)
+            emit("S", elapsed, utc_now(), pid, role, base, st["starttime"],
+                 st["utime"], st["stime"], st["rss_kib"], pss_kib(pid),
+                 ctx["vol"], ctx["invol"], wakeups(pid), idle, total, procs,
+                 sys_count if sys_count is not None else "NA",
+                 user_count if user_count is not None else "NA")
+        current = set(targets)
+        for pid in sorted(last_set - current):
             emit("EVENT %s" % json.dumps(
-                {"event": "process_start", "t": elapsed, "pid": pid,
-                 "role": role, "starttime": st["starttime"]}, sort_keys=True))
-        ctx = ctx_switches(pid)
-        emit("S", elapsed, utc_now(), pid, role, base, st["starttime"],
-             st["utime"], st["stime"], st["rss_kib"], pss_kib(pid),
-             ctx["vol"], ctx["invol"], wakeups(pid), idle, total, procs,
-             sys_units, user_units)
-    current = set(targets)
-    for pid in sorted(last_set - current):
-        emit("EVENT %s" % json.dumps(
-            {"event": "process_exit", "t": elapsed, "pid": pid}, sort_keys=True))
-    last_set = current
-    samples += 1
-    if elapsed >= DURATION:
-        break
-    time.sleep(max(0.0, min(INTERVAL, START_MONO + elapsed + INTERVAL - time.monotonic())))
+                {"event": "process_exit", "t": elapsed, "pid": pid}, sort_keys=True))
+        last_set = current
+        for scope, count, names in (("system", sys_count, sys_names),
+                                    ("user", user_count, user_names)):
+            emit("EVENT %s" % json.dumps(
+                unit_sample_event(scope, elapsed, count, names), sort_keys=True))
+        samples += 1
+        if elapsed >= duration:
+            break
+        time.sleep(max(0.0, min(interval, start_mono + elapsed + interval - time.monotonic())))
 
-end_utc = utc_now()
-emit("EVENT %s" % json.dumps({"event": "journal_probe", "t": elapsed,
-                              "since": START_UTC, **journal_events()}, sort_keys=True))
-emit("# samples=%s" % samples)
-emit("# elapsed_s=%s" % elapsed)
-emit("# end_utc=%s" % end_utc)
+    end_utc = utc_now()
+    emit("EVENT %s" % json.dumps({"event": "journal_probe", "t": elapsed,
+                                  "since": start_utc, **journal_events(start_utc)}, sort_keys=True))
+    emit("# samples=%s" % samples)
+    emit("# elapsed_s=%s" % elapsed)
+    emit("# end_utc=%s" % end_utc)
+
+
+if __name__ == "__main__":
+    main()

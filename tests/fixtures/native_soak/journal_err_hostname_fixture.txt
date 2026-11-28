@@ -1,0 +1,6 @@
+2026-11-28T06:56:32+00:00 canopy-plasma6 rsyslogd[812]: imuxsock: Acquired UNIX socket '/run/systemd/journal/syslog' (fd 3) from systemd
+2026-11-28T06:56:32+00:00 canopy-plasma6 systemd[1]: apt-daily-upgrade.service: Succeeded.
+2026-11-28T06:56:32+00:00 canopy-plasma6 kernel: watchdog: BUG: soft lockup - CPU#1 stuck for 167s! [unattended-upgr:66146]
+2026-11-28T06:56:33+00:00 canopy-plasma6 systemd[1]: systemd-udevd.service: Killing process 386 (systemd-udevd) with signal SIGABRT.
+2026-11-28T06:56:33+00:00 canopy-plasma6 systemd[1]: snapd.service: Watchdog timeout (limit 5min)!
+2026-11-28T07:12:57+00:00 canopy-plasma6 systemd-coredump[67719]: Process 67719 (systemd-journald) of user 0 terminated with signal SIGABRT; core dumped.

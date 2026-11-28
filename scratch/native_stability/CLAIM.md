@@ -20,3 +20,15 @@
   24 h is explicitly `NOT_RUN` unless separately observed.
 - No merge, no self-approval, no ready-for-merge promotion. One DRAFT PR to
   `integration/canopy-plasma6-20261127` only.
+
+## Post-diagnosis remediation (read-only, no promotion)
+
+- Diagnosis `39ad2835` traced the WARN to guest soft lockups and sampler
+  defects. Remediation on this branch fixes the hostname regex, stores bounded
+  per-sample unit names, adds a read-only VBox/soft-lockup gap classifier,
+  corrects the guest meta key and `sample_count` type, and documents CPU bucket
+  caveats. Details: `docs/NATIVE_STABILITY_REMEDIATION.md`.
+- The exclusive/quiesced-guest 1 h soak rerun is `NOT_RUN`: read-only preflight
+  at `2026-11-28T08:03:19Z` found active unattended-upgrade/apt work (including
+  PID 66146), load 3.29/2.41/2.40 and 10 soft lockups. No VM action taken.
+- Verdict remains `SOAK_WARN_...`; no READY, merge or approval.

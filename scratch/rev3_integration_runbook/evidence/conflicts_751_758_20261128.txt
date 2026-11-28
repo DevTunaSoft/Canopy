@@ -43,3 +43,30 @@ CONFLICT (content): Merge conflict in canopy_features/dock/display_change_respon
 Auto-merging docs/NATIVE_DISPLAY_RESPONSE.md
 CONFLICT (add/add): Merge conflict in docs/NATIVE_DISPLAY_RESPONSE.md
 
+## #758 current live head vs #746 (owner G4 re-pin, re-verified 2026-11-28T15:25Z)
+head a1122a2f8d558aef727c4481d05a141075d06cfc rc=1 (against #746 live head 050853173419c7224ab8875233f5ef1d7aea622c)
+4c87353e034ad5377db27d76f6049fb976044c4e
+100644 2d11782397bc53c855f38513cb9fc5a26fd03405 1	canopy_features/dock/display_change_response.py
+100644 d7ba806cfb9469c2905e896693c42b1592833c3b 2	canopy_features/dock/display_change_response.py
+100644 b9eb835683464cf62f1528eac29245d7c86369e5 3	canopy_features/dock/display_change_response.py
+100644 7d0c6fea2afdc31aa10bd3a76353cb2500b55d4c 2	docs/NATIVE_DISPLAY_RESPONSE.md
+100644 c241f1ae1fdc2cf22e757b5cc33402703276a7f9 3	docs/NATIVE_DISPLAY_RESPONSE.md
+
+Auto-merging canopy_features/dock/display_change_response.py
+CONFLICT (content): Merge conflict in canopy_features/dock/display_change_response.py
+Auto-merging docs/NATIVE_DISPLAY_RESPONSE.md
+CONFLICT (add/add): Merge conflict in docs/NATIVE_DISPLAY_RESPONSE.md
+
+head a1122a2f8d558aef727c4481d05a141075d06cfc rc=1 (against post-#754 trial tip cf3af8a2d6fa4a393e8ca320641f77eed1b3ffd1)
+a1a7e745c2f78a29e0530c67bc5c818e4eb82098
+100644 2d11782397bc53c855f38513cb9fc5a26fd03405 1	canopy_features/dock/display_change_response.py
+100644 d7ba806cfb9469c2905e896693c42b1592833c3b 2	canopy_features/dock/display_change_response.py
+100644 b9eb835683464cf62f1528eac29245d7c86369e5 3	canopy_features/dock/display_change_response.py
+100644 7d0c6fea2afdc31aa10bd3a76353cb2500b55d4c 2	docs/NATIVE_DISPLAY_RESPONSE.md
+100644 c241f1ae1fdc2cf22e757b5cc33402703276a7f9 3	docs/NATIVE_DISPLAY_RESPONSE.md
+
+Auto-merging canopy_features/dock/display_change_response.py
+CONFLICT (content): Merge conflict in canopy_features/dock/display_change_response.py
+Auto-merging docs/NATIVE_DISPLAY_RESPONSE.md
+CONFLICT (add/add): Merge conflict in docs/NATIVE_DISPLAY_RESPONSE.md
+

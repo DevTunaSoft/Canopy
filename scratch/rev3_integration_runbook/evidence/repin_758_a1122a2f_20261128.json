@@ -1,0 +1,118 @@
+{
+  "artifact": "repin_758_a1122a2f_20261128",
+  "base_ref": "integration/canopy-plasma6-20261127",
+  "base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+  "checks_at_new_head": {
+    "fake-gio-launch-fixture": "completed/success",
+    "foundation": "completed/success",
+    "qt-evidence": "completed/success"
+  },
+  "concurrent_drift_repin": {
+    "new_file_count": 17,
+    "new_paths_sha256": "5784e8636f105ca811b505f67afdd796f3e8afb7ae136aeacd41b7472ba01aae",
+    "new_pin": "9e2051c9581226f5807f007975fc411bfca72e08",
+    "pr": 752,
+    "previous_file_count": 16,
+    "previous_paths_sha256": "670ab42e67ade491bdcfb40a33c21680d178fd644e779719f07d915d4ba1d0de",
+    "previous_pin": "906181cdc7ba5d1e3fb3565b50ec79526ea7f9e0",
+    "reason": "Independent live advance of #752 at 2026-11-28T14:42:54Z produced HEAD_DRIFT and SCOPE_DRIFT in the first fresh plan (20/21 trial). Its live head and 17-path digest were re-pinned so the 21/21 requirement could be re-proved; #752 stays ordered and #755 still follows it."
+  },
+  "conflict_recheck": {
+    "against_head": "050853173419c7224ab8875233f5ef1d7aea622c",
+    "against_pr": 746,
+    "chain_tip_through_754": "cf3af8a2d6fa4a393e8ca320641f77eed1b3ffd1",
+    "command_1": "git merge-tree --write-tree --merge-base ec910d7a... 0508531734... refs/rev3-runbook/pr-758",
+    "command_2": "git merge-tree --write-tree --merge-base ec910d7a... cf3af8a2d6... refs/rev3-runbook/pr-758",
+    "conflict_paths": [
+      "canopy_features/dock/display_change_response.py",
+      "docs/NATIVE_DISPLAY_RESPONSE.md"
+    ],
+    "evidence_file": "conflicts_751_758_20261128.txt",
+    "merge_base": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+    "rc": 1,
+    "result_tree_against_746": "4c87353e034ad5377db27d76f6049fb976044c4e",
+    "result_tree_against_post_754_tip": "a1a7e745c2f78a29e0530c67bc5c818e4eb82098"
+  },
+  "file_count": 15,
+  "generated_utc": "2026-11-28T15:52:48+00:00",
+  "graphql": {
+    "headRefOid": "a1122a2f8d558aef727c4481d05a141075d06cfc",
+    "reviewDecision": "REVIEW_REQUIRED"
+  },
+  "guard_gates_preserved": [
+    "21 ordered",
+    "7 skipped",
+    "28 pins",
+    "order/skip disjointness",
+    "topological deps",
+    "mutex pairs",
+    "conflict holds",
+    "resolved add/add",
+    "756 last",
+    "protection with dismiss_stale_reviews",
+    "GraphQL reviewDecision gate",
+    "exact non-null commit_id",
+    "prior_tip sibling blob comparison in plan and apply",
+    "trial merge unowned/workflow/conflict-marker gates",
+    "post-merge regression stop",
+    "plan-only default",
+    "--distinct-approval required by --apply",
+    "no admin bypass/force-push/review creation"
+  ],
+  "head_ref_name": "product/native-multimonitor-20261128",
+  "head_sha": "a1122a2f8d558aef727c4481d05a141075d06cfc",
+  "hold_marker_in_body": "The integrator must choose or combine the implementations explicitly",
+  "mergeable": true,
+  "mergeable_state": "blocked",
+  "mutations": {
+    "approval": false,
+    "force_push": false,
+    "pr_edit": false,
+    "pr_merge": false,
+    "protection_change": false,
+    "remote_mutation": "push of runbook branch only",
+    "review_creation": false
+  },
+  "new_pin": "a1122a2f8d558aef727c4481d05a141075d06cfc",
+  "paths_sha256": "90a6d8a24bba5ea653c701c7fd2f7fe553c0e24342677679d40e6a026915477a",
+  "plan": {
+    "all_candidate_heads_match_pins": true,
+    "candidate_count": 21,
+    "candidate_problem_count": 0,
+    "command": "python tools/integration/apply_rev3_approval_runbook.py --plan",
+    "dismiss_stale_reviews": {
+      "integration/canopy-plasma6-20261127": true,
+      "main": true
+    },
+    "generated_utc": "2026-11-28T15:45:18+00:00",
+    "live_tip": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+    "pr746_status": "TRIAL_CLEAN",
+    "pr758_in_sequence": false,
+    "pr758_skip_hold_rederived_live": true,
+    "protection": {
+      "integration/canopy-plasma6-20261127": "PASS",
+      "main": "PASS"
+    },
+    "rc": 0,
+    "rev3_sha256": "1fba4b1e7128b6bc33aba577c05fdccfa45fcac56ee714f02e9d8b43e32a0f2a",
+    "sequence_count": 21,
+    "sequence_statuses": {
+      "TRIAL_CLEAN": 21
+    },
+    "skip_count": 7,
+    "skip_holds_rederived_true": 7,
+    "trial_clean_count": 21,
+    "trial_count": 21,
+    "verdict": "PLAN_ONLY_DISTINCT_APPROVAL_PENDING"
+  },
+  "pr": 758,
+  "previous_pin": "32cc8e0b6a90f644f150419c9a34e93aab278c16",
+  "reason": "Owner action summary G4: runbook at 1c834d39 still pinned #758 to 32cc8e0b while the live head advanced to a1122a2f, so verify_skip_reason would stop re-deriving the hold on a future plan. Re-pin to the live head and re-verify every gate without merge or approval.",
+  "scope_unchanged_from_previous_pin": true,
+  "self_test": {
+    "command": "python tools/integration/apply_rev3_approval_runbook.py --self-test",
+    "output": "SELF_TEST_PASS gates=checks+approval+graphql-decision+commit-id+dismiss-stale+order+skip-disjointness+pin-shape+apply-sibling+mutex+conflict-holds+resolved-add-add+new-pins+skip758-head-rederive",
+    "rc": 0
+  },
+  "state": "open"
+}

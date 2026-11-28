@@ -121,8 +121,8 @@ PINS: dict[int, dict] = {
     751: dict(head="813ec445f042049615e4ed5c02f9a4831a2aba83", files=29,
               paths_sha256="f9feb071f1f80f259092d820dc9a56cd7ac51cc74e793b98f4326c20fc6c073a",
               deps=[], title="bounded first-party Modern Shell Pack definition"),
-    752: dict(head="906181cdc7ba5d1e3fb3565b50ec79526ea7f9e0", files=16,
-              paths_sha256="670ab42e67ade491bdcfb40a33c21680d178fd644e779719f07d915d4ba1d0de",
+    752: dict(head="9e2051c9581226f5807f007975fc411bfca72e08", files=17,
+              paths_sha256="5784e8636f105ca811b505f67afdd796f3e8afb7ae136aeacd41b7472ba01aae",
               deps=[732], title="QML secondary-label names and compact Window/Help reachability"),
     753: dict(head="616ce171a7b71f69f19060122f53c97ada346662", files=30,
               paths_sha256="600b5959734f8a44392567611c546b6922e3925fa665e7f953399bd106528ec8",
@@ -141,7 +141,7 @@ PINS: dict[int, dict] = {
     757: dict(head="4e4471a5c3719041353c432653f1bf0986091815", files=17,
               paths_sha256="7938aee2c3e9ea96493d248bf1ec28d370eabbe566b6f32eab5695c369cbe777",
               deps=[748], title="read-only native suspend/resume recovery contract (add/add resolved at this head)"),
-    758: dict(head="32cc8e0b6a90f644f150419c9a34e93aab278c16", files=15,
+    758: dict(head="a1122a2f8d558aef727c4481d05a141075d06cfc", files=15,
               paths_sha256="90a6d8a24bba5ea653c701c7fd2f7fe553c0e24342677679d40e6a026915477a",
               deps=[], title="KWin/KScreen multi-monitor/HiDPI response (HELD)"),
 }
@@ -153,7 +153,7 @@ SKIP = {
     742: "REVIEW_HOLD_DOC_CORRECTION: independent review requires two documentation corrections before promotion; stage_06_verify.log and board_probe.log are ABSENT at the exact head and the '37 tests' claim has no artifact.",
     749: "HOLD_NO_PROMOTION: re-pinned live head f8cbe123ba2a88edbdc509c5dd8ebe9e20b85260 (sampler/report remediated); body still says 'No merge, no self-approval, no ready-for-merge promotion; independent review only'; machine verdict SOAK_WARN_CRASH_OR_ERROR_EVENT+SAMPLING_GAP+SERVICE_COUNT_DRIFT.",
     750: "OVERLAP_HOLD: shares 4 instruction paths (.github/PULL_REQUEST_TEMPLATE.md, AGENTS.md, docs/AGENTS_WORKFORCE.md, docs/ROADMAP.md) with #722; exact-base trial merge conflicts on all four after #722 is promoted. Requires an authorized re-pin onto the post-#722 tip with a fresh independent review and 3/3 checks at the new head. No PR edit is performed by this runbook; the external Rev3 directive SHA remains controlling.",
-    758: "OVERLAP_HOLD: re-pinned to live head 32cc8e0b6a90f644f150419c9a34e93aab278c16 with unchanged 15-path scope; #758 changes canopy_features/dock/display_change_response.py and docs/NATIVE_DISPLAY_RESPONSE.md, both already owned and changed by ordered #746; exact-SHA trial merge conflicts with #746 even when sequenced after it (merge-tree rc=1 at the new head). #746 stays in ORDER; #758 is held for an explicit integrator decision or an authorized combined implementation with a fresh independent review and 3/3 checks at the new head.",
+    758: "OVERLAP_HOLD: re-pinned to live head a1122a2f8d558aef727c4481d05a141075d06cfc with unchanged 15-path scope; #758 changes canopy_features/dock/display_change_response.py and docs/NATIVE_DISPLAY_RESPONSE.md, both already owned and changed by ordered #746; exact-SHA trial merge conflicts with #746 even when sequenced after it (merge-tree rc=1 at the new head). #746 stays in ORDER; #758 is held for an explicit integrator decision or an authorized combined implementation with a fresh independent review and 3/3 checks at the new head.",
 }
 
 ORDER = [722, 741, 733, 737, 736, 732, 752, 755, 735, 745, 743, 744, 748, 740, 746, 747,
@@ -590,7 +590,10 @@ def self_test():
         assert HEX40.match(pin["head"]), f"bad new head pin #{n}"
         assert len(pin["paths_sha256"]) == 64 and pin["files"] > 0, f"bad new scope pin #{n}"
     assert PINS[757]["head"] == "4e4471a5c3719041353c432653f1bf0986091815"
-    assert PINS[758]["head"] == "32cc8e0b6a90f644f150419c9a34e93aab278c16"
+    assert PINS[752]["head"] == "9e2051c9581226f5807f007975fc411bfca72e08"
+    assert PINS[752]["files"] == 17
+    assert PINS[758]["head"] == "a1122a2f8d558aef727c4481d05a141075d06cfc"
+    assert "a1122a2f8d558aef727c4481d05a141075d06cfc" in SKIP[758]
     assert PINS[755]["head"] == "b5fd0b8337322d292e8f9c55bbedbb03fd9cab94"
     assert HEX40.match(BASE_SHA) and HEX40.match(REV3_SHA256) is None
     assert len(REV3_SHA256) == 64
@@ -598,6 +601,22 @@ def self_test():
     assert pin749["head"] == "f8cbe123ba2a88edbdc509c5dd8ebe9e20b85260"
     assert pin749["files"] == 32
     assert pin749["paths_sha256"] == "aab4da5484cec499d1ffbddeb0fc8b200f6093285e9e26cfa834c3b28894f59b"
+
+    # Offline #758 skip-hold regression guard: the plan re-derives this hold from
+    # live head bytes, so a pin left behind by a PR advance would silently turn a
+    # 7/7 hold re-derivation into 6/7. Prove True at the exact pin and False on drift.
+    saved_gh758 = globals()["gh_json"]
+    try:
+        shared_files = [{"filename": p} for p in (
+            "canopy_features/dock/display_change_response.py",
+            "docs/NATIVE_DISPLAY_RESPONSE.md", "docs/unrelated.md")]
+        globals()["gh_json"] = lambda endpoint: shared_files
+        hold_pr = {"head": {"sha": PINS[758]["head"]}}
+        hold_body = "The integrator must choose or combine the implementations explicitly"
+        assert verify_skip_reason(758, hold_pr, hold_body) is True
+        assert verify_skip_reason(758, {"head": {"sha": "d" * 40}}, hold_body) is False
+    finally:
+        globals()["gh_json"] = saved_gh758
 
     # Offline protection gate: dismiss_stale_reviews must be explicitly true.
     prot = {"required_pull_request_reviews": {
@@ -651,7 +670,7 @@ def self_test():
     assert 'ap.add_argument("--plan", action="store_true"' in main_src
     assert 'ap.add_argument("--apply", action="store_true"' in main_src
     assert "DISTINCT_APPROVAL_FLAG_REQUIRED" in inspect.getsource(apply_runbook)
-    print("SELF_TEST_PASS gates=checks+approval+graphql-decision+commit-id+dismiss-stale+order+skip-disjointness+pin-shape+apply-sibling+mutex+conflict-holds+resolved-add-add+new-pins")
+    print("SELF_TEST_PASS gates=checks+approval+graphql-decision+commit-id+dismiss-stale+order+skip-disjointness+pin-shape+apply-sibling+mutex+conflict-holds+resolved-add-add+new-pins+skip758-head-rederive")
 
 
 def plan(approver=None):

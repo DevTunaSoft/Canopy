@@ -1,0 +1,6 @@
+ID: N04R
+STAGE: N04 restore manifest bytes
+LABEL: PASS
+COMMAND: ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cp -p /home/canopy/native_rollback_rt/n04_manifest.bak /home/canopy/.local/share/canopy-classic/install-manifest.env && echo MANIFEST_RESTORED_SHA=$(sha256sum /home/canopy/.local/share/canopy-classic/install-manifest.env|awk "{print \$1}")
+rc=0
+MANIFEST_RESTORED_SHA=375fd19fedec7f27011bf44ad7ce8717c10a8a23cdf9fc51bbd97fce1724000e

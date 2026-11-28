@@ -1,0 +1,8 @@
+ID: C01
+STAGE: guest staging of exact pinned scripts
+LABEL: PASS
+COMMAND: ssh <redacted-key> mkdir -p /home/canopy/native_rollback_rt ; scp <pinned files> canopy@127.0.0.1:/home/canopy/native_rollback_rt/
+rc=0
+mkdir_rc=0
+scp_rc=0
+

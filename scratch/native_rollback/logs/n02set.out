@@ -1,0 +1,6 @@
+ID: N02SET
+STAGE: N02 setup: unhashed binary at installed path
+LABEL: PASS
+COMMAND: ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; printf 'unknown-source-native-rollback' > /home/canopy/.local/bin/canopy-classic && chmod 755 /home/canopy/.local/bin/canopy-classic && echo PRESENT_SHA=$(sha256sum /home/canopy/.local/bin/canopy-classic|awk "{print \$1}")
+rc=0
+PRESENT_SHA=8581e68e3dc15fdb0a864f8995576cd7f2e6093aa1efb2ee9ff186f9419fcc2b

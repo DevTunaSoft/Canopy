@@ -1,0 +1,8 @@
+ID: N04
+STAGE: N04 negative control: tampered manifest pin refused
+LABEL: PASS
+COMMAND: ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash rollback.sh --no-restart
+rc=1
+[canopy-classic][rollback] rollback: install assets already absent (post-uninstall ordering); using restore-only path
+[stderr]
+[canopy-classic][uninstall] ERROR: manifest binary pin mismatch (got=0000000000000000000000000000000000000000000000000000000000000000 want=4089251cf6a557d74ca308f3e32f59fea318f62d3285204e9ec7872bcc6b3f14): refusing unknown asset

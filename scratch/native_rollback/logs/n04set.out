@@ -1,0 +1,6 @@
+ID: N04SET
+STAGE: N04 setup: tamper manifest binary pin
+LABEL: PASS
+COMMAND: ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cp -p /home/canopy/.local/share/canopy-classic/install-manifest.env /home/canopy/native_rollback_rt/n04_manifest.bak && sed -i 's|^CANOPY_BINARY_SHA256=.*|CANOPY_BINARY_SHA256=0000000000000000000000000000000000000000000000000000000000000000|' /home/canopy/.local/share/canopy-classic/install-manifest.env && grep '^CANOPY_BINARY_SHA256=' /home/canopy/.local/share/canopy-classic/install-manifest.env
+rc=0
+CANOPY_BINARY_SHA256=0000000000000000000000000000000000000000000000000000000000000000

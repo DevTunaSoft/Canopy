@@ -1,0 +1,15 @@
+ID: R06
+STAGE: cycle 1 verify pending restore
+LABEL: PASS
+COMMAND: ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash verify.sh
+rc=0
+[canopy-classic][verify] INFO binary: absent (post-uninstall restore-only state)
+[canopy-classic][verify] INFO wallpaper: absent (post-uninstall restore-only state)
+[canopy-classic][verify] INFO autostart: absent (post-uninstall restore-only state)
+[canopy-classic][verify] PASS snapshot: metadata present
+[canopy-classic][verify] PASS snapshot file: /home/canopy/.local/share/canopy-classic/backup/plasma-org.kde.plasma.desktop-appletsrc
+[canopy-classic][verify] WARN config changed since install (user/settings or Plasma update): /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc
+[canopy-classic][verify] PASS snapshot file: /home/canopy/.local/share/canopy-classic/backup/plasmashellrc
+[canopy-classic][verify] STATUS=UNINSTALLED_PENDING_RESTORE
+[canopy-classic][verify] restore-only available: rollback.sh --restore-only (verified snapshot required)
+[canopy-classic][verify] runtime desktop probes (Plasma/DBus): NOT_RUN

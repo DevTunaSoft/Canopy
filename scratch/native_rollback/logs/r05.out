@@ -1,0 +1,12 @@
+ID: R05
+STAGE: cycle 1 uninstall preserving user settings
+LABEL: PASS
+COMMAND: ssh <redacted-key> canopy@127.0.0.1: export HOME=/home/canopy USER=canopy DISPLAY=:0 XAUTHORITY=/tmp/xauth_FRFiEY XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_SESSION_TYPE=x11 XDG_CURRENT_DESKTOP=KDE LANG=C.UTF-8; cd /home/canopy/native_rollback_rt && bash uninstall.sh
+rc=0
+[canopy-classic][uninstall] WARN config changed since install; preserving user settings: /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc
+[canopy-classic][uninstall] removed hash-verified Canopy binary, wallpaper and autostart entry
+[canopy-classic][uninstall] SKIP restore to preserve user settings: /home/canopy/.config/plasma-org.kde.plasma.desktop-appletsrc
+[canopy-classic][uninstall] restored stock config: /home/canopy/.config/plasmashellrc (mode=600 sha256=a7765af1f6a63d919afe49a86b0b0fa531f3b1845f120e035b67962ccc1c2774)
+[canopy-classic][uninstall] WARN kept manifest and snapshot because user settings were preserved
+[canopy-classic][uninstall] restart NOT_RUN (pass --restart or log out/in)
+[canopy-classic][uninstall] uninstall complete; stock Plasma config restored where not user-modified

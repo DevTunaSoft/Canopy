@@ -87,7 +87,7 @@ separately and validates dock bounds in logical space only.
 | M4 scenario probe at base | `python scratch/native_display/probe_display_response.py` | FAIL: 2/9 scenarios; RED evidence above |
 | M4 scenario probe after fix | same command | PASS: 11/11 scenarios — `probe_result.json`, `probe_stdout.log` |
 | Guest readiness probe on this host | `python scratch/native_display/guest_probe.py` | `NOT_RUN`, `HOST_ADAPTER_ABSENT` — `guest_probe_host_check.json` |
-| Full suite | bounded `python -m unittest discover -s tests` | see `full_suite_final.log` / `full_suite_final.rc`; an earlier 480 s bounded run timed out (`full_suite.log`) and is recorded as INCOMPLETE, never as a pass |
+| Full suite (broader checkpoint, not required for this module) | `PYTHONPATH=<wt> python -m unittest discover -s tests` with a 480 s cap, then a bounded background run | `INCOMPLETE`, never a pass: the capped run timed out (`full_suite.log`, rc 124); the background run had no terminal `Ran ... OK/FAILED` summary after ~10 min under host contention (competing suites and Plasma VM verification by other agents) and was stopped by this worker (`full_suite_final.log`, `full_suite_final.rc`, `full_suite_status.txt`). No FAIL/ERROR attribution is claimed. |
 
 All verification above is `SYNTHETIC` decision-logic testing on the Windows
 host. It does not prove compiled Qt or Plasma behaviour.
@@ -107,10 +107,10 @@ or real monitor/scale-change result is claimed here.
 
 - `SYNTHETIC`: targeted Python test counts/durations and the 11-scenario probe
   on the Windows host; no PSS, CPU or GPU number was measured.
-- `NOT_RUN`: full-suite terminal verdict if the bounded run does not finish,
-  compiled Qt frames, real Plasma session, real monitor add/remove, real
-  HiDPI scale changes, sustained 24-hour behaviour and screen-reader
-  announcements.
+- `NOT_RUN` / `INCOMPLETE`: full-suite terminal verdict under the two bounded
+  runs (host contention), compiled Qt frames, real Plasma session, real
+  monitor add/remove, real HiDPI scale changes, sustained 24-hour behaviour
+  and screen-reader announcements.
 - The change adds one optional tuple field with at most 16 bounded entries per
   event and no cache, service, polling loop, animation or asset. It does not
   trade stability, security, accessibility or approved visuals for a gain.

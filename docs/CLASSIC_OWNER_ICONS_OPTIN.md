@@ -4,6 +4,14 @@ Status: **AWAITING_CHATGPT_VISUAL_APPROVAL**. This change prepares running-insta
 evidence only. It does not grant owner approval, does not change the approved
 asset set, and does not authorize a merge to `main`.
 
+Gate-language reconciliation (ND-076): the literal token above is retained
+verbatim because frozen tests and the read-only visual-lock checker depend on
+it; it is `SUPERSEDED_POINT_IN_TIME` language from the ChatGPT-exclusive visual
+lock. The current owner-controlled status is `AWAITING_OWNER_VISUAL_APPROVAL`.
+Hermes has owner-granted GUI/visual engineering authority; approved icons,
+wallpaper, dock geometry, colours and typography remain byte-frozen and final
+visual acceptance remains owner-only. This note changes no asset, test or gate.
+
 ## What it does
 
 `canopy-classic-spike` gains one explicit opt-in:

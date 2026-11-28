@@ -45,8 +45,12 @@ that as **AGENT REVIEWED**, never as human approval. Run post-merge regression
 **after** integration; it is not a pre-merge gate. Obtain explicit owner
 approval for final visual acceptance, substantial identity changes, high-risk
 security decisions and final acceptance into `main`. Named holds on #279, #151
-and #278 are never overridden by general authorization. The workforce ceiling
-is 12 engineering subagents plus Hermes as lead orchestrator under the newer
-owner directive (2026-11-26), which supersedes only the 10-agent ceiling in the
-external directive cited in [workforce policy](../docs/AGENTS_WORKFORCE.md); all
-other requirements there remain in force.
+and #278 are never overridden by general authorization. The owner-controlled workforce
+ceiling is 8 engineering subagents plus Hermes as lead orchestrator (9 total)
+under directive SHA-256 `f240bcdf635a498a7476c8104cbf3dc4e6cda492abba318254d80fce7566a197`;
+the 15/11/12/10-agent and four-worker configurations are
+`SUPERSEDED_POINT_IN_TIME`, retained not erased. See
+[workforce policy](../docs/AGENTS_WORKFORCE.md). Compiled engineering is not
+categorically forbidden; approved visual assets, geometry and wallpaper remain
+owner-gated with current status `AWAITING_OWNER_VISUAL_APPROVAL`. Do not treat a
+compiled-path deny-list hit or CI capture as owner approval.

@@ -1,0 +1,66 @@
+{
+  "consumption": "read-only",
+  "evidence_labels": [
+    "STATIC SOURCE ONLY",
+    "SYNTHETIC"
+  ],
+  "fixture_count": 16,
+  "guest_acceptance": "NOT_RUN",
+  "guest_probe_grants": {
+    "apt_deb": [
+      "install",
+      "launch",
+      "remove",
+      "search",
+      "update"
+    ],
+    "dnf_rpm": [
+      "install",
+      "launch",
+      "remove",
+      "search",
+      "update"
+    ],
+    "flatpak_flathub": [
+      "install",
+      "launch",
+      "permissions",
+      "remove",
+      "search",
+      "update"
+    ],
+    "pacman": [
+      "install",
+      "launch",
+      "remove",
+      "search",
+      "update"
+    ],
+    "rootless_podman_oci": [
+      "permissions",
+      "pull",
+      "remove",
+      "run",
+      "search",
+      "update"
+    ]
+  },
+  "guest_probe_status": "VALID",
+  "host_probe_tools_present": 0,
+  "manifest_status": "VALID",
+  "manifest_target": "lacos-guest",
+  "negative_count": 14,
+  "pr753_verify_summary": "SUMMARY\tchecks=29\tpass=29\tfail=0\tverdict=PASS",
+  "pr753_worktree_clean_after": true,
+  "pr753_worktree_clean_before": true,
+  "runtime": "BLOCKED_NOT_RUN",
+  "schema_version": 1,
+  "snapshot_sha256": "78b1a192deed354ae0ef92496d2d1d3c0c8278db7457f5e41ac71a64996320a4",
+  "source_base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+  "source_head_sha": "616ce171a7b71f69f19060122f53c97ada346662",
+  "source_pr": 753,
+  "source_sha256": {
+    "capability_manifest.py": "91ca6a8bd677c7a584b6c89ada7bb737b5c3a8bbe9da7b1c4cba21344df4d983",
+    "source_probe.py": "66685a317e745cddaf33f7c6d92b7d4fe195bc83716b43c55683ac292d981ade"
+  }
+}

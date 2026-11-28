@@ -1,0 +1,19 @@
+{
+  "snapshot_accounts.json": "POLICY_ACCOUNTS_REQUIRED",
+  "snapshot_core_mutation.json": "POLICY_NO_CORE_MUTATION_REQUIRED",
+  "snapshot_duplicate_key.json": "DUPLICATE_JSON_KEY",
+  "snapshot_duplicate_services.json": "POLICY_DUPLICATE_SERVICES_REQUIRED",
+  "snapshot_forbidden_capability.json": "CAPABILITY_FORBIDDEN",
+  "snapshot_forbidden_label_guest_accepted.json": "EVIDENCE_LABELS_INVALID",
+  "snapshot_forbidden_label_native_runtime.json": "EVIDENCE_LABELS_INVALID",
+  "snapshot_forbidden_label_verified.json": "EVIDENCE_LABELS_INVALID",
+  "snapshot_foreign_repo.json": "POLICY_FOREIGN_REPO_MIXING_REQUIRED",
+  "snapshot_missing_ecosystem.json": "ECOSYSTEM_SET_INVALID",
+  "snapshot_paid_tiers.json": "POLICY_PAID_TIERS_REQUIRED",
+  "snapshot_probe_ready.json": "PROBE_STATUS_INVALID",
+  "snapshot_runtime_claim.json": "RUNTIME_INVALID",
+  "snapshot_telemetry.json": "POLICY_TELEMETRY_REQUIRED",
+  "snapshot_unknown_ecosystem.json": "ECOSYSTEM_ID_INVALID",
+  "snapshot_verified_claim.json": "SIGNATURE_STATUS_INVALID",
+  "snapshot_wrong_type.json": "POLICY_TELEMETRY_REQUIRED"
+}

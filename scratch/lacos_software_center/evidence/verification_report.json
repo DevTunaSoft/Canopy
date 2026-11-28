@@ -1,0 +1,219 @@
+{
+  "checks": [
+    {
+      "id": "FIXTURE_HASHES",
+      "status": "PASS"
+    },
+    {
+      "id": "STATIC_FIVE_ECOSYSTEMS",
+      "status": "PASS"
+    },
+    {
+      "id": "STATIC_FORBIDDEN_CAPABILITIES",
+      "status": "PASS"
+    },
+    {
+      "id": "STATIC_NO_TOOL_EXEC",
+      "status": "PASS"
+    },
+    {
+      "id": "STATIC_NO_WRITE_IO",
+      "status": "PASS"
+    },
+    {
+      "id": "STATIC_READ_ONLY_IMPORTS",
+      "status": "PASS"
+    },
+    {
+      "id": "SNAPSHOT_VALID",
+      "status": "PASS"
+    },
+    {
+      "id": "SNAPSHOT_FIVE_CARDS",
+      "status": "PASS"
+    },
+    {
+      "id": "SNAPSHOT_NO_CORE_MUTATION",
+      "status": "PASS"
+    },
+    {
+      "id": "SNAPSHOT_NO_PAID_ACCOUNTS_TELEMETRY_DUP_SERVICES",
+      "status": "PASS"
+    },
+    {
+      "id": "SNAPSHOT_PROVENANCE_SIGNATURE_PRESENT",
+      "status": "PASS"
+    },
+    {
+      "id": "SNAPSHOT_ISOLATION_NOTES_PRESENT",
+      "status": "PASS"
+    },
+    {
+      "id": "SNAPSHOT_RUNTIME_BLOCKED",
+      "status": "PASS"
+    },
+    {
+      "id": "SNAPSHOT_CONSUMES_PR753_READ_ONLY",
+      "status": "PASS"
+    },
+    {
+      "id": "VIEW_IMMUTABLE",
+      "status": "PASS"
+    },
+    {
+      "id": "VIEW_DETERMINISTIC",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_COUNT_BOUND",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_SNAPSHOTACCOUNTS",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_SNAPSHOTCOREMUTATION",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_SNAPSHOTDUPLICATEKEY",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_SNAPSHOTDUPLICATESERVICES",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_SNAPSHOTFORBIDDENCAPABILITY",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_SNAPSHOTFORBIDDENLABELGUESTACCEPTED",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_SNAPSHOTFORBIDDENLABELNATIVERUNTIME",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_SNAPSHOTFORBIDDENLABELVERIFIED",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_SNAPSHOTFOREIGNREPO",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_SNAPSHOTMISSINGECOSYSTEM",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_SNAPSHOTPAIDTIERS",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_SNAPSHOTPROBEREADY",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_SNAPSHOTRUNTIMECLAIM",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_SNAPSHOTTELEMETRY",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_SNAPSHOTUNKNOWNECOSYSTEM",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_SNAPSHOTVERIFIEDCLAIM",
+      "status": "PASS"
+    },
+    {
+      "id": "NEGATIVE_SNAPSHOTWRONGTYPE",
+      "status": "PASS"
+    },
+    {
+      "id": "HARDEN_UNORDERED_REJECTED",
+      "status": "PASS"
+    },
+    {
+      "id": "HARDEN_STRING_NOT_SEQUENCE",
+      "status": "PASS"
+    },
+    {
+      "id": "HARDEN_TOP_NOT_MAPPING",
+      "status": "PASS"
+    },
+    {
+      "id": "HARDEN_TOP_FIELDS_INVALID",
+      "status": "PASS"
+    },
+    {
+      "id": "HARDEN_SOURCE_PIN_INVALID",
+      "status": "PASS"
+    },
+    {
+      "id": "HARDEN_RUNTIME_LABEL_REJECTED",
+      "status": "PASS"
+    },
+    {
+      "id": "HARDEN_GUEST_ACCEPTED_LABEL_REJECTED",
+      "status": "PASS"
+    },
+    {
+      "id": "HARDEN_VERIFIED_LABEL_REJECTED",
+      "status": "PASS"
+    },
+    {
+      "id": "HARDEN_GUEST_CLAIM_REJECTED",
+      "status": "PASS"
+    }
+  ],
+  "evidence_labels": [
+    "STATIC SOURCE ONLY",
+    "SYNTHETIC"
+  ],
+  "fixture_sha256": {
+    "negative_cases.json": "c6ea58d342e24d8ae42019ecd32549fcc5363de2f95d4fd6289dab615cf99527",
+    "snapshot_accounts.json": "fcad7db9795e176162bfc9e41feb3069bd9879563b51612ac1f6f71773632ecd",
+    "snapshot_core_mutation.json": "0c38bad4c2533e4c717580852552fc9fac03ef3f2d4eca0af5bb3c8226f5250a",
+    "snapshot_duplicate_key.json": "d54187f2d0f92d68bae51241db694043401822957f43174eab4782440604bf90",
+    "snapshot_duplicate_services.json": "f6052d3b5cb5922354456d2b4c1443a6f278d428752903306125442b23fde633",
+    "snapshot_forbidden_capability.json": "a197b33441f2770ce29045c84ddd70e01b1f74de938bd98ca87072606ab20e21",
+    "snapshot_forbidden_label_guest_accepted.json": "38409feaf2c047436ced046873699f7e3a44a9935920c3ff3b5cf02a0ef0b72b",
+    "snapshot_forbidden_label_native_runtime.json": "8cd224ec83822d3b83b6c1690cf016b86eec5c056372ae67ffe5b86fdbb5f444",
+    "snapshot_forbidden_label_verified.json": "b03e4bac624831c8b3cd8264c56659dfa5a36d20165c031abc2d853ad353c53c",
+    "snapshot_foreign_repo.json": "256701f2b1655c55d9a071694b22d5cb3662545ea4e167d5338c59277c5a2ef2",
+    "snapshot_missing_ecosystem.json": "78fd514cd2c132523cfdc4708031903942153312559d24e215d148d71618223b",
+    "snapshot_paid_tiers.json": "e866766e54871fc104fa89dc3b764af6fbcd7c3767f57e8bbf514c93d5e46036",
+    "snapshot_probe_ready.json": "6f04da38c78cd6c6645b48119b4629b6541f075aa894ced28a16f4002bcb43fb",
+    "snapshot_runtime_claim.json": "9f1328ad88d78db1e322cc1d4c4d03d3f6d58d5eef76f8a8eaeb3e5e4b04e168",
+    "snapshot_telemetry.json": "b0a3c795d7376e3e9671245c5aaaf169db4e4f682ad57530d0328e397d08b53a",
+    "snapshot_unknown_ecosystem.json": "00922a964d3d374676ce4d95243d3a4dbebe27ae9665107fef185ab196c560e5",
+    "snapshot_verified_claim.json": "232ea017398ee850682778a144c70a287203f5b8ed4c8da5eb82621b1d5e651b",
+    "snapshot_wrong_type.json": "c38dccdd8b9550667c754a90878141aab7d7f7834e56ecdf3c54537a0831b104",
+    "software_center_snapshot.json": "78b1a192deed354ae0ef92496d2d1d3c0c8278db7457f5e41ac71a64996320a4"
+  },
+  "guest_acceptance": "NOT_RUN",
+  "guest_execution": "NOT_RUN",
+  "note": "Declaration-only presentation. No core mutation, paid tiers, accounts, telemetry or duplicate always-on services. No real guest or Software Center runtime was executed.",
+  "production_sha256": {
+    "__init__.py": "5dde699a97e5e9980f1802511f35aa6fabd5c56dbc3b340a104272b7faace281",
+    "center.py": "2a6aa3a6ba0ee8ab5a57ad78110252150808a92a7da0054e9d03ece13b26a3d2"
+  },
+  "schema_version": 1,
+  "software_center_runtime": "BLOCKED_NOT_RUN",
+  "source_base_sha": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+  "source_consumption": "read-only",
+  "source_head_sha": "616ce171a7b71f69f19060122f53c97ada346662",
+  "source_pr": 753,
+  "source_sha256": {
+    "capability_manifest.py": "91ca6a8bd677c7a584b6c89ada7bb737b5c3a8bbe9da7b1c4cba21344df4d983",
+    "source_probe.py": "66685a317e745cddaf33f7c6d92b7d4fe195bc83716b43c55683ac292d981ade"
+  },
+  "verdict": "PASS"
+}

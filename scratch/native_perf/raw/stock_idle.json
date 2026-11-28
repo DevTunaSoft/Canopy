@@ -1,0 +1,189 @@
+{
+  "aggregate_all_observed": {
+    "cpu_percent_one_core": 2.3477,
+    "cpu_percent_two_cores": 1.1738,
+    "cpu_ticks_delta_sum": 709.0,
+    "processes": 4,
+    "pss_kib_sum_mean": 742761.6,
+    "pss_kib_sum_of_per_process_peaks": 754856.0
+  },
+  "aggregate_canopy": {
+    "cpu_percent_one_core": 0.2185,
+    "cpu_percent_two_cores": 0.1093,
+    "cpu_ticks_delta_sum": 66.0,
+    "processes": 1,
+    "pss_kib_sum_mean": 140895.8,
+    "pss_kib_sum_of_per_process_peaks": 144433.0
+  },
+  "aggregate_stock_shell": {
+    "cpu_percent_one_core": 2.1291,
+    "cpu_percent_two_cores": 1.0646,
+    "cpu_ticks_delta_sum": 643.0,
+    "processes": 3,
+    "pss_kib_sum_mean": 601865.8,
+    "pss_kib_sum_of_per_process_peaks": 610423.0
+  },
+  "canopy_processes": {
+    "5667": {
+      "comm": "canopy-classic",
+      "cpu_percent_one_core": 0.2185,
+      "cpu_ticks_delta": 66.0,
+      "nonvoluntary_ctx_delta": 17,
+      "pss_kib": {
+        "max": 144433.0,
+        "mean": 140895.8,
+        "min": 136048.0
+      },
+      "rss_kib": {
+        "max": 274096.0,
+        "mean": 269837.9,
+        "min": 268976.0
+      },
+      "samples": 30,
+      "voluntary_ctx_delta": 89
+    }
+  },
+  "clk_tck": 100.0,
+  "elapsed_seconds": 302.0,
+  "end_utc": "2026-11-28T04:45:38Z",
+  "guest": "canopy-plasma6",
+  "label": "STOCK_PLASMA6",
+  "per_process": {
+    "4656": {
+      "comm": "startplasma-x11",
+      "cpu_percent_one_core": 0.0,
+      "cpu_ticks_delta": 0.0,
+      "nonvoluntary_ctx_delta": 0,
+      "pss_kib": {
+        "max": 7402.0,
+        "mean": 7311.9,
+        "min": 7146.0
+      },
+      "rss_kib": {
+        "max": 46224.0,
+        "mean": 46224.0,
+        "min": 46224.0
+      },
+      "samples": 30,
+      "voluntary_ctx_delta": 0
+    },
+    "5384": {
+      "comm": "kwin_x11",
+      "cpu_percent_one_core": 1.6821,
+      "cpu_ticks_delta": 508.0,
+      "nonvoluntary_ctx_delta": 2389,
+      "pss_kib": {
+        "max": 119877.0,
+        "mean": 115629.9,
+        "min": 111362.0
+      },
+      "rss_kib": {
+        "max": 266748.0,
+        "mean": 254134.0,
+        "min": 247048.0
+      },
+      "samples": 30,
+      "voluntary_ctx_delta": 5540
+    },
+    "5422": {
+      "comm": "plasmashell",
+      "cpu_percent_one_core": 0.447,
+      "cpu_ticks_delta": 135.0,
+      "nonvoluntary_ctx_delta": 256,
+      "pss_kib": {
+        "max": 483144.0,
+        "mean": 478924.0,
+        "min": 467960.0
+      },
+      "rss_kib": {
+        "max": 629492.0,
+        "mean": 624679.2,
+        "min": 617204.0
+      },
+      "samples": 30,
+      "voluntary_ctx_delta": 642
+    },
+    "5667": {
+      "comm": "canopy-classic",
+      "cpu_percent_one_core": 0.2185,
+      "cpu_ticks_delta": 66.0,
+      "nonvoluntary_ctx_delta": 17,
+      "pss_kib": {
+        "max": 144433.0,
+        "mean": 140895.8,
+        "min": 136048.0
+      },
+      "rss_kib": {
+        "max": 274096.0,
+        "mean": 269837.9,
+        "min": 268976.0
+      },
+      "samples": 30,
+      "voluntary_ctx_delta": 89
+    }
+  },
+  "raw_path": "C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\wt-native-perf-baseline-20261127\\scratch\\native_perf\\raw\\stock_idle.tsv",
+  "sample_rows": 120,
+  "schema": "canopy.native_idle_report/1",
+  "start_utc": "2026-11-28T04:40:27Z",
+  "stock_shell_processes": {
+    "4656": {
+      "comm": "startplasma-x11",
+      "cpu_percent_one_core": 0.0,
+      "cpu_ticks_delta": 0.0,
+      "nonvoluntary_ctx_delta": 0,
+      "pss_kib": {
+        "max": 7402.0,
+        "mean": 7311.9,
+        "min": 7146.0
+      },
+      "rss_kib": {
+        "max": 46224.0,
+        "mean": 46224.0,
+        "min": 46224.0
+      },
+      "samples": 30,
+      "voluntary_ctx_delta": 0
+    },
+    "5384": {
+      "comm": "kwin_x11",
+      "cpu_percent_one_core": 1.6821,
+      "cpu_ticks_delta": 508.0,
+      "nonvoluntary_ctx_delta": 2389,
+      "pss_kib": {
+        "max": 119877.0,
+        "mean": 115629.9,
+        "min": 111362.0
+      },
+      "rss_kib": {
+        "max": 266748.0,
+        "mean": 254134.0,
+        "min": 247048.0
+      },
+      "samples": 30,
+      "voluntary_ctx_delta": 5540
+    },
+    "5422": {
+      "comm": "plasmashell",
+      "cpu_percent_one_core": 0.447,
+      "cpu_ticks_delta": 135.0,
+      "nonvoluntary_ctx_delta": 256,
+      "pss_kib": {
+        "max": 483144.0,
+        "mean": 478924.0,
+        "min": 467960.0
+      },
+      "rss_kib": {
+        "max": 629492.0,
+        "mean": 624679.2,
+        "min": 617204.0
+      },
+      "samples": 30,
+      "voluntary_ctx_delta": 642
+    }
+  },
+  "system_idle": {
+    "idle_delta_ticks": 11959.0,
+    "idle_percent_of_all_cpu_time": 19.8
+  }
+}

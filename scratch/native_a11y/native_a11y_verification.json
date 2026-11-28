@@ -1,0 +1,445 @@
+{
+  "schema_version": 1,
+  "generated_utc": "2026-11-28T05:00:28.249263+00:00",
+  "scope": "STATIC/CI-SCOPED; evidence bytes recomputed on host, no VM use",
+  "evidence_root": "C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch",
+  "base_commit": "ec910d7a",
+  "sizes": {
+    "1920x1080": {
+      "size": "1920x1080",
+      "evidence_sha256": {
+        "a11y_summary.json": "99424ceda923995e14bacf9113d0b1b69864254e34e0996088a0c53e4099b6c3",
+        "a11y_extents.jsonl": "e9aa464ba0adbadba7ae0ca62a4c42f08cda08b331192ea2a2387bee311405b6",
+        "keyboard_diff.json": "b56da5d3211f82478cab386775b159c18419aa2a14a378c56cc25f40abc08fd9"
+      },
+      "atspi_available": true,
+      "elements": 248,
+      "named": 241,
+      "unnamed": 7,
+      "unnamed_details": [
+        {
+          "index": 57,
+          "role": "label",
+          "depth": 5
+        },
+        {
+          "index": 60,
+          "role": "label",
+          "depth": 5
+        },
+        {
+          "index": 66,
+          "role": "label",
+          "depth": 5
+        },
+        {
+          "index": 69,
+          "role": "label",
+          "depth": 5
+        },
+        {
+          "index": 75,
+          "role": "label",
+          "depth": 5
+        },
+        {
+          "index": 78,
+          "role": "label",
+          "depth": 5
+        },
+        {
+          "index": 93,
+          "role": "label",
+          "depth": 5
+        }
+      ],
+      "roles": {
+        "alert": 3,
+        "application": 1,
+        "button": 65,
+        "check box": 3,
+        "filler": 40,
+        "frame": 1,
+        "label": 133,
+        "text": 2
+      },
+      "description_fields": 0,
+      "extent_records": 105,
+      "extents_with_geometry": 49,
+      "extents_null": 56,
+      "named_menus": [
+        "Edit menu",
+        "File menu",
+        "Go menu",
+        "Help menu",
+        "View menu",
+        "Window menu"
+      ],
+      "menus_with_extents": [
+        "Edit menu",
+        "File menu",
+        "Go menu",
+        "Help menu",
+        "View menu",
+        "Window menu"
+      ],
+      "dock_tiles_named": [
+        "Browser preview",
+        "Mail preview",
+        "Files preview",
+        "Calendar preview",
+        "Photos preview",
+        "Music preview",
+        "Terminal preview",
+        "Settings preview"
+      ],
+      "dock_tiles_with_extents": [
+        "Browser preview",
+        "Mail preview",
+        "Files preview",
+        "Calendar preview",
+        "Photos preview",
+        "Music preview",
+        "Terminal preview",
+        "Settings preview"
+      ],
+      "keyboard": {
+        "altf": {
+          "changed_pixels": 21423,
+          "bbox": [
+            642,
+            367,
+            1274,
+            609
+          ],
+          "sha256": "4110b1a17be5f4e07e3db0557a2b8d45bc669a627ad0bfa4f5f0ca2042d81465"
+        },
+        "escape": {
+          "changed_pixels": 896340,
+          "bbox": [
+            360,
+            152,
+            1560,
+            902
+          ],
+          "sha256": "88ca2d3baaad45fddfbea0330e31019dab28b92bcb216d7486a265bcab637c30"
+        }
+      },
+      "legacy_gate_defect": {
+        "invalid_role_elements_before_fix": 47,
+        "invalid_role_names_before_fix": [
+          "application",
+          "check box",
+          "filler",
+          "frame",
+          "text"
+        ],
+        "unnamed_named_role_elements_before_fix": 0
+      }
+    },
+    "1200x750": {
+      "size": "1200x750",
+      "evidence_sha256": {
+        "a11y_summary.json": "645d3e9baa67a0f1c90bd4f06dfa94f590dae375249d5e11b975e4b12b801585",
+        "a11y_extents.jsonl": "0ced07bd622ba0fc91127eca0c0862320c3d78c57dfd0ad315d46e93608dbd82",
+        "keyboard_diff.json": "bff15be4955a38ae4cfd0e9fd0f4e5a0dd6ee9580c22804471a64f3a532bf8cc"
+      },
+      "atspi_available": true,
+      "elements": 248,
+      "named": 241,
+      "unnamed": 7,
+      "unnamed_details": [
+        {
+          "index": 57,
+          "role": "label",
+          "depth": 5
+        },
+        {
+          "index": 60,
+          "role": "label",
+          "depth": 5
+        },
+        {
+          "index": 66,
+          "role": "label",
+          "depth": 5
+        },
+        {
+          "index": 69,
+          "role": "label",
+          "depth": 5
+        },
+        {
+          "index": 75,
+          "role": "label",
+          "depth": 5
+        },
+        {
+          "index": 78,
+          "role": "label",
+          "depth": 5
+        },
+        {
+          "index": 93,
+          "role": "label",
+          "depth": 5
+        }
+      ],
+      "roles": {
+        "alert": 3,
+        "application": 1,
+        "button": 65,
+        "check box": 3,
+        "filler": 40,
+        "frame": 1,
+        "label": 133,
+        "text": 2
+      },
+      "description_fields": 0,
+      "extent_records": 105,
+      "extents_with_geometry": 49,
+      "extents_null": 56,
+      "named_menus": [
+        "Edit menu",
+        "File menu",
+        "Go menu",
+        "Help menu",
+        "View menu",
+        "Window menu"
+      ],
+      "menus_with_extents": [
+        "Edit menu",
+        "File menu",
+        "Go menu",
+        "Help menu",
+        "View menu",
+        "Window menu"
+      ],
+      "dock_tiles_named": [
+        "Browser preview",
+        "Mail preview",
+        "Files preview",
+        "Calendar preview",
+        "Photos preview",
+        "Music preview",
+        "Terminal preview",
+        "Settings preview"
+      ],
+      "dock_tiles_with_extents": [
+        "Browser preview",
+        "Mail preview",
+        "Files preview",
+        "Calendar preview",
+        "Photos preview",
+        "Music preview",
+        "Terminal preview",
+        "Settings preview"
+      ],
+      "keyboard": {
+        "altf": {
+          "changed_pixels": 21400,
+          "bbox": [
+            282,
+            206,
+            914,
+            444
+          ],
+          "sha256": "04c16c35396eb6513f37c67e4bc9e9b43c3e70ef0d19e856b817003de02b0968"
+        },
+        "escape": {
+          "changed_pixels": 797946,
+          "bbox": [
+            0,
+            28,
+            1200,
+            696
+          ],
+          "sha256": "cf4c40ff5018c7ebbc5f6f8c1a277436613bd6f7772bb1320bf594a08d977bb3"
+        }
+      },
+      "legacy_gate_defect": {
+        "invalid_role_elements_before_fix": 47,
+        "invalid_role_names_before_fix": [
+          "application",
+          "check box",
+          "filler",
+          "frame",
+          "text"
+        ],
+        "unnamed_named_role_elements_before_fix": 0
+      }
+    },
+    "760x500": {
+      "size": "760x500",
+      "evidence_sha256": {
+        "a11y_summary.json": "819aa075a4bc5d9ac9e43a2f9a8db2f39d786bee255109966873cf60846c6535",
+        "a11y_extents.jsonl": "4b19f09a3b4d0a49c7b1d5b696899974e82fd4180d1df561eb7263928f40d406",
+        "keyboard_diff.json": "e07272aa8448839048801d655759144b9502ae381082d9fe4d7b3dd803ecd9d5"
+      },
+      "atspi_available": true,
+      "elements": 227,
+      "named": 221,
+      "unnamed": 6,
+      "unnamed_details": [
+        {
+          "index": 57,
+          "role": "label",
+          "depth": 5
+        },
+        {
+          "index": 60,
+          "role": "label",
+          "depth": 5
+        },
+        {
+          "index": 64,
+          "role": "label",
+          "depth": 4
+        },
+        {
+          "index": 66,
+          "role": "label",
+          "depth": 4
+        },
+        {
+          "index": 70,
+          "role": "label",
+          "depth": 4
+        },
+        {
+          "index": 72,
+          "role": "label",
+          "depth": 4
+        }
+      ],
+      "roles": {
+        "alert": 3,
+        "application": 1,
+        "button": 65,
+        "check box": 3,
+        "filler": 27,
+        "frame": 1,
+        "label": 125,
+        "text": 2
+      },
+      "description_fields": 0,
+      "extent_records": 92,
+      "extents_with_geometry": 44,
+      "extents_null": 48,
+      "named_menus": [
+        "Edit menu",
+        "File menu",
+        "Go menu",
+        "Help menu",
+        "View menu",
+        "Window menu"
+      ],
+      "menus_with_extents": [
+        "Edit menu",
+        "File menu",
+        "Go menu",
+        "View menu"
+      ],
+      "dock_tiles_named": [
+        "Browser preview",
+        "Mail preview",
+        "Files preview",
+        "Calendar preview",
+        "Photos preview",
+        "Music preview",
+        "Terminal preview",
+        "Settings preview"
+      ],
+      "dock_tiles_with_extents": [
+        "Browser preview",
+        "Mail preview",
+        "Files preview",
+        "Calendar preview",
+        "Photos preview",
+        "Music preview",
+        "Terminal preview",
+        "Settings preview"
+      ],
+      "keyboard": {
+        "altf": {
+          "changed_pixels": 15820,
+          "bbox": [
+            89,
+            154,
+            658,
+            332
+          ],
+          "sha256": "8d56b3b608bd831adec25ba1319db6a295f90ee2a462856f489b5343615db3dc"
+        },
+        "escape": {
+          "changed_pixels": 314026,
+          "bbox": [
+            0,
+            28,
+            760,
+            446
+          ],
+          "sha256": "f794ed1a8b6b25103f32328bcdb740ee90f5551d9239eb5d820837a965ef43cc"
+        }
+      },
+      "legacy_gate_defect": {
+        "invalid_role_elements_before_fix": 34,
+        "invalid_role_names_before_fix": [
+          "application",
+          "check box",
+          "filler",
+          "frame",
+          "text"
+        ],
+        "unnamed_named_role_elements_before_fix": 0
+      }
+    }
+  },
+  "native_metadata_gate": {
+    "records_checked": 723,
+    "issue_codes": {
+      "empty-name": 20
+    },
+    "known_native_roles": [
+      "application",
+      "check box",
+      "filler",
+      "frame",
+      "label",
+      "text"
+    ],
+    "status": "PASS_SCOPED"
+  },
+  "screen_reader": {
+    "status": "NOT_RUN",
+    "text_files_scanned": 95,
+    "announcement_evidence_hits": [],
+    "note": "A text hit is not an announcement. No Orca process, speech log or AT-SPI event recording exists in these artifacts; screen-reader behaviour was never executed."
+  },
+  "vm": {
+    "vm_running": [
+      "Canopy-Test-Plasma6"
+    ],
+    "probe_error": null,
+    "performance_agent_artifacts": [
+      {
+        "path": "C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\native_perf_vm_info_probe.txt",
+        "mtime_utc": "2026-11-28T04:32:41.730309+00:00"
+      },
+      {
+        "path": "C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\wt-native-perf-baseline-20261127",
+        "mtime_utc": "2026-11-28T04:40:20.428975+00:00"
+      },
+      {
+        "path": "C:\\Users\\X1\\AppData\\Local\\hermes\\cache\\scratch\\native_build_baseline_vm.lock",
+        "mtime_utc": "2026-11-28T04:04:41.680013+00:00"
+      }
+    ],
+    "status": "BLOCKED_BY_PERFORMANCE_AGENT",
+    "decision": "No guest login, AT-SPI query, key injection or screen-reader start performed; VM use is serialized behind the performance agent."
+  },
+  "focus_order_tab_shift_tab": {
+    "status": "NOT_RUN",
+    "note": "Existing native evidence records X11 active-window state and Alt+F/Escape pixel diffs only; no Tab/Shift+Tab traversal or AT-SPI state_focused capture exists."
+  }
+}

@@ -1,0 +1,17 @@
+contents/approved/icons/Browser_Option_3.png: OK
+contents/approved/icons/Calendar_Option_3.png: OK
+contents/approved/icons/Files_Option_2.png: OK
+contents/approved/icons/Mail_Option_5.png: OK
+contents/approved/icons/Music_Option_3.png: OK
+contents/approved/icons/Photos_Option_2.png: OK
+contents/approved/icons/Settings_Option_8.png: OK
+contents/approved/icons/Terminal_Option_4.png: OK
+contents/approved/manifest.json: OK
+contents/approved/wallpaper/Canopy_Classic_Master_Wallpaper_1920x1080.png: OK
+contents/approved/wallpaper/canopy-wave-preview.png: OK
+contents/bin/canopy-classic-spike: OK
+contents/ui/main.qml: OK
+install.sh: OK
+metadata.json: OK
+uninstall.sh: OK
+verify.sh: OK

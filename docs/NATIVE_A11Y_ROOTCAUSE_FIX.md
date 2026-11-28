@@ -107,8 +107,8 @@ visual quality was traded for a resource gain.
 
 Git-blob SHA-256 (LF-normalized bytes at this head):
 
-- `prototype/classic/PreviewWindow.qml`: `baeb7dacf63a135938bc09151c7dbdc63dea2f3e0bd3a947d0835bd46a9d17ce`
-- `prototype/classic/Main.qml`: `05ec83ed87c44103f0ffa6ab990a5aea02bebff84927cd03656ee39ccdaf40f6`
+- `prototype/classic/PreviewWindow.qml`: `c784f93bfedd4c5a1cfe65d3f14dbc918b71d38cb28b73663303e4e577a382c5`
+- `prototype/classic/Main.qml`: `025c7b9ad0a99630c7277485662bf579aad85f2bf52f3caf03a5c5c02d184547`
 
 Per-file digests for all evidence artifacts are in
 `scratch/a11y_rootcause/SHA256SUMS.txt`; verify with `sha256sum -c` from the

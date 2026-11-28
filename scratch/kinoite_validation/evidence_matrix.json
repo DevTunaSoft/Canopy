@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-11-28T04:22:11Z",
-  "exact_head": "ec910d7a7275296ecbc8b5e5c459d356205165d1",
+  "generated_utc": "2026-11-28T05:22:33Z",
+  "exact_head": "93c4dbc8c8d650034d387de69ea8955dacd74d57",
   "scope": "STATIC SOURCE ONLY evidence gate plus host-side planner execution; no native Kinoite runtime",
   "source_count": 20,
   "sources_ok": true,

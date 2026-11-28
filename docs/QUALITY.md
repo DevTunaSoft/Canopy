@@ -3,6 +3,7 @@
 **All budgets are initial targets, not verified results.** Revise only with reproducible benchmark evidence.
 
 ## Targets
+Follow [MASTER_OWNER_DIRECTIVE.md](MASTER_OWNER_DIRECTIVE.md). Aspirational incremental PSS <100 MiB and idle CPU <0.1% of one core; engineering limits below remain. Include in-process Plasma host deltas, helper processes and full-system metrics. Target 24-hour soak and 100 round-trip Shell Pack switches when applicable; zero duplicate compositors and unnecessary continuous services. These are targets, not evidence.
 - No continuously busy shell loop when idle; favor signal-driven behavior.
 - No mandatory always-on blur, live wallpaper, or constant animation.
 - Keep incremental shell idle memory small; initial engineering target <= 200 MiB proportional set size for shell-owned processes on the reference machine, excluding compositor and existing system services. Report exclusions clearly.
@@ -11,7 +12,7 @@
 - Test cold/warm launch and memory growth after repeated app opening, theme switching, and monitor changes.
 
 ## Required matrix
-- Linux Mint release and desktop/session compatibility, Wayland and X11 where applicable.
+- Native Plasma 6 reference guest and selected supported base, Wayland and X11 where applicable; Linux Mint remains the legacy comparison baseline.
 - Low-end integrated graphics and a representative modern system.
 - 1080p and HiDPI, single and multi-monitor, light and dark.
 - Keyboard-only navigation, screen reader where supported, high contrast, reduced motion.
@@ -25,13 +26,19 @@ Unit and integration tests green, no unexplained performance regression, origina
 
 ## Draft PR lifecycle and integration authority (issue #132)
 - A draft PR is a temporary working state, not a permanent holding area. Once its exact head SHA has passed every applicable check and its dependencies/conflicts are verified, promote it to ready-for-review.
-- Green CI alone is never authorization to merge. Before any integration, verify: exact SHA tested equals SHA merged; all required checks passed; no unresolved dependencies or conflicts; regression/integration/security/performance checks completed; no protected visual change without owner approval; correct target branch and sequence; all requirements applicable to the target and scope satisfied. Final release requirements apply to final release integration, not routine independently verified integration into `integration/canopy-classic-20261123`.
-- Independently verified engineering changes and authorized bounded GUI refinements may be integrated incrementally through `integration/canopy-classic-20261123` with regression tests after each step. Preserve history; never force-push shared branches or bypass protections.
+- Green CI alone is never authorization to merge. Before any integration, verify: exact SHA tested equals SHA merged; all required checks passed; no unresolved dependencies or conflicts; regression/integration/security/performance checks completed; no protected visual change without owner approval; correct target branch and sequence; all requirements applicable to the target and scope satisfied. Final release requirements apply to public releases, not routine independently verified development integration. Follow the owner-approved trunk transition gates in [PLASMA6_PIVOT.md](PLASMA6_PIVOT.md).
+- Independently verified engineering changes and authorized bounded GUI refinements may be integrated incrementally through the respective integration branch during migration and protected main after the Plasma baseline gates pass, with regression tests after each step. Preserve history; never force-push shared branches or bypass protections.
 - Post-merge regression is mandatory **after** the merge; it is not a pre-merge gate. Keep pre-merge verification intact and do not create a circular rule requiring a post-merge result before an eligible merge.
-- The authorized workforce is up to 12 concurrent engineering subagents plus Hermes as lead orchestrator (a ceiling, not a quota), with isolated worktrees, explicit ownership and independent review. The newer owner directive (2026-11-26) supersedes only the 10-agent ceiling in the external directive cited in [workforce policy](AGENTS_WORKFORCE.md); all other requirements there remain in force.
+- Maximum eight subagents plus Hermes, not a quota; throttle lower when necessary. Finish already active assignments without new launches above cap. Use isolated worktrees, explicit ownership and independent review; serialize expensive VM/build jobs as needed.
 - Named owner holds on #279, #151 and #278 remain binding; general integration authorization does not waive them.
-- Classic Qt final desktop integration remains release-blocked until actual Linux Mint acceptance and owner visual approval are recorded. Keep those PRs in draft regardless of CI status.
+- Legacy standalone Qt release holds remain binding. Native Plasma baseline transition requires actual guest acceptance and applicable owner visual approval under the ADR. Main is a development trunk after transition; public releases require separate explicit owner authorization and all release gates.
 - Do not stop independent engineering work because another task is awaiting approval.
+
+## LacOS immutable release gates (planned)
+Apply [LACOS_IMMUTABLE_ARCHITECTURE.md](LACOS_IMMUTABLE_ARCHITECTURE.md). Verify mount flags and core integrity before/after APT, Pacman, DNF/RPM, Flatpak and rootless Podman installation/update/remove, including malicious or malformed inputs and interrupted operations. Demonstrate signed atomic deployment, known-good boot rollback, persistence and compatibility of user/configuration state, power-loss/disk-full/failed-boot recovery, supported upstream security rebuilds, provenance and patch latency, and independent application/container updates. Test on actual hardware and isolated guests; do not confuse Distrobox integration with a sandbox or snapshots with backups. Benchmark full-system and per-app RAM, CPU, GPU, wakeups, startup, storage and image/container overhead; include inactive Shell Pack and stopped-container checks. Do not require production LacOS gates for ordinary Canopy development. Preserve existing resource budgets and owner approval requirements.
+
+## Upstream continuity and recovery
+Verify supported upstream OS/application updates and major upgrades while LacOS infrastructure is unavailable; stock Plasma fallback, personal-data backup/restore and recovery media, signature failure, extension ABI/layer conflicts and core integrity. Test simulated twelve-month inactivity without promising support after upstream EOL. Routine upstream security fixes must not wait for owner release approval. Maintain public source/license provenance, SBOM and dependency compatibility checks; restrict container host access and test permissions. See master directive.
 
 ## Additional Shell Pack release checks (planned)
 

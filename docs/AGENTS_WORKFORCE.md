@@ -1,5 +1,16 @@
 # Agent workforce and integration policy
 
+## ACTIVE GOAL — Rev3 controlling directive (2026-11-28)
+
+Sole controlling Canopy/LacOS goal: `C:/Users/X1/Downloads/Canopy_LacOS_Master_Execution_Directive_2026-11-28_Rev3.md`, SHA-256 `1fba4b1e7128b6bc33aba577c05fdccfa45fcac56ee714f02e9d8b43e32a0f2a` (short `1fba4b1e`). The external supplemental directive and the 2026-11-26/2026-11-27 cap directives described below are `SUPERSEDED_POINT_IN_TIME` for caps, draft-only rules, workforce scheduling and integration authority; retained as history, not retracted or erased. No wallpaper/icon hash protection, named PR hold (#151/#278/#279), security gate or release gate is weakened.
+
+- **A0.1 — finish current work:** let every current Canopy/LacOS assignment finish on its authorized branch and worktree. Do not interrupt, cancel, restart, reassign or change branch merely to apply this directive, an integration priority or a workforce cap. Narrow exceptions only: genuine external blocker, unrecoverable stall, security/safety incident, resource emergency, or demonstrably obsolete/duplicated work. Preserve commits, evidence and pending obligations; checkpoint, never mark complete.
+- **Project-scoped cap 8+Hermes:** maximum 8 concurrent Canopy/LacOS subagents plus Hermes; count active project workers, not queued or inactive sessions. Finish valid in-flight assignments naturally if over cap and dispatch no new or replacement project worker until capacity exists. **no-global-change:** other Hermes projects and global agent settings are excluded and must not be modified. This reconciliation PR is DRAFT: no merge, no self-approval.
+- **Integration authority / distinct-human-approval blocker:** integration branch and `main` protection require 1 distinct human approving review with `enforce_admins=true`; the only authenticated account (`DevTunaSoft`) authors the eligible PRs, so this is a genuine external blocker. Never self-approve, impersonate a reviewer or bypass protection. Promote eligible PRs to ready, record the exact owner action required, and continue unrelated eligible work.
+- **Exclusive guest lease:** use an exclusive guest lease (exclusive session lease with owner, heartbeat and recovery checkpoint) for interactive VM, install/uninstall, display changes, suspend/resume and session restart. Serialize heavy builds, full suites and VM work; never terminate unrelated work to acquire a lock; a timeout is incomplete, not a pass.
+
+Earlier `integration/canopy-classic-20261123` integration wording below is retained as branch history and classified `SUPERSEDED_POINT_IN_TIME`; Rev3 designates `integration/canopy-plasma6-20261127` until the native Plasma baseline gates pass.
+
 Authoritative source (external to this repository): the composer-pasted master
 supplemental directive, preserved on disk at
 `C:/Users/X1/AppData/Local/hermes/cache/scratch/canopy_master_supplemental_directive_20261126.md`
@@ -14,18 +25,19 @@ no repository blob backs this citation. This file is a concise repository-facing
 summary; where wording elsewhere conflicts, the external directive governs. It
 does not grant a merge or visual approval.
 
-Newer owner directive (received after the external source above, 2026-11-26):
-the authorized ceiling is **up to 12 concurrent engineering subagents plus
+`SUPERSEDED_POINT_IN_TIME` — Newer owner directive (received after the external source above, 2026-11-26):
+the authorized ceiling was **up to 12 concurrent engineering subagents plus
 Hermes as lead orchestrator** when productive, independent, non-overlapping
-work exists. This owner directive is newer than the external directive cited
+work exists; Rev3 (`1fba4b1e`) now governs with a project-scoped cap 8+Hermes.
+This owner directive is newer than the external directive cited
 above and supersedes only its 10-agent ceiling; all other requirements and
 acceptance gates in that external directive remain in force. It grants no
 merge, visual or release approval.
 
 ## Workforce
 
-- Authorized ceiling: **up to 12 concurrent engineering subagents plus Hermes as
-  lead orchestrator** under the newer owner directive (superseding the earlier
+- `SUPERSEDED_POINT_IN_TIME` authorized ceiling (Rev3 cap 8+Hermes governs): **up to 12 concurrent engineering subagents plus Hermes as
+  lead orchestrator** under the older owner directive (superseding the earlier
   10-agent ceiling in the external directive above, and all earlier 15-, nine-,
   seven- and four-agent configurations). This is a ceiling, not a quota: assign
   work only when independent, productive, non-overlapping and
@@ -66,10 +78,9 @@ merge, visual or release approval.
   `docs/ARCHITECTURE.md`, `.github/PULL_REQUEST_TEMPLATE.md` and this file.
   `AGENTS.md`, `docs/ROADMAP.md`, workflow, test, visual-asset and source paths
   are outside its ownership and were not edited here.
-- Known residual wording outside this scope: `AGENTS.md` and `docs/ROADMAP.md`
-  still contain a "at least four active subagents" floor alongside the 12-agent
-  ceiling in `docs/ROADMAP.md`. Their owners must reconcile that text; this
-  file (including the newer owner ceiling) and the cited external directive
-  remain authoritative until then.
+- Historical residual wording in `AGENTS.md` and `docs/ROADMAP.md` ("at least
+  four active subagents" floor, 12-agent ceiling) is `SUPERSEDED_POINT_IN_TIME`
+  as of Rev3 (`1fba4b1e`); both files are reconciled in the same Rev3 change.
+  No cited source is retracted or erased.
 - No new visual, security or release approval is claimed by this documentation
   change.
